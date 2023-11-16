@@ -15,6 +15,7 @@ var RootCmd = &cobra.Command{
 	DisableAutoGenTag: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Welcome to the STACKIT CLI! Functionality will be added soon.")
+
 		return nil
 	},
 }
