@@ -1,0 +1,9 @@
+# Binaries
+bin/
+dist/
+
+# IDE
+.vscode
+
+# OS generated files
+.DS_Store

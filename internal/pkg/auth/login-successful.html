@@ -1,0 +1,18 @@
+<html>
+
+<body>
+    <h2>Hello {{.Email}}, your login was successful!</h2>
+    <p>You can close this window and return to the STACKIT CLI, or we will redirect you to the <a
+            href="https://www.stackit.de">STACKIT website</a> in 1 minute.</p>
+    <p>For more info and documentation, check the <a href="https://github.com/stackitcloud/stackit-cli">CLI repo</a></p>
+    <script>
+        if (window.location.hash) {
+            history.replaceState(null, "", window.location.pathname);
+        }
+        setTimeout(function () {
+            window.location = 'https://www.stackit.de'
+        }, 60000);
+    </script>
+</body>
+
+</html>

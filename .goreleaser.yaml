@@ -1,0 +1,76 @@
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: linux-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    binary: "stackit"
+
+  - id: windows-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    binary: "stackit"
+  
+  - id: macos-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    binary: "stackit"
+
+archives:
+  - format: tar.gz
+    # This name template makes the OS and Arch compatible with the results of `uname`
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+nfpms:
+  - id: linux-packages
+    # IDs of the builds for which to create packages for
+    builds:
+      - linux-builds
+    vendor: STACKIT
+    homepage: https://github.com/stackitcloud/stackit-cli
+    maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
+    description: A command-line interface to manage STACKIT resources.
+    license: Apache 2.0
+    formats:
+      - deb
+      - rpm
+
+brews:
+  - name: stackit-cli
+    repository:
+      owner: stackitcloud
+      name: homebrew-tap
+    commit_author:
+      name: CLI Release Bot
+      email: noreply@stackit.de
+    homepage: "https://github.com/stackitcloud/stackit-cli"
+    description: "A command-line interface to manage STACKIT resources."
+    license: "Apache-2.0"
+    # If set to auto, the release will not be uploaded to the homebrew tap repo
+    # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+    # Not setting it for now to test with a prerelease tag
+    # skip_upload: auto

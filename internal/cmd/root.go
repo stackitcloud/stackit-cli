@@ -1,0 +1,154 @@
+package cmd
+
+import (
+	"fmt"
+	"os"
+	"strings"
+	"time"
+
+	"stackit/internal/cmd/auth"
+	"stackit/internal/cmd/config"
+	"stackit/internal/cmd/curl"
+	"stackit/internal/cmd/dns"
+	"stackit/internal/cmd/mongodbflex"
+	"stackit/internal/cmd/organization"
+	"stackit/internal/cmd/project"
+	serviceaccount "stackit/internal/cmd/service-account"
+	"stackit/internal/cmd/ske"
+	"stackit/internal/pkg/args"
+	"stackit/internal/pkg/errors"
+	"stackit/internal/pkg/flags"
+	"stackit/internal/pkg/globalflags"
+
+	"github.com/spf13/cobra"
+)
+
+func NewRootCmd(version, date string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:               "stackit",
+		Short:             "Manage STACKIT resources using the command line",
+		Args:              args.NoArgs,
+		SilenceErrors:     true, // Error is beautified in a custom way before being printed
+		SilenceUsage:      true,
+		DisableAutoGenTag: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if flags.FlagToBoolValue(cmd, "version") {
+				cmd.Printf("STACKIT CLI\n")
+
+				parsedDate, err := time.Parse(time.RFC3339, date)
+				if err != nil {
+					cmd.Printf("Version: %s\n", version)
+					return nil
+				}
+				cmd.Printf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
+				return nil
+			}
+
+			return cmd.Help()
+		},
+	}
+	cmd.SetOut(os.Stdout)
+
+	err := configureFlags(cmd)
+	cobra.CheckErr(err)
+
+	addSubcommands(cmd)
+
+	// Cobra creates the help flag with "help for <command>" as the description
+	// We want to override that message by capitalizing the first letter to match the other flag descriptions
+	// See spf13/cobra#480
+	traverseCommands(cmd, func(c *cobra.Command) {
+		c.Flags().BoolP("help", "h", false, fmt.Sprintf("Help for %q", c.CommandPath()))
+	})
+
+	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) error {
+	cmd.Flags().BoolP("version", "v", false, `Show "stackit" version`)
+
+	err := globalflags.Configure(cmd.PersistentFlags())
+	if err != nil {
+		return fmt.Errorf("configure global flags: %w", err)
+	}
+	return nil
+}
+
+func addSubcommands(cmd *cobra.Command) {
+	cmd.AddCommand(auth.NewCmd())
+	cmd.AddCommand(curl.NewCmd())
+	cmd.AddCommand(config.NewCmd())
+	cmd.AddCommand(organization.NewCmd())
+	cmd.AddCommand(project.NewCmd())
+	cmd.AddCommand(dns.NewCmd())
+	cmd.AddCommand(mongodbflex.NewCmd())
+	cmd.AddCommand(serviceaccount.NewCmd())
+	cmd.AddCommand(ske.NewCmd())
+}
+
+// traverseCommands calls f for c and all of its children.
+func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
+	f(c)
+	for _, c := range c.Commands() {
+		traverseCommands(c, f)
+	}
+}
+
+func Execute(version, date string) {
+	cmd := NewRootCmd(version, date)
+	err := cmd.Execute()
+	if err != nil {
+		err := beautifyUnknownAndMissingCommandsError(cmd, err)
+		cmd.PrintErrln(cmd.ErrPrefix(), err.Error())
+		os.Exit(1)
+	}
+}
+
+// Returns a more user-friendly error if the input error is due to unknown/missing subcommands (issue: https://github.com/spf13/cobra/issues/706)
+//
+// Otherwise, returns the input error unchanged
+func beautifyUnknownAndMissingCommandsError(rootCmd *cobra.Command, cmdErr error) error {
+	if !strings.HasPrefix(cmdErr.Error(), "unknown flag") {
+		return cmdErr
+	}
+
+	cmd, unparsedInputs, err := rootCmd.Traverse(os.Args[1:])
+	if err != nil {
+		return cmdErr
+	}
+	if len(unparsedInputs) == 0 {
+		// This shouldn't happen
+		// If we're here, Cobra was able to parse everything, thus it wouldn't raise "unknown flag" errors
+		return cmdErr
+	}
+
+	// If cmd itself has more subcommands, we assume it has no logic by itself (other than --help)
+	// We want the error message to state that either a cmd's subcommand is missing, or that the cmd's subcommand called is wrong
+	if cmd.HasSubCommands() {
+		if strings.HasPrefix(unparsedInputs[0], "-") {
+			return &errors.SubcommandMissingError{
+				Cmd: cmd,
+			}
+		}
+
+		return &errors.InputUnknownError{
+			ProvidedInput: unparsedInputs[0],
+			Cmd:           cmd,
+		}
+	}
+
+	// If we're here, cmd doesn't have subcommands command
+	// If Cobra raised "unknown flag" errors, then it was while parsing cmd's flags
+	// To be more user-friendly, we add a usage tip
+	err = cmd.ParseFlags(unparsedInputs)
+	if err != nil {
+		return errors.AppendUsageTip(err, cmd)
+	}
+
+	// This shouldn't happen
+	// If we're here, Cobra was able to parse cmd's flags, thus it wouldn't raise "unknown flag" errors
+	return &errors.InputUnknownError{
+		ProvidedInput: unparsedInputs[0],
+		Cmd:           cmd,
+	}
+}
