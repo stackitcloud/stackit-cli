@@ -1,0 +1,6 @@
+# Binaries
+bin/
+dist/
+
+# IDE
+.vscode
