@@ -257,15 +257,29 @@ func buildCurrentPayload(instance *postgresql.Instance) (*postgresql.UpdateInsta
 			}
 		}
 		if currentParameters["plugins"] != nil {
-			currentPlugins, ok = currentParameters["plugins"].([]string)
+			tempPlugins, ok := currentParameters["plugins"].([]interface{})
 			if !ok {
-				return nil, fmt.Errorf("parse plugins: type cannot be converted to []string")
+				return nil, fmt.Errorf("parse plugins: type cannot be converted to []interface{}")
+			}
+			for _, v := range tempPlugins {
+				pluginItem, ok := v.(string)
+				if !ok {
+					return nil, fmt.Errorf("parse plugins item: type cannot be converted to string")
+				}
+				currentPlugins = append(currentPlugins, pluginItem)
 			}
 		}
 		if currentParameters["syslog"] != nil {
-			currentSyslog, ok = currentParameters["syslog"].([]string)
+			tempSyslog, ok := currentParameters["syslog"].([]interface{})
 			if !ok {
-				return nil, fmt.Errorf("parse syslog: type cannot be converted to []string")
+				return nil, fmt.Errorf("parse syslog: type cannot be converted to []interface{}")
+			}
+			for _, v := range tempSyslog {
+				syslogItem, ok := v.(string)
+				if !ok {
+					return nil, fmt.Errorf("parse syslog item: type cannot be converted to string")
+				}
+				currentSyslog = append(currentSyslog, syslogItem)
 			}
 		}
 		if currentParameters["sgw_acl"] != nil {
