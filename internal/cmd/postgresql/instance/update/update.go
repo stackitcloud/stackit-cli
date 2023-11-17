@@ -69,14 +69,8 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
 		}
 
-		// Get instance
-		instance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
-		if err != nil {
-			return fmt.Errorf("get PostgreSQL instance: %w", err)
-		}
-
 		// Call API
-		req, err := buildRequest(ctx, instance, model, apiClient)
+		req, err := buildRequest(ctx, model, apiClient)
 		if err != nil {
 			return fmt.Errorf("build PostgreSQL instance update request: %w", err)
 		}
@@ -102,7 +96,7 @@ func init() {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(instanceIdFlag, "i", "", "Instance ID")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
@@ -154,16 +148,11 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, instance *postgresql.Instance, model *flagModel, apiClient postgresqlUtils.PostgreSQLClient) (postgresql.ApiUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *flagModel, apiClient postgresqlUtils.PostgreSQLClient) (postgresql.ApiUpdateInstanceRequest, error) {
 	req := apiClient.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
-	payload, err := buildCurrentPayload(instance)
-	if err != nil {
-		return req, fmt.Errorf("build payload from the current instance parameters: %w", err)
-	}
-
-	// Override payload with the command parameters
 	var planId *string
+	var err error
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
 		planId, err = postgresqlUtils.LoadPlanId(ctx, apiClient, model.ProjectId, model.PlanName, model.Version)
 		if err != nil {
@@ -172,136 +161,24 @@ func buildRequest(ctx context.Context, instance *postgresql.Instance, model *fla
 	} else {
 		planId = model.PlanId
 	}
+
 	var sgwAcl *string
 	if model.SgwAcl != nil {
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
-	if planId != nil {
-		payload.PlanId = planId
-	}
-	if model.EnableMonitoring != nil {
-		payload.Parameters.EnableMonitoring = model.EnableMonitoring
-	}
-	if model.Graphite != nil {
-		payload.Parameters.Graphite = model.Graphite
-	}
-	if model.MonitoringInstanceId != nil {
-		payload.Parameters.MonitoringInstanceId = model.MonitoringInstanceId
-	}
-	if model.MetricsFrequency != nil {
-		payload.Parameters.MetricsFrequency = model.MetricsFrequency
-	}
-	if model.MetricsPrefix != nil {
-		payload.Parameters.MetricsPrefix = model.MetricsPrefix
-	}
-	if model.Plugin != nil {
-		payload.Parameters.Plugins = model.Plugin
-	}
-	if model.SgwAcl != nil {
-		payload.Parameters.SgwAcl = sgwAcl
-	}
-	if model.Syslog != nil {
-		payload.Parameters.Syslog = model.Syslog
-	}
-
-	req = req.UpdateInstancePayload(*payload)
-	return req, nil
-}
-
-// Builds the payload from the current instance parameters
-func buildCurrentPayload(instance *postgresql.Instance) (*postgresql.UpdateInstancePayload, error) {
-	if instance == nil {
-		return nil, fmt.Errorf("instance is nil")
-	}
-
-	currentParameters := *instance.Parameters
-	var ok bool
-	var currentEnableMonitoring bool
-	var currentGraphite string
-	var currentMonitoringInstanceId string
-	var currentMetricsFrequency int64
-	var currentMetricsPrefix string
-	var currentPlugins []string
-	var currentSyslog []string
-	var currentSgwAcl string
-	if currentParameters != nil {
-		if currentParameters["enable_monitoring"] != nil {
-			currentEnableMonitoring, ok = currentParameters["enable_monitoring"].(bool)
-			if !ok {
-				return nil, fmt.Errorf("parse enable_monitoring: type cannot be converted to bool")
-			}
-		}
-		if currentParameters["graphite"] != nil {
-			currentGraphite, ok = currentParameters["graphite"].(string)
-			if !ok {
-				return nil, fmt.Errorf("parse graphite: type cannot be converted to string")
-			}
-		}
-		if currentParameters["monitoring_instance_id"] != nil {
-			currentMonitoringInstanceId, ok = currentParameters["monitoring_instance_id"].(string)
-			if !ok {
-				return nil, fmt.Errorf("parse monitoring_instance_id: type cannot be converted to string")
-			}
-		}
-		if currentParameters["metrics_frequency"] != nil {
-			currentMetricsFrequency, ok = currentParameters["metrics_frequency"].(int64)
-			if !ok {
-				return nil, fmt.Errorf("parse metrics_frequency: type cannot be converted to int64")
-			}
-		}
-		if currentParameters["metrics_prefix"] != nil {
-			currentMetricsPrefix, ok = currentParameters["metrics_prefix"].(string)
-			if !ok {
-				return nil, fmt.Errorf("parse metrics_prefix: type cannot be converted to string")
-			}
-		}
-		if currentParameters["plugins"] != nil {
-			tempPlugins, ok := currentParameters["plugins"].([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("parse plugins: type cannot be converted to []interface{}")
-			}
-			for _, v := range tempPlugins {
-				pluginItem, ok := v.(string)
-				if !ok {
-					return nil, fmt.Errorf("parse plugins item: type cannot be converted to string")
-				}
-				currentPlugins = append(currentPlugins, pluginItem)
-			}
-		}
-		if currentParameters["syslog"] != nil {
-			tempSyslog, ok := currentParameters["syslog"].([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("parse syslog: type cannot be converted to []interface{}")
-			}
-			for _, v := range tempSyslog {
-				syslogItem, ok := v.(string)
-				if !ok {
-					return nil, fmt.Errorf("parse syslog item: type cannot be converted to string")
-				}
-				currentSyslog = append(currentSyslog, syslogItem)
-			}
-		}
-		if currentParameters["sgw_acl"] != nil {
-			currentSgwAcl, ok = currentParameters["sgw_acl"].(string)
-			if !ok {
-				return nil, fmt.Errorf("parse sgw_acl: type cannot be converted to string")
-			}
-		}
-	}
-	payload := &postgresql.UpdateInstancePayload{
+	req = req.UpdateInstancePayload(postgresql.UpdateInstancePayload{
 		Parameters: &postgresql.InstanceParameters{
-			EnableMonitoring:     &currentEnableMonitoring,
-			Graphite:             &currentGraphite,
-			MonitoringInstanceId: &currentMonitoringInstanceId,
-			MetricsFrequency:     &currentMetricsFrequency,
-			MetricsPrefix:        &currentMetricsPrefix,
-			Plugins:              &currentPlugins,
-			Syslog:               &currentSyslog,
-			SgwAcl:               &currentSgwAcl,
+			EnableMonitoring:     model.EnableMonitoring,
+			Graphite:             model.Graphite,
+			MonitoringInstanceId: model.MonitoringInstanceId,
+			MetricsFrequency:     model.MetricsFrequency,
+			MetricsPrefix:        model.MetricsPrefix,
+			Plugins:              model.Plugin,
+			SgwAcl:               sgwAcl,
+			Syslog:               model.Syslog,
 		},
-		PlanId: instance.PlanId,
-	}
-
-	return payload, nil
+		PlanId: planId,
+	})
+	return req, nil
 }
