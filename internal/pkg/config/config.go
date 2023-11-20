@@ -15,6 +15,7 @@ const (
 	ProjectIdKey                = "stackit_project_id"
 	DNSCustomEndpointKey        = "stackit_dns_custom_endpoint"
 	PostgreSQLCustomEndpointKey = "stackit_postgresql_custom_endpoint"
+	SKECustomEndpointKey        = "stackit_ske_custom_endpoint"
 )
 
 const (

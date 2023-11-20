@@ -13,6 +13,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.7.3
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresql v0.8.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.6.0
 	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/oauth2 v0.14.0
 )
@@ -40,10 +41,8 @@ require (
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect

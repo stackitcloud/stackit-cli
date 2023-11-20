@@ -14,12 +14,14 @@ const (
 	projectIdFlag                = "project-id"
 	dnsCustomEndpointFlag        = "dns-custom-endpoint"
 	postgreSQLCustomEndpointFlag = "postgresql-custom-endpoint"
+	skeCustomEndpointFlag        = "ske-custom-endpoint"
 )
 
 type flagModel struct {
 	ProjectId                bool
 	DNSCustomEndpoint        bool
 	PostgreSQLCustomEndpoint bool
+	SKECustomEndpoint        bool
 }
 
 var Cmd = &cobra.Command{
@@ -39,6 +41,9 @@ var Cmd = &cobra.Command{
 		if model.PostgreSQLCustomEndpoint {
 			viper.Set(config.PostgreSQLCustomEndpointKey, "")
 		}
+		if model.PostgreSQLCustomEndpoint {
+			viper.Set(config.SKECustomEndpointKey, "")
+		}
 
 		err := viper.WriteConfig()
 		if err != nil {
@@ -56,6 +61,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
 	cmd.Flags().Bool(postgreSQLCustomEndpointFlag, false, "PostgreSQL custom endpoint")
+	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
 }
 
 func parseFlags(cmd *cobra.Command) *flagModel {
@@ -63,5 +69,6 @@ func parseFlags(cmd *cobra.Command) *flagModel {
 		ProjectId:                utils.FlagToBoolValue(cmd, projectIdFlag),
 		DNSCustomEndpoint:        utils.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		PostgreSQLCustomEndpoint: utils.FlagToBoolValue(cmd, postgreSQLCustomEndpointFlag),
+		SKECustomEndpoint:        utils.FlagToBoolValue(cmd, skeCustomEndpointFlag),
 	}
 }
