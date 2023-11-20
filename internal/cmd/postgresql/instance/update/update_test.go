@@ -42,29 +42,10 @@ func (c *postgreSQLClientMocked) GetOfferingsExecute(_ context.Context, _ string
 }
 
 var (
-	testProjectId                    = uuid.NewString()
-	testInstanceId                   = uuid.NewString()
-	currentPlanId                    = uuid.NewString()
-	currentMonitoringInstanceIdValue = uuid.NewString()
-	updatedPlanIdValue               = uuid.NewString()
-	updatedMonitoringInstanceIdValue = uuid.NewString()
-)
-
-const (
-	currentEnableMonitoringValue = false
-	currentGraphiteValue         = "example-graphite"
-	currentMetricsFrequencyValue = int64(100)
-	currentMetricsPrefixValue    = "example-prefix"
-	currentPluginValue           = "example-plugin"
-	currentSgwAclValue           = "198.51.100.14/24"
-	currentSyslogValue           = "example-syslog"
-	updatedEnableMonitoringValue = true
-	updatedGraphiteValue         = "example-graphite-updated"
-	updatedMetricsFrequencyValue = int64(101)
-	updatedMetricsPrefixValue    = "example-prefix-updated"
-	updatedPluginValue           = "example-plugin-updated"
-	updatedSgwAclValue           = "0.0.0.0/0"
-	updatedSyslogValue           = "example-syslog-updated"
+	testProjectId            = uuid.NewString()
+	testInstanceId           = uuid.NewString()
+	testPlanId               = uuid.NewString()
+	testMonitoringInstanceId = uuid.NewString()
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -72,14 +53,14 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:            testProjectId,
 		instanceIdFlag:           testInstanceId,
 		enableMonitoringFlag:     "true",
-		graphiteFlag:             updatedGraphiteValue,
-		metricsFrequencyFlag:     "101",
-		metricsPrefixFlag:        updatedMetricsPrefixValue,
-		monitoringInstanceIdFlag: updatedMonitoringInstanceIdValue,
-		pluginFlag:               updatedPluginValue,
-		sgwAclFlag:               updatedSgwAclValue,
-		syslogFlag:               updatedSyslogValue,
-		planIdFlag:               updatedPlanIdValue,
+		graphiteFlag:             "example-graphite",
+		metricsFrequencyFlag:     "100",
+		metricsPrefixFlag:        "example-prefix",
+		monitoringInstanceIdFlag: testMonitoringInstanceId,
+		pluginFlag:               "example-plugin",
+		sgwAclFlag:               "198.51.100.14/24",
+		syslogFlag:               "example-syslog",
+		planIdFlag:               testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -91,15 +72,15 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
 		ProjectId:            testProjectId,
 		InstanceId:           testInstanceId,
-		EnableMonitoring:     utils.Ptr(updatedEnableMonitoringValue),
-		Graphite:             utils.Ptr(updatedGraphiteValue),
-		MetricsFrequency:     utils.Ptr(updatedMetricsFrequencyValue),
-		MetricsPrefix:        utils.Ptr(updatedMetricsPrefixValue),
-		MonitoringInstanceId: utils.Ptr(updatedMonitoringInstanceIdValue),
-		Plugin:               utils.Ptr([]string{updatedPluginValue}),
-		SgwAcl:               utils.Ptr([]string{updatedSgwAclValue}),
-		Syslog:               utils.Ptr([]string{updatedSyslogValue}),
-		PlanId:               utils.Ptr(updatedPlanIdValue),
+		EnableMonitoring:     utils.Ptr(true),
+		Graphite:             utils.Ptr("example-graphite"),
+		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsPrefix:        utils.Ptr("example-prefix"),
+		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+		Plugin:               utils.Ptr([]string{"example-plugin"}),
+		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
+		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -107,42 +88,20 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	return model
 }
 
-func fixtureInstance(mods ...func(instance *postgresql.Instance)) *postgresql.Instance {
-	instance := &postgresql.Instance{
-		InstanceId: utils.Ptr(testInstanceId),
-		PlanId:     utils.Ptr(currentPlanId),
-		Name:       utils.Ptr("example-name"),
-		Parameters: utils.Ptr(map[string]interface{}{
-			"enable_monitoring":      currentEnableMonitoringValue,
-			"graphite":               currentGraphiteValue,
-			"metrics_frequency":      currentMetricsFrequencyValue,
-			"metrics_prefix":         currentMetricsPrefixValue,
-			"monitoring_instance_id": currentMonitoringInstanceIdValue,
-			"plugins":                []string{currentPluginValue},
-			"sgw_acl":                currentSgwAclValue,
-			"syslog":                 []string{currentSyslogValue},
-		}),
-	}
-	for _, mod := range mods {
-		mod(instance)
-	}
-	return instance
-}
-
 func fixtureRequest(mods ...func(request *postgresql.ApiUpdateInstanceRequest)) postgresql.ApiUpdateInstanceRequest {
 	request := testClient.UpdateInstance(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateInstancePayload(postgresql.UpdateInstancePayload{
 		Parameters: &postgresql.InstanceParameters{
-			EnableMonitoring:     utils.Ptr(updatedEnableMonitoringValue),
-			Graphite:             utils.Ptr(updatedGraphiteValue),
-			MetricsFrequency:     utils.Ptr(updatedMetricsFrequencyValue),
-			MetricsPrefix:        utils.Ptr(updatedMetricsPrefixValue),
-			MonitoringInstanceId: utils.Ptr(updatedMonitoringInstanceIdValue),
-			Plugins:              utils.Ptr([]string{updatedPluginValue}),
-			SgwAcl:               utils.Ptr(updatedSgwAclValue),
-			Syslog:               utils.Ptr([]string{updatedSyslogValue}),
+			EnableMonitoring:     utils.Ptr(true),
+			Graphite:             utils.Ptr("example-graphite"),
+			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsPrefix:        utils.Ptr("example-prefix"),
+			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+			Plugins:              utils.Ptr([]string{"example-plugin"}),
+			SgwAcl:               utils.Ptr("198.51.100.14/24"),
+			Syslog:               utils.Ptr([]string{"example-syslog"}),
 		},
-		PlanId: utils.Ptr(updatedPlanIdValue),
+		PlanId: utils.Ptr(testPlanId),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -167,24 +126,6 @@ func TestParseFlags(t *testing.T) {
 			expectedModel: fixtureFlagModel(),
 		},
 		{
-			description: "base with plan_name and version",
-			flagValues: fixtureFlagValues(
-				func(flagValues map[string]string) {
-					delete(flagValues, planIdFlag)
-					flagValues[planNameFlag] = "example-plan-name"
-					flagValues[versionFlag] = "example-version"
-				},
-			),
-			isValid: true,
-			expectedModel: fixtureFlagModel(
-				func(model *flagModel) {
-					model.PlanId = nil
-					model.PlanName = "example-plan-name"
-					model.Version = "example-version"
-				},
-			),
-		},
-		{
 			description: "no values",
 			flagValues:  map[string]string{},
 			isValid:     false,
@@ -205,8 +146,8 @@ func TestParseFlags(t *testing.T) {
 			description: "zero values",
 			flagValues: map[string]string{
 				projectIdFlag:        testProjectId,
-				planIdFlag:           currentPlanId,
 				instanceIdFlag:       testInstanceId,
+				planIdFlag:           testPlanId,
 				enableMonitoringFlag: "false",
 				graphiteFlag:         "",
 				metricsFrequencyFlag: "0",
@@ -216,7 +157,7 @@ func TestParseFlags(t *testing.T) {
 			expectedModel: &flagModel{
 				ProjectId:        testProjectId,
 				InstanceId:       testInstanceId,
-				PlanId:           utils.Ptr(currentPlanId),
+				PlanId:           utils.Ptr(testPlanId),
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
 				MetricsFrequency: utils.Ptr(int64(0)),
@@ -245,13 +186,34 @@ func TestParseFlags(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "instance id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
 			description:  "repeated acl flags",
 			flagValues:   fixtureFlagValues(),
-			sgwAclValues: []string{currentSgwAclValue, "198.51.100.14/32"},
+			sgwAclValues: []string{"198.51.100.14/24", "198.51.100.14/32"},
 			isValid:      true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {
 				model.SgwAcl = utils.Ptr(
-					append(*model.SgwAcl, currentSgwAclValue, "198.51.100.14/32"),
+					append(*model.SgwAcl, "198.51.100.14/24", "198.51.100.14/32"),
 				)
 			}),
 		},
@@ -262,7 +224,7 @@ func TestParseFlags(t *testing.T) {
 			isValid:      true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {
 				model.SgwAcl = utils.Ptr(
-					append(*model.SgwAcl, currentSgwAclValue, "198.51.100.14/32"),
+					append(*model.SgwAcl, "198.51.100.14/24", "198.51.100.14/32"),
 				)
 			}),
 		},
@@ -373,7 +335,6 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description       string
 		model             *flagModel
-		instance          *postgresql.Instance
 		expectedRequest   postgresql.ApiUpdateInstanceRequest
 		getOfferingsFails bool
 		getOfferingsResp  *postgresql.OfferingList
@@ -381,42 +342,8 @@ func TestBuildRequest(t *testing.T) {
 	}{
 		{
 			description:     "base",
-			instance:        fixtureInstance(),
 			model:           fixtureFlagModel(),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "do not update any field",
-			instance:    fixtureInstance(),
-			model: fixtureFlagModel(
-				func(model *flagModel) {
-					model.PlanId = nil
-					model.PlanName = ""
-					model.Version = ""
-					model.EnableMonitoring = nil
-					model.Graphite = nil
-					model.MetricsFrequency = nil
-					model.MetricsPrefix = nil
-					model.MonitoringInstanceId = nil
-					model.Plugin = nil
-					model.SgwAcl = nil
-					model.Syslog = nil
-				},
-			),
-			expectedRequest: testClient.UpdateInstance(testCtx, testProjectId, testInstanceId).
-				UpdateInstancePayload(postgresql.UpdateInstancePayload{
-					Parameters: &postgresql.InstanceParameters{
-						EnableMonitoring:     utils.Ptr(currentEnableMonitoringValue),
-						Graphite:             utils.Ptr(currentGraphiteValue),
-						MetricsFrequency:     utils.Ptr(currentMetricsFrequencyValue),
-						MetricsPrefix:        utils.Ptr(currentMetricsPrefixValue),
-						MonitoringInstanceId: utils.Ptr(currentMonitoringInstanceIdValue),
-						Plugins:              utils.Ptr([]string{currentPluginValue}),
-						SgwAcl:               utils.Ptr(currentSgwAclValue),
-						Syslog:               utils.Ptr([]string{currentSyslogValue}),
-					},
-					PlanId: utils.Ptr(currentPlanId),
-				}),
 		},
 		{
 			description: "use plan name and version",
@@ -427,7 +354,6 @@ func TestBuildRequest(t *testing.T) {
 					model.Version = "example-version"
 				},
 			),
-			instance:        fixtureInstance(),
 			expectedRequest: fixtureRequest(),
 			getOfferingsResp: &postgresql.OfferingList{
 				Offerings: &[]postgresql.Offering{
@@ -436,7 +362,7 @@ func TestBuildRequest(t *testing.T) {
 						Plans: &[]postgresql.Plan{
 							{
 								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(updatedPlanIdValue),
+								Id:   utils.Ptr(testPlanId),
 							},
 						},
 					},
@@ -471,13 +397,22 @@ func TestBuildRequest(t *testing.T) {
 						Plans: &[]postgresql.Plan{
 							{
 								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(currentPlanId),
+								Id:   utils.Ptr(testPlanId),
 							},
 						},
 					},
 				},
 			},
 			isValid: false,
+		},
+		{
+			description: "required fields only",
+			model: &flagModel{
+				ProjectId:  testProjectId,
+				InstanceId: testInstanceId,
+			},
+			expectedRequest: testClient.UpdateInstance(testCtx, testProjectId, testInstanceId).
+				UpdateInstancePayload(postgresql.UpdateInstancePayload{Parameters: &postgresql.InstanceParameters{}}),
 		},
 	}
 
@@ -487,7 +422,7 @@ func TestBuildRequest(t *testing.T) {
 				returnError:      tt.getOfferingsFails,
 				getOfferingsResp: tt.getOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.instance, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, client)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -495,7 +430,7 @@ func TestBuildRequest(t *testing.T) {
 				t.Fatalf("error building request: %v", err)
 			}
 
-			diff := cmp.Diff(tt.expectedRequest, request,
+			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.IgnoreFields(postgresql.ApiUpdateInstanceRequest{}, "apiService", "ctx", "projectId", "instanceId"),
 			)
