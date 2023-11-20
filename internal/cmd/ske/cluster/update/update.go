@@ -15,9 +15,9 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:     "update",
-	Short:   "Updates a Kubernetes cluster",
-	Long:    "Updates a Kubernetes cluster",
-	Example: `$ stackit ske cluster update --project-id xxx --payload "{\"field\":\value\"}"`,
+	Short:   "Updates an SKE cluster",
+	Long:    "Updates an SKE cluster",
+	Example: `$ stackit ske cluster update --project-id xxx --payload @./payload.json`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		model, err := create.ParseFlags(cmd, os.ReadFile)

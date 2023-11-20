@@ -32,9 +32,9 @@ type FlagModel struct {
 
 var Cmd = &cobra.Command{
 	Use:     "create",
-	Short:   "Creates a Kubernetes cluster",
-	Long:    "Creates a Kubernetes cluster",
-	Example: `$ stackit ske cluster create --project-id xxx --payload "{\"field\":\value\"}"`,
+	Short:   "Creates an SKE cluster",
+	Long:    "Creates an SKE cluster",
+	Example: `$ stackit ske cluster create --project-id xxx --payload @./payload.json`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		model, err := ParseFlags(cmd, os.ReadFile)
