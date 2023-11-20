@@ -16,6 +16,7 @@ const (
 	projectIdFlag                = "project-id"
 	dnsCustomEndpointFlag        = "dns-custom-endpoint"
 	postgreSQLCustomEndpointFlag = "postgresql-custom-endpoint"
+	skeCustomEndpointFlag        = "ske-custom-endpoint"
 )
 
 type flagModel struct {
@@ -54,10 +55,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS custom endpoint")
 	cmd.Flags().String(postgreSQLCustomEndpointFlag, "", "PostgreSQL custom endpoint")
+	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
 
 	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.PostgreSQLCustomEndpointKey, cmd.Flags().Lookup(postgreSQLCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 
