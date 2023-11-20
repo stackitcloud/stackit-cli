@@ -7,7 +7,7 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "zone",
+	Use:     "cluster",
 	Short:   "Provides functionality for SKE cluster",
 	Long:    "Provides functionality for SKE cluster",
 	Example: list.Cmd.Example,

@@ -7,7 +7,7 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "dns",
+	Use:     "ske",
 	Short:   "Provides functionality for SKE",
 	Long:    "Provides functionality for STACKIT Kubernetes engine (SKE)",
 	Example: cluster.Cmd.Example,
