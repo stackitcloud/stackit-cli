@@ -28,7 +28,7 @@ var Cmd = &cobra.Command{
 	Example: `$ stackit ske cluster list --project-id xxx`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		model, err := parseFlags(cmd)
+		model, err := parseFlags()
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ var Cmd = &cobra.Command{
 	},
 }
 
-func parseFlags(cmd *cobra.Command) (*flagModel, error) {
+func parseFlags() (*flagModel, error) {
 	projectId := viper.GetString(config.ProjectIdKey)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
