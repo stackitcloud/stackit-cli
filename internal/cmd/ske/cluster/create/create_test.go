@@ -53,6 +53,16 @@ var testPayload = ske.CreateOrUpdateClusterPayload{
 			AllowedCidrs: &[]string{"0.0.0.0/0"},
 		},
 	},
+	Maintenance: &ske.Maintenance{
+		AutoUpdate: &ske.MaintenanceAutoUpdate{
+			KubernetesVersion:   utils.Ptr(true),
+			MachineImageVersion: utils.Ptr(true),
+		},
+		TimeWindow: &ske.TimeWindow{
+			End:   utils.Ptr("0000-01-01T05:00:00+02:00"),
+			Start: utils.Ptr("0000-01-01T03:00:00+02:00"),
+		},
+	},
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -82,7 +92,17 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"availabilityZones": ["eu01-3"]
 			  }
 			],
-			"extensions": { "acl": { "enabled": true, "allowedCidrs": ["0.0.0.0/0"] } }
+			"extensions": { "acl": { "enabled": true, "allowedCidrs": ["0.0.0.0/0"] } },
+			"maintenance": {
+				"autoUpdate": {
+				  "kubernetesVersion": true,
+				  "machineImageVersion": true
+				},
+				"timeWindow": {
+				  "end": "0000-01-01T05:00:00+02:00",
+				  "start": "0000-01-01T03:00:00+02:00"
+				}
+			  }
 		  }`,
 	}
 	for _, mod := range mods {

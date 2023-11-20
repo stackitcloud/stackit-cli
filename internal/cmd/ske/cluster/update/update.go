@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/create"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
@@ -31,16 +32,9 @@ var Cmd = &cobra.Command{
 		}
 
 		// Check if cluster exists
-		clusters, err := apiClient.GetClustersExecute(ctx, model.ProjectId)
+		exists, err := utils.ClusterExists(ctx, apiClient, model.ProjectId, model.Name)
 		if err != nil {
-			return fmt.Errorf("get SKE cluster: %w", err)
-		}
-		exists := false
-		for _, cl := range *clusters.Items {
-			if cl.Name != nil && *cl.Name == model.Name {
-				exists = true
-				break
-			}
+			return err
 		}
 		if !exists {
 			return fmt.Errorf("cluster with name %s does not exist", model.Name)
