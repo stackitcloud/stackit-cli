@@ -85,7 +85,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for PostgreSQL instance creation: %w", err)
 		}
 
-		fmt.Printf("Created instance with ID %s\n", instanceId)
+		cmd.Printf("Created instance with ID %s\n", instanceId)
 		return nil
 	},
 }

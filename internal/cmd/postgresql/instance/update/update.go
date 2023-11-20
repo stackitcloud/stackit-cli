@@ -86,7 +86,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for PostgreSQL instance update: %w", err)
 		}
 
-		fmt.Printf("Updated instance with ID %s\n", instanceId)
+		cmd.Printf("Updated instance with ID %s\n", instanceId)
 		return nil
 	},
 }

@@ -49,7 +49,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("create PostgreSQL credentials: %w", err)
 		}
 
-		fmt.Printf("Created credentials with ID %s\n", *resp.Id)
+		cmd.Printf("Created credentials with ID %s\n", *resp.Id)
 		return nil
 	},
 }

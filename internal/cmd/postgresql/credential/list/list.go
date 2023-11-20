@@ -51,7 +51,7 @@ var Cmd = &cobra.Command{
 		}
 		credentials := *resp.CredentialsList
 		if len(credentials) == 0 {
-			fmt.Printf("No credentials found for instance with ID %s\n", model.InstanceId)
+			cmd.Printf("No credentials found for instance with ID %s\n", model.InstanceId)
 			return nil
 		}
 
@@ -61,7 +61,7 @@ var Cmd = &cobra.Command{
 		for _, i := range credentials {
 			table.AddRow(*i.Id)
 		}
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},

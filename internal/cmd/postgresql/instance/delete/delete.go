@@ -55,7 +55,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for PostgreSQL instance deletion: %w", err)
 		}
 
-		fmt.Printf("Deleted instance with ID %s\n", model.InstanceId)
+		cmd.Printf("Deleted instance with ID %s\n", model.InstanceId)
 		return nil
 	},
 }

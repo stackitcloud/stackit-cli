@@ -43,7 +43,7 @@ var Cmd = &cobra.Command{
 		}
 		instances := *resp.Instances
 		if len(instances) == 0 {
-			fmt.Printf("No instances found for product with ID %s\n", model.ProjectId)
+			cmd.Printf("No instances found for product with ID %s\n", model.ProjectId)
 			return nil
 		}
 
@@ -53,7 +53,7 @@ var Cmd = &cobra.Command{
 		for _, i := range instances {
 			table.AddRow(*i.InstanceId, *i.Name, *i.LastOperation.Type, *i.LastOperation.State)
 		}
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},

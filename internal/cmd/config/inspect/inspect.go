@@ -25,7 +25,7 @@ var Cmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("marshal config: %w", err)
 		}
-		fmt.Println(string(configJSON))
+		cmd.Println(string(configJSON))
 
 		return nil
 	},

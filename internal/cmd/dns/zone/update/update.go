@@ -79,7 +79,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS zone update: %w", err)
 		}
 
-		fmt.Println("Zone updated")
+		cmd.Println("Zone updated")
 		return nil
 	},
 }

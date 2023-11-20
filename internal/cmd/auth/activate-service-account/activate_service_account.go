@@ -61,7 +61,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("authenticate service account: %w", err)
 		}
 
-		fmt.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
+		cmd.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 
 		return nil
 	},

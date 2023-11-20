@@ -67,7 +67,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS record set creation: %w", err)
 		}
 
-		fmt.Printf("Created record set with ID %s\n", recordSetId)
+		cmd.Printf("Created record set with ID %s\n", recordSetId)
 		return nil
 	},
 }

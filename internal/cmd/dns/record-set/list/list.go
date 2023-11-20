@@ -58,7 +58,7 @@ var Cmd = &cobra.Command{
 		}
 		recordSets := *resp.RrSets
 		if len(recordSets) == 0 {
-			fmt.Printf("No record-sets found for zone with ID %s\n", model.ZoneId)
+			cmd.Printf("No record-sets found for zone with ID %s\n", model.ZoneId)
 			return nil
 		}
 
@@ -68,7 +68,7 @@ var Cmd = &cobra.Command{
 		for _, recordSet := range recordSets {
 			table.AddRow(*recordSet.Id, *recordSet.Name, *recordSet.Type, *recordSet.State)
 		}
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},
