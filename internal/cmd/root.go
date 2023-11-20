@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
 	configPkg "github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 
@@ -42,6 +43,7 @@ func init() {
 	RootCmd.AddCommand(config.Cmd)
 	RootCmd.AddCommand(dns.Cmd)
 	RootCmd.AddCommand(postgresql.Cmd)
+	RootCmd.AddCommand(ske.Cmd)
 
 	configureFlags(RootCmd)
 }
