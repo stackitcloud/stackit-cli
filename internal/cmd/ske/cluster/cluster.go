@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
 
@@ -17,4 +18,5 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(list.Cmd)
 	Cmd.AddCommand(describe.Cmd)
+	Cmd.AddCommand(delete.Cmd)
 }
