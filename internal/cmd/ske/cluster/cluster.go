@@ -1,7 +1,6 @@
 package cluster
 
 import (
-
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
