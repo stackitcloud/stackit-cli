@@ -20,13 +20,13 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresql.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testCredentialsId = uuid.NewString()
+var testCredentialId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:    testProjectId,
 		instanceIdFlag:   testInstanceId,
-		credentialIdFlag: testCredentialsId,
+		credentialIdFlag: testCredentialId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -36,9 +36,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:     testProjectId,
-		InstanceId:    testInstanceId,
-		CredentialsId: testCredentialsId,
+		ProjectId:    testProjectId,
+		InstanceId:   testInstanceId,
+		CredentialId: testCredentialId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -47,7 +47,7 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresql.ApiDeleteCredentialsRequest)) postgresql.ApiDeleteCredentialsRequest {
-	request := testClient.DeleteCredentials(testCtx, testProjectId, testInstanceId, testCredentialsId)
+	request := testClient.DeleteCredentials(testCtx, testProjectId, testInstanceId, testCredentialId)
 	for _, mod := range mods {
 		mod(&request)
 	}

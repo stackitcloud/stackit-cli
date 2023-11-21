@@ -47,10 +47,10 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create PostgreSQL credentials: %w", err)
+				return fmt.Errorf("create PostgreSQL credential: %w", err)
 			}
 
-			cmd.Printf("Created credentials with ID %s\n", *resp.Id)
+			cmd.Printf("Created credential with ID %s\n", *resp.Id)
 			return nil
 		},
 	}

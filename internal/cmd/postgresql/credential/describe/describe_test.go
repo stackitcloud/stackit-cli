@@ -20,13 +20,13 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresql.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testCredentialsId = uuid.NewString()
+var testCredentialId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:     testProjectId,
-		instanceIdFlag:    testInstanceId,
-		credentialsIdFlag: testCredentialsId,
+		projectIdFlag:    testProjectId,
+		instanceIdFlag:   testInstanceId,
+		credentialIdFlag: testCredentialId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -36,9 +36,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:     testProjectId,
-		InstanceId:    testInstanceId,
-		CredentialsId: testCredentialsId,
+		ProjectId:    testProjectId,
+		InstanceId:   testInstanceId,
+		CredentialId: testCredentialId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -47,7 +47,7 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresql.ApiGetCredentialsRequest)) postgresql.ApiGetCredentialsRequest {
-	request := testClient.GetCredentials(testCtx, testProjectId, testInstanceId, testCredentialsId)
+	request := testClient.GetCredentials(testCtx, testProjectId, testInstanceId, testCredentialId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -117,21 +117,21 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "credentials id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, credentialsIdFlag)
+				delete(flagValues, credentialIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsIdFlag] = ""
+				flagValues[credentialIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsIdFlag] = "invalid-uuid"
+				flagValues[credentialIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
