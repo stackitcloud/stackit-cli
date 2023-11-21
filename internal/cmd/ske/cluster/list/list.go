@@ -47,7 +47,7 @@ var Cmd = &cobra.Command{
 		}
 		clusters := *resp.Items
 		if len(clusters) == 0 {
-			fmt.Printf("No clusters found for project with ID %s\n", model.ProjectId)
+			cmd.Printf("No clusters found for project with ID %s\n", model.ProjectId)
 			return nil
 		}
 
@@ -57,7 +57,7 @@ var Cmd = &cobra.Command{
 		for _, cluster := range clusters {
 			table.AddRow(*cluster.Name, *cluster.Status.Aggregated)
 		}
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},

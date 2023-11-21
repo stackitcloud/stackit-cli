@@ -54,7 +54,7 @@ var Cmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL instance: %w", err)
 		}
-		fmt.Println(string(details))
+		cmd.Println(string(details))
 
 		return nil
 	},

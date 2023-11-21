@@ -54,7 +54,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for SKE cluster deletion: %w", err)
 		}
 
-		fmt.Println("Cluster deleted")
+		cmd.Println("Cluster deleted")
 		return nil
 	},
 }

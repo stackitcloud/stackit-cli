@@ -61,7 +61,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS record set deletion: %w", err)
 		}
 
-		fmt.Println("Record set deleted")
+		cmd.Println("Record set deleted")
 		return nil
 	},
 }

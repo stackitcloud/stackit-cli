@@ -80,7 +80,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS zone creation: %w", err)
 		}
 
-		fmt.Printf("Created zone with ID %s\n", zoneId)
+		cmd.Printf("Created zone with ID %s\n", zoneId)
 		return nil
 	},
 }

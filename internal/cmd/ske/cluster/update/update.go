@@ -57,7 +57,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for SKE cluster update: %w", err)
 		}
 
-		fmt.Printf("Updated cluster with name %s\n", name)
+		cmd.Printf("Updated cluster with name %s\n", name)
 		return nil
 	},
 }

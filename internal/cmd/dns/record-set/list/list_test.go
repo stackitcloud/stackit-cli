@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -187,7 +186,6 @@ func TestParseFlags(t *testing.T) {
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
-				fmt.Printf("setting flag --%s=%s: %v", flag, value, err)
 				if err != nil {
 					if !tt.isValid {
 						return

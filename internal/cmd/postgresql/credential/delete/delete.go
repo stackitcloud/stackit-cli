@@ -51,7 +51,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("delete PostgreSQL credentials: %w", err)
 		}
 
-		fmt.Printf("Deleted credentials with ID %s\n", model.CredentialsId)
+		cmd.Printf("Deleted credentials with ID %s\n", model.CredentialsId)
 		return nil
 	},
 }

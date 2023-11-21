@@ -2,7 +2,6 @@ package login
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 
@@ -14,14 +13,14 @@ var Cmd = &cobra.Command{
 	Short:   "Login to the provider",
 	Long:    "Login to the provider",
 	Example: `$ stackit auth login`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		err := auth.AuthorizeUser()
 		if err != nil {
-			fmt.Printf("Authorization failed: %s\n", err)
-			os.Exit(1)
+			return fmt.Errorf("authorization failed: %w", err)
 		}
 
-		fmt.Println("Successfully logged into STACKIT CLI.")
+		cmd.Println("Successfully logged into STACKIT CLI.")
+		return nil
 	},
 }
 

@@ -66,7 +66,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS record set update: %w", err)
 		}
 
-		fmt.Println("Record set updated")
+		cmd.Println("Record set updated")
 		return nil
 	},
 }

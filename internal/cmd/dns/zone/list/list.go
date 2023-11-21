@@ -56,7 +56,7 @@ var Cmd = &cobra.Command{
 		}
 		zones := *resp.Zones
 		if len(zones) == 0 {
-			fmt.Printf("No zones found for project with ID %s\n", model.ProjectId)
+			cmd.Printf("No zones found for project with ID %s\n", model.ProjectId)
 			return nil
 		}
 
@@ -66,7 +66,7 @@ var Cmd = &cobra.Command{
 		for _, zone := range zones {
 			table.AddRow(*zone.Id, *zone.Name, *zone.DnsName, *zone.State)
 		}
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},

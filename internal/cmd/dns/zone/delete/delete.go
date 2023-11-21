@@ -59,7 +59,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for DNS zone deletion: %w", err)
 		}
 
-		fmt.Println("Zone deleted")
+		cmd.Println("Zone deleted")
 		return nil
 	},
 }

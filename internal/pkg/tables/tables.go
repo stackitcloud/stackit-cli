@@ -1,10 +1,8 @@
 package tables
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/spf13/cobra"
 )
 
 type Table struct {
@@ -14,7 +12,6 @@ type Table struct {
 // Creates a new table
 func NewTable() Table {
 	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
 	return Table{
 		table: t,
 	}
@@ -45,13 +42,11 @@ func (t *Table) EnableAutoMergeOnColumns(columns ...int) {
 }
 
 // Renders the table
-func (t *Table) Render() {
-	fmt.Print("\n")
+func (t *Table) Render(cmd *cobra.Command) {
 	t.table.SetStyle(table.StyleLight)
 	t.table.Style().Options.DrawBorder = false
 	t.table.Style().Options.SeparateRows = false
 	t.table.Style().Options.SeparateColumns = true
 	t.table.Style().Options.SeparateHeader = true
-	t.table.Render()
-	fmt.Print("\n")
+	cmd.Printf("\n%s\n", t.table.Render())
 }

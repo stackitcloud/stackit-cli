@@ -151,7 +151,6 @@ func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authoriza
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Printf("HTTP error: %s", err)
 		return "", "", fmt.Errorf("call access token endpoint: %w", err)
 	}
 
@@ -174,14 +173,13 @@ func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authoriza
 	}{}
 	err = json.Unmarshal(body, &responseData)
 	if err != nil {
-		fmt.Printf("JSON error: %s", err)
-		return "", "", err
+		return "", "", fmt.Errorf("unmarshal response: %w", err)
 	}
 	if responseData.AccessToken == "" {
-		fmt.Printf("found no access token")
+		return "", "", fmt.Errorf("found no access token")
 	}
 	if responseData.RefreshToken == "" {
-		fmt.Printf("found no refresh token")
+		return "", "", fmt.Errorf("found no refresh token")
 	}
 
 	return responseData.AccessToken, responseData.RefreshToken, nil

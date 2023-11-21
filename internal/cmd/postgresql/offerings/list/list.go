@@ -53,7 +53,7 @@ var Cmd = &cobra.Command{
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1)
-		table.Render()
+		table.Render(cmd)
 
 		return nil
 	},
