@@ -25,47 +25,47 @@ type flagModel struct {
 	ZoneId    string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete a DNS zone",
-	Long:    "Delete a DNS zone",
-	Example: `$ stackit dns zone delete --project-id xxx --zone-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "Delete a DNS zone",
+		Long:    "Delete a DNS zone",
+		Example: `$ stackit dns zone delete --project-id xxx --zone-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		if err != nil {
-			return err
-		}
-		_, err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("delete DNS zone: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return err
+			}
+			_, err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete DNS zone: %w", err)
+			}
 
-		// Wait for async operation
-		_, err = wait.DeleteZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for DNS zone deletion: %w", err)
-		}
+			// Wait for async operation
+			_, err = wait.DeleteZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for DNS zone deletion: %w", err)
+			}
 
-		cmd.Println("Zone deleted")
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Println("Zone deleted")
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

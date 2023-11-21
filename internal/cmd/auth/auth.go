@@ -7,15 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "auth",
-	Short:   "Provides authentication functionality",
-	Long:    "Provides authentication functionality",
-	Example: `$ stackit auth login`,
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "auth",
+		Short:   "Provides authentication functionality",
+		Long:    "Provides authentication functionality",
+		Example: `$ stackit auth login`,
+	}
+	addChilds(cmd)
+	return cmd
 }
 
-func init() {
-	// Add all direct child commands
-	Cmd.AddCommand(login.Cmd)
-	Cmd.AddCommand(activateserviceaccount.Cmd)
+func addChilds(cmd *cobra.Command) {
+	cmd.AddCommand(login.NewCmd())
+	cmd.AddCommand(activateserviceaccount.NewCmd())
 }

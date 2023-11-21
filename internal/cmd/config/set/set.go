@@ -23,32 +23,32 @@ type flagModel struct {
 	SessionTimeLimit *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "set",
-	Short:   "Set CLI configuration options",
-	Long:    "Set CLI configuration options",
-	Example: `$ stackit config set --project-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "set",
+		Short:   "Set CLI configuration options",
+		Long:    "Set CLI configuration options",
+		Example: `$ stackit config set --project-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		if model.SessionTimeLimit != nil {
-			cmd.Println("Authenticate again to apply changes to session time limit")
-			viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
-		}
+			if model.SessionTimeLimit != nil {
+				cmd.Println("Authenticate again to apply changes to session time limit")
+				viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
+			}
 
-		err = viper.WriteConfig()
-		if err != nil {
-			return fmt.Errorf("write new config to file: %w", err)
-		}
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			err = viper.WriteConfig()
+			if err != nil {
+				return fmt.Errorf("write new config to file: %w", err)
+			}
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

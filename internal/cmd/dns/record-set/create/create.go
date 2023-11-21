@@ -35,45 +35,45 @@ type flagModel struct {
 	Type      *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Creates a DNS record set",
-	Long:    "Creates a DNS record set",
-	Example: `$ stackit dns record-set create --project-id xxx --zone-id xxx --name my-zone --type A --record 1.2.3.4 --record 5.6.7.8`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a DNS record set",
+		Long:    "Creates a DNS record set",
+		Example: `$ stackit dns record-set create --project-id xxx --zone-id xxx --name my-zone --type A --record 1.2.3.4 --record 5.6.7.8`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("create DNS record set: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("create DNS record set: %w", err)
+			}
 
-		// Wait for async operation
-		recordSetId := *resp.Rrset.Id
-		_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for DNS record set creation: %w", err)
-		}
+			// Wait for async operation
+			recordSetId := *resp.Rrset.Id
+			_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for DNS record set creation: %w", err)
+			}
 
-		cmd.Printf("Created record set with ID %s\n", recordSetId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Created record set with ID %s\n", recordSetId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

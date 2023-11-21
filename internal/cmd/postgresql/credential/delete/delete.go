@@ -26,38 +26,38 @@ type flagModel struct {
 	CredentialsId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete a PostgreSQL instance credential",
-	Long:    "Delete a PostgreSQL instance credential",
-	Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credentials-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "Delete a PostgreSQL instance credential",
+		Long:    "Delete a PostgreSQL instance credential",
+		Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credentials-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("delete PostgreSQL credentials: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete PostgreSQL credentials: %w", err)
+			}
 
-		cmd.Printf("Deleted credentials with ID %s\n", model.CredentialsId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Deleted credentials with ID %s\n", model.CredentialsId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

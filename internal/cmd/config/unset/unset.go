@@ -24,37 +24,37 @@ type flagModel struct {
 	SKECustomEndpoint        bool
 }
 
-var Cmd = &cobra.Command{
-	Use:     "unset",
-	Short:   "Unset CLI configuration options",
-	Long:    "Unset CLI configuration options",
-	Example: `$ stackit config unset --project-id`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		model := parseFlags(cmd)
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "unset",
+		Short:   "Unset CLI configuration options",
+		Long:    "Unset CLI configuration options",
+		Example: `$ stackit config unset --project-id`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model := parseFlags(cmd)
 
-		if model.ProjectId {
-			viper.Set(config.ProjectIdKey, "")
-		}
-		if model.DNSCustomEndpoint {
-			viper.Set(config.DNSCustomEndpointKey, "")
-		}
-		if model.PostgreSQLCustomEndpoint {
-			viper.Set(config.PostgreSQLCustomEndpointKey, "")
-		}
-		if model.PostgreSQLCustomEndpoint {
-			viper.Set(config.SKECustomEndpointKey, "")
-		}
+			if model.ProjectId {
+				viper.Set(config.ProjectIdKey, "")
+			}
+			if model.DNSCustomEndpoint {
+				viper.Set(config.DNSCustomEndpointKey, "")
+			}
+			if model.PostgreSQLCustomEndpoint {
+				viper.Set(config.PostgreSQLCustomEndpointKey, "")
+			}
+			if model.PostgreSQLCustomEndpoint {
+				viper.Set(config.SKECustomEndpointKey, "")
+			}
 
-		err := viper.WriteConfig()
-		if err != nil {
-			return fmt.Errorf("write updated config to file: %w", err)
-		}
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			err := viper.WriteConfig()
+			if err != nil {
+				return fmt.Errorf("write updated config to file: %w", err)
+			}
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

@@ -12,17 +12,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "cluster",
-	Short:   "Provides functionality for SKE cluster",
-	Long:    "Provides functionality for SKE cluster",
-	Example: fmt.Sprintf("%s\n%s", create.Cmd.Example, list.Cmd.Example),
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "cluster",
+		Short:   "Provides functionality for SKE cluster",
+		Long:    "Provides functionality for SKE cluster",
+		Example: fmt.Sprintf("%s\n%s", create.NewCmd().Example, list.NewCmd().Example),
+	}
+	addChilds(cmd)
+	return cmd
 }
 
-func init() {
-	Cmd.AddCommand(create.Cmd)
-	Cmd.AddCommand(delete.Cmd)
-	Cmd.AddCommand(describe.Cmd)
-	Cmd.AddCommand(list.Cmd)
-	Cmd.AddCommand(update.Cmd)
+func addChilds(cmd *cobra.Command) {
+	cmd.AddCommand(create.NewCmd())
+	cmd.AddCommand(delete.NewCmd())
+	cmd.AddCommand(describe.NewCmd())
+	cmd.AddCommand(list.NewCmd())
+	cmd.AddCommand(update.NewCmd())
 }

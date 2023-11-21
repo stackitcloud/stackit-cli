@@ -24,43 +24,43 @@ type flagModel struct {
 	ClusterName string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete a SKE cluster",
-	Long:    "Delete a SKE cluster",
-	Example: `$ stackit ske cluster delete --project-id xxx --name xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "Delete a SKE cluster",
+		Long:    "Delete a SKE cluster",
+		Example: `$ stackit ske cluster delete --project-id xxx --name xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		_, err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("delete SKE cluster: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			_, err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete SKE cluster: %w", err)
+			}
 
-		// Wait for async operation
-		_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for SKE cluster deletion: %w", err)
-		}
+			// Wait for async operation
+			_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for SKE cluster deletion: %w", err)
+			}
 
-		cmd.Println("Cluster deleted")
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Println("Cluster deleted")
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

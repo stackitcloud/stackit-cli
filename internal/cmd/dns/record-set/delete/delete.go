@@ -27,47 +27,47 @@ type flagModel struct {
 	RecordSetId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete a DNS record set",
-	Long:    "Delete a DNS record set",
-	Example: `$ stackit dns record-set delete --project-id xxx --zone-id xxx --record-set-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "Delete a DNS record set",
+		Long:    "Delete a DNS record set",
+		Example: `$ stackit dns record-set delete --project-id xxx --zone-id xxx --record-set-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		if err != nil {
-			return err
-		}
-		_, err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("delete DNS record set: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return err
+			}
+			_, err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete DNS record set: %w", err)
+			}
 
-		// Wait for async operation
-		_, err = wait.DeleteRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for DNS record set deletion: %w", err)
-		}
+			// Wait for async operation
+			_, err = wait.DeleteRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for DNS record set deletion: %w", err)
+			}
 
-		cmd.Println("Record set deleted")
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Println("Record set deleted")
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

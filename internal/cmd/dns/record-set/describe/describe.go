@@ -27,45 +27,45 @@ type flagModel struct {
 	RecordSetId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "describe",
-	Short:   "Get details of a DNS record set",
-	Long:    "Get details of a DNS record set",
-	Example: `$ stackit dns record-set describe --project-id xxx --zone-id xxx --record-set-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "describe",
+		Short:   "Get details of a DNS record set",
+		Long:    "Get details of a DNS record set",
+		Example: `$ stackit dns record-set describe --project-id xxx --zone-id xxx --record-set-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("read DNS record set: %w", err)
-		}
-		recordSet := *resp.Rrset
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read DNS record set: %w", err)
+			}
+			recordSet := *resp.Rrset
 
-		// Show details
-		details, err := json.MarshalIndent(recordSet, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set: %w", err)
-		}
-		cmd.Println(string(details))
+			// Show details
+			details, err := json.MarshalIndent(recordSet, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshal DNS record set: %w", err)
+			}
+			cmd.Println(string(details))
 
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

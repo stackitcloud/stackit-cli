@@ -25,43 +25,43 @@ type flagModel struct {
 	InstanceId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete a PostgreSQL instance",
-	Long:    "Delete a PostgreSQL instance",
-	Example: `$ stackit postgresql instance delete --project-id xxx --instance-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "Delete a PostgreSQL instance",
+		Long:    "Delete a PostgreSQL instance",
+		Example: `$ stackit postgresql instance delete --project-id xxx --instance-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("delete PostgreSQL instance: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete PostgreSQL instance: %w", err)
+			}
 
-		// Wait for async operation
-		_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for PostgreSQL instance deletion: %w", err)
-		}
+			// Wait for async operation
+			_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for PostgreSQL instance deletion: %w", err)
+			}
 
-		cmd.Printf("Deleted instance with ID %s\n", model.InstanceId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Deleted instance with ID %s\n", model.InstanceId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

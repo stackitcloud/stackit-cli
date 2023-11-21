@@ -12,18 +12,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "record-set",
-	Short:   "Provides functionality for DNS record set",
-	Long:    "Provides functionality for DNS record set",
-	Example: fmt.Sprintf("%s\n%s", list.Cmd.Example, create.Cmd.Example),
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "record-set",
+		Short:   "Provides functionality for DNS record set",
+		Long:    "Provides functionality for DNS record set",
+		Example: fmt.Sprintf("%s\n%s", list.NewCmd().Example, create.NewCmd().Example),
+	}
+	addChilds(cmd)
+	return cmd
 }
 
-func init() {
-	// Add all direct child commands
-	Cmd.AddCommand(list.Cmd)
-	Cmd.AddCommand(create.Cmd)
-	Cmd.AddCommand(describe.Cmd)
-	Cmd.AddCommand(delete.Cmd)
-	Cmd.AddCommand(update.Cmd)
+func addChilds(cmd *cobra.Command) {
+	cmd.AddCommand(list.NewCmd())
+	cmd.AddCommand(create.NewCmd())
+	cmd.AddCommand(describe.NewCmd())
+	cmd.AddCommand(delete.NewCmd())
+	cmd.AddCommand(update.NewCmd())
 }

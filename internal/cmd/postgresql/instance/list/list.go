@@ -17,47 +17,50 @@ type flagModel struct {
 	ProjectId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all PostgreSQL instances",
-	Long:    "List all PostgreSQL instances",
-	Example: `$ stackit postgresql instance list --project-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List all PostgreSQL instances",
+		Long:    "List all PostgreSQL instances",
+		Example: `$ stackit postgresql instance list --project-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("get PostgreSQL instances: %w", err)
-		}
-		instances := *resp.Instances
-		if len(instances) == 0 {
-			cmd.Printf("No instances found for product with ID %s\n", model.ProjectId)
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("get PostgreSQL instances: %w", err)
+			}
+			instances := *resp.Instances
+			if len(instances) == 0 {
+				cmd.Printf("No instances found for product with ID %s\n", model.ProjectId)
+				return nil
+			}
+
+			// Show output as table
+			table := tables.NewTable()
+			table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
+			for i := range instances {
+				instance := instances[i]
+				table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
+			}
+			table.Render(cmd)
+
 			return nil
-		}
-
-		// Show output as table
-		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
-		for i := range instances {
-			instance := instances[i]
-			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
-		}
-		table.Render(cmd)
-
-		return nil
-	},
+		},
+	}
+	return cmd
 }
 
 func parseFlags(_ *cobra.Command) (*flagModel, error) {

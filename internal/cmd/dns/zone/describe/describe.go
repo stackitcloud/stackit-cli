@@ -25,44 +25,44 @@ type flagModel struct {
 	ZoneId    string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "describe",
-	Short:   "Get details of a DNS zone",
-	Long:    "Get details of a DNS zone",
-	Example: `$ stackit dns zone describe --project-id xxx --zone-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "describe",
+		Short:   "Get details of a DNS zone",
+		Long:    "Get details of a DNS zone",
+		Example: `$ stackit dns zone describe --project-id xxx --zone-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("read DNS zone: %w", err)
-		}
-		zone := *resp.Zone
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read DNS zone: %w", err)
+			}
+			zone := *resp.Zone
 
-		// Show details
-		details, err := json.MarshalIndent(zone, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone: %w", err)
-		}
-		cmd.Println(string(details))
+			// Show details
+			details, err := json.MarshalIndent(zone, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshal DNS zone: %w", err)
+			}
+			cmd.Println(string(details))
 
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

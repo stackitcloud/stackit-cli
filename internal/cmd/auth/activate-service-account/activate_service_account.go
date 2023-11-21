@@ -27,48 +27,48 @@ type flagModel struct {
 	JwksCustomEndpoint    string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "activate-service-account",
-	Short:   "Activate service account authentication",
-	Long:    "Activate authentication using service account credentials.\nFor more details on how to configure your service account, check the Authentication section on our documentation (LINK HERE README)",
-	Example: `$ stackit auth activate-service-account --service-account-key-path path/to/service_account_key.json --private-key-path path/to/private_key.pem`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		model := parseFlags(cmd)
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "activate-service-account",
+		Short:   "Activate service account authentication",
+		Long:    "Activate authentication using service account credentials.\nFor more details on how to configure your service account, check the Authentication section on our documentation (LINK HERE README)",
+		Example: `$ stackit auth activate-service-account --service-account-key-path path/to/service_account_key.json --private-key-path path/to/private_key.pem`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model := parseFlags(cmd)
 
-		err := storeFlags(model)
-		if err != nil {
-			return err
-		}
+			err := storeFlags(model)
+			if err != nil {
+				return err
+			}
 
-		cfg := &sdkConfig.Configuration{
-			Token:                 model.ServiceAccountToken,
-			ServiceAccountKeyPath: model.ServiceAccountKeyPath,
-			PrivateKeyPath:        model.PrivateKeyPath,
-			TokenCustomUrl:        model.TokenCustomEndpoint,
-			JWKSCustomUrl:         model.JwksCustomEndpoint,
-		}
+			cfg := &sdkConfig.Configuration{
+				Token:                 model.ServiceAccountToken,
+				ServiceAccountKeyPath: model.ServiceAccountKeyPath,
+				PrivateKeyPath:        model.PrivateKeyPath,
+				TokenCustomUrl:        model.TokenCustomEndpoint,
+				JWKSCustomUrl:         model.JwksCustomEndpoint,
+			}
 
-		// Setup authentication based on the provided credentials and the environment
-		// Initializes the authentication flow
-		rt, err := sdkAuth.SetupAuth(cfg)
-		if err != nil {
-			return fmt.Errorf("set up authentication: %w", err)
-		}
+			// Setup authentication based on the provided credentials and the environment
+			// Initializes the authentication flow
+			rt, err := sdkAuth.SetupAuth(cfg)
+			if err != nil {
+				return fmt.Errorf("set up authentication: %w", err)
+			}
 
-		// Authenticates the service account and stores credentials
-		email, err := auth.AuthenticateServiceAccount(rt)
-		if err != nil {
-			return fmt.Errorf("authenticate service account: %w", err)
-		}
+			// Authenticates the service account and stores credentials
+			email, err := auth.AuthenticateServiceAccount(rt)
+			if err != nil {
+				return fmt.Errorf("authenticate service account: %w", err)
+			}
 
-		cmd.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
+			cmd.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

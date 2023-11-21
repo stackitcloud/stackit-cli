@@ -10,15 +10,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "config",
-	Short:   "CLI configuration options",
-	Long:    "CLI configuration options",
-	Example: fmt.Sprintf("%s\n%s\n%s", set.Cmd.Example, inspect.Cmd.Example, unset.Cmd.Example),
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "config",
+		Short:   "CLI configuration options",
+		Long:    "CLI configuration options",
+		Example: fmt.Sprintf("%s\n%s\n%s", set.NewCmd().Example, inspect.NewCmd().Example, unset.NewCmd().Example),
+	}
+	addChilds(cmd)
+	return cmd
 }
 
-func init() {
-	Cmd.AddCommand(inspect.Cmd)
-	Cmd.AddCommand(set.Cmd)
-	Cmd.AddCommand(unset.Cmd)
+func addChilds(cmd *cobra.Command) {
+	cmd.AddCommand(inspect.NewCmd())
+	cmd.AddCommand(set.NewCmd())
+	cmd.AddCommand(unset.NewCmd())
 }

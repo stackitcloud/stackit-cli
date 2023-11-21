@@ -48,45 +48,45 @@ type flagModel struct {
 	ContactEmail  *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Creates a DNS zone",
-	Long:    "Creates a DNS zone",
-	Example: `$ stackit dns zone create --project-id xxx --name my-zone --dns-name my-zone.com`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a DNS zone",
+		Long:    "Creates a DNS zone",
+		Example: `$ stackit dns zone create --project-id xxx --name my-zone --dns-name my-zone.com`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("create DNS zone: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("create DNS zone: %w", err)
+			}
 
-		// Wait for async operation
-		zoneId := *resp.Zone.Id
-		_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for DNS zone creation: %w", err)
-		}
+			// Wait for async operation
+			zoneId := *resp.Zone.Id
+			_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for DNS zone creation: %w", err)
+			}
 
-		cmd.Printf("Created zone with ID %s\n", zoneId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Created zone with ID %s\n", zoneId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

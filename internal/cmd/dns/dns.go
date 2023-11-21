@@ -9,14 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "dns",
-	Short:   "Provides functionality for DNS",
-	Long:    "Provides functionality for DNS",
-	Example: fmt.Sprintf("%s\n%s", zone.Cmd.Example, recordset.Cmd.Example),
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "dns",
+		Short:   "Provides functionality for DNS",
+		Long:    "Provides functionality for DNS",
+		Example: fmt.Sprintf("%s\n%s", zone.NewCmd().Example, recordset.NewCmd().Example),
+	}
+	addChilds(cmd)
+	return cmd
 }
 
-func init() {
-	Cmd.AddCommand(zone.Cmd)
-	Cmd.AddCommand(recordset.Cmd)
+func addChilds(cmd *cobra.Command) {
+	cmd.AddCommand(zone.NewCmd())
+	cmd.AddCommand(recordset.NewCmd())
 }
