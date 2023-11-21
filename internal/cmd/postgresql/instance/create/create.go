@@ -55,7 +55,7 @@ func NewCmd() *cobra.Command {
 		Use:     "create",
 		Short:   "Creates a PostgreSQL instance",
 		Long:    "Creates a PostgreSQL instance",
-		Example: `$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version version`,
+		Example: `$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version 13`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)
