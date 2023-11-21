@@ -19,11 +19,11 @@ func NewCmd() *cobra.Command {
 		Long:    "Provides functionality for DNS record set",
 		Example: fmt.Sprintf("%s\n%s", list.NewCmd().Example, create.NewCmd().Example),
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(list.NewCmd())
 	cmd.AddCommand(create.NewCmd())
 	cmd.AddCommand(describe.NewCmd())

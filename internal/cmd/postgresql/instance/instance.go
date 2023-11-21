@@ -19,11 +19,11 @@ func NewCmd() *cobra.Command {
 		Long:    "Provides functionality for PostgreSQL instance",
 		Example: fmt.Sprintf("%s\n%s", create.NewCmd().Example, list.NewCmd().Example),
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(create.NewCmd())
 	cmd.AddCommand(delete.NewCmd())
 	cmd.AddCommand(describe.NewCmd())

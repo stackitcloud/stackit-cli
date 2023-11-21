@@ -28,7 +28,7 @@ func NewRootCmd() *cobra.Command {
 		DisableAutoGenTag: true,
 	}
 	configureFlags(cmd)
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
@@ -46,7 +46,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(auth.NewCmd())
 	cmd.AddCommand(config.NewCmd())
 	cmd.AddCommand(dns.NewCmd())

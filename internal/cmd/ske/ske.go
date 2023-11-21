@@ -13,10 +13,10 @@ func NewCmd() *cobra.Command {
 		Long:    "Provides functionality for STACKIT Kubernetes engine (SKE)",
 		Example: cluster.NewCmd().Example,
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(cluster.NewCmd())
 }

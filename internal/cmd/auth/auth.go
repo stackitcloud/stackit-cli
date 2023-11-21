@@ -14,11 +14,11 @@ func NewCmd() *cobra.Command {
 		Long:    "Provides authentication functionality",
 		Example: `$ stackit auth login`,
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(login.NewCmd())
 	cmd.AddCommand(activateserviceaccount.NewCmd())
 }

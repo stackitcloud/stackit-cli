@@ -13,10 +13,10 @@ func NewCmd() *cobra.Command {
 		Long:    "Provides information regarding the PostgreSQL service offerings",
 		Example: list.NewCmd().Example,
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(list.NewCmd())
 }

@@ -17,11 +17,11 @@ func NewCmd() *cobra.Command {
 		Long:    "CLI configuration options",
 		Example: fmt.Sprintf("%s\n%s\n%s", set.NewCmd().Example, inspect.NewCmd().Example, unset.NewCmd().Example),
 	}
-	addChilds(cmd)
+	addSubcommands(cmd)
 	return cmd
 }
 
-func addChilds(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(inspect.NewCmd())
 	cmd.AddCommand(set.NewCmd())
 	cmd.AddCommand(unset.NewCmd())
