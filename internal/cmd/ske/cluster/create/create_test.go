@@ -150,7 +150,7 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "base from file",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[PayloadFlag] = "@" + fixtureFlagValues()[PayloadFlag]
+				flagValues[PayloadFlag] = fmt.Sprintf("@%s", flagValues[PayloadFlag])
 			}),
 			payloadFileContent: []byte(fixtureFlagValues()[PayloadFlag]),
 			isValid:            true,

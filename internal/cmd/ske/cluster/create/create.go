@@ -85,7 +85,7 @@ func init() {
 
 func ConfigureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(NameFlag, "n", "", "Cluster name")
-	cmd.Flags().String(PayloadFlag, "", "Request payload (JSON)")
+	cmd.Flags().String(PayloadFlag, "", `Request payload (JSON). Can be a string or a file path, if prefixed with "@". Example: @./payload.json`)
 
 	err := utils.MarkFlagsRequired(cmd, NameFlag)
 	cobra.CheckErr(err)
