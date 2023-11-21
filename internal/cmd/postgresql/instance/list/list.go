@@ -50,8 +50,9 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
-		for _, i := range instances {
-			table.AddRow(*i.InstanceId, *i.Name, *i.LastOperation.Type, *i.LastOperation.State)
+		for i := range instances {
+			instance := instances[i]
+			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
 		}
 		table.Render(cmd)
 

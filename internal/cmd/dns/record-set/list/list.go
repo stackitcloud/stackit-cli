@@ -65,8 +65,9 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Type", "State")
-		for _, recordSet := range recordSets {
-			table.AddRow(*recordSet.Id, *recordSet.Name, *recordSet.Type, *recordSet.State)
+		for i := range recordSets {
+			rs := recordSets[i]
+			table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
 		}
 		table.Render(cmd)
 

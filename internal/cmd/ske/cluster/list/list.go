@@ -54,8 +54,9 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE")
-		for _, cluster := range clusters {
-			table.AddRow(*cluster.Name, *cluster.Status.Aggregated)
+		for i := range clusters {
+			c := clusters[i]
+			table.AddRow(*c.Name, *c.Status.Aggregated)
 		}
 		table.Render(cmd)
 
