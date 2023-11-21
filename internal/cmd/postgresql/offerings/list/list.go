@@ -46,8 +46,10 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("NAME", "PLAN.ID", "PLAN.NAME", "PLAN.DESCRIPTION")
-		for _, o := range offerings {
-			for _, p := range *o.Plans {
+		for i := range offerings {
+			o := offerings[i]
+			for j := range *o.Plans {
+				p := (*o.Plans)[j]
 				table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
 			}
 			table.AddSeparator()

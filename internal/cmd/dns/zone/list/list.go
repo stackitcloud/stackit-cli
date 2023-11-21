@@ -63,8 +63,9 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
-		for _, zone := range zones {
-			table.AddRow(*zone.Id, *zone.Name, *zone.DnsName, *zone.State)
+		for i := range zones {
+			z := zones[i]
+			table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
 		}
 		table.Render(cmd)
 

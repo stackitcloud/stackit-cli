@@ -58,8 +58,9 @@ var Cmd = &cobra.Command{
 		// Show output as table
 		table := tables.NewTable()
 		table.SetHeader("ID")
-		for _, i := range credentials {
-			table.AddRow(*i.Id)
+		for i := range credentials {
+			c := credentials[i]
+			table.AddRow(*c.Id)
 		}
 		table.Render(cmd)
 
