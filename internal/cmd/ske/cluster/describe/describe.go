@@ -16,7 +16,7 @@ import (
 
 const (
 	projectIdFlag   = "project-id"
-	clusterNameFlag = "cluster-name"
+	clusterNameFlag = "name"
 )
 
 type flagModel struct {
@@ -28,7 +28,7 @@ var Cmd = &cobra.Command{
 	Use:     "describe",
 	Short:   "Get details of a SKE cluster",
 	Long:    "Get details of a SKE cluster",
-	Example: `$ stackit ske cluster describe --project-id xxx --cluster-name xxx`,
+	Example: `$ stackit ske cluster describe --project-id xxx --name xxx`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		model, err := parseFlags(cmd)
