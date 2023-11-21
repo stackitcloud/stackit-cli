@@ -48,5 +48,5 @@ func (t *Table) Render(cmd *cobra.Command) {
 	t.table.Style().Options.SeparateRows = false
 	t.table.Style().Options.SeparateColumns = true
 	t.table.Style().Options.SeparateHeader = true
-	cmd.Printf("\n%s\n", t.table.Render())
+	cmd.Printf("\n%s\n\n", t.table.Render())
 }
