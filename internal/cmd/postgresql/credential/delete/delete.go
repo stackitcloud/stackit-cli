@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	projectIdFlag     = "project-id"
-	instanceIdFlag    = "instance-id"
-	credentialsIdFlag = "credentials-id"
+	projectIdFlag    = "project-id"
+	instanceIdFlag   = "instance-id"
+	credentialIdFlag = "credential-id"
 )
 
 type flagModel struct {
@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 		Use:     "delete",
 		Short:   "Delete a PostgreSQL instance credential",
 		Long:    "Delete a PostgreSQL instance credential",
-		Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credentials-id xxx`,
+		Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credential-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)
@@ -62,11 +62,11 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Var(flags.UUIDFlag(), credentialsIdFlag, "Credentials ID")
+	cmd.Flags().Var(flags.UUIDFlag(), credentialIdFlag, "Credentials ID")
 
 	err := utils.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
-	err = utils.MarkFlagsRequired(cmd, credentialsIdFlag)
+	err = utils.MarkFlagsRequired(cmd, credentialIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -79,7 +79,7 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	return &flagModel{
 		ProjectId:     projectId,
 		InstanceId:    utils.FlagToStringValue(cmd, instanceIdFlag),
-		CredentialsId: utils.FlagToStringValue(cmd, credentialsIdFlag),
+		CredentialsId: utils.FlagToStringValue(cmd, credentialIdFlag),
 	}, nil
 }
 

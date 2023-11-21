@@ -18,7 +18,7 @@ import (
 const (
 	projectIdFlag     = "project-id"
 	instanceIdFlag    = "instance-id"
-	credentialsIdFlag = "credentials-id"
+	credentialsIdFlag = "credential-id"
 )
 
 type flagModel struct {
@@ -32,7 +32,7 @@ func NewCmd() *cobra.Command {
 		Use:     "describe",
 		Short:   "Get details of a PostgreSQL instance credential",
 		Long:    "Get details of a PostgreSQL instance credential",
-		Example: `$ stackit postgresql credential describe --project-id xxx --instance-id xxx --credentials-id xxx`,
+		Example: `$ stackit postgresql credential describe --project-id xxx --instance-id xxx --credential-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)

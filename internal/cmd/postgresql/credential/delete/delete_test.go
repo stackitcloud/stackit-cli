@@ -24,9 +24,9 @@ var testCredentialsId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:     testProjectId,
-		instanceIdFlag:    testInstanceId,
-		credentialsIdFlag: testCredentialsId,
+		projectIdFlag:    testProjectId,
+		instanceIdFlag:   testInstanceId,
+		credentialIdFlag: testCredentialsId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -117,21 +117,21 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "credentials id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, credentialsIdFlag)
+				delete(flagValues, credentialIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsIdFlag] = ""
+				flagValues[credentialIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsIdFlag] = "invalid-uuid"
+				flagValues[credentialIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
