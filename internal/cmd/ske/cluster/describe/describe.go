@@ -64,7 +64,7 @@ func init() {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(clusterNameFlag, "", "Cluster name")
+	cmd.Flags().StringP(clusterNameFlag, "n", "", "Cluster name")
 
 	err := utils.MarkFlagsRequired(cmd, clusterNameFlag)
 	cobra.CheckErr(err)
