@@ -45,7 +45,7 @@ var Cmd = &cobra.Command{
 		req := buildRequest(ctx, model, apiClient)
 		_, err = req.Execute()
 		if err != nil {
-			return fmt.Errorf("read SKE cluster: %w", err)
+			return fmt.Errorf("delete SKE cluster: %w", err)
 		}
 
 		// Wait for async operation
