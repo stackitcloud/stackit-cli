@@ -37,7 +37,7 @@ func main() {
 	linkHandler := func(filename string) string {
 		return fmt.Sprintf("./%s", filename)
 	}
-	err = doc.GenMarkdownTreeCustom(cmd.RootCmd, docsDir, filePrepender, linkHandler)
+	err = doc.GenMarkdownTreeCustom(cmd.NewRootCmd(), docsDir, filePrepender, linkHandler)
 	if err != nil {
 		log.Fatalf("Error generating documentation: %v", err)
 	}

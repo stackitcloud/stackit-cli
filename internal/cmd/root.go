@@ -19,33 +19,24 @@ const (
 	projectIdFlag = "project-id"
 )
 
-var RootCmd = &cobra.Command{
-	Use:               "stackit",
-	Short:             "The root command of the STACKIT CLI",
-	Long:              "The root command of the STACKIT CLI",
-	SilenceUsage:      true,
-	DisableAutoGenTag: true,
+func NewRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:               "stackit",
+		Short:             "The root command of the STACKIT CLI",
+		Long:              "The root command of the STACKIT CLI",
+		SilenceUsage:      true,
+		DisableAutoGenTag: true,
+	}
+	configureFlags(cmd)
+	addSubcommands(cmd)
+	return cmd
 }
 
 func Execute() {
-	err := RootCmd.Execute()
+	err := NewRootCmd().Execute()
 	if err != nil {
 		os.Exit(1)
 	}
-}
-
-func init() {
-	// Set up configuration files
-	configPkg.InitConfig()
-
-	// Add all direct child commands
-	RootCmd.AddCommand(auth.Cmd)
-	RootCmd.AddCommand(config.Cmd)
-	RootCmd.AddCommand(dns.Cmd)
-	RootCmd.AddCommand(postgresql.Cmd)
-	RootCmd.AddCommand(ske.Cmd)
-
-	configureFlags(RootCmd)
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -53,4 +44,12 @@ func configureFlags(cmd *cobra.Command) {
 
 	err := viper.BindPFlag(configPkg.ProjectIdKey, cmd.PersistentFlags().Lookup(projectIdFlag))
 	cobra.CheckErr(err)
+}
+
+func addSubcommands(cmd *cobra.Command) {
+	cmd.AddCommand(auth.NewCmd())
+	cmd.AddCommand(config.NewCmd())
+	cmd.AddCommand(dns.NewCmd())
+	cmd.AddCommand(postgresql.NewCmd())
+	cmd.AddCommand(ske.NewCmd())
 }

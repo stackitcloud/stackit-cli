@@ -24,38 +24,38 @@ type flagModel struct {
 	InstanceId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Create credentials for a PostgreSQL instance",
-	Long:    "Create credentials for a PostgreSQL instance",
-	Example: `$ stackit postgresql credential create --project-id xxx --instance-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Create credentials for a PostgreSQL instance",
+		Long:    "Create credentials for a PostgreSQL instance",
+		Example: `$ stackit postgresql credential create --project-id xxx --instance-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("create PostgreSQL credentials: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("create PostgreSQL credentials: %w", err)
+			}
 
-		cmd.Printf("Created credentials with ID %s\n", *resp.Id)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Created credentials with ID %s\n", *resp.Id)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

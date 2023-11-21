@@ -24,45 +24,44 @@ type flagModel struct {
 	ClusterName string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "describe",
-	Short:   "Get details of a SKE cluster",
-	Long:    "Get details of a SKE cluster",
-	Example: `$ stackit ske cluster describe --project-id xxx --name xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "describe",
+		Short:   "Get details of a SKE cluster",
+		Long:    "Get details of a SKE cluster",
+		Example: `$ stackit ske cluster describe --project-id xxx --name xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("read SKE cluster: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read SKE cluster: %w", err)
+			}
 
-		// Show details
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		cmd.Println(string(details))
+			// Show details
+			details, err := json.MarshalIndent(resp, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshal SKE cluster: %w", err)
+			}
+			cmd.Println(string(details))
 
-		return nil
-	},
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
-
-func init() {
-	configureFlags(Cmd)
-}
-
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(clusterNameFlag, "n", "", "Cluster name")
 

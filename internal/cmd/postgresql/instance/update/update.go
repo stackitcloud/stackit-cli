@@ -51,48 +51,48 @@ type flagModel struct {
 	PlanId               *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "update",
-	Short:   "Updates a PostgreSQL instance",
-	Long:    "Updates a PostgreSQL instance",
-	Example: `$ stackit postgresql instance update --project-id xxx --instance-id xxx --plan-id xxx --acl xx.xx.xx.xx/xx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "update",
+		Short:   "Updates a PostgreSQL instance",
+		Long:    "Updates a PostgreSQL instance",
+		Example: `$ stackit postgresql instance update --project-id xxx --instance-id xxx --plan-id xxx --acl xx.xx.xx.xx/xx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req, err := buildRequest(ctx, model, apiClient)
-		if err != nil {
-			return fmt.Errorf("build PostgreSQL instance update request: %w", err)
-		}
-		err = req.Execute()
-		if err != nil {
-			return fmt.Errorf("update PostgreSQL instance: %w", err)
-		}
+			// Call API
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return fmt.Errorf("build PostgreSQL instance update request: %w", err)
+			}
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("update PostgreSQL instance: %w", err)
+			}
 
-		// Wait for async operation
-		instanceId := model.InstanceId
-		_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for PostgreSQL instance update: %w", err)
-		}
+			// Wait for async operation
+			instanceId := model.InstanceId
+			_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for PostgreSQL instance update: %w", err)
+			}
 
-		cmd.Printf("Updated instance with ID %s\n", instanceId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Updated instance with ID %s\n", instanceId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

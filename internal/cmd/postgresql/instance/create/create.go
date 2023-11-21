@@ -50,48 +50,48 @@ type flagModel struct {
 	PlanId               *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Creates a PostgreSQL instance",
-	Long:    "Creates a PostgreSQL instance",
-	Example: `$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version version`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a PostgreSQL instance",
+		Long:    "Creates a PostgreSQL instance",
+		Example: `$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version version`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req, err := buildRequest(ctx, model, apiClient)
-		if err != nil {
-			return fmt.Errorf("build PostgreSQL instance creation request: %w", err)
-		}
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("create PostgreSQL instance: %w", err)
-		}
+			// Call API
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return fmt.Errorf("build PostgreSQL instance creation request: %w", err)
+			}
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("create PostgreSQL instance: %w", err)
+			}
 
-		// Wait for async operation
-		instanceId := *resp.InstanceId
-		_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
-		if err != nil {
-			return fmt.Errorf("wait for PostgreSQL instance creation: %w", err)
-		}
+			// Wait for async operation
+			instanceId := *resp.InstanceId
+			_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+			if err != nil {
+				return fmt.Errorf("wait for PostgreSQL instance creation: %w", err)
+			}
 
-		cmd.Printf("Created instance with ID %s\n", instanceId)
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			cmd.Printf("Created instance with ID %s\n", instanceId)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

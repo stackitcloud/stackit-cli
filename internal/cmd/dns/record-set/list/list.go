@@ -32,51 +32,51 @@ type flagModel struct {
 	OrderByName *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all DNS record sets",
-	Long:    "List all DNS record sets",
-	Example: `$ stackit dns record-set list --project-id xxx --zone-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List all DNS record sets",
+		Long:    "List all DNS record sets",
+		Example: `$ stackit dns record-set list --project-id xxx --zone-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("get DNS record sets: %w", err)
-		}
-		recordSets := *resp.RrSets
-		if len(recordSets) == 0 {
-			cmd.Printf("No record-sets found for zone with ID %s\n", model.ZoneId)
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("get DNS record sets: %w", err)
+			}
+			recordSets := *resp.RrSets
+			if len(recordSets) == 0 {
+				cmd.Printf("No record-sets found for zone with ID %s\n", model.ZoneId)
+				return nil
+			}
+
+			// Show output as table
+			table := tables.NewTable()
+			table.SetHeader("ID", "Name", "Type", "State")
+			for i := range recordSets {
+				rs := recordSets[i]
+				table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
+			}
+			table.Render(cmd)
+
 			return nil
-		}
-
-		// Show output as table
-		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Type", "State")
-		for i := range recordSets {
-			rs := recordSets[i]
-			table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
-		}
-		table.Render(cmd)
-
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

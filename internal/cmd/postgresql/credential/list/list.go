@@ -25,51 +25,51 @@ type flagModel struct {
 	InstanceId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all credentials IDs for a PostgreSQL instance",
-	Long:    "List all credentials IDs for a PostgreSQL instance",
-	Example: `$ stackit postgresql credential list --project-id xxx --instance-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List all credentials IDs for a PostgreSQL instance",
+		Long:    "List all credentials IDs for a PostgreSQL instance",
+		Example: `$ stackit postgresql credential list --project-id xxx --instance-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("list PostgreSQL credentials: %w", err)
-		}
-		credentials := *resp.CredentialsList
-		if len(credentials) == 0 {
-			cmd.Printf("No credentials found for instance with ID %s\n", model.InstanceId)
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("list PostgreSQL credentials: %w", err)
+			}
+			credentials := *resp.CredentialsList
+			if len(credentials) == 0 {
+				cmd.Printf("No credentials found for instance with ID %s\n", model.InstanceId)
+				return nil
+			}
+
+			// Show output as table
+			table := tables.NewTable()
+			table.SetHeader("ID")
+			for i := range credentials {
+				c := credentials[i]
+				table.AddRow(*c.Id)
+			}
+			table.Render(cmd)
+
 			return nil
-		}
-
-		// Show output as table
-		table := tables.NewTable()
-		table.SetHeader("ID")
-		for i := range credentials {
-			c := credentials[i]
-			table.AddRow(*c.Id)
-		}
-		table.Render(cmd)
-
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

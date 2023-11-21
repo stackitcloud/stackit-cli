@@ -25,43 +25,43 @@ type flagModel struct {
 	InstanceId string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "describe",
-	Short:   "Get details of a PostgreSQL instance",
-	Long:    "Get details of a PostgreSQL instance",
-	Example: `$ stackit postgresql instance describe --project-id xxx --instance-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "describe",
+		Short:   "Get details of a PostgreSQL instance",
+		Long:    "Get details of a PostgreSQL instance",
+		Example: `$ stackit postgresql instance describe --project-id xxx --instance-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("read PostgreSQL instance: %w", err)
-		}
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read PostgreSQL instance: %w", err)
+			}
 
-		// Show details
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL instance: %w", err)
-		}
-		cmd.Println(string(details))
+			// Show details
+			details, err := json.MarshalIndent(resp, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshal PostgreSQL instance: %w", err)
+			}
+			cmd.Println(string(details))
 
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

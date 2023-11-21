@@ -6,14 +6,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Cmd = &cobra.Command{
-	Use:     "offerings",
-	Short:   "Provides information regarding the PostgreSQL service offerings",
-	Long:    "Provides information regarding the PostgreSQL service offerings",
-	Example: list.Cmd.Example,
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "offerings",
+		Short:   "Provides information regarding the PostgreSQL service offerings",
+		Long:    "Provides information regarding the PostgreSQL service offerings",
+		Example: list.NewCmd().Example,
+	}
+	addSubcommands(cmd)
+	return cmd
 }
 
-func init() {
-	// Add all direct child commands
-	Cmd.AddCommand(list.Cmd)
+func addSubcommands(cmd *cobra.Command) {
+	cmd.AddCommand(list.NewCmd())
 }

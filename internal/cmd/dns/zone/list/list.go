@@ -30,51 +30,51 @@ type flagModel struct {
 	OrderByName *string
 }
 
-var Cmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all DNS zones",
-	Long:    "List all DNS zones",
-	Example: `$ stackit dns zone list --project-id xxx`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		model, err := parseFlags(cmd)
-		if err != nil {
-			return err
-		}
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List all DNS zones",
+		Long:    "List all DNS zones",
+		Example: `$ stackit dns zone list --project-id xxx`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseFlags(cmd)
+			if err != nil {
+				return err
+			}
 
-		// Configure API client
-		apiClient, err := client.ConfigureClient(cmd)
-		if err != nil {
-			return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
-		}
+			// Configure API client
+			apiClient, err := client.ConfigureClient(cmd)
+			if err != nil {
+				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
+			}
 
-		// Call API
-		req := buildRequest(ctx, model, apiClient)
-		resp, err := req.Execute()
-		if err != nil {
-			return fmt.Errorf("get DNS zones: %w", err)
-		}
-		zones := *resp.Zones
-		if len(zones) == 0 {
-			cmd.Printf("No zones found for project with ID %s\n", model.ProjectId)
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("get DNS zones: %w", err)
+			}
+			zones := *resp.Zones
+			if len(zones) == 0 {
+				cmd.Printf("No zones found for project with ID %s\n", model.ProjectId)
+				return nil
+			}
+
+			// Show output as table
+			table := tables.NewTable()
+			table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
+			for i := range zones {
+				z := zones[i]
+				table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
+			}
+			table.Render(cmd)
+
 			return nil
-		}
-
-		// Show output as table
-		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
-		for i := range zones {
-			z := zones[i]
-			table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
-		}
-		table.Render(cmd)
-
-		return nil
-	},
-}
-
-func init() {
-	configureFlags(Cmd)
+		},
+	}
+	configureFlags(cmd)
+	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {

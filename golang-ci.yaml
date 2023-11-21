@@ -76,7 +76,7 @@ linters:
     # additional linters
     - errorlint
     - exportloopref
-    # - gochecknoinits
+    - gochecknoinits
     - gocritic
     - gofmt
     - goimports
