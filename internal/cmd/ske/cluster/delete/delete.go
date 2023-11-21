@@ -16,7 +16,7 @@ import (
 
 const (
 	projectIdFlag   = "project-id"
-	clusterNameFlag = "cluster-name"
+	clusterNameFlag = "name"
 )
 
 type flagModel struct {
@@ -28,7 +28,7 @@ var Cmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete a SKE cluster",
 	Long:    "Delete a SKE cluster",
-	Example: `$ stackit ske cluster delete --project-id xxx --cluster-name xxx`,
+	Example: `$ stackit ske cluster delete --project-id xxx --name xxx`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		model, err := parseFlags(cmd)
