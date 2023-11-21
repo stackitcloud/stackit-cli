@@ -124,7 +124,7 @@ func fixtureFlagModel(mods ...func(model *FlagModel)) *FlagModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiCreateOrUpdateClusterRequest)) ske.ApiCreateOrUpdateClusterRequest {
-	request := testClient.CreateOrUpdateCluster(testCtx, testProjectId, (*fixtureFlagModel()).Name)
+	request := testClient.CreateOrUpdateCluster(testCtx, testProjectId, fixtureFlagModel().Name)
 	request = request.CreateOrUpdateClusterPayload(testPayload)
 	for _, mod := range mods {
 		mod(&request)
