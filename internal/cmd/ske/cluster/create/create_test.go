@@ -162,6 +162,13 @@ func TestParseFlags(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "name missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, NameFlag)
+			}),
+			isValid: false,
+		},
+		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, ProjectIdFlag)
