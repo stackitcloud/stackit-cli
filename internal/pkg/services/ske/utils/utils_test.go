@@ -23,7 +23,7 @@ type skeClientMocked struct {
 	getClustersResp  *ske.ClustersResponse
 }
 
-func (m *skeClientMocked) GetClustersExecute(_ context.Context, projectId string) (*ske.ClustersResponse, error) {
+func (m *skeClientMocked) GetClustersExecute(_ context.Context, _ string) (*ske.ClustersResponse, error) {
 	if m.getClustersFails {
 		return nil, fmt.Errorf("could not get clusters")
 	}
