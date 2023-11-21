@@ -19,7 +19,7 @@ const (
 	projectIdFlag = "project-id"
 )
 
-func NewCmd() *cobra.Command {
+func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "stackit",
 		Short:             "The root command of the STACKIT CLI",
@@ -33,7 +33,7 @@ func NewCmd() *cobra.Command {
 }
 
 func Execute() {
-	err := NewCmd().Execute()
+	err := NewRootCmd().Execute()
 	if err != nil {
 		os.Exit(1)
 	}
