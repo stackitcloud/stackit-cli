@@ -19,19 +19,19 @@ const (
 )
 
 const (
-	ConfigFolder        = ".stackit"
-	ConfigFileName      = "cli-config"
-	ConfigFileExtension = "json"
+	configFolder        = ".stackit"
+	configFileName      = "cli-config"
+	configFileExtension = "json"
 )
 
 func InitConfig() {
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
-	configFolderPath := filepath.Join(home, ConfigFolder)
-	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", ConfigFileName, ConfigFileExtension))
+	configFolderPath := filepath.Join(home, configFolder)
+	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
-	viper.SetConfigName(ConfigFileName)
-	viper.SetConfigType(ConfigFileExtension)
+	viper.SetConfigName(configFileName)
+	viper.SetConfigType(configFileExtension)
 	viper.AddConfigPath(configFolderPath)
 
 	err = createFolderIfNotExists(configFolderPath)
