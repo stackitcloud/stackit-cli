@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/update"
 
 	"github.com/spf13/cobra"
 )
@@ -23,4 +24,5 @@ func init() {
 	Cmd.AddCommand(delete.Cmd)
 	Cmd.AddCommand(describe.Cmd)
 	Cmd.AddCommand(list.Cmd)
+	Cmd.AddCommand(update.Cmd)
 }
