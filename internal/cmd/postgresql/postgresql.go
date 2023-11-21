@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql/credential"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql/instance"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql/offerings"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql/offering"
 
 	"github.com/spf13/cobra"
 )
@@ -23,6 +23,6 @@ func NewCmd() *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(instance.NewCmd())
-	cmd.AddCommand(offerings.NewCmd())
+	cmd.AddCommand(offering.NewCmd())
 	cmd.AddCommand(credential.NewCmd())
 }

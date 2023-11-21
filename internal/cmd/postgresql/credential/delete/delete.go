@@ -15,15 +15,15 @@ import (
 )
 
 const (
-	projectIdFlag     = "project-id"
-	instanceIdFlag    = "instance-id"
-	credentialsIdFlag = "credentials-id"
+	projectIdFlag    = "project-id"
+	instanceIdFlag   = "instance-id"
+	credentialIdFlag = "credential-id" //nolint:gosec // linter false positive
 )
 
 type flagModel struct {
-	ProjectId     string
-	InstanceId    string
-	CredentialsId string
+	ProjectId    string
+	InstanceId   string
+	CredentialId string
 }
 
 func NewCmd() *cobra.Command {
@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 		Use:     "delete",
 		Short:   "Delete a PostgreSQL instance credential",
 		Long:    "Delete a PostgreSQL instance credential",
-		Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credentials-id xxx`,
+		Example: `$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credential-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)
@@ -49,10 +49,10 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete PostgreSQL credentials: %w", err)
+				return fmt.Errorf("delete PostgreSQL credential: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials with ID %s\n", model.CredentialsId)
+			cmd.Printf("Deleted credential with ID %s\n", model.CredentialId)
 			return nil
 		},
 	}
@@ -62,11 +62,11 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Var(flags.UUIDFlag(), credentialsIdFlag, "Credentials ID")
+	cmd.Flags().Var(flags.UUIDFlag(), credentialIdFlag, "Credentials ID")
 
 	err := utils.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
-	err = utils.MarkFlagsRequired(cmd, credentialsIdFlag)
+	err = utils.MarkFlagsRequired(cmd, credentialIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -77,13 +77,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:     projectId,
-		InstanceId:    utils.FlagToStringValue(cmd, instanceIdFlag),
-		CredentialsId: utils.FlagToStringValue(cmd, credentialsIdFlag),
+		ProjectId:    projectId,
+		InstanceId:   utils.FlagToStringValue(cmd, instanceIdFlag),
+		CredentialId: utils.FlagToStringValue(cmd, credentialIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiDeleteCredentialsRequest {
-	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialId)
 	return req
 }

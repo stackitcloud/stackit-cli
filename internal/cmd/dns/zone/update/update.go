@@ -111,19 +111,38 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	zoneId := utils.FlagToStringValue(cmd, zoneIdFlag)
+	name := utils.FlagToStringPointer(cmd, nameFlag)
+	defaultTTL := utils.FlagToInt64Pointer(cmd, defaultTTLFlag)
+	primaries := utils.FlagToStringSlicePointer(cmd, primaryFlag)
+	acl := utils.FlagToStringPointer(cmd, aclFlag)
+	retryTime := utils.FlagToInt64Pointer(cmd, retryTimeFlag)
+	refreshTime := utils.FlagToInt64Pointer(cmd, refreshTimeFlag)
+	negativeCache := utils.FlagToInt64Pointer(cmd, negativeCacheFlag)
+	expireTime := utils.FlagToInt64Pointer(cmd, expireTimeFlag)
+	description := utils.FlagToStringPointer(cmd, descriptionFlag)
+	contactEmail := utils.FlagToStringPointer(cmd, contactEmailFlag)
+
+	if name == nil && defaultTTL == nil && primaries == nil &&
+		acl == nil && retryTime == nil && refreshTime == nil &&
+		negativeCache == nil && expireTime == nil && description == nil &&
+		contactEmail == nil {
+		return nil, fmt.Errorf("please specify at least one field to update")
+	}
+
 	return &flagModel{
 		ProjectId:     projectId,
-		ZoneId:        utils.FlagToStringValue(cmd, zoneIdFlag),
-		Name:          utils.FlagToStringPointer(cmd, nameFlag),
-		DefaultTTL:    utils.FlagToInt64Pointer(cmd, defaultTTLFlag),
-		Primaries:     utils.FlagToStringSlicePointer(cmd, primaryFlag),
-		Acl:           utils.FlagToStringPointer(cmd, aclFlag),
-		RetryTime:     utils.FlagToInt64Pointer(cmd, retryTimeFlag),
-		RefreshTime:   utils.FlagToInt64Pointer(cmd, refreshTimeFlag),
-		NegativeCache: utils.FlagToInt64Pointer(cmd, negativeCacheFlag),
-		ExpireTime:    utils.FlagToInt64Pointer(cmd, expireTimeFlag),
-		Description:   utils.FlagToStringPointer(cmd, descriptionFlag),
-		ContactEmail:  utils.FlagToStringPointer(cmd, contactEmailFlag),
+		ZoneId:        zoneId,
+		Name:          name,
+		DefaultTTL:    defaultTTL,
+		Primaries:     primaries,
+		Acl:           acl,
+		RetryTime:     retryTime,
+		RefreshTime:   refreshTime,
+		NegativeCache: negativeCache,
+		ExpireTime:    expireTime,
+		Description:   description,
+		ContactEmail:  contactEmail,
 	}, nil
 }
 

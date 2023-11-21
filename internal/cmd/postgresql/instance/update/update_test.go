@@ -131,12 +131,12 @@ func TestParseFlags(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "required fields only",
+			description: "required flags only (no values to update)",
 			flagValues: map[string]string{
 				projectIdFlag:  testProjectId,
 				instanceIdFlag: testInstanceId,
 			},
-			isValid: true,
+			isValid: false,
 			expectedModel: &flagModel{
 				ProjectId:  testProjectId,
 				InstanceId: testInstanceId,

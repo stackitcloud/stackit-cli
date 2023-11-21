@@ -15,13 +15,15 @@ import (
 )
 
 const (
-	projectIdFlag  = "project-id"
-	instanceIdFlag = "instance-id"
+	projectIdFlag    = "project-id"
+	instanceIdFlag   = "instance-id"
+	hidePasswordFlag = "hide-password"
 )
 
 type flagModel struct {
-	ProjectId  string
-	InstanceId string
+	ProjectId    string
+	InstanceId   string
+	HidePassword bool
 }
 
 func NewCmd() *cobra.Command {
@@ -47,10 +49,15 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create PostgreSQL credentials: %w", err)
+				return fmt.Errorf("create PostgreSQL credential: %w", err)
 			}
 
-			cmd.Printf("Created credentials with ID %s\n", *resp.Id)
+			cmd.Printf("Created credential with ID %s\n\nUsername: %s\n", *resp.Id, *resp.Raw.Credentials.Username)
+			if model.HidePassword {
+				cmd.Printf("Password: <hidden>\n")
+			} else {
+				cmd.Printf("Password: %s\n", *resp.Raw.Credentials.Password)
+			}
 			return nil
 		},
 	}
@@ -60,6 +67,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+	cmd.Flags().Bool(hidePasswordFlag, false, "Hide password in output")
 
 	err := utils.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -72,8 +80,9 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:  projectId,
-		InstanceId: utils.FlagToStringValue(cmd, instanceIdFlag),
+		ProjectId:    projectId,
+		InstanceId:   utils.FlagToStringValue(cmd, instanceIdFlag),
+		HidePassword: utils.FlagToBoolValue(cmd, hidePasswordFlag),
 	}, nil
 }
 

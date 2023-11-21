@@ -93,14 +93,25 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	zoneId := utils.FlagToStringValue(cmd, zoneIdFlag)
+	recordSetId := utils.FlagToStringValue(cmd, recordSetIdFlag)
+	comment := utils.FlagToStringPointer(cmd, commentFlag)
+	name := utils.FlagToStringPointer(cmd, nameFlag)
+	records := utils.FlagToStringSlicePointer(cmd, recordFlag)
+	ttl := utils.FlagToInt64Pointer(cmd, ttlFlag)
+
+	if comment == nil && name == nil && records == nil && ttl == nil {
+		return nil, fmt.Errorf("please specify at least one field to update")
+	}
+
 	return &flagModel{
 		ProjectId:   projectId,
-		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
-		RecordSetId: utils.FlagToStringValue(cmd, recordSetIdFlag),
-		Comment:     utils.FlagToStringPointer(cmd, commentFlag),
-		Name:        utils.FlagToStringPointer(cmd, nameFlag),
-		Records:     utils.FlagToStringSlicePointer(cmd, recordFlag),
-		TTL:         utils.FlagToInt64Pointer(cmd, ttlFlag),
+		ZoneId:      zoneId,
+		RecordSetId: recordSetId,
+		Comment:     comment,
+		Name:        name,
+		Records:     records,
+		TTL:         ttl,
 	}, nil
 }
 

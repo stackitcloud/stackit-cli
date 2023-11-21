@@ -123,6 +123,15 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	instanceId := utils.FlagToStringValue(cmd, instanceIdFlag)
+	enableMonitoring := utils.FlagToBoolPointer(cmd, enableMonitoringFlag)
+	monitoringInstanceId := utils.FlagToStringPointer(cmd, monitoringInstanceIdFlag)
+	graphite := utils.FlagToStringPointer(cmd, graphiteFlag)
+	metricsFrequency := utils.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
+	metricsPrefix := utils.FlagToStringPointer(cmd, metricsPrefixFlag)
+	plugin := utils.FlagToStringSlicePointer(cmd, pluginFlag)
+	sgwAcl := utils.FlagToStringSlicePointer(cmd, sgwAclFlag)
+	syslog := utils.FlagToStringSlicePointer(cmd, syslogFlag)
 	planId := utils.FlagToStringPointer(cmd, planIdFlag)
 	planName := utils.FlagToStringValue(cmd, planNameFlag)
 	version := utils.FlagToStringValue(cmd, versionFlag)
@@ -131,17 +140,24 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("please specify either plan-id or plan-name and version but not both")
 	}
 
+	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
+		metricsFrequency == nil && metricsPrefix == nil && plugin == nil &&
+		sgwAcl == nil && syslog == nil && planId == nil &&
+		planName == "" && version == "" {
+		return nil, fmt.Errorf("please specify at least one field to update")
+	}
+
 	return &flagModel{
 		ProjectId:            projectId,
-		InstanceId:           utils.FlagToStringValue(cmd, instanceIdFlag),
-		EnableMonitoring:     utils.FlagToBoolPointer(cmd, enableMonitoringFlag),
-		MonitoringInstanceId: utils.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
-		Graphite:             utils.FlagToStringPointer(cmd, graphiteFlag),
-		MetricsFrequency:     utils.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
-		MetricsPrefix:        utils.FlagToStringPointer(cmd, metricsPrefixFlag),
-		Plugin:               utils.FlagToStringSlicePointer(cmd, pluginFlag),
-		SgwAcl:               utils.FlagToStringSlicePointer(cmd, sgwAclFlag),
-		Syslog:               utils.FlagToStringSlicePointer(cmd, syslogFlag),
+		InstanceId:           instanceId,
+		EnableMonitoring:     enableMonitoring,
+		MonitoringInstanceId: monitoringInstanceId,
+		Graphite:             graphite,
+		MetricsFrequency:     metricsFrequency,
+		MetricsPrefix:        metricsPrefix,
+		Plugin:               plugin,
+		SgwAcl:               sgwAcl,
+		Syslog:               syslog,
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
