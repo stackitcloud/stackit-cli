@@ -74,7 +74,7 @@ var Cmd = &cobra.Command{
 			return fmt.Errorf("wait for SKE cluster creation: %w", err)
 		}
 
-		fmt.Printf("Created cluster with name %s\n", name)
+		cmd.Printf("Created cluster with name %s\n", name)
 		return nil
 	},
 }
