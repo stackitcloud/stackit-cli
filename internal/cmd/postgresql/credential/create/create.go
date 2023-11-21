@@ -50,7 +50,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create PostgreSQL credential: %w", err)
 			}
 
-			cmd.Printf("Created credential with ID %s\n", *resp.Id)
+			cmd.Printf("Created credential with ID %s\n\nUsername: %s\nPassword: %s\n", *resp.Id, *resp.Raw.Credentials.Username, *resp.Raw.Credentials.Password)
 			return nil
 		},
 	}
