@@ -23,10 +23,10 @@ type FlagModel struct {
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "create",
+		Use:     "disable",
 		Short:   "Disables SKE for a project",
 		Long:    "Disables SKE for a project",
-		Example: `$ stackit ske enable --project-id xxx`,
+		Example: `$ stackit ske disable --project-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)

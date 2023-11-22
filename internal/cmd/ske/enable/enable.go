@@ -23,7 +23,7 @@ type FlagModel struct {
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "create",
+		Use:     "enable",
 		Short:   "Enables SKE for a project",
 		Long:    "Enables SKE for a project",
 		Example: `$ stackit ske enable --project-id xxx`,
