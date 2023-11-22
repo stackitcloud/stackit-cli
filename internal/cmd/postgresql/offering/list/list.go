@@ -22,7 +22,7 @@ func NewCmd() *cobra.Command {
 		Use:     "list",
 		Short:   "List all PostgreSQL service offerings",
 		Long:    "List all PostgreSQL service offerings",
-		Example: `$ stackit postgresql offerings list --project-id xxx`,
+		Example: `$ stackit postgresql offering list --project-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)
