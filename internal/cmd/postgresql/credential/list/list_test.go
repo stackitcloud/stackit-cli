@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -25,6 +26,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
+		limitFlag:      "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -36,6 +38,7 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
 		ProjectId:  testProjectId,
 		InstanceId: testInstanceId,
+		Limit:      utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -108,6 +111,20 @@ func TestParseFlags(t *testing.T) {
 			description: "instance id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},

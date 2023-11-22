@@ -29,6 +29,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameLikeFlag:    "some-pattern",
 		activeFlag:      "true",
 		orderByNameFlag: "asc",
+		limitFlag:       "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,6 +44,7 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 		NameLike:    utils.Ptr("some-pattern"),
 		Active:      utils.Ptr(true),
 		OrderByName: utils.Ptr("asc"),
+		Limit:       utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -167,6 +169,20 @@ func TestParseFlags(t *testing.T) {
 			description: "order by name invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[orderByNameFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},
