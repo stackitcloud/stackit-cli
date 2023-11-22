@@ -26,12 +26,12 @@ type postgreSQLClientMocked struct {
 	getOfferingsResp *postgresql.OfferingList
 }
 
-func (c *postgreSQLClientMocked) CreateInstance(_ context.Context, _ string) postgresql.ApiCreateInstanceRequest {
-	return postgresql.ApiCreateInstanceRequest{}
+func (c *postgreSQLClientMocked) CreateInstance(ctx context.Context, projectId string) postgresql.ApiCreateInstanceRequest {
+	return testClient.CreateInstance(ctx, projectId)
 }
 
-func (c *postgreSQLClientMocked) UpdateInstance(_ context.Context, _, _ string) postgresql.ApiUpdateInstanceRequest {
-	return postgresql.ApiUpdateInstanceRequest{}
+func (c *postgreSQLClientMocked) UpdateInstance(ctx context.Context, projectId, instanceId string) postgresql.ApiUpdateInstanceRequest {
+	return testClient.UpdateInstance(ctx, projectId, instanceId)
 }
 
 func (c *postgreSQLClientMocked) GetOfferingsExecute(_ context.Context, _ string) (*postgresql.OfferingList, error) {
@@ -432,7 +432,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.IgnoreFields(postgresql.ApiUpdateInstanceRequest{}, "apiService", "ctx", "projectId", "instanceId"),
+				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
