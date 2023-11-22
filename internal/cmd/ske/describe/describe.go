@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read SKE cluster: %w", err)
+				return fmt.Errorf("read SKE project details: %w", err)
 			}
 
 			// Show details
