@@ -146,7 +146,6 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureFlagModel(),
-			isValid:         true,
 			expectedRequest: fixtureRequest(),
 		},
 	}
