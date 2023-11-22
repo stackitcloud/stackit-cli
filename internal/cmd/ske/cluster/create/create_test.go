@@ -292,7 +292,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.IgnoreFields(ske.ApiCreateOrUpdateClusterRequest{}, "apiService", "ctx", "projectId"),
+				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
