@@ -13,15 +13,15 @@ stackit postgresql credential delete [flags]
 ### Examples
 
 ```
-$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credentials-id xxx
+$ stackit postgresql credential delete --project-id xxx --instance-id xxx --credential-id xxx
 ```
 
 ### Options
 
 ```
-      --credentials-id string   Credentials ID
-  -h, --help                    help for delete
-      --instance-id string      Instance ID
+      --credential-id string   Credentials ID
+  -h, --help                   help for delete
+      --instance-id string     Instance ID
 ```
 
 ### Options inherited from parent commands

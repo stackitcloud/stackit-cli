@@ -1,4 +1,4 @@
-## stackit postgresql offerings list
+## stackit postgresql offering list
 
 List all PostgreSQL service offerings
 
@@ -7,13 +7,13 @@ List all PostgreSQL service offerings
 List all PostgreSQL service offerings
 
 ```
-stackit postgresql offerings list [flags]
+stackit postgresql offering list [flags]
 ```
 
 ### Examples
 
 ```
-$ stackit postgresql offerings list --project-id xxx
+$ stackit postgresql offering list --project-id xxx
 ```
 
 ### Options
@@ -30,5 +30,5 @@ $ stackit postgresql offerings list --project-id xxx
 
 ### SEE ALSO
 
-* [stackit postgresql offerings](./stackit_postgresql_offerings.md)	 - Provides information regarding the PostgreSQL service offerings
+* [stackit postgresql offering](./stackit_postgresql_offering.md)	 - Provides information regarding the PostgreSQL service offerings
 

@@ -20,6 +20,7 @@ $ stackit postgresql credential create --project-id xxx --instance-id xxx
 
 ```
   -h, --help                 help for create
+      --hide-password        Hide password in output
       --instance-id string   Instance ID
 ```
 

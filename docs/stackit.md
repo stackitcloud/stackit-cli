@@ -19,4 +19,5 @@ The root command of the STACKIT CLI
 * [stackit config](./stackit_config.md)	 - CLI configuration options
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit postgresql](./stackit_postgresql.md)	 - Provides functionality for PostgreSQL
+* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 

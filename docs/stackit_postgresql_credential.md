@@ -10,7 +10,7 @@ Provides functionality for PostgreSQL credentials
 
 ```
 $ stackit postgresql credential create --project-id xxx --instance-id xxx
-$ stackit postgresql credential describe --project-id xxx --instance-id xxx --credentials-id xxx
+$ stackit postgresql credential describe --project-id xxx --instance-id xxx --credential-id xxx
 ```
 
 ### Options

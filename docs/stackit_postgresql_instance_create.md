@@ -13,7 +13,7 @@ stackit postgresql instance create [flags]
 ### Examples
 
 ```
-$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version version
+$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version 13
 ```
 
 ### Options

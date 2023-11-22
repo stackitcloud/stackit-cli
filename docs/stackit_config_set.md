@@ -23,6 +23,7 @@ $ stackit config set --project-id xxx
   -h, --help                                help for set
       --postgresql-custom-endpoint string   PostgreSQL custom endpoint
       --session-time-limit string           Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s
+      --ske-custom-endpoint string          SKE custom endpoint
 ```
 
 ### Options inherited from parent commands

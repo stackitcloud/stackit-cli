@@ -9,7 +9,7 @@ Provides functionality for PostgreSQL instance
 ### Examples
 
 ```
-$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version version
+$ stackit postgresql instance create --project-id xxx --name my-instance --plan-name plan-name --version 13
 $ stackit postgresql instance list --project-id xxx
 ```
 
