@@ -29,7 +29,7 @@ func NewCmd() *cobra.Command {
 		Example: `$ stackit ske enable --project-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseFlags(cmd)
+			model, err := parseFlags()
 			if err != nil {
 				return err
 			}
@@ -60,7 +60,7 @@ func NewCmd() *cobra.Command {
 	return cmd
 }
 
-func parseFlags(cmd *cobra.Command) (*FlagModel, error) {
+func parseFlags() (*FlagModel, error) {
 	projectId := viper.GetString(config.ProjectIdKey)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
