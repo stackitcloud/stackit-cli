@@ -23,7 +23,7 @@ $ stackit postgresql instance update --project-id xxx --instance-id xxx --plan-i
       --enable-monitoring               Enable monitoring
       --graphite string                 Graphite host
   -h, --help                            help for update
-  -i, --instance-id string              Instance ID
+      --instance-id string              Instance ID
       --metrics-frequency int           Metrics frequency
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID

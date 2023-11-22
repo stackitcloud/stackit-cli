@@ -23,6 +23,7 @@ $ stackit config unset --project-id
   -h, --help                         help for unset
       --postgresql-custom-endpoint   PostgreSQL custom endpoint
       --project-id                   Project ID
+      --ske-custom-endpoint          SKE custom endpoint
 ```
 
 ### SEE ALSO
