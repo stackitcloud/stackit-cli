@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -15,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
+
+var projectIdFlag = commonflags.ProjectIdFlag.FlagName()
 
 type testCtxKey struct{}
 
@@ -67,7 +68,7 @@ var testPayload = ske.CreateOrUpdateClusterPayload{
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		ProjectIdFlag: testProjectId,
+		projectIdFlag: testProjectId,
 		NameFlag:      "example-name",
 		PayloadFlag: `{
 			"name": "cli-jp",
@@ -171,21 +172,21 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, ProjectIdFlag)
+				delete(flagValues, projectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[ProjectIdFlag] = ""
+				flagValues[projectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[ProjectIdFlag] = "invalid-uuid"
+				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -213,14 +214,11 @@ func TestParseFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			cmd := &cobra.Command{}
-
-			// Flag defined in root command
-			err := testutils.ConfigureBindUUIDFlag(cmd, ProjectIdFlag, config.ProjectIdKey)
-			if err != nil {
-				t.Fatalf("configure global flag --%s: %v", ProjectIdFlag, err)
-			}
-
 			ConfigureFlags(cmd)
+			err := commonflags.ConfigureFlags(cmd.Flags())
+			if err != nil {
+				t.Fatalf("configure global flags: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)

@@ -5,18 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresql/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresql"
 )
 
 const (
-	projectIdFlag    = "project-id"
 	instanceIdFlag   = "instance-id"
 	credentialIdFlag = "credential-id" //nolint:gosec // linter false positive
 )
@@ -78,7 +76,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
+	projectId := commonflags.GetString(commonflags.ProjectIdFlag)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

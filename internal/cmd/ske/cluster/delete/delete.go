@@ -4,18 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 const (
-	projectIdFlag   = "project-id"
 	clusterNameFlag = "name"
 )
 
@@ -71,7 +69,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
+	projectId := commonflags.GetString(commonflags.ProjectIdFlag)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
