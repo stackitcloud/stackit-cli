@@ -312,7 +312,7 @@ func TestFetchZones(t *testing.T) {
 			description:         "no limit and pageSize<totalItems 2",
 			model:               fixtureFlagModel(),
 			totalItems:          200,
-			expectedNumAPICalls: 3, // Last call with return no items
+			expectedNumAPICalls: 3, // Last call will return no items
 			apiCallFails:        false,
 			expectedNumItems:    200,
 		},
@@ -320,7 +320,7 @@ func TestFetchZones(t *testing.T) {
 			description:         "no limit and pageSize=totalItems",
 			model:               fixtureFlagModel(),
 			totalItems:          100,
-			expectedNumAPICalls: 2, // Last call with return no items
+			expectedNumAPICalls: 2, // Last call will return no items
 			apiCallFails:        false,
 			expectedNumItems:    100,
 		},
