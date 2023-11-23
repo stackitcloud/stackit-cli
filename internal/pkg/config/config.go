@@ -79,5 +79,6 @@ func createFileIfNotExists(filePath string) error {
 }
 
 func setConfigDefaults() {
+	viper.SetDefault(OutputFormatKey, "default")
 	viper.SetDefault(SessionTimeLimitKey, "2h")
 }

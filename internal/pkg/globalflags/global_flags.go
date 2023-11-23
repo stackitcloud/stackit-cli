@@ -34,7 +34,7 @@ func Configure(flagSet *pflag.FlagSet) error {
 		return fmt.Errorf("bind --%s flag to config: %w", ProjectIdFlag, err)
 	}
 
-	flagSet.Var(flags.EnumFlag(false, outputFormatFlagOptions...), OutputFormatFlag.FlagName(), fmt.Sprintf("Output format, one of %q", outputFormatFlagOptions))
+	flagSet.Var(flags.EnumFlag(true, outputFormatFlagOptions...), OutputFormatFlag.FlagName(), fmt.Sprintf("Output format, one of %q", outputFormatFlagOptions))
 	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag.FlagName()))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag, err)
