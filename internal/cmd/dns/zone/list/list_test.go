@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -372,7 +371,7 @@ func TestFetchZones(t *testing.T) {
 
 				w.Header().Set("Content-Type", "application/json")
 				if tt.apiCallFails {
-					w.WriteHeader(http.StatusBadGateway)
+					w.WriteHeader(http.StatusInternalServerError)
 					_, err := w.Write([]byte("{\"message\": \"Something bad happened\""))
 					if err != nil {
 						t.Errorf("Failed to write bad response: %v", err)
@@ -429,7 +428,6 @@ func TestFetchZones(t *testing.T) {
 			client, err := dns.NewAPIClient(
 				sdkConfig.WithEndpoint(mockedServer.URL),
 				sdkConfig.WithoutAuthentication(),
-				sdkConfig.WithRetryTimeout(time.Millisecond),
 			)
 			if err != nil {
 				t.Fatalf("Failed to initialize client: %v", err)
