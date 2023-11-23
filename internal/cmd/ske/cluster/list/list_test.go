@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -23,6 +24,7 @@ var testProjectId = uuid.NewString()
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
+		limitFlag:     "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -33,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
 		ProjectId: testProjectId,
+		Limit:     utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -87,6 +90,20 @@ func TestParseFlags(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -98,6 +115,8 @@ func TestParseFlags(t *testing.T) {
 			if err != nil {
 				t.Fatalf("configure global flag --%s: %v", projectIdFlag, err)
 			}
+
+			configureFlags(cmd)
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -117,7 +136,7 @@ func TestParseFlags(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseFlags()
+			model, err := parseFlags(cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

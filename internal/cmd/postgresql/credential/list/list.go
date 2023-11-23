@@ -18,11 +18,13 @@ import (
 const (
 	projectIdFlag  = "project-id"
 	instanceIdFlag = "instance-id"
+	limitFlag      = "limit"
 )
 
 type flagModel struct {
 	ProjectId  string
 	InstanceId string
+	Limit      *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -56,6 +58,11 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
+			// Truncate output
+			if model.Limit != nil && len(credentials) > int(*model.Limit) {
+				credentials = credentials[:*model.Limit]
+			}
+
 			// Show output as table
 			table := tables.NewTable()
 			table.SetHeader("ID")
@@ -74,6 +81,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 
 	err := utils.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -85,9 +93,15 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	limit := utils.FlagToInt64Pointer(cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, fmt.Errorf("limit must be greater than 0")
+	}
+
 	return &flagModel{
 		ProjectId:  projectId,
 		InstanceId: utils.FlagToStringValue(cmd, instanceIdFlag),
+		Limit:      limit,
 	}, nil
 }
 

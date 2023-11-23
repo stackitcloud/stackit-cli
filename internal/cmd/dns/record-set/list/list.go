@@ -22,6 +22,7 @@ const (
 	nameLikeFlag    = "name-like"
 	activeFlag      = "is-active"
 	orderByNameFlag = "order-by-name"
+	limitFlag       = "limit"
 )
 
 type flagModel struct {
@@ -30,6 +31,7 @@ type flagModel struct {
 	NameLike    *string
 	Active      *bool
 	OrderByName *string
+	Limit       *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -63,6 +65,11 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
+			// Truncate output
+			if model.Limit != nil && len(recordSets) > int(*model.Limit) {
+				recordSets = recordSets[:*model.Limit]
+			}
+
 			// Show output as table
 			table := tables.NewTable()
 			table.SetHeader("ID", "Name", "Type", "State")
@@ -75,6 +82,7 @@ func NewCmd() *cobra.Command {
 			return nil
 		},
 	}
+
 	configureFlags(cmd)
 	return cmd
 }
@@ -87,6 +95,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameLikeFlag, "", "Filter by name")
 	cmd.Flags().Var(flags.EnumBoolFlag(), activeFlag, fmt.Sprintf("Filter by active status, one of %q", activeFlagOptions))
 	cmd.Flags().Var(flags.EnumFlag(true, orderByNameFlagOptions...), orderByNameFlag, fmt.Sprintf("Order by name, one of %q", orderByNameFlagOptions))
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 
 	err := utils.MarkFlagsRequired(cmd, zoneIdFlag)
 	cobra.CheckErr(err)
@@ -98,12 +107,18 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	limit := utils.FlagToInt64Pointer(cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, fmt.Errorf("limit must be greater than 0")
+	}
+
 	return &flagModel{
 		ProjectId:   projectId,
 		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
 		NameLike:    utils.FlagToStringPointer(cmd, nameLikeFlag),
 		Active:      utils.FlagToBoolPointer(cmd, activeFlag),
 		OrderByName: utils.FlagToStringPointer(cmd, orderByNameFlag),
+		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
 	}, nil
 }
 

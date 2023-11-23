@@ -7,14 +7,20 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresql/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresql"
 )
 
+const (
+	limitFlag = "limit"
+)
+
 type flagModel struct {
 	ProjectId string
+	Limit     *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -48,6 +54,11 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
+			// Truncate output
+			if model.Limit != nil && len(instances) > int(*model.Limit) {
+				instances = instances[:*model.Limit]
+			}
+
 			// Show output as table
 			table := tables.NewTable()
 			table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
@@ -60,17 +71,29 @@ func NewCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	configureFlags(cmd)
 	return cmd
 }
 
-func parseFlags(_ *cobra.Command) (*flagModel, error) {
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+}
+
+func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	projectId := viper.GetString(config.ProjectIdKey)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
+	limit := utils.FlagToInt64Pointer(cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, fmt.Errorf("limit must be greater than 0")
+	}
+
 	return &flagModel{
 		ProjectId: projectId,
+		Limit:     utils.FlagToInt64Pointer(cmd, limitFlag),
 	}, nil
 }
 
