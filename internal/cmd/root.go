@@ -20,7 +20,7 @@ func NewRootCmd() *cobra.Command {
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
 	}
-	err := globalflags.ConfigureFlags(cmd.PersistentFlags())
+	err := globalflags.Configure(cmd.PersistentFlags())
 	cobra.CheckErr(err)
 	addSubcommands(cmd)
 	return cmd

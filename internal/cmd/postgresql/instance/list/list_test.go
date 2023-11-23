@@ -110,7 +110,7 @@ func TestParseFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			cmd := &cobra.Command{}
-			err := globalflags.ConfigureFlags(cmd.Flags())
+			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}

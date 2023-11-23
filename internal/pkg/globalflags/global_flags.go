@@ -19,7 +19,7 @@ func (f GlobalFlag) FlagName() string {
 	return string(f)
 }
 
-func ConfigureFlags(flagSet *pflag.FlagSet) error {
+func Configure(flagSet *pflag.FlagSet) error {
 	flagSet.Var(flags.UUIDFlag(), ProjectIdFlag.FlagName(), "Project ID")
 	err := viper.BindPFlag(config.ProjectIdKey, flagSet.Lookup(ProjectIdFlag.FlagName()))
 	if err != nil {
