@@ -23,6 +23,7 @@ const (
 	activeFlag      = "is-active"
 	orderByNameFlag = "order-by-name"
 	limitFlag       = "limit"
+	pageSizeFlag    = "page-size"
 )
 
 type flagModel struct {
@@ -32,6 +33,7 @@ type flagModel struct {
 	Active      *bool
 	OrderByName *string
 	Limit       *int64
+	PageSize    int64
 }
 
 func NewCmd() *cobra.Command {
@@ -53,21 +55,14 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("authentication failed, please run \"stackit auth login\" or \"stackit auth activate-service-account\"")
 			}
 
-			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			// Fetch record sets
+			recordSets, err := fetchRecordSets(ctx, model, apiClient)
 			if err != nil {
-				return fmt.Errorf("get DNS record sets: %w", err)
+				return err
 			}
-			recordSets := *resp.RrSets
 			if len(recordSets) == 0 {
-				cmd.Printf("No record-sets found for zone with ID %s\n", model.ZoneId)
+				cmd.Printf("No record sets found for zone %s in project with ID %s\n", model.ZoneId, model.ProjectId)
 				return nil
-			}
-
-			// Truncate output
-			if model.Limit != nil && len(recordSets) > int(*model.Limit) {
-				recordSets = recordSets[:*model.Limit]
 			}
 
 			// Show output as table
@@ -96,6 +91,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumBoolFlag(), activeFlag, fmt.Sprintf("Filter by active status, one of %q", activeFlagOptions))
 	cmd.Flags().Var(flags.EnumFlag(true, orderByNameFlagOptions...), orderByNameFlag, fmt.Sprintf("Order by name, one of %q", orderByNameFlagOptions))
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+	cmd.Flags().Int64(pageSizeFlag, 100, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 
 	err := utils.MarkFlagsRequired(cmd, zoneIdFlag)
 	cobra.CheckErr(err)
@@ -112,6 +108,14 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		return nil, fmt.Errorf("limit must be greater than 0")
 	}
 
+	pageSize, err := utils.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	if err != nil {
+		return nil, fmt.Errorf("parse %s flag: %w", pageSizeFlag, err)
+	}
+	if pageSize < 1 {
+		return nil, fmt.Errorf("page size must be greater than 0")
+	}
+
 	return &flagModel{
 		ProjectId:   projectId,
 		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
@@ -119,10 +123,11 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 		Active:      utils.FlagToBoolPointer(cmd, activeFlag),
 		OrderByName: utils.FlagToStringPointer(cmd, orderByNameFlag),
 		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
+		PageSize:    pageSize,
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiGetRecordSetsRequest {
+func buildRequest(ctx context.Context, model *flagModel, apiClient dnsClient, page int) dns.ApiGetRecordSetsRequest {
 	req := apiClient.GetRecordSets(ctx, model.ProjectId, model.ZoneId)
 	if model.NameLike != nil {
 		req = req.NameLike(*model.NameLike)
@@ -133,5 +138,43 @@ func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClien
 	if model.OrderByName != nil {
 		req = req.OrderByName(strings.ToUpper(*model.OrderByName))
 	}
+	req = req.PageSize(int32(model.PageSize))
+	req = req.Page(int32(page))
 	return req
+}
+
+type dnsClient interface {
+	GetRecordSets(ctx context.Context, projectId, zoneId string) dns.ApiGetRecordSetsRequest
+}
+
+func fetchRecordSets(ctx context.Context, model *flagModel, apiClient dnsClient) ([]dns.RecordSet, error) {
+	if model.Limit != nil && *model.Limit < model.PageSize {
+		model.PageSize = *model.Limit
+	}
+	page := 1
+	recordSets := []dns.RecordSet{}
+	for {
+		// Call API
+		req := buildRequest(ctx, model, apiClient, page)
+		resp, err := req.Execute()
+		if err != nil {
+			return nil, fmt.Errorf("get DNS record sets: %w", err)
+		}
+		respRecordSets := *resp.RrSets
+		if len(respRecordSets) == 0 {
+			break
+		}
+		recordSets = append(recordSets, respRecordSets...)
+		// Stop if no more pages
+		if len(respRecordSets) < int(model.PageSize) {
+			break
+		}
+		// Stop and truncate if limit is reached
+		if model.Limit != nil && len(recordSets) >= int(*model.Limit) {
+			recordSets = recordSets[:*model.Limit]
+			break
+		}
+		page++
+	}
+	return recordSets, nil
 }
