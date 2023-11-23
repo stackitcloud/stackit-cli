@@ -40,7 +40,7 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.ProjectIdKey, "")
 			}
 			if model.OutputFormat {
-				viper.Set(config.OutputFormatKey, "default")
+				viper.Set(config.OutputFormatKey, "")
 			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")

@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -50,16 +51,9 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read DNS record set: %w", err)
 			}
-			recordSet := *resp.Rrset
+			recordSet := resp.Rrset
 
-			// Show details
-			details, err := json.MarshalIndent(recordSet, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal DNS record set: %w", err)
-			}
-			cmd.Println(string(details))
-
-			return nil
+			return outputResult(cmd, model.GlobalFlags.OutputFormat, recordSet)
 		},
 	}
 	configureFlags(cmd)
@@ -90,4 +84,24 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiGetRecordSetRequest {
 	req := apiClient.GetRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.RecordSet) error {
+	switch outputFormat {
+	case globalflags.TableOutputFormat:
+		table := tables.NewTable()
+		table.SetHeader("ID", "Name", "Type", "State")
+		table.AddRow(*recordSet.Id, *recordSet.Name, *recordSet.Type, *recordSet.State)
+		table.Render(cmd)
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(recordSet, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record set: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	}
 }
