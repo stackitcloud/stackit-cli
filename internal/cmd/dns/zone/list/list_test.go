@@ -349,10 +349,10 @@ func TestFetchZones(t *testing.T) {
 			description: "limit>totalItems and pageSize<totalItems",
 			model: fixtureFlagModel(func(model *flagModel) {
 				model.Limit = utils.Ptr(int64(200))
-				model.PageSize = 100
+				model.PageSize = 30
 			}),
 			totalItems:          50,
-			expectedNumAPICalls: 1,
+			expectedNumAPICalls: 2,
 			apiCallFails:        false,
 			expectedNumItems:    50,
 		},
