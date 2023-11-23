@@ -4,8 +4,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Returns the flag's value as a string.
 // Returns "" if the flag is not set, if its value can not be converted to string, or if the flag does not exist.
-// Otherwise, returns the flag's value as a string
 func FlagToStringValue(cmd *cobra.Command, flag string) string {
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
@@ -17,8 +17,8 @@ func FlagToStringValue(cmd *cobra.Command, flag string) string {
 	return ""
 }
 
+// Returns the flag's value as a bool.
 // Returns "false" if its value can not be converted to bool, or if the flag does not exist.
-// Otherwise, returns flag's value as a bool
 func FlagToBoolValue(cmd *cobra.Command, flag string) bool {
 	value, err := cmd.Flags().GetBool(flag)
 	if err != nil {
@@ -27,8 +27,8 @@ func FlagToBoolValue(cmd *cobra.Command, flag string) bool {
 	return value
 }
 
+// Returns the flag's value as a []string.
 // Returns nil if the flag is not set, if its value can not be converted to []string, or if the flag does not exist.
-// Otherwise, returns the flag's value.
 func FlagToStringSliceValue(cmd *cobra.Command, flag string) []string {
 	value, err := cmd.Flags().GetStringSlice(flag)
 	if err != nil {
@@ -40,8 +40,8 @@ func FlagToStringSliceValue(cmd *cobra.Command, flag string) []string {
 	return nil
 }
 
+// Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to int64, or if the flag does not exist.
-// Otherwise, returns a pointer to the flag's value.
 func FlagToInt64Pointer(cmd *cobra.Command, flag string) *int64 {
 	value, err := cmd.Flags().GetInt64(flag)
 	if err != nil {
@@ -53,8 +53,8 @@ func FlagToInt64Pointer(cmd *cobra.Command, flag string) *int64 {
 	return nil
 }
 
+// Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to string, or if the flag does not exist.
-// Otherwise, returns a pointer to the flag's value.
 func FlagToStringPointer(cmd *cobra.Command, flag string) *string {
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
@@ -66,8 +66,8 @@ func FlagToStringPointer(cmd *cobra.Command, flag string) *string {
 	return nil
 }
 
+// Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to []string, or if the flag does not exist.
-// Otherwise, returns a pointer to the flag's value.
 func FlagToStringSlicePointer(cmd *cobra.Command, flag string) *[]string {
 	value, err := cmd.Flags().GetStringSlice(flag)
 	if err != nil {
@@ -79,8 +79,8 @@ func FlagToStringSlicePointer(cmd *cobra.Command, flag string) *[]string {
 	return nil
 }
 
+// Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to bool, or if the flag does not exist.
-// Otherwise, returns a pointer to the flag's value.
 func FlagToBoolPointer(cmd *cobra.Command, flag string) *bool {
 	value, err := cmd.Flags().GetBool(flag)
 	if err != nil {
@@ -92,8 +92,8 @@ func FlagToBoolPointer(cmd *cobra.Command, flag string) *bool {
 	return nil
 }
 
-// Returns an error if the flag value can not be converted to int64 or if the flag does not exist.
-// Otherwise, returns the int64 value of the flag.
+// Returns the int64 value set on the flag. If no value is set, returns the flag's default value.
+// An error is returned if the flag value can not be converted to int64 or if the flag does not exist.
 func FlagWithDefaultToInt64Value(cmd *cobra.Command, flag string) (int64, error) {
 	return cmd.Flags().GetInt64(flag)
 }
