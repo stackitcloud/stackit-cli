@@ -7,21 +7,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 const (
-	ProjectIdFlag = "project-id"
-	NameFlag      = "name"
-	PayloadFlag   = "payload"
+	NameFlag    = "name"
+	PayloadFlag = "payload"
 )
 
 type FlagModel struct {
@@ -94,7 +92,7 @@ func ConfigureFlags(cmd *cobra.Command) {
 type FileReaderFunc func(filename string) ([]byte, error)
 
 func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
+	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

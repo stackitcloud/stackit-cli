@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
+
+var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
 
 type testCtxKey struct{}
 
@@ -116,14 +116,11 @@ func TestParseFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			cmd := &cobra.Command{}
-
-			// Flag defined in root command
-			err := testutils.ConfigureBindUUIDFlag(cmd, projectIdFlag, config.ProjectIdKey)
-			if err != nil {
-				t.Fatalf("configure global flag --%s: %v", projectIdFlag, err)
-			}
-
 			configureFlags(cmd)
+			err := globalflags.Configure(cmd.Flags())
+			if err != nil {
+				t.Fatalf("configure global flags: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)

@@ -13,10 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
-const (
-	projectIdFlag = "project-id"
-)
-
 type flagModel struct {
 	ProjectId string
 }

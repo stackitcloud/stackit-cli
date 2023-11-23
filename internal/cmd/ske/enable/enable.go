@@ -13,10 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
-const (
-	projectIdFlag = "project-id"
-)
-
 type FlagModel struct {
 	ProjectId string
 }
