@@ -92,6 +92,12 @@ func FlagToBoolPointer(cmd *cobra.Command, flag string) *bool {
 	return nil
 }
 
+// Returns an error if the flag value can not be converted to int64 or if the flag does not exist.
+// Otherwise, returns the int64 value of the flag.
+func FlagWithDefaultToInt64Value(cmd *cobra.Command, flag string) (int64, error) {
+	return cmd.Flags().GetInt64(flag)
+}
+
 // Marks all given flags as required, causing the command to report an error if invoked without them.
 func MarkFlagsRequired(cmd *cobra.Command, flags ...string) error {
 	for _, flag := range flags {
