@@ -10,10 +10,18 @@ import (
 )
 
 const (
-	ProjectIdFlag GlobalFlag = "project-id"
+	ProjectIdFlag    GlobalFlag = "project-id"
+	OutputFormatFlag GlobalFlag = "output-format"
 )
 
+var outputFormatFlagOptions = []string{"default", "json", "table"}
+
 type GlobalFlag string
+
+type Model struct {
+	ProjectId    string
+	OutputFormat string
+}
 
 func (f GlobalFlag) FlagName() string {
 	return string(f)
@@ -25,14 +33,18 @@ func Configure(flagSet *pflag.FlagSet) error {
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", ProjectIdFlag, err)
 	}
+
+	flagSet.Var(flags.EnumFlag(false, outputFormatFlagOptions...), OutputFormatFlag.FlagName(), fmt.Sprintf("Output format, one of %q", outputFormatFlagOptions))
+	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag.FlagName()))
+	if err != nil {
+		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag, err)
+	}
 	return nil
 }
 
-func GetString(f GlobalFlag) string {
-	switch f {
-	default:
-		return ""
-	case ProjectIdFlag:
-		return viper.GetString(config.ProjectIdKey)
+func Parse() *Model {
+	return &Model{
+		ProjectId:    viper.GetString(config.ProjectIdKey),
+		OutputFormat: viper.GetString(config.OutputFormatKey),
 	}
 }

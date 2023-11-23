@@ -18,7 +18,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId   string
+	GlobalFlags *globalflags.Model
 	ClusterName string
 }
 
@@ -68,8 +68,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 	clusterName := utils.FlagToStringValue(cmd, clusterNameFlag)
@@ -78,12 +78,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:   projectId,
+		GlobalFlags: globalFlags,
 		ClusterName: clusterName,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.GetCluster(ctx, model.GlobalFlags.ProjectId, model.ClusterName)
 	return req
 }

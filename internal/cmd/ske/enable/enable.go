@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 type FlagModel struct {
-	ProjectId string
+	GlobalFlags *globalflags.Model
 }
 
 func NewCmd() *cobra.Command {
@@ -44,7 +43,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.CreateProjectWaitHandler(ctx, apiClient, model.ProjectId).WaitWithContext(ctx)
+			_, err = wait.CreateProjectWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for SKE enabling: %w", err)
 			}
@@ -57,17 +56,17 @@ func NewCmd() *cobra.Command {
 }
 
 func parseFlags() (*FlagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &FlagModel{
-		ProjectId: projectId,
+		GlobalFlags: globalFlags,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *FlagModel, apiClient *ske.APIClient) ske.ApiCreateProjectRequest {
-	req := apiClient.CreateProject(ctx, model.ProjectId)
+	req := apiClient.CreateProject(ctx, model.GlobalFlags.ProjectId)
 	return req
 }

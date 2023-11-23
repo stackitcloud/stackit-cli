@@ -18,8 +18,8 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	Limit     *int64
+	GlobalFlags *globalflags.Model
+	Limit       *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 			}
 			offerings := *resp.Offerings
 			if len(offerings) == 0 {
-				cmd.Printf("No offerings found for project with ID %s\n", model.ProjectId)
+				cmd.Printf("No offerings found for project with ID %s\n", model.GlobalFlags.ProjectId)
 				return nil
 			}
 
@@ -85,8 +85,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -96,12 +96,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		Limit:     limit,
+		GlobalFlags: globalFlags,
+		Limit:       limit,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetOfferingsRequest {
-	req := apiClient.GetOfferings(ctx, model.ProjectId)
+	req := apiClient.GetOfferings(ctx, model.GlobalFlags.ProjectId)
 	return req
 }

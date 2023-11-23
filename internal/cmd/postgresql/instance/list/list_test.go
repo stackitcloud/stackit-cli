@@ -35,8 +35,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId: testProjectId,
-		Limit:     utils.Ptr(int64(10)),
+		GlobalFlags: &globalflags.Model{
+			ProjectId: testProjectId,
+		},
+		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)

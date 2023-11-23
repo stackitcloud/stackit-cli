@@ -33,7 +33,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Check if cluster exists
-			exists, err := utils.ClusterExists(ctx, apiClient, model.ProjectId, model.Name)
+			exists, err := utils.ClusterExists(ctx, apiClient, model.GlobalFlags.ProjectId, model.Name)
 			if err != nil {
 				return err
 			}
@@ -53,7 +53,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			name := *resp.Name
-			_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.ProjectId, name).WaitWithContext(ctx)
+			_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, name).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for SKE cluster update: %w", err)
 			}

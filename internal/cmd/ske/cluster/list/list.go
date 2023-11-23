@@ -18,8 +18,8 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	Limit     *int64
+	GlobalFlags *globalflags.Model
+	Limit       *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 			}
 			clusters := *resp.Items
 			if len(clusters) == 0 {
-				cmd.Printf("No clusters found for project with ID %s\n", model.ProjectId)
+				cmd.Printf("No clusters found for project with ID %s\n", model.GlobalFlags.ProjectId)
 				return nil
 			}
 
@@ -80,8 +80,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -91,12 +91,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		Limit:     utils.FlagToInt64Pointer(cmd, limitFlag),
+		GlobalFlags: globalFlags,
+		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetClustersRequest {
-	req := apiClient.GetClusters(ctx, model.ProjectId)
+	req := apiClient.GetClusters(ctx, model.GlobalFlags.ProjectId)
 	return req
 }

@@ -38,7 +38,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:   testProjectId,
+		GlobalFlags: &globalflags.Model{
+			ProjectId: testProjectId,
+		},
 		NameLike:    utils.Ptr("some-pattern"),
 		Active:      utils.Ptr(true),
 		OrderByName: utils.Ptr("asc"),
@@ -86,7 +88,9 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId: testProjectId,
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
 			},
 		},
 		{
@@ -244,7 +248,9 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "required fields only",
 			model: &flagModel{
-				ProjectId: testProjectId,
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
 			},
 			expectedRequest: testClient.GetZones(testCtx, testProjectId),
 		},

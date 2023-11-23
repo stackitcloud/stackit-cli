@@ -47,7 +47,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:     testProjectId,
+		GlobalFlags: &globalflags.Model{
+			ProjectId: testProjectId,
+		},
 		Name:          utils.Ptr("example"),
 		DnsName:       utils.Ptr("example.com"),
 		DefaultTTL:    utils.Ptr(int64(3600)),
@@ -119,9 +121,11 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId: testProjectId,
-				Name:      utils.Ptr("example"),
-				DnsName:   utils.Ptr("example.com"),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				Name:    utils.Ptr("example"),
+				DnsName: utils.Ptr("example.com"),
 			},
 		},
 		{
@@ -144,7 +148,9 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId:     testProjectId,
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
 				Name:          utils.Ptr(""),
 				DnsName:       utils.Ptr(""),
 				DefaultTTL:    utils.Ptr(int64(0)),
@@ -275,9 +281,11 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "required fields only",
 			model: &flagModel{
-				ProjectId: testProjectId,
-				Name:      utils.Ptr("example"),
-				DnsName:   utils.Ptr("example.com"),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				Name:    utils.Ptr("example"),
+				DnsName: utils.Ptr("example.com"),
 			},
 			expectedRequest: testClient.CreateZone(testCtx, testProjectId).
 				CreateZonePayload(dns.CreateZonePayload{

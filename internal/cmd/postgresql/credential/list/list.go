@@ -20,9 +20,9 @@ const (
 )
 
 type flagModel struct {
-	ProjectId  string
-	InstanceId string
-	Limit      *int64
+	GlobalFlags *globalflags.Model
+	InstanceId  string
+	Limit       *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -86,8 +86,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -97,13 +97,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:  projectId,
-		InstanceId: utils.FlagToStringValue(cmd, instanceIdFlag),
-		Limit:      limit,
+		GlobalFlags: globalFlags,
+		InstanceId:  utils.FlagToStringValue(cmd, instanceIdFlag),
+		Limit:       limit,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetCredentialsIdsRequest {
-	req := apiClient.GetCredentialsIds(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.GetCredentialsIds(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
 	return req
 }

@@ -41,13 +41,15 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId: testProjectId,
-		ZoneId:    testZoneId,
-		Name:      utils.Ptr("example.com"),
-		Comment:   utils.Ptr("comment"),
-		Records:   []string{"1.1.1.1"},
-		TTL:       utils.Ptr(int64(3600)),
-		Type:      utils.Ptr("A"),
+		GlobalFlags: &globalflags.Model{
+			ProjectId: testProjectId,
+		},
+		ZoneId:  testZoneId,
+		Name:    utils.Ptr("example.com"),
+		Comment: utils.Ptr("comment"),
+		Records: []string{"1.1.1.1"},
+		TTL:     utils.Ptr(int64(3600)),
+		Type:    utils.Ptr("A"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -102,11 +104,13 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId: testProjectId,
-				ZoneId:    testZoneId,
-				Name:      utils.Ptr("example.com"),
-				Records:   []string{"1.1.1.1"},
-				Type:      utils.Ptr("A"),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				ZoneId:  testZoneId,
+				Name:    utils.Ptr("example.com"),
+				Records: []string{"1.1.1.1"},
+				Type:    utils.Ptr("A"),
 			},
 		},
 		{
@@ -122,13 +126,15 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId: testProjectId,
-				ZoneId:    testZoneId,
-				Name:      utils.Ptr(""),
-				Comment:   utils.Ptr(""),
-				Records:   []string{"1.1.1.1"},
-				TTL:       utils.Ptr(int64(0)),
-				Type:      utils.Ptr("A"),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				ZoneId:  testZoneId,
+				Name:    utils.Ptr(""),
+				Comment: utils.Ptr(""),
+				Records: []string{"1.1.1.1"},
+				TTL:     utils.Ptr(int64(0)),
+				Type:    utils.Ptr("A"),
 			},
 		},
 		{
@@ -298,11 +304,13 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "required fields only",
 			model: &flagModel{
-				ProjectId: testProjectId,
-				ZoneId:    testZoneId,
-				Name:      utils.Ptr("example.com"),
-				Records:   []string{"1.1.1.1"},
-				Type:      utils.Ptr("A"),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				ZoneId:  testZoneId,
+				Name:    utils.Ptr("example.com"),
+				Records: []string{"1.1.1.1"},
+				Type:    utils.Ptr("A"),
 			},
 			expectedRequest: testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
 				CreateRecordSetPayload(dns.CreateRecordSetPayload{

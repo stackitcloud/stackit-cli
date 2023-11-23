@@ -19,8 +19,8 @@ const (
 )
 
 type flagModel struct {
-	ProjectId  string
-	InstanceId string
+	GlobalFlags *globalflags.Model
+	InstanceId  string
 }
 
 func NewCmd() *cobra.Command {
@@ -70,18 +70,18 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId:  projectId,
-		InstanceId: utils.FlagToStringValue(cmd, instanceIdFlag),
+		GlobalFlags: globalFlags,
+		InstanceId:  utils.FlagToStringValue(cmd, instanceIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.GetInstance(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
 	return req
 }

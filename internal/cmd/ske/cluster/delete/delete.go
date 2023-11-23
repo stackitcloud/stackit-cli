@@ -18,7 +18,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId   string
+	GlobalFlags *globalflags.Model
 	ClusterName string
 }
 
@@ -48,7 +48,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
+			_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ClusterName).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for SKE cluster deletion: %w", err)
 			}
@@ -69,8 +69,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 	clusterName := utils.FlagToStringValue(cmd, clusterNameFlag)
@@ -79,12 +79,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:   projectId,
+		GlobalFlags: globalFlags,
 		ClusterName: clusterName,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiDeleteClusterRequest {
-	req := apiClient.DeleteCluster(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.DeleteCluster(ctx, model.GlobalFlags.ProjectId, model.ClusterName)
 	return req
 }

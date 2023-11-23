@@ -20,7 +20,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId   string
+	GlobalFlags *globalflags.Model
 	ZoneId      string
 	RecordSetId string
 }
@@ -75,19 +75,19 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId:   projectId,
+		GlobalFlags: globalFlags,
 		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
 		RecordSetId: utils.FlagToStringValue(cmd, recordSetIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiGetRecordSetRequest {
-	req := apiClient.GetRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.GetRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId)
 	return req
 }

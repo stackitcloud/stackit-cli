@@ -24,7 +24,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId   string
+	GlobalFlags *globalflags.Model
 	ZoneId      string
 	RecordSetId string
 	Comment     *string
@@ -60,7 +60,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.UpdateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
+			_, err = wait.UpdateRecordSetWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS record set update: %w", err)
 			}
@@ -86,8 +86,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -103,7 +103,7 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:   projectId,
+		GlobalFlags: globalFlags,
 		ZoneId:      zoneId,
 		RecordSetId: recordSetId,
 		Comment:     comment,
@@ -122,7 +122,7 @@ func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClien
 		}
 	}
 
-	req := apiClient.UpdateRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.UpdateRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId)
 	req = req.UpdateRecordSetPayload(dns.UpdateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    model.Name,

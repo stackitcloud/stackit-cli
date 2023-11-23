@@ -33,10 +33,10 @@ const (
 )
 
 type flagModel struct {
-	ProjectId  string
-	InstanceId string
-	PlanName   string
-	Version    string
+	GlobalFlags *globalflags.Model
+	InstanceId  string
+	PlanName    string
+	Version     string
 
 	EnableMonitoring     *bool
 	Graphite             *string
@@ -80,7 +80,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			instanceId := model.InstanceId
-			_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+			_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, instanceId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for PostgreSQL instance update: %w", err)
 			}
@@ -116,8 +116,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -146,7 +146,7 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:            projectId,
+		GlobalFlags:          globalFlags,
 		InstanceId:           instanceId,
 		EnableMonitoring:     enableMonitoring,
 		MonitoringInstanceId: monitoringInstanceId,
@@ -163,12 +163,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient postgresqlUtils.PostgreSQLClient) (postgresql.ApiUpdateInstanceRequest, error) {
-	req := apiClient.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.UpdateInstance(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
 
 	var planId *string
 	var err error
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
-		planId, err = postgresqlUtils.LoadPlanId(ctx, apiClient, model.ProjectId, model.PlanName, model.Version)
+		planId, err = postgresqlUtils.LoadPlanId(ctx, apiClient, model.GlobalFlags.ProjectId, model.PlanName, model.Version)
 		if err != nil {
 			return req, fmt.Errorf("load plan ID: %w", err)
 		}

@@ -19,8 +19,8 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	ZoneId    string
+	GlobalFlags *globalflags.Model
+	ZoneId      string
 }
 
 func NewCmd() *cobra.Command {
@@ -53,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.DeleteZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
+			_, err = wait.DeleteZoneWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS zone deletion: %w", err)
 			}
@@ -74,18 +74,18 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		ZoneId:    utils.FlagToStringValue(cmd, zoneIdFlag),
+		GlobalFlags: globalFlags,
+		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiDeleteZoneRequest {
-	req := apiClient.DeleteZone(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.DeleteZone(ctx, model.GlobalFlags.ProjectId, model.ZoneId)
 	return req
 }

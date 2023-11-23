@@ -13,6 +13,7 @@ import (
 const (
 	SessionTimeLimitKey         = "stackit_session_time_limit"
 	ProjectIdKey                = "stackit_project_id"
+	OutputFormatKey             = "stackit_output_format"
 	DNSCustomEndpointKey        = "stackit_dns_custom_endpoint"
 	PostgreSQLCustomEndpointKey = "stackit_postgresql_custom_endpoint"
 	SKECustomEndpointKey        = "stackit_ske_custom_endpoint"

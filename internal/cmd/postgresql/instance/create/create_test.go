@@ -68,7 +68,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:            testProjectId,
+		GlobalFlags: &globalflags.Model{
+			ProjectId: testProjectId,
+		},
 		InstanceName:         utils.Ptr("example-name"),
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
@@ -138,7 +140,9 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId:    testProjectId,
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
 				InstanceName: utils.Ptr("example-name"),
 				PlanId:       utils.Ptr(testPlanId),
 			},
@@ -156,7 +160,9 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				ProjectId:        testProjectId,
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
 				PlanId:           utils.Ptr(testPlanId),
 				InstanceName:     utils.Ptr(""),
 				EnableMonitoring: utils.Ptr(false),
@@ -385,8 +391,10 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "required fields only",
 			model: &flagModel{
-				ProjectId: testProjectId,
-				PlanId:    utils.Ptr(testPlanId),
+				GlobalFlags: &globalflags.Model{
+					ProjectId: testProjectId,
+				},
+				PlanId: utils.Ptr(testPlanId),
 			},
 			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
 				CreateInstancePayload(postgresql.CreateInstancePayload{PlanId: utils.Ptr(testPlanId), Parameters: &postgresql.InstanceParameters{}}),

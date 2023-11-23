@@ -24,13 +24,13 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	ZoneId    string
-	Comment   *string
-	Name      *string
-	Records   []string
-	TTL       *int64
-	Type      *string
+	GlobalFlags *globalflags.Model
+	ZoneId      string
+	Comment     *string
+	Name        *string
+	Records     []string
+	TTL         *int64
+	Type        *string
 }
 
 func NewCmd() *cobra.Command {
@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			recordSetId := *resp.Rrset.Id
-			_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
+			_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS record set creation: %w", err)
 			}
@@ -89,19 +89,19 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		ZoneId:    utils.FlagToStringValue(cmd, zoneIdFlag),
-		Comment:   utils.FlagToStringPointer(cmd, commentFlag),
-		Name:      utils.FlagToStringPointer(cmd, nameFlag),
-		Records:   utils.FlagToStringSliceValue(cmd, recordFlag),
-		TTL:       utils.FlagToInt64Pointer(cmd, ttlFlag),
-		Type:      utils.FlagToStringPointer(cmd, typeFlag),
+		GlobalFlags: globalFlags,
+		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
+		Comment:     utils.FlagToStringPointer(cmd, commentFlag),
+		Name:        utils.FlagToStringPointer(cmd, nameFlag),
+		Records:     utils.FlagToStringSliceValue(cmd, recordFlag),
+		TTL:         utils.FlagToInt64Pointer(cmd, ttlFlag),
+		Type:        utils.FlagToStringPointer(cmd, typeFlag),
 	}, nil
 }
 
@@ -111,7 +111,7 @@ func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClien
 		records = append(records, dns.RecordPayload{Content: utils.Ptr(r)})
 	}
 
-	req := apiClient.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.CreateRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId)
 	req = req.CreateRecordSetPayload(dns.CreateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    model.Name,
