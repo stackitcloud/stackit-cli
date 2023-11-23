@@ -5,18 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
 const (
-	projectIdFlag   = "project-id"
 	zoneIdFlag      = "zone-id"
 	recordSetIdFlag = "record-set-id"
 )
@@ -77,7 +75,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
+	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

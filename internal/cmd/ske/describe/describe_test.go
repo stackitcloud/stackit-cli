@@ -1,4 +1,4 @@
-package delete
+package describe
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
@@ -18,16 +18,12 @@ var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
-var testZoneId = uuid.NewString()
-var testRecordSetId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:   testProjectId,
-		zoneIdFlag:      testZoneId,
-		recordSetIdFlag: testRecordSetId,
+		projectIdFlag: testProjectId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,9 +33,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId:   testProjectId,
-		ZoneId:      testZoneId,
-		RecordSetId: testRecordSetId,
+		ProjectId: testProjectId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -47,8 +41,8 @@ func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *dns.ApiDeleteRecordSetRequest)) dns.ApiDeleteRecordSetRequest {
-	request := testClient.DeleteRecordSet(testCtx, testProjectId, testZoneId, testRecordSetId)
+func fixtureRequest(mods ...func(request *ske.ApiGetProjectRequest)) ske.ApiGetProjectRequest {
+	request := testClient.GetProject(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -94,54 +88,11 @@ func TestParseFlags(t *testing.T) {
 			}),
 			isValid: false,
 		},
-		{
-			description: "zone id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, zoneIdFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "zone id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[zoneIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "zone id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[zoneIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "record set id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, recordSetIdFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "record set id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[recordSetIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "record set id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[recordSetIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			cmd := &cobra.Command{}
-			configureFlags(cmd)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -165,7 +116,7 @@ func TestParseFlags(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseFlags(cmd)
+			model, err := parseFlags()
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -189,12 +140,11 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *flagModel
 		isValid         bool
-		expectedRequest dns.ApiDeleteRecordSetRequest
+		expectedRequest ske.ApiGetProjectRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureFlagModel(),
-			isValid:         true,
 			expectedRequest: fixtureRequest(),
 		},
 	}
