@@ -3,15 +3,18 @@ package globalflags
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
 	ProjectIdFlag    = "project-id"
 	OutputFormatFlag = "output-format"
+	AssumeYesFlag    = "assume-yes"
 )
 
 var outputFormatFlagOptions = []string{"default", "json", "table"}
@@ -19,6 +22,7 @@ var outputFormatFlagOptions = []string{"default", "json", "table"}
 type GlobalFlagModel struct {
 	ProjectId    string
 	OutputFormat string
+	AssumeYes    bool
 }
 
 func Configure(flagSet *pflag.FlagSet) error {
@@ -33,12 +37,15 @@ func Configure(flagSet *pflag.FlagSet) error {
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag, err)
 	}
+
+	flagSet.BoolP(AssumeYesFlag, "y", false, "If set, skips all confirmation prompts")
 	return nil
 }
 
-func Parse() *GlobalFlagModel {
+func Parse(cmd *cobra.Command) *GlobalFlagModel {
 	return &GlobalFlagModel{
 		ProjectId:    viper.GetString(config.ProjectIdKey),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
+		AssumeYes:    utils.FlagToBoolValue(cmd, AssumeYesFlag),
 	}
 }

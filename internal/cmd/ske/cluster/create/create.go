@@ -92,7 +92,7 @@ func ConfigureFlags(cmd *cobra.Command) {
 type FileReaderFunc func(filename string) ([]byte, error)
 
 func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, error) {
-	globalFlags := globalflags.Parse()
+	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

@@ -24,7 +24,7 @@ func NewCmd() *cobra.Command {
 		Example: `$ stackit ske describe --project-id xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseFlags()
+			model, err := parseFlags(cmd)
 			if err != nil {
 				return err
 			}
@@ -54,8 +54,8 @@ func NewCmd() *cobra.Command {
 	return cmd
 }
 
-func parseFlags() (*flagModel, error) {
-	globalFlags := globalflags.Parse()
+func parseFlags(cmd *cobra.Command) (*flagModel, error) {
+	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
