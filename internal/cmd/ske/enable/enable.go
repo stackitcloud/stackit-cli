@@ -53,7 +53,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("wait for SKE enabling: %w", err)
 			}
 
-			cmd.Printf("SKE enabled")
+			cmd.Println("SKE enabled")
 			return nil
 		},
 	}
