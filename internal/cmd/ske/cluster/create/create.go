@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -92,7 +92,7 @@ func ConfigureFlags(cmd *cobra.Command) {
 type FileReaderFunc func(filename string) ([]byte, error)
 
 func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, error) {
-	projectId := commonflags.GetString(commonflags.ProjectIdFlag)
+	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
 	if projectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

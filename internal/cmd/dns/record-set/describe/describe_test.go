@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = commonflags.ProjectIdFlag.FlagName()
+var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
 
 type testCtxKey struct{}
 
@@ -142,7 +142,7 @@ func TestParseFlags(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			cmd := &cobra.Command{}
 			configureFlags(cmd)
-			err := commonflags.ConfigureFlags(cmd.Flags())
+			err := globalflags.ConfigureFlags(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}

@@ -1,4 +1,4 @@
-package commonflags
+package globalflags
 
 import (
 	"fmt"

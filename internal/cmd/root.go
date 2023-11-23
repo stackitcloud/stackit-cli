@@ -9,7 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresql"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/commonflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 )
 
 func NewRootCmd() *cobra.Command {
@@ -20,7 +20,7 @@ func NewRootCmd() *cobra.Command {
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
 	}
-	err := commonflags.ConfigureFlags(cmd.PersistentFlags())
+	err := globalflags.ConfigureFlags(cmd.PersistentFlags())
 	cobra.CheckErr(err)
 	addSubcommands(cmd)
 	return cmd
