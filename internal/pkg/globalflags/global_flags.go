@@ -28,6 +28,11 @@ func ConfigureFlags(flagSet *pflag.FlagSet) error {
 	return nil
 }
 
-func GetString(_ GlobalFlag) string {
-	return viper.GetString(config.ProjectIdKey)
+func GetString(f GlobalFlag) string {
+	switch f {
+	default:
+		return ""
+	case ProjectIdFlag:
+		return viper.GetString(config.ProjectIdKey)
+	}
 }
