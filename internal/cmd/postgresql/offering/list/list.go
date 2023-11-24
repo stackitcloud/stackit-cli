@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -58,21 +59,7 @@ func NewCmd() *cobra.Command {
 				offerings = offerings[:*model.Limit]
 			}
 
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("NAME", "PLAN.ID", "PLAN.NAME", "PLAN.DESCRIPTION")
-			for i := range offerings {
-				o := offerings[i]
-				for j := range *o.Plans {
-					p := (*o.Plans)[j]
-					table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
-				}
-				table.AddSeparator()
-			}
-			table.EnableAutoMergeOnColumns(1)
-			table.Render(cmd)
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, offerings)
 		},
 	}
 
@@ -104,4 +91,32 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetOfferingsRequest {
 	req := apiClient.GetOfferings(ctx, model.ProjectId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, offerings []postgresql.Offering) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		details, err := json.MarshalIndent(offerings, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL offerings: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("NAME", "PLAN.ID", "PLAN.NAME", "PLAN.DESCRIPTION")
+		for i := range offerings {
+			o := offerings[i]
+			for j := range *o.Plans {
+				p := (*o.Plans)[j]
+				table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
+			}
+			table.AddSeparator()
+		}
+		table.EnableAutoMergeOnColumns(1)
+		table.Render(cmd)
+
+		return nil
+	}
 }

@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -60,17 +61,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("ID")
-			for i := range credentials {
-				c := credentials[i]
-				table.AddRow(*c.Id)
-			}
-			table.Render(cmd)
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -106,4 +97,27 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetCredentialsIdsRequest {
 	req := apiClient.GetCredentialsIds(ctx, model.ProjectId, model.InstanceId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, credentialsList []postgresql.CredentialsListItem) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentialsList, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL credentials list: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("ID")
+		for i := range credentialsList {
+			c := credentialsList[i]
+			table.AddRow(*c.Id)
+		}
+		table.Render(cmd)
+
+		return nil
+	}
 }

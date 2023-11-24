@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresql/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -51,14 +52,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("describe PostgreSQL credential: %w", err)
 			}
 
-			// Show details
-			details, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal PostgreSQL credential: %w", err)
-			}
-			cmd.Println(string(details))
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -91,4 +85,24 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetCredentialsRequest {
 	req := apiClient.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *postgresql.CredentialsResponse) error {
+	switch outputFormat {
+	case globalflags.TableOutputFormat:
+		table := tables.NewTable()
+		table.SetHeader("ID")
+		table.AddRow(*credentials.Id)
+		table.Render(cmd)
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL credential: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	}
 }
