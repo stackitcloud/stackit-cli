@@ -70,7 +70,10 @@ func NewCmd() *cobra.Command {
 				table.AddSeparator()
 			}
 			table.EnableAutoMergeOnColumns(1)
-			table.Render(cmd)
+			err = table.Render(cmd)
+			if err != nil {
+				return fmt.Errorf("render table: %w", err)
+			}
 
 			return nil
 		},
