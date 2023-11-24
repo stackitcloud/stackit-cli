@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
@@ -39,6 +40,14 @@ func NewCmd() *cobra.Command {
 			model, err := ParseFlags(cmd, os.ReadFile)
 			if err != nil {
 				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := "Do you want to create a cluster?"
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Configure API client

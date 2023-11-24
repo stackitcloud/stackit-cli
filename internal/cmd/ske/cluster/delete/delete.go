@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -34,6 +35,15 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Do you want to delete cluster %s? (This cannot be undone)", model.ClusterName)
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
+			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(cmd)
 			if err != nil {

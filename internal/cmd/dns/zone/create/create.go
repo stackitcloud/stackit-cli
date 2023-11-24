@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -58,6 +59,16 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			if !model.AssumeYes {
+				prompt := "Do you want to create a zone?"
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
+			}
+
+			cmd.OutOrStdout()
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(cmd)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresql/client"
@@ -35,6 +36,14 @@ func NewCmd() *cobra.Command {
 			model, err := parseFlags(cmd)
 			if err != nil {
 				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Do you want to delete credential %s? (This cannot be undone)", model.CredentialId)
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Configure API client
