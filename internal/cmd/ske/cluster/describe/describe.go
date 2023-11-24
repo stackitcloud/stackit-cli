@@ -18,7 +18,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 	ClusterName string
 }
 
@@ -78,12 +78,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		ClusterName: clusterName,
+		GlobalFlagModel: globalFlags,
+		ClusterName:     clusterName,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.GlobalFlags.ProjectId, model.ClusterName)
+	req := apiClient.GetCluster(ctx, model.ProjectId, model.ClusterName)
 	return req
 }

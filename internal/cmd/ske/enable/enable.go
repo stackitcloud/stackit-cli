@@ -13,7 +13,7 @@ import (
 )
 
 type FlagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 }
 
 func NewCmd() *cobra.Command {
@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.CreateProjectWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId).WaitWithContext(ctx)
+			_, err = wait.CreateProjectWaitHandler(ctx, apiClient, model.ProjectId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for SKE enabling: %w", err)
 			}
@@ -62,11 +62,11 @@ func parseFlags() (*FlagModel, error) {
 	}
 
 	return &FlagModel{
-		GlobalFlags: globalFlags,
+		GlobalFlagModel: globalFlags,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *FlagModel, apiClient *ske.APIClient) ske.ApiCreateProjectRequest {
-	req := apiClient.CreateProject(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.CreateProject(ctx, model.ProjectId)
 	return req
 }

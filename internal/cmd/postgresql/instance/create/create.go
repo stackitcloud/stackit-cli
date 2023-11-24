@@ -32,9 +32,9 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
-	PlanName    string
-	Version     string
+	*globalflags.GlobalFlagModel
+	PlanName string
+	Version  string
 
 	InstanceName         *string
 	EnableMonitoring     *bool
@@ -79,7 +79,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			instanceId := *resp.InstanceId
-			_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, instanceId).WaitWithContext(ctx)
+			_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for PostgreSQL instance creation: %w", err)
 			}
@@ -132,7 +132,7 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags:          globalFlags,
+		GlobalFlagModel:      globalFlags,
 		InstanceName:         utils.FlagToStringPointer(cmd, instanceNameFlag),
 		EnableMonitoring:     utils.FlagToBoolPointer(cmd, enableMonitoringFlag),
 		MonitoringInstanceId: utils.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
@@ -149,12 +149,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient postgresqlUtils.PostgreSQLClient) (postgresql.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
 	var err error
 	if model.PlanId == nil {
-		planId, err = postgresqlUtils.LoadPlanId(ctx, apiClient, model.GlobalFlags.ProjectId, model.PlanName, model.Version)
+		planId, err = postgresqlUtils.LoadPlanId(ctx, apiClient, model.ProjectId, model.PlanName, model.Version)
 		if err != nil {
 			return req, fmt.Errorf("load plan ID: %w", err)
 		}

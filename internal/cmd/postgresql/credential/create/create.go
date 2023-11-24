@@ -19,7 +19,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags  *globalflags.Model
+	*globalflags.GlobalFlagModel
 	InstanceId   string
 	HidePassword bool
 }
@@ -78,13 +78,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags:  globalFlags,
-		InstanceId:   utils.FlagToStringValue(cmd, instanceIdFlag),
-		HidePassword: utils.FlagToBoolValue(cmd, hidePasswordFlag),
+		GlobalFlagModel: globalFlags,
+		InstanceId:      utils.FlagToStringValue(cmd, instanceIdFlag),
+		HidePassword:    utils.FlagToBoolValue(cmd, hidePasswordFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiCreateCredentialsRequest {
-	req := apiClient.CreateCredentials(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
+	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
 	return req
 }

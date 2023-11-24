@@ -25,7 +25,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 	NameLike    *string
 	Active      *bool
 	OrderByName *string
@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(zones) == 0 {
-				cmd.Printf("No zones found for project with ID %s\n", model.GlobalFlags.ProjectId)
+				cmd.Printf("No zones found for project with ID %s\n", model.ProjectId)
 				return nil
 			}
 
@@ -100,17 +100,17 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		NameLike:    utils.FlagToStringPointer(cmd, nameLikeFlag),
-		Active:      utils.FlagToBoolPointer(cmd, activeFlag),
-		OrderByName: utils.FlagToStringPointer(cmd, orderByNameFlag),
-		Limit:       limit,
-		PageSize:    pageSize,
+		GlobalFlagModel: globalFlags,
+		NameLike:        utils.FlagToStringPointer(cmd, nameLikeFlag),
+		Active:          utils.FlagToBoolPointer(cmd, activeFlag),
+		OrderByName:     utils.FlagToStringPointer(cmd, orderByNameFlag),
+		Limit:           limit,
+		PageSize:        pageSize,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient dnsClient, page int) dns.ApiGetZonesRequest {
-	req := apiClient.GetZones(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.GetZones(ctx, model.ProjectId)
 	if model.NameLike != nil {
 		req = req.NameLike(*model.NameLike)
 	}

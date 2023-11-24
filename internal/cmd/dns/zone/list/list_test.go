@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
+var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
@@ -41,7 +41,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		GlobalFlags: &globalflags.Model{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
 		NameLike:    utils.Ptr("some-pattern"),
@@ -92,7 +92,7 @@ func TestParseFlags(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &flagModel{
-				GlobalFlags: &globalflags.Model{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 				},
 				PageSize: 100, // Default value
@@ -261,7 +261,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "required fields only",
 			model: &flagModel{
-				GlobalFlags: &globalflags.Model{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 				},
 				PageSize: 100,
