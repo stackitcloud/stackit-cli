@@ -9,11 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ErrAborted = errAborted()
-
-func errAborted() error {
-	return errors.New("operation aborted")
-}
+var errAborted = errors.New("operation aborted")
 
 // Prompts the user for confirmation.
 //
@@ -33,7 +29,7 @@ func PromptForConfirmation(cmd *cobra.Command, prompt string) error {
 			return nil
 		}
 		if answer == "" || answer == "n" || answer == "no" {
-			return ErrAborted
+			return errAborted
 		}
 	}
 	return fmt.Errorf("max number of wrong inputs")

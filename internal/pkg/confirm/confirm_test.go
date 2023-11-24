@@ -154,10 +154,10 @@ func TestPromptForConfirmation(t *testing.T) {
 			if !tt.isValid && err == nil {
 				t.Errorf("should have failed")
 			}
-			if tt.isAborted && !errors.Is(err, ErrAborted) {
+			if tt.isAborted && !errors.Is(err, errAborted) {
 				t.Errorf("should have returned aborted error, instead returned: %v", err)
 			}
-			if !tt.isAborted && errors.Is(err, ErrAborted) {
+			if !tt.isAborted && errors.Is(err, errAborted) {
 				t.Errorf("should not have returned aborted error")
 			}
 		})
