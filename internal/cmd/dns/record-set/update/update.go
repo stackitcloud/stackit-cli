@@ -24,7 +24,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 	ZoneId      string
 	RecordSetId string
 	Comment     *string
@@ -60,7 +60,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.UpdateRecordSetWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
+			_, err = wait.UpdateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS record set update: %w", err)
 			}
@@ -103,13 +103,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		ZoneId:      zoneId,
-		RecordSetId: recordSetId,
-		Comment:     comment,
-		Name:        name,
-		Records:     records,
-		TTL:         ttl,
+		GlobalFlagModel: globalFlags,
+		ZoneId:          zoneId,
+		RecordSetId:     recordSetId,
+		Comment:         comment,
+		Name:            name,
+		Records:         records,
+		TTL:             ttl,
 	}, nil
 }
 
@@ -122,7 +122,7 @@ func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClien
 		}
 	}
 
-	req := apiClient.UpdateRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.UpdateRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
 	req = req.UpdateRecordSetPayload(dns.UpdateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    model.Name,

@@ -13,7 +13,7 @@ import (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 }
 
 func NewCmd() *cobra.Command {
@@ -61,11 +61,11 @@ func parseFlags() (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
+		GlobalFlagModel: globalFlags,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetProjectRequest {
-	req := apiClient.GetProject(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.GetProject(ctx, model.ProjectId)
 	return req
 }

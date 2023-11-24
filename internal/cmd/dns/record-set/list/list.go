@@ -25,7 +25,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 	ZoneId      string
 	NameLike    *string
 	Active      *bool
@@ -59,7 +59,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(recordSets) == 0 {
-				cmd.Printf("No record sets found for zone %s in project with ID %s\n", model.ZoneId, model.GlobalFlags.ProjectId)
+				cmd.Printf("No record sets found for zone %s in project with ID %s\n", model.ZoneId, model.ProjectId)
 				return nil
 			}
 
@@ -115,18 +115,18 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
-		NameLike:    utils.FlagToStringPointer(cmd, nameLikeFlag),
-		Active:      utils.FlagToBoolPointer(cmd, activeFlag),
-		OrderByName: utils.FlagToStringPointer(cmd, orderByNameFlag),
-		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
-		PageSize:    pageSize,
+		GlobalFlagModel: globalFlags,
+		ZoneId:          utils.FlagToStringValue(cmd, zoneIdFlag),
+		NameLike:        utils.FlagToStringPointer(cmd, nameLikeFlag),
+		Active:          utils.FlagToBoolPointer(cmd, activeFlag),
+		OrderByName:     utils.FlagToStringPointer(cmd, orderByNameFlag),
+		Limit:           utils.FlagToInt64Pointer(cmd, limitFlag),
+		PageSize:        pageSize,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient dnsClient, page int) dns.ApiGetRecordSetsRequest {
-	req := apiClient.GetRecordSets(ctx, model.GlobalFlags.ProjectId, model.ZoneId)
+	req := apiClient.GetRecordSets(ctx, model.ProjectId, model.ZoneId)
 	if model.NameLike != nil {
 		req = req.NameLike(*model.NameLike)
 	}

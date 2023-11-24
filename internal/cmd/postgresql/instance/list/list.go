@@ -18,8 +18,8 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
-	Limit       *int64
+	*globalflags.GlobalFlagModel
+	Limit *int64
 }
 
 func NewCmd() *cobra.Command {
@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 			}
 			instances := *resp.Instances
 			if len(instances) == 0 {
-				cmd.Printf("No instances found for product with ID %s\n", model.GlobalFlags.ProjectId)
+				cmd.Printf("No instances found for product with ID %s\n", model.ProjectId)
 				return nil
 			}
 
@@ -91,12 +91,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
+		GlobalFlagModel: globalFlags,
+		Limit:           utils.FlagToInt64Pointer(cmd, limitFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetInstancesRequest {
-	req := apiClient.GetInstances(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.GetInstances(ctx, model.ProjectId)
 	return req
 }

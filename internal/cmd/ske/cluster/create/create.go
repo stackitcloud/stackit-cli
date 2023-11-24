@@ -23,9 +23,9 @@ const (
 )
 
 type FlagModel struct {
-	GlobalFlags *globalflags.Model
-	Name        string
-	Payload     ske.CreateOrUpdateClusterPayload
+	*globalflags.GlobalFlagModel
+	Name    string
+	Payload ske.CreateOrUpdateClusterPayload
 }
 
 func NewCmd() *cobra.Command {
@@ -48,7 +48,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Check if cluster exists
-			exists, err := skeUtils.ClusterExists(ctx, apiClient, model.GlobalFlags.ProjectId, model.Name)
+			exists, err := skeUtils.ClusterExists(ctx, apiClient, model.ProjectId, model.Name)
 			if err != nil {
 				return err
 			}
@@ -68,7 +68,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			name := *resp.Name
-			_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, name).WaitWithContext(ctx)
+			_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.ProjectId, name).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for SKE cluster creation: %w", err)
 			}
@@ -117,14 +117,14 @@ func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, 
 	}
 
 	return &FlagModel{
-		GlobalFlags: globalFlags,
-		Name:        name,
-		Payload:     payload,
+		GlobalFlagModel: globalFlags,
+		Name:            name,
+		Payload:         payload,
 	}, nil
 }
 
 func BuildRequest(ctx context.Context, model *FlagModel, apiClient *ske.APIClient) (ske.ApiCreateOrUpdateClusterRequest, error) {
-	req := apiClient.CreateOrUpdateCluster(ctx, model.GlobalFlags.ProjectId, model.Name)
+	req := apiClient.CreateOrUpdateCluster(ctx, model.ProjectId, model.Name)
 
 	req = req.CreateOrUpdateClusterPayload(model.Payload)
 	return req, nil

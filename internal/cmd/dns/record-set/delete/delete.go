@@ -20,7 +20,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
+	*globalflags.GlobalFlagModel
 	ZoneId      string
 	RecordSetId string
 }
@@ -55,7 +55,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.DeleteRecordSetWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
+			_, err = wait.DeleteRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS record set deletion: %w", err)
 			}
@@ -83,13 +83,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
-		RecordSetId: utils.FlagToStringValue(cmd, recordSetIdFlag),
+		GlobalFlagModel: globalFlags,
+		ZoneId:          utils.FlagToStringValue(cmd, zoneIdFlag),
+		RecordSetId:     utils.FlagToStringValue(cmd, recordSetIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiDeleteRecordSetRequest {
-	req := apiClient.DeleteRecordSet(ctx, model.GlobalFlags.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.DeleteRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
 	return req
 }

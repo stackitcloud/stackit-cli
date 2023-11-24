@@ -29,7 +29,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags   *globalflags.Model
+	*globalflags.GlobalFlagModel
 	ZoneId        string
 	Name          *string
 	DefaultTTL    *int64
@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.UpdateZoneWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.ZoneId).WaitWithContext(ctx)
+			_, err = wait.UpdateZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS zone update: %w", err)
 			}
@@ -129,23 +129,23 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags:   globalFlags,
-		ZoneId:        zoneId,
-		Name:          name,
-		DefaultTTL:    defaultTTL,
-		Primaries:     primaries,
-		Acl:           acl,
-		RetryTime:     retryTime,
-		RefreshTime:   refreshTime,
-		NegativeCache: negativeCache,
-		ExpireTime:    expireTime,
-		Description:   description,
-		ContactEmail:  contactEmail,
+		GlobalFlagModel: globalFlags,
+		ZoneId:          zoneId,
+		Name:            name,
+		DefaultTTL:      defaultTTL,
+		Primaries:       primaries,
+		Acl:             acl,
+		RetryTime:       retryTime,
+		RefreshTime:     refreshTime,
+		NegativeCache:   negativeCache,
+		ExpireTime:      expireTime,
+		Description:     description,
+		ContactEmail:    contactEmail,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiUpdateZoneRequest {
-	req := apiClient.UpdateZone(ctx, model.GlobalFlags.ProjectId, model.ZoneId)
+	req := apiClient.UpdateZone(ctx, model.ProjectId, model.ZoneId)
 	req = req.UpdateZonePayload(dns.UpdateZonePayload{
 		Name:          model.Name,
 		DefaultTTL:    model.DefaultTTL,

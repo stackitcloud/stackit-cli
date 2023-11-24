@@ -10,8 +10,8 @@ import (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
 	flagValues := map[string]bool{
-		projectIdFlag.FlagName():     true,
-		outputFormatFlag.FlagName():  true,
+		projectIdFlag:                true,
+		outputFormatFlag:             true,
 		dnsCustomEndpointFlag:        true,
 		postgreSQLCustomEndpointFlag: true,
 	}
@@ -61,7 +61,7 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "project id empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
-				flagValues[projectIdFlag.FlagName()] = false
+				flagValues[projectIdFlag] = false
 			}),
 			isValid: true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {
@@ -71,7 +71,7 @@ func TestParseFlags(t *testing.T) {
 		{
 			description: "output format empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
-				flagValues[outputFormatFlag.FlagName()] = false
+				flagValues[outputFormatFlag] = false
 			}),
 			isValid: true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {

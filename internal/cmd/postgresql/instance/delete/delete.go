@@ -19,8 +19,8 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
-	InstanceId  string
+	*globalflags.GlobalFlagModel
+	InstanceId string
 }
 
 func NewCmd() *cobra.Command {
@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Wait for async operation
-			_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, model.InstanceId).WaitWithContext(ctx)
+			_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for PostgreSQL instance deletion: %w", err)
 			}
@@ -76,12 +76,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		InstanceId:  utils.FlagToStringValue(cmd, instanceIdFlag),
+		GlobalFlagModel: globalFlags,
+		InstanceId:      utils.FlagToStringValue(cmd, instanceIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiDeleteInstanceRequest {
-	req := apiClient.DeleteInstance(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
+	req := apiClient.DeleteInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }

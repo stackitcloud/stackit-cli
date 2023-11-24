@@ -19,8 +19,8 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags *globalflags.Model
-	InstanceId  string
+	*globalflags.GlobalFlagModel
+	InstanceId string
 }
 
 func NewCmd() *cobra.Command {
@@ -76,12 +76,12 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags: globalFlags,
-		InstanceId:  utils.FlagToStringValue(cmd, instanceIdFlag),
+		GlobalFlagModel: globalFlags,
+		InstanceId:      utils.FlagToStringValue(cmd, instanceIdFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.GlobalFlags.ProjectId, model.InstanceId)
+	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }

@@ -30,7 +30,7 @@ const (
 )
 
 type flagModel struct {
-	GlobalFlags   *globalflags.Model
+	*globalflags.GlobalFlagModel
 	Name          *string
 	DnsName       *string
 	DefaultTTL    *int64
@@ -74,7 +74,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation
 			zoneId := *resp.Zone.Id
-			_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.GlobalFlags.ProjectId, zoneId).WaitWithContext(ctx)
+			_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("wait for DNS zone creation: %w", err)
 			}
@@ -113,25 +113,25 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		GlobalFlags:   globalFlags,
-		Name:          utils.FlagToStringPointer(cmd, nameFlag),
-		DnsName:       utils.FlagToStringPointer(cmd, dnsNameFlag),
-		DefaultTTL:    utils.FlagToInt64Pointer(cmd, defaultTTLFlag),
-		Primaries:     utils.FlagToStringSlicePointer(cmd, primaryFlag),
-		Acl:           utils.FlagToStringPointer(cmd, aclFlag),
-		Type:          utils.FlagToStringPointer(cmd, typeFlag),
-		RetryTime:     utils.FlagToInt64Pointer(cmd, retryTimeFlag),
-		RefreshTime:   utils.FlagToInt64Pointer(cmd, refreshTimeFlag),
-		NegativeCache: utils.FlagToInt64Pointer(cmd, negativeCacheFlag),
-		IsReverseZone: utils.FlagToBoolPointer(cmd, isReverseZoneFlag),
-		ExpireTime:    utils.FlagToInt64Pointer(cmd, expireTimeFlag),
-		Description:   utils.FlagToStringPointer(cmd, descriptionFlag),
-		ContactEmail:  utils.FlagToStringPointer(cmd, contactEmailFlag),
+		GlobalFlagModel: globalFlags,
+		Name:            utils.FlagToStringPointer(cmd, nameFlag),
+		DnsName:         utils.FlagToStringPointer(cmd, dnsNameFlag),
+		DefaultTTL:      utils.FlagToInt64Pointer(cmd, defaultTTLFlag),
+		Primaries:       utils.FlagToStringSlicePointer(cmd, primaryFlag),
+		Acl:             utils.FlagToStringPointer(cmd, aclFlag),
+		Type:            utils.FlagToStringPointer(cmd, typeFlag),
+		RetryTime:       utils.FlagToInt64Pointer(cmd, retryTimeFlag),
+		RefreshTime:     utils.FlagToInt64Pointer(cmd, refreshTimeFlag),
+		NegativeCache:   utils.FlagToInt64Pointer(cmd, negativeCacheFlag),
+		IsReverseZone:   utils.FlagToBoolPointer(cmd, isReverseZoneFlag),
+		ExpireTime:      utils.FlagToInt64Pointer(cmd, expireTimeFlag),
+		Description:     utils.FlagToStringPointer(cmd, descriptionFlag),
+		ContactEmail:    utils.FlagToStringPointer(cmd, contactEmailFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiCreateZoneRequest {
-	req := apiClient.CreateZone(ctx, model.GlobalFlags.ProjectId)
+	req := apiClient.CreateZone(ctx, model.ProjectId)
 	req = req.CreateZonePayload(dns.CreateZonePayload{
 		Name:          model.Name,
 		DnsName:       model.DnsName,
