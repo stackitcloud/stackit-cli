@@ -29,7 +29,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId     string
+	*globalflags.GlobalFlagModel
 	ZoneId        string
 	Name          *string
 	DefaultTTL    *int64
@@ -104,8 +104,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -129,18 +129,18 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:     projectId,
-		ZoneId:        zoneId,
-		Name:          name,
-		DefaultTTL:    defaultTTL,
-		Primaries:     primaries,
-		Acl:           acl,
-		RetryTime:     retryTime,
-		RefreshTime:   refreshTime,
-		NegativeCache: negativeCache,
-		ExpireTime:    expireTime,
-		Description:   description,
-		ContactEmail:  contactEmail,
+		GlobalFlagModel: globalFlags,
+		ZoneId:          zoneId,
+		Name:            name,
+		DefaultTTL:      defaultTTL,
+		Primaries:       primaries,
+		Acl:             acl,
+		RetryTime:       retryTime,
+		RefreshTime:     refreshTime,
+		NegativeCache:   negativeCache,
+		ExpireTime:      expireTime,
+		Description:     description,
+		ContactEmail:    contactEmail,
 	}, nil
 }
 

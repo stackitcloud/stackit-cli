@@ -5,16 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 type flagModel struct {
-	ProjectId string
+	*globalflags.GlobalFlagModel
 }
 
 func NewCmd() *cobra.Command {
@@ -56,13 +55,13 @@ func NewCmd() *cobra.Command {
 }
 
 func parseFlags() (*flagModel, error) {
-	projectId := viper.GetString(config.ProjectIdKey)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
+		GlobalFlagModel: globalFlags,
 	}, nil
 }
 

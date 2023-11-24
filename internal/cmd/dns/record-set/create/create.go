@@ -24,13 +24,13 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	ZoneId    string
-	Comment   *string
-	Name      *string
-	Records   []string
-	TTL       *int64
-	Type      *string
+	*globalflags.GlobalFlagModel
+	ZoneId  string
+	Comment *string
+	Name    *string
+	Records []string
+	TTL     *int64
+	Type    *string
 }
 
 func NewCmd() *cobra.Command {
@@ -89,19 +89,19 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		ZoneId:    utils.FlagToStringValue(cmd, zoneIdFlag),
-		Comment:   utils.FlagToStringPointer(cmd, commentFlag),
-		Name:      utils.FlagToStringPointer(cmd, nameFlag),
-		Records:   utils.FlagToStringSliceValue(cmd, recordFlag),
-		TTL:       utils.FlagToInt64Pointer(cmd, ttlFlag),
-		Type:      utils.FlagToStringPointer(cmd, typeFlag),
+		GlobalFlagModel: globalFlags,
+		ZoneId:          utils.FlagToStringValue(cmd, zoneIdFlag),
+		Comment:         utils.FlagToStringPointer(cmd, commentFlag),
+		Name:            utils.FlagToStringPointer(cmd, nameFlag),
+		Records:         utils.FlagToStringSliceValue(cmd, recordFlag),
+		TTL:             utils.FlagToInt64Pointer(cmd, ttlFlag),
+		Type:            utils.FlagToStringPointer(cmd, typeFlag),
 	}, nil
 }
 

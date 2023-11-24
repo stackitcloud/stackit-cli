@@ -10,29 +10,35 @@ import (
 )
 
 const (
-	ProjectIdFlag GlobalFlag = "project-id"
+	ProjectIdFlag    = "project-id"
+	OutputFormatFlag = "output-format"
 )
 
-type GlobalFlag string
+var outputFormatFlagOptions = []string{"default", "json", "table"}
 
-func (f GlobalFlag) FlagName() string {
-	return string(f)
+type GlobalFlagModel struct {
+	ProjectId    string
+	OutputFormat string
 }
 
 func Configure(flagSet *pflag.FlagSet) error {
-	flagSet.Var(flags.UUIDFlag(), ProjectIdFlag.FlagName(), "Project ID")
-	err := viper.BindPFlag(config.ProjectIdKey, flagSet.Lookup(ProjectIdFlag.FlagName()))
+	flagSet.Var(flags.UUIDFlag(), ProjectIdFlag, "Project ID")
+	err := viper.BindPFlag(config.ProjectIdKey, flagSet.Lookup(ProjectIdFlag))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", ProjectIdFlag, err)
+	}
+
+	flagSet.Var(flags.EnumFlag(true, outputFormatFlagOptions...), OutputFormatFlag, fmt.Sprintf("Output format, one of %q", outputFormatFlagOptions))
+	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag))
+	if err != nil {
+		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag, err)
 	}
 	return nil
 }
 
-func GetString(f GlobalFlag) string {
-	switch f {
-	default:
-		return ""
-	case ProjectIdFlag:
-		return viper.GetString(config.ProjectIdKey)
+func Parse() *GlobalFlagModel {
+	return &GlobalFlagModel{
+		ProjectId:    viper.GetString(config.ProjectIdKey),
+		OutputFormat: viper.GetString(config.OutputFormatKey),
 	}
 }

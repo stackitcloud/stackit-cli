@@ -23,9 +23,9 @@ const (
 )
 
 type FlagModel struct {
-	ProjectId string
-	Name      string
-	Payload   ske.CreateOrUpdateClusterPayload
+	*globalflags.GlobalFlagModel
+	Name    string
+	Payload ske.CreateOrUpdateClusterPayload
 }
 
 func NewCmd() *cobra.Command {
@@ -92,8 +92,8 @@ func ConfigureFlags(cmd *cobra.Command) {
 type FileReaderFunc func(filename string) ([]byte, error)
 
 func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -117,9 +117,9 @@ func ParseFlags(cmd *cobra.Command, fileReaderFunc FileReaderFunc) (*FlagModel, 
 	}
 
 	return &FlagModel{
-		ProjectId: projectId,
-		Name:      name,
-		Payload:   payload,
+		GlobalFlagModel: globalFlags,
+		Name:            name,
+		Payload:         payload,
 	}, nil
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag.FlagName()
+var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
@@ -35,8 +35,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
-		ProjectId: testProjectId,
-		ZoneId:    testZoneId,
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+		},
+		ZoneId: testZoneId,
 	}
 	for _, mod := range mods {
 		mod(model)

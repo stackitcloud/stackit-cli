@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -11,7 +12,8 @@ import (
 )
 
 const (
-	projectIdFlag                = "project-id"
+	projectIdFlag                = globalflags.ProjectIdFlag
+	outputFormatFlag             = globalflags.OutputFormatFlag
 	dnsCustomEndpointFlag        = "dns-custom-endpoint"
 	postgreSQLCustomEndpointFlag = "postgresql-custom-endpoint"
 	skeCustomEndpointFlag        = "ske-custom-endpoint"
@@ -19,6 +21,7 @@ const (
 
 type flagModel struct {
 	ProjectId                bool
+	OutputFormat             bool
 	DNSCustomEndpoint        bool
 	PostgreSQLCustomEndpoint bool
 	SKECustomEndpoint        bool
@@ -35,6 +38,9 @@ func NewCmd() *cobra.Command {
 
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
+			}
+			if model.OutputFormat {
+				viper.Set(config.OutputFormatKey, "default")
 			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
@@ -59,6 +65,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
+	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
 	cmd.Flags().Bool(postgreSQLCustomEndpointFlag, false, "PostgreSQL custom endpoint")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
@@ -67,6 +74,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseFlags(cmd *cobra.Command) *flagModel {
 	return &flagModel{
 		ProjectId:                utils.FlagToBoolValue(cmd, projectIdFlag),
+		OutputFormat:             utils.FlagToBoolValue(cmd, outputFormatFlag),
 		DNSCustomEndpoint:        utils.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		PostgreSQLCustomEndpoint: utils.FlagToBoolValue(cmd, postgreSQLCustomEndpointFlag),
 		SKECustomEndpoint:        utils.FlagToBoolValue(cmd, skeCustomEndpointFlag),

@@ -19,8 +19,8 @@ const (
 )
 
 type flagModel struct {
-	ProjectId string
-	ZoneId    string
+	*globalflags.GlobalFlagModel
+	ZoneId string
 }
 
 func NewCmd() *cobra.Command {
@@ -74,14 +74,14 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId: projectId,
-		ZoneId:    utils.FlagToStringValue(cmd, zoneIdFlag),
+		GlobalFlagModel: globalFlags,
+		ZoneId:          utils.FlagToStringValue(cmd, zoneIdFlag),
 	}, nil
 }
 

@@ -11,6 +11,7 @@ import (
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
 	flagValues := map[string]bool{
 		projectIdFlag:                true,
+		outputFormatFlag:             true,
 		dnsCustomEndpointFlag:        true,
 		postgreSQLCustomEndpointFlag: true,
 	}
@@ -23,6 +24,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 func fixtureFlagModel(mods ...func(model *flagModel)) *flagModel {
 	model := &flagModel{
 		ProjectId:                true,
+		OutputFormat:             true,
 		DNSCustomEndpoint:        true,
 		PostgreSQLCustomEndpoint: true,
 	}
@@ -51,6 +53,7 @@ func TestParseFlags(t *testing.T) {
 			isValid:     true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {
 				model.ProjectId = false
+				model.OutputFormat = false
 				model.DNSCustomEndpoint = false
 				model.PostgreSQLCustomEndpoint = false
 			}),
@@ -63,6 +66,16 @@ func TestParseFlags(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureFlagModel(func(model *flagModel) {
 				model.ProjectId = false
+			}),
+		},
+		{
+			description: "output format empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[outputFormatFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureFlagModel(func(model *flagModel) {
+				model.OutputFormat = false
 			}),
 		},
 		{

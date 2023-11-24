@@ -30,7 +30,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId     string
+	*globalflags.GlobalFlagModel
 	Name          *string
 	DnsName       *string
 	DefaultTTL    *int64
@@ -107,26 +107,26 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
 	return &flagModel{
-		ProjectId:     projectId,
-		Name:          utils.FlagToStringPointer(cmd, nameFlag),
-		DnsName:       utils.FlagToStringPointer(cmd, dnsNameFlag),
-		DefaultTTL:    utils.FlagToInt64Pointer(cmd, defaultTTLFlag),
-		Primaries:     utils.FlagToStringSlicePointer(cmd, primaryFlag),
-		Acl:           utils.FlagToStringPointer(cmd, aclFlag),
-		Type:          utils.FlagToStringPointer(cmd, typeFlag),
-		RetryTime:     utils.FlagToInt64Pointer(cmd, retryTimeFlag),
-		RefreshTime:   utils.FlagToInt64Pointer(cmd, refreshTimeFlag),
-		NegativeCache: utils.FlagToInt64Pointer(cmd, negativeCacheFlag),
-		IsReverseZone: utils.FlagToBoolPointer(cmd, isReverseZoneFlag),
-		ExpireTime:    utils.FlagToInt64Pointer(cmd, expireTimeFlag),
-		Description:   utils.FlagToStringPointer(cmd, descriptionFlag),
-		ContactEmail:  utils.FlagToStringPointer(cmd, contactEmailFlag),
+		GlobalFlagModel: globalFlags,
+		Name:            utils.FlagToStringPointer(cmd, nameFlag),
+		DnsName:         utils.FlagToStringPointer(cmd, dnsNameFlag),
+		DefaultTTL:      utils.FlagToInt64Pointer(cmd, defaultTTLFlag),
+		Primaries:       utils.FlagToStringSlicePointer(cmd, primaryFlag),
+		Acl:             utils.FlagToStringPointer(cmd, aclFlag),
+		Type:            utils.FlagToStringPointer(cmd, typeFlag),
+		RetryTime:       utils.FlagToInt64Pointer(cmd, retryTimeFlag),
+		RefreshTime:     utils.FlagToInt64Pointer(cmd, refreshTimeFlag),
+		NegativeCache:   utils.FlagToInt64Pointer(cmd, negativeCacheFlag),
+		IsReverseZone:   utils.FlagToBoolPointer(cmd, isReverseZoneFlag),
+		ExpireTime:      utils.FlagToInt64Pointer(cmd, expireTimeFlag),
+		Description:     utils.FlagToStringPointer(cmd, descriptionFlag),
+		ContactEmail:    utils.FlagToStringPointer(cmd, contactEmailFlag),
 	}, nil
 }
 

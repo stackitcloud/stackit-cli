@@ -25,7 +25,7 @@ const (
 )
 
 type flagModel struct {
-	ProjectId   string
+	*globalflags.GlobalFlagModel
 	ZoneId      string
 	NameLike    *string
 	Active      *bool
@@ -96,8 +96,8 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	projectId := globalflags.GetString(globalflags.ProjectIdFlag)
-	if projectId == "" {
+	globalFlags := globalflags.Parse()
+	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
 
@@ -115,13 +115,13 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 	}
 
 	return &flagModel{
-		ProjectId:   projectId,
-		ZoneId:      utils.FlagToStringValue(cmd, zoneIdFlag),
-		NameLike:    utils.FlagToStringPointer(cmd, nameLikeFlag),
-		Active:      utils.FlagToBoolPointer(cmd, activeFlag),
-		OrderByName: utils.FlagToStringPointer(cmd, orderByNameFlag),
-		Limit:       utils.FlagToInt64Pointer(cmd, limitFlag),
-		PageSize:    pageSize,
+		GlobalFlagModel: globalFlags,
+		ZoneId:          utils.FlagToStringValue(cmd, zoneIdFlag),
+		NameLike:        utils.FlagToStringPointer(cmd, nameLikeFlag),
+		Active:          utils.FlagToBoolPointer(cmd, activeFlag),
+		OrderByName:     utils.FlagToStringPointer(cmd, orderByNameFlag),
+		Limit:           utils.FlagToInt64Pointer(cmd, limitFlag),
+		PageSize:        pageSize,
 	}, nil
 }
 

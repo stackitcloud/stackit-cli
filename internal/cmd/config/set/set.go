@@ -13,7 +13,6 @@ import (
 
 const (
 	sessionTimeLimitFlag         = "session-time-limit"
-	projectIdFlag                = "project-id"
 	dnsCustomEndpointFlag        = "dns-custom-endpoint"
 	postgreSQLCustomEndpointFlag = "postgresql-custom-endpoint"
 	skeCustomEndpointFlag        = "ske-custom-endpoint"
