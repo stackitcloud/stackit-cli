@@ -62,7 +62,7 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
-			return outputResult(cmd, model.GlobalFlags.OutputFormat, zones)
+			return outputResult(cmd, model.OutputFormat, zones)
 		},
 	}
 	configureFlags(cmd)

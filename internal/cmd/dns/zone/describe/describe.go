@@ -50,7 +50,7 @@ func NewCmd() *cobra.Command {
 			}
 			zone := resp.Zone
 
-			return outputResult(cmd, model.GlobalFlags.OutputFormat, zone)
+			return outputResult(cmd, model.OutputFormat, zone)
 		},
 	}
 	configureFlags(cmd)

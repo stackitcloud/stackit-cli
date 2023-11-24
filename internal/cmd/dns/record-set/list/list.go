@@ -63,7 +63,7 @@ func NewCmd() *cobra.Command {
 				cmd.Printf("No record sets found for zone %s in project with ID %s\n", model.ZoneId, model.ProjectId)
 				return nil
 			}
-			return outputResult(cmd, model.GlobalFlags.OutputFormat, recordSets)
+			return outputResult(cmd, model.OutputFormat, recordSets)
 		},
 	}
 

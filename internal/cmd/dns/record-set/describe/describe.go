@@ -53,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 			recordSet := resp.Rrset
 
-			return outputResult(cmd, model.GlobalFlags.OutputFormat, recordSet)
+			return outputResult(cmd, model.OutputFormat, recordSet)
 		},
 	}
 	configureFlags(cmd)
