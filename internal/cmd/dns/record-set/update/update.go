@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
@@ -46,6 +47,14 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update record-set %s?", model.RecordSetId)
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
+			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(cmd)
 			if err != nil {
@@ -86,7 +95,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	globalFlags := globalflags.Parse()
+	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}

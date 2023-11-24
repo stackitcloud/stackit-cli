@@ -118,7 +118,7 @@ func TestParseFlags(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseFlags()
+			model, err := parseFlags(cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
