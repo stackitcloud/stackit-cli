@@ -53,10 +53,10 @@ func (t *Table) Render(cmd *cobra.Command) error {
 	t.table.Style().Options.SeparateColumns = true
 	t.table.Style().Options.SeparateHeader = true
 
-	table := fmt.Sprintf("\n%s\n\n", t.table.Render())
+	renderedTable := fmt.Sprintf("\n%s\n\n", t.table.Render())
 
 	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = strings.NewReader(table)
+	lessCmd.Stdin = strings.NewReader(renderedTable)
 	lessCmd.Stdout = cmd.OutOrStdout()
 
 	err := lessCmd.Run()
