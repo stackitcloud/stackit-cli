@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -62,20 +63,7 @@ func NewCmd() *cobra.Command {
 				cmd.Printf("No record sets found for zone %s in project with ID %s\n", model.ZoneId, model.ProjectId)
 				return nil
 			}
-
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("ID", "Name", "Type", "State")
-			for i := range recordSets {
-				rs := recordSets[i]
-				table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
-			}
-			err = table.Render(cmd)
-			if err != nil {
-				return fmt.Errorf("render table: %w", err)
-			}
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, recordSets)
 		},
 	}
 
@@ -178,4 +166,30 @@ func fetchRecordSets(ctx context.Context, model *flagModel, apiClient dnsClient)
 		page++
 	}
 	return recordSets, nil
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.RecordSet) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		details, err := json.MarshalIndent(recordSets, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record set list: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("ID", "Name", "Type", "State")
+		for i := range recordSets {
+			rs := recordSets[i]
+			table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
+		}
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	}
 }

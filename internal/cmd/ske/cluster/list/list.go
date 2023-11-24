@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -58,19 +59,7 @@ func NewCmd() *cobra.Command {
 				clusters = clusters[:*model.Limit]
 			}
 
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("NAME", "STATE")
-			for i := range clusters {
-				c := clusters[i]
-				table.AddRow(*c.Name, *c.Status.Aggregated)
-			}
-			err = table.Render(cmd)
-			if err != nil {
-				return fmt.Errorf("render table: %w", err)
-			}
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, clusters)
 		},
 	}
 
@@ -102,4 +91,30 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetClustersRequest {
 	req := apiClient.GetClusters(ctx, model.ProjectId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, clusters []ske.ClusterResponse) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		details, err := json.MarshalIndent(clusters, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster list: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("NAME", "STATE")
+		for i := range clusters {
+			c := clusters[i]
+			table.AddRow(*c.Name, *c.Status.Aggregated)
+		}
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	}
 }
