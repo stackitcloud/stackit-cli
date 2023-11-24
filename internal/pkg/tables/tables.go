@@ -1,6 +1,10 @@
 package tables
 
 import (
+	"io"
+	"os"
+	"os/exec"
+
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +29,9 @@ func (t *Table) SetHeader(header ...interface{}) {
 // Adds a row to the table
 func (t *Table) AddRow(row ...interface{}) {
 	t.table.AppendRow(table.Row(row))
+	t.table.AppendRow(table.Row(row))
+	t.table.AppendRow(table.Row(row))
+	t.table.AppendRow(table.Row(row))
 }
 
 // Adds a separator between rows
@@ -48,5 +55,19 @@ func (t *Table) Render(cmd *cobra.Command) {
 	t.table.Style().Options.SeparateRows = false
 	t.table.Style().Options.SeparateColumns = true
 	t.table.Style().Options.SeparateHeader = true
-	cmd.Printf("\n%s\n\n", t.table.Render())
+
+	pr, pw := io.Pipe()
+	cmd.SetOutput(pw)
+	defer cmd.SetOutput(os.Stdout)
+
+	go func() {
+		defer pw.Close()
+		cmd.Printf("\n%s\n\n", t.table.Render())
+	}()
+
+	lessCmd := exec.Command("less", "-F", "-S", "-w")
+	lessCmd.Stdin = pr
+	lessCmd.Stdout = os.Stdout
+	lessCmd.Run()
+
 }
