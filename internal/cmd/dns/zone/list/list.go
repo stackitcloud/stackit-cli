@@ -68,7 +68,7 @@ func NewCmd() *cobra.Command {
 				z := zones[i]
 				table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
 			}
-			err = table.Render()
+			err = table.Render(cmd)
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}
