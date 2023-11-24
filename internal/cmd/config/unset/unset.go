@@ -48,7 +48,7 @@ func NewCmd() *cobra.Command {
 			if model.PostgreSQLCustomEndpoint {
 				viper.Set(config.PostgreSQLCustomEndpointKey, "")
 			}
-			if model.PostgreSQLCustomEndpoint {
+			if model.SKECustomEndpoint {
 				viper.Set(config.SKECustomEndpointKey, "")
 			}
 
