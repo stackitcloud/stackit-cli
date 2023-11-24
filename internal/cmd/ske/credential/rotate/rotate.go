@@ -26,7 +26,7 @@ func NewCmd() *cobra.Command {
 		Use:     "rotate",
 		Short:   "Rotate credential associated to a SKE cluster",
 		Long:    "Rotate credential associated to a SKE cluster. The old credential will be invalid after the operation",
-		Example: `$ stackit postgresql credential create --project-id xxx --instance-id xxx`,
+		Example: `$ stackit ske credential rotate --project-id xxx --cluster-name xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseFlags(cmd)
@@ -47,6 +47,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("rotate SKE credential: %w", err)
 			}
 
+			cmd.Println("Credentials rotated")
 			return nil
 		},
 	}
