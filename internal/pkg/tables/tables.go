@@ -1,9 +1,10 @@
 package tables
 
 import (
-	"io"
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -29,9 +30,6 @@ func (t *Table) SetHeader(header ...interface{}) {
 // Adds a row to the table
 func (t *Table) AddRow(row ...interface{}) {
 	t.table.AppendRow(table.Row(row))
-	t.table.AppendRow(table.Row(row))
-	t.table.AppendRow(table.Row(row))
-	t.table.AppendRow(table.Row(row))
 }
 
 // Adds a separator between rows
@@ -49,25 +47,23 @@ func (t *Table) EnableAutoMergeOnColumns(columns ...int) {
 }
 
 // Renders the table
-func (t *Table) Render(cmd *cobra.Command) {
+func (t *Table) Render(cmd *cobra.Command) error {
 	t.table.SetStyle(table.StyleLight)
 	t.table.Style().Options.DrawBorder = false
 	t.table.Style().Options.SeparateRows = false
 	t.table.Style().Options.SeparateColumns = true
 	t.table.Style().Options.SeparateHeader = true
 
-	pr, pw := io.Pipe()
-	cmd.SetOutput(pw)
-	defer cmd.SetOutput(os.Stdout)
-
-	go func() {
-		defer pw.Close()
-		cmd.Printf("\n%s\n\n", t.table.Render())
-	}()
+	table := fmt.Sprintf("\n%s\n\n", t.table.Render())
 
 	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = pr
+	lessCmd.Stdin = strings.NewReader(table)
 	lessCmd.Stdout = os.Stdout
-	lessCmd.Run()
 
+	err := lessCmd.Run()
+	if err != nil {
+		return fmt.Errorf("run less command: %w", err)
+	}
+
+	return nil
 }

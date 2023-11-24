@@ -65,7 +65,10 @@ func NewCmd() *cobra.Command {
 				instance := instances[i]
 				table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
 			}
-			table.Render(cmd)
+			err = table.Render(cmd)
+			if err != nil {
+				return fmt.Errorf("render table: %w", err)
+			}
 
 			return nil
 		},
