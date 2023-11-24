@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/create"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 
@@ -24,6 +25,14 @@ func NewCmd() *cobra.Command {
 			model, err := create.ParseFlags(cmd, os.ReadFile)
 			if err != nil {
 				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update cluster %s?", model.Name)
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Configure API client

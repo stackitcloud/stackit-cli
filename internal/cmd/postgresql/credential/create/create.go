@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresql/client"
@@ -35,6 +36,14 @@ func NewCmd() *cobra.Command {
 			model, err := parseFlags(cmd)
 			if err != nil {
 				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := "Are you sure you want to create a credential?"
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Configure API client
@@ -72,7 +81,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseFlags(cmd *cobra.Command) (*flagModel, error) {
-	globalFlags := globalflags.Parse()
+	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, fmt.Errorf("project ID not set")
 	}
