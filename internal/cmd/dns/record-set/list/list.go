@@ -173,7 +173,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.Reco
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(recordSets, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal DNS record sets: %w", err)
+			return fmt.Errorf("marshal DNS record set list: %w", err)
 		}
 		cmd.Println(string(details))
 

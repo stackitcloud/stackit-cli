@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -47,14 +48,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read SKE cluster: %w", err)
 			}
 
-			// Show details
-			details, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal SKE cluster: %w", err)
-			}
-			cmd.Println(string(details))
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -86,4 +80,24 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
 	req := apiClient.GetCluster(ctx, model.ProjectId, model.ClusterName)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.ClusterResponse) error {
+	switch outputFormat {
+	case globalflags.TableOutputFormat:
+		table := tables.NewTable()
+		table.SetHeader("NAME", "STATE")
+		table.AddRow(*cluster.Name, *cluster.Status.Aggregated)
+		table.Render(cmd)
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(cluster, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	}
 }

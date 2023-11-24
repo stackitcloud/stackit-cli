@@ -87,17 +87,17 @@ func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.A
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials *postgresql.CredentialsResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credential *postgresql.CredentialsResponse) error {
 	switch outputFormat {
 	case globalflags.TableOutputFormat:
 		table := tables.NewTable()
 		table.SetHeader("ID")
-		table.AddRow(*credentials.Id)
+		table.AddRow(*credential.Id)
 		table.Render(cmd)
 
 		return nil
 	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
+		details, err := json.MarshalIndent(credential, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL credential: %w", err)
 		}

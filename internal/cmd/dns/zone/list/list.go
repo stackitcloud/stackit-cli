@@ -167,7 +167,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 		// Show details
 		details, err := json.MarshalIndent(zones, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal DNS record sets: %w", err)
+			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}
 		cmd.Println(string(details))
 

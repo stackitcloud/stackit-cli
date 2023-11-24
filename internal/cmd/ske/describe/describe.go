@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -41,14 +42,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read SKE project details: %w", err)
 			}
 
-			// Show details
-			details, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal SKE project details: %w", err)
-			}
-			cmd.Println(string(details))
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -68,4 +62,24 @@ func parseFlags() (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *ske.APIClient) ske.ApiGetProjectRequest {
 	req := apiClient.GetProject(ctx, model.ProjectId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, project *ske.ProjectResponse) error {
+	switch outputFormat {
+	case globalflags.TableOutputFormat:
+		table := tables.NewTable()
+		table.SetHeader("ID", "STATE")
+		table.AddRow(*project.ProjectId, *project.State)
+		table.Render(cmd)
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(project, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE project details: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	}
 }

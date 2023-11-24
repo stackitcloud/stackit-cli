@@ -98,7 +98,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []postgresq
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL instance: %w", err)
+			return fmt.Errorf("marshal PostgreSQL instance list: %w", err)
 		}
 		cmd.Println(string(details))
 
