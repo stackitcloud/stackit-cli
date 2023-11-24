@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -47,16 +48,9 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read DNS zone: %w", err)
 			}
-			zone := *resp.Zone
+			zone := resp.Zone
 
-			// Show details
-			details, err := json.MarshalIndent(zone, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal DNS zone: %w", err)
-			}
-			cmd.Println(string(details))
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, zone)
 		},
 	}
 	configureFlags(cmd)
@@ -85,4 +79,27 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *dns.APIClient) dns.ApiGetZoneRequest {
 	req := apiClient.GetZone(ctx, model.ProjectId, model.ZoneId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone) error {
+	switch outputFormat {
+	case globalflags.TableOutputFormat:
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
+		table.AddRow(*zone.Id, *zone.Name, *zone.DnsName, *zone.State)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(zone, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS zone: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	}
 }

@@ -10,11 +10,13 @@ import (
 )
 
 const (
-	ProjectIdFlag    = "project-id"
-	OutputFormatFlag = "output-format"
+	ProjectIdFlag     = "project-id"
+	OutputFormatFlag  = "output-format"
+	JSONOutputFormat  = "json"
+	TableOutputFormat = "table"
 )
 
-var outputFormatFlagOptions = []string{"default", "json", "table"}
+var outputFormatFlagOptions = []string{JSONOutputFormat, TableOutputFormat}
 
 type GlobalFlagModel struct {
 	ProjectId    string
