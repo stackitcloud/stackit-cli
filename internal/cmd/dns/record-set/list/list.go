@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				rs := recordSets[i]
 				table.AddRow(*rs.Id, *rs.Name, *rs.Type, *rs.State)
 			}
-			err = table.Render(cmd)
+			err = table.Render()
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}

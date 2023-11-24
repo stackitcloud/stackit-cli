@@ -65,7 +65,7 @@ func NewCmd() *cobra.Command {
 				c := clusters[i]
 				table.AddRow(*c.Name, *c.Status.Aggregated)
 			}
-			err = table.Render(cmd)
+			err = table.Render()
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}

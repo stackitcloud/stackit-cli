@@ -68,7 +68,7 @@ func NewCmd() *cobra.Command {
 				c := credentials[i]
 				table.AddRow(*c.Id)
 			}
-			err = table.Render(cmd)
+			err = table.Render()
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}
