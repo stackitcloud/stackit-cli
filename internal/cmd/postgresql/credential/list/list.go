@@ -116,7 +116,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials []postgre
 			c := credentials[i]
 			table.AddRow(*c.Id)
 		}
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	}

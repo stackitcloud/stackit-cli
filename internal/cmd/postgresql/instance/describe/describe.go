@@ -86,7 +86,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresql.
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
 		table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	default:

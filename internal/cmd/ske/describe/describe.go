@@ -70,7 +70,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, project *ske.ProjectR
 		table := tables.NewTable()
 		table.SetHeader("ID", "STATE")
 		table.AddRow(*project.ProjectId, *project.State)
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	default:

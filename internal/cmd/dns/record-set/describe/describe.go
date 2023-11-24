@@ -92,7 +92,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Type", "State")
 		table.AddRow(*recordSet.Id, *recordSet.Name, *recordSet.Type, *recordSet.State)
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	default:

@@ -179,7 +179,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 			z := zones[i]
 			table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
 		}
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	}

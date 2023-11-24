@@ -88,7 +88,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.ClusterR
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE")
 		table.AddRow(*cluster.Name, *cluster.Status.Aggregated)
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	default:

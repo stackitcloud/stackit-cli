@@ -93,7 +93,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, credential *postgresq
 		table := tables.NewTable()
 		table.SetHeader("ID")
 		table.AddRow(*credential.Id)
-		table.Render(cmd)
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 
 		return nil
 	default:
