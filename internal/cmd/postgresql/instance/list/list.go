@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -58,16 +59,7 @@ func NewCmd() *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
-			for i := range instances {
-				instance := instances[i]
-				table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
-			}
-			table.Render(cmd)
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, instances)
 		},
 	}
 
@@ -99,4 +91,30 @@ func parseFlags(cmd *cobra.Command) (*flagModel, error) {
 func buildRequest(ctx context.Context, model *flagModel, apiClient *postgresql.APIClient) postgresql.ApiGetInstancesRequest {
 	req := apiClient.GetInstances(ctx, model.ProjectId)
 	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, instances []postgresql.Instance) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		details, err := json.MarshalIndent(instances, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL instance list: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "LAST_OPERATION.TYPE", "LAST_OPERATION.STATE")
+		for i := range instances {
+			instance := instances[i]
+			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
+		}
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	}
 }

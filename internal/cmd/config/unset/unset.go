@@ -40,7 +40,7 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.ProjectIdKey, "")
 			}
 			if model.OutputFormat {
-				viper.Set(config.OutputFormatKey, "default")
+				viper.Set(config.OutputFormatKey, "")
 			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
@@ -48,7 +48,7 @@ func NewCmd() *cobra.Command {
 			if model.PostgreSQLCustomEndpoint {
 				viper.Set(config.PostgreSQLCustomEndpointKey, "")
 			}
-			if model.PostgreSQLCustomEndpoint {
+			if model.SKECustomEndpoint {
 				viper.Set(config.SKECustomEndpointKey, "")
 			}
 

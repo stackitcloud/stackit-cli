@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -61,16 +62,7 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
-			// Show output as table
-			table := tables.NewTable()
-			table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
-			for i := range zones {
-				z := zones[i]
-				table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
-			}
-			table.Render(cmd)
-
-			return nil
+			return outputResult(cmd, model.OutputFormat, zones)
 		},
 	}
 	configureFlags(cmd)
@@ -167,4 +159,31 @@ func fetchZones(ctx context.Context, model *flagModel, apiClient dnsClient) ([]d
 		page++
 	}
 	return zones, nil
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) error {
+	switch outputFormat {
+	case globalflags.JSONOutputFormat:
+		// Show details
+		details, err := json.MarshalIndent(zones, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS zone list: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "DNS_NAME", "STATE")
+		for i := range zones {
+			z := zones[i]
+			table.AddRow(*z.Id, *z.Name, *z.DnsName, *z.State)
+		}
+		err := table.Render(cmd)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	}
 }
