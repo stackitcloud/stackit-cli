@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Do you want to create a cluster?"
+				prompt := "Are you sure you want to create a cluster?"
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

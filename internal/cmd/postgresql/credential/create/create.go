@@ -39,7 +39,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Do you want to create a credential?"
+				prompt := "Are you sure you want to create a credential?"
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

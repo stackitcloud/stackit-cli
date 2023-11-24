@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Do you want to disable SKE for project %s? (This will delete all associated clusters)", model.ProjectId)
+				prompt := fmt.Sprintf("Are you sure you want to disable SKE for project %s? (This will delete all associated clusters)", model.ProjectId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

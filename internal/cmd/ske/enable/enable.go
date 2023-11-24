@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Do you want to enable SKE for project %s?", model.ProjectId)
+				prompt := fmt.Sprintf("Are you sure you want to enable SKE for project %s?", model.ProjectId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

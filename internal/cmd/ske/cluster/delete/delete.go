@@ -37,7 +37,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Do you want to delete cluster %s? (This cannot be undone)", model.ClusterName)
+				prompt := fmt.Sprintf("Are you sure you want to delete cluster %s? (This cannot be undone)", model.ClusterName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

@@ -38,7 +38,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Do you want to delete instance %s? (This cannot be undone)", model.InstanceId)
+				prompt := fmt.Sprintf("Are you sure you want to delete instance %s? (This cannot be undone)", model.InstanceId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Do you want to create a zone?"
+				prompt := "Are you sure you want to create a zone?"
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

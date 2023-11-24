@@ -40,7 +40,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Do you want to delete record-set %s? (This cannot be undone)", model.RecordSetId)
+				prompt := fmt.Sprintf("Are you sure you want to delete record-set %s? (This cannot be undone)", model.RecordSetId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
