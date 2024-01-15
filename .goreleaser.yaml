@@ -3,17 +3,30 @@ before:
     - go mod tidy
 
 builds:
-  - env:
+  - id: linux-builds
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
+    binary: "stackit"
+
+  - id: windows-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
       - windows
+    binary: "stackit"
+  
+  - id: macos-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
       - darwin
     binary: "stackit"
 
 archives:
   - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of `uname`.
+    # This name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -21,7 +34,8 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
+    
+    # Use zip for windows archives
     format_overrides:
       - goos: windows
         format: zip
@@ -32,3 +46,32 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+nfpms:
+  - id: linux-packages
+
+    # Build IDs for the builds you want to create NFPM packages for.
+    # Defaults empty, which means no filtering.
+    builds:
+      - linux-builds
+
+    # Your app's vendor.
+    vendor: STACKIT
+
+    # Your app's homepage.
+    homepage: https://github.com/stackitcloud/stackit-cli
+
+    # Your app's maintainer.
+    # Which email to use here? Technical account email?
+    maintainer: STACKIT <philipp.seitz@mail.schwarz>
+
+    # Your app's description.
+    description: A command-line interface for the STACKIT services.
+
+    # Your app's license.
+    license: Apache 2.0
+
+    # Formats to be generated.
+    formats:
+      - deb
+      - rpm
