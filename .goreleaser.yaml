@@ -3,17 +3,30 @@ before:
     - go mod tidy
 
 builds:
-  - env:
+  - id: linux-builds
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
+    binary: "stackit"
+
+  - id: windows-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
       - windows
+    binary: "stackit"
+  
+  - id: macos-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
       - darwin
     binary: "stackit"
 
 archives:
   - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of `uname`.
+    # This name template makes the OS and Arch compatible with the results of `uname`
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -21,7 +34,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
     format_overrides:
       - goos: windows
         format: zip
@@ -32,3 +44,17 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+nfpms:
+  - id: linux-packages
+    # IDs of the builds for which to create packages for
+    builds:
+      - linux-builds
+    vendor: STACKIT
+    homepage: https://github.com/stackitcloud/stackit-cli
+    maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
+    description: A command-line interface to manage STACKIT resources.
+    license: Apache 2.0
+    formats:
+      - deb
+      - rpm
