@@ -52,7 +52,7 @@ nfpms:
       - linux-builds
     vendor: STACKIT
     homepage: https://github.com/stackitcloud/stackit-cli
-    maintainer: STACKIT <someone@mail.schwarz>
+    maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
     description: A command-line interface to manage STACKIT resources.
     license: Apache 2.0
     formats:
