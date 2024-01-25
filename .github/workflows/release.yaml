@@ -31,5 +31,4 @@ jobs:
         with:
           args: release --clean
         env:
-          # GitHub sets the GITHUB_TOKEN secret automatically.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
