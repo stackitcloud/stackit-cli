@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,14 +20,15 @@ import (
 )
 
 const (
-	authDomain                   = "auth.01.idp.eu01.stackit.cloud/oauth"
-	clientId                     = "stackit-cli-client-id"
-	redirectURL                  = "http://localhost:8000"
-	loginSuccessPath             = "/login-successful"
-	stackitLandingPage           = "https://www.stackit.de"
-	loginSuccessHtmlPageFilePath = "internal/pkg/auth/login-successful.html"
-	emailPlaceholder             = "$USER_EMAIL"
+	authDomain         = "auth.01.idp.eu01.stackit.cloud/oauth"
+	clientId           = "stackit-cli-client-id"
+	redirectURL        = "http://localhost:8000"
+	loginSuccessPath   = "/login-successful"
+	stackitLandingPage = "https://www.stackit.de"
 )
+
+//go:embed templates/*
+var htmlContent embed.FS
 
 type User struct {
 	Email string
@@ -130,7 +132,7 @@ func AuthorizeUser() error {
 			Email: email,
 		}
 
-		htmlTemplate, err := template.ParseFiles(loginSuccessHtmlPageFilePath)
+		htmlTemplate, err := template.ParseFS(htmlContent, "templates/login-successful.html")
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
