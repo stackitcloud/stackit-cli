@@ -77,9 +77,9 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Disabled"
+			operationState := "Enabled"
 			if model.Async {
-				operationState = "Triggered disablement of"
+				operationState = "Triggered enablement of"
 			}
 			cmd.Printf("%s SKE for project %s\n", operationState, projectLabel)
 			return nil
