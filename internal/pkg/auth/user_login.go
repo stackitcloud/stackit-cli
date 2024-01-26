@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -20,11 +21,13 @@ import (
 )
 
 const (
-	authDomain         = "auth.01.idp.eu01.stackit.cloud/oauth"
-	clientId           = "stackit-cli-client-id"
-	redirectURL        = "http://localhost:8000"
-	loginSuccessPath   = "/login-successful"
-	stackitLandingPage = "https://www.stackit.de"
+	authDomain              = "auth.01.idp.eu01.stackit.cloud/oauth"
+	clientId                = "stackit-cli-client-id"
+	redirectURL             = "http://localhost:8000"
+	loginSuccessPath        = "/login-successful"
+	stackitLandingPage      = "https://www.stackit.de"
+	htmlTemplatesPath       = "templates"
+	loginSuccessfulHTMLFile = "login-successful.html"
 )
 
 //go:embed templates/*
@@ -132,7 +135,7 @@ func AuthorizeUser() error {
 			Email: email,
 		}
 
-		htmlTemplate, err := template.ParseFS(htmlContent, "templates/login-successful.html")
+		htmlTemplate, err := template.ParseFS(htmlContent, filepath.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
