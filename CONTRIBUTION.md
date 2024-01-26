@@ -50,7 +50,7 @@ To test your changes, you can either:
    $ go run . [group] [subgroup] [command] [flags]
    ```
 
-## Code Contributions (Coming soon to GitHub!)
+## Code Contributions
 
 To make your contribution, follow these steps:
 
@@ -61,7 +61,7 @@ To make your contribution, follow these steps:
 5. Create a pull request with your changes.
 6. The pull request will be reviewed by the repo maintainers. If you need to make further changes, make additional commits to keep commit history. When the PR is merged, commits will be squashed.
 
-## Bug Reports (Coming soon to GitHub!)
+## Bug Reports
 
 If you would like to report a bug, please open a [GitHub issue](https://github.com/stackitcloud/stackit-cli/issues/new).
 
