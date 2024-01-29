@@ -59,6 +59,10 @@ nfpms:
       - deb
       - rpm
 
+signs:
+  - artifacts: package
+    args: ["-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
+
 brews:
   - name: stackit-cli
     repository:
