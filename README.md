@@ -7,7 +7,7 @@ Your feedback is appreciated!
 
 ## Installation
 
-Please refer to our [installation](./INSTALLATION.md) guide for instructions on how to install and get started using the STACKIT CLI.
+Please refer to our [installation guide](./INSTALLATION.md) for instructions on how to install and get started using the STACKIT CLI.
 
 ## Usage
 
@@ -65,7 +65,7 @@ To authenticate using a service account, run:
 $ stackit auth activate-service-account
 ```
 
-For more details on how to setup authentication using a service account, check our [Authentication guide](./AUTHENTICATION.md)
+For more details on how to setup authentication using a service account, check our [authentication guide](./AUTHENTICATION.md).
 
 ## Configuration
 
@@ -97,13 +97,17 @@ $ stackit config list
 
 You can also edit the configuration file manually.
 
+## Autocompletion
+
+If you wish to setup command autocompletion in your shell for the STACKIT CLI, please refer to our [autocompletion guide](./AUTOCOMPLETION.md).
+
 ## Reporting issues
 
 If you encounter any issues or have suggestions for improvements, please reach out to the Developer Tools team or open a ticket through the [STACKIT Help Center](https://support.stackit.cloud/).
 
 ## Contribute
 
-Your contribution is welcome! For more details on how to contribute, refer to our [Contribution Guide](./CONTRIBUTION.md).
+Your contribution is welcome! For more details on how to contribute, refer to our [contribution guide](./CONTRIBUTION.md).
 
 ## License
 
