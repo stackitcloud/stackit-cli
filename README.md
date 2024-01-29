@@ -7,33 +7,7 @@ Your feedback is appreciated!
 
 ## Installation
 
-To get started using it, you can:
-
-1. Download the binary corresponding to your operating system and CPU architecture
-2. Extract the contents of the file to your file system and move it to your preferred location (e.g. your home directory)
-3. (For macOS only) Right click on the executable, select "Open". You will see a dialog stating the identity of the developer cannot be confirmed. Click on "Open" to allow the app to run on your Mac. We soon plan to certificate the STACKIT CLI to be trusted by macOS
-
-Alternatively, you can use the STACKIT CLI by cloning the repository and either:
-
-1. Build the application locally by running:
-
-   ```bash
-   $ go build -o ./bin/stackit
-   ```
-
-   To use the application from the root of the repository, you can run:
-
-   ```bash
-   $ ./bin/stackit <GROUP> <SUB-GROUP> <COMMAND> <ARGUMENT> <FLAGS>
-   ```
-
-2. Skip building and run the Go application directly using:
-
-   ```bash
-   $ go run . <GROUP> <SUB-GROUP> <COMMAND> <ARGUMENT> <FLAGS>
-   ```
-
-We also plan to integrate the STACKIT CLI on package managers such as APT and Brew.
+Please refer to our [installation](./INSTALLATION.md) guide for instructions on how to install and get started using the STACKIT CLI.
 
 ## Usage
 
