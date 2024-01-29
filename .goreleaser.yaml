@@ -69,8 +69,9 @@ brews:
       email: noreply@stackit.de
     homepage: "https://github.com/stackitcloud/stackit-cli"
     description: "A command-line interface to manage STACKIT resources."
+    folder: Formula
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    # Not setting it for now to test with a prerelease tag
+    # Not setting it for now so we can publish prerelease tags
     # skip_upload: auto
