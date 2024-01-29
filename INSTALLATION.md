@@ -1,9 +1,5 @@
 # Installation
 
-## Linux
-
-We will soon distribute the STACKIT CLI via [Snap](https://snapcraft.io/). For the moment, please refer to the [manual installation](#manual-installation) guide.
-
 ## macOS
 
 The STACKIT CLI is available to download and install through the [Homebrew](https://brew.sh/) package manager.
@@ -19,6 +15,10 @@ brew tap stackitcloud/tap
 ```shell
 brew install stackit-cli
 ```
+
+## Linux
+
+We will soon distribute the STACKIT CLI via [Snap](https://snapcraft.io/). For the moment, you can either install via [Homebrew](https://brew.sh/) or refer to the [manual installation](#manual-installation) guide.
 
 ## Windows
 
