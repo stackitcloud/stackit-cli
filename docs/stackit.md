@@ -2,6 +2,12 @@
 
 Manage STACKIT resources using the command line
 
+### Synopsis
+
+Manage STACKIT resources using the command line.
+This CLI is in a BETA state.
+More services and functionality will be supported soon. Your feedback is appreciated!
+
 ```
 stackit [flags]
 ```
@@ -24,6 +30,7 @@ stackit [flags]
 * [stackit curl](./stackit_curl.md)	 - Execute an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
+* [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
 * [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
