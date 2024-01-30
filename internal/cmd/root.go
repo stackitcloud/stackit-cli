@@ -11,6 +11,7 @@ import (
 	"stackit/internal/cmd/curl"
 	"stackit/internal/cmd/dns"
 	"stackit/internal/cmd/mongodbflex"
+	"stackit/internal/cmd/opensearch"
 	"stackit/internal/cmd/organization"
 	"stackit/internal/cmd/project"
 	serviceaccount "stackit/internal/cmd/service-account"
@@ -77,12 +78,13 @@ func configureFlags(cmd *cobra.Command) error {
 
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(auth.NewCmd())
-	cmd.AddCommand(curl.NewCmd())
 	cmd.AddCommand(config.NewCmd())
-	cmd.AddCommand(organization.NewCmd())
-	cmd.AddCommand(project.NewCmd())
+	cmd.AddCommand(curl.NewCmd())
 	cmd.AddCommand(dns.NewCmd())
 	cmd.AddCommand(mongodbflex.NewCmd())
+	cmd.AddCommand(opensearch.NewCmd())
+	cmd.AddCommand(organization.NewCmd())
+	cmd.AddCommand(project.NewCmd())
 	cmd.AddCommand(serviceaccount.NewCmd())
 	cmd.AddCommand(ske.NewCmd())
 }
