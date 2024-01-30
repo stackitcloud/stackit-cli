@@ -9,6 +9,13 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
+// The number of replicas is enforced by the API according to the instance type
+var instanceTypeToReplicas = map[string]int64{
+	"Single":  1,
+	"Replica": 3,
+	"Sharded": 9,
+}
+
 func ValidateFlavorId(service, flavorId string, flavors *[]mongodbflex.HandlersInfraFlavor) error {
 	for _, f := range *flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
@@ -81,4 +88,21 @@ func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, in
 		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
 	}
 	return *resp.Item.Username, nil
+}
+
+func GetInstanceReplicas(instanceType string) (int64, error) {
+	numReplicas, ok := instanceTypeToReplicas[instanceType]
+	if !ok {
+		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
+	}
+	return numReplicas, nil
+}
+
+func GetInstanceType(numReplicas int64) (string, error) {
+	for k, v := range instanceTypeToReplicas {
+		if v == numReplicas {
+			return k, nil
+		}
+	}
+	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
 }
