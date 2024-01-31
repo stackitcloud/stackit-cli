@@ -94,7 +94,8 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 
 		instanceType, err := mongodbflexUtils.GetInstanceType(*instance.Replicas)
 		if err != nil {
-			instanceType = "Unknown"
+			// Should never happen
+			instanceType = ""
 		}
 
 		table := tables.NewTable()
