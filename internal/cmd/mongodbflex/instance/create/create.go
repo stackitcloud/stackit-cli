@@ -238,15 +238,8 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 		return req, err
 	}
 
-	// The number of replicas is enforced by the API according to the instance type
-	var replicas int64
-	if *model.Type == "Single" {
-		replicas = 1
-	} else if *model.Type == "Replica" {
-		replicas = 3
-	} else if *model.Type == "Sharded" {
-		replicas = 9
-	} else {
+	replicas, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
+	if err != nil {
 		return req, fmt.Errorf("invalid MongoDB Flex intance type: %w", err)
 	}
 
