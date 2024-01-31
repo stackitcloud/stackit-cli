@@ -72,6 +72,7 @@ func NewCmd() *cobra.Command {
 			ctx := context.Background()
 			// Service name and operation needed for error handling
 			service := "mongodbflex"
+			operation := cmd.Use
 			model, err := parseInput(cmd, args, service, operation)
 			if err != nil {
 				return err
