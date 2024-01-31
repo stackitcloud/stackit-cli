@@ -13,7 +13,7 @@ This process depends on the `bash-completion` package. If you don't have it inst
 #### Linux
 
 ```shell
-stackit completion bash > /etc/bash_completion.d/stackit
+stackit completion bash > ~/.bash_completion
 ```
 
 #### macOS
