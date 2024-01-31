@@ -64,7 +64,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an OpenSearch instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit opensearch instance create --name my-instance --plan-name stackit-qa-opensearch-1.2.10-replica --version 2"),
+				"$ stackit opensearch instance create --name my-instance --plan-name stackit-opensearch-1.2.10-replica --version 2"),
 			examples.NewExample(
 				`Create an OpenSearch instance with name "my-instance" and specify plan by ID`,
 				"$ stackit opensearch instance create --name my-instance --plan-id xxx"),

@@ -23,7 +23,7 @@ const (
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
-	OpenSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
+	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 )
 
 type inputModel struct {
@@ -87,7 +87,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
-	cmd.Flags().String(OpenSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
+	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
 
 	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -101,7 +101,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(OpenSearchCustomEndpointFlag))
+	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

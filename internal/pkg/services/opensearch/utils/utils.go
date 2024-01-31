@@ -20,7 +20,7 @@ func ValidatePlanId(service, planId string, offerings *opensearch.ListOfferingsR
 
 	return &errors.DSAInvalidPlanError{
 		Service: service,
-		Details: fmt.Sprintf("You provided plan ID '%s', which is invalid.", planId),
+		Details: fmt.Sprintf("You provided plan ID %q, which is invalid.", planId),
 	}
 }
 
@@ -47,13 +47,13 @@ func LoadPlanId(service, planName, version string, offerings *opensearch.ListOff
 	}
 
 	if !isValidVersion {
-		details := fmt.Sprintf("You provided version '%s', which is invalid. Available versions are: %s", version, availableVersions)
+		details := fmt.Sprintf("You provided version %q, which is invalid. Available versions are: %s", version, availableVersions)
 		return nil, &errors.DSAInvalidPlanError{
 			Service: service,
 			Details: details,
 		}
 	}
-	details := fmt.Sprintf("You provided plan_name '%s' for version %s, which is invalid. Available plan names for that version are: %s", planName, version, availablePlanNames)
+	details := fmt.Sprintf("You provided plan_name %q for version %s, which is invalid. Available plan names for that version are: %s", planName, version, availablePlanNames)
 	return nil, &errors.DSAInvalidPlanError{
 		Service: service,
 		Details: details,
