@@ -19,7 +19,11 @@ lint-golangci-lint:
 	@echo "Linting with golangci-lint"
 	@golangci-lint run ${GOLANG_CI_ARGS}
 
-lint: lint-golangci-lint
+lint-yamllint:
+	@echo "Linting with yamllint"
+	@yamllint -c .yamllint.yaml .
+
+lint: lint-golangci-lint lint-yamllint
 
 # Test
 test:
