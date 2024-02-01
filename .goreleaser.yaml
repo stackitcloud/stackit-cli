@@ -92,4 +92,4 @@ snapcrafts:
     publish: true
     summary: A command-line interface to manage STACKIT resources.
     description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
-    license: Apache-2.0
+     license: Apache-2.0
