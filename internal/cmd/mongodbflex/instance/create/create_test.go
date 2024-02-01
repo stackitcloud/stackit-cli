@@ -56,7 +56,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		aclFlag:            "0.0.0.0/0",
 		backupScheduleFlag: "0 0/6 * * *",
 		flavorIdFlag:       testFlavorId,
-		storageClassFlag:   "premium-perf2-mongodb",
+		storageClassFlag:   "premium-perf4-mongodb", // Non-default
 		storageSizeFlag:    "10",
 		versionFlag:        "6.0",
 		typeFlag:           "Replica",
@@ -76,7 +76,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
 		BackupSchedule: utils.Ptr("0 0/6 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
-		StorageClass:   utils.Ptr("premium-perf2-mongodb"),
+		StorageClass:   utils.Ptr("premium-perf4-mongodb"),
 		StorageSize:    utils.Ptr(int64(10)),
 		Version:        utils.Ptr("6.0"),
 		Type:           utils.Ptr("Replica"),
@@ -104,7 +104,7 @@ func fixturePayload(mods ...func(payload *mongodbflex.CreateInstancePayload)) mo
 		FlavorId:       utils.Ptr(testFlavorId),
 		Replicas:       utils.Ptr(int64(3)),
 		Storage: &mongodbflex.Storage{
-			Class: utils.Ptr("premium-perf2-mongodb"),
+			Class: utils.Ptr("premium-perf4-mongodb"),
 			Size:  utils.Ptr(int64(10)),
 		},
 		Version: utils.Ptr("6.0"),
@@ -317,7 +317,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -350,7 +350,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -375,7 +375,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -400,7 +400,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -473,7 +473,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -498,7 +498,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf2-mongodb"},
+				StorageClasses: &[]string{"premium-perf4-mongodb"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
