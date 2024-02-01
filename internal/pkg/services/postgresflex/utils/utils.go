@@ -69,7 +69,7 @@ type PostgreSQLFlexClient interface {
 func GetInstanceName(ctx context.Context, apiClient PostgreSQLFlexClient, projectId, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex instance: %w", err)
+		return "", fmt.Errorf("get PostgreSQL instance: %w", err)
 	}
 	return *resp.Item.Name, nil
 }
