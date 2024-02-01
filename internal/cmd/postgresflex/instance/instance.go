@@ -4,6 +4,7 @@ import (
 	"stackit/internal/cmd/postgresflex/instance/create"
 	"stackit/internal/cmd/postgresflex/instance/describe"
 	"stackit/internal/cmd/postgresflex/instance/list"
+	"stackit/internal/cmd/postgresflex/instance/update"
 	"stackit/internal/pkg/args"
 	"stackit/internal/pkg/utils"
 
@@ -26,4 +27,5 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(list.NewCmd())
 	cmd.AddCommand(create.NewCmd())
 	cmd.AddCommand(describe.NewCmd())
+	cmd.AddCommand(update.NewCmd())
 }
