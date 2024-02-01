@@ -79,3 +79,17 @@ brews:
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
     # Not setting it for now so we can publish prerelease tags
     # skip_upload: auto
+
+  snapcrafts:
+    # IDs of the builds for which to create packages for
+    builds:
+      - linux-builds
+    # The name of the snap
+    name: stackit-cli
+    # The canonical title of the application, displayed in the software
+    # centre graphical frontends
+    title: STACKIT CLI
+    publish: true
+    summary: A command-line interface to manage STACKIT resources.
+    description: A command-line interface to manage STACKIT resources.
+    license: Apache-2.0
