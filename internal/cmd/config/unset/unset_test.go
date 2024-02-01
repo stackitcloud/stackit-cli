@@ -9,13 +9,14 @@ import (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
 	flagValues := map[string]bool{
-		projectIdFlag:                     true,
-		outputFormatFlag:                  true,
+		projectIdFlag:    true,
+		outputFormatFlag: true,
+
 		dnsCustomEndpointFlag:             true,
+		openSearchCustomEndpointFlag:      true,
+		resourceManagerCustomEndpointFlag: true,
 		serviceAccountCustomEndpointFlag:  true,
 		skeCustomEndpointFlag:             true,
-		resourceManagerCustomEndpointFlag: true,
-		openSearchCustomEndpointFlag:      true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
