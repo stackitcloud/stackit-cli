@@ -62,11 +62,11 @@ func LoadFlavorId(service string, cpu, ram int64, flavors *[]postgresflex.Flavor
 	}
 }
 
-type MongoDBFlexClient interface {
+type PostgreSQLFlexClient interface {
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
 }
 
-func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId string) (string, error) {
+func GetInstanceName(ctx context.Context, apiClient PostgreSQLFlexClient, projectId, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
 	if err != nil {
 		return "", fmt.Errorf("get MongoDBFlex instance: %w", err)
