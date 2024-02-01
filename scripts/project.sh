@@ -13,8 +13,17 @@ if [ "$action" = "help" ]; then
     [ -f "$0".man ] && man "$0".man || echo "No help, please read the script in ${script}, we will add help later"
 elif [ "$action" = "tools" ]; then
     cd ${ROOT_DIR}
+
     go mod download
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2
+
+    PIP_COMMAND="pip"
+    if ! command -v yamllint &>/dev/null; then
+        if command -v pip3 &>/dev/null; then
+            PIP_COMMAND="pip3"
+        fi
+        $PIP_COMMAND install yamllint
+    fi
 else
     echo "Invalid action: '$action', please use $0 help for help"
 fi

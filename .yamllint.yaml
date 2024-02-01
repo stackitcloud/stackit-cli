@@ -1,0 +1,2 @@
+# Empty rules means that only syntax is checked
+rules: {}
