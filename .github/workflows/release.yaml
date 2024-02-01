@@ -17,6 +17,8 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    env:
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +34,8 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v2
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
