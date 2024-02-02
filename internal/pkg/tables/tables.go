@@ -2,7 +2,8 @@ package tables
 
 import (
 	"fmt"
-	"stackit/internal/pkg/pager"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"

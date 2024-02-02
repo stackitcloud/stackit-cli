@@ -1,10 +1,10 @@
 package dns
 
 import (
-	recordset "stackit/internal/cmd/dns/record-set"
-	"stackit/internal/cmd/dns/zone"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	recordset "github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

@@ -1,14 +1,14 @@
 package user
 
 import (
-	"stackit/internal/cmd/mongodbflex/user/create"
-	"stackit/internal/cmd/mongodbflex/user/delete"
-	"stackit/internal/cmd/mongodbflex/user/describe"
-	"stackit/internal/cmd/mongodbflex/user/list"
-	resetpassword "stackit/internal/cmd/mongodbflex/user/reset-password"
-	"stackit/internal/cmd/mongodbflex/user/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/list"
+	resetpassword "github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/reset-password"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

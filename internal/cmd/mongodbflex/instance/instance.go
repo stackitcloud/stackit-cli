@@ -1,13 +1,13 @@
 package instance
 
 import (
-	"stackit/internal/cmd/mongodbflex/instance/create"
-	"stackit/internal/cmd/mongodbflex/instance/delete"
-	"stackit/internal/cmd/mongodbflex/instance/describe"
-	"stackit/internal/cmd/mongodbflex/instance/list"
-	"stackit/internal/cmd/mongodbflex/instance/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

@@ -1,11 +1,11 @@
 package member
 
 import (
-	"stackit/internal/cmd/project/member/add"
-	"stackit/internal/cmd/project/member/list"
-	"stackit/internal/cmd/project/member/remove"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/member/add"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/member/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/member/remove"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

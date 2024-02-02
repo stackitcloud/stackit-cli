@@ -2,10 +2,11 @@ package organization
 
 import (
 	"fmt"
-	"stackit/internal/cmd/organization/member"
-	"stackit/internal/cmd/organization/role"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+
+	"github.com/stackitcloud/stackit-cli/internal/cmd/organization/member"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/organization/role"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

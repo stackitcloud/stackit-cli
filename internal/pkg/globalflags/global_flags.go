@@ -3,8 +3,8 @@ package globalflags
 import (
 	"fmt"
 
-	"stackit/internal/pkg/config"
-	"stackit/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

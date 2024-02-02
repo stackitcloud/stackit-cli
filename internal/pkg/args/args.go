@@ -1,7 +1,7 @@
 package args
 
 import (
-	"stackit/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/spf13/cobra"
 )

@@ -1,11 +1,11 @@
 package mongodbflex
 
 import (
-	"stackit/internal/cmd/mongodbflex/instance"
-	"stackit/internal/cmd/mongodbflex/options"
-	"stackit/internal/cmd/mongodbflex/user"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/options"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

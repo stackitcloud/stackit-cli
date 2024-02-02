@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"golang.org/x/mod/semver"

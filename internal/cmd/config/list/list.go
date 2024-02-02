@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"slices"
 	"sort"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/config"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/tables"
 	"strings"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

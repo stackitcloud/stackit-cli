@@ -1,14 +1,14 @@
 package serviceaccount
 
 import (
-	"stackit/internal/cmd/service-account/create"
-	"stackit/internal/cmd/service-account/delete"
-	getjwks "stackit/internal/cmd/service-account/get-jwks"
-	"stackit/internal/cmd/service-account/key"
-	"stackit/internal/cmd/service-account/list"
-	"stackit/internal/cmd/service-account/token"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/delete"
+	getjwks "github.com/stackitcloud/stackit-cli/internal/cmd/service-account/get-jwks"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/key"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

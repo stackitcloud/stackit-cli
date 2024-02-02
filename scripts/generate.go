@@ -6,8 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"stackit/internal/cmd"
 	"strings"
+
+	"github.com/stackitcloud/stackit-cli/internal/cmd"
 
 	"github.com/spf13/cobra/doc"
 )

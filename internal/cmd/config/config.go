@@ -1,11 +1,11 @@
 package config
 
 import (
-	"stackit/internal/cmd/config/list"
-	"stackit/internal/cmd/config/set"
-	"stackit/internal/cmd/config/unset"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/config/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/config/set"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/config/unset"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

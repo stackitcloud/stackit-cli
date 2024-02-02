@@ -1,4 +1,4 @@
-module stackit
+module github.com/stackitcloud/stackit-cli
 
 go 1.21
 
