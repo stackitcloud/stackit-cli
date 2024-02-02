@@ -50,12 +50,12 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Service                 | CLI Commands              | Status                  |
 | ----------------------- | ------------------------- | ----------------------- |
 | Argus                   |                           | Will be integrated soon |
+| Authorization           | `project`, `organization` | :white_check_mark:      |
 | DNS                     | `dns`                     | :white_check_mark:      |
 | Kubernetes Engine (SKE) | `ske`                     | :white_check_mark:      |
 | Load Balancer           |                           | Will be integrated soon |
 | LogMe                   |                           | Will be integrated soon |
 | MariaDB                 |                           | Will be integrated soon |
-| Membership              | `project`, `organization` | :white_check_mark:      |
 | MongoDB Flex            | `mongodbflex`             | :white_check_mark:      |
 | Object Storage          |                           | Will be integrated soon |
 | OpenSearch              |                           | Will be integrated soon |
