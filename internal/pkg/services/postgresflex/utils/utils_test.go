@@ -18,7 +18,6 @@ var (
 
 const (
 	testInstanceName = "instance"
-	testUserName     = "user"
 )
 
 type postgresFlexClientMocked struct {
