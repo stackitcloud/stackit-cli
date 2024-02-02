@@ -64,7 +64,7 @@ signs:
     args: ["-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
 
 brews:
-  - name: stackit-cli
+  - name: stackit
     repository:
       owner: stackitcloud
       name: homebrew-tap
@@ -72,7 +72,7 @@ brews:
       name: CLI Release Bot
       email: noreply@stackit.de
     homepage: "https://github.com/stackitcloud/stackit-cli"
-    description: "A command-line interface to manage STACKIT resources."
+    description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
     folder: Formula
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
@@ -85,7 +85,7 @@ snapcrafts:
   - builds:
     - linux-builds
     # The name of the snap
-    name: stackit-cli
+    name: stackit
     # The canonical title of the application, displayed in the software
     # centre graphical frontends
     title: STACKIT CLI
