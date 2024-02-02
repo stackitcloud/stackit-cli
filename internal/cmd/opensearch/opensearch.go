@@ -1,11 +1,11 @@
 package opensearch
 
 import (
-	"stackit/internal/cmd/opensearch/credentials"
-	"stackit/internal/cmd/opensearch/instance"
-	"stackit/internal/cmd/opensearch/plans"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/credentials"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/plans"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

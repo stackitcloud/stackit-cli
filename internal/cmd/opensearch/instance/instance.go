@@ -1,13 +1,13 @@
 package instance
 
 import (
-	"stackit/internal/cmd/opensearch/instance/create"
-	"stackit/internal/cmd/opensearch/instance/delete"
-	"stackit/internal/cmd/opensearch/instance/describe"
-	"stackit/internal/cmd/opensearch/instance/list"
-	"stackit/internal/cmd/opensearch/instance/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

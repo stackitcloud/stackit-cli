@@ -1,12 +1,12 @@
 package credentials
 
 import (
-	"stackit/internal/cmd/opensearch/credentials/create"
-	"stackit/internal/cmd/opensearch/credentials/delete"
-	"stackit/internal/cmd/opensearch/credentials/describe"
-	"stackit/internal/cmd/opensearch/credentials/list"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/credentials/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/credentials/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/credentials/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch/credentials/list"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

@@ -3,8 +3,9 @@ package utils
 import (
 	"context"
 	"fmt"
-	"stackit/internal/pkg/errors"
 	"strings"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
 )
