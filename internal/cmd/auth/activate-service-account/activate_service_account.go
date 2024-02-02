@@ -3,11 +3,12 @@ package activateserviceaccount
 import (
 	"errors"
 	"fmt"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/auth"
-	cliErr "stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/flags"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 
 	"github.com/spf13/cobra"
 	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"

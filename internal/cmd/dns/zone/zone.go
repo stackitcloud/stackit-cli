@@ -1,13 +1,13 @@
 package zone
 
 import (
-	"stackit/internal/cmd/dns/zone/create"
-	"stackit/internal/cmd/dns/zone/delete"
-	"stackit/internal/cmd/dns/zone/describe"
-	"stackit/internal/cmd/dns/zone/list"
-	"stackit/internal/cmd/dns/zone/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

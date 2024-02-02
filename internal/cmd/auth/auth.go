@@ -1,10 +1,10 @@
 package auth
 
 import (
-	activateserviceaccount "stackit/internal/cmd/auth/activate-service-account"
-	"stackit/internal/cmd/auth/login"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	activateserviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/auth/activate-service-account"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/login"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

@@ -1,13 +1,13 @@
 package recordset
 
 import (
-	"stackit/internal/cmd/dns/record-set/create"
-	"stackit/internal/cmd/dns/record-set/delete"
-	"stackit/internal/cmd/dns/record-set/describe"
-	"stackit/internal/cmd/dns/record-set/list"
-	"stackit/internal/cmd/dns/record-set/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

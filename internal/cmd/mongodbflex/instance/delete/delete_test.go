@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"stackit/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"

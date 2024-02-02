@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/config"
-	"stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/flags"
-	"stackit/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

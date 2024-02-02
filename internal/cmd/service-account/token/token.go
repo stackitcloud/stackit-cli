@@ -1,11 +1,11 @@
 package token
 
 import (
-	"stackit/internal/cmd/service-account/token/create"
-	"stackit/internal/cmd/service-account/token/list"
-	"stackit/internal/cmd/service-account/token/revoke"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token/revoke"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

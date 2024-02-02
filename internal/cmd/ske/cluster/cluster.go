@@ -1,14 +1,14 @@
 package cluster
 
 import (
-	"stackit/internal/cmd/ske/cluster/create"
-	"stackit/internal/cmd/ske/cluster/delete"
-	"stackit/internal/cmd/ske/cluster/describe"
-	generatepayload "stackit/internal/cmd/ske/cluster/generate-payload"
-	"stackit/internal/cmd/ske/cluster/list"
-	"stackit/internal/cmd/ske/cluster/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/describe"
+	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/generate-payload"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

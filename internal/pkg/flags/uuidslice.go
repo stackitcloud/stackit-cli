@@ -2,8 +2,9 @@ package flags
 
 import (
 	"fmt"
-	"stackit/internal/pkg/utils"
 	"strings"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/pflag"
 )

@@ -3,9 +3,9 @@ package login
 import (
 	"fmt"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/auth"
-	"stackit/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 
 	"github.com/spf13/cobra"
 )

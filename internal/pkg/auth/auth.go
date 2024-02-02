@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"stackit/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"

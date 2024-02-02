@@ -1,8 +1,8 @@
 package main
 
 import (
-	"stackit/internal/cmd"
-	"stackit/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/cmd"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 // These values are dynamically overridden by GoReleaser

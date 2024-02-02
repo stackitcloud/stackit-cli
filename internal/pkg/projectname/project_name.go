@@ -3,10 +3,11 @@ package projectname
 import (
 	"context"
 	"fmt"
-	"stackit/internal/pkg/config"
-	"stackit/internal/pkg/flags"
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/services/resourcemanager/client"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
