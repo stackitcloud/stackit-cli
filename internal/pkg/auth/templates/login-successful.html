@@ -1,18 +1,340 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>STACKIT CLI</title>
+    <base href="/" />
+    <meta
+      name="description"
+      content="A command-line interface to manage STACKIT resources. This CLI is in a BETA state. More services and functionality will be supported soon."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="STACKIT" />
+    <meta property="og:url" content="https://portal.stackit.cloud/" />
 
-<body>
-    <h2>Hello {{.Email}}, your login was successful!</h2>
-    <p>You can close this window and return to the STACKIT CLI, or we will redirect you to the <a
-            href="https://www.stackit.de">STACKIT website</a> in 1 minute.</p>
-    <p>For more info and documentation, check the <a href="https://github.com/stackitcloud/stackit-cli">CLI repo</a></p>
-    <script>
-        if (window.location.hash) {
-            history.replaceState(null, "", window.location.pathname);
-        }
-        setTimeout(function () {
-            window.location = 'https://www.stackit.de'
-        }, 60000);
-    </script>
-</body>
+    <link
+      rel="apple-touch-icon-precomposed"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-precomposed.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="22x22"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-22@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="44x44"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-22@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="66x66"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-22@3x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="25x25"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-25@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="50x50"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-25@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="75x75"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-25@3x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="29x29"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-29@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="58x58"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-29@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="87x87"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-29@3x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="40x40"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-40@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="80x80"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-40@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="50x50"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-50@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-57@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-60@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-72@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-76@1x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="100x100"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-50@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-57@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-40@3x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-72@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-76@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="167x167"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-83.5@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ios/Icon-60@3x.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-16x16.png"
+    />
+    <!-- Used by IE, and also by some other browsers- if not alternative -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="24x24"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-24x24.png"
+    />
+    <!-- The classic favicon, displayed in the tabs. -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-48x48.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-96x96.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="196x196"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-196x196.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="228x228"
+      href="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/favicons/favicon-228x228.png"
+    />
+    <!-- multiple icons for IE (Internet Explorer & Windows Phone) -->
+    <meta
+      name="msapplication-square70x70logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/70-square-logo.scale-100.png"
+    />
+    <meta
+      name="msapplication-square71x71logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/71-square-logo.scale-100.png"
+    />
+    <meta
+      name="msapplication-square106x106logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/44-square-logo.scale-240.png"
+    />
+    <meta
+      name="msapplication-square170x170logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/70-square-logo.scale-240.png"
+    />
+    <meta
+      name="msapplication-square360x360logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/150-square-logo.scale-240.png"
+    />
+    <meta
+      name="msapplication-wide310x150logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/310x150-wide-logo.scale-100.png"
+    />
+    <meta
+      name="msapplication-wide744x360logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/310x150-wide-logo.scale-240.png"
+    />
+    <!-- Windows 7,8,8.1,10 -->
+    <meta
+      name="msapplication-TileImage"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/tile-144x144.png"
+    />
+    <meta name="application-name" content="STACKIT" />
+    <meta name="msapplication-TileColor" content="#0C4A57" />
+    <meta
+      name="msapplication-square310x310logo"
+      content="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/app-icons/ms/310-square-logo.scale-100.png"
+    />
+    <meta name="theme-color" content="#045462" />
 
+    <!-- <link rel="stylesheet" href="main.css" /> -->
+    <style>*,:after,:before{box-sizing:border-box}html{font-family:sans-serif;line-height:1.15;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0)}main{display:block}body{background-color:#fff;color:#424242;font-family:MuseoSansW05,Helvetica,Arial,sans-serif;font-size:1rem;font-weight:400;line-height:1.56;margin:0;text-align:left}h1,h2{margin-bottom:.5rem}h1,h2,p{margin-top:0}p{margin-bottom:1rem}small{font-size:80%}a{background-color:transparent;color:#045462}a:hover{color:#011519;text-decoration:none}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}img{border-style:none}img,svg{vertical-align:middle}svg{overflow:hidden}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}.container{margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem;width:100%}@media (min-width:576px){.container{max-width:540px}}@media (min-width:768px){.container{max-width:720px}}@media (min-width:992px){.container{max-width:960px}}@media (min-width:1200px){.container{max-width:1140px}}@media (min-width:1500px){.container{max-width:1396px}}.d-inline-block{display:inline-block!important}.d-flex{display:flex!important}.flex-column{flex-direction:column!important}.flex-grow-1{flex-grow:1!important}.overflow-hidden{overflow:hidden!important}.shadow{box-shadow:0 3px 12px rgba(0,0,0,.16)!important}.min-vh-100{min-height:100vh!important}.mt-2{margin-top:1rem!important}.m-5{margin:2.5rem!important}.p-0{padding:0!important}.p-2{padding:1rem!important}.py-8{padding-bottom:4rem!important;padding-top:4rem!important}.text-left{text-align:left!important}.text-center{text-align:center!important}@keyframes placeholderShimmerSmall{0%{background-position:-400px 0}to{background-position:400px 0}}@keyframes dfi{0%{opacity:0}to{opacity:1;visibility:visible}}.icon{--color-1:currentColor;--color-2:currentColor;align-items:center;display:inline-flex;height:1rem;line-height:normal;vertical-align:middle;width:1rem}.icon svg{height:100%;width:100%;fill:currentColor}.card{background-color:transparent;border:1px solid #ebebeb;border-radius:.5rem;padding:1rem}@keyframes messageFadeIn{0%{opacity:0}to{opacity:1}}@keyframes checkIconFadeIn{0%{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23f4f4f4' d='M8.177 21.993 0 12.582l1.15-1 7 8.056L22.827 2.006 24 2.981z' data-name='check'/%3E%3C/svg%3E")}to{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%234ab54f' d='M8.177 21.993 0 12.582l1.15-1 7 8.056L22.827 2.006 24 2.981z' data-name='check'/%3E%3C/svg%3E")}}html{font-size:16px;line-height:1.56}h1{font-size:2.125rem}h1,h2{line-height:1.5}h2{font-size:1.42rem;margin:1.75rem 0}small{font-size:.75rem;line-height:1.2}a{font-weight:500;text-decoration:none}a:hover{color:#1c6471}a:hover svg{--color-1:#1c6471;--color-2:#1c6471}@font-face{font-family:MuseoSansW05;font-weight:400;src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-300.eot?#iefix);src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-300.eot?#iefix) format("eot"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-300.woff2) format("woff2"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-300.woff) format("woff"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-300.ttf) format("truetype")}@font-face{font-family:MuseoSansW05;font-weight:500;src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-500.eot?#iefix);src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-500.eot?#iefix) format("eot"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-500.woff2) format("woff2"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-500.woff) format("woff"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-500.ttf) format("truetype")}@font-face{font-family:MuseoSansW05;font-weight:700;src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-700.eot?#iefix);src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-700.eot?#iefix) format("eot"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-700.woff2) format("woff2"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-700.woff) format("woff"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-700.ttf) format("truetype")}@font-face{font-family:MuseoSansW05;font-weight:900;src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-900.eot?#iefix);src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-900.eot?#iefix) format("eot"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-900.woff2) format("woff2"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-900.woff) format("woff"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/museo/MuseoSansW05-900.ttf) format("truetype")}body{font-display:swap;font-size:16px;vertical-align:baseline}@font-face{font-family:OCRAStd;src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/ocr/ocrastd.eot?#iefix);src:url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/ocr/ocrastd.eot?#iefix) format("eot"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/ocr/ocrastd.woff2) format("woff2"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/ocr/ocrastd.woff) format("woff"),url(https://cdn.apps.01.cf.eu01.stackit.cloud/fonts/ocr/ocrastd.ttf) format("truetype")}.mw-text{max-width:70ch}[tabindex]:not(.disabled):active,[tabindex]:not(.disabled):active:focus{outline:none}@keyframes dialog-full-animation{0%{transform:translateY(20vh)}to{transform:none}}@keyframes dialog-animation{0%{transform:translateY(-50px)}to{transform:none}}@keyframes placeholderShimmer{0%{background-position:-600px 0}to{background-position:700px 0}}@keyframes rotate{8%{transform:rotate(0deg)}42%{transform:rotate(-180deg)}58%{transform:rotate(-180deg)}92%{transform:rotate(-1turn)}to{transform:rotate(-1turn)}}@keyframes open{0%{transform:translateX(0)}18%{transform:translateX(calc(15%*var(--invert)))}52%{transform:translateX(calc(15%*var(--invert)))}70%{transform:translateX(0)}to{transform:translateX(0)}}.content{margin-top:6rem}body{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}</style>
+
+    <style>
+      .check-wrapper {
+        display: inline-block;
+        padding: 2.5rem;
+        border-radius: 100%;
+        background-color: #ecf8ed;
+      }
+
+      .check {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+
+      .success {
+        fill: #4ab54f;
+        color: #4ab54f;
+      }
+
+      .top-bar {
+        height: 1.5rem;
+        background-color: #d8d8d8;
+        width: 100%;
+        padding-left: 0.5rem;
+      }
+
+      .dot {
+        width: 0.8rem;
+        height: 0.8rem;
+        margin-top: 0.35rem;
+        margin-left: 0.125rem;
+        border-radius: 100%;
+        display: inline-block;
+        background-color: #b2b2b2;
+      }
+
+      .footer-content {
+        font-size: small;
+        margin: 1rem;
+      }
+
+      .footer-content a {
+        margin: 0.5rem;
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="d-flex min-vh-100 flex-column">
+      <div class="logo m-5">
+        <img
+          alt="logo"
+          src="https://cdn.apps.01.cf.eu01.stackit.cloud/assets/img/logo_inverted.svg"
+        />
+      </div>
+
+      <div class="container flex-grow-1 mt-2 text-center">
+        <div class="card shadow d-inline-block p-0 overflow-hidden">
+          <div class="top-bar text-left">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="p-2 py-8">
+            <div class="check-wrapper">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xml:space="preserve"
+                viewBox="0 0 32 32"
+                class="icon check success"
+              >
+                <path
+                  d="M26.847 7.293 11.554 22.586l-6.401-6.401-1.414 1.414 7.815 7.815L28.261 8.707z"
+                />
+              </svg>
+            </div>
+
+            <h1 class="success mt-2">Login Success</h1>
+
+            <h2>Hello {{.Email}},</h2>
+            <p class="mw-text">
+              You can close this window and return to the STACKIT CLI, or we
+              will redirect you to the
+              <a href="https://www.stackit.de">STACKIT website</a> in 1 minute.
+            </p>
+            <p>
+              For more info and documentation, check the
+              <a href="https://github.com/stackitcloud/stackit-cli">CLI repo</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-content">
+        <a
+          tabindex="0"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.stackit.de/en/imprint"
+        >
+          Imprint </a
+        ><a
+          tabindex="0"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.stackit.de/en/general-terms-and-conditions"
+          >Terms &amp; Conditions</a
+        ><a
+          tabindex="0"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.stackit.de/en/data-protection-notice"
+        >
+          Data Protection
+        </a>
+      </div>
+    </div>
+  </body>
 </html>
