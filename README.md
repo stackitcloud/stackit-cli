@@ -61,6 +61,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | OpenSearch              |                           | Will be integrated soon |
 | PostgreSQL Flex         |                           | Will be integrated soon |
 | RabbitMQ                |                           | Will be integrated soon |
+| Resource Manager        | `project`                 | :white_check_mark:      |
 | Secrets Manager         |                           | Will be integrated soon |
 | Service Account         | `service-account`         | :white_check_mark:      |
 
