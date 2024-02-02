@@ -5,6 +5,7 @@ import (
 	"stackit/internal/cmd/postgresflex/user/delete"
 	"stackit/internal/cmd/postgresflex/user/describe"
 	"stackit/internal/cmd/postgresflex/user/list"
+	resetpassword "stackit/internal/cmd/postgresflex/user/reset-password"
 	"stackit/internal/cmd/postgresflex/user/update"
 	"stackit/internal/pkg/args"
 	"stackit/internal/pkg/utils"
@@ -30,4 +31,5 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(describe.NewCmd())
 	cmd.AddCommand(update.NewCmd())
 	cmd.AddCommand(delete.NewCmd())
+	cmd.AddCommand(resetpassword.NewCmd())
 }
