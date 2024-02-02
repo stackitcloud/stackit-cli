@@ -45,7 +45,7 @@ func NewCmd() *cobra.Command {
 				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit mongodbflex user list xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "xxx" in table format`,
+				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy" in table format`,
 				"$ stackit mongodbflex user list xxx --instance-id yyy --output-format pretty"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
