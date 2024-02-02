@@ -10,11 +10,12 @@ import (
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "postgresflex",
-		Short: "Provides functionality for PostgreSQL Flex",
-		Long:  "Provides functionality for PostgreSQL Flex.",
-		Args:  args.NoArgs,
-		Run:   utils.CmdHelp,
+		Use:     "postgresflex",
+		Aliases: []string{"postgresqlflex"},
+		Short:   "Provides functionality for PostgreSQL Flex",
+		Long:    "Provides functionality for PostgreSQL Flex.",
+		Args:    args.NoArgs,
+		Run:     utils.CmdHelp,
 	}
 	addSubcommands(cmd)
 	return cmd
