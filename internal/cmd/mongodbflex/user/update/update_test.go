@@ -62,6 +62,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateUserRequest)) mongodbflex.ApiPartialUpdateUserRequest {
 	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
+	request = request.PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
+		Database: utils.Ptr("default"),
+	})
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -249,20 +252,18 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest mongodbflex.ApiPartialUpdateUserRequest
 	}{
 		{
-			description: "update database only",
-			model:       fixtureInputModel(func(model *inputModel) {}),
-			expectedRequest: fixtureRequest().PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-				Database: utils.Ptr("default"),
-			}),
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
 		},
 		{
-			description: "update roles only",
+			description: "update database only",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Database = nil
-				model.Roles = utils.Ptr([]string{"reader"})
+				model.Roles = nil
+				model.Database = utils.Ptr("default")
 			}),
 			expectedRequest: fixtureRequest().PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-				Roles: &[]string{"reader"},
+				Database: utils.Ptr("default"),
 			}),
 		},
 	}
