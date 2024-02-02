@@ -20,11 +20,11 @@ brew install stackit
 
 ### Linux
 
-We are working on distribution the CLI using a package manager for Linux. For the moment, you can either install via [Homebrew](https://brew.sh/) or refer to the [manual installation](#manual-installation) guide.
+We are working on distributing the CLI using a package manager for Linux. For the moment, you can either install via [Homebrew](https://brew.sh/) or refer to the [manual installation](#manual-installation) guide.
 
 ### Windows
 
-We are working on distribution the CLI using a package manager for Windows. For the moment, please refer to the [manual installation](#manual-installation) guide.
+We are working on distributing the CLI using a package manager for Windows. For the moment, please refer to the [manual installation](#manual-installation) guide.
 
 ## Manual installation
 
