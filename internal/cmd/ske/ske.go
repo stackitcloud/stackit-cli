@@ -1,14 +1,14 @@
 package ske
 
 import (
-	"stackit/internal/cmd/ske/cluster"
-	"stackit/internal/cmd/ske/credentials"
-	"stackit/internal/cmd/ske/describe"
-	"stackit/internal/cmd/ske/disable"
-	"stackit/internal/cmd/ske/enable"
-	"stackit/internal/cmd/ske/options"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/disable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/enable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

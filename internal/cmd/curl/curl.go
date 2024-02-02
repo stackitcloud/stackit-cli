@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/auth"
-	"stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 
 	"github.com/spf13/cobra"
 )

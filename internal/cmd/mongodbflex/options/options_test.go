@@ -3,9 +3,10 @@ package options
 import (
 	"context"
 	"fmt"
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/utils"
 	"testing"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"

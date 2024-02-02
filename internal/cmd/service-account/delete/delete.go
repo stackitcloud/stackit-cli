@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/confirm"
-	"stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/services/service-account/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"

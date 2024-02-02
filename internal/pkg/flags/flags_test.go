@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"

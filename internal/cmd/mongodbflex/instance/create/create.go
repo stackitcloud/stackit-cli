@@ -5,17 +5,17 @@ import (
 	"errors"
 	"fmt"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/confirm"
-	cliErr "stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/flags"
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/projectname"
-	"stackit/internal/pkg/services/mongodbflex/client"
-	mongodbflexUtils "stackit/internal/pkg/services/mongodbflex/utils"
-	"stackit/internal/pkg/spinner"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
+	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -237,15 +237,8 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 		return req, err
 	}
 
-	// The number of replicas is enforced by the API according to the instance type
-	var replicas int64
-	if *model.Type == "Single" {
-		replicas = 1
-	} else if *model.Type == "Replica" {
-		replicas = 3
-	} else if *model.Type == "Sharded" {
-		replicas = 9
-	} else {
+	replicas, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
+	if err != nil {
 		return req, fmt.Errorf("invalid MongoDB Flex intance type: %w", err)
 	}
 

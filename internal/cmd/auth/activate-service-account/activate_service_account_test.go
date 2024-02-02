@@ -1,8 +1,9 @@
 package activateserviceaccount
 
 import (
-	"stackit/internal/pkg/globalflags"
 	"testing"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 
 	"github.com/google/go-cmp/cmp"
 )

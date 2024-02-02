@@ -43,6 +43,28 @@ Help is available for any command by specifying the special flag `--help` (or si
 - `stackit <GROUP> <SUB-GROUP> --help`
 - `stackit <GROUP> <SUB-GROUP> <COMMAND> --help`
 
+## Available services
+
+Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
+
+| Service                 | CLI Commands              | Status                  |
+| ----------------------- | ------------------------- | ----------------------- |
+| Argus                   |                           | Will be integrated soon |
+| Authorization           | `project`, `organization` | :white_check_mark:      |
+| DNS                     | `dns`                     | :white_check_mark:      |
+| Kubernetes Engine (SKE) | `ske`                     | :white_check_mark:      |
+| Load Balancer           |                           | Will be integrated soon |
+| LogMe                   |                           | Will be integrated soon |
+| MariaDB                 |                           | Will be integrated soon |
+| MongoDB Flex            | `mongodbflex`             | :white_check_mark:      |
+| Object Storage          |                           | Will be integrated soon |
+| OpenSearch              |                           | Will be integrated soon |
+| PostgreSQL Flex         |                           | Will be integrated soon |
+| RabbitMQ                |                           | Will be integrated soon |
+| Resource Manager        | `project`                 | :white_check_mark:      |
+| Secrets Manager         |                           | Will be integrated soon |
+| Service Account         | `service-account`         | :white_check_mark:      |
+
 ## Authentication
 
 Most of the commands will require you to be authenticated. Currently it's possible to authenticate with your personal user or with a service account.

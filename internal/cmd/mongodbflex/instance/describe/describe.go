@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/errors"
-	"stackit/internal/pkg/examples"
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/services/mongodbflex/client"
-	"stackit/internal/pkg/tables"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
+	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -91,6 +92,12 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 		acls := *instance.Acl.Items
 		strings.Join(acls, ",")
 
+		instanceType, err := mongodbflexUtils.GetInstanceType(*instance.Replicas)
+		if err != nil {
+			// Should never happen
+			instanceType = ""
+		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
 		table.AddSeparator()
@@ -106,11 +113,15 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 		table.AddSeparator()
 		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
 		table.AddSeparator()
+		table.AddRow("TYPE", instanceType)
+		table.AddSeparator()
+		table.AddRow("REPLICAS", *instance.Replicas)
+		table.AddSeparator()
 		table.AddRow("CPU", *instance.Flavor.Cpu)
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
 		table.AddSeparator()
-		err := table.Display(cmd)
+		err = table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

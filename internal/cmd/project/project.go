@@ -2,15 +2,16 @@ package project
 
 import (
 	"fmt"
-	"stackit/internal/cmd/project/create"
-	"stackit/internal/cmd/project/delete"
-	"stackit/internal/cmd/project/describe"
-	"stackit/internal/cmd/project/list"
-	"stackit/internal/cmd/project/member"
-	"stackit/internal/cmd/project/role"
-	"stackit/internal/cmd/project/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/member"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/role"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/project/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
