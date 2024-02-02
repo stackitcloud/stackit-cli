@@ -59,7 +59,7 @@ func NewCmd() *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			credentialLabel, err := opensearchUtils.GetCredentialUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
+			credentialLabel, err := opensearchUtils.GetCredentialsUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
 			if err != nil {
 				credentialLabel = model.CredentialsId
 			}

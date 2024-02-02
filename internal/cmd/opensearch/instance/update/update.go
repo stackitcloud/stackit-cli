@@ -72,10 +72,7 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			// Service name and operation needed for error handling
-			service := "opensearch"
-			operation := cmd.Use
-			model, err := parseInput(cmd, args, service, operation)
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -100,7 +97,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, service, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -155,7 +152,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsRequiredTogether(planNameFlag, versionFlag)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, service, operation string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	service := "opensearch"
+	operation := cmd.Use
 	instanceId := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
@@ -211,7 +210,9 @@ type OpenSearchClient interface {
 	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, service string, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
+	service := "opensearch"
+
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
@@ -223,7 +224,7 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 	}
 
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
-		planId, err = opensearchUtils.LoadPlanId(service, model.PlanName, model.Version, offerings)
+		planId, err = opensearchUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {

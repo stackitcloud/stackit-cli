@@ -326,7 +326,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd, "opensearch", "create")
+			model, err := parseInput(cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -464,7 +464,7 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, "opensearch", tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, client)
 			if err != nil {
 				if !tt.isValid {
 					return

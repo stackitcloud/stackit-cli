@@ -25,7 +25,9 @@ func ValidatePlanId(service, planId string, offerings *opensearch.ListOfferingsR
 	}
 }
 
-func LoadPlanId(service, planName, version string, offerings *opensearch.ListOfferingsResponse) (*string, error) {
+func LoadPlanId(planName, version string, offerings *opensearch.ListOfferingsResponse) (*string, error) {
+	service := "opensearch"
+
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false
@@ -74,7 +76,7 @@ func GetInstanceName(ctx context.Context, apiClient OpenSearchClient, projectId,
 	return *resp.Name, nil
 }
 
-func GetCredentialUsername(ctx context.Context, apiClient OpenSearchClient, projectId, instanceId, credentialsId string) (string, error) {
+func GetCredentialsUsername(ctx context.Context, apiClient OpenSearchClient, projectId, instanceId, credentialsId string) (string, error) {
 	resp, err := apiClient.GetCredentialsExecute(ctx, projectId, instanceId, credentialsId)
 	if err != nil {
 		return "", fmt.Errorf("get OpenSearch credentials: %w", err)

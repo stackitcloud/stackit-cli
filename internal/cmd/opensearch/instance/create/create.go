@@ -74,10 +74,7 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			// Service name and operation needed for error handling
-			service := "opensearch"
-			operation := cmd.Use
-			model, err := parseInput(cmd, service, operation)
+			model, err := parseInput(cmd)
 			if err != nil {
 				return err
 			}
@@ -102,7 +99,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, service, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -157,7 +154,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, service, operation string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command) (*inputModel, error) {
+	service := "opensearch"
+	operation := cmd.Use
+
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -202,7 +202,8 @@ type OpenSearchClient interface {
 	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, service string, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
+	service := "opensearch"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
@@ -214,7 +215,7 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 	}
 
 	if model.PlanId == nil {
-		planId, err = opensearchUtils.LoadPlanId(service, model.PlanName, model.Version, offerings)
+		planId, err = opensearchUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {

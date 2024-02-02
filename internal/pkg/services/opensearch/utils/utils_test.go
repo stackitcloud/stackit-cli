@@ -91,7 +91,7 @@ func TestGetInstanceName(t *testing.T) {
 	}
 }
 
-func TestCredentialUsername(t *testing.T) {
+func TestGetCredentialsUsername(t *testing.T) {
 	tests := []struct {
 		description         string
 		getCredentialsFails bool
@@ -125,7 +125,7 @@ func TestCredentialUsername(t *testing.T) {
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
