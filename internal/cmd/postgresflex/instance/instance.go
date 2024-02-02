@@ -1,13 +1,13 @@
 package instance
 
 import (
-	"stackit/internal/cmd/postgresflex/instance/create"
-	"stackit/internal/cmd/postgresflex/instance/delete"
-	"stackit/internal/cmd/postgresflex/instance/describe"
-	"stackit/internal/cmd/postgresflex/instance/list"
-	"stackit/internal/cmd/postgresflex/instance/update"
-	"stackit/internal/pkg/args"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

@@ -1,9 +1,9 @@
 package client
 
 import (
-	"stackit/internal/pkg/auth"
-	"stackit/internal/pkg/config"
-	"stackit/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

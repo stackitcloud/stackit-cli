@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"stackit/internal/pkg/globalflags"
-	"stackit/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
