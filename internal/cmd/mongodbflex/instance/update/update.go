@@ -160,7 +160,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Service:   "mongodbflex",
-			Operation: "update",
+			Operation: cmd.Use,
 		}
 	}
 

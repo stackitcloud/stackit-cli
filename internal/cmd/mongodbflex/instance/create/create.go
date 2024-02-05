@@ -167,13 +167,13 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Service:   "mongodbflex",
-			Operation: "create",
+			Operation: cmd.Use,
 		}
 	}
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Service:   "mongodbflex",
-			Operation: "create",
+			Operation: cmd.Use,
 		}
 	}
 
