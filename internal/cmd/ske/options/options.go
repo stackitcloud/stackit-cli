@@ -39,8 +39,11 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "List SKE provider options",
-		Long:  "List STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types)\nPass one or more flags to filter what categories are shown.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s",
+			"List STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types).",
+			"Pass one or more flags to filter what categories are shown.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for all categories`,

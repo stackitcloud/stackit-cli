@@ -96,7 +96,7 @@ func NewCmd() *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	sortByFlagOptions := []string{"subject", "role"}
 
-	cmd.Flags().String(subjectFlag, "", "Filter by subject (Identifier of user, service account or client. Usually email address in case of users or name in case of clients)")
+	cmd.Flags().String(subjectFlag, "", "Filter by subject (the identifier of a user, service account or client). This is usually the email address (for users) or name (for clients)")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Var(flags.EnumFlag(false, "subject", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
 }

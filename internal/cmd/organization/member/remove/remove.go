@@ -42,7 +42,7 @@ func NewCmd() *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Remove a member from an organization.",
 			"A member is a combination of a subject (user, service account or client) and a role.",
-			"The subject is usually email address for users or name in case of clients.",
+			"The subject is usually email address (for users) or name (for clients).",
 		),
 		Args: args.SingleArg(subjectArg, nil),
 		Example: examples.Build(
