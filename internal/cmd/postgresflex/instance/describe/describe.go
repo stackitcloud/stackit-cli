@@ -88,8 +88,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
-		acls := *instance.Acl.Items
-		strings.Join(acls, ",")
+		aclsArray := *instance.Acl.Items
+		acls := strings.Join(aclsArray, ",")
 
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)

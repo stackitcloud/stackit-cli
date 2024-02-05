@@ -89,8 +89,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
-		acls := *instance.Acl.Items
-		strings.Join(acls, ",")
+		aclsArray := *instance.Acl.Items
+		acls := strings.Join(aclsArray, ",")
 
 		instanceType, err := mongodbflexUtils.GetInstanceType(*instance.Replicas)
 		if err != nil {
