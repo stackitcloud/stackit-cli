@@ -7,7 +7,7 @@ Delete credentials of an OpenSearch instance
 Delete credentials of an OpenSearch instance
 
 ```
-stackit opensearch credentials delete CREDENTIAL_ID [flags]
+stackit opensearch credentials delete CREDENTIALS_ID [flags]
 ```
 
 ### Examples

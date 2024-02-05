@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	credentialsIdArg = "CREDENTIAL_ID" //nolint:gosec // linter false positive
+	credentialsIdArg = "CREDENTIALS_ID" //nolint:gosec // linter false positive
 
 	instanceIdFlag = "instance-id"
 )

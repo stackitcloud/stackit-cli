@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a credential for instance %s?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %s?", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -75,7 +75,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create OpenSearch credentials: %w", err)
 			}
 
-			cmd.Printf("Created credential for instance %s. Credential ID: %s\n\n", instanceLabel, *resp.Id)
+			cmd.Printf("Created credentials for instance %s. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
 			cmd.Printf("Username: %s\n", *resp.Raw.Credentials.Username)
 			if model.HidePassword {
 				cmd.Printf("Password: <hidden>\n")

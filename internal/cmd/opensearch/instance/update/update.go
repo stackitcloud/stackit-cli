@@ -205,12 +205,12 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-type OpenSearchClient interface {
+type openSearchClient interface {
 	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) opensearch.ApiPartialUpdateInstanceRequest
 	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
 	service := "opensearch"
 
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)

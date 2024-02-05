@@ -7,7 +7,7 @@ Get details of credentials of an OpenSearch instance
 Get details of credentials of an OpenSearch instance. The password will be shown in plain text in the output.
 
 ```
-stackit opensearch credentials describe CREDENTIAL_ID [flags]
+stackit opensearch credentials describe CREDENTIALS_ID [flags]
 ```
 
 ### Examples

@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	credentialsIdArg = "CREDENTIAL_ID" //nolint:gosec // linter false positive
+	credentialsIdArg = "CREDENTIALS_ID" //nolint:gosec // linter false positive
 
 	instanceIdFlag = "instance-id"
 )
@@ -59,13 +59,13 @@ func NewCmd() *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			credentialLabel, err := opensearchUtils.GetCredentialsUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
+			credentialsLabel, err := opensearchUtils.GetCredentialsUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
 			if err != nil {
-				credentialLabel = model.CredentialsId
+				credentialsLabel = model.CredentialsId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credential %s of instance %s? (This cannot be undone)", credentialLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials %s of instance %s? (This cannot be undone)", credentialsLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -79,7 +79,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete OpenSearch credentials: %w", err)
 			}
 
-			cmd.Printf("Deleted credential %s of instance %s\n", credentialLabel, instanceLabel)
+			cmd.Printf("Deleted credentials %s of instance %s\n", credentialsLabel, instanceLabel)
 			return nil
 		},
 	}

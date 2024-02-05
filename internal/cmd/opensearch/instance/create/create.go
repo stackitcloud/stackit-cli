@@ -197,12 +197,12 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-type OpenSearchClient interface {
+type openSearchClient interface {
 	CreateInstance(ctx context.Context, projectId string) opensearch.ApiCreateInstanceRequest
 	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient OpenSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
 	service := "opensearch"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
