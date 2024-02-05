@@ -309,7 +309,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd, tt.argValues, "mongodbflex", "update")
+			model, err := parseInput(cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -559,7 +559,7 @@ func TestBuildRequest(t *testing.T) {
 				listStoragesFails: tt.listStoragesFails,
 				listStoragesResp:  tt.listStoragesResp,
 			}
-			request, err := buildRequest(testCtx, "mongodbflex", tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, client)
 			if err != nil {
 				if !tt.isValid {
 					return
