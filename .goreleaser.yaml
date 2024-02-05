@@ -20,9 +20,27 @@ builds:
   - id: macos-builds
     env:
       - CGO_ENABLED=0
+      - BUNDLE_ID=cloud.stackit.cli
+      - 'APPLE_APPLICATION_IDENTITY=Developer ID Application: Schwarz IT KG'
     goos:
       - darwin
     binary: "stackit"
+    goarch:
+      - arm64
+      - amd64
+    hooks:
+      post:
+        - |
+          sh -c '
+          codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
+          codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
+          ls -l "dist/macos_{{.Target}}"
+          hdiutil create -volname "STACKIT-CLI" -srcfolder "dist/macos-builds_{{.Target}}/{{.Name}}" -ov -format UDZO "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          xcrun notarytool submit --keychain-profile "stackit-cli" --wait --progress dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+          xcrun stapler staple "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+          '
 
 archives:
   - format: tar.gz
