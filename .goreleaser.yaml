@@ -44,17 +44,11 @@ builds:
 
 archives:
   - format: tar.gz
-    # This name template makes the OS and Arch compatible with the results of `uname`
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
         format: zip
+    files:
+      - dist/*.dmg
 
 release:
   draft: true
@@ -99,20 +93,20 @@ brews:
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
     # Not setting it for now so we can publish prerelease tags
-    # skip_upload: auto
+    skip_upload: auto
 
-snapcrafts:
-  # IDs of the builds for which to create packages for
-  - builds:
-    - linux-builds
-    # The name of the snap
-    name: stackit
-    # The canonical title of the application, displayed in the software
-    # centre graphical frontends
-    title: STACKIT CLI
-    publish: true
-    summary: A command-line interface to manage STACKIT resources.
-    description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
-    license: Apache-2.0
-    # Will only publish to `edge` and `beta` channels 
-    grade: devel
+# snapcrafts:
+#   # IDs of the builds for which to create packages for
+#   - builds:
+#     - linux-builds
+#     # The name of the snap
+#     name: stackit
+#     # The canonical title of the application, displayed in the software
+#     # centre graphical frontends
+#     title: STACKIT CLI
+#     publish: true
+#     summary: A command-line interface to manage STACKIT resources.
+#     description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
+#     license: Apache-2.0
+#     # Will only publish to `edge` and `beta` channels 
+#     grade: devel
