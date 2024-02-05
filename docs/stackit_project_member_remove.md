@@ -1,6 +1,6 @@
 ## stackit project member remove
 
-Removes a member from a project.
+Removes a member from a project
 
 ### Synopsis
 

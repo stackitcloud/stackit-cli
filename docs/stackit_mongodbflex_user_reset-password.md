@@ -4,7 +4,7 @@ Resets the password of a MongoDB Flex user
 
 ### Synopsis
 
-Resets the password of a MongoDB Flex user. The new password is returned in the response.
+Resets the password of a MongoDB Flex user. The new password is shown in the command's output.
 
 ```
 stackit mongodbflex user reset-password USER_ID [flags]

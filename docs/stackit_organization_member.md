@@ -30,5 +30,5 @@ stackit organization member [flags]
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
 * [stackit organization member add](./stackit_organization_member_add.md)	 - Adds a member to an organization
 * [stackit organization member list](./stackit_organization_member_list.md)	 - Lists members of an organization
-* [stackit organization member remove](./stackit_organization_member_remove.md)	 - Removes a member from an organization.
+* [stackit organization member remove](./stackit_organization_member_remove.md)	 - Removes a member from an organization
 

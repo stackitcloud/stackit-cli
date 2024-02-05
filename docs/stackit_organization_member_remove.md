@@ -1,6 +1,6 @@
 ## stackit organization member remove
 
-Removes a member from an organization.
+Removes a member from an organization
 
 ### Synopsis
 
