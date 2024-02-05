@@ -1,10 +1,10 @@
 ## stackit project describe
 
-Show details of a STACKIT project
+Shows details of a STACKIT project
 
 ### Synopsis
 
-Show details of a STACKIT project.
+Shows details of a STACKIT project.
 
 ```
 stackit project describe [flags]

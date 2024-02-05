@@ -24,8 +24,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("get-jwks %s", emailArg),
-		Short: "Gets the JWKS for a service account",
-		Long:  "Gets the JSON Web Key set (JWKS) for a service account. Only JSON output is supported.",
+		Short: "Shows the JWKS for a service account",
+		Long:  "Shows the JSON Web Key set (JWKS) for a service account. Only JSON output is supported.",
 		Args:  args.SingleArg(emailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

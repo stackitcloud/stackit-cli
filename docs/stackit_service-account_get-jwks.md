@@ -1,10 +1,10 @@
 ## stackit service-account get-jwks
 
-Gets the JWKS for a service account
+Shows the JWKS for a service account
 
 ### Synopsis
 
-Gets the JSON Web Key set (JWKS) for a service account. Only JSON output is supported.
+Shows the JSON Web Key set (JWKS) for a service account. Only JSON output is supported.
 
 ```
 stackit service-account get-jwks EMAIL [flags]
