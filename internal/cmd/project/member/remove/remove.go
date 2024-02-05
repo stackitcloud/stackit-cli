@@ -38,7 +38,7 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("remove %s", subjectArg),
-		Short: "Removes a member from a project.",
+		Short: "Removes a member from a project",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Removes a member from a project.",
 			"A member is a combination of a subject (user, service account or client) and a role.",
