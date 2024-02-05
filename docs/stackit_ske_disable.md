@@ -4,7 +4,7 @@ Disables SKE for a project
 
 ### Synopsis
 
-Disables STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters
+Disables STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters.
 
 ```
 stackit ske disable [flags]

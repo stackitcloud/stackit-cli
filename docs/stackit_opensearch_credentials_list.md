@@ -1,10 +1,10 @@
 ## stackit opensearch credentials list
 
-List all credentials' IDs for an OpenSearch instance
+Lists all credentials' IDs for an OpenSearch instance
 
 ### Synopsis
 
-List all credentials' IDs for an OpenSearch instance
+Lists all credentials' IDs for an OpenSearch instance.
 
 ```
 stackit opensearch credentials list [flags]

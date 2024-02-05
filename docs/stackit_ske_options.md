@@ -1,11 +1,11 @@
 ## stackit ske options
 
-List SKE provider options
+Lists SKE provider options
 
 ### Synopsis
 
-List STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types)
-Pass one or more flags to filter what categories are shown
+Lists STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types).
+Pass one or more flags to filter what categories are shown.
 
 ```
 stackit ske options [flags]

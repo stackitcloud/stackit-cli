@@ -47,8 +47,8 @@ type flavorStorages struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
-		Short: "List MongoDB Flex options",
-		Long:  "List MongoDB Flex options (flavors, versions and storages for a given flavor)\nPass one or more flags to filter what categories are shown.",
+		Short: "Lists MongoDB Flex options",
+		Long:  "Lists MongoDB Flex options (flavors, versions and storages for a given flavor)\nPass one or more flags to filter what categories are shown.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

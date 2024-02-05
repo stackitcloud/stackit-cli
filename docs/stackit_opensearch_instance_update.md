@@ -4,7 +4,7 @@ Updates an OpenSearch instance
 
 ### Synopsis
 
-Updates an OpenSearch instance
+Updates an OpenSearch instance.
 
 ```
 stackit opensearch instance update INSTANCE_ID [flags]

@@ -4,7 +4,7 @@ Enables SKE for a project
 
 ### Synopsis
 
-Enables STACKIT Kubernetes Engine (SKE) for a project
+Enables STACKIT Kubernetes Engine (SKE) for a project.
 
 ```
 stackit ske enable [flags]

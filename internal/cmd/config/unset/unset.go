@@ -44,8 +44,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
-		Short: "Unset CLI configuration options",
-		Long:  "Unset CLI configuration options",
+		Short: "Unsets CLI configuration options",
+		Long:  "Unsets CLI configuration options.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

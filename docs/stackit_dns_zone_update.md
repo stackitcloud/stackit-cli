@@ -4,7 +4,7 @@ Updates a DNS zone
 
 ### Synopsis
 
-Updates a DNS zone. Performs a partial update; fields not provided are kept unchanged
+Updates a DNS zone.
 
 ```
 stackit dns zone update ZONE_ID [flags]

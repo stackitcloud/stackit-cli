@@ -1,10 +1,10 @@
 ## stackit project update
 
-Update a STACKIT project
+Updates a STACKIT project
 
 ### Synopsis
 
-Update a STACKIT project
+Updates a STACKIT project.
 
 ```
 stackit project update [flags]

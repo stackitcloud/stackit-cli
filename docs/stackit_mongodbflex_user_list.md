@@ -1,10 +1,10 @@
 ## stackit mongodbflex user list
 
-List all MongoDB Flex users of an instance
+Lists all MongoDB Flex users of an instance
 
 ### Synopsis
 
-List all MongoDB Flex users of an instance.
+Lists all MongoDB Flex users of an instance.
 
 ```
 stackit mongodbflex user list [flags]

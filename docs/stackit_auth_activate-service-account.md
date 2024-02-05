@@ -1,10 +1,10 @@
 ## stackit auth activate-service-account
 
-Activate service account authentication
+Authenticates using a service account
 
 ### Synopsis
 
-Activate authentication using service account credentials.
+Authenticates to the CLI using service account credentials.
 Subsequent commands will be authenticated using the service account credentials provided.
 For more details on how to configure your service account, check our Authentication guide at https://github.com/stackitcloud/stackit-cli/blob/main/AUTHENTICATION.md.
 

@@ -4,7 +4,7 @@ Provides functionality for MongoDB Flex instances
 
 ### Synopsis
 
-Provides functionality for MongoDB Flex instances
+Provides functionality for MongoDB Flex instances.
 
 ```
 stackit mongodbflex instance [flags]
@@ -28,9 +28,9 @@ stackit mongodbflex instance [flags]
 ### SEE ALSO
 
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
-* [stackit mongodbflex instance create](./stackit_mongodbflex_instance_create.md)	 - Create a MongoDB Flex instance
-* [stackit mongodbflex instance delete](./stackit_mongodbflex_instance_delete.md)	 - Delete a MongoDB Flex instance
-* [stackit mongodbflex instance describe](./stackit_mongodbflex_instance_describe.md)	 - Get details of a MongoDB Flex instance
-* [stackit mongodbflex instance list](./stackit_mongodbflex_instance_list.md)	 - List all MongoDB Flex instances
-* [stackit mongodbflex instance update](./stackit_mongodbflex_instance_update.md)	 - Update a MongoDB Flex instance
+* [stackit mongodbflex instance create](./stackit_mongodbflex_instance_create.md)	 - Creates a MongoDB Flex instance
+* [stackit mongodbflex instance delete](./stackit_mongodbflex_instance_delete.md)	 - Deletes a MongoDB Flex instance
+* [stackit mongodbflex instance describe](./stackit_mongodbflex_instance_describe.md)	 - Shows details  of a MongoDB Flex instance
+* [stackit mongodbflex instance list](./stackit_mongodbflex_instance_list.md)	 - Lists all MongoDB Flex instances
+* [stackit mongodbflex instance update](./stackit_mongodbflex_instance_update.md)	 - Updates a MongoDB Flex instance
 

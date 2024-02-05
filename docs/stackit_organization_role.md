@@ -4,7 +4,7 @@ Provides functionality regarding organization roles
 
 ### Synopsis
 
-Provides functionality regarding organization roles
+Provides functionality regarding organization roles.
 
 ```
 stackit organization role [flags]
@@ -28,5 +28,5 @@ stackit organization role [flags]
 ### SEE ALSO
 
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
-* [stackit organization role list](./stackit_organization_role_list.md)	 - List roles and permissions of an organization
+* [stackit organization role list](./stackit_organization_role_list.md)	 - Lists roles and permissions of an organization
 

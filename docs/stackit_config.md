@@ -4,7 +4,7 @@ CLI configuration options
 
 ### Synopsis
 
-CLI configuration options
+CLI configuration options.
 
 ```
 stackit config [flags]
@@ -28,7 +28,7 @@ stackit config [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit config list](./stackit_config_list.md)	 - List the current CLI configuration values
-* [stackit config set](./stackit_config_set.md)	 - Set CLI configuration options
-* [stackit config unset](./stackit_config_unset.md)	 - Unset CLI configuration options
+* [stackit config list](./stackit_config_list.md)	 - Lists the current CLI configuration values
+* [stackit config set](./stackit_config_set.md)	 - Sets CLI configuration options
+* [stackit config unset](./stackit_config_unset.md)	 - Unsets CLI configuration options
 

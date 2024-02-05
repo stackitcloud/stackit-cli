@@ -34,9 +34,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "activate-service-account",
-		Short: "Activate service account authentication",
+		Short: "Authenticates using a service account",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Activate authentication using service account credentials.",
+			"Authenticates to the CLI using service account credentials.",
 			"Subsequent commands will be authenticated using the service account credentials provided.",
 			"For more details on how to configure your service account, check our Authentication guide at https://github.com/stackitcloud/stackit-cli/blob/main/AUTHENTICATION.md.",
 		),

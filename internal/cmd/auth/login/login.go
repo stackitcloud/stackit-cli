@@ -13,8 +13,8 @@ import (
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "Login to the STACKIT CLI",
-		Long:  "Login to the STACKIT CLI",
+		Short: "Logs in to the STACKIT CLI",
+		Long:  "Logs in to the STACKIT CLI using a user account.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

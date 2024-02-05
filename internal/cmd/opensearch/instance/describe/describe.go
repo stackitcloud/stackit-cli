@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Get details of an OpenSearch instance",
-		Long:  "Get details of an OpenSearch instance",
+		Short: "Shows details  of an OpenSearch instance",
+		Long:  "Shows details  of an OpenSearch instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

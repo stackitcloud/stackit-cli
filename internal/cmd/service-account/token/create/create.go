@@ -33,9 +33,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create an access token for a service account",
+		Short: "Creates an access token for a service account",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Create an access token for a service account.",
+			"Creates an access token for a service account.",
 			"The access token can be then used for API calls (where enabled).",
 			"The token is only displayed upon creation, and it will not be recoverable later.",
 		),

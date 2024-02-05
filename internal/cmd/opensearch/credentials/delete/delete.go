@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
-		Short: "Delete credentials of an OpenSearch instance",
-		Long:  "Delete credentials of an OpenSearch instance",
+		Short: "Deletes credentials of an OpenSearch instance",
+		Long:  "Deletes credentials of an OpenSearch instance.",
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

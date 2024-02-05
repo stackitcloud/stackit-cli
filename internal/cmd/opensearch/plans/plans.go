@@ -30,8 +30,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
-		Short: "List all OpenSearch service plans",
-		Long:  "List all OpenSearch service plans",
+		Short: "Lists all OpenSearch service plans",
+		Long:  "Lists all OpenSearch service plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

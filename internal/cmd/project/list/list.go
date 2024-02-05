@@ -43,8 +43,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List STACKIT projects",
-		Long:  "List all STACKIT projects that match certain criteria. At least one of parent-id, project-id-like or member flag must be provided",
+		Short: "Lists STACKIT projects",
+		Long:  "Lists all STACKIT projects that match certain criteria.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

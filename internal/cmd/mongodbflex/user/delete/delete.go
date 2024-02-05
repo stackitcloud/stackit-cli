@@ -34,9 +34,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", userIdArg),
-		Short: "Delete a MongoDB Flex user",
+		Short: "Deletes a MongoDB Flex user",
 		Long: fmt.Sprintf("%s\n%s",
-			"Delete a MongoDB Flex user by ID. You can get the IDs of users for an instance by running:",
+			"Deletes a MongoDB Flex user by ID. You can get the IDs of users for an instance by running:",
 			"  $ stackit mongodbflex user list --instance-id <INSTANCE_ID>",
 		),
 		Example: examples.Build(

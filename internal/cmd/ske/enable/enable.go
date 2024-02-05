@@ -26,7 +26,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
 		Short: "Enables SKE for a project",
-		Long:  "Enables STACKIT Kubernetes Engine (SKE) for a project",
+		Long:  "Enables STACKIT Kubernetes Engine (SKE) for a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

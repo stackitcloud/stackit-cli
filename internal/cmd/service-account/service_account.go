@@ -17,7 +17,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "service-account",
 		Short: "Provides functionality for service accounts",
-		Long:  "Provides functionality for service accounts",
+		Long:  "Provides functionality for service accounts.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

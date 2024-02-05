@@ -57,8 +57,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Update a MongoDB Flex instance",
-		Long:  "Update a MongoDB Flex instance.",
+		Short: "Updates a MongoDB Flex instance",
+		Long:  "Updates a MongoDB Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the name of a MongoDB Flex instance`,
@@ -135,7 +135,7 @@ func configureFlags(cmd *cobra.Command) {
 	typeFlagOptions := []string{"Single", "Replica", "Sharded"}
 
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
-	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
+	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "Lists of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")

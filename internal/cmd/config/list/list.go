@@ -18,8 +18,8 @@ import (
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List the current CLI configuration values",
-		Long:  "List the current CLI configuration values",
+		Short: "Lists the current CLI configuration values",
+		Long:  "Lists the current CLI configuration values.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

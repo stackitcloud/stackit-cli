@@ -1,10 +1,10 @@
 ## stackit ske describe
 
-Get overall details regarding SKE
+Shows overall details regarding SKE
 
 ### Synopsis
 
-Get overall details regarding STACKIT Kubernetes Engine (SKE)
+Shows overall details regarding STACKIT Kubernetes Engine (SKE).
 
 ```
 stackit ske describe [flags]

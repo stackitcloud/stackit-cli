@@ -1,10 +1,10 @@
 ## stackit service-account key describe
 
-Get details of a service account key
+Shows details of a service account key
 
 ### Synopsis
 
-Get details of a service account key. Only JSON output is supported.
+Shows details of a service account key. Only JSON output is supported.
 
 ```
 stackit service-account key describe KEY_ID [flags]

@@ -59,8 +59,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a MongoDB Flex instance",
-		Long:  "Create a MongoDB Flex instance.",
+		Short: "Creates a MongoDB Flex instance",
+		Long:  "Creates a MongoDB Flex instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

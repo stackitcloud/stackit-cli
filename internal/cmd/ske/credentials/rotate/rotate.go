@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("rotate %s", clusterNameArg),
-		Short: "Rotate credentials associated to a SKE cluster",
-		Long:  "Rotate credentials associated to a STACKIT Kubernetes Engine (SKE) cluster. The old credentials will be invalid after the operation",
+		Short: "Rotates credentials associated to a SKE cluster",
+		Long:  "Rotates credentials associated to a STACKIT Kubernetes Engine (SKE) cluster. The old credentials will be invalid after the operation.",
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

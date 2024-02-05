@@ -16,7 +16,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "record-set",
 		Short: "Provides functionality for DNS record set",
-		Long:  "Provides functionality for DNS record set",
+		Long:  "Provides functionality for DNS record set.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

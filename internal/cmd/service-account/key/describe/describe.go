@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", keyIdArg),
-		Short: "Get details of a service account key",
-		Long:  "Get details of a service account key. Only JSON output is supported.",
+		Short: "Shows details of a service account key",
+		Long:  "Shows details of a service account key. Only JSON output is supported.",
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

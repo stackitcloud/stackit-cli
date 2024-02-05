@@ -1,10 +1,10 @@
 ## stackit dns zone delete
 
-Delete a DNS zone
+Deletes a DNS zone
 
 ### Synopsis
 
-Delete a DNS zone
+Deletes a DNS zone.
 
 ```
 stackit dns zone delete ZONE_ID [flags]

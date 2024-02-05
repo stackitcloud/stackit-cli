@@ -54,7 +54,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", zoneIdArg),
 		Short: "Updates a DNS zone",
-		Long:  "Updates a DNS zone. Performs a partial update; fields not provided are kept unchanged",
+		Long:  "Updates a DNS zone.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

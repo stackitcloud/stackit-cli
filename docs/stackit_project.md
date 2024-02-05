@@ -29,11 +29,11 @@ stackit project [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit project create](./stackit_project_create.md)	 - Create STACKIT projects
-* [stackit project delete](./stackit_project_delete.md)	 - Delete a STACKIT project
-* [stackit project describe](./stackit_project_describe.md)	 - Get the details of a STACKIT project
-* [stackit project list](./stackit_project_list.md)	 - List STACKIT projects
+* [stackit project create](./stackit_project_create.md)	 - Creates a STACKIT project
+* [stackit project delete](./stackit_project_delete.md)	 - Deletes a STACKIT project
+* [stackit project describe](./stackit_project_describe.md)	 - Shows details of a STACKIT project
+* [stackit project list](./stackit_project_list.md)	 - Lists STACKIT projects
 * [stackit project member](./stackit_project_member.md)	 - Provides functionality regarding project members
 * [stackit project role](./stackit_project_role.md)	 - Provides functionality regarding project roles
-* [stackit project update](./stackit_project_update.md)	 - Update a STACKIT project
+* [stackit project update](./stackit_project_update.md)	 - Updates a STACKIT project
 

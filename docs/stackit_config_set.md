@@ -1,13 +1,13 @@
 ## stackit config set
 
-Set CLI configuration options
+Sets CLI configuration options
 
 ### Synopsis
 
-Set CLI configuration options. 
-All of the configuration options can be set using an environment variable, which takes precedence over what is configured. 
+Sets CLI configuration options.
+All of the configuration options can be set using an environment variable, which takes precedence over what is configured.
 The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.
-Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID
+Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID.
 
 ```
 stackit config set [flags]

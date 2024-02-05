@@ -1,10 +1,10 @@
 ## stackit project member list
 
-List members of a project
+Lists members of a project
 
 ### Synopsis
 
-List members of a project
+Lists members of a project.
 
 ```
 stackit project member list [flags]
@@ -29,7 +29,7 @@ stackit project member list [flags]
   -h, --help             Help for "stackit project member list"
       --limit int        Maximum number of entries to list
       --sort-by string   Sort entries by a specific field, one of ["subject" "role"] (default "subject")
-      --subject string   Filter by subject (Identifier of user, service account or client. Usually email address in case of users or name in case of clients)
+      --subject string   Filter by subject (the identifier of a user, service account or client). This is usually the email address (for users) or name (for clients)
 ```
 
 ### Options inherited from parent commands

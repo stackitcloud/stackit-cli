@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", zoneIdArg),
-		Short: "Delete a DNS zone",
-		Long:  "Delete a DNS zone",
+		Short: "Deletes a DNS zone",
+		Long:  "Deletes a DNS zone.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
