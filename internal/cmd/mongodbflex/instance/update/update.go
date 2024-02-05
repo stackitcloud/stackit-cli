@@ -30,7 +30,6 @@ const (
 	flavorIdFlag       = "flavor-id"
 	cpuFlag            = "cpu"
 	ramFlag            = "ram"
-	replicasFlag       = "replicas"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
@@ -47,7 +46,6 @@ type inputModel struct {
 	FlavorId       *string
 	CPU            *int64
 	RAM            *int64
-	Replicas       *int64
 	StorageClass   *string
 	StorageSize    *int64
 	Version        *string
@@ -138,7 +136,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
 	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
-	cmd.Flags().Int64(replicasFlag, 0, "Number of replicas")
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
@@ -173,7 +170,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		Replicas:        flags.FlagToInt64Pointer(cmd, replicasFlag),
 		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag),
 		Version:         flags.FlagToStringPointer(cmd, versionFlag),
@@ -263,8 +259,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		}
 	}
 
+	var replicas *int64
 	var payloadOptions *map[string]string
 	if model.Type != nil {
+		replicasInt, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
+		if err != nil {
+			return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
+		}
+
+		replicas = &replicasInt
 		payloadOptions = utils.Ptr(map[string]string{
 			"type": *model.Type,
 		})
@@ -275,7 +278,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		Acl:            payloadAcl,
 		BackupSchedule: model.BackupSchedule,
 		FlavorId:       flavorId,
-		Replicas:       model.Replicas,
+		Replicas:       replicas,
 		Storage:        payloadStorage,
 		Version:        model.Version,
 		Options:        payloadOptions,

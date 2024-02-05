@@ -29,7 +29,6 @@ const (
 	flavorIdFlag       = "flavor-id"
 	cpuFlag            = "cpu"
 	ramFlag            = "ram"
-	replicasFlag       = "replicas"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
@@ -38,6 +37,7 @@ const (
 	defaultBackupSchedule = "0 0/6 * * *"
 	defaultStorageClass   = "premium-perf2-mongodb"
 	defaultStorageSize    = 10
+	defaultType           = "Replica"
 	defaultVersion        = "6.0"
 )
 
@@ -146,7 +146,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, defaultVersion, "Version")
-	cmd.Flags().Var(flags.EnumFlag(false, "Replica", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, defaultType, typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, aclFlag)
 	cobra.CheckErr(err)
@@ -237,7 +237,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 
 	replicas, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
 	if err != nil {
-		return req, fmt.Errorf("invalid MongoDB Flex intance type: %w", err)
+		return req, fmt.Errorf("get MongoDB Flex intance type: %w", err)
 	}
 
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{

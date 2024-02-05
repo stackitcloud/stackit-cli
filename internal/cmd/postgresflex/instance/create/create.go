@@ -29,7 +29,6 @@ const (
 	flavorIdFlag       = "flavor-id"
 	cpuFlag            = "cpu"
 	ramFlag            = "ram"
-	replicasFlag       = "replicas"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
@@ -38,6 +37,7 @@ const (
 	defaultBackupSchedule = "0 0/6 * * *"
 	defaultStorageClass   = "premium-perf2-stackit"
 	defaultStorageSize    = 10
+	defaultType           = "Replica"
 	defaultVersion        = "6.0"
 )
 
@@ -146,7 +146,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, defaultVersion, "Version")
-	cmd.Flags().Var(flags.EnumFlag(false, "Replica", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, defaultType, typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, aclFlag)
 	cobra.CheckErr(err)
@@ -235,16 +235,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		return req, err
 	}
 
-	// The number of replicas is enforced by the API according to the instance type
-	var replicas int64
-	if *model.Type == "Single" {
-		replicas = 1
-	} else if *model.Type == "Replica" {
-		replicas = 3
-	} else if *model.Type == "Sharded" {
-		replicas = 9
-	} else {
-		return req, fmt.Errorf("invalid PostgreSQL Flex instance type: %w", err)
+	replicas, err := postgreslexUtils.GetInstanceReplicas(*model.Type)
+	if err != nil {
+		return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
 	}
 
 	req = req.CreateInstancePayload(postgresflex.CreateInstancePayload{

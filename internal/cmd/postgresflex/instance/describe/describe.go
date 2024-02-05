@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
+	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -91,6 +92,12 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 
+		instanceType, err := postgresflexUtils.GetInstanceType(*instance.Replicas)
+		if err != nil {
+			// Should never happen
+			instanceType = ""
+		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
 		table.AddSeparator()
@@ -106,11 +113,15 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		table.AddSeparator()
 		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
 		table.AddSeparator()
+		table.AddRow("TYPE", instanceType)
+		table.AddSeparator()
+		table.AddRow("REPLICAS", *instance.Replicas)
+		table.AddSeparator()
 		table.AddRow("CPU", *instance.Flavor.Cpu)
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
 		table.AddSeparator()
-		err := table.Display(cmd)
+		err = table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
