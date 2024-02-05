@@ -47,11 +47,11 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    files:
-      - dist/*.dmg
-
 release:
   draft: true
+  extra_files:
+    - glob: dist/*.dmg
+
 
 changelog:
   sort: asc
