@@ -98,17 +98,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credential *opensearch.CredentialsResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *opensearch.CredentialsResponse) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
-		table.AddRow("ID", *credential.Id)
+		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", *credential.Raw.Credentials.Username)
+		table.AddRow("USERNAME", *credentials.Raw.Credentials.Username)
 		table.AddSeparator()
-		table.AddRow("PASSWORD", *credential.Raw.Credentials.Password)
+		table.AddRow("PASSWORD", *credentials.Raw.Credentials.Password)
 		table.AddSeparator()
-		table.AddRow("URI", *credential.Raw.Credentials.Uri)
+		table.AddRow("URI", *credentials.Raw.Credentials.Uri)
 		err := table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -116,7 +116,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credential *opensearc
 
 		return nil
 	default:
-		details, err := json.MarshalIndent(credential, "", "  ")
+		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
 		}

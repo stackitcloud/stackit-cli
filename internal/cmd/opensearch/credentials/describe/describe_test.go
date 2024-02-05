@@ -147,13 +147,13 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "credentail id invalid 1",
+			description: "credentials id invalid 1",
 			argValues:   []string{""},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
 		{
-			description: "credential id invalid 2",
+			description: "credentials id invalid 2",
 			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
