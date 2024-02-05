@@ -26,7 +26,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Disables SKE for a project",
-		Long:  "Disables STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters",
+		Long:  "Disables STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

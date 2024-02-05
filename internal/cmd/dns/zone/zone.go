@@ -16,7 +16,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "zone",
 		Short: "Provides functionality for DNS zones",
-		Long:  "Provides functionality for DNS zones",
+		Long:  "Provides functionality for DNS zones.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

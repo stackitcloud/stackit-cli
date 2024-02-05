@@ -12,7 +12,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "role",
 		Short: "Provides functionality regarding organization roles",
-		Long:  "Provides functionality regarding organization roles",
+		Long:  "Provides functionality regarding organization roles.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

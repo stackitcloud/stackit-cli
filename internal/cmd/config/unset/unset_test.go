@@ -15,6 +15,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		serviceAccountCustomEndpointFlag:  true,
 		skeCustomEndpointFlag:             true,
 		resourceManagerCustomEndpointFlag: true,
+		openSearchCustomEndpointFlag:      true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -30,6 +31,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServiceAccountCustomEndpoint:  true,
 		SKECustomEndpoint:             true,
 		ResourceManagerCustomEndpoint: true,
+		OpenSearchCustomEndpoint:      true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,6 +63,7 @@ func TestParseInput(t *testing.T) {
 				model.ServiceAccountCustomEndpoint = false
 				model.SKECustomEndpoint = false
 				model.ResourceManagerCustomEndpoint = false
+				model.OpenSearchCustomEndpoint = false
 			}),
 		},
 		{

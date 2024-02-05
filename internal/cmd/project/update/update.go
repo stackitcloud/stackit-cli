@@ -38,8 +38,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update a STACKIT project",
-		Long:  "Update a STACKIT project",
+		Short: "Updates a STACKIT project",
+		Long:  "Updates a STACKIT project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 

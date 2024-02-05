@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", clusterNameArg),
-		Short: "Get details of the credentials associated to a SKE cluster",
-		Long:  "Get details of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster",
+		Short: "Shows details of the credentials associated to a SKE cluster",
+		Long:  "Shows details of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster",
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -94,13 +94,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credential *ske.Credentials) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *ske.Credentials) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
-		table.AddRow("SERVER", *credential.Server)
+		table.AddRow("SERVER", *credentials.Server)
 		table.AddSeparator()
-		table.AddRow("TOKEN", *credential.Token)
+		table.AddRow("TOKEN", *credentials.Token)
 		err := table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -108,7 +108,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credential *ske.Crede
 
 		return nil
 	default:
-		details, err := json.MarshalIndent(credential, "", "  ")
+		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE credentials: %w", err)
 		}

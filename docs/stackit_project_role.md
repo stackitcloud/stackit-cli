@@ -4,7 +4,7 @@ Provides functionality regarding project roles
 
 ### Synopsis
 
-Provides functionality regarding project roles
+Provides functionality regarding project roles.
 
 ```
 stackit project role [flags]
@@ -28,5 +28,5 @@ stackit project role [flags]
 ### SEE ALSO
 
 * [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
-* [stackit project role list](./stackit_project_role_list.md)	 - List roles and permissions of a project
+* [stackit project role list](./stackit_project_role_list.md)	 - Lists roles and permissions of a project
 

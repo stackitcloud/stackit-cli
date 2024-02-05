@@ -36,9 +36,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("add %s", subjectArg),
-		Short: "Add a member to an organization",
+		Short: "Adds a member to an organization",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
-			"Add a member to an organization.",
+			"Adds a member to an organization.",
 			"A member is a combination of a subject (user, service account or client) and a role.",
 			"The subject is usually email address for users or name in case of clients",
 			"For more details on the available roles, run:",

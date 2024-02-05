@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all MongoDB Flex users of an instance",
-		Long:  "List all MongoDB Flex users of an instance.",
+		Short: "Lists all MongoDB Flex users of an instance",
+		Long:  "Lists all MongoDB Flex users of an instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`List all MongoDB Flex users of instance with ID "xxx"`,

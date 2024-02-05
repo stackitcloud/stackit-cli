@@ -24,6 +24,7 @@ const (
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
+	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 )
 
 type inputModel struct {
@@ -37,13 +38,14 @@ type inputModel struct {
 	ServiceAccountCustomEndpoint  bool
 	SKECustomEndpoint             bool
 	ResourceManagerCustomEndpoint bool
+	OpenSearchCustomEndpoint      bool
 }
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
-		Short: "Unset CLI configuration options",
-		Long:  "Unset CLI configuration options",
+		Short: "Unsets CLI configuration options",
+		Long:  "Unsets CLI configuration options.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -87,6 +89,9 @@ func NewCmd() *cobra.Command {
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
 			}
+			if model.OpenSearchCustomEndpoint {
+				viper.Set(config.OpenSearchCustomEndpointKey, "")
+			}
 
 			err := viper.WriteConfig()
 			if err != nil {
@@ -110,6 +115,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE custom endpoint")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager custom endpoint")
+	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
 }
 
 func parseInput(cmd *cobra.Command) *inputModel {
@@ -124,5 +130,6 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(cmd, serviceAccountCustomEndpointFlag),
 		SKECustomEndpoint:             flags.FlagToBoolValue(cmd, skeCustomEndpointFlag),
 		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(cmd, resourceManagerCustomEndpointFlag),
+		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
 	}
 }

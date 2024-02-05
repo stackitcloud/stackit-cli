@@ -1,10 +1,10 @@
 ## stackit service-account token list
 
-List access tokens of a service account
+Lists access tokens of a service account
 
 ### Synopsis
 
-List access tokens of a service account.
+Lists access tokens of a service account.
 Only the metadata about the access tokens is shown, and not the tokens themselves.
 Access tokens (including revoked tokens) are returned until they are expired.
 

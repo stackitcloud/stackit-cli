@@ -22,6 +22,7 @@ const (
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
+	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
 
 	AsyncDefault            = "false"
 	SessionTimeLimitDefault = "2h"
@@ -46,6 +47,7 @@ var ConfigKeys = []string{
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
 	ResourceManagerEndpointKey,
+	OpenSearchCustomEndpointKey,
 }
 
 func InitConfig() {
@@ -114,5 +116,6 @@ func setConfigDefaults() {
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
+	viper.SetDefault(OpenSearchCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
 }

@@ -1,10 +1,10 @@
 ## stackit project member remove
 
-Remove a member from a project.
+Removes a member from a project
 
 ### Synopsis
 
-Remove a member from a project.
+Removes a member from a project.
 A member is a combination of a subject (user, service account or client) and a role.
 The subject is usually email address for users or name in case of clients
 

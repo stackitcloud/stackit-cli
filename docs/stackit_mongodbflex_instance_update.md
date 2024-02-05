@@ -1,10 +1,10 @@
 ## stackit mongodbflex instance update
 
-Update a MongoDB Flex instance
+Updates a MongoDB Flex instance
 
 ### Synopsis
 
-Update a MongoDB Flex instance.
+Updates a MongoDB Flex instance.
 
 ```
 stackit mongodbflex instance update INSTANCE_ID [flags]
@@ -23,7 +23,7 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
 ### Options
 
 ```
-      --acl strings              List of IP networks in CIDR notation which are allowed to access this instance (default [])
+      --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
       --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor

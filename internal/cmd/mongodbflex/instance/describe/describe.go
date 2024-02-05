@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Get details of a MongoDB Flex instance",
-		Long:  "Get details of a MongoDB Flex instance",
+		Short: "Shows details  of a MongoDB Flex instance",
+		Long:  "Shows details  of a MongoDB Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

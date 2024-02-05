@@ -14,7 +14,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mongodbflex",
 		Short: "Provides functionality for MongoDB Flex",
-		Long:  "Provides functionality for MongoDB Flex",
+		Long:  "Provides functionality for MongoDB Flex.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

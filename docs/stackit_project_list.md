@@ -1,10 +1,10 @@
 ## stackit project list
 
-List STACKIT projects
+Lists STACKIT projects
 
 ### Synopsis
 
-List all STACKIT projects that match certain criteria. At least one of parent-id, project-id-like or member flag must be provided
+Lists all STACKIT projects that match certain criteria.
 
 ```
 stackit project list [flags]

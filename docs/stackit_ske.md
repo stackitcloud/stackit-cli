@@ -4,7 +4,7 @@ Provides functionality for SKE
 
 ### Synopsis
 
-Provides functionality for STACKIT Kubernetes Engine (SKE)
+Provides functionality for STACKIT Kubernetes Engine (SKE).
 
 ```
 stackit ske [flags]
@@ -30,8 +30,8 @@ stackit ske [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 * [stackit ske credentials](./stackit_ske_credentials.md)	 - Provides functionality for SKE credentials
-* [stackit ske describe](./stackit_ske_describe.md)	 - Get overall details regarding SKE
+* [stackit ske describe](./stackit_ske_describe.md)	 - Shows overall details regarding SKE
 * [stackit ske disable](./stackit_ske_disable.md)	 - Disables SKE for a project
 * [stackit ske enable](./stackit_ske_enable.md)	 - Enables SKE for a project
-* [stackit ske options](./stackit_ske_options.md)	 - List SKE provider options
+* [stackit ske options](./stackit_ske_options.md)	 - Lists SKE provider options
 

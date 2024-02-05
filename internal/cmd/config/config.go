@@ -14,7 +14,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "CLI configuration options",
-		Long:  "CLI configuration options",
+		Long:  "CLI configuration options.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

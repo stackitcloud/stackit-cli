@@ -1,10 +1,10 @@
 ## stackit service-account token revoke
 
-Revoke an access token of a service account
+Revokes an access token of a service account
 
 ### Synopsis
 
-Revoke an access token of a service account.
+Revokes an access token of a service account.
 The access token is instantly revoked, any following calls with the token will be unauthorized.
 The token metadata is still stored until the expiration time.
 

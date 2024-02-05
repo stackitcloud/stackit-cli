@@ -32,9 +32,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List access tokens of a service account",
+		Short: "Lists access tokens of a service account",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"List access tokens of a service account.",
+			"Lists access tokens of a service account.",
 			"Only the metadata about the access tokens is shown, and not the tokens themselves.",
 			"Access tokens (including revoked tokens) are returned until they are expired.",
 		),

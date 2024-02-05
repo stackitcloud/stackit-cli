@@ -1,10 +1,10 @@
 ## stackit service-account token create
 
-Create an access token for a service account
+Creates an access token for a service account
 
 ### Synopsis
 
-Create an access token for a service account.
+Creates an access token for a service account.
 The access token can be then used for API calls (where enabled).
 The token is only displayed upon creation, and it will not be recoverable later.
 

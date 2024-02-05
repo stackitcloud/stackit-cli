@@ -4,7 +4,7 @@ Provides functionality regarding service account tokens
 
 ### Synopsis
 
-Provides functionality regarding service account tokens
+Provides functionality regarding service account tokens.
 
 ```
 stackit service-account token [flags]
@@ -28,7 +28,7 @@ stackit service-account token [flags]
 ### SEE ALSO
 
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
-* [stackit service-account token create](./stackit_service-account_token_create.md)	 - Create an access token for a service account
-* [stackit service-account token list](./stackit_service-account_token_list.md)	 - List access tokens of a service account
-* [stackit service-account token revoke](./stackit_service-account_token_revoke.md)	 - Revoke an access token of a service account
+* [stackit service-account token create](./stackit_service-account_token_create.md)	 - Creates an access token for a service account
+* [stackit service-account token list](./stackit_service-account_token_list.md)	 - Lists access tokens of a service account
+* [stackit service-account token revoke](./stackit_service-account_token_revoke.md)	 - Revokes an access token of a service account
 

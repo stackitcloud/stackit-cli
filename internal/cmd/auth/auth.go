@@ -13,7 +13,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Provides authentication functionality",
-		Long:  "Provides authentication functionality",
+		Long:  "Provides authentication functionality.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

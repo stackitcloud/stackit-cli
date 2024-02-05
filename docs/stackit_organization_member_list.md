@@ -1,10 +1,10 @@
 ## stackit organization member list
 
-List members of an organization
+Lists members of an organization
 
 ### Synopsis
 
-List members of an organization
+Lists members of an organization
 
 ```
 stackit organization member list [flags]

@@ -1,10 +1,10 @@
 ## stackit mongodbflex instance list
 
-List all MongoDB Flex instances
+Lists all MongoDB Flex instances
 
 ### Synopsis
 
-List all MongoDB Flex instances
+Lists all MongoDB Flex instances.
 
 ```
 stackit mongodbflex instance list [flags]

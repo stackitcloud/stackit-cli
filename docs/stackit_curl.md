@@ -1,10 +1,10 @@
 ## stackit curl
 
-Execute an authenticated HTTP request to an endpoint
+Executes an authenticated HTTP request to an endpoint
 
 ### Synopsis
 
-Execute an HTTP request to an endpoint, using the authentication provided by the CLI
+Executes an HTTP request to an endpoint, using the authentication provided by the CLI.
 
 ```
 stackit curl URL [flags]

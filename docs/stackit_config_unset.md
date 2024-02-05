@@ -1,10 +1,10 @@
 ## stackit config unset
 
-Unset CLI configuration options
+Unsets CLI configuration options
 
 ### Synopsis
 
-Unset CLI configuration options
+Unsets CLI configuration options.
 
 ```
 stackit config unset [flags]
@@ -31,6 +31,7 @@ stackit config unset [flags]
   -h, --help                               Help for "stackit config unset"
       --membership-custom-endpoint         Membership custom endpoint
       --mongodbflex-custom-endpoint        MongoDB Flex custom endpoint
+      --opensearch-custom-endpoint         OpenSearch custom endpoint
       --output-format                      Output format
       --project-id                         Project ID
       --resource-manager-custom-endpoint   Resource Manager custom endpoint

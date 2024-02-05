@@ -1,10 +1,10 @@
 ## stackit mongodbflex user update
 
-Update a MongoDB Flex user
+Updates a MongoDB Flex user
 
 ### Synopsis
 
-Update a MongoDB Flex user.
+Updates a MongoDB Flex user.
 
 ```
 stackit mongodbflex user update USER_ID [flags]

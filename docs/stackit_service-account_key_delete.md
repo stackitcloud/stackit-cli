@@ -1,10 +1,10 @@
 ## stackit service-account key delete
 
-Delete a service account key
+Deletes a service account key
 
 ### Synopsis
 
-Delete a service account key.
+Deletes a service account key.
 
 ```
 stackit service-account key delete KEY_ID [flags]

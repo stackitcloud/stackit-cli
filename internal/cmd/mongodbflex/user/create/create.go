@@ -40,9 +40,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a MongoDB Flex user",
+		Short: "Creates a MongoDB Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
-			"Create a MongoDB Flex user.",
+			"Creates a MongoDB Flex user.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
 			"  $ stackit mongodbflex user reset-password --instance-id <INSTANCE_ID> --user-id <USER_ID>",

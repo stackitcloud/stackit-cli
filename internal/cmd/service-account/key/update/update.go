@@ -41,9 +41,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", keyIdArg),
-		Short: "Update a service account key",
+		Short: "Updates a service account key",
 		Long: fmt.Sprintf("%s\n%s",
-			"Update a service account key.",
+			"Updates a service account key.",
 			"You can temporarily activate or deactivate the key and/or update its date of expiration.",
 		),
 		Args: args.SingleArg(keyIdArg, utils.ValidateUUID),

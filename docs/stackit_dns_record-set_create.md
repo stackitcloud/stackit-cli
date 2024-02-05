@@ -4,7 +4,7 @@ Creates a DNS record set
 
 ### Synopsis
 
-Creates a DNS record set
+Creates a DNS record set.
 
 ```
 stackit dns record-set create [flags]

@@ -4,7 +4,7 @@ Creates a DNS zone
 
 ### Synopsis
 
-Creates a DNS zone
+Creates a DNS zone.
 
 ```
 stackit dns zone create [flags]

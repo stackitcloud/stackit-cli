@@ -1,10 +1,10 @@
 ## stackit config list
 
-List the current CLI configuration values
+Lists the current CLI configuration values
 
 ### Synopsis
 
-List the current CLI configuration values
+Lists the current CLI configuration values.
 
 ```
 stackit config list [flags]

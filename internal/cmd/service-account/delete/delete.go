@@ -27,8 +27,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", emailArg),
-		Short: "Delete a service account",
-		Long:  "Delete a service account",
+		Short: "Deletes a service account",
+		Long:  "Deletes a service account.",
 		Args:  args.SingleArg(emailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

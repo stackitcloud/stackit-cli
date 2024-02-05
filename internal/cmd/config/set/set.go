@@ -23,6 +23,7 @@ const (
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
+	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 )
 
 type inputModel struct {
@@ -34,11 +35,13 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
-		Short: "Set CLI configuration options",
-		Long: `Set CLI configuration options. 
-All of the configuration options can be set using an environment variable, which takes precedence over what is configured. 
-The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.
-Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID`,
+		Short: "Sets CLI configuration options",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
+			"Sets CLI configuration options.",
+			"All of the configuration options can be set using an environment variable, which takes precedence over what is configured.",
+			`The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
+			"Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID.",
+		),
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -86,6 +89,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
+	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
 
 	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -98,6 +102,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

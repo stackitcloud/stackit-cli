@@ -14,7 +14,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token",
 		Short: "Provides functionality regarding service account tokens",
-		Long:  "Provides functionality regarding service account tokens",
+		Long:  "Provides functionality regarding service account tokens.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

@@ -1,10 +1,10 @@
 ## stackit dns zone describe
 
-Get details of a DNS zone
+Shows details  of a DNS zone
 
 ### Synopsis
 
-Get details of a DNS zone
+Shows details  of a DNS zone.
 
 ```
 stackit dns zone describe ZONE_ID [flags]

@@ -28,8 +28,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", clusterNameArg),
-		Short: "Get details of a SKE cluster",
-		Long:  "Get details of a STACKIT Kubernetes Engine (SKE) cluster",
+		Short: "Shows details  of a SKE cluster",
+		Long:  "Shows details  of a STACKIT Kubernetes Engine (SKE) cluster.",
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

@@ -1,10 +1,10 @@
 ## stackit service-account key create
 
-Create a service account key
+Creates a service account key
 
 ### Synopsis
 
-Create a service account key.
+Creates a service account key.
 You can generate an RSA keypair and provide the public key.
 If you do not provide a public key, the service will generate a new key-pair and the private key is included in the response. You won't be able to retrieve it later.
 

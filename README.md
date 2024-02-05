@@ -76,7 +76,7 @@ After successful authentication, the CLI stores credentials in your OS keychain.
 To authenticate as a user, run the command below and follow the steps in your browser.
 
 ```bash
-$ stackit auth login
+stackit auth login
 ```
 
 ### Activate a service account
@@ -84,7 +84,7 @@ $ stackit auth login
 To authenticate using a service account, run:
 
 ```bash
-$ stackit auth activate-service-account
+stackit auth activate-service-account
 ```
 
 For more details on how to setup authentication using a service account, check our [authentication guide](./AUTHENTICATION.md).
@@ -94,19 +94,19 @@ For more details on how to setup authentication using a service account, check o
 You can configure the CLI using the command:
 
 ```bash
-$ stackit config
+stackit config
 ```
 
 The configurations are stored in `~/stackit/cli-config.json` and are valid for all commands. For example, you can set a default `project-id` by running:
 
 ```bash
-$ stackit config set --project-id xxxx-xxxx-xxxxx
+stackit config set --project-id xxxx-xxxx-xxxxx
 ```
 
 To remove it, you can run:
 
 ```bash
-$ stackit config unset --project-id
+stackit config unset --project-id
 ```
 
 Run the `config set` command with the flag `--help` to get a list of all of the available configuration options.
@@ -114,7 +114,7 @@ Run the `config set` command with the flag `--help` to get a list of all of the 
 You can lookup your current configuration by checking the configuration file or by running:
 
 ```bash
-$ stackit config list
+stackit config list
 ```
 
 You can also edit the configuration file manually.

@@ -1,10 +1,10 @@
 ## stackit ske credentials describe
 
-Get details of the credentials associated to a SKE cluster
+Shows details of the credentials associated to a SKE cluster
 
 ### Synopsis
 
-Get details of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster
+Shows details of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster
 
 ```
 stackit ske credentials describe CLUSTER_NAME [flags]
