@@ -149,8 +149,6 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	service := "opensearch"
-	operation := cmd.Use
 	instanceId := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
@@ -172,8 +170,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
-			Service:   service,
-			Operation: operation,
+			Cmd:  cmd,
+			Args: inputArgs,
 		}
 	}
 
