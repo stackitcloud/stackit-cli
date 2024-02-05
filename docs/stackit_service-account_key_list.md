@@ -1,10 +1,10 @@
 ## stackit service-account key list
 
-List all service account keys
+Lists all service account keys
 
 ### Synopsis
 
-List all service account keys.
+Lists all service account keys.
 
 ```
 stackit service-account key list [flags]

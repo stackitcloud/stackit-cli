@@ -1,10 +1,10 @@
 ## stackit opensearch instance create
 
-Create an OpenSearch instance
+Creates an OpenSearch instance
 
 ### Synopsis
 
-Create an OpenSearch instance.
+Creates an OpenSearch instance.
 
 ```
 stackit opensearch instance create [flags]

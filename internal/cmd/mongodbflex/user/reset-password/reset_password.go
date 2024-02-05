@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
-		Short: "Reset the password of a MongoDB Flex user",
-		Long:  "Reset the password of a MongoDB Flex user. The new password is returned in the response.",
+		Short: "Resets the password of a MongoDB Flex user",
+		Long:  "Resets the password of a MongoDB Flex user. The new password is returned in the response.",
 		Example: examples.Build(
 			examples.NewExample(
 				`Reset the password of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,

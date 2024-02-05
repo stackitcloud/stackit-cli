@@ -32,8 +32,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all credentials' IDs for an OpenSearch instance",
-		Long:  "List all credentials' IDs for an OpenSearch instance.",
+		Short: "Lists all credentials' IDs for an OpenSearch instance",
+		Long:  "Lists all credentials' IDs for an OpenSearch instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

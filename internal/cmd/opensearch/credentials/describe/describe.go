@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialsIdArg),
-		Short: "Get details of credentials of an OpenSearch instance",
-		Long:  "Get details of credentials of an OpenSearch instance. The password will be shown in plain text in the output.",
+		Short: "Shows details of credentials of an OpenSearch instance",
+		Long:  "Shows details of credentials of an OpenSearch instance. The password will be shown in plain text in the output.",
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

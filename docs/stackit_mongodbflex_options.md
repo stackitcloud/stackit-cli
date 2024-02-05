@@ -1,10 +1,10 @@
 ## stackit mongodbflex options
 
-List MongoDB Flex options
+Lists MongoDB Flex options
 
 ### Synopsis
 
-List MongoDB Flex options (flavors, versions and storages for a given flavor)
+Lists MongoDB Flex options (flavors, versions and storages for a given flavor)
 Pass one or more flags to filter what categories are shown.
 
 ```

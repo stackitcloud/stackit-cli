@@ -1,10 +1,10 @@
 ## stackit auth login
 
-Login to the STACKIT CLI
+Logs in to the STACKIT CLI
 
 ### Synopsis
 
-Login to the STACKIT CLI.
+Logs in to the STACKIT CLI using a user account.
 
 ```
 stackit auth login [flags]

@@ -1,10 +1,10 @@
 ## stackit ske cluster list
 
-List all SKE clusters
+Lists all SKE clusters
 
 ### Synopsis
 
-List all STACKIT Kubernetes Engine (SKE) clusters.
+Lists all STACKIT Kubernetes Engine (SKE) clusters.
 
 ```
 stackit ske cluster list [flags]

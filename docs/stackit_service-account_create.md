@@ -1,10 +1,10 @@
 ## stackit service-account create
 
-Create a service account
+Creates a service account
 
 ### Synopsis
 
-Create a service account.
+Creates a service account.
 
 ```
 stackit service-account create [flags]

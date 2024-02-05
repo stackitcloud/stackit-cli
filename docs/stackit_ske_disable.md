@@ -1,10 +1,10 @@
 ## stackit ske disable
 
-Disable SKE for a project
+Disables SKE for a project
 
 ### Synopsis
 
-Disable STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters.
+Disables STACKIT Kubernetes Engine (SKE) for a project. It will delete all associated clusters.
 
 ```
 stackit ske disable [flags]

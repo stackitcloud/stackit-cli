@@ -28,8 +28,8 @@ stackit opensearch credentials [flags]
 ### SEE ALSO
 
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
-* [stackit opensearch credentials create](./stackit_opensearch_credentials_create.md)	 - Create credentials for an OpenSearch instance
-* [stackit opensearch credentials delete](./stackit_opensearch_credentials_delete.md)	 - Delete credentials of an OpenSearch instance
-* [stackit opensearch credentials describe](./stackit_opensearch_credentials_describe.md)	 - Get details of credentials of an OpenSearch instance
-* [stackit opensearch credentials list](./stackit_opensearch_credentials_list.md)	 - List all credentials' IDs for an OpenSearch instance
+* [stackit opensearch credentials create](./stackit_opensearch_credentials_create.md)	 - Creates credentials for an OpenSearch instance
+* [stackit opensearch credentials delete](./stackit_opensearch_credentials_delete.md)	 - Deletes credentials of an OpenSearch instance
+* [stackit opensearch credentials describe](./stackit_opensearch_credentials_describe.md)	 - Shows details of credentials of an OpenSearch instance
+* [stackit opensearch credentials list](./stackit_opensearch_credentials_list.md)	 - Lists all credentials' IDs for an OpenSearch instance
 

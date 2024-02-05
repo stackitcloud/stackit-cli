@@ -1,10 +1,10 @@
 ## stackit ske enable
 
-Enable SKE for a project
+Enables SKE for a project
 
 ### Synopsis
 
-Enable STACKIT Kubernetes Engine (SKE) for a project.
+Enables STACKIT Kubernetes Engine (SKE) for a project.
 
 ```
 stackit ske enable [flags]

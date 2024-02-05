@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Get the details of a STACKIT project",
-		Long:  "Get the details of a STACKIT project.",
+		Short: "Show details of a STACKIT project",
+		Long:  "Show details of a STACKIT project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

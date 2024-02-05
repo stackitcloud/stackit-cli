@@ -30,5 +30,5 @@ stackit opensearch [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit opensearch credentials](./stackit_opensearch_credentials.md)	 - Provides functionality for OpenSearch credentials
 * [stackit opensearch instance](./stackit_opensearch_instance.md)	 - Provides functionality for OpenSearch instances
-* [stackit opensearch plans](./stackit_opensearch_plans.md)	 - List all OpenSearch service plans
+* [stackit opensearch plans](./stackit_opensearch_plans.md)	 - Lists all OpenSearch service plans
 

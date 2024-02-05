@@ -1,10 +1,10 @@
 ## stackit mongodbflex user delete
 
-Delete a MongoDB Flex user
+Deletes a MongoDB Flex user
 
 ### Synopsis
 
-Delete a MongoDB Flex user by ID. You can get the IDs of users for an instance by running:
+Deletes a MongoDB Flex user by ID. You can get the IDs of users for an instance by running:
   $ stackit mongodbflex user list --instance-id <INSTANCE_ID>
 
 ```

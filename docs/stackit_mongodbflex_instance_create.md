@@ -1,10 +1,10 @@
 ## stackit mongodbflex instance create
 
-Create a MongoDB Flex instance
+Creates a MongoDB Flex instance
 
 ### Synopsis
 
-Create a MongoDB Flex instance.
+Creates a MongoDB Flex instance.
 
 ```
 stackit mongodbflex instance create [flags]

@@ -1,10 +1,10 @@
 ## stackit project create
 
-Create a STACKIT project
+Creates a STACKIT project
 
 ### Synopsis
 
-Create a STACKIT project.
+Creates a STACKIT project.
 
 ```
 stackit project create [flags]

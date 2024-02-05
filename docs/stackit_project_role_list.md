@@ -1,10 +1,10 @@
 ## stackit project role list
 
-List roles and permissions of a project
+Lists roles and permissions of a project
 
 ### Synopsis
 
-List roles and permissions of a project.
+Lists roles and permissions of a project.
 
 ```
 stackit project role list [flags]

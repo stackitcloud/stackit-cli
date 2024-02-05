@@ -58,8 +58,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create an OpenSearch instance",
-		Long:  "Create an OpenSearch instance.",
+		Short: "Creates an OpenSearch instance",
+		Long:  "Creates an OpenSearch instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

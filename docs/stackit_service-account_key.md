@@ -28,9 +28,9 @@ stackit service-account key [flags]
 ### SEE ALSO
 
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
-* [stackit service-account key create](./stackit_service-account_key_create.md)	 - Create a service account key
-* [stackit service-account key delete](./stackit_service-account_key_delete.md)	 - Delete a service account key
-* [stackit service-account key describe](./stackit_service-account_key_describe.md)	 - Get details of a service account key
-* [stackit service-account key list](./stackit_service-account_key_list.md)	 - List all service account keys
-* [stackit service-account key update](./stackit_service-account_key_update.md)	 - Update a service account key
+* [stackit service-account key create](./stackit_service-account_key_create.md)	 - Creates a service account key
+* [stackit service-account key delete](./stackit_service-account_key_delete.md)	 - Deletes a service account key
+* [stackit service-account key describe](./stackit_service-account_key_describe.md)	 - Shows details of a service account key
+* [stackit service-account key list](./stackit_service-account_key_list.md)	 - Lists all service account keys
+* [stackit service-account key update](./stackit_service-account_key_update.md)	 - Updates a service account key
 

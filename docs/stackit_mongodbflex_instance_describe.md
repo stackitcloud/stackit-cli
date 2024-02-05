@@ -1,10 +1,10 @@
 ## stackit mongodbflex instance describe
 
-Get details of a MongoDB Flex instance
+Shows details  of a MongoDB Flex instance
 
 ### Synopsis
 
-Get details of a MongoDB Flex instance.
+Shows details  of a MongoDB Flex instance.
 
 ```
 stackit mongodbflex instance describe INSTANCE_ID [flags]

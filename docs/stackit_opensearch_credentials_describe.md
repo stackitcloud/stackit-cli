@@ -1,10 +1,10 @@
 ## stackit opensearch credentials describe
 
-Get details of credentials of an OpenSearch instance
+Shows details of credentials of an OpenSearch instance
 
 ### Synopsis
 
-Get details of credentials of an OpenSearch instance. The password will be shown in plain text in the output.
+Shows details of credentials of an OpenSearch instance. The password will be shown in plain text in the output.
 
 ```
 stackit opensearch credentials describe CREDENTIALS_ID [flags]

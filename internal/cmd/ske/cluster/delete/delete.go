@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", clusterNameArg),
-		Short: "Delete a SKE cluster",
-		Long:  "Delete a STACKIT Kubernetes Engine (SKE) cluster.",
+		Short: "Deletes a SKE cluster",
+		Long:  "Deletes a STACKIT Kubernetes Engine (SKE) cluster.",
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

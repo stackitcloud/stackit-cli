@@ -1,10 +1,10 @@
 ## stackit config unset
 
-Unset CLI configuration options
+Unsets CLI configuration options
 
 ### Synopsis
 
-Unset CLI configuration options.
+Unsets CLI configuration options.
 
 ```
 stackit config unset [flags]

@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", keyIdArg),
-		Short: "Delete a service account key",
-		Long:  "Delete a service account key.",
+		Short: "Deletes a service account key",
+		Long:  "Deletes a service account key.",
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

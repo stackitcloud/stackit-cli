@@ -32,9 +32,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("revoke %s", tokenIdArg),
-		Short: "Revoke an access token of a service account",
+		Short: "Revokes an access token of a service account",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Revoke an access token of a service account.",
+			"Revokes an access token of a service account.",
 			"The access token is instantly revoked, any following calls with the token will be unauthorized.",
 			"The token metadata is still stored until the expiration time.",
 		),

@@ -1,10 +1,10 @@
 ## stackit opensearch instance update
 
-Update an OpenSearch instance
+Updates an OpenSearch instance
 
 ### Synopsis
 
-Update an OpenSearch instance.
+Updates an OpenSearch instance.
 
 ```
 stackit opensearch instance update INSTANCE_ID [flags]

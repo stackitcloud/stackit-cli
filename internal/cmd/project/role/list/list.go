@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List roles and permissions of a project",
-		Long:  "List roles and permissions of a project.",
+		Short: "Lists roles and permissions of a project",
+		Long:  "Lists roles and permissions of a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

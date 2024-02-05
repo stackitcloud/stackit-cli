@@ -1,10 +1,10 @@
 ## stackit service-account key update
 
-Update a service account key
+Updates a service account key
 
 ### Synopsis
 
-Update a service account key.
+Updates a service account key.
 You can temporarily activate or deactivate the key and/or update its date of expiration.
 
 ```

@@ -25,8 +25,8 @@ type InputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
-		Short: "Enable SKE for a project",
-		Long:  "Enable STACKIT Kubernetes Engine (SKE) for a project.",
+		Short: "Enables SKE for a project",
+		Long:  "Enables STACKIT Kubernetes Engine (SKE) for a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

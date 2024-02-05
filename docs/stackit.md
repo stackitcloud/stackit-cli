@@ -27,7 +27,7 @@ stackit [flags]
 
 * [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
 * [stackit config](./stackit_config.md)	 - CLI configuration options
-* [stackit curl](./stackit_curl.md)	 - Execute an authenticated HTTP request to an endpoint
+* [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch

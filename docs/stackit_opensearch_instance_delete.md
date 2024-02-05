@@ -1,10 +1,10 @@
 ## stackit opensearch instance delete
 
-Delete an OpenSearch instance
+Deletes an OpenSearch instance
 
 ### Synopsis
 
-Delete an OpenSearch instance.
+Deletes an OpenSearch instance.
 
 ```
 stackit opensearch instance delete INSTANCE_ID [flags]

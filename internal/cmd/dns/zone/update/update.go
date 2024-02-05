@@ -53,8 +53,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", zoneIdArg),
-		Short: "Update a DNS zone",
-		Long:  "Update a DNS zone.",
+		Short: "Updates a DNS zone",
+		Long:  "Updates a DNS zone.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

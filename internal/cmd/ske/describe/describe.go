@@ -23,8 +23,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Get overall details regarding SKE",
-		Long:  "Get overall details regarding STACKIT Kubernetes Engine (SKE).",
+		Short: "Shows overall details regarding SKE",
+		Long:  "Shows overall details regarding STACKIT Kubernetes Engine (SKE).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

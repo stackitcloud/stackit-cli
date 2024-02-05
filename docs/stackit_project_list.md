@@ -1,10 +1,10 @@
 ## stackit project list
 
-List STACKIT projects
+Lists STACKIT projects
 
 ### Synopsis
 
-List all STACKIT projects that match certain criteria.
+Lists all STACKIT projects that match certain criteria.
 
 ```
 stackit project list [flags]

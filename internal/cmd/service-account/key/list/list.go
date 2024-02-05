@@ -32,8 +32,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all service account keys",
-		Long:  "List all service account keys.",
+		Short: "Lists all service account keys",
+		Long:  "Lists all service account keys.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

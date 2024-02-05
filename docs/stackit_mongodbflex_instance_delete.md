@@ -1,10 +1,10 @@
 ## stackit mongodbflex instance delete
 
-Delete a MongoDB Flex instance
+Deletes a MongoDB Flex instance
 
 ### Synopsis
 
-Delete a MongoDB Flex instance.
+Deletes a MongoDB Flex instance.
 
 ```
 stackit mongodbflex instance delete INSTANCE_ID [flags]

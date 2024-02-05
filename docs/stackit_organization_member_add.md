@@ -1,10 +1,10 @@
 ## stackit organization member add
 
-Add a member to an organization
+Adds a member to an organization
 
 ### Synopsis
 
-Add a member to an organization.
+Adds a member to an organization.
 A member is a combination of a subject (user, service account or client) and a role.
 The subject is usually email address for users or name in case of clients
 For more details on the available roles, run:

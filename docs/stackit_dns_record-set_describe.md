@@ -1,10 +1,10 @@
 ## stackit dns record-set describe
 
-Get details of a DNS record set
+Shows details  of a DNS record set
 
 ### Synopsis
 
-Get details of a DNS record set.
+Shows details  of a DNS record set.
 
 ```
 stackit dns record-set describe RECORD_SET_ID [flags]

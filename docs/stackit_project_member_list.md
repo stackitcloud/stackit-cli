@@ -1,10 +1,10 @@
 ## stackit project member list
 
-List members of a project
+Lists members of a project
 
 ### Synopsis
 
-List members of a project.
+Lists members of a project.
 
 ```
 stackit project member list [flags]

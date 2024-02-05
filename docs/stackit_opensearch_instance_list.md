@@ -1,10 +1,10 @@
 ## stackit opensearch instance list
 
-List all OpenSearch instances
+Lists all OpenSearch instances
 
 ### Synopsis
 
-List all OpenSearch instances.
+Lists all OpenSearch instances.
 
 ```
 stackit opensearch instance list [flags]

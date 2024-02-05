@@ -55,8 +55,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a DNS zone",
-		Long:  "Create a DNS zone.",
+		Short: "Creates a DNS zone",
+		Long:  "Creates a DNS zone.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
