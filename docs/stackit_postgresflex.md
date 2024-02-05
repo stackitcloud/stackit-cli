@@ -4,7 +4,7 @@ Provides functionality for PostgreSQL Flex
 
 ### Synopsis
 
-Provides functionality for PostgreSQL Flex
+Provides functionality for PostgreSQL Flex.
 
 ```
 stackit postgresflex [flags]

@@ -12,7 +12,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "postgresflex",
 		Short: "Provides functionality for PostgreSQL Flex",
-		Long:  "Provides functionality for PostgreSQL Flex",
+		Long:  "Provides functionality for PostgreSQL Flex.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
