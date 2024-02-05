@@ -146,10 +146,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance OpenSearch version")
-
-	cmd.MarkFlagsMutuallyExclusive(planIdFlag, planNameFlag)
-	cmd.MarkFlagsMutuallyExclusive(planIdFlag, versionFlag)
-	cmd.MarkFlagsRequiredTogether(planNameFlag, versionFlag)
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
