@@ -4,7 +4,7 @@ Get details of a PostgreSQL Flex instance
 
 ### Synopsis
 
-Get details of a PostgreSQL Flex instance
+Get details of a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex instance describe INSTANCE_ID [flags]

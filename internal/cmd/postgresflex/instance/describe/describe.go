@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Get details of a PostgreSQL Flex instance",
-		Long:  "Get details of a PostgreSQL Flex instance",
+		Long:  "Get details of a PostgreSQL Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

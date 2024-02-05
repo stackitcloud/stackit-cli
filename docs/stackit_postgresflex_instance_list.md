@@ -4,7 +4,7 @@ List all PostgreSQL Flex instances
 
 ### Synopsis
 
-List all PostgreSQL Flex instances
+List all PostgreSQL Flex instances.
 
 ```
 stackit postgresflex instance list [flags]

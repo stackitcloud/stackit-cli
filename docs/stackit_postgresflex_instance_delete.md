@@ -4,7 +4,7 @@ Delete a PostgreSQL Flex instance
 
 ### Synopsis
 
-Delete a PostgreSQL Flex instance
+Delete a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex instance delete INSTANCE_ID [flags]
