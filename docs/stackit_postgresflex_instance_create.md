@@ -1,10 +1,10 @@
 ## stackit postgresflex instance create
 
-Create a PostgreSQL Flex instance
+Creates a PostgreSQL Flex instance
 
 ### Synopsis
 
-Create a PostgreSQL Flex instance.
+Creates a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex instance create [flags]

@@ -4,7 +4,7 @@ Provides functionality for PostgreSQL Flex instances
 
 ### Synopsis
 
-Provides functionality for PostgreSQL Flex instances
+Provides functionality for PostgreSQL Flex instances.
 
 ```
 stackit postgresflex instance [flags]
@@ -28,9 +28,9 @@ stackit postgresflex instance [flags]
 ### SEE ALSO
 
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
-* [stackit postgresflex instance create](./stackit_postgresflex_instance_create.md)	 - Create a PostgreSQL Flex instance
-* [stackit postgresflex instance delete](./stackit_postgresflex_instance_delete.md)	 - Delete a PostgreSQL Flex instance
-* [stackit postgresflex instance describe](./stackit_postgresflex_instance_describe.md)	 - Get details of a PostgreSQL Flex instance
-* [stackit postgresflex instance list](./stackit_postgresflex_instance_list.md)	 - List all PostgreSQL Flex instances
-* [stackit postgresflex instance update](./stackit_postgresflex_instance_update.md)	 - Update a PostgreSQL Flex instance
+* [stackit postgresflex instance create](./stackit_postgresflex_instance_create.md)	 - Creates a PostgreSQL Flex instance
+* [stackit postgresflex instance delete](./stackit_postgresflex_instance_delete.md)	 - Deletes a PostgreSQL Flex instance
+* [stackit postgresflex instance describe](./stackit_postgresflex_instance_describe.md)	 - Shows details of a PostgreSQL Flex instance
+* [stackit postgresflex instance list](./stackit_postgresflex_instance_list.md)	 - Lists all PostgreSQL Flex instances
+* [stackit postgresflex instance update](./stackit_postgresflex_instance_update.md)	 - Updates a PostgreSQL Flex instance
 

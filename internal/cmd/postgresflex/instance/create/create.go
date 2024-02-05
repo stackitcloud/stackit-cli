@@ -59,8 +59,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a PostgreSQL Flex instance",
-		Long:  "Create a PostgreSQL Flex instance.",
+		Short: "Creates a PostgreSQL Flex instance",
+		Long:  "Creates a PostgreSQL Flex instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

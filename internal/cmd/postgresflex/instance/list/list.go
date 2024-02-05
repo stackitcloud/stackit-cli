@@ -30,8 +30,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all PostgreSQL Flex instances",
-		Long:  "List all PostgreSQL Flex instances.",
+		Short: "Lists all PostgreSQL Flex instances",
+		Long:  "Lists all PostgreSQL Flex instances.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

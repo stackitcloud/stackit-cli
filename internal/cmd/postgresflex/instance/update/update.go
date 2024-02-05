@@ -57,8 +57,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Update a PostgreSQL Flex instance",
-		Long:  "Update a PostgreSQL Flex instance.",
+		Short: "Updates a PostgreSQL Flex instance",
+		Long:  "Updates a PostgreSQL Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the name of a PostgreSQL Flex instance`,

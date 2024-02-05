@@ -1,10 +1,10 @@
 ## stackit postgresflex instance update
 
-Update a PostgreSQL Flex instance
+Updates a PostgreSQL Flex instance
 
 ### Synopsis
 
-Update a PostgreSQL Flex instance.
+Updates a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex instance update INSTANCE_ID [flags]

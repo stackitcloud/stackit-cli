@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Delete a PostgreSQL Flex instance",
-		Long:  "Delete a PostgreSQL Flex instance.",
+		Short: "Deletes a PostgreSQL Flex instance",
+		Long:  "Deletes a PostgreSQL Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
