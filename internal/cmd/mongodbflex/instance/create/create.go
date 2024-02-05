@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
@@ -77,7 +76,7 @@ func NewCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			// Service name and operation needed for error handling
-			service := strings.Split(cmd.Parent().Parent().Use, " ")[0]
+			service := "mongodbflex"
 			operation := cmd.Use
 			model, err := parseInput(cmd, service, operation)
 			if err != nil {

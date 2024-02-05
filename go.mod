@@ -14,6 +14,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.2
 	github.com/stackitcloud/stackit-sdk-go/services/membership v0.3.4
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.10.3
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.9.2
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.7.5
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.4
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.9.2

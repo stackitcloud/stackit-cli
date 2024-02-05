@@ -33,6 +33,7 @@ stackit config set [flags]
   -h, --help                                      Help for "stackit config set"
       --membership-custom-endpoint string         Membership custom endpoint
       --mongodbflex-custom-endpoint string        MongoDB Flex custom endpoint
+      --opensearch-custom-endpoint string         OpenSearch custom endpoint
       --resource-manager-custom-endpoint string   Resource manager custom endpoint
       --service-account-custom-endpoint string    Service Account custom endpoint
       --session-time-limit string                 Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)
