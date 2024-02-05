@@ -70,10 +70,8 @@ func NewCmd() *cobra.Command {
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			// Service name and operation needed for error handling
-			service := "postgresflex"
-			operation := cmd.Use
-			model, err := parseInput(cmd, args, service, operation)
+
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -98,7 +96,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, service, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				return err
 			}
@@ -147,7 +145,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, service, operation string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
@@ -161,8 +159,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string, service, operation strin
 
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Service:   service,
-			Operation: operation,
+			Service:   "postgresflex",
+			Operation: "update",
 		}
 	}
 
@@ -190,7 +188,7 @@ type PostgreSQLFlexClient interface {
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
-func buildRequest(ctx context.Context, service string, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var flavorId *string
@@ -216,7 +214,7 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 				cpu = currentInstance.Item.Flavor.Cpu
 			}
 		}
-		flavorId, err = postgresflexUtils.LoadFlavorId(service, *cpu, *ram, flavors.Flavors)
+		flavorId, err = postgresflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -225,7 +223,7 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 			return req, err
 		}
 	} else if model.FlavorId != nil {
-		err := postgresflexUtils.ValidateFlavorId(service, *model.FlavorId, flavors.Flavors)
+		err := postgresflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
@@ -246,7 +244,7 @@ func buildRequest(ctx context.Context, service string, model *inputModel, apiCli
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
-		err = postgresflexUtils.ValidateStorage(service, model.StorageClass, model.StorageSize, storages, *validationFlavorId)
+		err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
 		if err != nil {
 			return req, err
 		}

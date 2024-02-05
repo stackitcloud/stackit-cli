@@ -10,7 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-func ValidateFlavorId(service, flavorId string, flavors *[]postgresflex.Flavor) error {
+func ValidateFlavorId(flavorId string, flavors *[]postgresflex.Flavor) error {
 	for _, f := range *flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
 			return nil
@@ -18,12 +18,12 @@ func ValidateFlavorId(service, flavorId string, flavors *[]postgresflex.Flavor) 
 	}
 
 	return &errors.DatabaseInvalidFlavorError{
-		Service: service,
+		Service: "postgresflex",
 		Details: fmt.Sprintf("You provided flavor ID '%s', which is invalid.", flavorId),
 	}
 }
 
-func ValidateStorage(service string, storageClass *string, storageSize *int64, storages *postgresflex.ListStoragesResponse, flavorId string) error {
+func ValidateStorage(storageClass *string, storageSize *int64, storages *postgresflex.ListStoragesResponse, flavorId string) error {
 	if storageSize != nil {
 		if *storageSize < *storages.StorageRange.Min || *storageSize > *storages.StorageRange.Max {
 			return fmt.Errorf("%s", fmt.Sprintf("You provided storage size '%d', which is invalid. The valid range is %d-%d.", *storageSize, *storages.StorageRange.Min, *storages.StorageRange.Max))
@@ -40,13 +40,13 @@ func ValidateStorage(service string, storageClass *string, storageSize *int64, s
 		}
 	}
 	return &errors.DatabaseInvalidStorageError{
-		Service:  service,
+		Service:  "postgresflex",
 		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", *storageClass),
 		FlavorId: flavorId,
 	}
 }
 
-func LoadFlavorId(service string, cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, error) {
+func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, error) {
 	availableFlavors := ""
 	for _, f := range *flavors {
 		if f.Id == nil || f.Cpu == nil || f.Memory == nil {
@@ -58,7 +58,7 @@ func LoadFlavorId(service string, cpu, ram int64, flavors *[]postgresflex.Flavor
 		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, *f.Cpu, *f.Cpu)
 	}
 	return nil, &errors.DatabaseInvalidFlavorError{
-		Service: service,
+		Service: "postgresflex",
 		Details: "You provided an invalid combination for CPU and RAM.",
 	}
 }
