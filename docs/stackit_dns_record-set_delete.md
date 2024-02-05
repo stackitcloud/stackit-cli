@@ -4,7 +4,7 @@ Delete a DNS record set
 
 ### Synopsis
 
-Delete a DNS record set
+Delete a DNS record set.
 
 ```
 stackit dns record-set delete RECORD_SET_ID [flags]

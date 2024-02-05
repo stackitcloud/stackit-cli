@@ -1,10 +1,10 @@
 ## stackit dns zone update
 
-Updates a DNS zone
+Update a DNS zone
 
 ### Synopsis
 
-Updates a DNS zone. Performs a partial update; fields not provided are kept unchanged
+Update a DNS zone. Performs a partial update, i.e., fields not provided are kept unchanged.
 
 ```
 stackit dns zone update ZONE_ID [flags]

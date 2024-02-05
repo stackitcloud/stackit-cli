@@ -4,7 +4,7 @@ List all SKE clusters
 
 ### Synopsis
 
-List all STACKIT Kubernetes Engine (SKE) clusters
+List all STACKIT Kubernetes Engine (SKE) clusters.
 
 ```
 stackit ske cluster list [flags]

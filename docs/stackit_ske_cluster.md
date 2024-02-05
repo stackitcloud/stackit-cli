@@ -4,7 +4,7 @@ Provides functionality for SKE cluster
 
 ### Synopsis
 
-Provides functionality for STACKIT Kubernetes Engine (SKE) cluster
+Provides functionality for STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
 stackit ske cluster [flags]

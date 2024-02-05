@@ -4,7 +4,7 @@ List the current CLI configuration values
 
 ### Synopsis
 
-List the current CLI configuration values
+List the current CLI configuration values.
 
 ```
 stackit config list [flags]

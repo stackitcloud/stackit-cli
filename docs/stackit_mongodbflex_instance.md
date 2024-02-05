@@ -4,7 +4,7 @@ Provides functionality for MongoDB Flex instances
 
 ### Synopsis
 
-Provides functionality for MongoDB Flex instances
+Provides functionality for MongoDB Flex instances.
 
 ```
 stackit mongodbflex instance [flags]

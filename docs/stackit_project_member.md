@@ -4,7 +4,7 @@ Provides functionality regarding project members
 
 ### Synopsis
 
-Provides functionality regarding project members
+Provides functionality regarding project members.
 
 ```
 stackit project member [flags]

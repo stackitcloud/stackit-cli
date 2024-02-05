@@ -4,7 +4,7 @@ Provides functionality regarding organization roles
 
 ### Synopsis
 
-Provides functionality regarding organization roles
+Provides functionality regarding organization roles.
 
 ```
 stackit organization role [flags]

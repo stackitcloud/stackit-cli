@@ -4,7 +4,7 @@ Delete a STACKIT project
 
 ### Synopsis
 
-Delete a STACKIT project
+Delete a STACKIT project.
 
 ```
 stackit project delete [flags]

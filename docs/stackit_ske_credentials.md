@@ -4,7 +4,7 @@ Provides functionality for SKE credentials
 
 ### Synopsis
 
-Provides functionality for STACKIT Kubernetes Engine (SKE) credentials
+Provides functionality for STACKIT Kubernetes Engine (SKE) credentials.
 
 ```
 stackit ske credentials [flags]

@@ -4,7 +4,7 @@ Get details of an OpenSearch instance
 
 ### Synopsis
 
-Get details of an OpenSearch instance
+Get details of an OpenSearch instance.
 
 ```
 stackit opensearch instance describe INSTANCE_ID [flags]

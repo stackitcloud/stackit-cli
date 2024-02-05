@@ -4,7 +4,7 @@ Provides functionality regarding service account keys
 
 ### Synopsis
 
-Provides functionality regarding service account keys
+Provides functionality regarding service account keys.
 
 ```
 stackit service-account key [flags]

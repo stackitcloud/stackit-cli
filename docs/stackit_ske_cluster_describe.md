@@ -4,7 +4,7 @@ Get details of a SKE cluster
 
 ### Synopsis
 
-Get details of a STACKIT Kubernetes Engine (SKE) cluster
+Get details of a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
 stackit ske cluster describe CLUSTER_NAME [flags]

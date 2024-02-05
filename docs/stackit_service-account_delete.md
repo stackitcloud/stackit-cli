@@ -4,7 +4,7 @@ Delete a service account
 
 ### Synopsis
 
-Delete a service account
+Delete a service account.
 
 ```
 stackit service-account delete EMAIL [flags]

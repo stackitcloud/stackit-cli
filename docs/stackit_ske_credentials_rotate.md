@@ -4,7 +4,7 @@ Rotate credentials associated to a SKE cluster
 
 ### Synopsis
 
-Rotate credentials associated to a STACKIT Kubernetes Engine (SKE) cluster. The old credentials will be invalid after the operation
+Rotate credentials associated to a STACKIT Kubernetes Engine (SKE) cluster. The old credentials will be invalid after the operation.
 
 ```
 stackit ske credentials rotate CLUSTER_NAME [flags]

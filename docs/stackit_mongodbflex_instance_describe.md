@@ -4,7 +4,7 @@ Get details of a MongoDB Flex instance
 
 ### Synopsis
 
-Get details of a MongoDB Flex instance
+Get details of a MongoDB Flex instance.
 
 ```
 stackit mongodbflex instance describe INSTANCE_ID [flags]

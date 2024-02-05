@@ -4,7 +4,7 @@ Provides authentication functionality
 
 ### Synopsis
 
-Provides authentication functionality
+Provides authentication functionality.
 
 ```
 stackit auth [flags]

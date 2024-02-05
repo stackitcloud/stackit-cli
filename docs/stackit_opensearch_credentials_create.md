@@ -4,7 +4,7 @@ Create credentials for an OpenSearch instance
 
 ### Synopsis
 
-Create credentials (username and password) for an OpenSearch instance
+Create credentials (username and password) for an OpenSearch instance.
 
 ```
 stackit opensearch credentials create [flags]

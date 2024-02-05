@@ -4,7 +4,7 @@ Update a STACKIT project
 
 ### Synopsis
 
-Update a STACKIT project
+Update a STACKIT project.
 
 ```
 stackit project update [flags]

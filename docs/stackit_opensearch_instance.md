@@ -4,7 +4,7 @@ Provides functionality for OpenSearch instances
 
 ### Synopsis
 
-Provides functionality for OpenSearch instances
+Provides functionality for OpenSearch instances.
 
 ```
 stackit opensearch instance [flags]
@@ -32,5 +32,5 @@ stackit opensearch instance [flags]
 * [stackit opensearch instance delete](./stackit_opensearch_instance_delete.md)	 - Delete an OpenSearch instance
 * [stackit opensearch instance describe](./stackit_opensearch_instance_describe.md)	 - Get details of an OpenSearch instance
 * [stackit opensearch instance list](./stackit_opensearch_instance_list.md)	 - List all OpenSearch instances
-* [stackit opensearch instance update](./stackit_opensearch_instance_update.md)	 - Updates an OpenSearch instance
+* [stackit opensearch instance update](./stackit_opensearch_instance_update.md)	 - Update an OpenSearch instance
 

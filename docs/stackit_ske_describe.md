@@ -4,7 +4,7 @@ Get overall details regarding SKE
 
 ### Synopsis
 
-Get overall details regarding STACKIT Kubernetes Engine (SKE)
+Get overall details regarding STACKIT Kubernetes Engine (SKE).
 
 ```
 stackit ske describe [flags]

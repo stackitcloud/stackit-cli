@@ -4,7 +4,7 @@ Execute an authenticated HTTP request to an endpoint
 
 ### Synopsis
 
-Execute an HTTP request to an endpoint, using the authentication provided by the CLI
+Execute an HTTP request to an endpoint, using the authentication provided by the CLI.
 
 ```
 stackit curl URL [flags]

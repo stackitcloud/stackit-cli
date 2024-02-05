@@ -4,7 +4,7 @@ Get details of a DNS zone
 
 ### Synopsis
 
-Get details of a DNS zone
+Get details of a DNS zone.
 
 ```
 stackit dns zone describe ZONE_ID [flags]

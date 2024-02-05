@@ -4,7 +4,7 @@ Create a service account
 
 ### Synopsis
 
-Create a service account
+Create a service account.
 
 ```
 stackit service-account create [flags]

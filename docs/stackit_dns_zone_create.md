@@ -1,10 +1,10 @@
 ## stackit dns zone create
 
-Creates a DNS zone
+Create a DNS zone
 
 ### Synopsis
 
-Creates a DNS zone
+Create a DNS zone.
 
 ```
 stackit dns zone create [flags]

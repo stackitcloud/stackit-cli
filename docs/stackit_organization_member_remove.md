@@ -6,7 +6,7 @@ Remove a member from an organization.
 
 Remove a member from an organization.
 A member is a combination of a subject (user, service account or client) and a role.
-The subject is usually email address for users or name in case of clients
+The subject is usually email address for users or name in case of clients.
 
 ```
 stackit organization member remove SUBJECT [flags]

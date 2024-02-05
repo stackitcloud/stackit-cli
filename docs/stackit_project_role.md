@@ -4,7 +4,7 @@ Provides functionality regarding project roles
 
 ### Synopsis
 
-Provides functionality regarding project roles
+Provides functionality regarding project roles.
 
 ```
 stackit project role [flags]

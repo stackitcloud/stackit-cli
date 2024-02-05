@@ -1,10 +1,10 @@
 ## stackit dns record-set create
 
-Creates a DNS record set
+Create a DNS record set
 
 ### Synopsis
 
-Creates a DNS record set
+Create a DNS record set.
 
 ```
 stackit dns record-set create [flags]

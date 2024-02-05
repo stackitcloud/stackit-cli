@@ -4,7 +4,7 @@ Provides functionality for OpenSearch
 
 ### Synopsis
 
-Provides functionality for OpenSearch
+Provides functionality for OpenSearch.
 
 ```
 stackit opensearch [flags]

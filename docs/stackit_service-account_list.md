@@ -4,7 +4,7 @@ List all service accounts
 
 ### Synopsis
 
-List all service accounts
+List all service accounts.
 
 ```
 stackit service-account list [flags]

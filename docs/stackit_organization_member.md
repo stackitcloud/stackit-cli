@@ -4,7 +4,7 @@ Provides functionality regarding organization members
 
 ### Synopsis
 
-Provides functionality regarding organization members
+Provides functionality regarding organization members.
 
 ```
 stackit organization member [flags]

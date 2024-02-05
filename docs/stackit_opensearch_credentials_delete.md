@@ -4,7 +4,7 @@ Delete credentials of an OpenSearch instance
 
 ### Synopsis
 
-Delete credentials of an OpenSearch instance
+Delete credentials of an OpenSearch instance.
 
 ```
 stackit opensearch credentials delete CREDENTIALS_ID [flags]

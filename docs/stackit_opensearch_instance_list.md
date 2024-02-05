@@ -4,7 +4,7 @@ List all OpenSearch instances
 
 ### Synopsis
 
-List all OpenSearch instances
+List all OpenSearch instances.
 
 ```
 stackit opensearch instance list [flags]

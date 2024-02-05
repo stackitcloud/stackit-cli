@@ -4,7 +4,7 @@ Provides functionality for OpenSearch credentials
 
 ### Synopsis
 
-Provides functionality for OpenSearch credentials
+Provides functionality for OpenSearch credentials.
 
 ```
 stackit opensearch credentials [flags]

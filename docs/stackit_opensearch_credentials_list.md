@@ -4,7 +4,7 @@ List all credentials' IDs for an OpenSearch instance
 
 ### Synopsis
 
-List all credentials' IDs for an OpenSearch instance
+List all credentials' IDs for an OpenSearch instance.
 
 ```
 stackit opensearch credentials list [flags]

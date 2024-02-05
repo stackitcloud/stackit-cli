@@ -1,10 +1,10 @@
 ## stackit dns record-set update
 
-Updates a DNS record set
+Update a DNS record set
 
 ### Synopsis
 
-Updates a DNS record set. Performs a partial update; fields not provided are kept unchanged
+Update a DNS record set. Performs a partial update, i.e., fields not provided are kept unchanged.
 
 ```
 stackit dns record-set update RECORD_SET_ID [flags]

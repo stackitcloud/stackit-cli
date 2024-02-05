@@ -4,7 +4,7 @@ List roles and permissions of an organization
 
 ### Synopsis
 
-List roles and permissions of an organization
+List roles and permissions of an organization.
 
 ```
 stackit organization role list [flags]

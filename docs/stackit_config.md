@@ -4,7 +4,7 @@ CLI configuration options
 
 ### Synopsis
 
-CLI configuration options
+CLI configuration options.
 
 ```
 stackit config [flags]

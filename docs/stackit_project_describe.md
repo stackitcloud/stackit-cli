@@ -4,7 +4,7 @@ Get the details of a STACKIT project
 
 ### Synopsis
 
-Get the details of a STACKIT project
+Get the details of a STACKIT project.
 
 ```
 stackit project describe [flags]

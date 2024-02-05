@@ -4,7 +4,7 @@ Delete a SKE cluster
 
 ### Synopsis
 
-Delete a STACKIT Kubernetes Engine (SKE) cluster
+Delete a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
 stackit ske cluster delete CLUSTER_NAME [flags]

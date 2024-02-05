@@ -4,7 +4,7 @@ List all OpenSearch service plans
 
 ### Synopsis
 
-List all OpenSearch service plans
+List all OpenSearch service plans.
 
 ```
 stackit opensearch plans [flags]

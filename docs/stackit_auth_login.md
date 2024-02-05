@@ -4,7 +4,7 @@ Login to the STACKIT CLI
 
 ### Synopsis
 
-Login to the STACKIT CLI
+Login to the STACKIT CLI.
 
 ```
 stackit auth login [flags]

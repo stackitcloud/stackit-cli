@@ -4,7 +4,7 @@ Provides functionality for DNS
 
 ### Synopsis
 
-Provides functionality for DNS
+Provides functionality for DNS.
 
 ```
 stackit dns [flags]

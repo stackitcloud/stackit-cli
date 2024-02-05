@@ -4,7 +4,7 @@ Provides functionality regarding service account tokens
 
 ### Synopsis
 
-Provides functionality regarding service account tokens
+Provides functionality regarding service account tokens.
 
 ```
 stackit service-account token [flags]
