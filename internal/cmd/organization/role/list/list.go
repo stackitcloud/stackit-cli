@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List roles and permissions of an organization",
-		Long:  "List roles and permissions of an organization",
+		Long:  "List roles and permissions of an organization.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

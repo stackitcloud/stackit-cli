@@ -59,8 +59,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an OpenSearch instance",
-		Long:  "Updates an OpenSearch instance",
+		Short: "Update an OpenSearch instance",
+		Long:  "Update an OpenSearch instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

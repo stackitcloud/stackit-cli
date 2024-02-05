@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "List all OpenSearch service plans",
-		Long:  "List all OpenSearch service plans",
+		Long:  "List all OpenSearch service plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

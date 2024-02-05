@@ -24,7 +24,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a STACKIT project",
-		Long:  "Delete a STACKIT project",
+		Long:  "Delete a STACKIT project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

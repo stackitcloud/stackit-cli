@@ -39,8 +39,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create STACKIT projects",
-		Long:  "Create STACKIT projects",
+		Short: "Create a STACKIT project",
+		Long:  "Create a STACKIT project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

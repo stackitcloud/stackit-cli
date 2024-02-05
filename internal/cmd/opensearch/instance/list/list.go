@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all OpenSearch instances",
-		Long:  "List all OpenSearch instances",
+		Long:  "List all OpenSearch instances.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

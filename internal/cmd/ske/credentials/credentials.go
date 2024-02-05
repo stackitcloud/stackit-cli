@@ -13,7 +13,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credentials",
 		Short: "Provides functionality for SKE credentials",
-		Long:  "Provides functionality for STACKIT Kubernetes Engine (SKE) credentials",
+		Long:  "Provides functionality for STACKIT Kubernetes Engine (SKE) credentials.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

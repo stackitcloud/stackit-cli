@@ -14,7 +14,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login to the STACKIT CLI",
-		Long:  "Login to the STACKIT CLI",
+		Long:  "Login to the STACKIT CLI.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

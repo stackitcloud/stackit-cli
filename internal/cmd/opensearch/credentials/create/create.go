@@ -32,7 +32,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create credentials for an OpenSearch instance",
-		Long:  "Create credentials (username and password) for an OpenSearch instance",
+		Long:  "Create credentials (username and password) for an OpenSearch instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

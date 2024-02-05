@@ -25,7 +25,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("get-jwks %s", emailArg),
 		Short: "Get JWKS for a service account",
-		Long:  "Get JSON Web Key set (JWKS) for a service account. Only JSON output is supported",
+		Long:  "Get JSON Web Key set (JWKS) for a service account. Only JSON output is supported.",
 		Args:  args.SingleArg(emailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

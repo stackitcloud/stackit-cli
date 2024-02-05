@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", recordSetIdArg),
 		Short: "Get details of a DNS record set",
-		Long:  "Get details of a DNS record set",
+		Long:  "Get details of a DNS record set.",
 		Args:  args.SingleArg(recordSetIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

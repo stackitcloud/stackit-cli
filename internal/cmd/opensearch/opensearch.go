@@ -14,7 +14,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "opensearch",
 		Short: "Provides functionality for OpenSearch",
-		Long:  "Provides functionality for OpenSearch",
+		Long:  "Provides functionality for OpenSearch.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

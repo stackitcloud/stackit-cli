@@ -32,7 +32,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all SKE clusters",
-		Long:  "List all STACKIT Kubernetes Engine (SKE) clusters",
+		Long:  "List all STACKIT Kubernetes Engine (SKE) clusters.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

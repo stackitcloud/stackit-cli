@@ -45,7 +45,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unset CLI configuration options",
-		Long:  "Unset CLI configuration options",
+		Long:  "Unset CLI configuration options.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

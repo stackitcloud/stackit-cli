@@ -30,7 +30,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a service account",
-		Long:  "Create a service account",
+		Long:  "Create a service account.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

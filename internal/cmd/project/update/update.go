@@ -39,7 +39,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a STACKIT project",
-		Long:  "Update a STACKIT project",
+		Long:  "Update a STACKIT project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 

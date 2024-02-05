@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all MongoDB Flex instances",
-		Long:  "List all MongoDB Flex instances",
+		Long:  "List all MongoDB Flex instances.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

@@ -17,7 +17,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ske",
 		Short: "Provides functionality for SKE",
-		Long:  "Provides functionality for STACKIT Kubernetes Engine (SKE)",
+		Long:  "Provides functionality for STACKIT Kubernetes Engine (SKE).",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

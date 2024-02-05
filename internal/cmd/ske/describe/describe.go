@@ -24,7 +24,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Get overall details regarding SKE",
-		Long:  "Get overall details regarding STACKIT Kubernetes Engine (SKE)",
+		Long:  "Get overall details regarding STACKIT Kubernetes Engine (SKE).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

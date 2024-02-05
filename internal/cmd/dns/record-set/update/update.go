@@ -43,8 +43,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", recordSetIdArg),
-		Short: "Updates a DNS record set",
-		Long:  "Updates a DNS record set. Performs a partial update; fields not provided are kept unchanged",
+		Short: "Update a DNS record set",
+		Long:  "Update a DNS record set. Performs a partial update, i.e., fields not provided are kept unchanged.",
 		Args:  args.SingleArg(recordSetIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all service accounts",
-		Long:  "List all service accounts",
+		Long:  "List all service accounts.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

@@ -47,7 +47,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("curl %s", urlArg),
 		Short: "Execute an authenticated HTTP request to an endpoint",
-		Long:  "Execute an HTTP request to an endpoint, using the authentication provided by the CLI",
+		Long:  "Execute an HTTP request to an endpoint, using the authentication provided by the CLI.",
 		Example: examples.Build(
 			examples.NewExample(
 				"Make a GET request to http://locahost:8000",

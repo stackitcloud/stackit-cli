@@ -30,7 +30,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", zoneIdArg),
 		Short: "Get details of a DNS zone",
-		Long:  "Get details of a DNS zone",
+		Long:  "Get details of a DNS zone.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
