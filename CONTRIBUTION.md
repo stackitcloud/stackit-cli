@@ -10,6 +10,11 @@ Your contribution is welcome! Thank you for your interest in contributing to the
 
 ## Developer Guide
 
+Prerequisites:
+
+- [`Go`](https://go.dev/doc/install) 1.21+
+- [`yamllint`](https://yamllint.readthedocs.io/en/stable/quickstart.html)
+
 ### Repository structure
 
 The CLI commands are located under `internal/cmd`, where each folder includes the source code for a `group` of commands. Inside `pkg` you can find several useful packages that are shared by the commands and provide additional functionality such as `flags`, `globalflags`, `tables`, etc.
@@ -23,9 +28,9 @@ Check the [Authentication](README.md#authentication) section on the README.
 These commands can be executed from the project root:
 
 - `make project-tools`: install the required dependencies
-- `make build`: compiles the CLI and saves the binary under _./bin/stackit_
-- `make lint`: lint the code and examples
-- `make generate-docs`: generates Markdown documentation for every command
+- `make build`: compile the CLI and save the binary under _./bin/stackit_
+- `make lint`: lint the code
+- `make generate-docs`: generate Markdown documentation for every command
 - `make test`: run unit tests
 
 #### Local development
@@ -54,7 +59,7 @@ To test your changes, you can either:
 
 To make your contribution, follow these steps:
 
-1. Check open or recently closed [Pull Requests](https://github.com/stackitcloud/stackit-cli/pulls) and [Issues](https://github.com/stackitcloud/stackit-cli/issues)to make sure the contribution you are making has not been already tackled by someone else.
+1. Check open or recently closed [Pull Requests](https://github.com/stackitcloud/stackit-cli/pulls) and [Issues](https://github.com/stackitcloud/stackit-cli/issues) to make sure the contribution you are making has not been already tackled by someone else.
 2. Fork the repo.
 3. Make your changes in a branch that is up-to-date with the original repo's `main` branch.
 4. Commit your changes including a descriptive message
