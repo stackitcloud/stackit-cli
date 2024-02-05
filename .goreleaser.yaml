@@ -56,6 +56,9 @@ archives:
       - goos: windows
         format: zip
 
+release:
+  draft: true
+
 changelog:
   sort: asc
   filters:
