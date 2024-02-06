@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,27 +19,27 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &postgresflex.APIClient{}
 
-type mongoDBFlexClientMocked struct {
+type postgresFlexClientMocked struct {
 	listFlavorsFails  bool
-	listFlavorsResp   *mongodbflex.ListFlavorsResponse
+	listFlavorsResp   *postgresflex.ListFlavorsResponse
 	listStoragesFails bool
-	listStoragesResp  *mongodbflex.ListStoragesResponse
+	listStoragesResp  *postgresflex.ListStoragesResponse
 }
 
-func (c *mongoDBFlexClientMocked) CreateInstance(ctx context.Context, projectId string) mongodbflex.ApiCreateInstanceRequest {
+func (c *postgresFlexClientMocked) CreateInstance(ctx context.Context, projectId string) postgresflex.ApiCreateInstanceRequest {
 	return testClient.CreateInstance(ctx, projectId)
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*mongodbflex.ListFlavorsResponse, error) {
+func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*postgresflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -54,9 +54,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:      testProjectId,
 		instanceNameFlag:   "example-name",
 		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0/6 * * *",
+		backupScheduleFlag: "0 0 * * *",
 		flavorIdFlag:       testFlavorId,
-		storageClassFlag:   "premium-perf4-mongodb", // Non-default
+		storageClassFlag:   "premium-perf4-stackit", // Non-default
 		storageSizeFlag:    "10",
 		versionFlag:        "6.0",
 		typeFlag:           "Replica",
@@ -74,9 +74,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceName:   utils.Ptr("example-name"),
 		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
+		BackupSchedule: utils.Ptr("0 0 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
-		StorageClass:   utils.Ptr("premium-perf4-mongodb"),
+		StorageClass:   utils.Ptr("premium-perf4-stackit"),
 		StorageSize:    utils.Ptr(int64(10)),
 		Version:        utils.Ptr("6.0"),
 		Type:           utils.Ptr("Replica"),
@@ -87,7 +87,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *mongodbflex.ApiCreateInstanceRequest)) mongodbflex.ApiCreateInstanceRequest {
+func fixtureRequest(mods ...func(request *postgresflex.ApiCreateInstanceRequest)) postgresflex.ApiCreateInstanceRequest {
 	request := testClient.CreateInstance(testCtx, testProjectId)
 	request = request.CreateInstancePayload(fixturePayload())
 	for _, mod := range mods {
@@ -96,15 +96,15 @@ func fixtureRequest(mods ...func(request *mongodbflex.ApiCreateInstanceRequest))
 	return request
 }
 
-func fixturePayload(mods ...func(payload *mongodbflex.CreateInstancePayload)) mongodbflex.CreateInstancePayload {
-	payload := mongodbflex.CreateInstancePayload{
+func fixturePayload(mods ...func(payload *postgresflex.CreateInstancePayload)) postgresflex.CreateInstancePayload {
+	payload := postgresflex.CreateInstancePayload{
 		Name:           utils.Ptr("example-name"),
-		Acl:            &mongodbflex.ACL{Items: utils.Ptr([]string{"0.0.0.0/0"})},
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
+		Acl:            &postgresflex.ACL{Items: utils.Ptr([]string{"0.0.0.0/0"})},
+		BackupSchedule: utils.Ptr("0 0 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		Replicas:       utils.Ptr(int64(3)),
-		Storage: &mongodbflex.Storage{
-			Class: utils.Ptr("premium-perf4-mongodb"),
+		Storage: &postgresflex.Storage{
+			Class: utils.Ptr("premium-perf4-stackit"),
 			Size:  utils.Ptr(int64(10)),
 		},
 		Version: utils.Ptr("6.0"),
@@ -136,7 +136,6 @@ func TestParseInput(t *testing.T) {
 			description: "with defaults",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, backupScheduleFlag)
-				delete(flagValues, versionFlag)
 				delete(flagValues, typeFlag)
 			}),
 			isValid:       true,
@@ -203,6 +202,16 @@ func TestParseInput(t *testing.T) {
 				flagValues[cpuFlag] = "2"
 			}),
 			isValid: false,
+		},
+		{
+			description: "no version",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, versionFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Version = nil
+			}),
 		},
 		{
 			description: "repeated acl flags",
@@ -295,11 +304,11 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description       string
 		model             *inputModel
-		expectedRequest   mongodbflex.ApiCreateInstanceRequest
+		expectedRequest   postgresflex.ApiCreateInstanceRequest
 		listFlavorsFails  bool
-		listFlavorsResp   *mongodbflex.ListFlavorsResponse
+		listFlavorsResp   *postgresflex.ListFlavorsResponse
 		listStoragesFails bool
-		listStoragesResp  *mongodbflex.ListStoragesResponse
+		listStoragesResp  *postgresflex.ListStoragesResponse
 		isValid           bool
 	}{
 		{
@@ -307,8 +316,8 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -316,9 +325,9 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"premium-perf4-stackit"},
+				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
 				},
@@ -335,8 +344,8 @@ func TestBuildRequest(t *testing.T) {
 			),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -349,9 +358,9 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"premium-perf4-stackit"},
+				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
 				},
@@ -361,12 +370,12 @@ func TestBuildRequest(t *testing.T) {
 			description: "single instance type",
 			model:       fixtureInputModel(func(model *inputModel) { model.Type = utils.Ptr("Single") }),
 			isValid:     true,
-			expectedRequest: fixtureRequest().CreateInstancePayload(fixturePayload(func(payload *mongodbflex.CreateInstancePayload) {
+			expectedRequest: fixtureRequest().CreateInstancePayload(fixturePayload(func(payload *postgresflex.CreateInstancePayload) {
 				payload.Options = utils.Ptr(map[string]string{"type": "Single"})
 				payload.Replicas = utils.Ptr(int64(1))
 			})),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -374,34 +383,9 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			},
-		},
-		{
-			description: "sharded instance type",
-			model:       fixtureInputModel(func(model *inputModel) { model.Type = utils.Ptr("Sharded") }),
-			isValid:     true,
-			expectedRequest: fixtureRequest().CreateInstancePayload(fixturePayload(func(payload *mongodbflex.CreateInstancePayload) {
-				payload.Options = utils.Ptr(map[string]string{"type": "Sharded"})
-				payload.Replicas = utils.Ptr(int64(9))
-			})),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
-					},
-				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"premium-perf4-stackit"},
+				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
 				},
@@ -428,8 +412,8 @@ func TestBuildRequest(t *testing.T) {
 					model.RAM = utils.Ptr(int64(9))
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -463,8 +447,8 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageClass = utils.Ptr("non-existing-class")
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -472,9 +456,9 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"premium-perf4-stackit"},
+				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
 				},
@@ -488,8 +472,8 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageSize = utils.Ptr(int64(9))
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+			listFlavorsResp: &postgresflex.ListFlavorsResponse{
+				Flavors: &[]postgresflex.Flavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -497,9 +481,9 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"premium-perf4-stackit"},
+				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
 				},
@@ -510,7 +494,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			client := &postgresFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listFlavorsResp:   tt.listFlavorsResp,
 				listStoragesFails: tt.listStoragesFails,

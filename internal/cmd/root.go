@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
@@ -86,6 +87,7 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(mongodbflex.NewCmd())
 	cmd.AddCommand(opensearch.NewCmd())
 	cmd.AddCommand(organization.NewCmd())
+	cmd.AddCommand(postgresflex.NewCmd())
 	cmd.AddCommand(project.NewCmd())
 	cmd.AddCommand(rabbitmq.NewCmd())
 	cmd.AddCommand(redis.NewCmd())

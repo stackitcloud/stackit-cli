@@ -34,6 +34,7 @@ stackit config set [flags]
       --membership-custom-endpoint string         Membership custom endpoint
       --mongodbflex-custom-endpoint string        MongoDB Flex custom endpoint
       --opensearch-custom-endpoint string         OpenSearch custom endpoint
+      --postgresflex-custom-endpoint string       PostgreSQL Flex custom endpoint
       --rabbitmq-custom-endpoint string           RabbitMQ custom endpoint
       --redis-custom-endpoint string              Redis custom endpoint
       --resource-manager-custom-endpoint string   Resource manager custom endpoint

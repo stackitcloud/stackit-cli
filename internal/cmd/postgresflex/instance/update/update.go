@@ -11,14 +11,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
-	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
+	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
 )
 
 const (
@@ -55,15 +55,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates a MongoDB Flex instance",
-		Long:  "Updates a MongoDB Flex instance.",
+		Short: "Updates a PostgreSQL Flex instance",
+		Long:  "Updates a PostgreSQL Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the name of a MongoDB Flex instance`,
-				"$ stackit mongodbflex instance update xxx --name my-new-name"),
+				`Update the name of a PostgreSQL Flex instance`,
+				"$ stackit postgresflex instance update xxx --name my-new-name"),
 			examples.NewExample(
-				`Update the version of a MongoDB Flex instance`,
-				"$ stackit mongodbflex instance update xxx --version 6.0"),
+				`Update the version of a PostgreSQL Flex instance`,
+				"$ stackit postgresflex instance update xxx --version 6.0"),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -80,7 +80,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
 				instanceLabel = model.InstanceId
 			}
@@ -100,7 +100,7 @@ func NewCmd() *cobra.Command {
 			}
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update MongoDB Flex instance: %w", err)
+				return fmt.Errorf("update PostgreSQL Flex instance: %w", err)
 			}
 			instanceId := *resp.Item.Id
 
@@ -110,7 +110,7 @@ func NewCmd() *cobra.Command {
 				s.Start("Updating instance")
 				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for MongoDB Flex instance update: %w", err)
+					return fmt.Errorf("wait for PostgreSQL Flex instance update: %w", err)
 				}
 				s.Stop()
 			}
@@ -128,10 +128,10 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := mongodbflexUtils.AvailableInstanceTypes()
+	typeFlagOptions := postgresflexUtils.AvailableInstanceTypes()
 
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
-	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "Lists of IP networks in CIDR notation which are allowed to access this instance")
+	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
@@ -156,7 +156,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Service:   "mongodbflex",
+			Service:   "postgresflex",
 			Operation: cmd.Use,
 		}
 	}
@@ -177,14 +177,14 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-type MongoDBFlexClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) mongodbflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
-	ListFlavorsExecute(ctx context.Context, projectId string) (*mongodbflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*mongodbflex.ListStoragesResponse, error)
+type PostgreSQLFlexClient interface {
+	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiPartialUpdateInstanceRequest
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+	ListFlavorsExecute(ctx context.Context, projectId string) (*postgresflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var flavorId *string
@@ -192,7 +192,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 
 	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
 	if err != nil {
-		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
+		return req, fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 	}
 
 	if model.FlavorId == nil && (model.RAM != nil || model.CPU != nil) {
@@ -201,7 +201,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		if model.RAM == nil || model.CPU == nil {
 			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
 			if err != nil {
-				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 			}
 			if model.RAM == nil {
 				ram = currentInstance.Item.Flavor.Memory
@@ -210,7 +210,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 				cpu = currentInstance.Item.Flavor.Cpu
 			}
 		}
-		flavorId, err = mongodbflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
+		flavorId, err = postgresflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -219,41 +219,41 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			return req, err
 		}
 	} else if model.FlavorId != nil {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := postgresflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
 		flavorId = model.FlavorId
 	}
 
-	var storages *mongodbflex.ListStoragesResponse
+	var storages *postgresflex.ListStoragesResponse
 	if model.StorageClass != nil || model.StorageSize != nil {
 		validationFlavorId := flavorId
 		if validationFlavorId == nil {
 			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
 			if err != nil {
-				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 			}
 			validationFlavorId = currentInstance.Item.Flavor.Id
 		}
 		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId)
 		if err != nil {
-			return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
+			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
-		err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
+		err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
 		if err != nil {
 			return req, err
 		}
 	}
 
-	var payloadAcl *mongodbflex.ACL
+	var payloadAcl *postgresflex.ACL
 	if model.ACL != nil {
-		payloadAcl = &mongodbflex.ACL{Items: model.ACL}
+		payloadAcl = &postgresflex.ACL{Items: model.ACL}
 	}
 
-	var payloadStorage *mongodbflex.Storage
+	var payloadStorage *postgresflex.Storage
 	if model.StorageClass != nil || model.StorageSize != nil {
-		payloadStorage = &mongodbflex.Storage{
+		payloadStorage = &postgresflex.Storage{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		}
@@ -262,7 +262,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 	var replicas *int64
 	var payloadOptions *map[string]string
 	if model.Type != nil {
-		replicasInt, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
+		replicasInt, err := postgresflexUtils.GetInstanceReplicas(*model.Type)
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
 		}
@@ -273,7 +273,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		})
 	}
 
-	req = req.PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
+	req = req.PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 		Name:           model.InstanceName,
 		Acl:            payloadAcl,
 		BackupSchedule: model.BackupSchedule,

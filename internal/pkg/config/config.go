@@ -19,12 +19,13 @@ const (
 	DNSCustomEndpointKey            = "dns_custom_endpoint"
 	MembershipCustomEndpointKey     = "membership_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
+	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
+	PostgresFlexCustomEndpointKey   = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
+	RedisCustomEndpointKey          = "redis_custom_endpoint"
+	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
-	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
-	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
-	RedisCustomEndpointKey          = "redis_custom_endpoint"
-	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
 
 	AsyncDefault            = "false"
 	SessionTimeLimitDefault = "2h"
@@ -43,15 +44,18 @@ var ConfigKeys = []string{
 	OutputFormatKey,
 	ProjectIdKey,
 	SessionTimeLimitKey,
+
 	DNSCustomEndpointKey,
+	OpenSearchCustomEndpointKey,
+	PostgresFlexCustomEndpointKey,
+	ResourceManagerEndpointKey,
 	MembershipCustomEndpointKey,
 	MongoDBFlexCustomEndpointKey,
+	RabbitMQCustomEndpointKey,
+	RedisCustomEndpointKey,
+	ResourceManagerEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
-	ResourceManagerEndpointKey,
-	OpenSearchCustomEndpointKey,
-	RedisCustomEndpointKey,
-	RabbitMQCustomEndpointKey,
 }
 
 func InitConfig() {
@@ -118,8 +122,9 @@ func setConfigDefaults() {
 	viper.SetDefault(DNSCustomEndpointKey, "")
 	viper.SetDefault(MembershipCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
+	viper.SetDefault(OpenSearchCustomEndpointKey, "")
+	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
+	viper.SetDefault(ResourceManagerEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
-	viper.SetDefault(OpenSearchCustomEndpointKey, "")
-	viper.SetDefault(ResourceManagerEndpointKey, "")
 }
