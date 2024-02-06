@@ -65,7 +65,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the plan of a Redis instance with ID "xxx"`,
-				"$ stackit redis instance update xxx --plan-id xxx"),
+				"$ stackit redis instance update xxx --plan-id yyy"),
 			examples.NewExample(
 				`Update the range of IPs allowed to access a Redis instance with ID "xxx"`,
 				"$ stackit redis instance update xxx --acl 192.168.1.0/24"),

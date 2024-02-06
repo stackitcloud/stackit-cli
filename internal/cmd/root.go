@@ -10,6 +10,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
@@ -84,6 +86,8 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(config.NewCmd())
 	cmd.AddCommand(curl.NewCmd())
 	cmd.AddCommand(dns.NewCmd())
+	cmd.AddCommand(logme.NewCmd())
+	cmd.AddCommand(mariadb.NewCmd())
 	cmd.AddCommand(mongodbflex.NewCmd())
 	cmd.AddCommand(opensearch.NewCmd())
 	cmd.AddCommand(organization.NewCmd())

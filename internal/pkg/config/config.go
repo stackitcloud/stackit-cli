@@ -17,6 +17,8 @@ const (
 	SessionTimeLimitKey = "session_time_limit"
 
 	DNSCustomEndpointKey            = "dns_custom_endpoint"
+	LogMeCustomEndpointKey          = "logme_custom_endpoint"
+	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
 	MembershipCustomEndpointKey     = "membership_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
 	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
@@ -46,6 +48,8 @@ var ConfigKeys = []string{
 	SessionTimeLimitKey,
 
 	DNSCustomEndpointKey,
+	LogMeCustomEndpointKey,
+	MariaDBCustomEndpointKey,
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	ResourceManagerEndpointKey,

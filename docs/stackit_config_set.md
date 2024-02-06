@@ -31,6 +31,8 @@ stackit config set [flags]
 ```
       --dns-custom-endpoint string                DNS custom endpoint
   -h, --help                                      Help for "stackit config set"
+      --logme-custom-endpoint string              LogMe custom endpoint
+      --mariadb-custom-endpoint string            MariaDB custom endpoint
       --membership-custom-endpoint string         Membership custom endpoint
       --mongodbflex-custom-endpoint string        MongoDB Flex custom endpoint
       --opensearch-custom-endpoint string         OpenSearch custom endpoint
