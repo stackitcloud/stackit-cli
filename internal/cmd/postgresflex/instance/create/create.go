@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
-	postgreslexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
+	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -135,7 +135,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := postgreslexUtils.AvailableInstanceTypes()
+	typeFlagOptions := postgresflexUtils.AvailableInstanceTypes()
 
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
@@ -210,7 +210,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	}
 
 	if model.FlavorId == nil {
-		flavorId, err = postgreslexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors.Flavors)
+		flavorId, err = postgresflexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -219,7 +219,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 			return req, err
 		}
 	} else {
-		err := postgreslexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := postgresflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
@@ -230,12 +230,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 	}
-	err = postgreslexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *flavorId)
+	err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *flavorId)
 	if err != nil {
 		return req, err
 	}
 
-	replicas, err := postgreslexUtils.GetInstanceReplicas(*model.Type)
+	replicas, err := postgresflexUtils.GetInstanceReplicas(*model.Type)
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
 	}
