@@ -34,11 +34,11 @@ const (
 	versionFlag        = "version"
 	typeFlag           = "type"
 
-	defaultBackupSchedule = "0 0/6 * * *"
+	defaultBackupSchedule = "0 0 * * *"
 	defaultStorageClass   = "premium-perf2-stackit"
 	defaultStorageSize    = 10
 	defaultType           = "Replica"
-	defaultVersion        = "6.0"
+	defaultVersion        = "15"
 )
 
 type inputModel struct {
@@ -135,7 +135,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := []string{"Single", "Replica", "Sharded"}
+	typeFlagOptions := postgreslexUtils.AvailableInstanceTypes()
 
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")

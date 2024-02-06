@@ -14,7 +14,6 @@ import (
 var instanceTypeToReplicas = map[string]int64{
 	"Single":  1,
 	"Replica": 3,
-	"Sharded": 9,
 }
 
 func ValidateFlavorId(flavorId string, flavors *[]postgresflex.Flavor) error {
@@ -92,6 +91,16 @@ func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectI
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
+}
+
+func AvailableInstanceTypes() []string {
+	instanceTypes := make([]string, len(instanceTypeToReplicas))
+	i := 0
+	for k := range instanceTypeToReplicas {
+		instanceTypes[i] = k
+		i++
+	}
+	return instanceTypes
 }
 
 func GetInstanceReplicas(instanceType string) (int64, error) {
