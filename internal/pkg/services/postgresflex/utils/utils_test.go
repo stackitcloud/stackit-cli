@@ -22,10 +22,10 @@ const (
 )
 
 type postgresFlexClientMocked struct {
-	getInstanceFails  bool
-	getInstanceResp   *postgresflex.InstanceResponse
 	listVersionsFails bool
 	listVersionsResp  *postgresflex.ListVersionsResponse
+	getInstanceFails  bool
+	getInstanceResp   *postgresflex.InstanceResponse
 }
 
 func (m *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
