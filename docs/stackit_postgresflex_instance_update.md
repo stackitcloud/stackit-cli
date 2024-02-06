@@ -30,7 +30,6 @@ stackit postgresflex instance update INSTANCE_ID [flags]
   -h, --help                     Help for "stackit postgresflex instance update"
   -n, --name string              Instance name
       --ram int                  Amount of RAM (in GB)
-      --replicas int             Number of replicas
       --storage-class string     Storage class
       --storage-size int         Storage size (in GB)
       --type string              Instance type, one of ["Single" "Replica" "Sharded"]
