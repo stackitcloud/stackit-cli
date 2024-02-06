@@ -81,6 +81,10 @@ github.com/stackitcloud/stackit-sdk-go/core v0.7.7 h1:w1T8I2ERT5xPHXS+UV9maSseK8
 github.com/stackitcloud/stackit-sdk-go/core v0.7.7/go.mod h1:nfC2Tbjd73Ivn8wEp3lvG/dmiXHgl6QX+HY2Ih3aGgw=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.2 h1:Wj3A+BAitSK74dRMxEGoKU1itEZmjwrAECT/CgsEJOQ=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.2/go.mod h1:RYRnST/3Kz5GmxMmFvsaYFblfZ/LMxw8r9DNfnRhX/4=
+github.com/stackitcloud/stackit-sdk-go/services/logme v0.10.0 h1:5+X0sKPdnLT/a1Jt73YphecQpPEOpd6TY6XdK0zGqP4=
+github.com/stackitcloud/stackit-sdk-go/services/logme v0.10.0/go.mod h1:e/I/8wJEqLdzdEgsGh7UbwbMMMNL5F1os25K+vQSzOc=
+github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.10.0 h1:WxvySRZfkecOVjrpK3NiyqPL9YWKSpdBbIf55Y5HlNs=
+github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.10.0/go.mod h1:GQ+UyuUOANO/kQOIhqLmMYRH34NbZShMrfmUY6hTSjo=
 github.com/stackitcloud/stackit-sdk-go/services/membership v0.3.4 h1:0OT/UBP55/GPMm9Tks9Uhb+PvP/2zI6ZUySfh7px+kY=
 github.com/stackitcloud/stackit-sdk-go/services/membership v0.3.4/go.mod h1:6ovfcQJ96ivkBpSI933lVl2a/SWprpVGoK6YNKycLps=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.10.3 h1:M7ALIg1tE8MFLLw9Um0iyvdBgIhl83tJ0sWRjP7YqMM=
