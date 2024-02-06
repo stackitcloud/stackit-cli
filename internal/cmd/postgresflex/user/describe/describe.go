@@ -34,11 +34,11 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
-		Short: "Get details of a PostgreSQL Flex user",
+		Short: "Shows details of a PostgreSQL Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Get details of a PostgreSQL Flex user.",
+			"Shows details of a PostgreSQL Flex user.",
 			`The user password is hidden inside the "host" field and replaced with asterisks, as it is only visible upon creation. You can reset it by running:`,
-			"  $ stackit postgresflex user reset-password <USER_ID> --instance-id <INSTANCE_ID>",
+			"  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(

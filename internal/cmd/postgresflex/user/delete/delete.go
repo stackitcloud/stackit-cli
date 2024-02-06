@@ -34,9 +34,9 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", userIdArg),
-		Short: "Delete a PostgreSQL Flex user",
+		Short: "Deletes a PostgreSQL Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Delete a PostgreSQL Flex user by ID.",
+			"Deletes a PostgreSQL Flex user by ID.",
 			"You can get the IDs of users for an instance by running:",
 			"  $ stackit postgresflex user list --instance-id <INSTANCE_ID>",
 		),

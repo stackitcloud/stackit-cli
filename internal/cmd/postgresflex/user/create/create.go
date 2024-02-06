@@ -38,12 +38,12 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a PostgreSQL Flex user",
+		Short: "Creates a PostgreSQL Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
-			"Create a PostgreSQL Flex user.",
+			"Creates a PostgreSQL Flex user.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
-			"  $ stackit postgresflex user reset-password --instance-id <INSTANCE_ID> --user-id <USER_ID>",
+			"  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
