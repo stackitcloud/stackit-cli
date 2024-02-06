@@ -128,7 +128,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := []string{"Single", "Replica", "Sharded"}
+	typeFlagOptions := mongodbflexUtils.AvailableInstanceTypes()
 
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")

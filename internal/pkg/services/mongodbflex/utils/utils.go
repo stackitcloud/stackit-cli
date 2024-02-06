@@ -103,6 +103,16 @@ func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, in
 	return *resp.Item.Username, nil
 }
 
+func AvailableInstanceTypes() []string {
+	instanceTypes := make([]string, len(instanceTypeToReplicas))
+	i := 0
+	for k := range instanceTypeToReplicas {
+		instanceTypes[i] = k
+		i++
+	}
+	return instanceTypes
+}
+
 func GetInstanceReplicas(instanceType string) (int64, error) {
 	numReplicas, ok := instanceTypeToReplicas[instanceType]
 	if !ok {
