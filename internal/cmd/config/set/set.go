@@ -23,6 +23,8 @@ const (
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
+	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
+	redisCustomEndpointFlag           = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
@@ -91,6 +93,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex custom endpoint")
 	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
 	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex custom endpoint")
+	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ custom endpoint")
+	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis custom endpoint")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
@@ -110,6 +114,10 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RabbitMQCustomEndpointKey, cmd.Flags().Lookup(rabbitMQCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

@@ -32,7 +32,7 @@ stackit postgresflex instance update INSTANCE_ID [flags]
       --ram int                  Amount of RAM (in GB)
       --storage-class string     Storage class
       --storage-size int         Storage size (in GB)
-      --type string              Instance type, one of ["Single" "Replica" "Sharded"]
+      --type string              Instance type, one of ["Single" "Replica"]
       --version string           Version
 ```
 

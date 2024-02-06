@@ -21,6 +21,8 @@ const (
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
 	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey   = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
+	RedisCustomEndpointKey          = "redis_custom_endpoint"
 	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
@@ -49,6 +51,9 @@ var ConfigKeys = []string{
 	ResourceManagerEndpointKey,
 	MembershipCustomEndpointKey,
 	MongoDBFlexCustomEndpointKey,
+	RabbitMQCustomEndpointKey,
+	RedisCustomEndpointKey,
+	ResourceManagerEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
 }

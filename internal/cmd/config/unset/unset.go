@@ -23,6 +23,8 @@ const (
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
+	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
+	redisCustomEndpointFlag           = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
@@ -38,6 +40,8 @@ type inputModel struct {
 	MongoDBFlexCustomEndpoint     bool
 	OpenSearchCustomEndpoint      bool
 	PostgresFlexCustomEndpoint    bool
+	RabbitMQCustomEndpoint        bool
+	RedisCustomEndpoint           bool
 	ResourceManagerCustomEndpoint bool
 	ServiceAccountCustomEndpoint  bool
 	SKECustomEndpoint             bool
@@ -76,20 +80,26 @@ func NewCmd() *cobra.Command {
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
 			}
+			if model.MembershipCustomEndpoint {
+				viper.Set(config.MembershipCustomEndpointKey, "")
+			}
+			if model.MongoDBFlexCustomEndpoint {
+				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
+			}
 			if model.OpenSearchCustomEndpoint {
 				viper.Set(config.OpenSearchCustomEndpointKey, "")
 			}
 			if model.PostgresFlexCustomEndpoint {
 				viper.Set(config.PostgresFlexCustomEndpointKey, "")
 			}
+			if model.RabbitMQCustomEndpoint {
+				viper.Set(config.RabbitMQCustomEndpointKey, "")
+			}
+			if model.RedisCustomEndpoint {
+				viper.Set(config.RedisCustomEndpointKey, "")
+			}
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
-			}
-			if model.MembershipCustomEndpoint {
-				viper.Set(config.MembershipCustomEndpointKey, "")
-			}
-			if model.MongoDBFlexCustomEndpoint {
-				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
 			}
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
@@ -119,6 +129,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex custom endpoint")
 	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
 	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex custom endpoint")
+	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ custom endpoint")
+	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis custom endpoint")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager custom endpoint")
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE custom endpoint")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
@@ -135,6 +147,8 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(cmd, mongoDBFlexCustomEndpointFlag),
 		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
 		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(cmd, postgresFlexCustomEndpointFlag),
+		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(cmd, rabbitMQCustomEndpointFlag),
+		RedisCustomEndpoint:           flags.FlagToBoolValue(cmd, redisCustomEndpointFlag),
 		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(cmd, resourceManagerCustomEndpointFlag),
 		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(cmd, serviceAccountCustomEndpointFlag),
 		SKECustomEndpoint:             flags.FlagToBoolValue(cmd, skeCustomEndpointFlag),
