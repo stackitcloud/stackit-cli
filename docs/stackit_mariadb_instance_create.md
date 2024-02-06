@@ -1,10 +1,10 @@
 ## stackit mariadb instance create
 
-Creates an MariaDB instance
+Creates a MariaDB instance
 
 ### Synopsis
 
-Creates an MariaDB instance.
+Creates a MariaDB instance.
 
 ```
 stackit mariadb instance create [flags]
@@ -13,13 +13,13 @@ stackit mariadb instance create [flags]
 ### Examples
 
 ```
-  Create an MariaDB instance with name "my-instance" and specify plan by name and version
+  Create a MariaDB instance with name "my-instance" and specify plan by name and version
   $ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 10.6
 
-  Create an MariaDB instance with name "my-instance" and specify plan by ID
+  Create a MariaDB instance with name "my-instance" and specify plan by ID
   $ stackit mariadb instance create --name my-instance --plan-id xxx
 
-  Create an MariaDB instance with name "my-instance" and specify IP range which is allowed to access it
+  Create a MariaDB instance with name "my-instance" and specify IP range which is allowed to access it
   $ stackit mariadb instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
 ```
 

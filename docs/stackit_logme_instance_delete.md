@@ -1,10 +1,10 @@
 ## stackit logme instance delete
 
-Deletes an LogMe instance
+Deletes a LogMe instance
 
 ### Synopsis
 
-Deletes an LogMe instance.
+Deletes a LogMe instance.
 
 ```
 stackit logme instance delete INSTANCE_ID [flags]
@@ -13,7 +13,7 @@ stackit logme instance delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete an LogMe instance with ID "xxx"
+  Delete a LogMe instance with ID "xxx"
   $ stackit logme instance delete xxx
 ```
 

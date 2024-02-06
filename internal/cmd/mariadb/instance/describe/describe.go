@@ -29,15 +29,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of an MariaDB instance",
-		Long:  "Shows details  of an MariaDB instance.",
+		Short: "Shows details  of a MariaDB instance",
+		Long:  "Shows details  of a MariaDB instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an MariaDB instance with ID "xxx"`,
+				`Get details of a MariaDB instance with ID "xxx"`,
 				"$ stackit mariadb instance describe xxx"),
 			examples.NewExample(
-				`Get details of an MariaDB instance with ID "xxx" in a table format`,
+				`Get details of a MariaDB instance with ID "xxx" in a table format`,
 				"$ stackit mariadb instance describe xxx --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -1,10 +1,10 @@
 ## stackit mariadb instance update
 
-Updates an MariaDB instance
+Updates a MariaDB instance
 
 ### Synopsis
 
-Updates an MariaDB instance.
+Updates a MariaDB instance.
 
 ```
 stackit mariadb instance update INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit mariadb instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update the plan of an MariaDB instance with ID "xxx"
+  Update the plan of a MariaDB instance with ID "xxx"
   $ stackit mariadb instance update xxx --plan-id yyy
 
-  Update the range of IPs allowed to access an MariaDB instance with ID "xxx"
+  Update the range of IPs allowed to access a MariaDB instance with ID "xxx"
   $ stackit mariadb instance update xxx --acl 192.168.1.0/24
 ```
 

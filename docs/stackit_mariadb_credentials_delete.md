@@ -1,10 +1,10 @@
 ## stackit mariadb credentials delete
 
-Deletes credentials of an MariaDB instance
+Deletes credentials of a MariaDB instance
 
 ### Synopsis
 
-Deletes credentials of an MariaDB instance.
+Deletes credentials of a MariaDB instance.
 
 ```
 stackit mariadb credentials delete CREDENTIALS_ID [flags]

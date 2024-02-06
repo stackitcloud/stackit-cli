@@ -31,12 +31,12 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes an LogMe instance",
-		Long:  "Deletes an LogMe instance.",
+		Short: "Deletes a LogMe instance",
+		Long:  "Deletes a LogMe instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an LogMe instance with ID "xxx"`,
+				`Delete a LogMe instance with ID "xxx"`,
 				"$ stackit logme instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

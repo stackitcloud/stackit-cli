@@ -28,8 +28,8 @@ stackit mariadb credentials [flags]
 ### SEE ALSO
 
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
-* [stackit mariadb credentials create](./stackit_mariadb_credentials_create.md)	 - Creates credentials for an MariaDB instance
-* [stackit mariadb credentials delete](./stackit_mariadb_credentials_delete.md)	 - Deletes credentials of an MariaDB instance
-* [stackit mariadb credentials describe](./stackit_mariadb_credentials_describe.md)	 - Shows details of credentials of an MariaDB instance
-* [stackit mariadb credentials list](./stackit_mariadb_credentials_list.md)	 - Lists all credentials' IDs for an MariaDB instance
+* [stackit mariadb credentials create](./stackit_mariadb_credentials_create.md)	 - Creates credentials for a MariaDB instance
+* [stackit mariadb credentials delete](./stackit_mariadb_credentials_delete.md)	 - Deletes credentials of a MariaDB instance
+* [stackit mariadb credentials describe](./stackit_mariadb_credentials_describe.md)	 - Shows details of credentials of a MariaDB instance
+* [stackit mariadb credentials list](./stackit_mariadb_credentials_list.md)	 - Lists all credentials' IDs for a MariaDB instance
 

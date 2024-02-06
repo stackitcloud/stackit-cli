@@ -1,10 +1,10 @@
 ## stackit mariadb instance describe
 
-Shows details  of an MariaDB instance
+Shows details  of a MariaDB instance
 
 ### Synopsis
 
-Shows details  of an MariaDB instance.
+Shows details  of a MariaDB instance.
 
 ```
 stackit mariadb instance describe INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit mariadb instance describe INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Get details of an MariaDB instance with ID "xxx"
+  Get details of a MariaDB instance with ID "xxx"
   $ stackit mariadb instance describe xxx
 
-  Get details of an MariaDB instance with ID "xxx" in a table format
+  Get details of a MariaDB instance with ID "xxx" in a table format
   $ stackit mariadb instance describe xxx --output-format pretty
 ```
 

@@ -31,12 +31,12 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes an MariaDB instance",
-		Long:  "Deletes an MariaDB instance.",
+		Short: "Deletes a MariaDB instance",
+		Long:  "Deletes a MariaDB instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an MariaDB instance with ID "xxx"`,
+				`Delete a MariaDB instance with ID "xxx"`,
 				"$ stackit mariadb instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

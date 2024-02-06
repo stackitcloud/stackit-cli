@@ -1,10 +1,10 @@
 ## stackit mariadb credentials create
 
-Creates credentials for an MariaDB instance
+Creates credentials for a MariaDB instance
 
 ### Synopsis
 
-Creates credentials (username and password) for an MariaDB instance.
+Creates credentials (username and password) for a MariaDB instance.
 
 ```
 stackit mariadb credentials create [flags]
@@ -13,10 +13,10 @@ stackit mariadb credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for an MariaDB instance
+  Create credentials for a MariaDB instance
   $ stackit mariadb credentials create --instance-id xxx
 
-  Create credentials for an MariaDB instance and hide the password in the output
+  Create credentials for a MariaDB instance and hide the password in the output
   $ stackit mariadb credentials create --instance-id xxx --hide-password
 ```
 

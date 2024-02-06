@@ -1,10 +1,10 @@
 ## stackit logme credentials list
 
-Lists all credentials' IDs for an LogMe instance
+Lists all credentials' IDs for a LogMe instance
 
 ### Synopsis
 
-Lists all credentials' IDs for an LogMe instance.
+Lists all credentials' IDs for a LogMe instance.
 
 ```
 stackit logme credentials list [flags]
@@ -13,13 +13,13 @@ stackit logme credentials list [flags]
 ### Examples
 
 ```
-  List all credentials' IDs for an LogMe instance
+  List all credentials' IDs for a LogMe instance
   $ stackit logme credentials list --instance-id xxx
 
-  List all credentials' IDs for an LogMe instance in JSON format
+  List all credentials' IDs for a LogMe instance in JSON format
   $ stackit logme credentials list --instance-id xxx --output-format json
 
-  List up to 10 credentials' IDs for an LogMe instance
+  List up to 10 credentials' IDs for a LogMe instance
   $ stackit logme credentials list --instance-id xxx --limit 10
 ```
 

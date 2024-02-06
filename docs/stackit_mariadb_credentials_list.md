@@ -1,10 +1,10 @@
 ## stackit mariadb credentials list
 
-Lists all credentials' IDs for an MariaDB instance
+Lists all credentials' IDs for a MariaDB instance
 
 ### Synopsis
 
-Lists all credentials' IDs for an MariaDB instance.
+Lists all credentials' IDs for a MariaDB instance.
 
 ```
 stackit mariadb credentials list [flags]
@@ -13,13 +13,13 @@ stackit mariadb credentials list [flags]
 ### Examples
 
 ```
-  List all credentials' IDs for an MariaDB instance
+  List all credentials' IDs for a MariaDB instance
   $ stackit mariadb credentials list --instance-id xxx
 
-  List all credentials' IDs for an MariaDB instance in JSON format
+  List all credentials' IDs for a MariaDB instance in JSON format
   $ stackit mariadb credentials list --instance-id xxx --output-format json
 
-  List up to 10 credentials' IDs for an MariaDB instance
+  List up to 10 credentials' IDs for a MariaDB instance
   $ stackit mariadb credentials list --instance-id xxx --limit 10
 ```
 

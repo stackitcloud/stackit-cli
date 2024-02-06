@@ -32,18 +32,18 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials' IDs for an MariaDB instance",
-		Long:  "Lists all credentials' IDs for an MariaDB instance.",
+		Short: "Lists all credentials' IDs for a MariaDB instance",
+		Long:  "Lists all credentials' IDs for a MariaDB instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all credentials' IDs for an MariaDB instance`,
+				`List all credentials' IDs for a MariaDB instance`,
 				"$ stackit mariadb credentials list --instance-id xxx"),
 			examples.NewExample(
-				`List all credentials' IDs for an MariaDB instance in JSON format`,
+				`List all credentials' IDs for a MariaDB instance in JSON format`,
 				"$ stackit mariadb credentials list --instance-id xxx --output-format json"),
 			examples.NewExample(
-				`List up to 10 credentials' IDs for an MariaDB instance`,
+				`List up to 10 credentials' IDs for a MariaDB instance`,
 				"$ stackit mariadb credentials list --instance-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

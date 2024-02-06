@@ -32,18 +32,18 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials' IDs for an LogMe instance",
-		Long:  "Lists all credentials' IDs for an LogMe instance.",
+		Short: "Lists all credentials' IDs for a LogMe instance",
+		Long:  "Lists all credentials' IDs for a LogMe instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all credentials' IDs for an LogMe instance`,
+				`List all credentials' IDs for a LogMe instance`,
 				"$ stackit logme credentials list --instance-id xxx"),
 			examples.NewExample(
-				`List all credentials' IDs for an LogMe instance in JSON format`,
+				`List all credentials' IDs for a LogMe instance in JSON format`,
 				"$ stackit logme credentials list --instance-id xxx --output-format json"),
 			examples.NewExample(
-				`List up to 10 credentials' IDs for an LogMe instance`,
+				`List up to 10 credentials' IDs for a LogMe instance`,
 				"$ stackit logme credentials list --instance-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

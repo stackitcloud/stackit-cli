@@ -1,10 +1,10 @@
 ## stackit logme credentials create
 
-Creates credentials for an LogMe instance
+Creates credentials for a LogMe instance
 
 ### Synopsis
 
-Creates credentials (username and password) for an LogMe instance.
+Creates credentials (username and password) for a LogMe instance.
 
 ```
 stackit logme credentials create [flags]
@@ -13,10 +13,10 @@ stackit logme credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for an LogMe instance
+  Create credentials for a LogMe instance
   $ stackit logme credentials create --instance-id xxx
 
-  Create credentials for an LogMe instance and hide the password in the output
+  Create credentials for a LogMe instance and hide the password in the output
   $ stackit logme credentials create --instance-id xxx --hide-password
 ```
 

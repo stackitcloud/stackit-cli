@@ -1,10 +1,10 @@
 ## stackit logme instance create
 
-Creates an LogMe instance
+Creates a LogMe instance
 
 ### Synopsis
 
-Creates an LogMe instance.
+Creates a LogMe instance.
 
 ```
 stackit logme instance create [flags]
@@ -13,13 +13,13 @@ stackit logme instance create [flags]
 ### Examples
 
 ```
-  Create an LogMe instance with name "my-instance" and specify plan by name and version
+  Create a LogMe instance with name "my-instance" and specify plan by name and version
   $ stackit logme instance create --name my-instance --plan-name stackit-logme2-1.2.50-replica --version 2
 
-  Create an LogMe instance with name "my-instance" and specify plan by ID
+  Create a LogMe instance with name "my-instance" and specify plan by ID
   $ stackit logme instance create --name my-instance --plan-id xxx
 
-  Create an LogMe instance with name "my-instance" and specify IP range which is allowed to access it
+  Create a LogMe instance with name "my-instance" and specify IP range which is allowed to access it
   $ stackit logme instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
 ```
 

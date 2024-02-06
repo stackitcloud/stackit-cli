@@ -1,10 +1,10 @@
 ## stackit logme credentials delete
 
-Deletes credentials of an LogMe instance
+Deletes credentials of a LogMe instance
 
 ### Synopsis
 
-Deletes credentials of an LogMe instance.
+Deletes credentials of a LogMe instance.
 
 ```
 stackit logme credentials delete CREDENTIALS_ID [flags]

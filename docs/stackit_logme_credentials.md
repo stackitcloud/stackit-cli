@@ -28,8 +28,8 @@ stackit logme credentials [flags]
 ### SEE ALSO
 
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
-* [stackit logme credentials create](./stackit_logme_credentials_create.md)	 - Creates credentials for an LogMe instance
-* [stackit logme credentials delete](./stackit_logme_credentials_delete.md)	 - Deletes credentials of an LogMe instance
-* [stackit logme credentials describe](./stackit_logme_credentials_describe.md)	 - Shows details of credentials of an LogMe instance
-* [stackit logme credentials list](./stackit_logme_credentials_list.md)	 - Lists all credentials' IDs for an LogMe instance
+* [stackit logme credentials create](./stackit_logme_credentials_create.md)	 - Creates credentials for a LogMe instance
+* [stackit logme credentials delete](./stackit_logme_credentials_delete.md)	 - Deletes credentials of a LogMe instance
+* [stackit logme credentials describe](./stackit_logme_credentials_describe.md)	 - Shows details of credentials of a LogMe instance
+* [stackit logme credentials list](./stackit_logme_credentials_list.md)	 - Lists all credentials' IDs for a LogMe instance
 

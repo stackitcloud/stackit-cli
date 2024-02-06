@@ -1,10 +1,10 @@
 ## stackit logme instance describe
 
-Shows details  of an LogMe instance
+Shows details  of a LogMe instance
 
 ### Synopsis
 
-Shows details  of an LogMe instance.
+Shows details  of a LogMe instance.
 
 ```
 stackit logme instance describe INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit logme instance describe INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Get details of an LogMe instance with ID "xxx"
+  Get details of a LogMe instance with ID "xxx"
   $ stackit logme instance describe xxx
 
-  Get details of an LogMe instance with ID "xxx" in a table format
+  Get details of a LogMe instance with ID "xxx" in a table format
   $ stackit logme instance describe xxx --output-format pretty
 ```
 

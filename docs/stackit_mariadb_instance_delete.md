@@ -1,10 +1,10 @@
 ## stackit mariadb instance delete
 
-Deletes an MariaDB instance
+Deletes a MariaDB instance
 
 ### Synopsis
 
-Deletes an MariaDB instance.
+Deletes a MariaDB instance.
 
 ```
 stackit mariadb instance delete INSTANCE_ID [flags]
@@ -13,7 +13,7 @@ stackit mariadb instance delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete an MariaDB instance with ID "xxx"
+  Delete a MariaDB instance with ID "xxx"
   $ stackit mariadb instance delete xxx
 ```
 

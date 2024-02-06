@@ -59,15 +59,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an MariaDB instance",
-		Long:  "Updates an MariaDB instance.",
+		Short: "Updates a MariaDB instance",
+		Long:  "Updates a MariaDB instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the plan of an MariaDB instance with ID "xxx"`,
+				`Update the plan of a MariaDB instance with ID "xxx"`,
 				"$ stackit mariadb instance update xxx --plan-id yyy"),
 			examples.NewExample(
-				`Update the range of IPs allowed to access an MariaDB instance with ID "xxx"`,
+				`Update the range of IPs allowed to access a MariaDB instance with ID "xxx"`,
 				"$ stackit mariadb instance update xxx --acl 192.168.1.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

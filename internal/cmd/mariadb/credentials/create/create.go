@@ -31,15 +31,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates credentials for an MariaDB instance",
-		Long:  "Creates credentials (username and password) for an MariaDB instance.",
+		Short: "Creates credentials for a MariaDB instance",
+		Long:  "Creates credentials (username and password) for a MariaDB instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create credentials for an MariaDB instance`,
+				`Create credentials for a MariaDB instance`,
 				"$ stackit mariadb credentials create --instance-id xxx"),
 			examples.NewExample(
-				`Create credentials for an MariaDB instance and hide the password in the output`,
+				`Create credentials for a MariaDB instance and hide the password in the output`,
 				"$ stackit mariadb credentials create --instance-id xxx --hide-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

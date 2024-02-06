@@ -1,10 +1,10 @@
 ## stackit logme credentials describe
 
-Shows details of credentials of an LogMe instance
+Shows details of credentials of a LogMe instance
 
 ### Synopsis
 
-Shows details of credentials of an LogMe instance. The password will be shown in plain text in the output.
+Shows details of credentials of a LogMe instance. The password will be shown in plain text in the output.
 
 ```
 stackit logme credentials describe CREDENTIALS_ID [flags]
@@ -13,10 +13,10 @@ stackit logme credentials describe CREDENTIALS_ID [flags]
 ### Examples
 
 ```
-  Get details of credentials of an LogMe instance with ID "xxx" from instance with ID "yyy"
+  Get details of credentials of a LogMe instance with ID "xxx" from instance with ID "yyy"
   $ stackit logme credentials describe xxx --instance-id yyy
 
-  Get details of credentials of an LogMe instance with ID "xxx" from instance with ID "yyy" in a table format
+  Get details of credentials of a LogMe instance with ID "xxx" from instance with ID "yyy" in a table format
   $ stackit logme credentials describe xxx --instance-id yyy --output-format pretty
 ```
 

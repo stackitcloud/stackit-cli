@@ -58,18 +58,18 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates an MariaDB instance",
-		Long:  "Creates an MariaDB instance.",
+		Short: "Creates a MariaDB instance",
+		Long:  "Creates a MariaDB instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an MariaDB instance with name "my-instance" and specify plan by name and version`,
+				`Create a MariaDB instance with name "my-instance" and specify plan by name and version`,
 				"$ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 10.6"),
 			examples.NewExample(
-				`Create an MariaDB instance with name "my-instance" and specify plan by ID`,
+				`Create a MariaDB instance with name "my-instance" and specify plan by ID`,
 				"$ stackit mariadb instance create --name my-instance --plan-id xxx"),
 			examples.NewExample(
-				`Create an MariaDB instance with name "my-instance" and specify IP range which is allowed to access it`,
+				`Create a MariaDB instance with name "my-instance" and specify IP range which is allowed to access it`,
 				"$ stackit mariadb instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -91,7 +91,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create an MariaDB instance for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a MariaDB instance for project %s?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

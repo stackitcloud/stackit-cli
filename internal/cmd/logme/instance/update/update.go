@@ -59,15 +59,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an LogMe instance",
-		Long:  "Updates an LogMe instance.",
+		Short: "Updates a LogMe instance",
+		Long:  "Updates a LogMe instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the plan of an LogMe instance with ID "xxx"`,
+				`Update the plan of a LogMe instance with ID "xxx"`,
 				"$ stackit logme instance update xxx --plan-id yyy"),
 			examples.NewExample(
-				`Update the range of IPs allowed to access an LogMe instance with ID "xxx"`,
+				`Update the range of IPs allowed to access a LogMe instance with ID "xxx"`,
 				"$ stackit logme instance update xxx --acl 192.168.1.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -33,15 +33,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialsIdArg),
-		Short: "Shows details of credentials of an LogMe instance",
-		Long:  "Shows details of credentials of an LogMe instance. The password will be shown in plain text in the output.",
+		Short: "Shows details of credentials of a LogMe instance",
+		Long:  "Shows details of credentials of a LogMe instance. The password will be shown in plain text in the output.",
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of credentials of an LogMe instance with ID "xxx" from instance with ID "yyy"`,
+				`Get details of credentials of a LogMe instance with ID "xxx" from instance with ID "yyy"`,
 				"$ stackit logme credentials describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of credentials of an LogMe instance with ID "xxx" from instance with ID "yyy" in a table format`,
+				`Get details of credentials of a LogMe instance with ID "xxx" from instance with ID "yyy" in a table format`,
 				"$ stackit logme credentials describe xxx --instance-id yyy --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

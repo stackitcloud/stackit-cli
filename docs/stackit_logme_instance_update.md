@@ -1,10 +1,10 @@
 ## stackit logme instance update
 
-Updates an LogMe instance
+Updates a LogMe instance
 
 ### Synopsis
 
-Updates an LogMe instance.
+Updates a LogMe instance.
 
 ```
 stackit logme instance update INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit logme instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update the plan of an LogMe instance with ID "xxx"
+  Update the plan of a LogMe instance with ID "xxx"
   $ stackit logme instance update xxx --plan-id yyy
 
-  Update the range of IPs allowed to access an LogMe instance with ID "xxx"
+  Update the range of IPs allowed to access a LogMe instance with ID "xxx"
   $ stackit logme instance update xxx --acl 192.168.1.0/24
 ```
 

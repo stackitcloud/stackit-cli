@@ -29,15 +29,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of an LogMe instance",
-		Long:  "Shows details  of an LogMe instance.",
+		Short: "Shows details  of a LogMe instance",
+		Long:  "Shows details  of a LogMe instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an LogMe instance with ID "xxx"`,
+				`Get details of a LogMe instance with ID "xxx"`,
 				"$ stackit logme instance describe xxx"),
 			examples.NewExample(
-				`Get details of an LogMe instance with ID "xxx" in a table format`,
+				`Get details of a LogMe instance with ID "xxx" in a table format`,
 				"$ stackit logme instance describe xxx --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
