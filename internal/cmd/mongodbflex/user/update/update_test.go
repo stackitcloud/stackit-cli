@@ -257,13 +257,13 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 		{
-			description: "update database only",
+			description: "update roles only",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Roles = nil
-				model.Database = utils.Ptr("default")
+				model.Database = nil
+				model.Roles = &[]string{"default"}
 			}),
 			expectedRequest: fixtureRequest().PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-				Database: utils.Ptr("default"),
+				Roles: &[]string{"default"},
 			}),
 		},
 	}
