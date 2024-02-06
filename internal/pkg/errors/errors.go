@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -37,14 +38,14 @@ For more details run:
 
 	DSA_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
-Either provide plan-id by running:
-  $ stackit %[1]s instance %[2]s --project-id xxx --name my-instance --plan-id <PLAN ID>
+Either provide the plan ID:
+  $ %[1]s --plan-id <PLAN ID> [flags]
 
-or provide plan-name and version:
-  $ stackit %[1]s instance %[2]s --project-id xxx --name my-instance --plan-name <PLAN NAME> --version <VERSION>
+or provide plan name and version:
+  $ %[1]s --plan-name <PLAN NAME> --version <VERSION> [flags]
 
 For more details on the available plans, run:
-  $ stackit %[1]s plans`
+  $ stackit %[2]s plans`
 
 	DSA_INVALID_PLAN = `the provided instance plan is not valid.
 	
@@ -55,7 +56,7 @@ For more details on the available plans, run:
 
 	DATABASE_INVALID_INPUT_FLAVOR = `the instance flavor was not correctly provided. 
 
-Either provide flavor-id by running:
+Either provide flavor ID by:
   $ stackit %[1]s instance %[2]s --project-id xxx --flavor-id <FLAVOR ID> [flags]
 
 or provide CPU and RAM:
@@ -121,12 +122,18 @@ func (e *ActivateServiceAccountError) Error() string {
 }
 
 type DSAInputPlanError struct {
-	Service   string
-	Operation string
+	Cmd  *cobra.Command
+	Args []string
 }
 
 func (e *DSAInputPlanError) Error() string {
-	return fmt.Sprintf(DSA_INVALID_INPUT_PLAN, e.Service, e.Operation)
+	fullCommandPath := e.Cmd.CommandPath()
+	if len(e.Args) > 0 {
+		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
+	}
+	service := e.Cmd.Parent().Parent().Use
+
+	return fmt.Sprintf(DSA_INVALID_INPUT_PLAN, fullCommandPath, service)
 }
 
 type DSAInvalidPlanError struct {
