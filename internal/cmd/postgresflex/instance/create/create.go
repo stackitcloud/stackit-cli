@@ -99,7 +99,7 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
-			// Fill in defautl version, if needed
+			// Fill in version, if needed
 			if model.Version == nil {
 				version, err := postgresflexUtils.GetLatestPostgreSQLVersion(ctx, apiClient, model.ProjectId)
 				if err != nil {
