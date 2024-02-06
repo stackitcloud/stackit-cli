@@ -1,4 +1,4 @@
-package create
+package update
 
 import (
 	"context"
@@ -12,18 +12,19 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
-	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
+	rabbitmqUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/wait"
 )
 
 const (
+	instanceIdArg = "INSTANCE_ID"
+
 	instanceNameFlag         = "name"
 	enableMonitoringFlag     = "enable-monitoring"
 	graphiteFlag             = "graphite"
@@ -40,10 +41,10 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	PlanName string
-	Version  string
+	InstanceId string
+	PlanName   string
+	Version    string
 
-	InstanceName         *string
 	EnableMonitoring     *bool
 	Graphite             *string
 	MetricsFrequency     *int64
@@ -57,24 +58,21 @@ type inputModel struct {
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates a Redis instance",
-		Long:  "Creates a Redis instance.",
-		Args:  args.NoArgs,
+		Use:   fmt.Sprintf("update %s", instanceIdArg),
+		Short: "Updates an RabbitMQ instance",
+		Long:  "Updates an RabbitMQ instance.",
+		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit redis instance create --name my-instance --plan-name stackit-redis-1.2.10-replica --version 6"),
+				`Update the plan of an RabbitMQ instance with ID "xxx"`,
+				"$ stackit rabbitmq instance update xxx --plan-id xxx"),
 			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify plan by ID`,
-				"$ stackit redis instance create --name my-instance --plan-id xxx"),
-			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify IP range which is allowed to access it`,
-				"$ stackit redis instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24"),
+				`Update the range of IPs allowed to access an RabbitMQ instance with ID "xxx"`,
+				"$ stackit rabbitmq instance update xxx --acl 192.168.1.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -85,13 +83,13 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
-				projectLabel = model.ProjectId
+				instanceLabel = model.InstanceId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Redis instance for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update instance %s?", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -103,32 +101,32 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
-					return fmt.Errorf("build Redis instance creation request: %w", err)
+					return fmt.Errorf("build RabbitMQ instance update request: %w", err)
 				}
 				return err
 			}
-			resp, err := req.Execute()
+			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Redis instance: %w", err)
+				return fmt.Errorf("update RabbitMQ instance: %w", err)
 			}
-			instanceId := *resp.InstanceId
+			instanceId := model.InstanceId
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(cmd)
-				s.Start("Creating instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				s.Start("Updating instance")
+				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Redis instance creation: %w", err)
+					return fmt.Errorf("wait for RabbitMQ instance update: %w", err)
 				}
 				s.Stop()
 			}
 
-			operationState := "Created"
+			operationState := "Updated"
 			if model.Async {
-				operationState = "Triggered creation of"
+				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s instance for project %s. Instance ID: %s\n", operationState, projectLabel, instanceId)
+			cmd.Printf("%s instance %s\n", operationState, instanceLabel)
 			return nil
 		},
 	}
@@ -137,7 +135,6 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
@@ -148,69 +145,80 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
-	cmd.Flags().String(versionFlag, "", "Instance Redis version")
-
-	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
-	cobra.CheckErr(err)
+	cmd.Flags().String(versionFlag, "", "Instance RabbitMQ version")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	enableMonitoring := flags.FlagToBoolPointer(cmd, enableMonitoringFlag)
+	monitoringInstanceId := flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag)
+	graphite := flags.FlagToStringPointer(cmd, graphiteFlag)
+	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
+	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag)
+	plugin := flags.FlagToStringSlicePointer(cmd, pluginFlag)
+	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag)
+	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(cmd, planIdFlag)
 	planName := flags.FlagToStringValue(cmd, planNameFlag)
 	version := flags.FlagToStringValue(cmd, versionFlag)
 
-	if planId == nil && (planName == "" || version == "") {
-		return nil, &cliErr.DSAInputPlanError{
-			Cmd: cmd,
-		}
-	}
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
-			Cmd: cmd,
+			Cmd:  cmd,
+			Args: inputArgs,
 		}
+	}
+
+	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
+		metricsFrequency == nil && metricsPrefix == nil && plugin == nil &&
+		sgwAcl == nil && syslog == nil && planId == nil &&
+		planName == "" && version == "" {
+		return nil, &cliErr.EmptyUpdateError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(cmd, instanceNameFlag),
-		EnableMonitoring:     flags.FlagToBoolPointer(cmd, enableMonitoringFlag),
-		MonitoringInstanceId: flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
-		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
-		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag),
-		Plugin:               flags.FlagToStringSlicePointer(cmd, pluginFlag),
-		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag),
+		InstanceId:           instanceId,
+		EnableMonitoring:     enableMonitoring,
+		MonitoringInstanceId: monitoringInstanceId,
+		Graphite:             graphite,
+		MetricsFrequency:     metricsFrequency,
+		MetricsPrefix:        metricsPrefix,
+		Plugin:               plugin,
+		SgwAcl:               sgwAcl,
+		Syslog:               syslog,
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
 	}, nil
 }
 
-type redisClient interface {
-	CreateInstance(ctx context.Context, projectId string) redis.ApiCreateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*redis.ListOfferingsResponse, error)
+type rabbitMQClient interface {
+	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) rabbitmq.ApiPartialUpdateInstanceRequest
+	ListOfferingsExecute(ctx context.Context, projectId string) (*rabbitmq.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient) (redis.ApiCreateInstanceRequest, error) {
-	service := "redis"
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiPartialUpdateInstanceRequest, error) {
+	service := "rabbitmq"
+
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
 	var err error
 
 	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
 	if err != nil {
-		return req, fmt.Errorf("get Redis offerings: %w", err)
+		return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 	}
 
-	if model.PlanId == nil {
-		planId, err = redisUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
+		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -219,9 +227,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 			return req, err
 		}
 	} else {
-		err := redisUtils.ValidatePlanId(service, *model.PlanId, offerings)
-		if err != nil {
-			return req, err
+		// planId is not required for update operation
+		if model.PlanId != nil {
+			err := rabbitmqUtils.ValidatePlanId(service, *model.PlanId, offerings)
+			if err != nil {
+				return req, err
+			}
 		}
 		planId = model.PlanId
 	}
@@ -231,9 +242,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
-	req = req.CreateInstancePayload(redis.CreateInstancePayload{
-		InstanceName: model.InstanceName,
-		Parameters: &redis.InstanceParameters{
+	req = req.PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{
+		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
 			MonitoringInstanceId: model.MonitoringInstanceId,

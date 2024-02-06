@@ -50,6 +50,8 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 	ResourceManagerEndpointKey,
 	OpenSearchCustomEndpointKey,
+	RedisCustomEndpointKey,
+	RabbitMQCustomEndpointKey,
 }
 
 func InitConfig() {

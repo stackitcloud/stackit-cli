@@ -13,14 +13,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
-	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
+	rabbitmqUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/wait"
 )
 
 const (
@@ -58,19 +58,19 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a Redis instance",
-		Long:  "Creates a Redis instance.",
+		Short: "Creates an RabbitMQ instance",
+		Long:  "Creates an RabbitMQ instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit redis instance create --name my-instance --plan-name stackit-redis-1.2.10-replica --version 6"),
+				`Create an RabbitMQ instance with name "my-instance" and specify plan by name and version`,
+				"$ stackit rabbitmq instance create --name my-instance --plan-name stackit-rabbitmq-1.2.10-replica --version 3.10"),
 			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify plan by ID`,
-				"$ stackit redis instance create --name my-instance --plan-id xxx"),
+				`Create an RabbitMQ instance with name "my-instance" and specify plan by ID`,
+				"$ stackit rabbitmq instance create --name my-instance --plan-id xxx"),
 			examples.NewExample(
-				`Create a Redis instance with name "my-instance" and specify IP range which is allowed to access it`,
-				"$ stackit redis instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24"),
+				`Create an RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it`,
+				"$ stackit rabbitmq instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -91,7 +91,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Redis instance for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create an RabbitMQ instance for project %s?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -103,13 +103,13 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
-					return fmt.Errorf("build Redis instance creation request: %w", err)
+					return fmt.Errorf("build RabbitMQ instance creation request: %w", err)
 				}
 				return err
 			}
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Redis instance: %w", err)
+				return fmt.Errorf("create RabbitMQ instance: %w", err)
 			}
 			instanceId := *resp.InstanceId
 
@@ -119,7 +119,7 @@ func NewCmd() *cobra.Command {
 				s.Start("Creating instance")
 				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Redis instance creation: %w", err)
+					return fmt.Errorf("wait for RabbitMQ instance creation: %w", err)
 				}
 				s.Stop()
 			}
@@ -148,7 +148,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
-	cmd.Flags().String(versionFlag, "", "Instance Redis version")
+	cmd.Flags().String(versionFlag, "", "Instance RabbitMQ version")
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
 	cobra.CheckErr(err)
@@ -192,13 +192,13 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-type redisClient interface {
-	CreateInstance(ctx context.Context, projectId string) redis.ApiCreateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*redis.ListOfferingsResponse, error)
+type rabbitMQClient interface {
+	CreateInstance(ctx context.Context, projectId string) rabbitmq.ApiCreateInstanceRequest
+	ListOfferingsExecute(ctx context.Context, projectId string) (*rabbitmq.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient) (redis.ApiCreateInstanceRequest, error) {
-	service := "redis"
+func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiCreateInstanceRequest, error) {
+	service := "rabbitmq"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
@@ -206,11 +206,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 
 	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
 	if err != nil {
-		return req, fmt.Errorf("get Redis offerings: %w", err)
+		return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 	}
 
 	if model.PlanId == nil {
-		planId, err = redisUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -219,7 +219,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 			return req, err
 		}
 	} else {
-		err := redisUtils.ValidatePlanId(service, *model.PlanId, offerings)
+		err := rabbitmqUtils.ValidatePlanId(service, *model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}
@@ -231,9 +231,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
-	req = req.CreateInstancePayload(redis.CreateInstancePayload{
+	req = req.CreateInstancePayload(rabbitmq.CreateInstancePayload{
 		InstanceName: model.InstanceName,
-		Parameters: &redis.InstanceParameters{
+		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
 			MonitoringInstanceId: model.MonitoringInstanceId,
