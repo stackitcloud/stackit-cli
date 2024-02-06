@@ -136,7 +136,6 @@ func TestParseInput(t *testing.T) {
 			description: "with defaults",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, backupScheduleFlag)
-				delete(flagValues, versionFlag)
 				delete(flagValues, typeFlag)
 			}),
 			isValid:       true,
@@ -203,6 +202,16 @@ func TestParseInput(t *testing.T) {
 				flagValues[cpuFlag] = "2"
 			}),
 			isValid: false,
+		},
+		{
+			description: "no version",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, versionFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Version = nil
+			}),
 		},
 		{
 			description: "repeated acl flags",
