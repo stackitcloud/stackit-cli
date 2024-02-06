@@ -35,6 +35,8 @@ stackit config unset [flags]
       --output-format                      Output format
       --postgresflex-custom-endpoint       PostgreSQL Flex custom endpoint
       --project-id                         Project ID
+      --rabbitmq-custom-endpoint           RabbitMQ custom endpoint
+      --redis-custom-endpoint              Redis custom endpoint
       --resource-manager-custom-endpoint   Resource Manager custom endpoint
       --service-account-custom-endpoint    SKE custom endpoint
       --ske-custom-endpoint                SKE custom endpoint

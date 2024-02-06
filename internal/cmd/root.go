@@ -15,6 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -87,6 +89,8 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(organization.NewCmd())
 	cmd.AddCommand(postgresflex.NewCmd())
 	cmd.AddCommand(project.NewCmd())
+	cmd.AddCommand(rabbitmq.NewCmd())
+	cmd.AddCommand(redis.NewCmd())
 	cmd.AddCommand(serviceaccount.NewCmd())
 	cmd.AddCommand(ske.NewCmd())
 }

@@ -198,7 +198,6 @@ type openSearchClient interface {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
-	service := "opensearch"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
@@ -219,7 +218,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchCl
 			return req, err
 		}
 	} else {
-		err := opensearchUtils.ValidatePlanId(service, *model.PlanId, offerings)
+		err := opensearchUtils.ValidatePlanId(*model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}
