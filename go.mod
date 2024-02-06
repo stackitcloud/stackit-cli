@@ -10,7 +10,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
-	github.com/stackitcloud/stackit-sdk-go/core v0.7.6
+	github.com/stackitcloud/stackit-sdk-go/core v0.7.7
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.2
 	github.com/stackitcloud/stackit-sdk-go/services/membership v0.3.4
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.10.3
@@ -47,6 +47,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.10.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect

@@ -25,6 +25,8 @@ const (
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
+	redisCustomEndpointFlag           = "redis-custom-endpoint"
+	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
 )
 
 type inputModel struct {
@@ -39,6 +41,8 @@ type inputModel struct {
 	SKECustomEndpoint             bool
 	ResourceManagerCustomEndpoint bool
 	OpenSearchCustomEndpoint      bool
+	RedisCustomEndpoint           bool
+	RabbitMQCustomEndpoint        bool
 }
 
 func NewCmd() *cobra.Command {
@@ -92,6 +96,12 @@ func NewCmd() *cobra.Command {
 			if model.OpenSearchCustomEndpoint {
 				viper.Set(config.OpenSearchCustomEndpointKey, "")
 			}
+			if model.RedisCustomEndpoint {
+				viper.Set(config.RedisCustomEndpointKey, "")
+			}
+			if model.RabbitMQCustomEndpoint {
+				viper.Set(config.RabbitMQCustomEndpointKey, "")
+			}
 
 			err := viper.WriteConfig()
 			if err != nil {
@@ -116,6 +126,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager custom endpoint")
 	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
+	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis custom endpoint")
+	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ custom endpoint")
 }
 
 func parseInput(cmd *cobra.Command) *inputModel {
@@ -131,5 +143,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		SKECustomEndpoint:             flags.FlagToBoolValue(cmd, skeCustomEndpointFlag),
 		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(cmd, resourceManagerCustomEndpointFlag),
 		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
+		RedisCustomEndpoint:           flags.FlagToBoolValue(cmd, redisCustomEndpointFlag),
+		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(cmd, rabbitMQCustomEndpointFlag),
 	}
 }

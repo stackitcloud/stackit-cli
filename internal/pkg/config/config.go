@@ -23,6 +23,8 @@ const (
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
 	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
+	RedisCustomEndpointKey          = "redis_custom_endpoint"
+	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
 
 	AsyncDefault            = "false"
 	SessionTimeLimitDefault = "2h"

@@ -24,6 +24,8 @@ const (
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
+	redisCustomEndpointFlag           = "redis-custom-endpoint"
+	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
 )
 
 type inputModel struct {
@@ -90,6 +92,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
 	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
+	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis custom endpoint")
+	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ custom endpoint")
 
 	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -104,6 +108,10 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RabbitMQCustomEndpointKey, cmd.Flags().Lookup(rabbitMQCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

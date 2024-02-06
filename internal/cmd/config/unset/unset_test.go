@@ -16,6 +16,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		skeCustomEndpointFlag:             true,
 		resourceManagerCustomEndpointFlag: true,
 		openSearchCustomEndpointFlag:      true,
+		redisCustomEndpointFlag:           true,
+		rabbitMQCustomEndpointFlag:        true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -32,6 +34,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		SKECustomEndpoint:             true,
 		ResourceManagerCustomEndpoint: true,
 		OpenSearchCustomEndpoint:      true,
+		RedisCustomEndpoint:           true,
+		RabbitMQCustomEndpoint:        true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -64,6 +68,8 @@ func TestParseInput(t *testing.T) {
 				model.SKECustomEndpoint = false
 				model.ResourceManagerCustomEndpoint = false
 				model.OpenSearchCustomEndpoint = false
+				model.RedisCustomEndpoint = false
+				model.RabbitMQCustomEndpoint = false
 			}),
 		},
 		{
