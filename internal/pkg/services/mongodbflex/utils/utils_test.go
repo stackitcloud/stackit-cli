@@ -24,10 +24,19 @@ const (
 )
 
 type mongoDBFlexClientMocked struct {
-	getInstanceFails bool
-	getInstanceResp  *mongodbflex.GetInstanceResponse
-	getUserFails     bool
-	getUserResp      *mongodbflex.GetUserResponse
+	listVersionsFails bool
+	listVersionsResp  *mongodbflex.ListVersionsResponse
+	getInstanceFails  bool
+	getInstanceResp   *mongodbflex.GetInstanceResponse
+	getUserFails      bool
+	getUserResp       *mongodbflex.GetUserResponse
+}
+
+func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*mongodbflex.ListVersionsResponse, error) {
+	if m.listVersionsFails {
+		return nil, fmt.Errorf("could not list versions")
+	}
+	return m.listVersionsResp, nil
 }
 
 func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
@@ -350,6 +359,61 @@ func TestLoadFlavorId(t *testing.T) {
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("outputs do not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestGetLatestPostgreSQLVersion(t *testing.T) {
+	tests := []struct {
+		description       string
+		listVersionsFails bool
+		listVersionsResp  *mongodbflex.ListVersionsResponse
+		isValid           bool
+		expectedOutput    string
+	}{
+		{
+			description: "base",
+			listVersionsResp: &mongodbflex.ListVersionsResponse{
+				Versions: &[]string{"8", "10", "9"},
+			},
+			isValid:        true,
+			expectedOutput: "10",
+		},
+		{
+			description:       "get instance fails",
+			listVersionsFails: true,
+			isValid:           false,
+		},
+		{
+			description: "no versions",
+			listVersionsResp: &mongodbflex.ListVersionsResponse{
+				Versions: &[]string{},
+			},
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &mongoDBFlexClientMocked{
+				listVersionsFails: tt.listVersionsFails,
+				listVersionsResp:  tt.listVersionsResp,
+			}
+
+			output, err := GetLatestMongoDBVersion(context.Background(), client, testProjectId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
 		})
 	}
