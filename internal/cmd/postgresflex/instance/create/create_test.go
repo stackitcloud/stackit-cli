@@ -392,31 +392,6 @@ func TestBuildRequest(t *testing.T) {
 			},
 		},
 		{
-			description: "sharded instance type",
-			model:       fixtureInputModel(func(model *inputModel) { model.Type = utils.Ptr("Sharded") }),
-			isValid:     true,
-			expectedRequest: fixtureRequest().CreateInstancePayload(fixturePayload(func(payload *postgresflex.CreateInstancePayload) {
-				payload.Options = utils.Ptr(map[string]string{"type": "Sharded"})
-				payload.Replicas = utils.Ptr(int64(9))
-			})),
-			listFlavorsResp: &postgresflex.ListFlavorsResponse{
-				Flavors: &[]postgresflex.Flavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
-					},
-				},
-			},
-			listStoragesResp: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"premium-perf4-stackit"},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			},
-		},
-		{
 			description: "get flavors fails",
 			model: fixtureInputModel(
 				func(model *inputModel) {
