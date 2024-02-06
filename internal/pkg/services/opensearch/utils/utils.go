@@ -10,7 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
 )
 
-func ValidatePlanId(service, planId string, offerings *opensearch.ListOfferingsResponse) error {
+const (
+	service = "opensearch"
+)
+
+func ValidatePlanId(planId string, offerings *opensearch.ListOfferingsResponse) error {
 	for _, offer := range *offerings.Offerings {
 		for _, plan := range *offer.Plans {
 			if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
@@ -26,8 +30,6 @@ func ValidatePlanId(service, planId string, offerings *opensearch.ListOfferingsR
 }
 
 func LoadPlanId(planName, version string, offerings *opensearch.ListOfferingsResponse) (*string, error) {
-	service := "opensearch"
-
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false

@@ -198,7 +198,6 @@ type redisClient interface {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient) (redis.ApiCreateInstanceRequest, error) {
-	service := "redis"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
@@ -219,7 +218,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 			return req, err
 		}
 	} else {
-		err := redisUtils.ValidatePlanId(service, *model.PlanId, offerings)
+		err := redisUtils.ValidatePlanId(*model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}

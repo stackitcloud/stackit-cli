@@ -10,7 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
 )
 
-func ValidatePlanId(service, planId string, offerings *rabbitmq.ListOfferingsResponse) error {
+const (
+	service = "rabbitmq"
+)
+
+func ValidatePlanId(planId string, offerings *rabbitmq.ListOfferingsResponse) error {
 	for _, offer := range *offerings.Offerings {
 		for _, plan := range *offer.Plans {
 			if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
@@ -26,8 +30,6 @@ func ValidatePlanId(service, planId string, offerings *rabbitmq.ListOfferingsRes
 }
 
 func LoadPlanId(planName, version string, offerings *rabbitmq.ListOfferingsResponse) (*string, error) {
-	service := "rabbitmq"
-
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false

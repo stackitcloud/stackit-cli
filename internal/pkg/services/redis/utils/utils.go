@@ -10,7 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/redis"
 )
 
-func ValidatePlanId(service, planId string, offerings *redis.ListOfferingsResponse) error {
+const (
+	service = "redis"
+)
+
+func ValidatePlanId(planId string, offerings *redis.ListOfferingsResponse) error {
 	for _, offer := range *offerings.Offerings {
 		for _, plan := range *offer.Plans {
 			if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
@@ -26,8 +30,6 @@ func ValidatePlanId(service, planId string, offerings *redis.ListOfferingsRespon
 }
 
 func LoadPlanId(planName, version string, offerings *redis.ListOfferingsResponse) (*string, error) {
-	service := "redis"
-
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false

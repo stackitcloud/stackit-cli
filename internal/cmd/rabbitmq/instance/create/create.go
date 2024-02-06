@@ -198,7 +198,6 @@ type rabbitMQClient interface {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiCreateInstanceRequest, error) {
-	service := "rabbitmq"
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
@@ -219,7 +218,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 			return req, err
 		}
 	} else {
-		err := rabbitmqUtils.ValidatePlanId(service, *model.PlanId, offerings)
+		err := rabbitmqUtils.ValidatePlanId(*model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}

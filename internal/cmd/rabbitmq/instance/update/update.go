@@ -205,8 +205,6 @@ type rabbitMQClient interface {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiPartialUpdateInstanceRequest, error) {
-	service := "rabbitmq"
-
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
@@ -229,7 +227,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	} else {
 		// planId is not required for update operation
 		if model.PlanId != nil {
-			err := rabbitmqUtils.ValidatePlanId(service, *model.PlanId, offerings)
+			err := rabbitmqUtils.ValidatePlanId(*model.PlanId, offerings)
 			if err != nil {
 				return req, err
 			}

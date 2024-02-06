@@ -205,8 +205,6 @@ type openSearchClient interface {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
-	service := "opensearch"
-
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
@@ -229,7 +227,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchCl
 	} else {
 		// planId is not required for update operation
 		if model.PlanId != nil {
-			err := opensearchUtils.ValidatePlanId(service, *model.PlanId, offerings)
+			err := opensearchUtils.ValidatePlanId(*model.PlanId, offerings)
 			if err != nil {
 				return req, err
 			}
