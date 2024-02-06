@@ -18,6 +18,10 @@ var instanceTypeToReplicas = map[string]int64{
 }
 
 func ValidateFlavorId(flavorId string, flavors *[]postgresflex.Flavor) error {
+	if flavors == nil {
+		return fmt.Errorf("nil flavors")
+	}
+
 	for _, f := range *flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
 			return nil
@@ -31,6 +35,10 @@ func ValidateFlavorId(flavorId string, flavors *[]postgresflex.Flavor) error {
 }
 
 func ValidateStorage(storageClass *string, storageSize *int64, storages *postgresflex.ListStoragesResponse, flavorId string) error {
+	if storages == nil {
+		return fmt.Errorf("nil storages")
+	}
+
 	if storageSize != nil {
 		if *storageSize < *storages.StorageRange.Min || *storageSize > *storages.StorageRange.Max {
 			return fmt.Errorf("%s", fmt.Sprintf("You provided storage size '%d', which is invalid. The valid range is %d-%d.", *storageSize, *storages.StorageRange.Min, *storages.StorageRange.Max))
@@ -54,6 +62,10 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *postgre
 }
 
 func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, error) {
+	if flavors == nil {
+		return nil, fmt.Errorf("nil flavors")
+	}
+
 	availableFlavors := ""
 	for _, f := range *flavors {
 		if f.Id == nil || f.Cpu == nil || f.Memory == nil {
