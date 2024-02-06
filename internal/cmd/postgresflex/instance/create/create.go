@@ -174,14 +174,12 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Service:   "postgresflex",
-			Operation: cmd.Use,
+			Cmd: cmd,
 		}
 	}
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Service:   "postgresflex",
-			Operation: cmd.Use,
+			Cmd: cmd,
 		}
 	}
 

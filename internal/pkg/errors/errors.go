@@ -57,13 +57,13 @@ For more details on the available plans, run:
 	DATABASE_INVALID_INPUT_FLAVOR = `the instance flavor was not correctly provided. 
 
 Either provide flavor ID by:
-  $ stackit %[1]s instance %[2]s --project-id xxx --flavor-id <FLAVOR ID> [flags]
+  $ %[1]s --flavor-id <FLAVOR ID> [flags]
 
 or provide CPU and RAM:
-  $ stackit %[1]s instance %[2]s --project-id xxx --cpu <CPU> --ram <RAM> [flags]
+  $ %[1]s --cpu <CPU> --ram <RAM> [flags]
 
 For more details on the available flavors, run:
-  $ stackit %[1]s options --flavors`
+  $ stackit %[2]s options --flavors`
 
 	DATABASE_INVALID_FLAVOR = `the provided instance flavor is not valid.
 	
@@ -131,6 +131,7 @@ func (e *DSAInputPlanError) Error() string {
 	if len(e.Args) > 0 {
 		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
 	}
+	// Assumes a structure of the form "stackit <service> <resource> <operation>"
 	service := e.Cmd.Parent().Parent().Use
 
 	return fmt.Sprintf(DSA_INVALID_INPUT_PLAN, fullCommandPath, service)
@@ -148,10 +149,19 @@ func (e *DSAInvalidPlanError) Error() string {
 type DatabaseInputFlavorError struct {
 	Service   string
 	Operation string
+	Cmd       *cobra.Command
+	Args      []string
 }
 
 func (e *DatabaseInputFlavorError) Error() string {
-	return fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, e.Service, e.Operation)
+	fullCommandPath := e.Cmd.CommandPath()
+	if len(e.Args) > 0 {
+		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
+	}
+	// Assumes a structure of the form "stackit <service> <resource> <operation>"
+	service := e.Cmd.Parent().Parent().Use
+
+	return fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, fullCommandPath, service)
 }
 
 type DatabaseInvalidFlavorError struct {
