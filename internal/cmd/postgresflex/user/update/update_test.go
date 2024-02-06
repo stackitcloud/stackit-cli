@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,7 +18,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testUserId = uuid.NewString()
@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		databaseFlag:   "default",
+		rolesFlag:      "read",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		UserId:     testUserId,
-		Database:   utils.Ptr("default"),
+		Roles:      utils.Ptr([]string{"read"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -60,10 +60,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateUserRequest)) mongodbflex.ApiPartialUpdateUserRequest {
+func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateUserRequest)) postgresflex.ApiPartialUpdateUserRequest {
 	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
-	request = request.PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-		Database: utils.Ptr("default"),
+	request = request.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
+		Roles: utils.Ptr([]string{"read"}),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -98,28 +98,6 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
-		},
-		{
-			description: "update roles",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[rolesFlag] = "read"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = utils.Ptr([]string{"read"})
-			}),
-		},
-		{
-			description: "update database",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[databaseFlag] = "default"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Database = utils.Ptr("default")
-			}),
 		},
 		{
 			description: "project id missing",
@@ -185,7 +163,6 @@ func TestParseInput(t *testing.T) {
 			description: "empty update",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, databaseFlag)
 				delete(flagValues, rolesFlag)
 			}),
 			isValid: false,
@@ -249,22 +226,12 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest mongodbflex.ApiPartialUpdateUserRequest
+		expectedRequest postgresflex.ApiPartialUpdateUserRequest
 	}{
 		{
 			description:     "base",
-			model:           fixtureInputModel(),
+			model:           fixtureInputModel(func(model *inputModel) {}),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "update roles only",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Database = nil
-				model.Roles = &[]string{"default"}
-			}),
-			expectedRequest: fixtureRequest().PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-				Roles: &[]string{"default"},
-			}),
 		},
 	}
 

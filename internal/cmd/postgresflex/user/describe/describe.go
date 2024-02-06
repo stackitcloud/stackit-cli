@@ -10,12 +10,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
 const (
@@ -34,19 +34,19 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
-		Short: "Shows details of a MongoDB Flex user",
+		Short: "Shows details of a PostgreSQL Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Shows details of a MongoDB Flex user.",
+			"Shows details of a PostgreSQL Flex user.",
 			`The user password is hidden inside the "host" field and replaced with asterisks, as it is only visible upon creation. You can reset it by running:`,
-			"  $ stackit mongodbflex user reset-password USER_ID --instance-id INSTANCE_ID",
+			"  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit mongodbflex user list xxx --instance-id yyy"),
+				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"`,
+				"$ stackit postgresflex user list xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy" in table format`,
-				"$ stackit mongodbflex user list xxx --instance-id yyy --output-format pretty"),
+				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in table format`,
+				"$ stackit postgresflex user list xxx --instance-id yyy --output-format pretty"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -99,12 +99,12 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetUserRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetUserRequest {
 	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, user mongodbflex.InstanceResponseUser) error {
+func outputResult(cmd *cobra.Command, outputFormat string, user postgresflex.UserResponse) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -113,8 +113,6 @@ func outputResult(cmd *cobra.Command, outputFormat string, user mongodbflex.Inst
 		table.AddRow("USERNAME", *user.Username)
 		table.AddSeparator()
 		table.AddRow("ROLES", *user.Roles)
-		table.AddSeparator()
-		table.AddRow("DATABASE", *user.Database)
 		table.AddSeparator()
 		table.AddRow("HOST", *user.Host)
 		table.AddSeparator()

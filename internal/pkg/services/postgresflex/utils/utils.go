@@ -112,6 +112,7 @@ func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, erro
 type PostgresFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
 }
 
 func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId string) (string, error) {
@@ -142,4 +143,12 @@ func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectI
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
+}
+
+func GetUserName(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId, userId string) (string, error) {
+	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
+	if err != nil {
+		return "", fmt.Errorf("get PostgreSQL Flex user: %w", err)
+	}
+	return *resp.Item.Username, nil
 }
