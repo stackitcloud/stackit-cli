@@ -17,6 +17,41 @@ var instanceTypeToReplicas = map[string]int64{
 	"Sharded": 9,
 }
 
+func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId string) (string, error) {
+	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
+	if err != nil {
+		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
+	}
+	return *resp.Item.Username, nil
+}
+
+func AvailableInstanceTypes() []string {
+	instanceTypes := make([]string, len(instanceTypeToReplicas))
+	i := 0
+	for k := range instanceTypeToReplicas {
+		instanceTypes[i] = k
+		i++
+	}
+	return instanceTypes
+}
+
+func GetInstanceReplicas(instanceType string) (int64, error) {
+	numReplicas, ok := instanceTypeToReplicas[instanceType]
+	if !ok {
+		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
+	}
+	return numReplicas, nil
+}
+
+func GetInstanceType(numReplicas int64) (string, error) {
+	for k, v := range instanceTypeToReplicas {
+		if v == numReplicas {
+			return k, nil
+		}
+	}
+	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
+}
+
 func ValidateFlavorId(flavorId string, flavors *[]mongodbflex.HandlersInfraFlavor) error {
 	if flavors == nil {
 		return fmt.Errorf("nil flavors")
@@ -93,39 +128,4 @@ func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId
 		return "", fmt.Errorf("get MongoDBFlex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
-}
-
-func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId string) (string, error) {
-	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
-	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
-	}
-	return *resp.Item.Username, nil
-}
-
-func AvailableInstanceTypes() []string {
-	instanceTypes := make([]string, len(instanceTypeToReplicas))
-	i := 0
-	for k := range instanceTypeToReplicas {
-		instanceTypes[i] = k
-		i++
-	}
-	return instanceTypes
-}
-
-func GetInstanceReplicas(instanceType string) (int64, error) {
-	numReplicas, ok := instanceTypeToReplicas[instanceType]
-	if !ok {
-		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
-	}
-	return numReplicas, nil
-}
-
-func GetInstanceType(numReplicas int64) (string, error) {
-	for k, v := range instanceTypeToReplicas {
-		if v == numReplicas {
-			return k, nil
-		}
-	}
-	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
 }
