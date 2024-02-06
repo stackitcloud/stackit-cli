@@ -32,6 +32,7 @@ stackit [flags]
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
+* [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
 * [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE

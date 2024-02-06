@@ -1,33 +1,33 @@
-## stackit mongodbflex instance update
+## stackit postgresflex instance update
 
-Updates a MongoDB Flex instance
+Updates a PostgreSQL Flex instance
 
 ### Synopsis
 
-Updates a MongoDB Flex instance.
+Updates a PostgreSQL Flex instance.
 
 ```
-stackit mongodbflex instance update INSTANCE_ID [flags]
+stackit postgresflex instance update INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Update the name of a MongoDB Flex instance
-  $ stackit mongodbflex instance update xxx --name my-new-name
+  Update the name of a PostgreSQL Flex instance
+  $ stackit postgresflex instance update xxx --name my-new-name
 
-  Update the version of a MongoDB Flex instance
-  $ stackit mongodbflex instance update xxx --version 6.0
+  Update the version of a PostgreSQL Flex instance
+  $ stackit postgresflex instance update xxx --version 6.0
 ```
 
 ### Options
 
 ```
-      --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
+      --acl strings              List of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
       --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit mongodbflex instance update"
+  -h, --help                     Help for "stackit postgresflex instance update"
   -n, --name string              Instance name
       --ram int                  Amount of RAM (in GB)
       --storage-class string     Storage class
@@ -47,5 +47,5 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit mongodbflex instance](./stackit_mongodbflex_instance.md)	 - Provides functionality for MongoDB Flex instances
+* [stackit postgresflex instance](./stackit_postgresflex_instance.md)	 - Provides functionality for PostgreSQL Flex instances
 

@@ -16,14 +16,16 @@ import (
 )
 
 const (
-	sessionTimeLimitFlag              = "session-time-limit"
+	sessionTimeLimitFlag = "session-time-limit"
+
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	membershipCustomEndpointFlag      = "membership-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
+	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
+	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
+	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
-	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
-	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 )
 
 type inputModel struct {
@@ -83,13 +85,15 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
+
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS custom endpoint")
 	cmd.Flags().String(membershipCustomEndpointFlag, "", "Membership custom endpoint")
 	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex custom endpoint")
+	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
+	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex custom endpoint")
+	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
-	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
-	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
 
 	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -97,13 +101,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MongoDBFlexCustomEndpointKey, cmd.Flags().Lookup(mongoDBFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
+	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
+	err = viper.BindPFlag(config.PostgresFlexCustomEndpointKey, cmd.Flags().Lookup(postgresFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
+	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

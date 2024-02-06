@@ -33,6 +33,7 @@ stackit config unset [flags]
       --mongodbflex-custom-endpoint        MongoDB Flex custom endpoint
       --opensearch-custom-endpoint         OpenSearch custom endpoint
       --output-format                      Output format
+      --postgresflex-custom-endpoint       PostgreSQL Flex custom endpoint
       --project-id                         Project ID
       --resource-manager-custom-endpoint   Resource Manager custom endpoint
       --service-account-custom-endpoint    SKE custom endpoint

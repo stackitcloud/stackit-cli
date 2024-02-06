@@ -10,13 +10,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
-	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
+	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
 const (
@@ -31,16 +31,16 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of a MongoDB Flex instance",
-		Long:  "Shows details  of a MongoDB Flex instance.",
+		Short: "Shows details of a PostgreSQL Flex instance",
+		Long:  "Shows details of a PostgreSQL Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a MongoDB Flex instance with ID "xxx"`,
-				"$ stackit mongodbflex instance describe xxx"),
+				`Get details of a PostgreSQL Flex instance with ID "xxx"`,
+				"$ stackit postgresflex instance describe xxx"),
 			examples.NewExample(
-				`Get details of a MongoDB Flex instance with ID "xxx" in a table format`,
-				"$ stackit mongodbflex instance describe xxx --output-format pretty"),
+				`Get details of a PostgreSQL Flex instance with ID "xxx" in a table format`,
+				"$ stackit postgresflex instance describe xxx --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read MongoDB Flex instance: %w", err)
+				return fmt.Errorf("read PostgreSQL Flex instance: %w", err)
 			}
 
 			return outputResult(cmd, model.OutputFormat, resp.Item)
@@ -81,18 +81,18 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetInstanceRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex.Instance) error {
+func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 
-		instanceType, err := mongodbflexUtils.GetInstanceType(*instance.Replicas)
+		instanceType, err := postgresflexUtils.GetInstanceType(*instance.Replicas)
 		if err != nil {
 			// Should never happen
 			instanceType = ""
@@ -130,7 +130,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 	default:
 		details, err := json.MarshalIndent(instance, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex instance: %w", err)
+			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
 		}
 		cmd.Println(string(details))
 
