@@ -64,7 +64,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an LogMe instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit logme instance create --name my-instance --plan-name stackit-logme-1.2.10-replica --version 3.10"),
+				"$ stackit logme instance create --name my-instance --plan-name stackit-logme2-1.2.50-replica --version 2"),
 			examples.NewExample(
 				`Create an LogMe instance with name "my-instance" and specify plan by ID`,
 				"$ stackit logme instance create --name my-instance --plan-id xxx"),

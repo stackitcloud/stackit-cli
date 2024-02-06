@@ -48,6 +48,8 @@ var ConfigKeys = []string{
 	SessionTimeLimitKey,
 
 	DNSCustomEndpointKey,
+	LogMeCustomEndpointKey,
+	MariaDBCustomEndpointKey,
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	ResourceManagerEndpointKey,

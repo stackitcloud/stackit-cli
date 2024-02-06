@@ -64,7 +64,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an MariaDB instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 3.10"),
+				"$ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 10.6"),
 			examples.NewExample(
 				`Create an MariaDB instance with name "my-instance" and specify plan by ID`,
 				"$ stackit mariadb instance create --name my-instance --plan-id xxx"),
