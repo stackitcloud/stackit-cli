@@ -27,7 +27,7 @@ stackit postgresflex instance create [flags]
 
 ```
       --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
-      --backup-schedule string   Backup schedule (default "0 0/6 * * *")
+      --backup-schedule string   Backup schedule (default "0 0 * * *")
       --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit postgresflex instance create"
@@ -35,8 +35,8 @@ stackit postgresflex instance create [flags]
       --ram int                  Amount of RAM (in GB)
       --storage-class string     Storage class (default "premium-perf2-stackit")
       --storage-size int         Storage size (in GB) (default 10)
-      --type string              Instance type, one of ["Single" "Replica" "Sharded"] (default "Replica")
-      --version string           Version (default "6.0")
+      --type string              Instance type, one of ["Single" "Replica"] (default "Replica")
+      --version string           PostgreSQL version. Defaults to the latest version available
 ```
 
 ### Options inherited from parent commands

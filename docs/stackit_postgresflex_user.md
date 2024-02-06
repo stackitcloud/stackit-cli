@@ -4,7 +4,7 @@ Provides functionality for PostgreSQL Flex users
 
 ### Synopsis
 
-Provides functionality for PostgreSQL Flex users
+Provides functionality for PostgreSQL Flex users.
 
 ```
 stackit postgresflex user [flags]
@@ -28,10 +28,10 @@ stackit postgresflex user [flags]
 ### SEE ALSO
 
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
-* [stackit postgresflex user create](./stackit_postgresflex_user_create.md)	 - Create a PostgreSQL Flex user
-* [stackit postgresflex user delete](./stackit_postgresflex_user_delete.md)	 - Delete a PostgreSQL Flex user
-* [stackit postgresflex user describe](./stackit_postgresflex_user_describe.md)	 - Get details of a PostgreSQL Flex user
-* [stackit postgresflex user list](./stackit_postgresflex_user_list.md)	 - List all PostgreSQL Flex users of an instance
-* [stackit postgresflex user reset-password](./stackit_postgresflex_user_reset-password.md)	 - Reset the password of a PostgreSQL Flex user
-* [stackit postgresflex user update](./stackit_postgresflex_user_update.md)	 - Update a PostgreSQL Flex user
+* [stackit postgresflex user create](./stackit_postgresflex_user_create.md)	 - Creates a PostgreSQL Flex user
+* [stackit postgresflex user delete](./stackit_postgresflex_user_delete.md)	 - Deletes a PostgreSQL Flex user
+* [stackit postgresflex user describe](./stackit_postgresflex_user_describe.md)	 - Shows details of a PostgreSQL Flex user
+* [stackit postgresflex user list](./stackit_postgresflex_user_list.md)	 - Lists all PostgreSQL Flex users of an instance
+* [stackit postgresflex user reset-password](./stackit_postgresflex_user_reset-password.md)	 - Resets the password of a PostgreSQL Flex user
+* [stackit postgresflex user update](./stackit_postgresflex_user_update.md)	 - Updates a PostgreSQL Flex user
 

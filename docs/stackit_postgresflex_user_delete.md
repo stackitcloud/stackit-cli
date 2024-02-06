@@ -1,10 +1,10 @@
 ## stackit postgresflex user delete
 
-Delete a PostgreSQL Flex user
+Deletes a PostgreSQL Flex user
 
 ### Synopsis
 
-Delete a PostgreSQL Flex user by ID.
+Deletes a PostgreSQL Flex user by ID.
 You can get the IDs of users for an instance by running:
   $ stackit postgresflex user list --instance-id <INSTANCE_ID>
 

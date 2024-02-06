@@ -1,13 +1,13 @@
 ## stackit postgresflex user create
 
-Create a PostgreSQL Flex user
+Creates a PostgreSQL Flex user
 
 ### Synopsis
 
-Create a PostgreSQL Flex user.
+Creates a PostgreSQL Flex user.
 The password is only visible upon creation and cannot be retrieved later.
 Alternatively, you can reset the password and access the new one by running:
-  $ stackit postgresflex user reset-password --instance-id <INSTANCE_ID> --user-id <USER_ID>
+  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID
 
 ```
 stackit postgresflex user create [flags]

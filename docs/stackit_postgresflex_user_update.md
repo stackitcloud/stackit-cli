@@ -1,10 +1,10 @@
 ## stackit postgresflex user update
 
-Update a PostgreSQL Flex user
+Updates a PostgreSQL Flex user
 
 ### Synopsis
 
-Update a PostgreSQL Flex user.
+Updates a PostgreSQL Flex user.
 
 ```
 stackit postgresflex user update USER_ID [flags]

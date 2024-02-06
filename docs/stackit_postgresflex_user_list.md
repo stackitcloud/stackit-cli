@@ -1,10 +1,10 @@
 ## stackit postgresflex user list
 
-List all PostgreSQL Flex users of an instance
+Lists all PostgreSQL Flex users of an instance
 
 ### Synopsis
 
-List all PostgreSQL Flex users of an instance.
+Lists all PostgreSQL Flex users of an instance.
 
 ```
 stackit postgresflex user list [flags]

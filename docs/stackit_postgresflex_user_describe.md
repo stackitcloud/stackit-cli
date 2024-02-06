@@ -1,12 +1,12 @@
 ## stackit postgresflex user describe
 
-Get details of a PostgreSQL Flex user
+Shows details of a PostgreSQL Flex user
 
 ### Synopsis
 
-Get details of a PostgreSQL Flex user.
+Shows details of a PostgreSQL Flex user.
 The user password is hidden inside the "host" field and replaced with asterisks, as it is only visible upon creation. You can reset it by running:
-  $ stackit postgresflex user reset-password <USER_ID> --instance-id <INSTANCE_ID>
+  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID
 
 ```
 stackit postgresflex user describe USER_ID [flags]
