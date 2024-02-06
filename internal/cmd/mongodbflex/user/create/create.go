@@ -45,7 +45,7 @@ func NewCmd() *cobra.Command {
 			"Creates a MongoDB Flex user.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
-			"  $ stackit mongodbflex user reset-password --instance-id <INSTANCE_ID> --user-id <USER_ID>",
+			"  $ stackit mongodbflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
