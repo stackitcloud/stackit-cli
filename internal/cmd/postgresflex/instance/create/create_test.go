@@ -54,7 +54,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:      testProjectId,
 		instanceNameFlag:   "example-name",
 		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0/6 * * *",
+		backupScheduleFlag: "0 0 * * *",
 		flavorIdFlag:       testFlavorId,
 		storageClassFlag:   "premium-perf4-stackit", // Non-default
 		storageSizeFlag:    "10",
@@ -74,7 +74,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceName:   utils.Ptr("example-name"),
 		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
+		BackupSchedule: utils.Ptr("0 0 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		StorageClass:   utils.Ptr("premium-perf4-stackit"),
 		StorageSize:    utils.Ptr(int64(10)),
@@ -100,7 +100,7 @@ func fixturePayload(mods ...func(payload *postgresflex.CreateInstancePayload)) p
 	payload := postgresflex.CreateInstancePayload{
 		Name:           utils.Ptr("example-name"),
 		Acl:            &postgresflex.ACL{Items: utils.Ptr([]string{"0.0.0.0/0"})},
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
+		BackupSchedule: utils.Ptr("0 0 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		Replicas:       utils.Ptr(int64(3)),
 		Storage: &postgresflex.Storage{
@@ -136,7 +136,6 @@ func TestParseInput(t *testing.T) {
 			description: "with defaults",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, backupScheduleFlag)
-				delete(flagValues, versionFlag)
 				delete(flagValues, typeFlag)
 			}),
 			isValid:       true,
@@ -203,6 +202,16 @@ func TestParseInput(t *testing.T) {
 				flagValues[cpuFlag] = "2"
 			}),
 			isValid: false,
+		},
+		{
+			description: "no version",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, versionFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Version = nil
+			}),
 		},
 		{
 			description: "repeated acl flags",

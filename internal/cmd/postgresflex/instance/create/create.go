@@ -38,7 +38,6 @@ const (
 	defaultStorageClass   = "premium-perf2-stackit"
 	defaultStorageSize    = 10
 	defaultType           = "Replica"
-	defaultVersion        = "15"
 )
 
 type inputModel struct {
@@ -100,6 +99,15 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
+			// Fill in defautl version, if needed
+			if model.Version == nil {
+				version, err := postgresflexUtils.GetLatestPostgreSQLVersion(ctx, apiClient, model.ProjectId)
+				if err != nil {
+					return fmt.Errorf("get latest PostgreSQL version: %w", err)
+				}
+				model.Version = &version
+			}
+
 			// Call API
 			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
@@ -145,7 +153,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
-	cmd.Flags().String(versionFlag, defaultVersion, "Version")
+	cmd.Flags().String(versionFlag, "", "PostgreSQL version. Defaults to the latest version available")
 	cmd.Flags().Var(flags.EnumFlag(false, defaultType, typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, aclFlag)
@@ -187,7 +195,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		RAM:             ram,
 		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
-		Version:         utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, versionFlag)),
+		Version:         flags.FlagToStringPointer(cmd, versionFlag),
 		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, typeFlag)),
 	}, nil
 }

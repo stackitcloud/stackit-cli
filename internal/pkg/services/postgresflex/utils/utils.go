@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"golang.org/x/mod/semver"
 )
 
 // The number of replicas is enforced by the API according to the instance type
@@ -109,7 +110,30 @@ func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, erro
 }
 
 type PostgresFlexClient interface {
+	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+}
+
+func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId string) (string, error) {
+	resp, err := apiClient.ListVersionsExecute(ctx, projectId)
+	if err != nil {
+		return "", fmt.Errorf("get PostgreSQL versions: %w", err)
+	}
+	versions := *resp.Versions
+
+	latestVersion := "0"
+	for i := range versions {
+		oldSemVer := fmt.Sprintf("v%s", latestVersion)
+		newSemVer := fmt.Sprintf("v%s", versions[i])
+		if semver.Compare(newSemVer, oldSemVer) != 1 {
+			continue
+		}
+		latestVersion = versions[i]
+	}
+	if latestVersion == "0" {
+		return "", fmt.Errorf("no PostgreSQL versions found")
+	}
+	return latestVersion, nil
 }
 
 func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId string) (string, error) {
