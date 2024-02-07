@@ -12,6 +12,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		projectIdFlag:    true,
 		outputFormatFlag: true,
 
+		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
@@ -30,8 +31,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		ProjectId:                     true,
-		OutputFormat:                  true,
+		ProjectId:    true,
+		OutputFormat: true,
+
+		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
@@ -68,6 +71,8 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ProjectId = false
 				model.OutputFormat = false
+
+				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
