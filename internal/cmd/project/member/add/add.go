@@ -11,11 +11,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/membership/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -113,10 +113,10 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *membership.APIClient) membership.ApiAddMembersRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiAddMembersRequest {
 	req := apiClient.AddMembers(ctx, model.GlobalFlagModel.ProjectId)
-	req = req.AddMembersPayload(membership.AddMembersPayload{
-		Members: utils.Ptr([]membership.Member{
+	req = req.AddMembersPayload(authorization.AddMembersPayload{
+		Members: utils.Ptr([]authorization.Member{
 			{
 				Subject: utils.Ptr(model.Subject),
 				Role:    model.Role,

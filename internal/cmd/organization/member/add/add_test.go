@@ -9,13 +9,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &membership.APIClient{}
+var testClient = &authorization.APIClient{}
 var testOrganizationID = "some-organization-id"
 var testSubject = "someone@domain.com"
 var testRole = "reader"
@@ -54,10 +54,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *membership.ApiAddMembersRequest)) membership.ApiAddMembersRequest {
+func fixtureRequest(mods ...func(request *authorization.ApiAddMembersRequest)) authorization.ApiAddMembersRequest {
 	request := testClient.AddMembers(testCtx, testOrganizationID)
-	request = request.AddMembersPayload(membership.AddMembersPayload{
-		Members: utils.Ptr([]membership.Member{
+	request = request.AddMembersPayload(authorization.AddMembersPayload{
+		Members: utils.Ptr([]authorization.Member{
 			{
 				Subject: &testSubject,
 				Role:    &testRole,
@@ -178,7 +178,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest membership.ApiAddMembersRequest
+		expectedRequest authorization.ApiAddMembersRequest
 	}{
 		{
 			description:     "base",

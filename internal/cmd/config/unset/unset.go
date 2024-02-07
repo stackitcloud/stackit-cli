@@ -18,10 +18,10 @@ const (
 	outputFormatFlag = globalflags.OutputFormatFlag
 	projectIdFlag    = globalflags.ProjectIdFlag
 
+	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
-	membershipCustomEndpointFlag      = "membership-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
@@ -37,10 +37,10 @@ type inputModel struct {
 	OutputFormat bool
 	ProjectId    bool
 
+	AuthorizationCustomEndpoint   bool
 	DNSCustomEndpoint             bool
 	LogMeCustomEndpoint           bool
 	MariaDBCustomEndpoint         bool
-	MembershipCustomEndpoint      bool
 	MongoDBFlexCustomEndpoint     bool
 	OpenSearchCustomEndpoint      bool
 	PostgresFlexCustomEndpoint    bool
@@ -81,6 +81,9 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.ProjectIdKey, "")
 			}
 
+			if model.AuthorizationCustomEndpoint {
+				viper.Set(config.AuthorizationCustomEndpointKey, "")
+			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
 			}
@@ -89,9 +92,6 @@ func NewCmd() *cobra.Command {
 			}
 			if model.MariaDBCustomEndpoint {
 				viper.Set(config.MariaDBCustomEndpointKey, "")
-			}
-			if model.MembershipCustomEndpoint {
-				viper.Set(config.MembershipCustomEndpointKey, "")
 			}
 			if model.MongoDBFlexCustomEndpoint {
 				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
@@ -134,10 +134,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 
+	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization custom endpoint")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe custom endpoint")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB custom endpoint")
-	cmd.Flags().Bool(membershipCustomEndpointFlag, false, "Membership custom endpoint")
 	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex custom endpoint")
 	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
 	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex custom endpoint")
@@ -154,10 +154,10 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		OutputFormat: flags.FlagToBoolValue(cmd, outputFormatFlag),
 		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
 
+		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:         flags.FlagToBoolValue(cmd, mariaDBCustomEndpointFlag),
-		MembershipCustomEndpoint:      flags.FlagToBoolValue(cmd, membershipCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(cmd, mongoDBFlexCustomEndpointFlag),
 		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
 		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(cmd, postgresFlexCustomEndpointFlag),

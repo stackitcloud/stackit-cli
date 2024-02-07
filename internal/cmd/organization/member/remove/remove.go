@@ -9,11 +9,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/membership/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -115,10 +115,10 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *membership.APIClient) membership.ApiRemoveMembersRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiRemoveMembersRequest {
 	req := apiClient.RemoveMembers(ctx, *model.OrganizationId)
-	payload := membership.RemoveMembersPayload{
-		Members: utils.Ptr([]membership.Member{
+	payload := authorization.RemoveMembersPayload{
+		Members: utils.Ptr([]authorization.Member{
 			{
 				Subject: utils.Ptr(model.Subject),
 				Role:    model.Role,

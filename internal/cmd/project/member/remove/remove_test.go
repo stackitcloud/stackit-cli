@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,7 +18,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &membership.APIClient{}
+var testClient = &authorization.APIClient{}
 var testProjectId = uuid.NewString()
 var testSubject = "someone@domain.com"
 var testRole = "reader"
@@ -58,10 +58,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *membership.ApiRemoveMembersRequest)) membership.ApiRemoveMembersRequest {
+func fixtureRequest(mods ...func(request *authorization.ApiRemoveMembersRequest)) authorization.ApiRemoveMembersRequest {
 	request := testClient.RemoveMembers(testCtx, testProjectId)
-	request = request.RemoveMembersPayload(membership.RemoveMembersPayload{
-		Members: utils.Ptr([]membership.Member{
+	request = request.RemoveMembersPayload(authorization.RemoveMembersPayload{
+		Members: utils.Ptr([]authorization.Member{
 			{
 				Subject: &testSubject,
 				Role:    &testRole,
@@ -189,7 +189,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest membership.ApiRemoveMembersRequest
+		expectedRequest authorization.ApiRemoveMembersRequest
 	}{
 		{
 			description:     "base",
@@ -202,8 +202,8 @@ func TestBuildRequest(t *testing.T) {
 				model.Force = true
 			}),
 			expectedRequest: testClient.RemoveMembers(testCtx, testProjectId).
-				RemoveMembersPayload(membership.RemoveMembersPayload{
-					Members: utils.Ptr([]membership.Member{
+				RemoveMembersPayload(authorization.RemoveMembersPayload{
+					Members: utils.Ptr([]authorization.Member{
 						{
 							Subject: &testSubject,
 							Role:    &testRole,

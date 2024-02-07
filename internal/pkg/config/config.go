@@ -16,10 +16,10 @@ const (
 	ProjectIdKey        = "project_id"
 	SessionTimeLimitKey = "session_time_limit"
 
+	AuthorizationCustomEndpointKey  = "authorization_custom_endpoint"
 	DNSCustomEndpointKey            = "dns_custom_endpoint"
 	LogMeCustomEndpointKey          = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
-	MembershipCustomEndpointKey     = "membership_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
 	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey   = "postgresflex_custom_endpoint"
@@ -53,7 +53,7 @@ var ConfigKeys = []string{
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	ResourceManagerEndpointKey,
-	MembershipCustomEndpointKey,
+	AuthorizationCustomEndpointKey,
 	MongoDBFlexCustomEndpointKey,
 	RabbitMQCustomEndpointKey,
 	RedisCustomEndpointKey,
@@ -124,7 +124,7 @@ func setConfigDefaults() {
 	viper.SetDefault(ProjectIdKey, "")
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
-	viper.SetDefault(MembershipCustomEndpointKey, "")
+	viper.SetDefault(AuthorizationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")

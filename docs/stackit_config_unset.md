@@ -27,11 +27,11 @@ stackit config unset [flags]
 
 ```
       --async                              Configuration option to run commands asynchronously
+      --authorization-custom-endpoint      Authorization custom endpoint
       --dns-custom-endpoint                DNS custom endpoint
   -h, --help                               Help for "stackit config unset"
       --logme-custom-endpoint              LogMe custom endpoint
       --mariadb-custom-endpoint            MariaDB custom endpoint
-      --membership-custom-endpoint         Membership custom endpoint
       --mongodbflex-custom-endpoint        MongoDB Flex custom endpoint
       --opensearch-custom-endpoint         OpenSearch custom endpoint
       --output-format                      Output format

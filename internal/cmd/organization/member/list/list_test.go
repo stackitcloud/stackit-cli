@@ -10,13 +10,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &membership.APIClient{}
+var testClient = &authorization.APIClient{}
 var testOrganizationID = "some-organization-id"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -43,7 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *membership.ApiListMembersRequest)) membership.ApiListMembersRequest {
+func fixtureRequest(mods ...func(request *authorization.ApiListMembersRequest)) authorization.ApiListMembersRequest {
 	request := testClient.ListMembers(testCtx, organizationResourceType, testOrganizationID)
 	for _, mod := range mods {
 		mod(&request)
@@ -172,7 +172,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest membership.ApiListMembersRequest
+		expectedRequest authorization.ApiListMembersRequest
 	}{
 		{
 			description:     "base",
