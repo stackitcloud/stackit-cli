@@ -86,7 +86,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			cmd.PrintErr(fmt.Sprintf("Created key for service account %s\n", model.ServiceAccountEmail))
+			cmd.PrintErrf("Created key for service account %s\n", model.ServiceAccountEmail)
 
 			key, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
