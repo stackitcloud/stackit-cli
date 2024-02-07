@@ -11,11 +11,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/membership/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -122,7 +122,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *membership.APIClient) membership.ApiListMembersRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListMembersRequest {
 	req := apiClient.ListMembers(ctx, organizationResourceType, *model.OrganizationId)
 	if model.Subject != nil {
 		req = req.Subject(*model.Subject)
@@ -130,7 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *membership.
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, members []membership.Member) error {
+func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":

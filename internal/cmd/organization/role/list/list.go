@@ -10,11 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/membership/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -111,11 +111,11 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *membership.APIClient) membership.ApiListRolesRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListRolesRequest {
 	return apiClient.ListRoles(ctx, organizationResourceType, *model.OrganizationId)
 }
 
-func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []membership.Role) error {
+func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authorization.Role) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details

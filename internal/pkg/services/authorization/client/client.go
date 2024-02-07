@@ -8,12 +8,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-	"github.com/stackitcloud/stackit-sdk-go/services/membership"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
-func ConfigureClient(cmd *cobra.Command) (*membership.APIClient, error) {
+func ConfigureClient(cmd *cobra.Command) (*authorization.APIClient, error) {
 	var err error
-	var apiClient *membership.APIClient
+	var apiClient *authorization.APIClient
 	var cfgOptions []sdkConfig.ConfigurationOption
 
 	authCfgOption, err := auth.AuthenticationConfig(cmd, auth.AuthorizeUser)
@@ -22,13 +22,13 @@ func ConfigureClient(cmd *cobra.Command) (*membership.APIClient, error) {
 	}
 	cfgOptions = append(cfgOptions, authCfgOption)
 
-	customEndpoint := viper.GetString(config.MembershipCustomEndpointKey)
+	customEndpoint := viper.GetString(config.AuthorizationCustomEndpointKey)
 
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	}
 
-	apiClient, err = membership.NewAPIClient(cfgOptions...)
+	apiClient, err = authorization.NewAPIClient(cfgOptions...)
 	if err != nil {
 		return nil, &errors.AuthError{}
 	}

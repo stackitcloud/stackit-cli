@@ -18,10 +18,10 @@ import (
 const (
 	sessionTimeLimitFlag = "session-time-limit"
 
+	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
-	membershipCustomEndpointFlag      = "membership-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
@@ -90,10 +90,10 @@ func NewCmd() *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
 
+	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization custom endpoint")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS custom endpoint")
 	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe custom endpoint")
 	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB custom endpoint")
-	cmd.Flags().String(membershipCustomEndpointFlag, "", "Membership custom endpoint")
 	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex custom endpoint")
 	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
 	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex custom endpoint")
@@ -103,13 +103,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
 
-	err := viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
+	err := viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.LogMeCustomEndpointKey, cmd.Flags().Lookup(logMeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MariaDBCustomEndpointKey, cmd.Flags().Lookup(mariaDBCustomEndpointFlag))
-	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.MembershipCustomEndpointKey, cmd.Flags().Lookup(membershipCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MongoDBFlexCustomEndpointKey, cmd.Flags().Lookup(mongoDBFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
