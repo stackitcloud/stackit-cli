@@ -54,13 +54,14 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | DNS                     | `dns`                     | :white_check_mark:      |
 | Kubernetes Engine (SKE) | `ske`                     | :white_check_mark:      |
 | Load Balancer           |                           | Will be integrated soon |
-| LogMe                   |                           | Will be integrated soon |
-| MariaDB                 |                           | Will be integrated soon |
+| LogMe                   | `logme`                   | :white_check_mark:      |
+| MariaDB                 | `mariadb`                 | :white_check_mark:      |
 | MongoDB Flex            | `mongodbflex`             | :white_check_mark:      |
 | Object Storage          |                           | Will be integrated soon |
-| OpenSearch              |                           | Will be integrated soon |
+| OpenSearch              | `opensearch`              | :white_check_mark:      |
 | PostgreSQL Flex         |                           | Will be integrated soon |
-| RabbitMQ                |                           | Will be integrated soon |
+| RabbitMQ                | `rabbitmq`                | :white_check_mark:      |
+| Redis                   | `redis`                   | :white_check_mark:      |
 | Resource Manager        | `project`                 | :white_check_mark:      |
 | Secrets Manager         |                           | Will be integrated soon |
 | Service Account         | `service-account`         | :white_check_mark:      |

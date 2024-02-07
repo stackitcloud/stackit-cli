@@ -64,5 +64,4 @@ Alternativelly, you can:
 ### Pre-compiled binary
 
 1. Download the binary corresponding to your operating system and CPU architecture from our [Releases](https://github.com/stackitcloud/stackit-cli/releases) page
-2. Extract the contents of the file to your file system and move it to your preferred location (e.g. your home directory)
-3. (For macOS only) Right click on the executable, select "Open". You will see a dialog stating the identity of the developer cannot be confirmed. Click on "Open" to allow the app to run on your Mac. We soon plan to certificate the STACKIT CLI to be trusted by macOS
+2. Extract the contents of the file to your file system and move it to your preferred location (make sure the directory is added to your `PATH`)
