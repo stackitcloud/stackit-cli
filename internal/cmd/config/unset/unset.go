@@ -154,10 +154,10 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		OutputFormat: flags.FlagToBoolValue(cmd, outputFormatFlag),
 		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
 
+		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:         flags.FlagToBoolValue(cmd, mariaDBCustomEndpointFlag),
-		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(cmd, mongoDBFlexCustomEndpointFlag),
 		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
 		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(cmd, postgresFlexCustomEndpointFlag),
