@@ -41,7 +41,7 @@ stackit config unset [flags]
       --redis-custom-endpoint              Redis API base URL. If unset, uses the default base URL
       --resource-manager-custom-endpoint   Resource Manager API base URL. If unset, uses the default base URL
       --service-account-custom-endpoint    SKE API base URL. If unset, uses the default base URL
-      --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to session_time_limit
+      --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to 2h
       --ske-custom-endpoint                SKE API base URL. If unset, uses the default base URL
 ```
 
