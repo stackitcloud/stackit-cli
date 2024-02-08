@@ -108,10 +108,10 @@ func configureFlags(cmd *cobra.Command) {
 	rolesOptions := []string{"login", "createdb"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
-	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
+	cmd.Flags().String(usernameFlag, "", "Username of the user")
 	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
 	cobra.CheckErr(err)
 }
 

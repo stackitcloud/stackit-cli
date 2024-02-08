@@ -79,16 +79,6 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no username specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, usernameFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-			}),
-		},
-		{
 			description: "no values",
 			flagValues:  map[string]string{},
 			isValid:     false,
@@ -125,6 +115,13 @@ func TestParseInput(t *testing.T) {
 			description: "instance id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "username missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, usernameFlag)
 			}),
 			isValid: false,
 		},
