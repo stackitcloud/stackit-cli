@@ -4,7 +4,7 @@ Unsets CLI configuration options
 
 ### Synopsis
 
-Unsets CLI configuration options.
+Unsets CLI configuration options, undoing past usages of the `stackit config set` command.
 
 ```
 stackit config unset [flags]

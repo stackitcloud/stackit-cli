@@ -42,13 +42,8 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
-		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s",
-			"Sets CLI configuration options.",
-			"Every configuration option can be set using an environment variable, which takes precedence over what is configured.",
-			`The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
-			"Example: you can set the project ID by running this command with the --project-id flag set or by setting the environment variable STACKIT_PROJECT_ID.",
-		),
-		Args: args.NoArgs,
+		Long:  "Sets CLI configuration options.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Set a project ID in your active configuration. This project ID will be used by every command (as long as it's not overridden by the "STACKIT_PROJECT_ID" environment variable)`,

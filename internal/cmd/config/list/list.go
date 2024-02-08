@@ -20,8 +20,16 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists the current CLI configuration values",
-		Long:  "Lists the current CLI configuration values.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s",
+			"Lists the current CLI configuration values, based on the following sources (in order of precedence):",
+			"- Environment variable",
+			`  The environment variable is the name of the setting, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
+			"  Example: you can set the project ID by setting the environment variable STACKIT_PROJECT_ID.",
+			"- Configuration set in CLI",
+			`  These are set using the "stackit config set" command`,
+			`  Example: you can set the project ID by running "stackit config set --project-id xxx"`,
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List your active configuration`,

@@ -59,7 +59,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
-		Long:  "Unsets CLI configuration options.",
+		Long:  "Unsets CLI configuration options, undoing past usages of the `stackit config set` command.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
