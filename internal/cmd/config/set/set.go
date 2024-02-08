@@ -42,17 +42,22 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
-		Long:  "Sets CLI configuration options.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
+			"Sets CLI configuration options.",
+			"All of the configuration options can be set using an environment variable, which takes precedence over what is configured using this command.",
+			`The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
+			"Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Set a project ID in your active configuration. This project ID will be used by every command (as long as it's not overridden by the "STACKIT_PROJECT_ID" environment variable)`,
+				`Set a project ID in your active configuration. This project ID will be used by every command (unless overridden by the "STACKIT_PROJECT_ID" environment variable)`,
 				"$ stackit config set --project-id xxx"),
 			examples.NewExample(
 				`Set the session time limit to 1 hour`,
 				"$ stackit config set --session-time-limit 1h"),
 			examples.NewExample(
-				`Set the DNS custom endpoint`,
+				`Set the DNS custom endpoint. This endpoint will be used on all calls to the DNS API (unless overridden by the "STACKIT_DNS_CUSTOM_ENDPOINT" environment variable)`,
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
