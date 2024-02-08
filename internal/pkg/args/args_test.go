@@ -69,6 +69,11 @@ func TestSingleArg(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "empty_arg",
+			args:        []string{""},
+			isValid:     false,
+		},
+		{
 			description: "invalid_arg",
 			args:        []string{"arg"},
 			validateFunc: func(value string) error {
