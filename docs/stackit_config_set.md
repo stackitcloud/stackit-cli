@@ -56,5 +56,5 @@ stackit config set [flags]
 
 ### SEE ALSO
 
-* [stackit config](./stackit_config.md)	 - CLI configuration options
+* [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 

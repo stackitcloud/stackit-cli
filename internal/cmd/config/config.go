@@ -13,8 +13,8 @@ import (
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
-		Short: "CLI configuration options",
-		Long:  "CLI configuration options.",
+		Short: "Provides functionality for CLI configuration options",
+		Long:  "Provides functionality for CLI configuration options.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
