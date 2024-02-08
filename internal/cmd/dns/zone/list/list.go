@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 				`List up to 10 DNS zones`,
 				"$ stackit dns zone list --limit 10"),
 			examples.NewExample(
-				`List the deleted DNS zones`,
+				`List DNS zones, including deleted`,
 				"$ stackit dns zone list --deleted"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

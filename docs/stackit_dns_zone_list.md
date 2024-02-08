@@ -22,7 +22,7 @@ stackit dns zone list [flags]
   List up to 10 DNS zones
   $ stackit dns zone list --limit 10
 
-  List the deleted DNS zones
+  List DNS zones, including deleted
   $ stackit dns zone list --deleted
 ```
 
