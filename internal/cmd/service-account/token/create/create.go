@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an access token for the service account with email "my-service-account-1234567@sa.stackit.cloud" with a default time to live`,
-				"$ stackit service-account token create --sa-email my-service-account-1234567@sa.stackit.cloud"),
+				"$ stackit service-account token create --email my-service-account-1234567@sa.stackit.cloud"),
 			examples.NewExample(
 				`Create an access token for the service account with email "my-service-account-1234567@sa.stackit.cloud" with a time to live of 10 days`,
 				"$ stackit service-account token create --email my-service-account-1234567@sa.stackit.cloud --ttl-days 10"),

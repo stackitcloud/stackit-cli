@@ -66,7 +66,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete service account: %w", err)
 			}
 
-			cmd.Printf("Service account %s deleted", model.Email)
+			cmd.Printf("Service account %s deleted\n", model.Email)
 			return nil
 		},
 	}
