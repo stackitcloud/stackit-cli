@@ -4,7 +4,13 @@ Lists the current CLI configuration values
 
 ### Synopsis
 
-Lists the current CLI configuration values.
+Lists the current CLI configuration values, based on the following sources (in order of precedence):
+- Environment variable
+  The environment variable is the name of the setting, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.
+  Example: you can set the project ID by setting the environment variable STACKIT_PROJECT_ID.
+- Configuration set in CLI
+  These are set using the "stackit config set" command
+  Example: you can set the project ID by running "stackit config set --project-id xxx"
 
 ```
 stackit config list [flags]
@@ -34,5 +40,5 @@ stackit config list [flags]
 
 ### SEE ALSO
 
-* [stackit config](./stackit_config.md)	 - CLI configuration options
+* [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 

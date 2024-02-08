@@ -18,6 +18,8 @@ const (
 	outputFormatFlag = globalflags.OutputFormatFlag
 	projectIdFlag    = globalflags.ProjectIdFlag
 
+	sessionTimeLimitFlag = "session-time-limit"
+
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
@@ -37,6 +39,8 @@ type inputModel struct {
 	OutputFormat bool
 	ProjectId    bool
 
+	SessionTimeLimit bool
+
 	AuthorizationCustomEndpoint   bool
 	DNSCustomEndpoint             bool
 	LogMeCustomEndpoint           bool
@@ -55,7 +59,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
-		Long:  "Unsets CLI configuration options.",
+		Long:  "Unsets CLI configuration options, undoing past usages of the `stackit config set` command.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -72,13 +76,17 @@ func NewCmd() *cobra.Command {
 			model := parseInput(cmd)
 
 			if model.AsyncFlag {
-				viper.Set(config.AsyncKey, "")
+				viper.Set(config.AsyncKey, config.AsyncDefault)
 			}
 			if model.OutputFormat {
 				viper.Set(config.OutputFormatKey, "")
 			}
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
+			}
+
+			if model.SessionTimeLimit {
+				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
 
 			if model.AuthorizationCustomEndpoint {
@@ -134,18 +142,20 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 
-	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization custom endpoint")
-	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
-	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe custom endpoint")
-	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB custom endpoint")
-	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex custom endpoint")
-	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
-	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex custom endpoint")
-	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ custom endpoint")
-	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis custom endpoint")
-	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager custom endpoint")
-	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE custom endpoint")
-	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
+	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
+
+	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(cmd *cobra.Command) *inputModel {
@@ -154,6 +164,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		OutputFormat: flags.FlagToBoolValue(cmd, outputFormatFlag),
 		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
 
+		SessionTimeLimit:              flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),

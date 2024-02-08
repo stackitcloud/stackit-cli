@@ -29,7 +29,7 @@ const (
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 
-	AsyncDefault            = "false"
+	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
 )
 

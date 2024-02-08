@@ -4,7 +4,7 @@ Unsets CLI configuration options
 
 ### Synopsis
 
-Unsets CLI configuration options.
+Unsets CLI configuration options, undoing past usages of the `stackit config set` command.
 
 ```
 stackit config unset [flags]
@@ -27,21 +27,22 @@ stackit config unset [flags]
 
 ```
       --async                              Configuration option to run commands asynchronously
-      --authorization-custom-endpoint      Authorization custom endpoint
-      --dns-custom-endpoint                DNS custom endpoint
+      --authorization-custom-endpoint      Authorization API base URL. If unset, uses the default base URL
+      --dns-custom-endpoint                DNS API base URL. If unset, uses the default base URL
   -h, --help                               Help for "stackit config unset"
-      --logme-custom-endpoint              LogMe custom endpoint
-      --mariadb-custom-endpoint            MariaDB custom endpoint
-      --mongodbflex-custom-endpoint        MongoDB Flex custom endpoint
-      --opensearch-custom-endpoint         OpenSearch custom endpoint
+      --logme-custom-endpoint              LogMe API base URL. If unset, uses the default base URL
+      --mariadb-custom-endpoint            MariaDB API base URL. If unset, uses the default base URL
+      --mongodbflex-custom-endpoint        MongoDB Flex API base URL. If unset, uses the default base URL
+      --opensearch-custom-endpoint         OpenSearch API base URL. If unset, uses the default base URL
       --output-format                      Output format
-      --postgresflex-custom-endpoint       PostgreSQL Flex custom endpoint
+      --postgresflex-custom-endpoint       PostgreSQL Flex API base URL. If unset, uses the default base URL
       --project-id                         Project ID
-      --rabbitmq-custom-endpoint           RabbitMQ custom endpoint
-      --redis-custom-endpoint              Redis custom endpoint
-      --resource-manager-custom-endpoint   Resource Manager custom endpoint
-      --service-account-custom-endpoint    SKE custom endpoint
-      --ske-custom-endpoint                SKE custom endpoint
+      --rabbitmq-custom-endpoint           RabbitMQ API base URL. If unset, uses the default base URL
+      --redis-custom-endpoint              Redis API base URL. If unset, uses the default base URL
+      --resource-manager-custom-endpoint   Resource Manager API base URL. If unset, uses the default base URL
+      --service-account-custom-endpoint    SKE API base URL. If unset, uses the default base URL
+      --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to 2h
+      --ske-custom-endpoint                SKE API base URL. If unset, uses the default base URL
 ```
 
 ### Options inherited from parent commands
@@ -52,5 +53,5 @@ stackit config unset [flags]
 
 ### SEE ALSO
 
-* [stackit config](./stackit_config.md)	 - CLI configuration options
+* [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 

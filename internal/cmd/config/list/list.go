@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -19,8 +20,16 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists the current CLI configuration values",
-		Long:  "Lists the current CLI configuration values.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s",
+			"Lists the current CLI configuration values, based on the following sources (in order of precedence):",
+			"- Environment variable",
+			`  The environment variable is the name of the setting, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
+			"  Example: you can set the project ID by setting the environment variable STACKIT_PROJECT_ID.",
+			"- Configuration set in CLI",
+			`  These are set using the "stackit config set" command`,
+			`  Example: you can set the project ID by running "stackit config set --project-id xxx"`,
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List your active configuration`,
@@ -45,8 +54,20 @@ func NewCmd() *cobra.Command {
 			table.SetHeader("NAME", "VALUE")
 			for _, key := range configKeys {
 				value := configData[key]
+
+				// Convert value to string
+				// (Assuming value is either string or bool)
 				valueString, ok := value.(string)
-				if !ok || valueString == "" {
+				if !ok {
+					valueBool, ok := value.(bool)
+					if !ok {
+						continue
+					}
+					valueString = strconv.FormatBool(valueBool)
+				}
+
+				// Don't show unset values
+				if valueString == "" {
 					continue
 				}
 

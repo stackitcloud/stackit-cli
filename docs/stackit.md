@@ -26,7 +26,7 @@ stackit [flags]
 ### SEE ALSO
 
 * [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
-* [stackit config](./stackit_config.md)	 - CLI configuration options
+* [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe

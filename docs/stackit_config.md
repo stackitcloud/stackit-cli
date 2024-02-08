@@ -1,10 +1,10 @@
 ## stackit config
 
-CLI configuration options
+Provides functionality for CLI configuration options
 
 ### Synopsis
 
-CLI configuration options.
+Provides functionality for CLI configuration options.
 
 ```
 stackit config [flags]
