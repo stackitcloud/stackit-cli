@@ -20,7 +20,7 @@ stackit opensearch instance create [flags]
   $ stackit opensearch instance create --name my-instance --plan-id xxx
 
   Create an OpenSearch instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit opensearch instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
+  $ stackit opensearch instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
 ### Options

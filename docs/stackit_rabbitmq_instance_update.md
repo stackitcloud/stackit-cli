@@ -17,7 +17,7 @@ stackit rabbitmq instance update INSTANCE_ID [flags]
   $ stackit rabbitmq instance update xxx --plan-id yyy
 
   Update the range of IPs allowed to access an RabbitMQ instance with ID "xxx"
-  $ stackit rabbitmq instance update xxx --acl 192.168.1.0/24
+  $ stackit rabbitmq instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options

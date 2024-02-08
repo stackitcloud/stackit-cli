@@ -104,8 +104,12 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials *rabbitmq
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", *credentials.Raw.Credentials.Username)
-		table.AddSeparator()
+		// The username field cannot be set by the user so we only display it if it's not returned empty
+		username := *credentials.Raw.Credentials.Username
+		if username != "" {
+			table.AddRow("USERNAME", *credentials.Raw.Credentials.Username)
+			table.AddSeparator()
+		}
 		table.AddRow("PASSWORD", *credentials.Raw.Credentials.Password)
 		table.AddSeparator()
 		table.AddRow("URI", *credentials.Raw.Credentials.Uri)
