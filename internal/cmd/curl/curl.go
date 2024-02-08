@@ -122,7 +122,7 @@ func validateURL(value string) error {
 		return fmt.Errorf("bad url")
 	}
 	if !strings.HasSuffix(urlHost, "stackit.cloud") {
-		return fmt.Errorf("only urls belonging to STACKIT are permitted, e.g. https://dns.api.stackit.cloud/{path}")
+		return fmt.Errorf("only urls belonging to STACKIT are permitted, hostname must end in stackit.cloud")
 	}
 	return nil
 }
