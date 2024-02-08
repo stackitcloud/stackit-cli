@@ -50,20 +50,20 @@ func NewCmd() *cobra.Command {
 		Long:  "Executes an HTTP request to an endpoint, using the authentication provided by the CLI.",
 		Example: examples.Build(
 			examples.NewExample(
-				"Make a GET request to http://locahost:8000",
-				"$ stackit curl http://locahost:8000",
+				"Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones",
+				"$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones",
 			),
 			examples.NewExample(
-				`Make a GET request to http://locahost:8000, write complete response (headers and body) to file "./output.txt"`,
-				"$ stackit curl http://locahost:8000 -include --output ./output.txt",
+				`Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, write complete response (headers and body) to file "./output.txt"`,
+				"$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -include --output ./output.txt",
 			),
 			examples.NewExample(
-				`Make a POST request to http://locahost:8000 with payload from file "./payload.json"`,
-				`$ stackit curl http://locahost:8000 -X POST --data @./payload.json`,
+				`Create a new DNS zone for project with ID xxx via POST request to https://dns.api.stackit.cloud/v1/projects/xxx/zones with payload from file "./payload.json"`,
+				`$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST --data @./payload.json`,
 			),
 			examples.NewExample(
-				`Make a POST request to http://locahost:8000 with header "Foo: Bar", fail if server returns error (such as 403 Forbidden)`,
-				`$ stackit curl http://locahost:8000 -X POST -H "Foo: Bar" --fail`,
+				`Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, with header "Authorization: Bearer yyy", fail if server returns error (such as 403 Forbidden)`,
+				`$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail`,
 			),
 		),
 		Args: args.SingleArg(urlArg, validateURL),
@@ -122,7 +122,7 @@ func validateURL(value string) error {
 		return fmt.Errorf("bad url")
 	}
 	if !strings.HasSuffix(urlHost, "stackit.cloud") {
-		return fmt.Errorf("only urls belonging to STACKIT are permitted")
+		return fmt.Errorf("only urls belonging to STACKIT are permitted, e.g. https://dns.api.stackit.cloud/{path}")
 	}
 	return nil
 }

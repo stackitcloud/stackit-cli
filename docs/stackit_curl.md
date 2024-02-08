@@ -13,17 +13,17 @@ stackit curl URL [flags]
 ### Examples
 
 ```
-  Make a GET request to http://locahost:8000
-  $ stackit curl http://locahost:8000
+  Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones
 
-  Make a GET request to http://locahost:8000, write complete response (headers and body) to file "./output.txt"
-  $ stackit curl http://locahost:8000 -include --output ./output.txt
+  Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, write complete response (headers and body) to file "./output.txt"
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -include --output ./output.txt
 
-  Make a POST request to http://locahost:8000 with payload from file "./payload.json"
-  $ stackit curl http://locahost:8000 -X POST --data @./payload.json
+  Create a new DNS zone for project with ID xxx via POST request to https://dns.api.stackit.cloud/v1/projects/xxx/zones with payload from file "./payload.json"
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST --data @./payload.json
 
-  Make a POST request to http://locahost:8000 with header "Foo: Bar", fail if server returns error (such as 403 Forbidden)
-  $ stackit curl http://locahost:8000 -X POST -H "Foo: Bar" --fail
+  Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, with header "Authorization: Bearer yyy", fail if server returns error (such as 403 Forbidden)
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail
 ```
 
 ### Options
