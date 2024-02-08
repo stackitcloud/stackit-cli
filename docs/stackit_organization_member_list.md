@@ -14,13 +14,13 @@ stackit organization member list [flags]
 
 ```
   List all members of an organization
-  $ stackit organization role list --organization-id xxx
+  $ stackit organization member list --organization-id xxx
 
   List all members of an organization in JSON format
-  $ stackit organization role list --organization-id xxx --output-format json
+  $ stackit organization member list --organization-id xxx --output-format json
 
   List up to 10 members of an organization
-  $ stackit organization role list --organization-id xxx --limit 10
+  $ stackit organization member list --organization-id xxx --limit 10
 ```
 
 ### Options
