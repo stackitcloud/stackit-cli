@@ -20,13 +20,13 @@ import (
 )
 
 const (
-	activeFlag      = "active"
-	inactiveFlag    = "inactive"
-	deletedFlag     = "deleted"
-	nameLikeFlag    = "name-like"
-	orderByNameFlag = "order-by-name"
-	limitFlag       = "limit"
-	pageSizeFlag    = "page-size"
+	activeFlag         = "active"
+	inactiveFlag       = "inactive"
+	nameLikeFlag       = "name-like"
+	orderByNameFlag    = "order-by-name"
+	includeDeletedFlag = "include-deleted"
+	limitFlag          = "limit"
+	pageSizeFlag       = "page-size"
 
 	pageSizeDefault      = 100
 	deleteSucceededState = "DELETE_SUCCEEDED"
@@ -35,13 +35,13 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	Active      bool
-	Inactive    bool
-	Deleted     bool
-	NameLike    *string
-	OrderByName *string
-	Limit       *int64
-	PageSize    int64
+	Active         bool
+	Inactive       bool
+	NameLike       *string
+	OrderByName    *string
+	IncludeDeleted bool
+	Limit          *int64
+	PageSize       int64
 }
 
 func NewCmd() *cobra.Command {
@@ -61,8 +61,8 @@ func NewCmd() *cobra.Command {
 				`List up to 10 DNS zones`,
 				"$ stackit dns zone list --limit 10"),
 			examples.NewExample(
-				`List the deleted DNS zones`,
-				"$ stackit dns zone list --deleted"),
+				`List DNS zones, including deleted`,
+				"$ stackit dns zone list --include-deleted"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -102,10 +102,10 @@ func configureFlags(cmd *cobra.Command) {
 	orderByNameFlagOptions := []string{"asc", "desc"}
 
 	cmd.Flags().Bool(activeFlag, false, "Filter for active zones")
-	cmd.Flags().Bool(inactiveFlag, false, "Filter for inactive zones. Deleted zones are always inactive and will be included when this flag is set")
-	cmd.Flags().Bool(deletedFlag, false, "Filter for deleted zones")
+	cmd.Flags().Bool(inactiveFlag, false, "Filter for inactive zones")
 	cmd.Flags().String(nameLikeFlag, "", "Filter by name")
 	cmd.Flags().Var(flags.EnumFlag(true, "", orderByNameFlagOptions...), orderByNameFlag, fmt.Sprintf("Order by name, one of %q", orderByNameFlagOptions))
+	cmd.Flags().Bool(includeDeletedFlag, false, "Includes successfully deleted zones (if unset, these are filtered out)")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 }
@@ -142,7 +142,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		Active:          active,
 		Inactive:        inactive,
-		Deleted:         flags.FlagToBoolValue(cmd, deletedFlag),
+		IncludeDeleted:  flags.FlagToBoolValue(cmd, includeDeletedFlag),
 		NameLike:        flags.FlagToStringPointer(cmd, nameLikeFlag),
 		OrderByName:     flags.FlagToStringPointer(cmd, orderByNameFlag),
 		Limit:           limit,
@@ -158,16 +158,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, p
 	if model.Inactive {
 		req = req.ActiveEq(false)
 	}
-	if model.Deleted {
-		req = req.StateEq(deleteSucceededState)
-	} else if !model.Inactive {
-		req = req.StateNeq(deleteSucceededState)
-	}
 	if model.NameLike != nil {
 		req = req.NameLike(*model.NameLike)
 	}
 	if model.OrderByName != nil {
 		req = req.OrderByName(strings.ToUpper(*model.OrderByName))
+	}
+	if !model.IncludeDeleted {
+		req = req.StateNeq(deleteSucceededState)
 	}
 	req = req.PageSize(int32(model.PageSize))
 	req = req.Page(int32(page))

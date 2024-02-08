@@ -22,17 +22,17 @@ stackit dns zone list [flags]
   List up to 10 DNS zones
   $ stackit dns zone list --limit 10
 
-  List the deleted DNS zones
-  $ stackit dns zone list --deleted
+  List DNS zones, including deleted
+  $ stackit dns zone list --include-deleted
 ```
 
 ### Options
 
 ```
       --active                 Filter for active zones
-      --deleted                Filter for deleted zones
   -h, --help                   Help for "stackit dns zone list"
-      --inactive               Filter for inactive zones. Deleted zones are always inactive and will be included when this flag is set
+      --inactive               Filter for inactive zones
+      --include-deleted        Includes successfully deleted zones (if unset, these are filtered out)
       --limit int              Maximum number of entries to list
       --name-like string       Filter by name
       --order-by-name string   Order by name, one of ["asc" "desc"]

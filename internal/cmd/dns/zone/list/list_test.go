@@ -78,13 +78,13 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "deleted zones",
+			description: "include deleted zones",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[deletedFlag] = "true"
+				flagValues[includeDeletedFlag] = "true"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Deleted = true
+				model.IncludeDeleted = true
 			}),
 		},
 		{
@@ -269,12 +269,12 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest().StateNeq(deleteSucceededState).Page(10),
 		},
 		{
-			description: "deleted zones",
+			description: "include deleted zones",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Deleted = true
+				model.IncludeDeleted = true
 			}),
 			page:            1,
-			expectedRequest: fixtureRequest().StateEq(deleteSucceededState).Page(1),
+			expectedRequest: fixtureRequest().Page(1),
 		},
 		{
 			description: "active zones",
@@ -290,7 +290,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Inactive = true
 			}),
 			page:            1,
-			expectedRequest: fixtureRequest().ActiveEq(false).Page(1),
+			expectedRequest: fixtureRequest().ActiveEq(false).StateNeq(deleteSucceededState).Page(1),
 		},
 		{
 			description: "required fields only",
