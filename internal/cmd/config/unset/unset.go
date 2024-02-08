@@ -144,18 +144,18 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitKey))
 
-	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization custom endpoint")
-	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
-	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe custom endpoint")
-	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB custom endpoint")
-	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex custom endpoint")
-	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch custom endpoint")
-	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex custom endpoint")
-	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ custom endpoint")
-	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis custom endpoint")
-	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager custom endpoint")
-	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE custom endpoint")
-	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE custom endpoint")
+	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(cmd *cobra.Command) *inputModel {
