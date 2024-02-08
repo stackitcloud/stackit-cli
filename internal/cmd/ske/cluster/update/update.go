@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -65,6 +66,14 @@ func NewCmd() *cobra.Command {
 			apiClient, err := client.ConfigureClient(cmd)
 			if err != nil {
 				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update cluster %s?", model.ClusterName)
+				err = confirm.PromptForConfirmation(cmd, prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Check if cluster exists
