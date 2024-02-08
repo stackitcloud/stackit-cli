@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -45,8 +46,20 @@ func NewCmd() *cobra.Command {
 			table.SetHeader("NAME", "VALUE")
 			for _, key := range configKeys {
 				value := configData[key]
+
+				// Convert value to string
+				// (Assuming value is either string or bool)
 				valueString, ok := value.(string)
-				if !ok || valueString == "" {
+				if !ok {
+					valueBool, ok := value.(bool)
+					if !ok {
+						continue
+					}
+					valueString = strconv.FormatBool(valueBool)
+				}
+
+				// Don't show unset values
+				if valueString == "" {
 					continue
 				}
 
