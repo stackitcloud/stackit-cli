@@ -35,7 +35,7 @@ stackit mongodbflex instance create [flags]
       --ram int                  Amount of RAM (in GB)
       --storage-class string     Storage class (default "premium-perf2-mongodb")
       --storage-size int         Storage size (in GB) (default 10)
-      --type string              Instance type, one of ["Single" "Replica" "Sharded"] (default "Replica")
+      --type string              Instance type, one of ["Sharded" "Single" "Replica"] (default "Replica")
       --version string           MongoDB version. Defaults to the latest version available
 ```
 

@@ -28,8 +28,8 @@ stackit postgresflex user create [flags]
 ```
   -h, --help                 Help for "stackit postgresflex user create"
       --instance-id string   ID of the instance
-      --roles strings        Roles of the user, possible values are ["read" "readWrite"] (default [read])
-      --username string      Username of the user. If not specified, a random username will be assigned
+      --roles strings        Roles of the user, possible values are ["login" "createdb"] (default [login])
+      --username string      Username of the user
 ```
 
 ### Options inherited from parent commands
