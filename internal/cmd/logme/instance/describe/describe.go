@@ -19,6 +19,8 @@ import (
 
 const (
 	instanceIdArg = "INSTANCE_ID"
+
+	aclParameterKey = "sgw_acl"
 )
 
 type inputModel struct {
@@ -95,6 +97,17 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *logme.Insta
 		table.AddRow("LAST OPERATION TYPE", *instance.LastOperation.Type)
 		table.AddSeparator()
 		table.AddRow("LAST OPERATION STATE", *instance.LastOperation.State)
+		table.AddSeparator()
+		table.AddRow("PLAN ID", *instance.PlanId)
+		// Only show ACL if it's present and not empty
+		acl := (*instance.Parameters)[aclParameterKey]
+		aclStr, ok := acl.(string)
+		if ok {
+			if aclStr != "" {
+				table.AddSeparator()
+				table.AddRow("ACL", aclStr)
+			}
+		}
 		err := table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
