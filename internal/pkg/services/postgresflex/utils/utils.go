@@ -26,7 +26,7 @@ func AvailableInstanceTypes() []string {
 		i++
 	}
 	// Dict keys aren't iterated in a consistent order
-	// So we sort the map to make the output consistent
+	// So we sort the array to make the output consistent
 	slices.Sort(instanceTypes)
 	return instanceTypes
 }
