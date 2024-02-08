@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -25,6 +26,9 @@ func AvailableInstanceTypes() []string {
 		instanceTypes[i] = k
 		i++
 	}
+	// Dict keys aren't iterated in a consistent order
+	// So we sort the array to make the output consistent
+	slices.Sort(instanceTypes)
 	return instanceTypes
 }
 

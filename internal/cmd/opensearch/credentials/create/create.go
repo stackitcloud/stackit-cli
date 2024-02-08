@@ -75,8 +75,11 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create OpenSearch credentials: %w", err)
 			}
 
-			cmd.Printf("Created credentials for instance %s. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
-			cmd.Printf("Username: %s\n", *resp.Raw.Credentials.Username)
+			cmd.Printf("Created credentials for instance %s. Credentials ID: %s\n\n", instanceLabel, *resp.Id) // The username field cannot be set by the user so we only display it if it's not returned empty
+			username := *resp.Raw.Credentials.Username
+			if username != "" {
+				cmd.Printf("Username: %s\n", *resp.Raw.Credentials.Username)
+			}
 			if model.HidePassword {
 				cmd.Printf("Password: <hidden>\n")
 			} else {
