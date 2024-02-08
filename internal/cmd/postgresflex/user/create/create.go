@@ -109,7 +109,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, can be specified multiple times. Possible values are %q", roleOptions))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
 	cobra.CheckErr(err)

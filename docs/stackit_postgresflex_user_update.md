@@ -22,7 +22,7 @@ stackit postgresflex user update USER_ID [flags]
 ```
   -h, --help                 Help for "stackit postgresflex user update"
       --instance-id string   ID of the instance
-      --role strings         Roles of the user, can be specified multiple times. Possible values are ["login" "createdb"] (default [])
+      --role strings         Roles of the user, possible values are ["login" "createdb"] (default [])
 ```
 
 ### Options inherited from parent commands
