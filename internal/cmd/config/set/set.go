@@ -42,7 +42,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s",
 			"Sets CLI configuration options.",
 			"Every configuration option can be set using an environment variable, which takes precedence over what is configured.",
 			`The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
