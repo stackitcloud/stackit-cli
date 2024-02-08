@@ -76,7 +76,7 @@ func NewCmd() *cobra.Command {
 			model := parseInput(cmd)
 
 			if model.AsyncFlag {
-				viper.Set(config.AsyncKey, "")
+				viper.Set(config.AsyncKey, config.AsyncDefault)
 			}
 			if model.OutputFormat {
 				viper.Set(config.OutputFormatKey, "")
