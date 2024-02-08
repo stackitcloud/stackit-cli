@@ -28,7 +28,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
 		usernameFlag:   "johndoe",
-		rolesFlag:      "read",
+		rolesFlag:      "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,7 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		Username:   utils.Ptr("johndoe"),
-		Roles:      utils.Ptr([]string{"read"}),
+		Roles:      utils.Ptr([]string{"login"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -55,7 +55,7 @@ func fixtureRequest(mods ...func(request *postgresflex.ApiCreateUserRequest)) po
 	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
 	request = request.CreateUserPayload(postgresflex.CreateUserPayload{
 		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]string{"read"}),
+		Roles:    utils.Ptr([]string{"login"}),
 	})
 
 	for _, mod := range mods {
@@ -211,7 +211,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Username = nil
 			}),
 			expectedRequest: fixtureRequest().CreateUserPayload(postgresflex.CreateUserPayload{
-				Roles: utils.Ptr([]string{"read"}),
+				Roles: utils.Ptr([]string{"login"}),
 			}),
 		},
 	}

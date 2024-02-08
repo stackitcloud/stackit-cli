@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		rolesFlag:      "read",
+		rolesFlag:      "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		UserId:     testUserId,
-		Roles:      utils.Ptr([]string{"read"}),
+		Roles:      utils.Ptr([]string{"login"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateUserRequest)) postgresflex.ApiPartialUpdateUserRequest {
 	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
 	request = request.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
-		Roles: utils.Ptr([]string{"read"}),
+		Roles: utils.Ptr([]string{"login"}),
 	})
 	for _, mod := range mods {
 		mod(&request)

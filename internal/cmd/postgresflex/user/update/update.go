@@ -92,7 +92,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"read", "readWrite"}
+	rolesOptions := []string{"login", "createdb"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))

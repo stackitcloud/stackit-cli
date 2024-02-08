@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	rolesDefault = []string{"read"}
+	rolesDefault = []string{"login"}
 )
 
 type inputModel struct {
@@ -105,7 +105,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"read", "readWrite"}
+	rolesOptions := []string{"login", "createdb"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
