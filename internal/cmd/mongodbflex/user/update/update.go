@@ -23,7 +23,7 @@ const (
 
 	instanceIdFlag = "instance-id"
 	databaseFlag   = "database"
-	rolesFlag      = "roles"
+	roleFlag       = "role"
 )
 
 type inputModel struct {
@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the roles of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit mongodbflex user update xxx --instance-id yyy --roles read"),
+				"$ stackit mongodbflex user update xxx --instance-id yyy --role read"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -94,11 +94,11 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"read", "readWrite"}
+	roleOptions := []string{"read", "readWrite"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(databaseFlag, "", "The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -113,7 +113,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}
 
 	database := flags.FlagToStringPointer(cmd, databaseFlag)
-	roles := flags.FlagToStringSlicePointer(cmd, rolesFlag)
+	roles := flags.FlagToStringSlicePointer(cmd, roleFlag)
 
 	if database == nil && roles == nil {
 		return nil, &errors.EmptyUpdateError{}

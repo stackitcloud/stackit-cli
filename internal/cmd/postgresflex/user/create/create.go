@@ -20,11 +20,11 @@ import (
 const (
 	instanceIdFlag = "instance-id"
 	usernameFlag   = "username"
-	rolesFlag      = "roles"
+	roleFlag       = "role"
 )
 
 var (
-	rolesDefault = []string{"read"}
+	rolesDefault = []string{"login"}
 )
 
 type inputModel struct {
@@ -47,11 +47,11 @@ func NewCmd() *cobra.Command {
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a PostgreSQL Flex user for instance with ID "xxx" and specify the username`,
-				"$ stackit postgresflex user create --instance-id xxx --username johndoe --roles read"),
+				`Create a PostgreSQL Flex user for instance with ID "xxx"`,
+				"$ stackit postgresflex user create --instance-id xxx --username johndoe"),
 			examples.NewExample(
-				`Create a PostgreSQL Flex user for instance with ID "xxx" with an automatically generated username`,
-				"$ stackit postgresflex user create --instance-id xxx --roles read"),
+				`Create a PostgreSQL Flex user for instance with ID "xxx" and permission "createdb"`,
+				"$ stackit postgresflex user create --instance-id xxx --username johndoe --role createdb"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -105,13 +105,13 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"read", "readWrite"}
+	roleOptions := []string{"login", "createdb"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
-	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))
+	cmd.Flags().String(usernameFlag, "", "Username of the user")
+	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -125,7 +125,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(cmd, usernameFlag),
-		Roles:           flags.FlagWithDefaultToStringSlicePointer(cmd, rolesFlag),
+		Roles:           flags.FlagWithDefaultToStringSlicePointer(cmd, roleFlag),
 	}, nil
 }
 

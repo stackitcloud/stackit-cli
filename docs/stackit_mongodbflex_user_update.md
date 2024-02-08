@@ -14,7 +14,7 @@ stackit mongodbflex user update USER_ID [flags]
 
 ```
   Update the roles of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"
-  $ stackit mongodbflex user update xxx --instance-id yyy --roles read
+  $ stackit mongodbflex user update xxx --instance-id yyy --role read
 ```
 
 ### Options
@@ -23,7 +23,7 @@ stackit mongodbflex user update USER_ID [flags]
       --database string      The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it
   -h, --help                 Help for "stackit mongodbflex user update"
       --instance-id string   ID of the instance
-      --roles strings        Roles of the user, possible values are ["read" "readWrite"] (default [])
+      --role strings         Roles of the user, possible values are ["read" "readWrite"] (default [])
 ```
 
 ### Options inherited from parent commands

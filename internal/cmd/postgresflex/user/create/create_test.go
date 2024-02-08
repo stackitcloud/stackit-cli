@@ -28,7 +28,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
 		usernameFlag:   "johndoe",
-		rolesFlag:      "read",
+		roleFlag:       "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,7 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		Username:   utils.Ptr("johndoe"),
-		Roles:      utils.Ptr([]string{"read"}),
+		Roles:      utils.Ptr([]string{"login"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -55,7 +55,7 @@ func fixtureRequest(mods ...func(request *postgresflex.ApiCreateUserRequest)) po
 	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
 	request = request.CreateUserPayload(postgresflex.CreateUserPayload{
 		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]string{"read"}),
+		Roles:    utils.Ptr([]string{"login"}),
 	})
 
 	for _, mod := range mods {
@@ -77,16 +77,6 @@ func TestParseInput(t *testing.T) {
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
-		},
-		{
-			description: "no username specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, usernameFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-			}),
 		},
 		{
 			description: "no values",
@@ -129,9 +119,16 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "username missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, usernameFlag)
+			}),
+			isValid: false,
+		},
+		{
 			description: "roles missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, rolesFlag)
+				delete(flagValues, roleFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -141,7 +138,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "invalid role",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[rolesFlag] = "invalid-role"
+				flagValues[roleFlag] = "invalid-role"
 			}),
 			isValid: false,
 		},
@@ -211,7 +208,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Username = nil
 			}),
 			expectedRequest: fixtureRequest().CreateUserPayload(postgresflex.CreateUserPayload{
-				Roles: utils.Ptr([]string{"read"}),
+				Roles: utils.Ptr([]string{"login"}),
 			}),
 		},
 	}

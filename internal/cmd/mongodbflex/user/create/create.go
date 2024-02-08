@@ -21,7 +21,7 @@ const (
 	instanceIdFlag = "instance-id"
 	usernameFlag   = "username"
 	databaseFlag   = "database"
-	rolesFlag      = "roles"
+	roleFlag       = "role"
 )
 
 var (
@@ -50,10 +50,10 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a MongoDB Flex user for instance with ID "xxx" and specify the username`,
-				"$ stackit mongodbflex user create --instance-id xxx --username johndoe --roles read --database default"),
+				"$ stackit mongodbflex user create --instance-id xxx --username johndoe --role read --database default"),
 			examples.NewExample(
 				`Create a MongoDB Flex user for instance with ID "xxx" with an automatically generated username`,
-				"$ stackit mongodbflex user create --instance-id xxx --roles read --database default"),
+				"$ stackit mongodbflex user create --instance-id xxx --role read --database default"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -108,12 +108,12 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"read", "readWrite"}
+	roleOptions := []string{"read", "readWrite"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
 	cmd.Flags().String(databaseFlag, "", "The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, databaseFlag)
 	cobra.CheckErr(err)
@@ -130,7 +130,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(cmd, usernameFlag),
 		Database:        flags.FlagToStringPointer(cmd, databaseFlag),
-		Roles:           flags.FlagWithDefaultToStringSlicePointer(cmd, rolesFlag),
+		Roles:           flags.FlagWithDefaultToStringSlicePointer(cmd, roleFlag),
 	}, nil
 }
 

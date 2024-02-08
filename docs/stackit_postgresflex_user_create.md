@@ -16,11 +16,11 @@ stackit postgresflex user create [flags]
 ### Examples
 
 ```
-  Create a PostgreSQL Flex user for instance with ID "xxx" and specify the username
-  $ stackit postgresflex user create --instance-id xxx --username johndoe --roles read
+  Create a PostgreSQL Flex user for instance with ID "xxx"
+  $ stackit postgresflex user create --instance-id xxx --username johndoe
 
-  Create a PostgreSQL Flex user for instance with ID "xxx" with an automatically generated username
-  $ stackit postgresflex user create --instance-id xxx --roles read
+  Create a PostgreSQL Flex user for instance with ID "xxx" and permission "createdb"
+  $ stackit postgresflex user create --instance-id xxx --username johndoe --role createdb
 ```
 
 ### Options
@@ -28,8 +28,8 @@ stackit postgresflex user create [flags]
 ```
   -h, --help                 Help for "stackit postgresflex user create"
       --instance-id string   ID of the instance
-      --roles strings        Roles of the user, possible values are ["read" "readWrite"] (default [read])
-      --username string      Username of the user. If not specified, a random username will be assigned
+      --role strings         Roles of the user, possible values are ["login" "createdb"] (default [login])
+      --username string      Username of the user
 ```
 
 ### Options inherited from parent commands

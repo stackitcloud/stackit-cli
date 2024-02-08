@@ -21,7 +21,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = uuid.NewString()
+var testUserId = "12345"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		rolesFlag:      "read",
+		roleFlag:       "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		UserId:     testUserId,
-		Roles:      utils.Ptr([]string{"read"}),
+		Roles:      utils.Ptr([]string{"login"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateUserRequest)) postgresflex.ApiPartialUpdateUserRequest {
 	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
 	request = request.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
-		Roles: utils.Ptr([]string{"read"}),
+		Roles: utils.Ptr([]string{"login"}),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -140,14 +140,8 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "user id invalid 1",
+			description: "user id invalid",
 			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "user id invalid 2",
-			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
@@ -155,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid role",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[rolesFlag] = "invalid-role"
+				flagValues[roleFlag] = "invalid-role"
 			}),
 			isValid: false,
 		},
@@ -163,7 +157,7 @@ func TestParseInput(t *testing.T) {
 			description: "empty update",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, rolesFlag)
+				delete(flagValues, roleFlag)
 			}),
 			isValid: false,
 		},
