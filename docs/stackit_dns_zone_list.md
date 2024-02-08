@@ -30,9 +30,9 @@ stackit dns zone list [flags]
 
 ```
       --active                 Filter for active zones
-      --deleted                Filter for deleted zones
   -h, --help                   Help for "stackit dns zone list"
-      --inactive               Filter for inactive zones. Deleted zones are always inactive and will be included when this flag is set
+      --inactive               Filter for inactive zones
+      --include-deleted        Includes successfully deleted zones (if unset, these are filtered out)
       --limit int              Maximum number of entries to list
       --name-like string       Filter by name
       --order-by-name string   Order by name, one of ["asc" "desc"]
