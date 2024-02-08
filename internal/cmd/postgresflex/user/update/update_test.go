@@ -21,7 +21,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = uuid.NewString()
+var testUserId = "12345"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -140,14 +140,8 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "user id invalid 1",
+			description: "user id invalid",
 			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "user id invalid 2",
-			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},

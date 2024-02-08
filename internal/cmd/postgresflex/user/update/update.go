@@ -12,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -43,7 +42,7 @@ func NewCmd() *cobra.Command {
 				`Update the roles of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit postgresflex user update xxx --instance-id yyy --roles read"),
 		),
-		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
+		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(cmd, args)
