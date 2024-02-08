@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		rolesFlag:      "login",
+		roleFlag:       "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -149,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid role",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[rolesFlag] = "invalid-role"
+				flagValues[roleFlag] = "invalid-role"
 			}),
 			isValid: false,
 		},
@@ -157,7 +157,7 @@ func TestParseInput(t *testing.T) {
 			description: "empty update",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, rolesFlag)
+				delete(flagValues, roleFlag)
 			}),
 			isValid: false,
 		},

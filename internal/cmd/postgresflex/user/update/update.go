@@ -21,7 +21,7 @@ const (
 	userIdArg = "USER_ID"
 
 	instanceIdFlag = "instance-id"
-	rolesFlag      = "roles"
+	roleFlag       = "role"
 )
 
 type inputModel struct {
@@ -40,7 +40,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the roles of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit postgresflex user update xxx --instance-id yyy --roles read"),
+				"$ stackit postgresflex user update xxx --instance-id yyy --role login"),
 		),
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -91,10 +91,10 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	rolesOptions := []string{"login", "createdb"}
+	roleOptions := []string{"login", "createdb"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, rolesOptions...), rolesFlag, fmt.Sprintf("Roles of the user, possible values are %q", rolesOptions))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, can be specified multiple times. Possible values are %q", roleOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -108,7 +108,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	roles := flags.FlagToStringSlicePointer(cmd, rolesFlag)
+	roles := flags.FlagToStringSlicePointer(cmd, roleFlag)
 	if roles == nil {
 		return nil, &errors.EmptyUpdateError{}
 	}

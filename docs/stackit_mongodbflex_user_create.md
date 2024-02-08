@@ -17,10 +17,10 @@ stackit mongodbflex user create [flags]
 
 ```
   Create a MongoDB Flex user for instance with ID "xxx" and specify the username
-  $ stackit mongodbflex user create --instance-id xxx --username johndoe --roles read --database default
+  $ stackit mongodbflex user create --instance-id xxx --username johndoe --role read --database default
 
   Create a MongoDB Flex user for instance with ID "xxx" with an automatically generated username
-  $ stackit mongodbflex user create --instance-id xxx --roles read --database default
+  $ stackit mongodbflex user create --instance-id xxx --role read --database default
 ```
 
 ### Options
@@ -29,7 +29,7 @@ stackit mongodbflex user create [flags]
       --database string      The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it
   -h, --help                 Help for "stackit mongodbflex user create"
       --instance-id string   ID of the instance
-      --roles strings        Roles of the user, possible values are ["read" "readWrite"] (default [read])
+      --role strings         Roles of the user, can be specified multiple times. Possible values are ["read" "readWrite"] (default [])
       --username string      Username of the user. If not specified, a random username will be assigned
 ```
 
