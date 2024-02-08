@@ -23,14 +23,7 @@ func NoArgs(cmd *cobra.Command, args []string) error {
 // For no validation, you can pass a nil validate function
 func SingleArg(argName string, validate func(value string) error) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return &errors.SingleArgExpectedError{
-				Cmd:      cmd,
-				Expected: argName,
-				Count:    len(args),
-			}
-		}
-		if args[0] == "" {
+		if len(args) != 1 || args[0] == "" {
 			return &errors.SingleArgExpectedError{
 				Cmd:      cmd,
 				Expected: argName,
