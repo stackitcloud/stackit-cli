@@ -41,7 +41,7 @@ stackit config set [flags]
       --redis-custom-endpoint string              Redis custom endpoint. Will be used as the base URL on all calls to this API
       --resource-manager-custom-endpoint string   Resource manager custom endpoint. Will be used as the base URL on all calls to this API
       --service-account-custom-endpoint string    Service Account custom endpoint. Will be used as the base URL on all calls to this API
-      --session-time-limit string                 Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)
+      --session-time-limit string                 Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)
       --ske-custom-endpoint string                SKE custom endpoint. Will be used as the base URL on all calls to this API
 ```
 
