@@ -52,4 +52,5 @@ stackit opensearch instance create [flags]
 
 ### SEE ALSO
 
-- [stackit opensearch instance](./stackit_opensearch_instance.md) - Provides functionality for OpenSearch instances
+* [stackit opensearch instance](./stackit_opensearch_instance.md)	 - Provides functionality for OpenSearch instances
+

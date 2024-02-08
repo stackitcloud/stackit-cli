@@ -48,4 +48,5 @@ stackit opensearch instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-- [stackit opensearch instance](./stackit_opensearch_instance.md) - Provides functionality for OpenSearch instances
+* [stackit opensearch instance](./stackit_opensearch_instance.md)	 - Provides functionality for OpenSearch instances
+

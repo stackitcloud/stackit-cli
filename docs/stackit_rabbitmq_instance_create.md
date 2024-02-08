@@ -52,4 +52,5 @@ stackit rabbitmq instance create [flags]
 
 ### SEE ALSO
 
-- [stackit rabbitmq instance](./stackit_rabbitmq_instance.md) - Provides functionality for RabbitMQ instances
+* [stackit rabbitmq instance](./stackit_rabbitmq_instance.md)	 - Provides functionality for RabbitMQ instances
+

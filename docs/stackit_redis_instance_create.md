@@ -52,4 +52,5 @@ stackit redis instance create [flags]
 
 ### SEE ALSO
 
-- [stackit redis instance](./stackit_redis_instance.md) - Provides functionality for Redis instances
+* [stackit redis instance](./stackit_redis_instance.md)	 - Provides functionality for Redis instances
+

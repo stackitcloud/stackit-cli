@@ -52,4 +52,5 @@ stackit mariadb instance create [flags]
 
 ### SEE ALSO
 
-- [stackit mariadb instance](./stackit_mariadb_instance.md) - Provides functionality for MariaDB instances
+* [stackit mariadb instance](./stackit_mariadb_instance.md)	 - Provides functionality for MariaDB instances
+

@@ -48,4 +48,5 @@ stackit logme instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-- [stackit logme instance](./stackit_logme_instance.md) - Provides functionality for LogMe instances
+* [stackit logme instance](./stackit_logme_instance.md)	 - Provides functionality for LogMe instances
+
