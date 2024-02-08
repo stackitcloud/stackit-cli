@@ -17,7 +17,7 @@ stackit mariadb instance update INSTANCE_ID [flags]
   $ stackit mariadb instance update xxx --plan-id yyy
 
   Update the range of IPs allowed to access a MariaDB instance with ID "xxx"
-  $ stackit mariadb instance update xxx --acl 192.168.1.0/24
+  $ stackit mariadb instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -48,5 +48,4 @@ stackit mariadb instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit mariadb instance](./stackit_mariadb_instance.md)	 - Provides functionality for MariaDB instances
-
+- [stackit mariadb instance](./stackit_mariadb_instance.md) - Provides functionality for MariaDB instances

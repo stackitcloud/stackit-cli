@@ -17,7 +17,7 @@ stackit redis instance update INSTANCE_ID [flags]
   $ stackit redis instance update xxx --plan-id yyy
 
   Update the range of IPs allowed to access a Redis instance with ID "xxx"
-  $ stackit redis instance update xxx --acl 192.168.1.0/24
+  $ stackit redis instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -48,5 +48,4 @@ stackit redis instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit redis instance](./stackit_redis_instance.md)	 - Provides functionality for Redis instances
-
+- [stackit redis instance](./stackit_redis_instance.md) - Provides functionality for Redis instances

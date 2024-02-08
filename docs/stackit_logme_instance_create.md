@@ -20,7 +20,7 @@ stackit logme instance create [flags]
   $ stackit logme instance create --name my-instance --plan-id xxx
 
   Create a LogMe instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit logme instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
+  $ stackit logme instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -52,5 +52,4 @@ stackit logme instance create [flags]
 
 ### SEE ALSO
 
-* [stackit logme instance](./stackit_logme_instance.md)	 - Provides functionality for LogMe instances
-
+- [stackit logme instance](./stackit_logme_instance.md) - Provides functionality for LogMe instances

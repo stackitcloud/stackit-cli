@@ -20,7 +20,7 @@ stackit rabbitmq instance create [flags]
   $ stackit rabbitmq instance create --name my-instance --plan-id xxx
 
   Create an RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit rabbitmq instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
+  $ stackit rabbitmq instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -52,5 +52,4 @@ stackit rabbitmq instance create [flags]
 
 ### SEE ALSO
 
-* [stackit rabbitmq instance](./stackit_rabbitmq_instance.md)	 - Provides functionality for RabbitMQ instances
-
+- [stackit rabbitmq instance](./stackit_rabbitmq_instance.md) - Provides functionality for RabbitMQ instances

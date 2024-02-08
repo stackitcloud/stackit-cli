@@ -17,7 +17,7 @@ stackit opensearch instance update INSTANCE_ID [flags]
   $ stackit opensearch instance update xxx --plan-id yyy
 
   Update the range of IPs allowed to access an OpenSearch instance with ID "xxx"
-  $ stackit opensearch instance update xxx --acl 192.168.1.0/24
+  $ stackit opensearch instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -48,5 +48,4 @@ stackit opensearch instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit opensearch instance](./stackit_opensearch_instance.md)	 - Provides functionality for OpenSearch instances
-
+- [stackit opensearch instance](./stackit_opensearch_instance.md) - Provides functionality for OpenSearch instances

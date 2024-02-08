@@ -20,7 +20,7 @@ stackit mariadb instance create [flags]
   $ stackit mariadb instance create --name my-instance --plan-id xxx
 
   Create a MariaDB instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit mariadb instance create --name my-instance --plan-id xxx --acl 192.168.1.0/24
+  $ stackit mariadb instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -52,5 +52,4 @@ stackit mariadb instance create [flags]
 
 ### SEE ALSO
 
-* [stackit mariadb instance](./stackit_mariadb_instance.md)	 - Provides functionality for MariaDB instances
-
+- [stackit mariadb instance](./stackit_mariadb_instance.md) - Provides functionality for MariaDB instances
