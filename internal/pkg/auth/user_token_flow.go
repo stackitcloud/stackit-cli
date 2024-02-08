@@ -10,7 +10,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 )
 
@@ -38,19 +37,19 @@ func UserTokenFlow(cmd *cobra.Command) *userTokenFlow {
 func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	err := loadVarsFromStorage(utf)
 	if err != nil {
-		return nil, &errors.AuthError{}
+		return nil, err
 	}
 	if utf.authFlow != AUTH_FLOW_USER_TOKEN {
-		return nil, &errors.AuthError{}
+		return nil, fmt.Errorf("auth flow is not user token")
 	}
 
 	accessTokenValid := false
 	if accessTokenExpired, err := tokenExpired(utf.accessToken); err != nil {
-		return nil, &errors.AuthError{}
+		return nil, fmt.Errorf("check if access token has expired: %w", err)
 	} else if !accessTokenExpired {
 		accessTokenValid = true
 	} else if refreshTokenExpired, err := tokenExpired(utf.refreshToken); err != nil {
-		return nil, &errors.AuthError{}
+		return nil, fmt.Errorf("check if refresh token has expired: %w", err)
 	} else if !refreshTokenExpired {
 		err = refreshTokens(utf)
 		if err == nil {
@@ -62,7 +61,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 		utf.cmd.Println("Session expired, logging in again...")
 		err = reauthenticateUser(utf)
 		if err != nil {
-			return nil, &errors.AuthError{}
+			return nil, fmt.Errorf("reauthenticate user: %w", err)
 		}
 	}
 
