@@ -23,7 +23,7 @@ stackit dns zone list [flags]
   $ stackit dns zone list --limit 10
 
   List DNS zones, including deleted
-  $ stackit dns zone list --deleted
+  $ stackit dns zone list --include-deleted
 ```
 
 ### Options

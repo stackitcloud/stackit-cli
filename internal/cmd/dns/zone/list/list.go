@@ -62,7 +62,7 @@ func NewCmd() *cobra.Command {
 				"$ stackit dns zone list --limit 10"),
 			examples.NewExample(
 				`List DNS zones, including deleted`,
-				"$ stackit dns zone list --deleted"),
+				"$ stackit dns zone list --include-deleted"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
