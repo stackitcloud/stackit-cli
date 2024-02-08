@@ -18,6 +18,8 @@ const (
 	outputFormatFlag = globalflags.OutputFormatFlag
 	projectIdFlag    = globalflags.ProjectIdFlag
 
+	sessionTimeLimitFlag = "session-time-limit"
+
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
@@ -36,6 +38,8 @@ type inputModel struct {
 	AsyncFlag    bool
 	OutputFormat bool
 	ProjectId    bool
+
+	SessionTimeLimit bool
 
 	AuthorizationCustomEndpoint   bool
 	DNSCustomEndpoint             bool
@@ -79,6 +83,10 @@ func NewCmd() *cobra.Command {
 			}
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
+			}
+
+			if model.SessionTimeLimit {
+				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
 
 			if model.AuthorizationCustomEndpoint {
@@ -134,6 +142,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 
+	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitKey))
+
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization custom endpoint")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS custom endpoint")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe custom endpoint")
@@ -154,6 +164,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		OutputFormat: flags.FlagToBoolValue(cmd, outputFormatFlag),
 		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
 
+		SessionTimeLimit:              flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),

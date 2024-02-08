@@ -41,6 +41,7 @@ stackit config unset [flags]
       --redis-custom-endpoint              Redis custom endpoint
       --resource-manager-custom-endpoint   Resource Manager custom endpoint
       --service-account-custom-endpoint    SKE custom endpoint
+      --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to session_time_limit
       --ske-custom-endpoint                SKE custom endpoint
 ```
 
