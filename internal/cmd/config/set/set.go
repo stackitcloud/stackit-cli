@@ -46,18 +46,18 @@ func NewCmd() *cobra.Command {
 			"Sets CLI configuration options.",
 			"All of the configuration options can be set using an environment variable, which takes precedence over what is configured.",
 			`The environment variable is the name of the flag, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
-			"Example: to set the project ID you can set the environment variable STACKIT_PROJECT_ID.",
+			"Example: you can set the project ID by running this command with the --project-id flag set or by setting the environment variable STACKIT_PROJECT_ID.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Set a project ID in your active configuration. This project ID will be used by every command, as long as it's not overridden by the "STACKIT_PROJECT_ID" environment variable or the command flag`,
+				`Set a project ID in your active configuration. This project ID will be used by every command (as long as it's not overridden by the "STACKIT_PROJECT_ID" environment variable)`,
 				"$ stackit config set --project-id xxx"),
 			examples.NewExample(
-				`Set the session time limit to 1 hour. After this time you will be prompted to login again to be able to execute commands that need authentication`,
+				`Set the session time limit to 1 hour`,
 				"$ stackit config set --session-time-limit 1h"),
 			examples.NewExample(
-				`Set the DNS custom endpoint. This endpoint will be used on all calls to the DNS API, unless overridden by the "STACKIT_DNS_CUSTOM_ENDPOINT" environment variable`,
+				`Set the DNS custom endpoint`,
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -88,20 +88,20 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
+	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
 
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization custom endpoint")
-	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS custom endpoint")
-	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe custom endpoint")
-	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB custom endpoint")
-	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex custom endpoint")
-	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint")
-	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex custom endpoint")
-	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ custom endpoint")
-	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis custom endpoint")
-	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint")
-	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint")
-	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint")
+	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource manager custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account custom endpoint. Will be used as the base URL on all calls to this API")
+	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE custom endpoint. Will be used as the base URL on all calls to this API")
 
 	err := viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
 	cobra.CheckErr(err)
