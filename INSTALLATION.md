@@ -26,16 +26,6 @@ We are working on distributing the CLI using a package manager for Linux. For th
 
 We are working on distributing the CLI using a package manager for Windows. For the moment, please refer to one of the installation methods below.
 
-## Using `go install`
-
-If you have [Go](https://go.dev/doc/install) 1.16+ installed, you can directly install the STACKIT CLI via:
-
-```shell
-go install github.com/stackitcloud/stackit-cli@latest
-```
-
-> For more information, please refer to the [`go install` documentation](https://go.dev/ref/mod#go-install)
-
 ## Manual installation
 
 You can also get the STACKIT CLI by compiling it from source or downloading a pre-compiled binary.
