@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "prHourlyLimit": 10,
+  "labels": ["renovate"],
+  "repositories": ["stackitcloud/stackit-cli"],
+  "enabledManagers": ["gomod", "github-actions"],
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/stackitcloud/stackit-sdk-go"],
+      "groupName": "STACKIT SDK modules"
+    }
+  ],
+  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"]
+}
