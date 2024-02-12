@@ -12,13 +12,13 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stackitcloud/stackit-sdk-go/core v0.7.7
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.2
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.10.3
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.9.2
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.8.3
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.9.1
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.7.5
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.4
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.9.2
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.7.6
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.5
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.0
 	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/mod v0.14.0
 	golang.org/x/oauth2 v0.16.0
