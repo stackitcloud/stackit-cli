@@ -20,7 +20,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.5
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.0
 	github.com/zalando/go-keyring v0.2.3
-	golang.org/x/mod v0.14.0
+	golang.org/x/mod v0.15.0
 	golang.org/x/oauth2 v0.17.0
 )
 
