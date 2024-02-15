@@ -35,7 +35,10 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
 		Short: "Resets the password of a MongoDB Flex user",
-		Long:  "Resets the password of a MongoDB Flex user. The new password is shown in the command's output.",
+		Long: fmt.Sprintf("%s\ns%s",
+			"Resets the password of a MongoDB Flex user.",
+			"The new password is visible after and cannot be retrieved later.",
+		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Reset the password of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,

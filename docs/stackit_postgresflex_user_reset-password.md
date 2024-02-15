@@ -4,7 +4,8 @@ Resets the password of a PostgreSQL Flex user
 
 ### Synopsis
 
-Resets the password of a PostgreSQL Flex user. The new password is returned in the response.
+Resets the password of a PostgreSQL Flex user.
+sThe new password is visible after and cannot be retrieved later.
 
 ```
 stackit postgresflex user reset-password USER_ID [flags]
