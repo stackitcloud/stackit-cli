@@ -38,10 +38,10 @@ func NewCmd() *cobra.Command {
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of credentials of a MariaDB instance with ID "xxx" from instance with ID "yyy"`,
+				`Get details of credentials with ID "xxx" from instance with ID "yyy"`,
 				"$ stackit mariadb credentials describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of credentials of a MariaDB instance with ID "xxx" from instance with ID "yyy" in a table format`,
+				`Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format`,
 				"$ stackit mariadb credentials describe xxx --instance-id yyy --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
