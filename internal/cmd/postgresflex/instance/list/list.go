@@ -16,6 +16,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const (
@@ -126,11 +128,12 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []postgresf
 
 		return nil
 	default:
+		caser := cases.Title(language.English)
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.Id, *instance.Name, *instance.Status)
+			table.AddRow(*instance.Id, *instance.Name, caser.String(*instance.Status))
 		}
 		err := table.Display(cmd)
 		if err != nil {

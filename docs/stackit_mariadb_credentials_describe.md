@@ -13,10 +13,10 @@ stackit mariadb credentials describe CREDENTIALS_ID [flags]
 ### Examples
 
 ```
-  Get details of credentials of a MariaDB instance with ID "xxx" from instance with ID "yyy"
+  Get details of credentials with ID "xxx" from instance with ID "yyy"
   $ stackit mariadb credentials describe xxx --instance-id yyy
 
-  Get details of credentials of a MariaDB instance with ID "xxx" from instance with ID "yyy" in a table format
+  Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format
   $ stackit mariadb credentials describe xxx --instance-id yyy --output-format pretty
 ```
 

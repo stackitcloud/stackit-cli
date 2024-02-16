@@ -14,6 +14,8 @@ import (
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -103,7 +105,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		table.AddSeparator()
 		table.AddRow("NAME", *instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATUS", *instance.Status)
+		table.AddRow("STATUS", cases.Title(language.English).String(*instance.Status))
 		table.AddSeparator()
 		table.AddRow("STORAGE SIZE", *instance.Storage.Size)
 		table.AddSeparator()
