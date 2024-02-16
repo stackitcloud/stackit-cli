@@ -86,7 +86,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update instance %s? (This may cause downtime)", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update instance %s?", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
