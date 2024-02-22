@@ -32,7 +32,7 @@ var testPayload = &ske.CreateOrUpdateClusterPayload{
 			Machine: &ske.Machine{
 				Image: &ske.Image{
 					Name:    utils.Ptr("flatcar"),
-					Version: utils.Ptr("3602.2.1"),
+					Version: utils.Ptr("3760.2.1"),
 				},
 				Type: utils.Ptr("b1.2"),
 			},
@@ -89,7 +89,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"machine": {
 				  "image": {
 					"name": "flatcar",
-					"version": "3602.2.1"
+					"version": "3760.2.1"
 				  },
 				  "type": "b1.2"
 				},
