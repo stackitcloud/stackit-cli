@@ -33,6 +33,7 @@ stackit config unset [flags]
       --logme-custom-endpoint              LogMe API base URL. If unset, uses the default base URL
       --mariadb-custom-endpoint            MariaDB API base URL. If unset, uses the default base URL
       --mongodbflex-custom-endpoint        MongoDB Flex API base URL. If unset, uses the default base URL
+      --object-storage-custom-endpoint     Object Storage API base URL. If unset, uses the default base URL
       --opensearch-custom-endpoint         OpenSearch API base URL. If unset, uses the default base URL
       --output-format                      Output format
       --postgresflex-custom-endpoint       PostgreSQL Flex API base URL. If unset, uses the default base URL
