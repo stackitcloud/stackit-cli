@@ -23,6 +23,7 @@ const (
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
+	objectStorageCustomEndpointFlag   = "object-storage-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
 	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
@@ -95,6 +96,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe API base URL, used in calls to this API")
 	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB API base URL, used in calls to this API")
 	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex API base URL, used in calls to this API")
+	cmd.Flags().String(objectStorageCustomEndpointFlag, "", "Object Storage API base URL, used in calls to this API")
 	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch API base URL, used in calls to this API")
 	cmd.Flags().String(postgresFlexCustomEndpointFlag, "", "PostgreSQL Flex API base URL, used in calls to this API")
 	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ API base URL, used in calls to this API")
@@ -112,6 +114,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.MariaDBCustomEndpointKey, cmd.Flags().Lookup(mariaDBCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MongoDBFlexCustomEndpointKey, cmd.Flags().Lookup(mongoDBFlexCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.ObjectStorageCustomEndpointKey, cmd.Flags().Lookup(objectStorageCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
 	cobra.CheckErr(err)
