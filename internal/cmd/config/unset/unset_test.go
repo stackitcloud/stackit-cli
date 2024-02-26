@@ -16,6 +16,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		dnsCustomEndpointFlag:             true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
+		objectStorageCustomEndpointFlag:   true,
 		openSearchCustomEndpointFlag:      true,
 		rabbitMQCustomEndpointFlag:        true,
 		redisCustomEndpointFlag:           true,
@@ -38,12 +39,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		DNSCustomEndpoint:             true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
+		ObjectStorageCustomEndpoint:   true,
+		OpenSearchCustomEndpoint:      true,
+		RabbitMQCustomEndpoint:        true,
+		RedisCustomEndpoint:           true,
+		ResourceManagerCustomEndpoint: true,
 		ServiceAccountCustomEndpoint:  true,
 		SKECustomEndpoint:             true,
-		ResourceManagerCustomEndpoint: true,
-		OpenSearchCustomEndpoint:      true,
-		RedisCustomEndpoint:           true,
-		RabbitMQCustomEndpoint:        true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -76,6 +78,7 @@ func TestParseInput(t *testing.T) {
 				model.DNSCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
+				model.ObjectStorageCustomEndpoint = false
 				model.OpenSearchCustomEndpoint = false
 				model.RabbitMQCustomEndpoint = false
 				model.RedisCustomEndpoint = false

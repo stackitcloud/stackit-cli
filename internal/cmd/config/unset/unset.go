@@ -25,6 +25,7 @@ const (
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
+	objectStorageCustomEndpointFlag   = "object-storage-custom-endpoint"
 	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
 	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
@@ -46,6 +47,7 @@ type inputModel struct {
 	LogMeCustomEndpoint           bool
 	MariaDBCustomEndpoint         bool
 	MongoDBFlexCustomEndpoint     bool
+	ObjectStorageCustomEndpoint   bool
 	OpenSearchCustomEndpoint      bool
 	PostgresFlexCustomEndpoint    bool
 	RabbitMQCustomEndpoint        bool
@@ -104,6 +106,9 @@ func NewCmd() *cobra.Command {
 			if model.MongoDBFlexCustomEndpoint {
 				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
 			}
+			if model.ObjectStorageCustomEndpoint {
+				viper.Set(config.ObjectStorageCustomEndpointKey, "")
+			}
 			if model.OpenSearchCustomEndpoint {
 				viper.Set(config.OpenSearchCustomEndpointKey, "")
 			}
@@ -149,6 +154,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(objectStorageCustomEndpointFlag, false, "Object Storage API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(postgresFlexCustomEndpointFlag, false, "PostgreSQL Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ API base URL. If unset, uses the default base URL")
@@ -170,6 +176,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:         flags.FlagToBoolValue(cmd, mariaDBCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(cmd, mongoDBFlexCustomEndpointFlag),
+		ObjectStorageCustomEndpoint:   flags.FlagToBoolValue(cmd, objectStorageCustomEndpointFlag),
 		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
 		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(cmd, postgresFlexCustomEndpointFlag),
 		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(cmd, rabbitMQCustomEndpointFlag),

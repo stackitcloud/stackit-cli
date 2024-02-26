@@ -21,6 +21,7 @@ const (
 	LogMeCustomEndpointKey          = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
+	ObjectStorageCustomEndpointKey  = "object_storage_custom_endpoint"
 	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey   = "postgresflex_custom_endpoint"
 	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
@@ -50,6 +51,7 @@ var ConfigKeys = []string{
 	DNSCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
+	ObjectStorageCustomEndpointKey,
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	ResourceManagerEndpointKey,
@@ -126,6 +128,7 @@ func setConfigDefaults() {
 	viper.SetDefault(DNSCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
+	viper.SetDefault(ObjectStorageCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
