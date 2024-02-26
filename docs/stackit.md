@@ -32,6 +32,7 @@ stackit [flags]
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
+* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
