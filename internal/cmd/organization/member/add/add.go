@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to add the %s role to %s on organization with ID %s?", *model.Role, model.Subject, *model.OrganizationId)
+				prompt := fmt.Sprintf("Are you sure you want to add the %s role to %s on organization with ID %q?", *model.Role, model.Subject, *model.OrganizationId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

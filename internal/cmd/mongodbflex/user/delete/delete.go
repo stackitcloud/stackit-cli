@@ -69,7 +69,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete user %s of instance %s? (This cannot be undone)", userLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -83,7 +83,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete MongoDB Flex user: %w", err)
 			}
 
-			cmd.Printf("Deleted user %s of instance %s\n", userLabel, instanceLabel)
+			cmd.Printf("Deleted user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

@@ -91,7 +91,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create an RabbitMQ instance for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create an RabbitMQ instance for project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -128,7 +128,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			cmd.Printf("%s instance for project %s. Instance ID: %s\n", operationState, projectLabel, instanceId)
+			cmd.Printf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
 			return nil
 		},
 	}

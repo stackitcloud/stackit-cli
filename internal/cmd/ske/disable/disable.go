@@ -52,7 +52,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to disable SKE for project %s? (This will delete all associated clusters)", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to disable SKE for project %q? (This will delete all associated clusters)", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -81,7 +81,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered disablement of"
 			}
-			cmd.Printf("%s SKE for project %s\n", operationState, projectLabel)
+			cmd.Printf("%s SKE for project %q\n", operationState, projectLabel)
 			return nil
 		},
 	}

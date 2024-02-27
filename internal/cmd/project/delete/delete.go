@@ -53,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete the project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -67,7 +67,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete project: %w", err)
 			}
 
-			cmd.Printf("Deleted project %s\n", projectLabel)
+			cmd.Printf("Deleted project %q\n", projectLabel)
 			cmd.Printf("If this was your default project, consider configuring a new project ID by running:\n")
 			cmd.Printf("  $ stackit config set --project-id <PROJECT_ID>\n")
 			return nil

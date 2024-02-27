@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update the key with ID %s?", model.KeyId)
+				prompt := fmt.Sprintf("Are you sure you want to update the key with ID %q?", model.KeyId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err

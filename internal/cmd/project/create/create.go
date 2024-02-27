@@ -64,7 +64,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %s?", *model.ParentId)
+				prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %q?", *model.ParentId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -81,7 +81,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create project: %w", err)
 			}
 
-			cmd.Printf("Created project under the parent with ID %s. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
+			cmd.Printf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
 			return nil
 		},
 	}

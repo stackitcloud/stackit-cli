@@ -78,7 +78,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a cluster for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a cluster for project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -135,7 +135,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			cmd.Printf("%s cluster for project %s. Cluster name: %s\n", operationState, projectLabel, name)
+			cmd.Printf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, name)
 			return nil
 		},
 	}

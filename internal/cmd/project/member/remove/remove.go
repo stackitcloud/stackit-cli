@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to remove the role %s from %s on project %s?", *model.Role, model.Subject, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to remove the role %q from %s on project %q?", *model.Role, model.Subject, projectLabel)
 				if model.Force {
 					prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
 				}
@@ -89,7 +89,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			cmd.Printf("Removed the role %s from %s on project %s\n", *model.Role, model.Subject, projectLabel)
+			cmd.Printf("Removed the role %q from %s on project %q\n", *model.Role, model.Subject, projectLabel)
 			return nil
 		},
 	}

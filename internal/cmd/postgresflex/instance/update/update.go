@@ -86,7 +86,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update instance %s? (This may cause downtime)", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update instance %q? (This may cause downtime)", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -119,7 +119,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s instance %s\n", operationState, instanceLabel)
+			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}
