@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account: %w", err)
 			}
 
-			cmd.Printf("Created service account for project %q. Email %q\n", projectLabel, *resp.Email)
+			cmd.Printf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
 			return nil
 		},
 	}

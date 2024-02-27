@@ -71,7 +71,7 @@ func NewCmd() *cobra.Command {
 			}
 			tokensMetadata := *resp.Items
 			if len(tokensMetadata) == 0 {
-				cmd.Printf("No tokens found for service account with Email %q\n", model.ServiceAccountEmail)
+				cmd.Printf("No tokens found for service account with email %q\n", model.ServiceAccountEmail)
 				return nil
 			}
 
