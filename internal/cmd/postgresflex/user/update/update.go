@@ -67,7 +67,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update user %s of instance %s?", userLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update user %q of instance %q?", userLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -81,7 +81,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update PostgreSQL Flex user: %w", err)
 			}
 
-			cmd.Printf("Updated user %s of instance %s\n", userLabel, instanceLabel)
+			cmd.Printf("Updated user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

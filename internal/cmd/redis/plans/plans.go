@@ -69,7 +69,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No plans found for project %s\n", projectLabel)
+				cmd.Printf("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 

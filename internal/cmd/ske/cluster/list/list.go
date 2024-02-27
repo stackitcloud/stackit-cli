@@ -79,7 +79,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No clusters found for project %s\n", projectLabel)
+				cmd.Printf("No clusters found for project %q\n", projectLabel)
 				return nil
 			}
 

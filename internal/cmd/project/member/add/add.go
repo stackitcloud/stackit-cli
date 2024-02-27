@@ -69,7 +69,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to add the role %s to %s on project %s?", *model.Role, model.Subject, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to add the role %q to %s on project %q?", *model.Role, model.Subject, projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -83,7 +83,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			cmd.Printf("Added the role %s to %s on project %s\n", *model.Role, model.Subject, projectLabel)
+			cmd.Printf("Added the role %q to %s on project %q\n", *model.Role, model.Subject, projectLabel)
 			return nil
 		},
 	}

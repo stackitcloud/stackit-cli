@@ -51,7 +51,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to rotate credentials for SKE cluster %s? (The old credentials will be invalid after this operation)", model.ClusterName)
+				prompt := fmt.Sprintf("Are you sure you want to rotate credentials for SKE cluster %q? (The old credentials will be invalid after this operation)", model.ClusterName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -80,7 +80,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered rotation of"
 			}
-			cmd.Printf("%s credentials for cluster %s\n", operationState, model.ClusterName)
+			cmd.Printf("%s credentials for cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}

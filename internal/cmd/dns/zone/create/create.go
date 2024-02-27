@@ -85,7 +85,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a zone for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a zone for project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -115,7 +115,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			cmd.Printf("%s zone for project %s. Zone ID: %s\n", operationState, projectLabel, zoneId)
+			cmd.Printf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, zoneId)
 			return nil
 		},
 	}

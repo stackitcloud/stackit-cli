@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to revoke the access token with ID %s?", model.TokenId)
+				prompt := fmt.Sprintf("Are you sure you want to revoke the access token with ID %q?", model.TokenId)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("revoke access token: %w", err)
 			}
 
-			cmd.Printf("Revoked access token with ID %s\n", model.TokenId)
+			cmd.Printf("Revoked access token with ID %q\n", model.TokenId)
 			return nil
 		},
 	}

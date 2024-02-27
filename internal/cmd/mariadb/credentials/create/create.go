@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %s?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %q?", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -75,7 +75,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create MariaDB credentials: %w", err)
 			}
 
-			cmd.Printf("Created credentials for instance %s. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+			cmd.Printf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
 			// The username field cannot be set by the user so we only display it if it's not returned empty
 			username := *resp.Raw.Credentials.Username
 			if username != "" {

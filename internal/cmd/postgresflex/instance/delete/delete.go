@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete instance %s? (This cannot be undone)", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete instance %q? (This cannot be undone)", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -87,7 +87,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			cmd.Printf("%s instance %s\n", operationState, instanceLabel)
+			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}

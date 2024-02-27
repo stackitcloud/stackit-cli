@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -86,7 +86,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update project: %w", err)
 			}
 
-			cmd.Printf("Updated project %s\n", projectLabel)
+			cmd.Printf("Updated project %q\n", projectLabel)
 			return nil
 		},
 	}

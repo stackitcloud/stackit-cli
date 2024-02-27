@@ -65,7 +65,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credentials %s of instance %s? (This cannot be undone)", credentialsLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials %s of instance %q? (This cannot be undone)", credentialsLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -79,7 +79,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Redis credentials: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials %s of instance %s\n", credentialsLabel, instanceLabel)
+			cmd.Printf("Deleted credentials %s of instance %q\n", credentialsLabel, instanceLabel)
 			return nil
 		},
 	}
