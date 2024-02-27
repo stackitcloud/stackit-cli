@@ -51,6 +51,7 @@ func NewCmd() *cobra.Command {
 			sort.Strings(configKeys)
 
 			table := tables.NewTable()
+			table.SetTitle("Active profile: prod")
 			table.SetHeader("NAME", "VALUE")
 			for _, key := range configKeys {
 				value := configData[key]
