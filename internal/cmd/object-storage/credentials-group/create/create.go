@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	displayNameFlag = "display-name"
+	nameFlag = "name"
 )
 
 type inputModel struct {
@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create credentials group to hold Object Storage access credentials`,
-				"$ stackit object-storage credentials-group create --display-name example"),
+				"$ stackit object-storage credentials-group create --name example"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -75,9 +75,9 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(displayNameFlag, "", "Name of the group holding credentials")
+	cmd.Flags().String(nameFlag, "", "Name of the group holding credentials")
 
-	err := flags.MarkFlagsRequired(cmd, displayNameFlag)
+	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -89,7 +89,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		DisplayName:     flags.FlagToStringValue(cmd, displayNameFlag),
+		DisplayName:     flags.FlagToStringValue(cmd, nameFlag),
 	}, nil
 }
 

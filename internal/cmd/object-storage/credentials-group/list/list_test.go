@@ -1,4 +1,4 @@
-package create
+package list
 
 import (
 	"context"
@@ -20,12 +20,11 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
-var testDisplayName = "test-name"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		nameFlag:      testDisplayName,
+		limitFlag:     "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -38,7 +37,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		DisplayName: testDisplayName,
+		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -46,19 +45,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPayload)) objectstorage.CreateCredentialsGroupPayload {
-	payload := objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(testDisplayName),
-	}
-	for _, mod := range mods {
-		mod(&payload)
-	}
-	return payload
-}
-
-func fixtureRequest(mods ...func(request *objectstorage.ApiCreateCredentialsGroupRequest)) objectstorage.ApiCreateCredentialsGroupRequest {
-	request := testClient.CreateCredentialsGroup(testCtx, testProjectId)
-	request = request.CreateCredentialsGroupPayload(fixturePayload())
+func fixtureRequest(mods ...func(request *objectstorage.ApiListCredentialsGroupsRequest)) objectstorage.ApiListCredentialsGroupsRequest {
+	request := testClient.ListCredentialsGroups(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -105,9 +93,16 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "display name missing",
+			description: "limit invalid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nameFlag)
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},
@@ -162,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest objectstorage.ApiCreateCredentialsGroupRequest
+		expectedRequest objectstorage.ApiListCredentialsGroupsRequest
 	}{
 		{
 			description:     "base",

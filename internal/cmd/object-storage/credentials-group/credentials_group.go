@@ -3,6 +3,7 @@ package credentialsgroup
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/credentials-group/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/credentials-group/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/credentials-group/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -24,4 +25,5 @@ func NewCmd() *cobra.Command {
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(create.NewCmd())
 	cmd.AddCommand(delete.NewCmd())
+	cmd.AddCommand(list.NewCmd())
 }
