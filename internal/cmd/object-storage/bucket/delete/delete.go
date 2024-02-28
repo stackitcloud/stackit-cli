@@ -51,7 +51,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete bucket %s? (This cannot be undone)", model.BucketName)
+				prompt := fmt.Sprintf("Are you sure you want to delete bucket %q? (This cannot be undone)", model.BucketName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -80,7 +80,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			cmd.Printf("%s bucket %s\n", operationState, model.BucketName)
+			cmd.Printf("%s bucket %q\n", operationState, model.BucketName)
 			return nil
 		},
 	}
