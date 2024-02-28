@@ -87,7 +87,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No zones found for project %s matching the criteria\n", projectLabel)
+				cmd.Printf("No zones found for project %q matching the criteria\n", projectLabel)
 				return nil
 			}
 

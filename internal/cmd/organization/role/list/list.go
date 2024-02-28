@@ -69,7 +69,7 @@ func NewCmd() *cobra.Command {
 			}
 			roles := *resp.Roles
 			if len(roles) == 0 {
-				cmd.Printf("No roles found for organization with ID %s\n", *model.OrganizationId)
+				cmd.Printf("No roles found for organization with ID %q\n", *model.OrganizationId)
 				return nil
 			}
 

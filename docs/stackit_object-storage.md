@@ -28,6 +28,7 @@ stackit object-storage [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit object-storage bucket](./stackit_object-storage_bucket.md)	 - Provides functionality for Object Storage buckets
 * [stackit object-storage disable](./stackit_object-storage_disable.md)	 - Disables Object Storage for a project
 * [stackit object-storage enable](./stackit_object-storage_enable.md)	 - Enables Object Storage for a project
 

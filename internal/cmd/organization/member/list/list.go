@@ -74,7 +74,7 @@ func NewCmd() *cobra.Command {
 			}
 			members := *resp.Members
 			if len(members) == 0 {
-				cmd.Printf("No members found for organization with ID %s\n", *model.OrganizationId)
+				cmd.Printf("No members found for organization with ID %q\n", *model.OrganizationId)
 				return nil
 			}
 

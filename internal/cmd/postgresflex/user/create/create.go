@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a user for instance %s?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -88,7 +88,7 @@ func NewCmd() *cobra.Command {
 			}
 			user := resp.Item
 
-			cmd.Printf("Created user for instance %s. User ID: %s\n\n", instanceLabel, *user.Id)
+			cmd.Printf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
 			cmd.Printf("Username: %s\n", *user.Username)
 			cmd.Printf("Password: %s\n", *user.Password)
 			cmd.Printf("Roles: %v\n", *user.Roles)

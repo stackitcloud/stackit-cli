@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No roles found for project %s\n", projectLabel)
+				cmd.Printf("No roles found for project %q\n", projectLabel)
 				return nil
 			}
 

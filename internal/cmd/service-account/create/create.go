@@ -56,7 +56,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a service account for project %s?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a service account for project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account: %w", err)
 			}
 
-			cmd.Printf("Created service account for project %s. Email %s\n", projectLabel, *resp.Email)
+			cmd.Printf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
 			return nil
 		},
 	}

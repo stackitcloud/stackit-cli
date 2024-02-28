@@ -68,7 +68,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to reset the password of user %s of instance %s? (This cannot be undone)", userLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -82,7 +82,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("reset PostgreSQL Flex user password: %w", err)
 			}
 
-			cmd.Printf("Reset password for user %s of instance %s\n\n", userLabel, instanceLabel)
+			cmd.Printf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
 			cmd.Printf("Username: %s\n", *user.Item.Username)
 			cmd.Printf("New password: %s\n", *user.Item.Password)
 			cmd.Printf("New URI: %s\n", *user.Item.Uri)
