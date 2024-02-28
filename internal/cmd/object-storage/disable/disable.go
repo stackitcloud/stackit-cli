@@ -24,11 +24,11 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Disables Object Storage for a project",
-		Long:  "Disables Object Storage for a project. It will delete all associated buckets.",
+		Long:  "Disables Object Storage for a project. All buckets must be deleted beforehand.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Disable Object Storage functionality for your project, deleting all associated buckets`,
+				`Disable Object Storage functionality for your project.`,
 				"$ stackit object-storage disable"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -50,7 +50,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to disable Object Storage for project %q? (This will delete all associated clusters)", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to disable Object Storage for project %q?", projectLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
