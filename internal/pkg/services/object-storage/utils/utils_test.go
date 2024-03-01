@@ -104,6 +104,18 @@ func TestGetCredentialsGroupName(t *testing.T) {
 			},
 			isValid: false,
 		},
+		{
+			description: "empty credentials group name",
+			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
+				CredentialsGroups: &[]objectstorage.CredentialsGroup{
+					{
+						CredentialsGroupId: utils.Ptr(testCredentialsGroupId),
+						DisplayName:        utils.Ptr(""),
+					},
+				},
+			},
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
