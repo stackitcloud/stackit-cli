@@ -24,9 +24,9 @@ func GetCredentialsGroupName(ctx context.Context, apiClient ObjectStorageClient,
 
 	for _, group := range *credentialsGroups {
 		if group.CredentialsGroupId != nil && *group.CredentialsGroupId == credentialsGroupId && group.DisplayName != nil && *group.DisplayName != "" {
-			return group.DisplayName, nil
+			return *group.DisplayName, nil
 		}
 	}
 
-        return "", fmt.Errorf("could not find Object Storage credentials group name")
+	return "", fmt.Errorf("could not find Object Storage credentials group name")
 }
