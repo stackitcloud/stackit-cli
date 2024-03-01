@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials group %s\n", credentialsGroupLabel)
+			cmd.Printf("Deleted credentials group %q\n", credentialsGroupLabel)
 			return nil
 		},
 	}
