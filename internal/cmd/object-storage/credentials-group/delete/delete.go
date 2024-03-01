@@ -56,7 +56,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credentials group %s? (This cannot be undone)", credentialsGroupLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials group %q? (This cannot be undone)", credentialsGroupLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials group %s\n", credentialsGroupLabel)
+			cmd.Printf("Deleted credentials group %q\n", credentialsGroupLabel)
 			return nil
 		},
 	}
