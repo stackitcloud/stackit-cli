@@ -51,7 +51,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Are you sure you want to create a credentials group?"
+				prompt := fmt.Sprintf("Are you sure you want to create a credentials group with name %q?", model.DisplayName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -65,7 +65,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Created credentials group. Credentials group ID: %s\n\n", *resp.CredentialsGroup.CredentialsGroupId)
+			cmd.Printf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
 			cmd.Printf("URN: %s\n", *resp.CredentialsGroup.Urn)
 			return nil
 		},
