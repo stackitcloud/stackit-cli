@@ -52,6 +52,8 @@ jobs:
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           SIGNING_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_ID_CERT }}
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
+      - name: Install Aptly
+        run: brew install aptly
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v2
       - name: Run GoReleaser
@@ -61,3 +63,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - name: Publish packages to APT repo
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: ./scripts/publish-apt-packages.sh
+
