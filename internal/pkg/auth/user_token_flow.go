@@ -10,7 +10,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 )
 
 type userTokenFlow struct {
@@ -66,7 +65,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", utf.accessToken))
-	return clients.Do(utf.client, req, nil)
+	return utf.client.Do(req)
 }
 
 func loadVarsFromStorage(utf *userTokenFlow) error {
