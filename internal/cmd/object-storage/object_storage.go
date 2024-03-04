@@ -2,6 +2,7 @@ package objectstorage
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/bucket"
+	credentialsGroup "github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/credentials-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/enable"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -26,4 +27,5 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(bucket.NewCmd())
 	cmd.AddCommand(disable.NewCmd())
 	cmd.AddCommand(enable.NewCmd())
+	cmd.AddCommand(credentialsGroup.NewCmd())
 }
