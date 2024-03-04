@@ -118,9 +118,7 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	cfg := &clients.KeyFlowConfig{
 		ServiceAccountKey: serviceAccountKey,
 		PrivateKey:        authFields[PRIVATE_KEY],
-		ClientRetry:       clients.NewRetryConfig(),
 		TokenUrl:          authFields[TOKEN_CUSTOM_ENDPOINT],
-		JWKSUrl:           authFields[JWKS_CUSTOM_ENDPOINT],
 	}
 
 	keyFlow := &clients.KeyFlow{}
