@@ -93,7 +93,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 		table.AddSeparator()
 		table.AddRow("NAME", *instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATUS", *instance.State)
+		table.AddRow("STATE", *instance.State)
 		table.AddSeparator()
 		table.AddRow("SECRETS", *instance.SecretCount)
 		table.AddSeparator()
