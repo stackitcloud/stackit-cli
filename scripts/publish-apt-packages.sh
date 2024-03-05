@@ -6,8 +6,6 @@ set -eo pipefail
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
-#!/bin/bash
-
 OBJECT_STORAGE_ENDPOINT="https://object.storage.eu01.onstackit.cloud"
 APT_BUCKET_NAME="stackit-cli-apt"
 PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
