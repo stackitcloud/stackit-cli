@@ -35,11 +35,9 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager user",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s",
 			"Creates a Secrets Manager user.",
-			"The password is only visible upon creation and cannot be retrieved later.",
 			"The username is randomly generated and provided upon creation.",
-			"If you want the user to have write access to the secrets engine specify with the --write flag",
 		),
 		Example: examples.Build(
 			examples.NewExample(
