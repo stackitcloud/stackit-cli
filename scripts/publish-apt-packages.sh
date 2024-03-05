@@ -12,6 +12,7 @@ PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
 PUBLIC_KEY_FILE="key.gpg"
 CUSTOM_KEYRING="custom-keyring"
 APTLY_CONFIG_FILE_PATH="./.aptly.conf"
+GORELEASER_PACKAGES_FOLDER="dist/"
 
 # Create a local mirror of the current state of the remote APT repository
 printf ">>> Creating mirror \n"
@@ -33,7 +34,7 @@ aptly repo create -distribution="stackit-cli" new-repo
 
 # Add new generated .deb packages to the new local repo
 printf "\n>>> Adding new packages to local repo \n"
-aptly repo add new-repo dist/
+aptly repo add new-repo ${GORELEASER_PACKAGES_FOLDER}
 
 # Create a snapshot of the local repo
 printf "\n>>> Creating snapshot of local repo \n"
