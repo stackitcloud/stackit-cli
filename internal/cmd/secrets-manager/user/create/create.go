@@ -21,24 +21,23 @@ const (
 	instanceIdFlag  = "instance-id"
 	descriptionFlag = "description"
 	writeFlag       = "write"
+	hidePasswordFlag = "hide-password"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceId  string
-	Description *string
-	Write       *bool
+	InstanceId   string
+	Description  *string
+	Write        *bool
+	HidePassword bool
 }
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager user",
-		Long: fmt.Sprintf("%s\n%s",
-			"Creates a Secrets Manager user.",
-			"The username is randomly generated and provided upon creation.",
-		),
+		Long:  "Creates a user for a Secrets Manager instance with generated username and password",
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
@@ -83,7 +82,11 @@ func NewCmd() *cobra.Command {
 
 			cmd.Printf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
 			cmd.Printf("Username: %s\n", *resp.Username)
-			cmd.Printf("Password: %s\n", *resp.Password)
+			if model.HidePassword {
+				cmd.Printf("Password: <hidden>\n")
+			} else {
+				cmd.Printf("Password: %s\n", *resp.Password)
+			}
 			cmd.Printf("Description: %s\n", *resp.Description)
 			cmd.Printf("Write Access: %t\n", *resp.Write)
 
@@ -99,6 +102,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(descriptionFlag, "", "A user chosen description to differentiate between multiple users")
 	cmd.Flags().Bool(writeFlag, false, "User write access to the secrets engine. If unset, user is read-only")
+	cmd.Flags().Bool(hidePasswordFlag, false, "Hide password in output")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, descriptionFlag)
 	cobra.CheckErr(err)
@@ -115,6 +119,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
 		Description:     flags.FlagToStringPointer(cmd, descriptionFlag),
 		Write:           flags.FlagToBoolPointer(cmd, writeFlag),
+		HidePassword:    flags.FlagToBoolValue(cmd, hidePasswordFlag),
 	}, nil
 }
 
