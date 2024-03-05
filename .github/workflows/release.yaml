@@ -6,7 +6,8 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
   workflow_dispatch:
 
 # Releases need permissions to read and write the repository contents.
@@ -19,6 +20,9 @@ jobs:
     runs-on: macOS-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+      # Needed to publish new packages to our S3-hosted APT repo
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,6 +56,8 @@ jobs:
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           SIGNING_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_ID_CERT }}
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
+      - name: Install Aptly
+        run: brew install aptly
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v2
       - name: Run GoReleaser
@@ -61,3 +67,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - name: Publish packages to APT repo
+        if: ! contains(github.ref_name, '-')
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: ./scripts/publish-apt-packages.sh
