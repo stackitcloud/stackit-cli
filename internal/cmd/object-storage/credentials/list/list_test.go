@@ -50,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiListAccessKeysRequest)) objectstorage.ApiListAccessKeysRequest {
 	request := testClient.ListAccessKeys(testCtx, testProjectId)
+	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
 	}

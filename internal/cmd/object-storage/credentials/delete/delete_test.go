@@ -59,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiDeleteAccessKeyRequest)) objectstorage.ApiDeleteAccessKeyRequest {
 	request := testClient.DeleteAccessKey(testCtx, testProjectId, testCredentialId)
+	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
 	}

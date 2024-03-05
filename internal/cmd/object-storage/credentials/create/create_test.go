@@ -21,13 +21,13 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
-var testCredentialGroupId = uuid.NewString()
+var testCredentialsGroupId = uuid.NewString()
 var testExpirationDate = "2024-01-01T00:00:00Z"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:        testProjectId,
-		credentialsGroupFlag: testCredentialGroupId,
+		credentialsGroupFlag: testCredentialsGroupId,
 		expiresFlag:          testExpirationDate,
 	}
 	for _, mod := range mods {
@@ -47,7 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		Expires:            utils.Ptr(testExpirationDate),
-		CredentialsGroupId: testCredentialGroupId,
+		CredentialsGroupId: testCredentialsGroupId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -58,7 +58,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixturePayload(mods ...func(payload *objectstorage.CreateAccessKeyPayload)) objectstorage.CreateAccessKeyPayload {
 	testExpirationDate, err := time.Parse(expirationTimeFormat, testExpirationDate)
 	if err != nil {
-		//TODO check what can I return here
 		return objectstorage.CreateAccessKeyPayload{}
 	}
 	payload := objectstorage.CreateAccessKeyPayload{
@@ -73,6 +72,7 @@ func fixturePayload(mods ...func(payload *objectstorage.CreateAccessKeyPayload))
 func fixtureRequest(mods ...func(request *objectstorage.ApiCreateAccessKeyRequest)) objectstorage.ApiCreateAccessKeyRequest {
 	request := testClient.CreateAccessKey(testCtx, testProjectId)
 	request = request.CreateAccessKeyPayload(fixturePayload())
+	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
