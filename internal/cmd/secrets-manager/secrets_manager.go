@@ -2,6 +2,7 @@ package secretsmanager
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -22,4 +23,5 @@ func NewCmd() *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(instance.NewCmd())
+	cmd.AddCommand(user.NewCmd())
 }
