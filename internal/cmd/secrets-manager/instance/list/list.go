@@ -61,7 +61,7 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get Secret Manager instances: %w", err)
+				return fmt.Errorf("get Secrets Manager instances: %w", err)
 			}
 
 			if resp.Instances == nil || len(*resp.Instances) == 0 {
@@ -121,7 +121,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []secretsma
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Secret Manager instance list: %w", err)
+			return fmt.Errorf("marshal Secrets Manager instance list: %w", err)
 		}
 		cmd.Println(string(details))
 
@@ -129,7 +129,6 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []secretsma
 	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "SECRETS")
-		// TODO: Add support for Number of Users (to match Portal)
 		for i := range instances {
 			instance := instances[i]
 			table.AddRow(*instance.Id, *instance.Name, *instance.State, *instance.SecretCount)

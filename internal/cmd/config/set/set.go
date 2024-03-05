@@ -103,7 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ API base URL, used in calls to this API")
 	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis API base URL, used in calls to this API")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource Manager API base URL, used in calls to this API")
-	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Managert API base URL, used in calls to this API")
+	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Manager API base URL, used in calls to this API")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 

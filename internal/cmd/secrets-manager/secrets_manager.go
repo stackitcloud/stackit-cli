@@ -11,8 +11,8 @@ import (
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "secrets-manager",
-		Short: "Provides functionality for the Secrets Manager",
-		Long:  "Provides functionality for the Secrets Manager.",
+		Short: "Provides functionality for Secrets Manager",
+		Long:  "Provides functionality for Secrets Manager.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
