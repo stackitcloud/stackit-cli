@@ -19,6 +19,9 @@ jobs:
     runs-on: macOS-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+      # Needed to publish new packages to our S3-hosted APT repo
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,4 +71,3 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
         run: ./scripts/publish-apt-packages.sh
-
