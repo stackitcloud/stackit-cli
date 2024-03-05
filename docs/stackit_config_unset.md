@@ -41,6 +41,7 @@ stackit config unset [flags]
       --rabbitmq-custom-endpoint           RabbitMQ API base URL. If unset, uses the default base URL
       --redis-custom-endpoint              Redis API base URL. If unset, uses the default base URL
       --resource-manager-custom-endpoint   Resource Manager API base URL. If unset, uses the default base URL
+      --secrets-manager-custom-endpoint    Secrets Manager API base URL. If unset, uses the default base URL
       --service-account-custom-endpoint    SKE API base URL. If unset, uses the default base URL
       --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to 2h
       --ske-custom-endpoint                SKE API base URL. If unset, uses the default base URL

@@ -39,6 +39,7 @@ stackit [flags]
 * [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
 * [stackit redis](./stackit_redis.md)	 - Provides functionality for Redis
+* [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 
