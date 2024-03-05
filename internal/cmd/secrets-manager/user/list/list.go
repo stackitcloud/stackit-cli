@@ -135,10 +135,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, users []secretsmanage
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "USERNAME")
+		table.SetHeader("ID", "USERNAME", "DESCRIPTION", "WRITE ACCESS")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username)
+			table.AddRow(*user.Id, *user.Username, *user.Description, *user.Write)
 		}
 		err := table.Display(cmd)
 		if err != nil {
