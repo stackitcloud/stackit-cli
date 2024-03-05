@@ -6,7 +6,8 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
   workflow_dispatch:
 
 # Releases need permissions to read and write the repository contents.
