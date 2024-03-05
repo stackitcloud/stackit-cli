@@ -69,7 +69,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Secrets Manager instance: %w", err)
 			}
 
-			cmd.Printf("Deleted instance %s \n", model.InstanceId)
+			cmd.Printf("Deleted instance %q \n", model.InstanceId)
 			return nil
 		},
 	}
