@@ -1,4 +1,4 @@
-package create
+package list
 
 import (
 	"context"
@@ -10,7 +10,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,13 +19,13 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		nameFlag:      "example",
+		limitFlag:     "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,7 +38,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		Name: utils.Ptr("example"),
+		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -45,11 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccountRequest)) serviceaccount.ApiCreateServiceAccountRequest {
-	request := testClient.CreateServiceAccount(testCtx, testProjectId)
-	request = request.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
-		Name: utils.Ptr("example"),
-	})
+func fixtureRequest(mods ...func(request *secretsmanager.ApiListInstancesRequest)) secretsmanager.ApiListInstancesRequest {
+	request := testClient.ListInstances(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -75,20 +73,6 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "zero values",
-			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				nameFlag:      "",
-			},
-			isValid: true,
-			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-				},
-				Name: utils.Ptr(""),
-			},
-		},
-		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
@@ -109,15 +93,41 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "limit missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, limitFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := &cobra.Command{}
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
+
+			configureFlags(cmd)
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -160,7 +170,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest serviceaccount.ApiCreateServiceAccountRequest
+		expectedRequest secretsmanager.ApiListInstancesRequest
 	}{
 		{
 			description:     "base",

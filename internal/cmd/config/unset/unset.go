@@ -31,6 +31,7 @@ const (
 	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
 	redisCustomEndpointFlag           = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
+	secretsManagerCustomEndpointFlag  = "secrets-manager-custom-endpoint"
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 )
@@ -53,6 +54,7 @@ type inputModel struct {
 	RabbitMQCustomEndpoint        bool
 	RedisCustomEndpoint           bool
 	ResourceManagerCustomEndpoint bool
+	SecretsManagerCustomEndpoint  bool
 	ServiceAccountCustomEndpoint  bool
 	SKECustomEndpoint             bool
 }
@@ -124,6 +126,9 @@ func NewCmd() *cobra.Command {
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
 			}
+			if model.SecretsManagerCustomEndpoint {
+				viper.Set(config.SecretsManagerCustomEndpointKey, "")
+			}
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
 			}
@@ -160,6 +165,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(rabbitMQCustomEndpointFlag, false, "RabbitMQ API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(secretsManagerCustomEndpointFlag, false, "Secrets Manager API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 }
@@ -182,6 +188,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(cmd, rabbitMQCustomEndpointFlag),
 		RedisCustomEndpoint:           flags.FlagToBoolValue(cmd, redisCustomEndpointFlag),
 		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(cmd, resourceManagerCustomEndpointFlag),
+		SecretsManagerCustomEndpoint:  flags.FlagToBoolValue(cmd, secretsManagerCustomEndpointFlag),
 		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(cmd, serviceAccountCustomEndpointFlag),
 		SKECustomEndpoint:             flags.FlagToBoolValue(cmd, skeCustomEndpointFlag),
 	}

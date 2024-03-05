@@ -4,13 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,13 +17,13 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		nameFlag:      "example",
+		projectIdFlag:    testProjectId,
+		instanceNameFlag: "example",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,7 +36,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		Name: utils.Ptr("example"),
+		InstanceName: utils.Ptr("example"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -45,9 +44,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccountRequest)) serviceaccount.ApiCreateServiceAccountRequest {
-	request := testClient.CreateServiceAccount(testCtx, testProjectId)
-	request = request.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
+func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceRequest)) secretsmanager.ApiCreateInstanceRequest {
+	request := testClient.CreateInstance(testCtx, testProjectId)
+	request = request.CreateInstancePayload(secretsmanager.CreateInstancePayload{
 		Name: utils.Ptr("example"),
 	})
 	for _, mod := range mods {
@@ -77,16 +76,23 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "zero values",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				nameFlag:      "",
+				projectIdFlag:    testProjectId,
+				instanceNameFlag: "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 				},
-				Name: utils.Ptr(""),
+				InstanceName: utils.Ptr(""),
 			},
+		},
+		{
+			description: "instance name missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceNameFlag)
+			}),
+			isValid: false,
 		},
 		{
 			description: "project id missing",
@@ -160,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest serviceaccount.ApiCreateServiceAccountRequest
+		expectedRequest secretsmanager.ApiCreateInstanceRequest
 	}{
 		{
 			description:     "base",
