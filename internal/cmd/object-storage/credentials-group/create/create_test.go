@@ -20,12 +20,12 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
-var testDisplayName = "test-name"
+var testCredentialsGroupName = "test-name"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		nameFlag:      testDisplayName,
+		projectIdFlag:            testProjectId,
+		credentialsGroupNameFlag: testCredentialsGroupName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -38,7 +38,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		DisplayName: testDisplayName,
+		CredentialsGroupName: testCredentialsGroupName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPayload)) objectstorage.CreateCredentialsGroupPayload {
 	payload := objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(testDisplayName),
+		DisplayName: utils.Ptr(testCredentialsGroupName),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -107,7 +107,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "display name missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nameFlag)
+				delete(flagValues, credentialsGroupNameFlag)
 			}),
 			isValid: false,
 		},
