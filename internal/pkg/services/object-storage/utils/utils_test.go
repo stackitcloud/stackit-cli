@@ -23,6 +23,7 @@ const (
 type objectStorageClientMocked struct {
 	listCredentialsGroupsFails bool
 	listCredentialsGroupsResp  *objectstorage.ListCredentialsGroupsResponse
+	listAccessKeysReq          objectstorage.ApiListAccessKeysRequest
 }
 
 func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Context, _ string) (*objectstorage.ListCredentialsGroupsResponse, error) {
@@ -31,6 +32,11 @@ func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Conte
 	}
 	return m.listCredentialsGroupsResp, nil
 }
+
+func (m *objectStorageClientMocked) ListAccessKeys(_ context.Context, _ string) objectstorage.ApiListAccessKeysRequest {
+	return m.listAccessKeysReq
+}
+
 func TestGetCredentialsGroupName(t *testing.T) {
 	tests := []struct {
 		description                string
