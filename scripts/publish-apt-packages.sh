@@ -11,6 +11,7 @@ APT_BUCKET_NAME="stackit-cli-apt"
 PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
 PUBLIC_KEY_FILE="key.gpg"
 CUSTOM_KEYRING="custom-keyring"
+DISTRIBUTION="stackit"
 APTLY_CONFIG_FILE_PATH="./.aptly.conf"
 GORELEASER_PACKAGES_FOLDER="dist/"
 
@@ -18,7 +19,7 @@ GORELEASER_PACKAGES_FOLDER="dist/"
 printf ">>> Creating mirror \n"
 curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
 gpg --no-default-keyring --keyring ./${CUSTOM_KEYRING}.gpg --import public.asc
-aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" stackit
+aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
@@ -30,7 +31,7 @@ aptly snapshot create current-snapshot from mirror current
 
 # Create a new fresh local APT repo
 printf "\n>>> Creating fresh local repo \n"
-aptly repo create -distribution="stackit-cli" new-repo
+aptly repo create -distribution="${DISTRIBUTION}" new-repo
 
 # Add new generated .deb packages to the new local repo
 printf "\n>>> Adding new packages to local repo \n"
@@ -42,8 +43,8 @@ aptly snapshot create new-snapshot from repo new-repo
 
 # Merge new-snapshot into current-snapshot creating a new snapshot updated-snapshot
 printf "\n>>> Merging snapshots \n"
-aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot stackit
+aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
 
 # Publish the new snapshot to the remote repo
 printf "\n>>> Publishing updated snapshot \n"
-aptly publish switch -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" stackit "s3:${APT_BUCKET_NAME}:" updated-snapshot
+aptly publish switch -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" ${DISTRIBUTION} "s3:${APT_BUCKET_NAME}:" updated-snapshot
