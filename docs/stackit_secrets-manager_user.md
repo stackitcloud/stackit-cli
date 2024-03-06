@@ -29,5 +29,6 @@ stackit secrets-manager user [flags]
 
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit secrets-manager user create](./stackit_secrets-manager_user_create.md)	 - Creates a Secrets Manager user
+* [stackit secrets-manager user delete](./stackit_secrets-manager_user_delete.md)	 - Deletes a Secrets Manager user
 * [stackit secrets-manager user list](./stackit_secrets-manager_user_list.md)	 - Lists all Secrets Manager users
 

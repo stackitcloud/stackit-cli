@@ -37,12 +37,12 @@ func NewCmd() *cobra.Command {
 		Short: "Deletes a Secrets Manager user",
 		Long: fmt.Sprintf("%s\n%s",
 			"Deletes a Secrets Manager user by ID. You can get the IDs of users for an instance by running:",
-			"  $ stackit mongodbflex user list --instance-id <INSTANCE_ID>",
+			"  $ stackit secrets-manager user list --instance-id <INSTANCE_ID>",
 		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a Secrets Manager user with ID "xxx" for instance with ID "yyy"`,
-				"$ stackit mongodbflex user delete xxx --instance-id yyy"),
+				"$ stackit secrets-manager user delete xxx --instance-id yyy"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {

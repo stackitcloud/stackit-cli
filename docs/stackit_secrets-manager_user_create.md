@@ -4,7 +4,9 @@ Creates a Secrets Manager user
 
 ### Synopsis
 
-Creates a user for a Secrets Manager instance with generated username and password
+Creates a Secrets Manager user.
+The username and password are auto-generated and provided upon creation.
+A description can be provided to identify a user.
 
 ```
 stackit secrets-manager user create [flags]
@@ -13,17 +15,14 @@ stackit secrets-manager user create [flags]
 ### Examples
 
 ```
-  Create a Secrets Manager user for instance with ID "xxx"
-  $ stackit mongodbflex user create --instance-id xxx
-
   Create a Secrets Manager user for instance with ID "xxx" and description "yyy"
-  $ stackit mongodbflex user create --instance-id xxx --description yyy
+  $ stackit secrets-manager user create --instance-id xxx --description yyy
 
-  Create a Secrets Manager user for instance with ID "xxx" and doesn't display the password
-  $ stackit mongodbflex user create --instance-id xxx --hide-password
+  Create a Secrets Manager user for instance with ID "xxx" and hides the generated password
+  $ stackit secrets-manager user create --instance-id xxx --hide-password
 
   Create a Secrets Manager user for instance with ID "xxx" with write access to the secrets engine
-  $ stackit mongodbflex user create --instance-id xxx --write
+  $ stackit secrets-manager user create --instance-id xxx --write
 ```
 
 ### Options
