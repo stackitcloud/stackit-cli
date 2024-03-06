@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/list"
 )
 
@@ -24,4 +25,5 @@ func NewCmd() *cobra.Command {
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(list.NewCmd())
 	cmd.AddCommand(create.NewCmd())
+	cmd.AddCommand(delete.NewCmd())
 }
