@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	instanceIdFlag  = "instance-id"
-	descriptionFlag = "description"
-	writeFlag       = "write"
+	instanceIdFlag   = "instance-id"
+	descriptionFlag  = "description"
+	writeFlag        = "write"
 	hidePasswordFlag = "hide-password"
 )
 
@@ -42,6 +42,9 @@ func NewCmd() *cobra.Command {
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
 				"$ stackit mongodbflex user create --instance-id xxx --description yyy"),
+			examples.NewExample(
+				`Create a Secrets Manager user for instance with ID "xxx", description "yyy" and doesn't display the password`,
+				"$ stackit mongodbflex user create --instance-id xxx --description yyy --hide-password"),
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx", description "yyy" and with write access to the secrets engine`,
 				"$ stackit mongodbflex user create --instance-id xxx --description yyy --write"),
