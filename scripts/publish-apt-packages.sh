@@ -47,4 +47,4 @@ aptly snapshot create new-snapshot from repo new-repo
 
 # Publish the new snapshot to the remote repo
 printf "\n>>> Publishing updated snapshot \n"
-aptly publish switch -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" ${DISTRIBUTION} "s3:${APT_BUCKET_NAME}:" new-snapshot
+aptly publish snapshot -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" new-snapshot "s3:${APT_BUCKET_NAME}:"
