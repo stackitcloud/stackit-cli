@@ -10,16 +10,15 @@ OBJECT_STORAGE_ENDPOINT="https://object.storage.eu01.onstackit.cloud"
 APT_BUCKET_NAME="stackit-cli-apt"
 PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
 PUBLIC_KEY_FILE="key.gpg"
-CUSTOM_KEYRING="custom-keyring"
+CUSTOM_KEYRING_FILE="custom-keyring.gpg"
 DISTRIBUTION="stackit"
 APTLY_CONFIG_FILE_PATH="./.aptly.conf"
 GORELEASER_PACKAGES_FOLDER="dist/"
 
 # Create a local mirror of the current state of the remote APT repository
 printf ">>> Creating mirror \n"
-curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
-gpg --no-default-keyring --keyring ./${CUSTOM_KEYRING}.gpg --import public.asc
-aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
+wget -O - ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} | gpg --no-default-keyring --keyring ${CUSTOM_KEYRING} --import
+aptly mirror create -keyring="./${CUSTOM_KEYRING}" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
