@@ -38,11 +38,12 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager user",
-		Long:  "Creates a Secrets Manager user.",
+		Long: fmt.Sprintf("%s\n%s\n%s",
+			"Creates a Secrets Manager user.",
+			"The username and password are auto-generated and provided upon creation.",
+			"A description can be provided to identify a user.",
+		),
 		Example: examples.Build(
-			examples.NewExample(
-				`Create a Secrets Manager user for instance with ID "xxx"`,
-				"$ stackit mongodbflex user create --instance-id xxx"),
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
 				"$ stackit secrets-manager user create --instance-id xxx --description yyy"),
