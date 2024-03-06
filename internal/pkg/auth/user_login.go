@@ -9,7 +9,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,7 +22,6 @@ import (
 const (
 	authDomain              = "auth.01.idp.eu01.stackit.cloud/oauth"
 	clientId                = "stackit-cli-client-id"
-	redirectURL             = "http://localhost:8000"
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
 	htmlTemplatesPath       = "templates"
@@ -39,6 +37,13 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser() error {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return fmt.Errorf("bind port for login redirect: %w", err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	redirectURL := fmt.Sprintf("http://localhost:%d", port)
+
 	conf := &oauth2.Config{
 		ClientID: clientId,
 		Endpoint: oauth2.Endpoint{
@@ -146,19 +151,6 @@ func AuthorizeUser() error {
 		}
 	})
 
-	// Parse the redirect URL for the port number
-	u, err := url.Parse(redirectURL)
-	if err != nil {
-		return fmt.Errorf("parse redirect URL: %w", err)
-	}
-
-	// Set up a listener on the redirect port
-	port := fmt.Sprintf(":%s", u.Port())
-	l, err := net.Listen("tcp", port)
-	if err != nil {
-		return fmt.Errorf("listen to port %s: %w", port, err)
-	}
-
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
 	if err != nil {
@@ -167,7 +159,7 @@ func AuthorizeUser() error {
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
-	err = server.Serve(l)
+	err = server.Serve(listener)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server for PKCE flow closed unexpectedly: %w", err)
 	}
