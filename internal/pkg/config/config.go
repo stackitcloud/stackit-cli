@@ -27,6 +27,7 @@ const (
 	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
 	RedisCustomEndpointKey          = "redis_custom_endpoint"
 	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
+	SecretsManagerCustomEndpointKey = "secrets_manager_custom_endpoint"
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 
@@ -60,6 +61,7 @@ var ConfigKeys = []string{
 	RabbitMQCustomEndpointKey,
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
+	SecretsManagerCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
 }
@@ -132,6 +134,7 @@ func setConfigDefaults() {
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
+	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 }

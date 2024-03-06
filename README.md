@@ -59,7 +59,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | MongoDB Flex            | `mongodbflex`             | :white_check_mark:      |
 | Object Storage          |                           | Will be integrated soon |
 | OpenSearch              | `opensearch`              | :white_check_mark:      |
-| PostgreSQL Flex         |                           | Will be integrated soon |
+| PostgreSQL Flex         | `postgresflex`            | :white_check_mark:      |
 | RabbitMQ                | `rabbitmq`                | :white_check_mark:      |
 | Redis                   | `redis`                   | :white_check_mark:      |
 | Resource Manager        | `project`                 | :white_check_mark:      |

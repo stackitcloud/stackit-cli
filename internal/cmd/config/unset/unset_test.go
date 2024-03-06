@@ -21,6 +21,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		rabbitMQCustomEndpointFlag:        true,
 		redisCustomEndpointFlag:           true,
 		resourceManagerCustomEndpointFlag: true,
+		secretsManagerCustomEndpointFlag:  true,
 		serviceAccountCustomEndpointFlag:  true,
 		skeCustomEndpointFlag:             true,
 	}
@@ -44,6 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		RabbitMQCustomEndpoint:        true,
 		RedisCustomEndpoint:           true,
 		ResourceManagerCustomEndpoint: true,
+		SecretsManagerCustomEndpoint:  true,
 		ServiceAccountCustomEndpoint:  true,
 		SKECustomEndpoint:             true,
 	}
@@ -83,6 +85,7 @@ func TestParseInput(t *testing.T) {
 				model.RabbitMQCustomEndpoint = false
 				model.RedisCustomEndpoint = false
 				model.ResourceManagerCustomEndpoint = false
+				model.SecretsManagerCustomEndpoint = false
 				model.ServiceAccountCustomEndpoint = false
 				model.SKECustomEndpoint = false
 			}),
@@ -115,6 +118,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.DNSCustomEndpoint = false
+			}),
+		},
+		{
+			description: "secrets manager custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[secretsManagerCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.SecretsManagerCustomEndpoint = false
 			}),
 		},
 		{

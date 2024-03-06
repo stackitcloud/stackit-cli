@@ -29,6 +29,7 @@ const (
 	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
 	redisCustomEndpointFlag           = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
+	secretsManagerCustomEndpointFlag  = "secrets-manager-custom-endpoint"
 	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
 	skeCustomEndpointFlag             = "ske-custom-endpoint"
 )
@@ -102,6 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(rabbitMQCustomEndpointFlag, "", "RabbitMQ API base URL, used in calls to this API")
 	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis API base URL, used in calls to this API")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource Manager API base URL, used in calls to this API")
+	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Manager API base URL, used in calls to this API")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 
@@ -122,6 +124,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.PostgresFlexCustomEndpointKey, cmd.Flags().Lookup(postgresFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
 	cobra.CheckErr(err)

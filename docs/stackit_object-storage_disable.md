@@ -4,7 +4,7 @@ Disables Object Storage for a project
 
 ### Synopsis
 
-Disables Object Storage for a project. It will delete all associated buckets.
+Disables Object Storage for a project. All buckets must be deleted beforehand.
 
 ```
 stackit object-storage disable [flags]
@@ -13,7 +13,7 @@ stackit object-storage disable [flags]
 ### Examples
 
 ```
-  Disable Object Storage functionality for your project, deleting all associated buckets
+  Disable Object Storage functionality for your project.
   $ stackit object-storage disable
 ```
 
