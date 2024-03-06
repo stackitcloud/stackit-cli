@@ -15,19 +15,19 @@ DISTRIBUTION="stackit"
 APTLY_CONFIG_FILE_PATH="./.aptly.conf"
 GORELEASER_PACKAGES_FOLDER="dist/"
 
-# Create a local mirror of the current state of the remote APT repository
-printf ">>> Creating mirror \n"
-curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
-gpg --no-default-keyring --keyring ./${CUSTOM_KEYRING}.gpg --import public.asc
-aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
+# # Create a local mirror of the current state of the remote APT repository
+# printf ">>> Creating mirror \n"
+# curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
+# gpg --no-default-keyring --keyring ./${CUSTOM_KEYRING}.gpg --import public.asc
+# aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
 
-# Update the mirror to the latest state
-printf "\n>>> Updating mirror \n"
-aptly mirror update current
+# # Update the mirror to the latest state
+# printf "\n>>> Updating mirror \n"
+# aptly mirror update current
 
-# Create a snapshot of the mirror
-printf "\n>>> Creating snapshop from mirror \n"
-aptly snapshot create current-snapshot from mirror current
+# # Create a snapshot of the mirror
+# printf "\n>>> Creating snapshop from mirror \n"
+# aptly snapshot create current-snapshot from mirror current
 
 # Create a new fresh local APT repo
 printf "\n>>> Creating fresh local repo \n"
@@ -41,10 +41,10 @@ aptly repo add new-repo ${GORELEASER_PACKAGES_FOLDER}
 printf "\n>>> Creating snapshot of local repo \n"
 aptly snapshot create new-snapshot from repo new-repo
 
-# Merge new-snapshot into current-snapshot creating a new snapshot updated-snapshot
-printf "\n>>> Merging snapshots \n"
-aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
+# # Merge new-snapshot into current-snapshot creating a new snapshot updated-snapshot
+# printf "\n>>> Merging snapshots \n"
+# aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
 
 # Publish the new snapshot to the remote repo
 printf "\n>>> Publishing updated snapshot \n"
-aptly publish switch -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" ${DISTRIBUTION} "s3:${APT_BUCKET_NAME}:" updated-snapshot
+aptly publish switch -gpg-key="${GPG_PRIVATE_KEY_ID}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" ${DISTRIBUTION} "s3:${APT_BUCKET_NAME}:" new-snapshot
