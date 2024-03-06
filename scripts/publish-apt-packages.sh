@@ -10,19 +10,22 @@ OBJECT_STORAGE_ENDPOINT="https://object.storage.eu01.onstackit.cloud"
 APT_BUCKET_NAME="stackit-cli-apt"
 PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
 PUBLIC_KEY_FILE="key.gpg"
-CUSTOM_KEYRING="custom-keyring"
+CUSTOM_KEYRING_PIPELINE_FOLDER="/Users/runner/.gnupg"
+CUSTOM_KEYRING_FILE="custom-keyring.gpg"
 DISTRIBUTION="stackit"
 APTLY_CONFIG_FILE_PATH="./.aptly.conf"
 GORELEASER_PACKAGES_FOLDER="dist/"
 
 # Create a local mirror of the current state of the remote APT repository
 printf ">>> Creating mirror \n"
-curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
-gpg --no-default-keyring --keyring ./${CUSTOM_KEYRING}.gpg --import public.asc
-aptly mirror create -keyring="${CUSTOM_KEYRING}.gpg" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
+# curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
+# gpg --no-default-keyring --keyring=${CUSTOM_KEYRING_PIPELINE_FOLDER}/${CUSTOM_KEYRING_FILE} --import public.asc
+# aptly mirror create -keyring="${CUSTOM_KEYRING_FILE}" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION} # Folder (CUSTOM_KEYRING_PIPELINE_FOLDER) is appended automatic in the aptly command
+aptly mirror create current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
+# aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" current
 aptly mirror update current
 
 # Create a snapshot of the mirror
