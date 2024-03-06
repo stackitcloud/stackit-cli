@@ -38,20 +38,20 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager user",
-		Long:  "Creates a user for a Secrets Manager instance with generated username and password",
+		Long:  "Creates a Secrets Manager user.",
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx"`,
 				"$ stackit mongodbflex user create --instance-id xxx"),
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
-				"$ stackit mongodbflex user create --instance-id xxx --description yyy"),
+				"$ stackit secrets-manager user create --instance-id xxx --description yyy"),
 			examples.NewExample(
-				`Create a Secrets Manager user for instance with ID "xxx" and doesn't display the password`,
-				"$ stackit mongodbflex user create --instance-id xxx --hide-password"),
+				`Create a Secrets Manager user for instance with ID "xxx" and hides the generated password`,
+				"$ stackit secrets-manager user create --instance-id xxx --hide-password"),
 			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" with write access to the secrets engine`,
-				"$ stackit mongodbflex user create --instance-id xxx --write"),
+				"$ stackit secrets-manager user create --instance-id xxx --write"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
