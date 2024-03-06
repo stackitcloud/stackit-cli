@@ -93,7 +93,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, writeFlag)
 			}),
-			isValid: true,
+			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
