@@ -22,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.1
 	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/mod v0.15.0
-	golang.org/x/oauth2 v0.17.0
+	golang.org/x/oauth2 v0.18.0
 	golang.org/x/text v0.14.0
 )
 
