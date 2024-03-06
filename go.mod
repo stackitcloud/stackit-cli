@@ -3,7 +3,7 @@ module github.com/stackitcloud/stackit-cli
 go 1.21
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.5.4
@@ -22,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.1
 	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/mod v0.16.0
-	golang.org/x/oauth2 v0.17.0
+	golang.org/x/oauth2 v0.18.0
 	golang.org/x/text v0.14.0
 )
 
