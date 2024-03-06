@@ -1,16 +1,15 @@
-package create
+package describe
 
 import (
 	"context"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,13 +17,23 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
+var testInstanceId = uuid.NewString()
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testInstanceId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		nameFlag:      "example",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,7 +46,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		Name: utils.Ptr("example"),
+		InstanceId: testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -45,11 +54,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccountRequest)) serviceaccount.ApiCreateServiceAccountRequest {
-	request := testClient.CreateServiceAccount(testCtx, testProjectId)
-	request = request.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
-		Name: utils.Ptr("example"),
-	})
+func fixtureRequest(mods ...func(request *secretsmanager.ApiGetInstanceRequest)) secretsmanager.ApiGetInstanceRequest {
+	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -59,37 +65,39 @@ func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccount
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "no values",
+			argValues:   []string{},
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
-			description: "zero values",
-			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				nameFlag:      "",
-			},
-			isValid: true,
-			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-				},
-				Name: utils.Ptr(""),
-			},
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -97,6 +105,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -104,10 +113,23 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "instance id invalid 2",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 	}
 
@@ -129,6 +151,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -137,12 +167,12 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error parsing flags: %v", err)
+				t.Fatalf("error parsing input: %v", err)
 			}
 
 			if !tt.isValid {
@@ -160,7 +190,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest serviceaccount.ApiCreateServiceAccountRequest
+		expectedRequest secretsmanager.ApiGetInstanceRequest
 	}{
 		{
 			description:     "base",
