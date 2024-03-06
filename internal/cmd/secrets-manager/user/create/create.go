@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
@@ -40,14 +41,17 @@ func NewCmd() *cobra.Command {
 		Long:  "Creates a user for a Secrets Manager instance with generated username and password",
 		Example: examples.Build(
 			examples.NewExample(
+				`Create a Secrets Manager user for instance with ID "xxx"`,
+				"$ stackit mongodbflex user create --instance-id xxx"),
+			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
 				"$ stackit mongodbflex user create --instance-id xxx --description yyy"),
 			examples.NewExample(
-				`Create a Secrets Manager user for instance with ID "xxx", description "yyy" and doesn't display the password`,
-				"$ stackit mongodbflex user create --instance-id xxx --description yyy --hide-password"),
+				`Create a Secrets Manager user for instance with ID "xxx" and doesn't display the password`,
+				"$ stackit mongodbflex user create --instance-id xxx --hide-password"),
 			examples.NewExample(
-				`Create a Secrets Manager user for instance with ID "xxx", description "yyy" and with write access to the secrets engine`,
-				"$ stackit mongodbflex user create --instance-id xxx --description yyy --write"),
+				`Create a Secrets Manager user for instance with ID "xxx" with write access to the secrets engine`,
+				"$ stackit mongodbflex user create --instance-id xxx --write"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -107,7 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(writeFlag, false, "User write access to the secrets engine. If unset, user is read-only")
 	cmd.Flags().Bool(hidePasswordFlag, false, "Hide password in output")
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, descriptionFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -120,8 +124,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		Description:     flags.FlagToStringPointer(cmd, descriptionFlag),
-		Write:           flags.FlagToBoolPointer(cmd, writeFlag),
+		Description:     utils.Ptr(flags.FlagToStringValue(cmd, descriptionFlag)),
+		Write:           utils.Ptr(flags.FlagToBoolValue(cmd, writeFlag)),
 		HidePassword:    flags.FlagToBoolValue(cmd, hidePasswordFlag),
 	}, nil
 }

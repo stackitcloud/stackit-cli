@@ -83,7 +83,18 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, descriptionFlag)
 			}),
-			isValid: false,
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = utils.Ptr("")
+			}),
+		},
+		{
+			description: "no write flag given",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, writeFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "no values",
