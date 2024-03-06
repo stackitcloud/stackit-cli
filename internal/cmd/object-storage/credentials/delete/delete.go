@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	credentialIdArg      = "CREDENTIAL_ID"
+	credentialIdArg      = "CREDENTIAL_ID" //nolint:gosec // linter false positive
 	credentialsGroupFlag = "credentials-group"
 )
 

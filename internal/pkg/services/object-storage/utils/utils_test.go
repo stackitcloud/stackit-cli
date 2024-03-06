@@ -18,7 +18,7 @@ import (
 var (
 	testProjectId          = uuid.NewString()
 	testCredentialsGroupId = uuid.NewString()
-	testCredentialId       = "credentialID"
+	testCredentialId       = "credentialID" //nolint:gosec // linter false positive
 )
 
 const (
