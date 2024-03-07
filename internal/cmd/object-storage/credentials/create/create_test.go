@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -20,12 +21,14 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
-var testCredentialsGroupName = "test-name"
+var testCredentialsGroupId = uuid.NewString()
+var testExpirationDate = "2024-01-01T00:00:00Z"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		credentialsGroupNameFlag: testCredentialsGroupName,
+		projectIdFlag:          testProjectId,
+		credentialsGroupIdFlag: testCredentialsGroupId,
+		expireDateFlag:         testExpirationDate,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -34,11 +37,17 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
+	testExpirationDate, err := time.Parse(expirationTimeFormat, testExpirationDate)
+	if err != nil {
+		return &inputModel{}
+	}
+
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		CredentialsGroupName: testCredentialsGroupName,
+		ExpireDate:         utils.Ptr(testExpirationDate),
+		CredentialsGroupId: testCredentialsGroupId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -46,9 +55,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPayload)) objectstorage.CreateCredentialsGroupPayload {
-	payload := objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(testCredentialsGroupName),
+func fixturePayload(mods ...func(payload *objectstorage.CreateAccessKeyPayload)) objectstorage.CreateAccessKeyPayload {
+	testExpirationDate, err := time.Parse(expirationTimeFormat, testExpirationDate)
+	if err != nil {
+		return objectstorage.CreateAccessKeyPayload{}
+	}
+	payload := objectstorage.CreateAccessKeyPayload{
+		Expires: utils.Ptr(testExpirationDate),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -56,9 +69,10 @@ func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPa
 	return payload
 }
 
-func fixtureRequest(mods ...func(request *objectstorage.ApiCreateCredentialsGroupRequest)) objectstorage.ApiCreateCredentialsGroupRequest {
-	request := testClient.CreateCredentialsGroup(testCtx, testProjectId)
-	request = request.CreateCredentialsGroupPayload(fixturePayload())
+func fixtureRequest(mods ...func(request *objectstorage.ApiCreateAccessKeyRequest)) objectstorage.ApiCreateAccessKeyRequest {
+	request := testClient.CreateAccessKey(testCtx, testProjectId)
+	request = request.CreateAccessKeyPayload(fixturePayload())
+	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -105,9 +119,54 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "display name missing",
+			description: "credentials group id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, credentialsGroupNameFlag)
+				delete(flagValues, credentialsGroupIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "credentials group id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[credentialsGroupIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "credentials group id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[credentialsGroupIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "expiration date is missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, expireDateFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ExpireDate = nil
+			}),
+		},
+		{
+			description: "expiration date is empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expireDateFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "expiration date is invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expireDateFlag] = "test"
+			}),
+			isValid: false,
+		},
+		{
+			description: "expiration date is invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expireDateFlag] = "11:00 12/12/2024"
 			}),
 			isValid: false,
 		},
@@ -162,7 +221,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest objectstorage.ApiCreateCredentialsGroupRequest
+		expectedRequest objectstorage.ApiCreateAccessKeyRequest
 	}{
 		{
 			description:     "base",
