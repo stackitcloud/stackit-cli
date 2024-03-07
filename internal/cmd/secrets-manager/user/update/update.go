@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				userLabel = fmt.Sprintf("%q", model.UserId)
 			} else {
-				userLabel = fmt.Sprintf("%q (%q)", userName, userDescription)
+				userLabel = fmt.Sprintf("%q (%s)", userName, userDescription)
 			}
 
 			if !model.AssumeYes {
@@ -85,7 +85,11 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return err
+			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Secrets Manager user: %w", err)
@@ -135,15 +139,25 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateUserRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) (secretsmanager.ApiUpdateUserRequest, error) {
 	req := apiClient.UpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 
-	// model.EnableWrite and model.DisableWrite are mutually exclusive and can't be both nil
-	// therefore we can check only one for the value of the write parameter
-	write := model.EnableWrite != nil
+	var write bool
+
+	if model.EnableWrite != nil && model.DisableWrite == nil {
+		write = true
+	} else if model.DisableWrite != nil && model.EnableWrite == nil {
+		write = false
+	} else if model.DisableWrite == nil && model.EnableWrite == nil {
+		// Should never happen
+		return req, fmt.Errorf("one of enable-write and disable-write flags needs to be set")
+	} else if model.DisableWrite != nil && model.EnableWrite != nil {
+		// Should never happen
+		return req, fmt.Errorf("enable-write and disable-write flags can't be both set")
+	}
 
 	req = req.UpdateUserPayload(secretsmanager.UpdateUserPayload{
 		Write: utils.Ptr(write),
 	})
-	return req
+	return req, nil
 }
