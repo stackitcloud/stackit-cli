@@ -50,9 +50,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		InstanceId: testInstanceId,
-		UserId:     testUserId,
-		Write:      utils.Ptr(true),
+		InstanceId:   testInstanceId,
+		UserId:       testUserId,
+		EnableWrite:  utils.Ptr(true),
+		DisableWrite: utils.Ptr(false),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -108,7 +109,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Write = utils.Ptr(false)
+				model.EnableWrite = utils.Ptr(false)
+				model.DisableWrite = utils.Ptr(true)
 			}),
 		},
 		{

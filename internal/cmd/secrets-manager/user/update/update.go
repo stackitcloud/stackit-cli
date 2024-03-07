@@ -29,9 +29,10 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceId string
-	UserId     string
-	Write      *bool
+	InstanceId   string
+	UserId       string
+	EnableWrite  *bool
+	DisableWrite *bool
 }
 
 func NewCmd() *cobra.Command {
@@ -115,20 +116,20 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	enableWrite := flags.FlagToBoolValue(cmd, enableWriteFlag)
-
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		Write:           utils.Ptr(enableWrite),
+		EnableWrite:     utils.Ptr(flags.FlagToBoolValue(cmd, enableWriteFlag)),
+		DisableWrite:    utils.Ptr(flags.FlagToBoolValue(cmd, disableWriteFlag)),
 		UserId:          userId,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateUserRequest {
 	req := apiClient.UpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+
 	req = req.UpdateUserPayload(secretsmanager.UpdateUserPayload{
-		Write: model.Write,
+		Write: model.EnableWrite,
 	})
 	return req
 }
