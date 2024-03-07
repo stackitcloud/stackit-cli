@@ -43,7 +43,7 @@ func GetCredentialsName(ctx context.Context, apiClient ObjectStorageClient, proj
 
 	credentials := resp.AccessKeys
 	if credentials == nil {
-		return "", fmt.Errorf("nil Object Storage credentials list)
+		return "", fmt.Errorf("nil Object Storage credentials list")
 	}
 
 	for _, credential := range *credentials {
