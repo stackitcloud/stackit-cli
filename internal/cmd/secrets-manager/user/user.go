@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/update"
 )
 
 func NewCmd() *cobra.Command {
@@ -28,4 +29,5 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(create.NewCmd())
 	cmd.AddCommand(delete.NewCmd())
 	cmd.AddCommand(describe.NewCmd())
+	cmd.AddCommand(update.NewCmd())
 }
