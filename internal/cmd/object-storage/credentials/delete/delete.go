@@ -30,7 +30,7 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialIdArg),
-		Short: "Deletes a credential of a credentials group",
+		Short: "Deletes credentials of an Object Storage credentials group",
 		Long:  "Deletes a credential of a credentials group.",
 		Args:  args.SingleArg(credentialIdArg, nil),
 		Example: examples.Build(
