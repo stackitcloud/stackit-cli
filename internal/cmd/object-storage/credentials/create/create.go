@@ -34,7 +34,7 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates credentials for a credentials group",
+		Short: "Creates credentials for an Object Storage credentials group",
 		Long:  "Creates credentials for a credentials group.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
