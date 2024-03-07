@@ -60,6 +60,7 @@ nfpms:
     # IDs of the builds for which to create packages for
     builds:
       - linux-builds
+    package_name: stackit
     vendor: STACKIT
     homepage: https://github.com/stackitcloud/stackit-cli
     maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
