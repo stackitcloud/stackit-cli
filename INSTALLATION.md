@@ -43,7 +43,7 @@ sudo apt-get update
 sudo apt-get install stackit
 ```
 
-#### Any
+#### Any distribution
 
 Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
 
