@@ -150,10 +150,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 		write = false
 	} else if model.DisableWrite == nil && model.EnableWrite == nil {
 		// Should never happen
-		return req, fmt.Errorf("one of enable-write and disable-write flags needs to be set")
+		return req, fmt.Errorf("one of %s and %s flags needs to be set", enableWriteFlag, disableWriteFlag)
 	} else if model.DisableWrite != nil && model.EnableWrite != nil {
 		// Should never happen
-		return req, fmt.Errorf("enable-write and disable-write flags can't be both set")
+		return req, fmt.Errorf("%s and %s flags can't be both set", enableWriteFlag, disableWriteFlag)
 	}
 
 	req = req.UpdateUserPayload(secretsmanager.UpdateUserPayload{

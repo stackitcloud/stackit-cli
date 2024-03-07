@@ -250,11 +250,40 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		expectedRequest secretsmanager.ApiUpdateUserRequest
+		isValid         bool
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+			isValid:         true,
+		},
+		{
+			description: "disable write",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.EnableWrite = nil
+				model.DisableWrite = utils.Ptr(true)
+			}),
+			expectedRequest: fixtureRequest().UpdateUserPayload(secretsmanager.UpdateUserPayload{
+				Write: utils.Ptr(false),
+			}),
+			isValid: true,
+		},
+		{
+			description: "both write flags set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.EnableWrite = utils.Ptr(true)
+				model.DisableWrite = utils.Ptr(true)
+			}),
+			isValid: false,
+		},
+		{
+			description: "none of the write flags set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.EnableWrite = nil
+				model.DisableWrite = nil
+			}),
+			isValid: false,
 		},
 	}
 
@@ -262,6 +291,9 @@ func TestBuildRequest(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			request, err := buildRequest(testCtx, tt.model, testClient)
 			if err != nil {
+				if !tt.isValid {
+					return
+				}
 				t.Fatalf("error building request: %v", err)
 			}
 
