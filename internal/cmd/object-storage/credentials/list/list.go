@@ -135,7 +135,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials []objects
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("CREDENTIAL ID", "ACCESS KEY ID", "EXPIRES AT")
+		table.SetHeader("CREDENTIALS ID", "ACCESS KEY ID", "EXPIRES AT")
 		for i := range credentials {
 			c := credentials[i]
 
