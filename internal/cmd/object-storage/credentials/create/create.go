@@ -42,7 +42,7 @@ func NewCmd() *cobra.Command {
 				`Create credentials for a credentials group with ID "xxx"`,
 				"$ stackit object-storage credentials create --credentials-group-id xxx"),
 			examples.NewExample(
-				`Create credentials for a credentials group with ID xxx, including a specific expiration date`,
+				`Create credentials for a credentials group with ID "xxx", including a specific expiration date`,
 				"$ stackit object-storage credentials create --credentials-group-id xxx --expire-date 2024-03-06T00:00:00.000Z"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
