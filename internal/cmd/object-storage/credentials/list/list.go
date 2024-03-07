@@ -38,7 +38,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all credentials for a credentials group`,
+				`List all credentials for a credentials group with ID "xxx"`,
 				"$ stackit object-storage credentials list --credentials-group xxx"),
 			examples.NewExample(
 				`List all credentials for a credentials group in JSON format`,
