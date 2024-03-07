@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 					credentialsGroupLabel = model.CredentialsGroupId
 				}
 
-				cmd.Printf("No credentials found for your credentials group %q\n", credentialsGroupLabel)
+				cmd.Printf("No credentials found for credentials group %q\n", credentialsGroupLabel)
 				return nil
 			}
 
