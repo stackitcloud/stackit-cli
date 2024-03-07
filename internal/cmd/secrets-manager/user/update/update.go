@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update user %q (%s) of instance %q?", userLabel, userDescription, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update user %q (%q) of instance %q?", userLabel, userDescription, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
