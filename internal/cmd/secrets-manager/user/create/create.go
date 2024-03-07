@@ -46,9 +46,6 @@ func NewCmd() *cobra.Command {
 				`Create a Secrets Manager user for instance with ID "xxx" and description "yyy"`,
 				"$ stackit secrets-manager user create --instance-id xxx --description yyy"),
 			examples.NewExample(
-				`Create a Secrets Manager user for instance with ID "xxx" and hides the generated password`,
-				"$ stackit secrets-manager user create --instance-id xxx --hide-password"),
-			examples.NewExample(
 				`Create a Secrets Manager user for instance with ID "xxx" with write access to the secrets engine`,
 				"$ stackit secrets-manager user create --instance-id xxx --write"),
 		),

@@ -18,9 +18,6 @@ stackit secrets-manager user create [flags]
   Create a Secrets Manager user for instance with ID "xxx" and description "yyy"
   $ stackit secrets-manager user create --instance-id xxx --description yyy
 
-  Create a Secrets Manager user for instance with ID "xxx" and hides the generated password
-  $ stackit secrets-manager user create --instance-id xxx --hide-password
-
   Create a Secrets Manager user for instance with ID "xxx" with write access to the secrets engine
   $ stackit secrets-manager user create --instance-id xxx --write
 ```
