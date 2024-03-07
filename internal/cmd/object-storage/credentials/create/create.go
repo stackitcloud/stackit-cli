@@ -39,7 +39,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create credentials for a credentials group with ID xxx`,
+				`Create credentials for a credentials group with ID "xxx"`,
 				"$ stackit object-storage credentials create --credentials-group-id xxx"),
 			examples.NewExample(
 				`Create credentials for a credentials group with ID xxx, including a specific expiration date`,
