@@ -78,9 +78,15 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials: %w", err)
 			}
 
+			expireDate := "Never"
+			if resp.Expires != nil && *resp.Expires != "" {
+				expireDate = *resp.Expires
+			}
+
 			cmd.Printf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
 			cmd.Printf("Access Key ID: %s\n", *resp.AccessKey)
 			cmd.Printf("Secret Access Key: %s\n", *resp.SecretAccessKey)
+			cmd.Printf("Expire Date: %s\n", expireDate)
 
 			return nil
 		},
