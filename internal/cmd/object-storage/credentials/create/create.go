@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	expiresFlag          = "expires"
-	credentialsGroupFlag = "credentials-group"
-	expirationTimeFormat = time.RFC3339
+	expiresFlag            = "expires"
+	credentialsGroupIdFlag = "credentials-group-id"
+	expirationTimeFormat   = time.RFC3339
 )
 
 type inputModel struct {
@@ -40,10 +40,10 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create credentials for a credentials group with ID xxx`,
-				"$ stackit object-storage credentials create --credentials-group xxx"),
+				"$ stackit object-storage credentials create --credentials-group-id xxx"),
 			examples.NewExample(
 				`Create credentials for a credentials group with ID xxx, including a specific expiration date`,
-				"$ stackit object-storage credentials create --credentials-group xxx --expires 2024-03-06T00:00:00.000Z"),
+				"$ stackit object-storage credentials create --credentials-group-id xxx --expires 2024-03-06T00:00:00.000Z"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -91,9 +91,9 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(expiresFlag, "", "Expiration date for the credentials, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
-	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupFlag, "Credentials Group ID")
+	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupIdFlag, "Credentials Group ID")
 
-	err := flags.MarkFlagsRequired(cmd, credentialsGroupFlag)
+	err := flags.MarkFlagsRequired(cmd, credentialsGroupIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -114,7 +114,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel:    globalFlags,
 		Expires:            expires,
-		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupFlag),
+		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupIdFlag),
 	}, nil
 }
 

@@ -26,9 +26,9 @@ var testExpirationDate = "2024-01-01T00:00:00Z"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
-		credentialsGroupFlag: testCredentialsGroupId,
-		expiresFlag:          testExpirationDate,
+		projectIdFlag:          testProjectId,
+		credentialsGroupIdFlag: testCredentialsGroupId,
+		expiresFlag:            testExpirationDate,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -121,21 +121,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "credentials group id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, credentialsGroupFlag)
+				delete(flagValues, credentialsGroupIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials group id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsGroupFlag] = ""
+				flagValues[credentialsGroupIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials group id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsGroupFlag] = "invalid-uuid"
+				flagValues[credentialsGroupIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
