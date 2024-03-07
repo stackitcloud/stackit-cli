@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:   testInstanceId,
 		UserId:       testUserId,
 		EnableWrite:  utils.Ptr(true),
-		DisableWrite: utils.Ptr(false),
+		DisableWrite: nil,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -109,7 +109,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.EnableWrite = utils.Ptr(false)
+				model.EnableWrite = nil
 				model.DisableWrite = utils.Ptr(true)
 			}),
 		},

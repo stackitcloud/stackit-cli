@@ -109,7 +109,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.U
 		table.AddRow("USERNAME", *user.Username)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", *user.Description)
-		if *user.Password != "" {
+		if user.Password != nil && *user.Password != "" {
 			table.AddSeparator()
 			table.AddRow("PASSWORD", *user.Password)
 		}

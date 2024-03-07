@@ -67,13 +67,17 @@ func NewCmd() *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, userDescription, err := secretsManagerUtils.GetUserDetails(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
+			var userLabel string
+
+			userName, userDescription, err := secretsManagerUtils.GetUserDetails(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
-				userLabel = model.UserId
+				userLabel = fmt.Sprintf("%q", model.UserId)
+			} else {
+				userLabel = fmt.Sprintf("%q (%q)", userName, userDescription)
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update user %q (%q) of instance %q?", userLabel, userDescription, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update user %s of instance %q?", userLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -87,7 +91,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update Secrets Manager user: %w", err)
 			}
 
-			cmd.Printf("Updated user %q of instance %q\n", userLabel, instanceLabel)
+			cmd.Printf("Updated user %s of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}
@@ -98,13 +102,12 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
-	cmd.Flags().Bool(enableWriteFlag, false, "Set the user to have write access to the secrets engine.")
-	cmd.Flags().Bool(disableWriteFlag, false, "Set the user to have read-only access to the secrets engine.")
+	cmd.Flags().Bool(enableWriteFlag, false, "Set the user to have write access.")
+	cmd.Flags().Bool(disableWriteFlag, false, "Set the user to have read-only access.")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 
 	cmd.MarkFlagsMutuallyExclusive(enableWriteFlag, disableWriteFlag)
-	cmd.MarkFlagsOneRequired(enableWriteFlag, disableWriteFlag)
 	cobra.CheckErr(err)
 }
 
@@ -116,11 +119,18 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	enableWrite := flags.FlagToBoolPointer(cmd, enableWriteFlag)
+	disableWrite := flags.FlagToBoolPointer(cmd, disableWriteFlag)
+
+	if enableWrite == nil && disableWrite == nil {
+		return nil, &errors.EmptyUpdateError{}
+	}
+
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		EnableWrite:     utils.Ptr(flags.FlagToBoolValue(cmd, enableWriteFlag)),
-		DisableWrite:    utils.Ptr(flags.FlagToBoolValue(cmd, disableWriteFlag)),
+		EnableWrite:     enableWrite,
+		DisableWrite:    disableWrite,
 		UserId:          userId,
 	}, nil
 }
@@ -128,8 +138,12 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateUserRequest {
 	req := apiClient.UpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 
+	// model.EnableWrite and model.DisableWrite are mutually exclusive and can't be both nil
+	// therefore we can check only one for the value of the write parameter
+	write := model.EnableWrite != nil
+
 	req = req.UpdateUserPayload(secretsmanager.UpdateUserPayload{
-		Write: model.EnableWrite,
+		Write: utils.Ptr(write),
 	})
 	return req
 }

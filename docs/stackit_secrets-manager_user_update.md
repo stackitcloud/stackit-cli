@@ -23,8 +23,8 @@ stackit secrets-manager user update USER_ID [flags]
 ### Options
 
 ```
-      --disable-write        Set the user to have read-only access to the secrets engine.
-      --enable-write         Set the user to have write access to the secrets engine.
+      --disable-write        Set the user to have read-only access.
+      --enable-write         Set the user to have write access.
   -h, --help                 Help for "stackit secrets-manager user update"
       --instance-id string   ID of the instance
 ```

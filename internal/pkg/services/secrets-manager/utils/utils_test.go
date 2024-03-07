@@ -38,7 +38,7 @@ func (s *secretsManagerClientMocked) GetInstanceExecute(_ context.Context, _, _ 
 
 func (s *secretsManagerClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*secretsmanager.User, error) {
 	if s.getUserFails {
-		return nil, fmt.Errorf("could not get instance")
+		return nil, fmt.Errorf("could not get user")
 	}
 	return s.getUserResp, nil
 }
@@ -93,11 +93,12 @@ func TestGetInstanceName(t *testing.T) {
 
 func TestGetUserDetails(t *testing.T) {
 	tests := []struct {
-		description    string
-		getUserFails   bool
-		GetUserResp    *secretsmanager.User
-		isValid        bool
-		expectedOutput [2]string
+		description         string
+		getUserFails        bool
+		GetUserResp         *secretsmanager.User
+		isValid             bool
+		expectedUserName    string
+		expectedDescription string
 	}{
 		{
 			description: "base",
@@ -105,11 +106,12 @@ func TestGetUserDetails(t *testing.T) {
 				Username:    utils.Ptr(testUserName),
 				Description: utils.Ptr(testDescription),
 			},
-			isValid:        true,
-			expectedOutput: [2]string{testUserName, testDescription},
+			isValid:             true,
+			expectedUserName:    testUserName,
+			expectedDescription: testDescription,
 		},
 		{
-			description:  "get instance fails",
+			description:  "get user fails",
 			getUserFails: true,
 			isValid:      false,
 		},
@@ -124,8 +126,6 @@ func TestGetUserDetails(t *testing.T) {
 
 			username, description, err := GetUserDetails(context.Background(), client, testProjectId, testInstanceId, testUserId)
 
-			output := [2]string{username, description}
-
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
@@ -135,8 +135,11 @@ func TestGetUserDetails(t *testing.T) {
 			if !tt.isValid {
 				return
 			}
-			if output != tt.expectedOutput {
-				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			if username != tt.expectedUserName {
+				t.Errorf("expected username to be %s, got %s", tt.expectedUserName, username)
+			}
+			if description != tt.expectedDescription {
+				t.Errorf("expected description to be %s, got %s", tt.expectedDescription, description)
 			}
 		})
 	}
