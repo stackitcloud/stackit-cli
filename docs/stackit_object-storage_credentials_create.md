@@ -4,7 +4,7 @@ Creates credentials for an Object Storage credentials group
 
 ### Synopsis
 
-Creates credentials for an Object Storage credentials group. The credentials are only displayed upon creation, and it will not be retrievable later.
+Creates credentials for an Object Storage credentials group. The credentials are only displayed upon creation, and will not be retrievable later.
 
 ```
 stackit object-storage credentials create [flags]
@@ -13,10 +13,10 @@ stackit object-storage credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for a credentials group with ID xxx
+  Create credentials for a credentials group with ID "xxx"
   $ stackit object-storage credentials create --credentials-group-id xxx
 
-  Create credentials for a credentials group with ID xxx, including a specific expiration date
+  Create credentials for a credentials group with ID "xxx", including a specific expiration date
   $ stackit object-storage credentials create --credentials-group-id xxx --expire-date 2024-03-06T00:00:00.000Z
 ```
 
