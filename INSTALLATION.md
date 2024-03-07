@@ -20,11 +20,38 @@ brew install stackit
 
 ### Linux
 
-We are working on distributing the CLI using a package manager for Linux. For the moment, you can either install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
+#### Debian/Ubuntu (`APT`)
+
+The STACKIT CLI can be installed through the [`APT`](https://ubuntu.com/server/docs/package-management) package manager.
+
+1. Import the STACKIT public key:
+
+```shell
+curl https://object.storage.eu01.onstackit.cloud/stackit-public-key/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/stackit.gpg
+```
+
+2. Add the STACKIT CLI package repository as a package source:
+
+```shell
+echo "deb [signed-by=/usr/share/keyrings/stackit.gpg] https://object.storage.eu01.onstackit.cloud/stackit-cli-apt stackit main" | sudo tee -a /etc/apt/sources.list.d/stackit.list
+```
+
+3. Update repository information and install the `stackit` package:
+
+```shell
+sudo apt-get update
+sudo apt-get install stackit
+```
+
+#### Any distribution
+
+Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
+
+> We are currently working on distributing the CLI on more package managers for Linux.
 
 ### Windows
 
-We are working on distributing the CLI using a package manager for Windows. For the moment, please refer to one of the installation methods below.
+> We are currently working on distributing the CLI on a package manager for Windows. For the moment, please refer to one of the installation methods below.
 
 ## Manual installation
 
