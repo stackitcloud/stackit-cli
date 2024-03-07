@@ -34,7 +34,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials for an Object Storage credentials group",
-		Long:  "Lists all credentials for a credentials group.",
+		Long:  "Lists all credentials for an Object Storage credentials group.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
