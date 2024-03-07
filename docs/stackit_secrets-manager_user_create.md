@@ -5,7 +5,7 @@ Creates a Secrets Manager user
 ### Synopsis
 
 Creates a Secrets Manager user.
-The username and password are auto-generated and provided upon creation.
+The username and password are auto-generated and provided upon creation. The password cannot be retrieved later.
 A description can be provided to identify a user.
 
 ```
@@ -30,7 +30,6 @@ stackit secrets-manager user create [flags]
 ```
       --description string   A user chosen description to differentiate between multiple users
   -h, --help                 Help for "stackit secrets-manager user create"
-      --hide-password        Hide password in output
       --instance-id string   ID of the instance
       --write                User write access to the secrets engine. If unset, user is read-only
 ```
