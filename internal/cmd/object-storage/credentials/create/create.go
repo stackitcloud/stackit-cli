@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates credentials for an Object Storage credentials group",
-		Long:  "Creates credentials for a credentials group.",
+		Long:  "Creates credentials for an Object Storage credentials group.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
