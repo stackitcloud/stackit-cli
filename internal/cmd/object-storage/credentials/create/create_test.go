@@ -28,7 +28,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:          testProjectId,
 		credentialsGroupIdFlag: testCredentialsGroupId,
-		expiresFlag:            testExpirationDate,
+		expireDateFlag:         testExpirationDate,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -46,7 +46,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		Expires:            utils.Ptr(testExpirationDate),
+		ExpireDate:         utils.Ptr(testExpirationDate),
 		CredentialsGroupId: testCredentialsGroupId,
 	}
 	for _, mod := range mods {
@@ -142,31 +142,31 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "expiration date is missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, expiresFlag)
+				delete(flagValues, expireDateFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Expires = nil
+				model.ExpireDate = nil
 			}),
 		},
 		{
 			description: "expiration date is empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[expiresFlag] = ""
+				flagValues[expireDateFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "expiration date is invalid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[expiresFlag] = "test"
+				flagValues[expireDateFlag] = "test"
 			}),
 			isValid: false,
 		},
 		{
 			description: "expiration date is invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[expiresFlag] = "11:00 12/12/2024"
+				flagValues[expireDateFlag] = "11:00 12/12/2024"
 			}),
 			isValid: false,
 		},

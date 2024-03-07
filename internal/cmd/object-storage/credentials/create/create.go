@@ -19,14 +19,14 @@ import (
 )
 
 const (
-	expiresFlag            = "expires"
+	expireDateFlag         = "expire-date"
 	credentialsGroupIdFlag = "credentials-group-id"
 	expirationTimeFormat   = time.RFC3339
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Expires            *time.Time
+	ExpireDate         *time.Time
 	CredentialsGroupId string
 	HidePassword       bool
 }
@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates credentials for an Object Storage credentials group",
-		Long:  "Creates credentials for an Object Storage credentials group.",
+		Long:  "Creates credentials for an Object Storage credentials group. The credentials are only displayed upon creation, and it will not be retrievable later.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -43,7 +43,7 @@ func NewCmd() *cobra.Command {
 				"$ stackit object-storage credentials create --credentials-group-id xxx"),
 			examples.NewExample(
 				`Create credentials for a credentials group with ID xxx, including a specific expiration date`,
-				"$ stackit object-storage credentials create --credentials-group-id xxx --expires 2024-03-06T00:00:00.000Z"),
+				"$ stackit object-storage credentials create --credentials-group-id xxx --expire-date 2024-03-06T00:00:00.000Z"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -90,7 +90,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(expiresFlag, "", "Expiration date for the credentials, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
+	cmd.Flags().String(expireDateFlag, "", "Expiration date for the credentials, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
 	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupIdFlag, "Credentials Group ID")
 
 	err := flags.MarkFlagsRequired(cmd, credentialsGroupIdFlag)
@@ -103,17 +103,17 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	expires, err := flags.FlagToDateTimePointer(cmd, expiresFlag, expirationTimeFormat)
+	expireDate, err := flags.FlagToDateTimePointer(cmd, expireDateFlag, expirationTimeFormat)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
-			Flag:    expiresFlag,
+			Flag:    expireDateFlag,
 			Details: err.Error(),
 		}
 	}
 
 	return &inputModel{
 		GlobalFlagModel:    globalFlags,
-		Expires:            expires,
+		ExpireDate:         expireDate,
 		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupIdFlag),
 	}, nil
 }
@@ -122,7 +122,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	req := apiClient.CreateAccessKey(ctx, model.ProjectId)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
-		Expires: model.Expires,
+		Expires: model.ExpireDate,
 	})
 	return req
 }
