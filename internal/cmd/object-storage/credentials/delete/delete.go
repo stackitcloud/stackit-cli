@@ -76,7 +76,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials %s of credentials group %q\n", credentialsLabel, credentialsGroupLabel)
+			cmd.Printf("Deleted credentials %q of credentials group %q\n", credentialsLabel, credentialsGroupLabel)
 			return nil
 		},
 	}
