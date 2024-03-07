@@ -20,11 +20,11 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
 var testCredentialsGroupId = uuid.NewString()
-var testCredentialId = "keyID"
+var testCredentialsId = "keyID"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testCredentialId,
+		testCredentialsId,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -34,8 +34,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
-		credentialsGroupFlag: testCredentialsGroupId,
+		projectIdFlag:          testProjectId,
+		credentialsGroupIdFlag: testCredentialsGroupId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -49,7 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		CredentialsGroupId: testCredentialsGroupId,
-		CredentialId:       testCredentialId,
+		CredentialsId:      testCredentialsId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiDeleteAccessKeyRequest)) objectstorage.ApiDeleteAccessKeyRequest {
-	request := testClient.DeleteAccessKey(testCtx, testProjectId, testCredentialId)
+	request := testClient.DeleteAccessKey(testCtx, testProjectId, testCredentialsId)
 	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
@@ -126,21 +126,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "credentials group id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, credentialsGroupFlag)
+				delete(flagValues, credentialsGroupIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials group id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsGroupFlag] = ""
+				flagValues[credentialsGroupIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "credentials group id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[credentialsGroupFlag] = "invalid-uuid"
+				flagValues[credentialsGroupIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

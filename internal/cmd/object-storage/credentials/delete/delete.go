@@ -17,26 +17,26 @@ import (
 )
 
 const (
-	credentialIdArg      = "CREDENTIALS_ID" //nolint:gosec // linter false positive
-	credentialsGroupFlag = "credentials-group"
+	credentialsIdArg       = "CREDENTIALS_ID" //nolint:gosec // linter false positive
+	credentialsGroupIdFlag = "credentials-group-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	CredentialsGroupId string
-	CredentialId       string
+	CredentialsId      string
 }
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", credentialIdArg),
+		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
 		Short: "Deletes credentials of an Object Storage credentials group",
 		Long:  "Deletes credentials of an Object Storage credentials group",
-		Args:  args.SingleArg(credentialIdArg, nil),
+		Args:  args.SingleArg(credentialsIdArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a credential with ID "xxx" of credentials group with ID "yyy"`,
-				"$ stackit object-storage credentials delete xxx --credentials-group yyy"),
+				"$ stackit object-storage credentials delete xxx --credentials-group-id yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -56,9 +56,9 @@ func NewCmd() *cobra.Command {
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
-			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.CredentialId)
+			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.CredentialsId)
 			if err != nil {
-				credentialsLabel = model.CredentialId
+				credentialsLabel = model.CredentialsId
 			}
 
 			if !model.AssumeYes {
@@ -85,14 +85,14 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupFlag, "Credentials Group ID")
+	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupIdFlag, "Credentials Group ID")
 
-	err := flags.MarkFlagsRequired(cmd, credentialsGroupFlag)
+	err := flags.MarkFlagsRequired(cmd, credentialsGroupIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	credentialId := inputArgs[0]
+	credentialsId := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
@@ -101,13 +101,13 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:    globalFlags,
-		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupFlag),
-		CredentialId:       credentialId,
+		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupIdFlag),
+		CredentialsId:      credentialsId,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteAccessKeyRequest {
-	req := apiClient.DeleteAccessKey(ctx, model.ProjectId, model.CredentialId)
+	req := apiClient.DeleteAccessKey(ctx, model.ProjectId, model.CredentialsId)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	return req
 }

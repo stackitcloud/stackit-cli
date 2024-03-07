@@ -18,7 +18,7 @@ import (
 var (
 	testProjectId          = uuid.NewString()
 	testCredentialsGroupId = uuid.NewString()
-	testCredentialId       = "credentialID" //nolint:gosec // linter false positive
+	testCredentialsId      = "credentialsID" //nolint:gosec // linter false positive
 )
 
 const (
@@ -168,7 +168,7 @@ func TestGetCredentialsName(t *testing.T) {
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
 				AccessKeys: &[]objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr(testCredentialId),
+						KeyId:       utils.Ptr(testCredentialsId),
 						DisplayName: utils.Ptr(testCredentialsName),
 					},
 				},
@@ -190,7 +190,7 @@ func TestGetCredentialsName(t *testing.T) {
 						DisplayName: utils.Ptr("test-name"),
 					},
 					{
-						KeyId:       utils.Ptr(testCredentialId),
+						KeyId:       utils.Ptr(testCredentialsId),
 						DisplayName: utils.Ptr(testCredentialsName),
 					},
 				},
@@ -221,7 +221,7 @@ func TestGetCredentialsName(t *testing.T) {
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
 				AccessKeys: &[]objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr(testCredentialId),
+						KeyId:       utils.Ptr(testCredentialsId),
 						DisplayName: nil,
 					},
 				},
@@ -233,7 +233,7 @@ func TestGetCredentialsName(t *testing.T) {
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
 				AccessKeys: &[]objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr(testCredentialId),
+						KeyId:       utils.Ptr(testCredentialsId),
 						DisplayName: utils.Ptr(""),
 					},
 				},
@@ -276,7 +276,7 @@ func TestGetCredentialsName(t *testing.T) {
 				t.Fatalf("Failed to initialize client: %v", err)
 			}
 
-			output, err := GetCredentialsName(context.Background(), client, testProjectId, testCredentialsGroupId, testCredentialId)
+			output, err := GetCredentialsName(context.Background(), client, testProjectId, testCredentialsGroupId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

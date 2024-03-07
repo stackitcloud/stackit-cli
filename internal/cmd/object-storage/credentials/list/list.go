@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	limitFlag            = "limit"
-	credentialsGroupFlag = "credentials-group"
+	limitFlag              = "limit"
+	credentialsGroupIdFlag = "credentials-group-id"
 )
 
 type inputModel struct {
@@ -39,13 +39,13 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all credentials for a credentials group with ID "xxx"`,
-				"$ stackit object-storage credentials list --credentials-group xxx"),
+				"$ stackit object-storage credentials list --credentials-group-id xxx"),
 			examples.NewExample(
 				`List all credentials for a credentials group with ID "xxx" in JSON format`,
-				"$ stackit object-storage credentials list --credentials-group xxx --output-format json"),
+				"$ stackit object-storage credentials list --credentials-group-id xxx --output-format json"),
 			examples.NewExample(
 				`List up to 10 credentials for a credentials group with ID "xxx"`,
-				"$ stackit object-storage credentials list --credentials-group xxx --limit 10"),
+				"$ stackit object-storage credentials list --credentials-group-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -90,9 +90,9 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupFlag, "Credentials Group ID")
+	cmd.Flags().Var(flags.UUIDFlag(), credentialsGroupIdFlag, "Credentials Group ID")
 
-	err := flags.MarkFlagsRequired(cmd, credentialsGroupFlag)
+	err := flags.MarkFlagsRequired(cmd, credentialsGroupIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -112,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:    globalFlags,
-		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupFlag),
+		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupIdFlag),
 		Limit:              limit,
 	}, nil
 }

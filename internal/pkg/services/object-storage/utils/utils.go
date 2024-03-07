@@ -52,5 +52,5 @@ func GetCredentialsName(ctx context.Context, apiClient ObjectStorageClient, proj
 		}
 	}
 
-	return "", fmt.Errorf("could not find Object Storage credential name")
+	return "", fmt.Errorf("could not find Object Storage credentials name")
 }
