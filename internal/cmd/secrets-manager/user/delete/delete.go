@@ -37,7 +37,7 @@ func NewCmd() *cobra.Command {
 		Short: "Deletes a Secrets Manager user",
 		Long: fmt.Sprintf("%s\n%s",
 			"Deletes a Secrets Manager user by ID. You can get the IDs of users for an instance by running:",
-			"  $ stackit secrets-manager user list --instance-id <INSTANCE_ID>",
+			"  $ stackit secrets-manager user delete --instance-id <INSTANCE_ID>",
 		),
 		Example: examples.Build(
 			examples.NewExample(

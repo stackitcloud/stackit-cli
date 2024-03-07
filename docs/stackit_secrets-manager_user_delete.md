@@ -5,7 +5,7 @@ Deletes a Secrets Manager user
 ### Synopsis
 
 Deletes a Secrets Manager user by ID. You can get the IDs of users for an instance by running:
-  $ stackit secrets-manager user list --instance-id <INSTANCE_ID>
+  $ stackit secrets-manager user delete --instance-id <INSTANCE_ID>
 
 ```
 stackit secrets-manager user delete USER_ID [flags]
