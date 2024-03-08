@@ -22,7 +22,7 @@ func ConfigureClient(cmd *cobra.Command) (*argus.APIClient, error) {
 	}
 	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
 
-	customEndpoint := viper.GetString(config.MariaDBCustomEndpointKey)
+	customEndpoint := viper.GetString(config.ArgusCustomEndpointKey)
 
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))

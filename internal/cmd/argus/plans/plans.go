@@ -127,10 +127,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []argus.Plan) e
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("PLAN NAME", "ID", "DESCRIPTION")
+		table.SetHeader("ID", "PLAN NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
-			table.AddRow(*o.Name, *o.Id, *o.Description)
+			table.AddRow(*o.Id, *o.Name, *o.Description)
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1)
