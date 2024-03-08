@@ -14,11 +14,12 @@ const (
 	service = "argus"
 )
 
-func ValidatePlanId(planId string, plans *argus.PlansResponse) error {
-	for _, plan := range *plans.Plans {
-			if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
-				return nil
-			}
+func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
+	for i := range *resp.Plans {
+		plan := (*resp.Plans)[i]
+		if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
+			return nil
+		}
 	}
 
 	return &errors.DSAInvalidPlanError{
@@ -27,17 +28,17 @@ func ValidatePlanId(planId string, plans *argus.PlansResponse) error {
 	}
 }
 
-func LoadPlanId(planName string, plans *argus.PlansResponse) (*string, error) {
+func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 	availablePlanNames := ""
-	for _, plan := range *plans.Plans {
-
-			if plan.Name == nil {
-				continue
-			}
-			if strings.EqualFold(*plan.Name, planName) && plan.Id != nil {
-				return plan.Id, nil
-			}
-			availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
+	for i := range *resp.Plans {
+		plan := (*resp.Plans)[i]
+		if plan.Name == nil {
+			continue
+		}
+		if strings.EqualFold(*plan.Name, planName) && plan.Id != nil {
+			return plan.Id, nil
+		}
+		availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
 	}
 
 	details := fmt.Sprintf("You provided plan_name %q, which is invalid. Available plan names are: %s", planName, availablePlanNames)

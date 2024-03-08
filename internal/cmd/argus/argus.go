@@ -1,8 +1,8 @@
 package argus
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 

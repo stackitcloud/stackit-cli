@@ -22,33 +22,17 @@ import (
 )
 
 const (
-	instanceNameFlag         = "name"
-	enableMonitoringFlag     = "enable-monitoring"
-	graphiteFlag             = "graphite"
-	metricsFrequencyFlag     = "metrics-frequency"
-	metricsPrefixFlag        = "metrics-prefix"
-	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
-	sgwAclFlag               = "acl"
-	syslogFlag               = "syslog"
-	planIdFlag               = "plan-id"
-	planNameFlag             = "plan-name"
+	instanceNameFlag = "name"
+	planIdFlag       = "plan-id"
+	planNameFlag     = "plan-name"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	PlanName string
 
-	InstanceName         *string
-	EnableMonitoring     *bool
-	Graphite             *string
-	MetricsFrequency     *int64
-	MetricsPrefix        *string
-	MonitoringInstanceId *string
-	Plugin               *[]string
-	SgwAcl               *[]string
-	Syslog               *[]string
-	PlanId               *string
+	InstanceName *string
+	PlanId       *string
 }
 
 func NewCmd() *cobra.Command {
@@ -64,9 +48,6 @@ func NewCmd() *cobra.Command {
 			examples.NewExample(
 				`Create an Argus instance with name "my-instance" and specify plan by ID`,
 				"$ stackit argus instance create --name my-instance --plan-id xxx"),
-			examples.NewExample(
-				`Create an Argus instance with name "my-instance" and specify IP range which is allowed to access it`,
-				"$ stackit argus instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -113,7 +94,7 @@ func NewCmd() *cobra.Command {
 			if !model.Async {
 				s := spinner.New(cmd)
 				s.Start("Creating instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, instanceId, model.ProjectId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for Argus instance creation: %w", err)
 				}
@@ -134,14 +115,6 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
-	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
-	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
-	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
-	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
-	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
-	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 
@@ -163,25 +136,17 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 			Cmd: cmd,
 		}
 	}
-	if planId != nil && (planName != "" ){
+	if planId != nil && (planName != "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
 		}
 	}
 
 	return &inputModel{
-		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(cmd, instanceNameFlag),
-		EnableMonitoring:     flags.FlagToBoolPointer(cmd, enableMonitoringFlag),
-		MonitoringInstanceId: flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
-		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
-		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag),
-		Plugin:               flags.FlagToStringSlicePointer(cmd, pluginFlag),
-		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag),
-		PlanId:               planId,
-		PlanName:             planName,
+		GlobalFlagModel: globalFlags,
+		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
+		PlanId:          planId,
+		PlanName:        planName,
 	}, nil
 }
 
@@ -219,7 +184,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 	}
 
 	req = req.CreateInstancePayload(argus.CreateInstancePayload{
-		Name: model.InstanceName,
+		Name:   model.InstanceName,
 		PlanId: planId,
 	})
 	return req, nil
