@@ -1,8 +1,7 @@
-package argus
+package instance
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance/create"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -11,9 +10,9 @@ import (
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "argus",
-		Short: "Provides functionality for Argus",
-		Long:  "Provides functionality for Argus.",
+		Use:   "instance",
+		Short: "Provides functionality for Argus instances",
+		Long:  "Provides functionality for Argus instances.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
@@ -22,6 +21,5 @@ func NewCmd() *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(plans.NewCmd())
-	cmd.AddCommand(instance.NewCmd())
+	cmd.AddCommand(create.NewCmd())
 }
