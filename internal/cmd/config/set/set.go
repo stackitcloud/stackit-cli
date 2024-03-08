@@ -18,6 +18,7 @@ import (
 const (
 	sessionTimeLimitFlag = "session-time-limit"
 
+	argusCustomEndpointFlag           = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
@@ -92,6 +93,7 @@ func NewCmd() *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
 
+	cmd.Flags().String(argusCustomEndpointFlag, "", "Argus API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
 	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe API base URL, used in calls to this API")
@@ -107,7 +109,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 
-	err := viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
+	err := viper.BindPFlag(config.ArgusCustomEndpointKey, cmd.Flags().Lookup(argusCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
