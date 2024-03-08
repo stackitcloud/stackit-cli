@@ -20,6 +20,7 @@ const (
 
 	sessionTimeLimitFlag = "session-time-limit"
 
+	argusCustomEndpointFlag           = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
@@ -43,6 +44,7 @@ type inputModel struct {
 
 	SessionTimeLimit bool
 
+	ArgusCustomEndpoint           bool
 	AuthorizationCustomEndpoint   bool
 	DNSCustomEndpoint             bool
 	LogMeCustomEndpoint           bool
@@ -93,6 +95,9 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
 
+			if model.ArgusCustomEndpoint {
+				viper.Set(config.ArgusCustomEndpointKey, "")
+			}
 			if model.AuthorizationCustomEndpoint {
 				viper.Set(config.AuthorizationCustomEndpointKey, "")
 			}
@@ -154,6 +159,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 
+	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
@@ -177,6 +183,7 @@ func parseInput(cmd *cobra.Command) *inputModel {
 		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
 
 		SessionTimeLimit:              flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
+		ArgusCustomEndpoint:           flags.FlagToBoolValue(cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),
