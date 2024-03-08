@@ -26,12 +26,12 @@ func GetUserLabel(ctx context.Context, apiClient SecretsManagerClient, projectId
 		return "", fmt.Errorf("get Secrets Manager user: %w", err)
 	}
 
-	var userLabel string
 	if resp.Username == nil || *resp.Username == "" {
 		// Should never happen, username is auto-generated
 		return "", fmt.Errorf("username is empty")
 	}
 
+	var userLabel string
 	if resp.Description == nil || *resp.Description == "" {
 		userLabel = fmt.Sprintf("%q", *resp.Username)
 	} else {
