@@ -114,6 +114,16 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "argus custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[argusCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ArgusCustomEndpoint = false
+			}),
+		},
+		{
 			description: "dns custom endpoint empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
 				flagValues[dnsCustomEndpointFlag] = false
