@@ -63,13 +63,13 @@ func NewCmd() *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, userDescription, err := secretsManagerUtils.GetUserDetails(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
+			userLabel, err := secretsManagerUtils.GetUserLabel(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
-				userLabel = model.UserId
+				userLabel = fmt.Sprintf("%q", model.UserId)
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete user %q (%q) of instance %q? (This cannot be undone)", userLabel, userDescription, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete user %s of instance %q? (This cannot be undone)", userLabel, instanceLabel)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -83,7 +83,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Secrets Manager user: %w", err)
 			}
 
-			cmd.Printf("Deleted user %q of instance %q\n", userLabel, instanceLabel)
+			cmd.Printf("Deleted user %s of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

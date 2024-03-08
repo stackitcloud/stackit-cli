@@ -20,10 +20,22 @@ func GetInstanceName(ctx context.Context, apiClient SecretsManagerClient, projec
 	return *resp.Name, nil
 }
 
-func GetUserDetails(ctx context.Context, apiClient SecretsManagerClient, projectId, instanceId, userId string) (username, description string, err error) {
+func GetUserLabel(ctx context.Context, apiClient SecretsManagerClient, projectId, instanceId, userId string) (string, error) {
 	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
 	if err != nil {
-		return "", "", fmt.Errorf("get Secrets Manager user: %w", err)
+		return "", fmt.Errorf("get Secrets Manager user: %w", err)
 	}
-	return *resp.Username, *resp.Description, nil
+
+	var userLabel string
+	if resp.Username == nil || *resp.Username == "" {
+		// Should never happen, username is auto-generated
+		return "", fmt.Errorf("username is empty")
+	}
+
+	if resp.Description == nil || *resp.Description == "" {
+		userLabel = fmt.Sprintf("%q", *resp.Username)
+	} else {
+		userLabel = fmt.Sprintf("%q (%s)", *resp.Username, *resp.Description)
+	}
+	return userLabel, nil
 }
