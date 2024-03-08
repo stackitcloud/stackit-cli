@@ -67,13 +67,9 @@ func NewCmd() *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			var userLabel string
-
-			userName, userDescription, err := secretsManagerUtils.GetUserDetails(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
+			userLabel, err := secretsManagerUtils.GetUserLabel(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
 				userLabel = fmt.Sprintf("%q", model.UserId)
-			} else {
-				userLabel = fmt.Sprintf("%q (%s)", userName, userDescription)
 			}
 
 			if !model.AssumeYes {
