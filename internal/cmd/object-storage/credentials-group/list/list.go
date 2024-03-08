@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials groups",
-		Long:  "Lists all credentials groups.",
+		Short: "Lists all credentials groups that hold Object Storage access credentials",
+		Long:  "Lists all credentials groups that hold Object Storage access credentials.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

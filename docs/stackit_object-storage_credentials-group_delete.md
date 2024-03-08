@@ -1,10 +1,10 @@
 ## stackit object-storage credentials-group delete
 
-Deletes a credentials group
+Deletes a credentials group that holds Object Storage access credentials
 
 ### Synopsis
 
-Deletes a credentials group. Only possible if there are no valid credentials (access-keys) left in the group, otherwise it will throw an error.
+Deletes a credentials group that holds Object Storage access credentials. Only possible if there are no valid credentials (access-keys) left in the group, otherwise it will throw an error.
 
 ```
 stackit object-storage credentials-group delete CREDENTIALS_GROUP_ID [flags]
