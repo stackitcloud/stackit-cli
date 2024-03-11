@@ -33,22 +33,36 @@ aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" current
 printf "\n>>> Creating snapshop from mirror \n"
 aptly snapshot create current-snapshot from mirror current
 
-# Create a new fresh local APT repo
-printf "\n>>> Creating fresh local repo \n"
-aptly repo create -distribution="${DISTRIBUTION}" new-repo
+# Create repo from snapshot
+aptly repo create current-repo from snapshot current-snapshot
 
-# Add new generated .deb packages to the new local repo
-printf "\n>>> Adding new packages to local repo \n"
-aptly repo add new-repo ${GORELEASER_PACKAGES_FOLDER}
+# Remove old packages
+aptly repo remove current-repo stackit-cli_0.1.0~test-skip-publish.6_amd64
+aptly repo remove current-repo stackit-cli_0.1.0~test-skip-publish.6_arm64
+aptly repo remove current-repo stackit-cli_0.1.0~test-skip-publish.6_i386
 
-# Create a snapshot of the local repo
-printf "\n>>> Creating snapshot of local repo \n"
-aptly snapshot create new-snapshot from repo new-repo
+# Create snapshot from cleaned repo
+aptly snapshot create clean-snapshot from repo current-repo
 
-# Merge new-snapshot into current-snapshot creating a new snapshot updated-snapshot
-printf "\n>>> Merging snapshots \n"
-aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
+# Publish updated snapshot
+aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" clean-snapshot "s3:${APT_BUCKET_NAME}:"
 
-# Publish the new snapshot to the remote repo
-printf "\n>>> Publishing updated snapshot \n"
-aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" updated-snapshot "s3:${APT_BUCKET_NAME}:"
+# # Create a new fresh local APT repo
+# printf "\n>>> Creating fresh local repo \n"
+# aptly repo create -distribution="${DISTRIBUTION}" new-repo
+
+# # Add new generated .deb packages to the new local repo
+# printf "\n>>> Adding new packages to local repo \n"
+# aptly repo add new-repo ${GORELEASER_PACKAGES_FOLDER}
+
+# # Create a snapshot of the local repo
+# printf "\n>>> Creating snapshot of local repo \n"
+# aptly snapshot create new-snapshot from repo new-repo
+
+# # Merge new-snapshot into current-snapshot creating a new snapshot updated-snapshot
+# printf "\n>>> Merging snapshots \n"
+# aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
+
+# # Publish the new snapshot to the remote repo
+# printf "\n>>> Publishing updated snapshot \n"
+# aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" updated-snapshot "s3:${APT_BUCKET_NAME}:"
