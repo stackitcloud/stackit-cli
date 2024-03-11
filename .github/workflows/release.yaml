@@ -33,12 +33,12 @@ jobs:
         with:
           go-version-file: "go.mod"
           cache: true
-      # - name: Import GPG key
-      #   uses: crazy-max/ghaction-import-gpg@v6
-      #   id: import_gpg
-      #   with:
-      #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-      #     passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
       # - name: Set up keychain
       #   run: |
       #     echo -n $SIGNING_CERTIFICATE_BASE64 | base64 -d -o ./ApplicationID.p12
