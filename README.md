@@ -1,6 +1,6 @@
 # STACKIT CLI (BETA)
 
-Welcome to the STACKIT CLI, a command-line interface for the STACKIT services.
+Welcome to the [STACKIT](https://www.stackit.de/en) CLI, a command-line interface for the STACKIT services.
 
 This CLI is in a BETA state. More services and functionality will be supported soon.
 Your feedback is appreciated!
