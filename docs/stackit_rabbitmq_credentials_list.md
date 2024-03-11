@@ -1,10 +1,10 @@
 ## stackit rabbitmq credentials list
 
-Lists all credentials' IDs for an RabbitMQ instance
+Lists all credentials' IDs for a RabbitMQ instance
 
 ### Synopsis
 
-Lists all credentials' IDs for an RabbitMQ instance.
+Lists all credentials' IDs for a RabbitMQ instance.
 
 ```
 stackit rabbitmq credentials list [flags]
@@ -13,13 +13,13 @@ stackit rabbitmq credentials list [flags]
 ### Examples
 
 ```
-  List all credentials' IDs for an RabbitMQ instance
+  List all credentials' IDs for a RabbitMQ instance
   $ stackit rabbitmq credentials list --instance-id xxx
 
-  List all credentials' IDs for an RabbitMQ instance in JSON format
+  List all credentials' IDs for a RabbitMQ instance in JSON format
   $ stackit rabbitmq credentials list --instance-id xxx --output-format json
 
-  List up to 10 credentials' IDs for an RabbitMQ instance
+  List up to 10 credentials' IDs for a RabbitMQ instance
   $ stackit rabbitmq credentials list --instance-id xxx --limit 10
 ```
 

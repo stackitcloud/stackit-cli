@@ -28,9 +28,9 @@ stackit rabbitmq instance [flags]
 ### SEE ALSO
 
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
-* [stackit rabbitmq instance create](./stackit_rabbitmq_instance_create.md)	 - Creates an RabbitMQ instance
-* [stackit rabbitmq instance delete](./stackit_rabbitmq_instance_delete.md)	 - Deletes an RabbitMQ instance
-* [stackit rabbitmq instance describe](./stackit_rabbitmq_instance_describe.md)	 - Shows details  of an RabbitMQ instance
+* [stackit rabbitmq instance create](./stackit_rabbitmq_instance_create.md)	 - Creates a RabbitMQ instance
+* [stackit rabbitmq instance delete](./stackit_rabbitmq_instance_delete.md)	 - Deletes a RabbitMQ instance
+* [stackit rabbitmq instance describe](./stackit_rabbitmq_instance_describe.md)	 - Shows details of a RabbitMQ instance
 * [stackit rabbitmq instance list](./stackit_rabbitmq_instance_list.md)	 - Lists all RabbitMQ instances
-* [stackit rabbitmq instance update](./stackit_rabbitmq_instance_update.md)	 - Updates an RabbitMQ instance
+* [stackit rabbitmq instance update](./stackit_rabbitmq_instance_update.md)	 - Updates a RabbitMQ instance
 

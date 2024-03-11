@@ -1,10 +1,10 @@
 ## stackit rabbitmq instance delete
 
-Deletes an RabbitMQ instance
+Deletes a RabbitMQ instance
 
 ### Synopsis
 
-Deletes an RabbitMQ instance.
+Deletes a RabbitMQ instance.
 
 ```
 stackit rabbitmq instance delete INSTANCE_ID [flags]
@@ -13,7 +13,7 @@ stackit rabbitmq instance delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete an RabbitMQ instance with ID "xxx"
+  Delete a RabbitMQ instance with ID "xxx"
   $ stackit rabbitmq instance delete xxx
 ```
 

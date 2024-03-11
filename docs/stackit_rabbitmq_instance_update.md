@@ -1,10 +1,10 @@
 ## stackit rabbitmq instance update
 
-Updates an RabbitMQ instance
+Updates a RabbitMQ instance
 
 ### Synopsis
 
-Updates an RabbitMQ instance.
+Updates a RabbitMQ instance.
 
 ```
 stackit rabbitmq instance update INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit rabbitmq instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update the plan of an RabbitMQ instance with ID "xxx"
+  Update the plan of a RabbitMQ instance with ID "xxx"
   $ stackit rabbitmq instance update xxx --plan-id yyy
 
-  Update the range of IPs allowed to access an RabbitMQ instance with ID "xxx"
+  Update the range of IPs allowed to access a RabbitMQ instance with ID "xxx"
   $ stackit rabbitmq instance update xxx --acl 1.2.3.0/24
 ```
 
