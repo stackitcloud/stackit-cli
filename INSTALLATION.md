@@ -28,6 +28,7 @@ The STACKIT CLI can be installed through the [`APT`](https://ubuntu.com/server/d
 
 To install the STACKIT CLI package, you will need to have the `curl` and `gnupg` packages installed:
 ```shell
+sudo apt-get update
 sudo apt-get install curl gnupg
 ```
 
