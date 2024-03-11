@@ -63,7 +63,7 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list OpenSearch credentialss: %w", err)
+				return fmt.Errorf("list OpenSearch credentials: %w", err)
 			}
 			credentials := *resp.CredentialsList
 			if len(credentials) == 0 {
