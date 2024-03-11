@@ -45,7 +45,7 @@ aptly repo remove current-repo stackit-cli_0.1.0~test-skip-publish.6_i386
 aptly snapshot create clean-snapshot from repo current-repo
 
 # Publish updated snapshot
-aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" clean-snapshot "s3:${APT_BUCKET_NAME}:"
+aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" -distribution="${DISTRIBUTION}" clean-snapshot "s3:${APT_BUCKET_NAME}:"
 
 # # Create a new fresh local APT repo
 # printf "\n>>> Creating fresh local repo \n"
