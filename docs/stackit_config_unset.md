@@ -26,7 +26,6 @@ stackit config unset [flags]
 ### Options
 
 ```
-      --argus-custom-endpoint              Argus API base URL. If unset, uses the default base URL
       --async                              Configuration option to run commands asynchronously
       --authorization-custom-endpoint      Authorization API base URL. If unset, uses the default base URL
       --dns-custom-endpoint                DNS API base URL. If unset, uses the default base URL
