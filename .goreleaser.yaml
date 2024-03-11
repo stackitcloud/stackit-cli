@@ -16,12 +16,12 @@ builds:
     goos:
       - windows
     binary: "stackit"
-  
+
   - id: macos-builds
     env:
       - CGO_ENABLED=0
       - BUNDLE_ID=cloud.stackit.cli
-      - 'APPLE_APPLICATION_IDENTITY=Developer ID Application: Schwarz IT KG'
+      - "APPLE_APPLICATION_IDENTITY=Developer ID Application: Schwarz IT KG"
     goos:
       - darwin
     binary: "stackit"
@@ -66,13 +66,24 @@ nfpms:
     maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
     description: A command-line interface to manage STACKIT resources.
     license: Apache 2.0
+    contents:
+      - src: LICENSE.md
+        dst: LICENSE.md
     formats:
       - deb
       - rpm
 
 signs:
   - artifacts: package
-    args: ["-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
+    args:
+      [
+        "-u",
+        "{{ .Env.GPG_FINGERPRINT }}",
+        "--output",
+        "${signature}",
+        "--detach-sign",
+        "${artifact}",
+      ]
 
 brews:
   - name: stackit
@@ -93,7 +104,7 @@ brews:
 snapcrafts:
   # IDs of the builds for which to create packages for
   - builds:
-    - linux-builds
+      - linux-builds
     # The name of the snap
     name: stackit
     # The canonical title of the application, displayed in the software
@@ -102,7 +113,7 @@ snapcrafts:
     summary: A command-line interface to manage STACKIT resources.
     description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
     license: Apache-2.0
-    # Will only publish to `edge` and `beta` channels 
+    # Will only publish to `edge` and `beta` channels
     grade: devel
     # Skip publishing until we get approval for used interfaces or classic confinement
     publish: false
