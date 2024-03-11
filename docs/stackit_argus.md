@@ -28,5 +28,6 @@ stackit argus [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit argus instance](./stackit_argus_instance.md)	 - Provides functionality for Argus instances
 * [stackit argus plans](./stackit_argus_plans.md)	 - Lists all Argus service plans
 
