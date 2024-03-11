@@ -1,10 +1,10 @@
 ## stackit rabbitmq instance describe
 
-Shows details  of an RabbitMQ instance
+Shows details of a RabbitMQ instance
 
 ### Synopsis
 
-Shows details  of an RabbitMQ instance.
+Shows details of a RabbitMQ instance.
 
 ```
 stackit rabbitmq instance describe INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit rabbitmq instance describe INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Get details of an RabbitMQ instance with ID "xxx"
+  Get details of a RabbitMQ instance with ID "xxx"
   $ stackit rabbitmq instance describe xxx
 
-  Get details of an RabbitMQ instance with ID "xxx" in a table format
+  Get details of a RabbitMQ instance with ID "xxx" in a table format
   $ stackit rabbitmq instance describe xxx --output-format pretty
 ```
 

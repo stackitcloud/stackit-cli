@@ -1,10 +1,10 @@
 ## stackit rabbitmq instance create
 
-Creates an RabbitMQ instance
+Creates a RabbitMQ instance
 
 ### Synopsis
 
-Creates an RabbitMQ instance.
+Creates a RabbitMQ instance.
 
 ```
 stackit rabbitmq instance create [flags]
@@ -13,13 +13,13 @@ stackit rabbitmq instance create [flags]
 ### Examples
 
 ```
-  Create an RabbitMQ instance with name "my-instance" and specify plan by name and version
+  Create a RabbitMQ instance with name "my-instance" and specify plan by name and version
   $ stackit rabbitmq instance create --name my-instance --plan-name stackit-rabbitmq-1.2.10-replica --version 3.10
 
-  Create an RabbitMQ instance with name "my-instance" and specify plan by ID
+  Create a RabbitMQ instance with name "my-instance" and specify plan by ID
   $ stackit rabbitmq instance create --name my-instance --plan-id xxx
 
-  Create an RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it
+  Create a RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it
   $ stackit rabbitmq instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 

@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
-		Short: "Deletes credentials of an RabbitMQ instance",
-		Long:  "Deletes credentials of an RabbitMQ instance.",
+		Short: "Deletes credentials of a RabbitMQ instance",
+		Long:  "Deletes credentials of a RabbitMQ instance.",
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

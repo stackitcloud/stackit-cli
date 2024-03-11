@@ -31,15 +31,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of an RabbitMQ instance",
-		Long:  "Shows details  of an RabbitMQ instance.",
+		Short: "Shows details of a RabbitMQ instance",
+		Long:  "Shows details of a RabbitMQ instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an RabbitMQ instance with ID "xxx"`,
+				`Get details of a RabbitMQ instance with ID "xxx"`,
 				"$ stackit rabbitmq instance describe xxx"),
 			examples.NewExample(
-				`Get details of an RabbitMQ instance with ID "xxx" in a table format`,
+				`Get details of a RabbitMQ instance with ID "xxx" in a table format`,
 				"$ stackit rabbitmq instance describe xxx --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
