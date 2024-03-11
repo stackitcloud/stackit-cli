@@ -108,12 +108,14 @@ func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.U
 		table.AddSeparator()
 		table.AddRow("USERNAME", *user.Username)
 		table.AddSeparator()
-		table.AddRow("DESCRIPTION", *user.Description)
-		if user.Password != nil && *user.Password != "" {
+		if user.Description != nil && *user.Description != "" {
+			table.AddRow("DESCRIPTION", *user.Description)
 			table.AddSeparator()
-			table.AddRow("PASSWORD", *user.Password)
 		}
-		table.AddSeparator()
+		if user.Password != nil && *user.Password != "" {
+			table.AddRow("PASSWORD", *user.Password)
+			table.AddSeparator()
+		}
 		table.AddRow("WRITE ACCESS", *user.Write)
 
 		err := table.Display(cmd)

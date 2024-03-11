@@ -93,12 +93,11 @@ func TestGetInstanceName(t *testing.T) {
 
 func TestGetUserDetails(t *testing.T) {
 	tests := []struct {
-		description         string
-		getUserFails        bool
-		GetUserResp         *secretsmanager.User
-		isValid             bool
-		expectedUserName    string
-		expectedDescription string
+		description    string
+		getUserFails   bool
+		GetUserResp    *secretsmanager.User
+		isValid        bool
+		expectedOutput string
 	}{
 		{
 			description: "base",
@@ -106,9 +105,39 @@ func TestGetUserDetails(t *testing.T) {
 				Username:    utils.Ptr(testUserName),
 				Description: utils.Ptr(testDescription),
 			},
-			isValid:             true,
-			expectedUserName:    testUserName,
-			expectedDescription: testDescription,
+			isValid:        true,
+			expectedOutput: fmt.Sprintf("%q (%s)", testUserName, testDescription),
+		},
+		{
+			description: "user has no description",
+			GetUserResp: &secretsmanager.User{
+				Username: utils.Ptr(testUserName),
+			},
+			isValid:        true,
+			expectedOutput: fmt.Sprintf("%q", testUserName),
+		},
+		{
+			description: "user has empty description",
+			GetUserResp: &secretsmanager.User{
+				Username:    utils.Ptr(testUserName),
+				Description: utils.Ptr(""),
+			},
+			isValid:        true,
+			expectedOutput: fmt.Sprintf("%q", testUserName),
+		},
+		{
+			description: "user has empty username",
+			GetUserResp: &secretsmanager.User{
+				Username: utils.Ptr(""),
+			},
+			isValid: false,
+		},
+		{
+			description: "user has no username",
+			GetUserResp: &secretsmanager.User{
+				Username: nil,
+			},
+			isValid: false,
 		},
 		{
 			description:  "get user fails",
@@ -124,7 +153,7 @@ func TestGetUserDetails(t *testing.T) {
 				getUserResp:  tt.GetUserResp,
 			}
 
-			username, description, err := GetUserDetails(context.Background(), client, testProjectId, testInstanceId, testUserId)
+			userLabel, err := GetUserLabel(context.Background(), client, testProjectId, testInstanceId, testUserId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -135,11 +164,8 @@ func TestGetUserDetails(t *testing.T) {
 			if !tt.isValid {
 				return
 			}
-			if username != tt.expectedUserName {
-				t.Errorf("expected username to be %s, got %s", tt.expectedUserName, username)
-			}
-			if description != tt.expectedDescription {
-				t.Errorf("expected description to be %s, got %s", tt.expectedDescription, description)
+			if userLabel != tt.expectedOutput {
+				t.Errorf("expected user label to be %s, got %s", tt.expectedOutput, userLabel)
 			}
 		})
 	}

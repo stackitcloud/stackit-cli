@@ -13,10 +13,10 @@ stackit secrets-manager user list [flags]
 ### Examples
 
 ```
-  List all Secrets Manager users of instance with ID "xxx
+  List all Secrets Manager users of instance with ID "xxx"
   $ stackit secrets-manager user list --instance-id xxx
 
-  List all Secrets Manager users in JSON format with ID "xxx
+  List all Secrets Manager users in JSON format with ID "xxx"
   $ stackit secrets-manager user list --instance-id xxx --output-format json
 
   List up to 10 Secrets Manager users with ID "xxx"

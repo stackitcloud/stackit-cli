@@ -1,6 +1,6 @@
 # STACKIT CLI (BETA)
 
-Welcome to the STACKIT CLI, a command-line interface for the STACKIT services.
+Welcome to the [STACKIT](https://www.stackit.de/en) CLI, a command-line interface for the STACKIT services.
 
 This CLI is in a BETA state. More services and functionality will be supported soon.
 Your feedback is appreciated!
@@ -48,7 +48,7 @@ Help is available for any command by specifying the special flag `--help` (or si
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
 | Service                 | CLI Commands              | Status                  |
-| ----------------------- | ------------------------- | ----------------------- |
+| ----------------------- | ------------------------- |-------------------------|
 | Argus                   |                           | Will be integrated soon |
 | Authorization           | `project`, `organization` | :white_check_mark:      |
 | DNS                     | `dns`                     | :white_check_mark:      |
@@ -57,13 +57,13 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | LogMe                   | `logme`                   | :white_check_mark:      |
 | MariaDB                 | `mariadb`                 | :white_check_mark:      |
 | MongoDB Flex            | `mongodbflex`             | :white_check_mark:      |
-| Object Storage          |                           | Will be integrated soon |
+| Object Storage          | `object-storage`          | :white_check_mark:      |
 | OpenSearch              | `opensearch`              | :white_check_mark:      |
 | PostgreSQL Flex         | `postgresflex`            | :white_check_mark:      |
 | RabbitMQ                | `rabbitmq`                | :white_check_mark:      |
 | Redis                   | `redis`                   | :white_check_mark:      |
 | Resource Manager        | `project`                 | :white_check_mark:      |
-| Secrets Manager         |                           | Will be integrated soon |
+| Secrets Manager         | `secrets-manager`         | :white_check_mark:      |
 | Service Account         | `service-account`         | :white_check_mark:      |
 
 ## Authentication

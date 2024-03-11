@@ -24,6 +24,16 @@ brew install stackit
 
 The STACKIT CLI can be installed through the [`APT`](https://ubuntu.com/server/docs/package-management) package manager.
 
+##### Before you begin
+
+To install the STACKIT CLI package, you will need to have the `curl` and `gnupg` packages installed:
+```shell
+sudo apt-get update
+sudo apt-get install curl gnupg
+```
+
+##### Installing
+
 1. Import the STACKIT public key:
 
 ```shell
