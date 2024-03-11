@@ -78,13 +78,25 @@ func fixtureRequest(mods ...func(request *argus.ApiCreateInstanceRequest)) argus
 	return request
 }
 
+func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.PlansResponse {
+	response := &argus.PlansResponse{
+		Plans: &[]argus.Plan{
+			{
+				Name: utils.Ptr("example-plan-name"),
+				Id:   utils.Ptr(testPlanId),
+			},
+		},
+	}
+	for _, mod := range mods {
+		mod(response)
+	}
+	return response
+}
+
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
 		flagValues    map[string]string
-		sgwAclValues  []string
-		pluginValues  []string
-		syslogValues  []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -204,22 +216,19 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description       string
-		model             *inputModel
-		expectedRequest   argus.ApiCreateInstanceRequest
-		getOfferingsFails bool
-		getPlansReponse   *argus.PlansResponse
-		isValid           bool
+		description     string
+		model           *inputModel
+		expectedRequest argus.ApiCreateInstanceRequest
+		getPlansFails   bool
+		getPlansReponse *argus.PlansResponse
+		isValid         bool
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-			getPlansReponse: &argus.PlansResponse{
-				Plans: &[]argus.Plan{
-					{},
-				},
-			},
+			getPlansReponse: fixturePlansResponse(),
+			isValid:         true,
 		},
 		{
 			description: "use plan name",
@@ -230,14 +239,8 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			expectedRequest: fixtureRequest(),
-			getPlansReponse: &argus.PlansResponse{
-				Plans: &[]argus.Plan{
-					{
-						Name: utils.Ptr("example-plan-name"),
-						Id:   utils.Ptr(testPlanId),
-					},
-				},
-			},
+			getPlansReponse: fixturePlansResponse(),
+			isValid:         true,
 		},
 		{
 			description: "get plans fails",
@@ -247,52 +250,62 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "example-plan-name"
 				},
 			),
-			getOfferingsFails: true,
-			isValid:           false,
+			getPlansFails: true,
+			isValid:       false,
 		},
 		{
 			description: "plan name not found",
 			model: fixtureInputModel(
 				func(model *inputModel) {
 					model.PlanId = nil
-					model.PlanName = "example-plan-name"
+					model.PlanName = "non-existent-plan"
 				},
 			),
-			getPlansReponse: &argus.PlansResponse{
-				Plans: &[]argus.Plan{
-					{
-						Name: utils.Ptr("other-plan-name"),
-						Id:   utils.Ptr(testPlanId),
-					},
-				},
-			},
-			isValid: false,
+			getPlansReponse: fixturePlansResponse(),
+			isValid:         false,
 		},
 		{
-			description: "required fields only",
-			model: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
+			description: "plan id not found",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.PlanId = utils.Ptr(uuid.NewString())
 				},
-				PlanId: utils.Ptr(testPlanId),
-			},
-			getPlansReponse: &argus.PlansResponse{
-				Plans: &[]argus.Plan{
-					{
-						Name: utils.Ptr("example-plan-name"),
-						Id:   utils.Ptr(testPlanId),
-					},
+			),
+			getPlansReponse: fixturePlansResponse(),
+			isValid:         false,
+		},
+		{
+			description: "plan id, no instance name",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.InstanceName = nil
 				},
-			},
+			),
+			getPlansReponse: fixturePlansResponse(),
 			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
 				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			isValid: true,
+		},
+		{
+			description: "plan name, no instance name",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.PlanId = nil
+					model.PlanName = "example-plan-name"
+					model.InstanceName = nil
+				},
+			),
+			getPlansReponse: fixturePlansResponse(),
+			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
+				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			isValid: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			client := &argusClientMocked{
-				returnError:      tt.getOfferingsFails,
+				returnError:      tt.getPlansFails,
 				listPlansReponse: tt.getPlansReponse,
 			}
 			request, err := buildRequest(testCtx, tt.model, client)
@@ -301,6 +314,10 @@ func TestBuildRequest(t *testing.T) {
 					return
 				}
 				t.Fatalf("error building request: %v", err)
+			}
+
+			if !tt.isValid {
+				t.Fatal("expected error but none thrown")
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,

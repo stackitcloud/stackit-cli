@@ -16,7 +16,6 @@ const (
 
 func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 	if resp == nil {
-		// Should not happen, check is done before calling this function
 		return fmt.Errorf("no Argus plans provided")
 	}
 
@@ -27,7 +26,7 @@ func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 		}
 	}
 
-	return &errors.DSAInvalidPlanError{
+	return &errors.ArgusInvalidPlanError{
 		Service: service,
 		Details: fmt.Sprintf("You provided plan ID %q, which is invalid.", planId),
 	}
@@ -36,7 +35,6 @@ func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 	availablePlanNames := ""
 	if resp == nil {
-		// Should not happen, check is done before calling this function
 		return nil, fmt.Errorf("no Argus plans provided")
 	}
 
@@ -51,8 +49,8 @@ func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 		availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
 	}
 
-	details := fmt.Sprintf("You provided plan_name %q, which is invalid. Available plan names are: %s", planName, availablePlanNames)
-	return nil, &errors.DSAInvalidPlanError{
+	details := fmt.Sprintf("you provided plan name %q, which is invalid. available plan names are: %s", planName, availablePlanNames)
+	return nil, &errors.ArgusInvalidPlanError{
 		Service: service,
 		Details: details,
 	}

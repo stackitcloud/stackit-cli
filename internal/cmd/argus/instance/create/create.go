@@ -78,8 +78,8 @@ func NewCmd() *cobra.Command {
 			// Call API
 			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
-				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
-				if !errors.As(err, &dsaInvalidPlanError) {
+				var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
+				if !errors.As(err, &argusInvalidPlanError) {
 					return fmt.Errorf("build Argus instance creation request: %w", err)
 				}
 				return err
@@ -132,12 +132,12 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	planName := flags.FlagToStringValue(cmd, planNameFlag)
 
 	if planId == nil && (planName == "") {
-		return nil, &cliErr.DSAInputPlanError{
+		return nil, &cliErr.ArgusInputPlanError{
 			Cmd: cmd,
 		}
 	}
 	if planId != nil && (planName != "") {
-		return nil, &cliErr.DSAInputPlanError{
+		return nil, &cliErr.ArgusInputPlanError{
 			Cmd: cmd,
 		}
 	}
@@ -169,8 +169,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 	if model.PlanId == nil {
 		planId, err = argusUtils.LoadPlanId(model.PlanName, plans)
 		if err != nil {
-			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
-			if !errors.As(err, &dsaInvalidPlanError) {
+			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
+			if !errors.As(err, &argusInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
 			return req, err
