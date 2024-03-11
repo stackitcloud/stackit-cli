@@ -48,6 +48,11 @@ archives:
       - goos: windows
         format: zip
 
+release:
+  # If set to auto, the GitHub release will be marked as "Pre-release"
+  # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+  prerelease: auto
+
 changelog:
   sort: asc
   filters:
@@ -63,7 +68,7 @@ nfpms:
     package_name: stackit
     vendor: STACKIT
     homepage: https://github.com/stackitcloud/stackit-cli
-    maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
+    maintainer: STACKIT Developer Tools Team <developer-tools@stackit.cloud>
     description: A command-line interface to manage STACKIT resources.
     license: Apache 2.0
     formats:
