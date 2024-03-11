@@ -49,7 +49,7 @@ func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 		availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
 	}
 
-	details := fmt.Sprintf("you provided plan name %q, which is invalid. available plan names are: %s", planName, availablePlanNames)
+	details := fmt.Sprintf("You provided plan name %q, which is invalid. available plan names are: %s", planName, availablePlanNames)
 	return nil, &errors.ArgusInvalidPlanError{
 		Service: service,
 		Details: details,
