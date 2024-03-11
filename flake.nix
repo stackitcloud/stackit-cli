@@ -79,6 +79,9 @@
             };
           };
         });
+      overlays.default = final: prev: {
+        ${pname} = self.packages.${prev.system}.default;
+      };
 
       # 'nix develop'
       devShells = forAllSystems (system:
