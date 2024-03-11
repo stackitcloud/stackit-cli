@@ -48,7 +48,6 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/argus v0.9.5
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.8.6

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
@@ -85,7 +84,6 @@ func configureFlags(cmd *cobra.Command) error {
 }
 
 func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(argus.NewCmd())
 	cmd.AddCommand(auth.NewCmd())
 	cmd.AddCommand(config.NewCmd())
 	cmd.AddCommand(curl.NewCmd())
