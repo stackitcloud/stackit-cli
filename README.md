@@ -63,7 +63,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | RabbitMQ                | `rabbitmq`                | :white_check_mark:      |
 | Redis                   | `redis`                   | :white_check_mark:      |
 | Resource Manager        | `project`                 | :white_check_mark:      |
-| Secrets Manager         |                           | Will be integrated soon |
+| Secrets Manager         | `secrets-manager`         | :white_check_mark:      |
 | Service Account         | `service-account`         | :white_check_mark:      |
 
 ## Authentication
