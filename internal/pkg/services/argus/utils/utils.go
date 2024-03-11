@@ -17,7 +17,7 @@ const (
 func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 	if resp == nil {
 		// Should not happen, check is done before calling this function
-		return fmt.Errorf("get Argus plans")
+		return fmt.Errorf("no Argus plans provided")
 	}
 
 	for i := range *resp.Plans {
@@ -37,7 +37,7 @@ func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 	availablePlanNames := ""
 	if resp == nil {
 		// Should not happen, check is done before calling this function
-		return nil, fmt.Errorf("get Argus plans")
+		return nil, fmt.Errorf("no Argus plans provided")
 	}
 
 	for i := range *resp.Plans {
