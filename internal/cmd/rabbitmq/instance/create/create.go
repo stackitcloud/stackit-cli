@@ -58,18 +58,18 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates an RabbitMQ instance",
-		Long:  "Creates an RabbitMQ instance.",
+		Short: "Creates a RabbitMQ instance",
+		Long:  "Creates a RabbitMQ instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an RabbitMQ instance with name "my-instance" and specify plan by name and version`,
+				`Create a RabbitMQ instance with name "my-instance" and specify plan by name and version`,
 				"$ stackit rabbitmq instance create --name my-instance --plan-name stackit-rabbitmq-1.2.10-replica --version 3.10"),
 			examples.NewExample(
-				`Create an RabbitMQ instance with name "my-instance" and specify plan by ID`,
+				`Create a RabbitMQ instance with name "my-instance" and specify plan by ID`,
 				"$ stackit rabbitmq instance create --name my-instance --plan-id xxx"),
 			examples.NewExample(
-				`Create an RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it`,
+				`Create a RabbitMQ instance with name "my-instance" and specify IP range which is allowed to access it`,
 				"$ stackit rabbitmq instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

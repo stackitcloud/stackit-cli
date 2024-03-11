@@ -32,18 +32,18 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials' IDs for an RabbitMQ instance",
-		Long:  "Lists all credentials' IDs for an RabbitMQ instance.",
+		Short: "Lists all credentials' IDs for a RabbitMQ instance",
+		Long:  "Lists all credentials' IDs for a RabbitMQ instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all credentials' IDs for an RabbitMQ instance`,
+				`List all credentials' IDs for a RabbitMQ instance`,
 				"$ stackit rabbitmq credentials list --instance-id xxx"),
 			examples.NewExample(
-				`List all credentials' IDs for an RabbitMQ instance in JSON format`,
+				`List all credentials' IDs for a RabbitMQ instance in JSON format`,
 				"$ stackit rabbitmq credentials list --instance-id xxx --output-format json"),
 			examples.NewExample(
-				`List up to 10 credentials' IDs for an RabbitMQ instance`,
+				`List up to 10 credentials' IDs for a RabbitMQ instance`,
 				"$ stackit rabbitmq credentials list --instance-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,7 +63,7 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list RabbitMQ credentialss: %w", err)
+				return fmt.Errorf("list RabbitMQ credentials: %w", err)
 			}
 			credentials := *resp.CredentialsList
 			if len(credentials) == 0 {

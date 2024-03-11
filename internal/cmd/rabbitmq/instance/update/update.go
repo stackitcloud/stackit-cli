@@ -59,15 +59,15 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an RabbitMQ instance",
-		Long:  "Updates an RabbitMQ instance.",
+		Short: "Updates a RabbitMQ instance",
+		Long:  "Updates a RabbitMQ instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the plan of an RabbitMQ instance with ID "xxx"`,
+				`Update the plan of a RabbitMQ instance with ID "xxx"`,
 				"$ stackit rabbitmq instance update xxx --plan-id yyy"),
 			examples.NewExample(
-				`Update the range of IPs allowed to access an RabbitMQ instance with ID "xxx"`,
+				`Update the range of IPs allowed to access a RabbitMQ instance with ID "xxx"`,
 				"$ stackit rabbitmq instance update xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
