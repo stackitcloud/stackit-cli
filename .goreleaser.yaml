@@ -66,6 +66,9 @@ nfpms:
     maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
     description: A command-line interface to manage STACKIT resources.
     license: Apache 2.0
+    contents:
+      - src: LICENSE.md
+        dst: LICENSE.md
     formats:
       - deb
       - rpm
