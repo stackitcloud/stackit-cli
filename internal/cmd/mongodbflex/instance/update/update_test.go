@@ -150,13 +150,6 @@ func TestParseInput(t *testing.T) {
 		expectedModel *inputModel
 	}{
 		{
-			description:   "base",
-			argValues:     fixtureArgValues(),
-			flagValues:    fixtureRequiredFlagValues(),
-			isValid:       true,
-			expectedModel: fixtureRequiredInputModel(),
-		},
-		{
 			description: "no values",
 			argValues:   []string{},
 			flagValues:  map[string]string{},
@@ -173,6 +166,13 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
+		},
+		{
+			description: "only instance and project ids",
+			argValues:   fixtureArgValues(),
+			flagValues:  fixtureRequiredFlagValues(),
+
+			isValid: false,
 		},
 		{
 			description:   "all values with flavor id",
