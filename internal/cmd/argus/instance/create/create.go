@@ -163,7 +163,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 
 	plans, err := apiClient.ListPlansExecute(ctx, model.ProjectId)
 	if err != nil {
-		return req, fmt.Errorf("get Argus offerings: %w", err)
+		return req, fmt.Errorf("get Argus plans: %w", err)
 	}
 
 	if model.PlanId == nil {

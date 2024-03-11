@@ -15,6 +15,11 @@ const (
 )
 
 func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
+	if resp == nil {
+		// Should not happen, check is done before calling this function
+		return fmt.Errorf("get Argus plans")
+	}
+
 	for i := range *resp.Plans {
 		plan := (*resp.Plans)[i]
 		if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
@@ -30,6 +35,11 @@ func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 
 func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 	availablePlanNames := ""
+	if resp == nil {
+		// Should not happen, check is done before calling this function
+		return nil, fmt.Errorf("get Argus plans")
+	}
+
 	for i := range *resp.Plans {
 		plan := (*resp.Plans)[i]
 		if plan.Name == nil {
