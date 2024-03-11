@@ -25,6 +25,7 @@ stackit [flags]
 
 ### SEE ALSO
 
+* [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
