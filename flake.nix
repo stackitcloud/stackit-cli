@@ -58,6 +58,7 @@
               #   --fish <($out/bin/stackit completion fish)
             '';
 
+            # TODO: consider also wrapping `xdg-open` (needed for browser promped user login)
             postFixup = ''
               wrapProgram $out/bin/stackit \
                 --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.less ]}
