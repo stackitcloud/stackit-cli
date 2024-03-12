@@ -31,11 +31,11 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	InstanceId string
-	PlanName   string
+	InstanceId   string
+	PlanName     string
+	InstanceName string
 
-	InstanceName *string
-	PlanId       *string
+	PlanId *string
 }
 
 func NewCmd() *cobra.Command {
@@ -46,11 +46,8 @@ func NewCmd() *cobra.Command {
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the plan of an Argus instance with ID "xxx" by specifying the plan ID`,
+				`Update the plan of an Argus instance with ID "xxx"`,
 				"$ stackit argus instance update xxx --plan-id yyy"),
-			examples.NewExample(
-				`Update the plan of an Argus instance with ID "xxx" by specifying the plan name`,
-				"$ stackit argus instance update xxx --plan-name yyy"),
 			examples.NewExample(
 				`Update the name of an Argus instance with ID "xxx"`,
 				"$ stackit argus instance update xxx --name new-instance-name"),
@@ -68,8 +65,8 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := argusUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
-			if err != nil || instanceLabel == "" {
+			instanceLabel, err := argusUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			if err != nil {
 				instanceLabel = model.InstanceId
 			}
 
@@ -136,16 +133,30 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	planId := flags.FlagToStringPointer(cmd, planIdFlag)
 	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
+	instanceName := flags.FlagToStringValue(cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "") {
+		return nil, &cliErr.ArgusInputPlanError{
+			Cmd:  cmd,
+			Args: inputArgs,
+		}
+	}
+
+	//TODO: planID or planName is required
+
+	if planId == nil && planName == "" && instanceName == "" {
+		return nil, &cliErr.EmptyUpdateError{}
+	}
+
+	if planId == nil && (planName == "") {
 		return nil, &cliErr.ArgusInputPlanError{
 			Cmd: cmd,
 		}
 	}
-
-	if planId == nil && planName == "" && instanceName == nil {
-		return nil, &cliErr.EmptyUpdateError{}
+	if planId != nil && (planName != "") {
+		return nil, &cliErr.ArgusInputPlanError{
+			Cmd: cmd,
+		}
 	}
 
 	return &inputModel{
@@ -160,12 +171,12 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 type argusClient interface {
 	UpdateInstance(ctx context.Context, instanceId, projectId string) argus.ApiUpdateInstanceRequest
 	ListPlansExecute(ctx context.Context, projectId string) (*argus.PlansResponse, error)
-	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*argus.GetInstanceResponse, error)
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient) (argus.ApiUpdateInstanceRequest, error) {
 	req := apiClient.UpdateInstance(ctx, model.InstanceId, model.ProjectId)
 
+	var planId *string
 	var err error
 
 	plans, err := apiClient.ListPlansExecute(ctx, model.ProjectId)
@@ -173,18 +184,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 		return req, fmt.Errorf("get Argus plans: %w", err)
 	}
 
-	currentInstance, err := apiClient.GetInstanceExecute(ctx, model.InstanceId, model.ProjectId)
-	if err != nil {
-		return req, fmt.Errorf("get Argus instance: %w", err)
-	}
-
-	payload := argus.UpdateInstancePayload{
-		PlanId: currentInstance.PlanId,
-		Name:   currentInstance.Name,
-	}
-
 	if model.PlanId == nil && model.PlanName != "" {
-		payload.PlanId, err = argusUtils.LoadPlanId(model.PlanName, plans)
+		planId, err = argusUtils.LoadPlanId(model.PlanName, plans)
 		if err != nil {
 			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
 			if !errors.As(err, &argusInvalidPlanError) {
@@ -192,22 +193,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 			}
 			return req, err
 		}
-	} else if model.PlanId != nil && model.PlanName == "" {
-		err := argusUtils.ValidatePlanId(*model.PlanId, plans)
-		if err != nil {
-			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
-			if !errors.As(err, &argusInvalidPlanError) {
-				return req, fmt.Errorf("validate plan ID: %w", err)
+	} else {
+		// planId is not required for update operation
+		if model.PlanId != nil {
+			err := argusUtils.ValidatePlanId(*model.PlanId, plans)
+			if err != nil {
+				return req, err
 			}
-			return req, err
 		}
-		payload.PlanId = model.PlanId
+		planId = model.PlanId
 	}
 
-	if model.InstanceName != nil {
-		payload.Name = model.InstanceName
-	}
-
-	req = req.UpdateInstancePayload(payload)
+	req = req.UpdateInstancePayload(argus.UpdateInstancePayload{
+		PlanId: planId,
+		Name: &model.InstanceName,
+	})
 	return req, nil
 }
