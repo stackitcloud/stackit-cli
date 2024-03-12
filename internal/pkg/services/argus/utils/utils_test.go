@@ -91,6 +91,54 @@ func TestGetInstanceName(t *testing.T) {
 	}
 }
 
+func TestGetInstancePlanId(t *testing.T) {
+	tests := []struct {
+		description      string
+		getInstanceFails bool
+		getInstanceResp  *argus.GetInstanceResponse
+		isValid          bool
+		expectedOutput   string
+	}{
+		{
+			description: "base",
+			getInstanceResp: &argus.GetInstanceResponse{
+				PlanId: utils.Ptr(testPlanId),
+			},
+			isValid:        true,
+			expectedOutput: testPlanId,
+		},
+		{
+			description:      "get instance fails",
+			getInstanceFails: true,
+			isValid:          false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &argusClientMocked{
+				getInstanceFails: tt.getInstanceFails,
+				getInstanceResp:  tt.getInstanceResp,
+			}
+
+			output, err := GetInstancePlanId(context.Background(), client, testInstanceId, testProjectId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if *output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, *output)
+			}
+		})
+	}
+}
+
 func TestLoadPlanId(t *testing.T) {
 	tests := []struct {
 		description    string

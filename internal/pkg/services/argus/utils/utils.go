@@ -67,3 +67,11 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 	}
 	return *resp.Name, nil
 }
+
+func GetInstancePlanId(ctx context.Context, apiClient ArgusClient, instanceId, projectId string) (*string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, instanceId, projectId)
+	if err != nil {
+		return nil, fmt.Errorf("get Argus instance: %w", err)
+	}
+	return resp.PlanId, nil
+}
