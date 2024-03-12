@@ -33,8 +33,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId   string
 	PlanName     string
-	InstanceName string
 
+	InstanceName *string
 	PlanId *string
 }
 
@@ -136,7 +136,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	planId := flags.FlagToStringPointer(cmd, planIdFlag)
 	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	instanceName := flags.FlagToStringValue(cmd, instanceNameFlag)
+	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "") {
 		return nil, &cliErr.ArgusInputPlanError{
@@ -144,7 +144,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		}
 	}
 
-	if planId == nil && planName == "" && instanceName == "" {
+	if planId == nil && planName == "" && instanceName == nil {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
@@ -200,7 +200,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 
 	req = req.UpdateInstancePayload(argus.UpdateInstancePayload{
 		PlanId: planId,
-		Name:   &model.InstanceName,
+		Name:   model.InstanceName,
 	})
 	return req, nil
 }
