@@ -167,6 +167,15 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "with empty new instance name",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceNameFlag] = ""
+				delete(flagValues, planIdFlag)
+			}),
+			isValid: false,
+		},
+		{
 			description: "no values",
 			argValues:   []string{},
 			flagValues:  map[string]string{},
