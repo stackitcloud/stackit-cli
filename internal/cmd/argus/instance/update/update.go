@@ -147,8 +147,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	if planId == nil && planName == "" {
 		if instanceName == nil {
 			return nil, &cliErr.EmptyUpdateError{}
-		} else if *instanceName == "" {
-			return nil, fmt.Errorf("new instance name cannot be empty.")
 		}
 	}
 
@@ -177,14 +175,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 		return req, fmt.Errorf("get Argus plans: %w", err)
 	}
 
-	currInstanceName, currPlanId, err := argusUtils.GetInstanceDetails(ctx, apiClient, model.InstanceId, model.ProjectId)
+	currentInstance, err := apiClient.GetInstanceExecute(ctx, model.InstanceId, model.ProjectId)
 	if err != nil {
 		return req, fmt.Errorf("get Argus instance: %w", err)
 	}
 
 	payload := argus.UpdateInstancePayload{
-		PlanId: currPlanId,
-		Name:   currInstanceName,
+		PlanId: currentInstance.PlanId,
+		Name:   currentInstance.Name,
 	}
 
 	if model.PlanId == nil && model.PlanName != "" {

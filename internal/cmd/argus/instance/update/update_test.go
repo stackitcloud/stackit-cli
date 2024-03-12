@@ -54,6 +54,7 @@ var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testPlanId     = uuid.NewString()
+	testNewPlanId  = uuid.NewString()
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -69,7 +70,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		planIdFlag:    testPlanId,
+		planIdFlag:    testNewPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -83,7 +84,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceId: testInstanceId,
-		PlanId:     utils.Ptr(testPlanId),
+		PlanId:     utils.Ptr(testNewPlanId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -94,7 +95,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *argus.ApiUpdateInstanceRequest)) argus.ApiUpdateInstanceRequest {
 	request := testClient.UpdateInstance(testCtx, testInstanceId, testProjectId)
 	request = request.UpdateInstancePayload(argus.UpdateInstancePayload{
-		PlanId: utils.Ptr(testPlanId),
+		PlanId: utils.Ptr(testNewPlanId),
 		Name:   utils.Ptr(testInstanceName),
 	})
 	for _, mod := range mods {
@@ -108,7 +109,7 @@ func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.Pl
 		Plans: &[]argus.Plan{
 			{
 				Name: utils.Ptr("example-plan-name"),
-				Id:   utils.Ptr(testPlanId),
+				Id:   utils.Ptr(testNewPlanId),
 			},
 		},
 	}
@@ -170,15 +171,6 @@ func TestParseInput(t *testing.T) {
 				model.PlanName = ""
 				model.InstanceName = utils.Ptr("new-instance-name")
 			}),
-		},
-		{
-			description: "with empty new instance name",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[instanceNameFlag] = ""
-				delete(flagValues, planIdFlag)
-			}),
-			isValid: false,
 		},
 		{
 			description: "no values",
