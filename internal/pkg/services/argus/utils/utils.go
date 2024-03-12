@@ -57,7 +57,7 @@ func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 }
 
 type ArgusClient interface {
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*argus.GetInstanceResponse, error)
+	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*argus.GetInstanceResponse, error)
 }
 
 func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, projectId string) (string, error) {
@@ -66,4 +66,12 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 		return "", fmt.Errorf("get Argus instance: %w", err)
 	}
 	return *resp.Name, nil
+}
+
+func GetInstancePlanId(ctx context.Context, apiClient ArgusClient, instanceId, projectId string) (*string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, instanceId, projectId)
+	if err != nil {
+		return nil, fmt.Errorf("get Argus instance: %w", err)
+	}
+	return resp.PlanId, nil
 }
