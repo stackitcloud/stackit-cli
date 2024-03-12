@@ -201,7 +201,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 		if err != nil {
 			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
 			if !errors.As(err, &argusInvalidPlanError) {
-				return req, fmt.Errorf("load plan ID: %w", err)
+				return req, fmt.Errorf("validate plan ID: %w", err)
 			}
 			return req, err
 		}
