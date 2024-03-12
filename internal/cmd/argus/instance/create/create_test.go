@@ -23,7 +23,7 @@ var testClient = &argus.APIClient{}
 
 type argusClientMocked struct {
 	returnError      bool
-	listPlansReponse *argus.PlansResponse
+	listPlansResponse *argus.PlansResponse
 }
 
 func (c *argusClientMocked) CreateInstance(ctx context.Context, projectId string) argus.ApiCreateInstanceRequest {
@@ -34,7 +34,7 @@ func (c *argusClientMocked) ListPlansExecute(_ context.Context, _ string) (*argu
 	if c.returnError {
 		return nil, fmt.Errorf("list plans failed")
 	}
-	return c.listPlansReponse, nil
+	return c.listPlansResponse, nil
 }
 
 var testProjectId = uuid.NewString()
@@ -220,14 +220,14 @@ func TestBuildRequest(t *testing.T) {
 		model           *inputModel
 		expectedRequest argus.ApiCreateInstanceRequest
 		getPlansFails   bool
-		getPlansReponse *argus.PlansResponse
+		getPlansResponse *argus.PlansResponse
 		isValid         bool
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			isValid:         true,
 		},
 		{
@@ -239,7 +239,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			expectedRequest: fixtureRequest(),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			isValid:         true,
 		},
 		{
@@ -261,7 +261,7 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "non-existent-plan"
 				},
 			),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			isValid:         false,
 		},
 		{
@@ -271,7 +271,7 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanId = utils.Ptr(uuid.NewString())
 				},
 			),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			isValid:         false,
 		},
 		{
@@ -281,7 +281,7 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
 				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
 			isValid: true,
@@ -295,7 +295,7 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansReponse: fixturePlansResponse(),
+			getPlansResponse: fixturePlansResponse(),
 			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
 				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
 			isValid: true,
@@ -306,7 +306,7 @@ func TestBuildRequest(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			client := &argusClientMocked{
 				returnError:      tt.getPlansFails,
-				listPlansReponse: tt.getPlansReponse,
+				listPlansResponse: tt.getPlansResponse,
 			}
 			request, err := buildRequest(testCtx, tt.model, client)
 			if err != nil {
