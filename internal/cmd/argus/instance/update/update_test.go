@@ -39,7 +39,7 @@ func (c *argusClientMocked) ListPlansExecute(_ context.Context, _ string) (*argu
 	return c.listPlansResponse, nil
 }
 
-func (c *argusClientMocked) GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*argus.GetInstanceResponse, error) {
+func (c *argusClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*argus.GetInstanceResponse, error) {
 	if c.getInstanceError {
 		return nil, fmt.Errorf("get instance failed")
 	}
@@ -116,7 +116,7 @@ func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.Pl
 func fixtureGetInstanceResponse(mods ...func(response *argus.GetInstanceResponse)) *argus.GetInstanceResponse {
 	response := &argus.GetInstanceResponse{
 		PlanId: utils.Ptr(testPlanId),
-		Name: utils.Ptr("example-instance-name"),
+		Name:   utils.Ptr("example-instance-name"),
 	}
 	for _, mod := range mods {
 		mod(response)
@@ -397,16 +397,16 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getInstanceFails: true,
-			isValid: false,
+			isValid:          false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			client := &argusClientMocked{
-				listPlansError:    tt.getPlansFails,
-				listPlansResponse: tt.getPlansResponse,
-				getInstanceError: tt.getInstanceFails,
+				listPlansError:      tt.getPlansFails,
+				listPlansResponse:   tt.getPlansResponse,
+				getInstanceError:    tt.getInstanceFails,
 				getInstanceResponse: tt.getInstanceResponse,
 			}
 			request, err := buildRequest(testCtx, tt.model, client)
