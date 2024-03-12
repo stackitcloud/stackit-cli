@@ -31,11 +31,11 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	InstanceId   string
-	PlanName     string
+	InstanceId string
+	PlanName   string
 
 	InstanceName *string
-	PlanId *string
+	PlanId       *string
 }
 
 func NewCmd() *cobra.Command {

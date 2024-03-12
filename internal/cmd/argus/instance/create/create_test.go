@@ -22,7 +22,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &argus.APIClient{}
 
 type argusClientMocked struct {
-	returnError      bool
+	returnError       bool
 	listPlansResponse *argus.PlansResponse
 }
 
@@ -216,19 +216,19 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description     string
-		model           *inputModel
-		expectedRequest argus.ApiCreateInstanceRequest
-		getPlansFails   bool
+		description      string
+		model            *inputModel
+		expectedRequest  argus.ApiCreateInstanceRequest
+		getPlansFails    bool
 		getPlansResponse *argus.PlansResponse
-		isValid         bool
+		isValid          bool
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			description:      "base",
+			model:            fixtureInputModel(),
+			expectedRequest:  fixtureRequest(),
 			getPlansResponse: fixturePlansResponse(),
-			isValid:         true,
+			isValid:          true,
 		},
 		{
 			description: "use plan name",
@@ -238,9 +238,9 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "example-plan-name"
 				},
 			),
-			expectedRequest: fixtureRequest(),
+			expectedRequest:  fixtureRequest(),
 			getPlansResponse: fixturePlansResponse(),
-			isValid:         true,
+			isValid:          true,
 		},
 		{
 			description: "get plans fails",
@@ -262,7 +262,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			isValid:         false,
+			isValid:          false,
 		},
 		{
 			description: "plan id not found",
@@ -272,7 +272,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			isValid:         false,
+			isValid:          false,
 		},
 		{
 			description: "plan id, no instance name",
@@ -305,7 +305,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			client := &argusClientMocked{
-				returnError:      tt.getPlansFails,
+				returnError:       tt.getPlansFails,
 				listPlansResponse: tt.getPlansResponse,
 			}
 			request, err := buildRequest(testCtx, tt.model, client)
