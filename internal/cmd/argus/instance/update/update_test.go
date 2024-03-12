@@ -46,6 +46,10 @@ func (c *argusClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (
 	return c.getInstanceResponse, nil
 }
 
+const (
+	testInstanceName = "example-instance-name"
+)
+
 var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
@@ -91,6 +95,7 @@ func fixtureRequest(mods ...func(request *argus.ApiUpdateInstanceRequest)) argus
 	request := testClient.UpdateInstance(testCtx, testInstanceId, testProjectId)
 	request = request.UpdateInstancePayload(argus.UpdateInstancePayload{
 		PlanId: utils.Ptr(testPlanId),
+		Name: utils.Ptr(testInstanceName),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -116,7 +121,7 @@ func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.Pl
 func fixtureGetInstanceResponse(mods ...func(response *argus.GetInstanceResponse)) *argus.GetInstanceResponse {
 	response := &argus.GetInstanceResponse{
 		PlanId: utils.Ptr(testPlanId),
-		Name:   utils.Ptr("example-instance-name"),
+		Name:   utils.Ptr(testInstanceName),
 	}
 	for _, mod := range mods {
 		mod(response)
@@ -307,6 +312,7 @@ func TestBuildRequest(t *testing.T) {
 			model:            fixtureInputModel(),
 			expectedRequest:  fixtureRequest(),
 			getPlansResponse: fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
 			isValid:          true,
 		},
 		{
@@ -319,6 +325,7 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest:  fixtureRequest(),
 			getPlansResponse: fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
 			isValid:          true,
 		},
 		{
@@ -341,6 +348,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
 			isValid:          false,
 		},
 		{
@@ -351,6 +359,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
 			isValid:          false,
 		},
 		{
@@ -361,8 +370,8 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.UpdateInstance(testCtx, testInstanceId, testProjectId).
-				UpdateInstancePayload(argus.UpdateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			expectedRequest: fixtureRequest(),
 			isValid: true,
 		},
 		{
@@ -375,8 +384,8 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.UpdateInstance(testCtx, testInstanceId, testProjectId).
-				UpdateInstancePayload(argus.UpdateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			expectedRequest: fixtureRequest(),
 			isValid: true,
 		},
 		{
@@ -389,7 +398,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			expectedRequest: testClient.UpdateInstance(testCtx, testInstanceId, testProjectId).
+			expectedRequest: fixtureRequest().
 				UpdateInstancePayload(argus.UpdateInstancePayload{
 					PlanId: utils.Ptr(testPlanId),
 					Name:   utils.Ptr("new-instance-name"),
