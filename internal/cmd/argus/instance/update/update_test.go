@@ -1,4 +1,4 @@
-package create
+package update
 
 import (
 	"context"
@@ -22,29 +22,55 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &argus.APIClient{}
 
 type argusClientMocked struct {
-	returnError       bool
-	listPlansResponse *argus.PlansResponse
+	listPlansError      bool
+	listPlansResponse   *argus.PlansResponse
+	getInstanceError    bool
+	getInstanceResponse *argus.GetInstanceResponse
 }
 
-func (c *argusClientMocked) CreateInstance(ctx context.Context, projectId string) argus.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
+func (c *argusClientMocked) UpdateInstance(ctx context.Context, instanceId, projectId string) argus.ApiUpdateInstanceRequest {
+	return testClient.UpdateInstance(ctx, instanceId, projectId)
 }
 
 func (c *argusClientMocked) ListPlansExecute(_ context.Context, _ string) (*argus.PlansResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list plans failed")
+	if c.listPlansError {
+		return nil, fmt.Errorf("list flavors failed")
 	}
 	return c.listPlansResponse, nil
 }
 
-var testProjectId = uuid.NewString()
-var testPlanId = uuid.NewString()
+func (c *argusClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*argus.GetInstanceResponse, error) {
+	if c.getInstanceError {
+		return nil, fmt.Errorf("get instance failed")
+	}
+	return c.getInstanceResponse, nil
+}
+
+const (
+	testInstanceName = "example-instance-name"
+)
+
+var (
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testPlanId     = uuid.NewString()
+	testNewPlanId  = uuid.NewString()
+)
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testInstanceId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:    testProjectId,
-		instanceNameFlag: "example-name",
-		planIdFlag:       testPlanId,
+		projectIdFlag: testProjectId,
+		planIdFlag:    testNewPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -57,8 +83,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		InstanceName: utils.Ptr("example-name"),
-		PlanId:       utils.Ptr(testPlanId),
+		InstanceId: testInstanceId,
+		PlanId:     utils.Ptr(testNewPlanId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -66,11 +92,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *argus.ApiCreateInstanceRequest)) argus.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
-	request = request.CreateInstancePayload(argus.CreateInstancePayload{
-		Name:   utils.Ptr("example-name"),
-		PlanId: utils.Ptr(testPlanId),
+func fixtureRequest(mods ...func(request *argus.ApiUpdateInstanceRequest)) argus.ApiUpdateInstanceRequest {
+	request := testClient.UpdateInstance(testCtx, testInstanceId, testProjectId)
+	request = request.UpdateInstancePayload(argus.UpdateInstancePayload{
+		PlanId: utils.Ptr(testNewPlanId),
+		Name:   utils.Ptr(testInstanceName),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -83,9 +109,20 @@ func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.Pl
 		Plans: &[]argus.Plan{
 			{
 				Name: utils.Ptr("example-plan-name"),
-				Id:   utils.Ptr(testPlanId),
+				Id:   utils.Ptr(testNewPlanId),
 			},
 		},
+	}
+	for _, mod := range mods {
+		mod(response)
+	}
+	return response
+}
+
+func fixtureGetInstanceResponse(mods ...func(response *argus.GetInstanceResponse)) *argus.GetInstanceResponse {
+	response := &argus.GetInstanceResponse{
+		PlanId: utils.Ptr(testPlanId),
+		Name:   utils.Ptr(testInstanceName),
 	}
 	for _, mod := range mods {
 		mod(response)
@@ -96,18 +133,21 @@ func fixturePlansResponse(mods ...func(response *argus.PlansResponse)) *argus.Pl
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "with plan name",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[planNameFlag] = "plan-name"
 				delete(flagValues, planIdFlag)
@@ -119,28 +159,40 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "with new instance name",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceNameFlag] = "new-instance-name"
+				delete(flagValues, planIdFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.PlanId = nil
+				model.PlanName = ""
+				model.InstanceName = utils.Ptr("new-instance-name")
+			}),
+		},
+		{
 			description: "no values",
+			argValues:   []string{},
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
-			description: "zero values",
-			flagValues: map[string]string{
-				projectIdFlag:    testProjectId,
-				planIdFlag:       testPlanId,
-				instanceNameFlag: "",
-			},
-			isValid: true,
-			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-				},
-				PlanId:       utils.Ptr(testPlanId),
-				InstanceName: utils.Ptr(""),
-			},
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -148,6 +200,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -155,10 +208,23 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "instance id invalid 2",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "invalid with plan ID and plan name",
@@ -187,6 +253,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -195,7 +269,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -216,19 +290,22 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description      string
-		model            *inputModel
-		expectedRequest  argus.ApiCreateInstanceRequest
-		getPlansFails    bool
-		getPlansResponse *argus.PlansResponse
-		isValid          bool
+		description         string
+		model               *inputModel
+		expectedRequest     argus.ApiUpdateInstanceRequest
+		getPlansFails       bool
+		getPlansResponse    *argus.PlansResponse
+		getInstanceFails    bool
+		getInstanceResponse *argus.GetInstanceResponse
+		isValid             bool
 	}{
 		{
-			description:      "base",
-			model:            fixtureInputModel(),
-			expectedRequest:  fixtureRequest(),
-			getPlansResponse: fixturePlansResponse(),
-			isValid:          true,
+			description:         "base",
+			model:               fixtureInputModel(),
+			expectedRequest:     fixtureRequest(),
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			isValid:             true,
 		},
 		{
 			description: "use plan name",
@@ -238,9 +315,10 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "example-plan-name"
 				},
 			),
-			expectedRequest:  fixtureRequest(),
-			getPlansResponse: fixturePlansResponse(),
-			isValid:          true,
+			expectedRequest:     fixtureRequest(),
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			isValid:             true,
 		},
 		{
 			description: "get plans fails",
@@ -261,8 +339,9 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "non-existent-plan"
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
-			isValid:          false,
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			isValid:             false,
 		},
 		{
 			description: "plan id not found",
@@ -271,8 +350,9 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanId = utils.Ptr(uuid.NewString())
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
-			isValid:          false,
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			isValid:             false,
 		},
 		{
 			description: "plan id, no instance name",
@@ -281,10 +361,10 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
-			isValid: true,
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			expectedRequest:     fixtureRequest(),
+			isValid:             true,
 		},
 		{
 			description: "plan name, no instance name",
@@ -295,18 +375,49 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(argus.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			getPlansResponse:    fixturePlansResponse(),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			expectedRequest:     fixtureRequest(),
+			isValid:             true,
+		},
+		{
+			description: "instance name, no plan info",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.PlanId = nil
+					model.PlanName = ""
+					model.InstanceName = utils.Ptr("new-instance-name")
+				},
+			),
+			getInstanceResponse: fixtureGetInstanceResponse(),
+			expectedRequest: fixtureRequest().
+				UpdateInstancePayload(argus.UpdateInstancePayload{
+					PlanId: utils.Ptr(testPlanId),
+					Name:   utils.Ptr("new-instance-name"),
+				}),
 			isValid: true,
+		},
+		{
+			description: "instance name, no plan info, get instance fails",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.PlanId = nil
+					model.PlanName = ""
+					model.InstanceName = utils.Ptr("new-instance-name")
+				},
+			),
+			getInstanceFails: true,
+			isValid:          false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			client := &argusClientMocked{
-				returnError:       tt.getPlansFails,
-				listPlansResponse: tt.getPlansResponse,
+				listPlansError:      tt.getPlansFails,
+				listPlansResponse:   tt.getPlansResponse,
+				getInstanceError:    tt.getInstanceFails,
+				getInstanceResponse: tt.getInstanceResponse,
 			}
 			request, err := buildRequest(testCtx, tt.model, client)
 			if err != nil {

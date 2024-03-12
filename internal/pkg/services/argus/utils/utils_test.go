@@ -34,10 +34,10 @@ var testPlansResponse = argus.PlansResponse{
 
 type argusClientMocked struct {
 	getInstanceFails bool
-	getInstanceResp  *argus.Instance
+	getInstanceResp  *argus.GetInstanceResponse
 }
 
-func (m *argusClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*argus.Instance, error) {
+func (m *argusClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*argus.GetInstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
@@ -47,13 +47,13 @@ func TestGetInstanceName(t *testing.T) {
 	tests := []struct {
 		description      string
 		getInstanceFails bool
-		getInstanceResp  *argus.Instance
+		getInstanceResp  *argus.GetInstanceResponse
 		isValid          bool
 		expectedOutput   string
 	}{
 		{
 			description: "base",
-			getInstanceResp: &argus.Instance{
+			getInstanceResp: &argus.GetInstanceResponse{
 				Name: utils.Ptr(testInstanceName),
 			},
 			isValid:        true,
@@ -73,7 +73,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), client, testInstanceId, testProjectId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
