@@ -27,19 +27,18 @@
             inherit pname self;
             version = "${self.rev or self.dirtyRev}";
 
-            src = ./.; # TODO: check if I can change to a different revision here. This would reduce the maintenance pain of always needing to update `vendorHash`.
+            src = ./.; # TODO: check if we can change to a different revision here. This would reduce the maintenance pain of always needing to update 'vendorHash'.
             # 'vendorHash' represents a derivative of all go.mod dependencies and needs to be adjusted with every change
             vendorHash = "sha256-2DJ/NBeYxAL501Nz4qru77hXtOhRCO9i6RRymPviYBg=";
 
             CGO_ENABLED = 0;
             ldflags = [ "-X main.version=${version}" ];
 
-            subPackages = [ "/" ];
+            subPackages = [ "." ];
 
             nativeBuildInputs = [ pkgs.installShellFiles pkgs.makeWrapper ];
 
             # doCheck = false; # TODO: consider disabling checking to speed up building by ~10s
-            # nativeCheckInputs = [ less ]; # TODO: check if I can really drop this
             preCheck = ''
               export HOME=$TMPDIR # TODO: needed because tests executes mkdir
             '';
@@ -51,20 +50,22 @@
               installShellCompletion --cmd stackit --bash <($out/bin/stackit completion bash)
               installShellCompletion --cmd stackit --zsh <($out/bin/stackit completion zsh)
               installShellCompletion --cmd stackit --fish <($out/bin/stackit completion fish)
-              # Use this instead once LINK is fixed:
+              # Use this instead once https://github.com/stackitcloud/stackit-cli/issues/153 is fixed:
               # installShellCompletion --cmd stackit \
               #   --bash <($out/bin/stackit completion bash) \
               #   --zsh  <($out/bin/stackit completion zsh)  \
               #   --fish <($out/bin/stackit completion fish)
             '';
 
-            # TODO: consider also wrapping `xdg-open` (needed for browser promped user login)
+            # TODO: consider also wrapping 'xdg-open' (needed for browser promped user login)
+            # Wraps the binary in a bash wrapper making 'less' available in $PATH
             postFixup = ''
               wrapProgram $out/bin/stackit \
                 --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.less ]}
             '';
 
             # TODO: check if this can be run using flakes
+            # Test to verify that all shell completion scripts are created (including content)
             # passthru.tests = {
             #   simple = runCommand "${pname}-test" {} ''
             #     [ $(find ${stackit-cli}/share -not -empty -type f | wc -l) -eq 3 ]
