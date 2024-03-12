@@ -144,10 +144,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		}
 	}
 
-	if planId == nil && planName == "" {
-		if instanceName == nil {
-			return nil, &cliErr.EmptyUpdateError{}
-		}
+	if planId == nil && planName == "" && instanceName == nil {
+        return nil, &cliErr.EmptyUpdateError{}
 	}
 
 	return &inputModel{
