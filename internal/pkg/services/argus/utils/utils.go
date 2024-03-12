@@ -76,7 +76,6 @@ func GetInstancePlanId(ctx context.Context, apiClient ArgusClient, instanceId, p
 	return resp.PlanId, nil
 }
 
-
 func GetInstanceDetails(ctx context.Context, apiClient ArgusClient, instanceId, projectId string) (name, planId *string, err error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, instanceId, projectId)
 	if err != nil {

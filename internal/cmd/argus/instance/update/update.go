@@ -182,13 +182,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 		return req, fmt.Errorf("get Argus instance: %w", err)
 	}
 
-	defaultPayload := argus.UpdateInstancePayload{
+	payload := argus.UpdateInstancePayload{
 		PlanId: currPlanId,
 		Name:   currInstanceName,
 	}
 
 	if model.PlanId == nil && model.PlanName != "" {
-		defaultPayload.PlanId, err = argusUtils.LoadPlanId(model.PlanName, plans)
+		payload.PlanId, err = argusUtils.LoadPlanId(model.PlanName, plans)
 		if err != nil {
 			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
 			if !errors.As(err, &argusInvalidPlanError) {
@@ -197,19 +197,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient argusClient)
 			return req, err
 		}
 	} else if model.PlanId != nil && model.PlanName == "" {
-		if model.PlanId != nil {
-			err := argusUtils.ValidatePlanId(*model.PlanId, plans)
-			if err != nil {
-				return req, err
+		err := argusUtils.ValidatePlanId(*model.PlanId, plans)
+		if err != nil {
+			var argusInvalidPlanError *cliErr.ArgusInvalidPlanError
+			if !errors.As(err, &argusInvalidPlanError) {
+				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+			return req, err
 		}
-		defaultPayload.PlanId = model.PlanId
+		payload.PlanId = model.PlanId
 	}
 
 	if model.InstanceName != nil {
-		defaultPayload.Name = model.InstanceName
+		payload.Name = model.InstanceName
 	}
 
-	req = req.UpdateInstancePayload(defaultPayload)
+	req = req.UpdateInstancePayload(payload)
 	return req, nil
 }

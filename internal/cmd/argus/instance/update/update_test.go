@@ -95,7 +95,7 @@ func fixtureRequest(mods ...func(request *argus.ApiUpdateInstanceRequest)) argus
 	request := testClient.UpdateInstance(testCtx, testInstanceId, testProjectId)
 	request = request.UpdateInstancePayload(argus.UpdateInstancePayload{
 		PlanId: utils.Ptr(testPlanId),
-		Name: utils.Ptr(testInstanceName),
+		Name:   utils.Ptr(testInstanceName),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -308,12 +308,12 @@ func TestBuildRequest(t *testing.T) {
 		isValid             bool
 	}{
 		{
-			description:      "base",
-			model:            fixtureInputModel(),
-			expectedRequest:  fixtureRequest(),
-			getPlansResponse: fixturePlansResponse(),
+			description:         "base",
+			model:               fixtureInputModel(),
+			expectedRequest:     fixtureRequest(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			isValid:          true,
+			isValid:             true,
 		},
 		{
 			description: "use plan name",
@@ -323,10 +323,10 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "example-plan-name"
 				},
 			),
-			expectedRequest:  fixtureRequest(),
-			getPlansResponse: fixturePlansResponse(),
+			expectedRequest:     fixtureRequest(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			isValid:          true,
+			isValid:             true,
 		},
 		{
 			description: "get plans fails",
@@ -347,9 +347,9 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanName = "non-existent-plan"
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			isValid:          false,
+			isValid:             false,
 		},
 		{
 			description: "plan id not found",
@@ -358,9 +358,9 @@ func TestBuildRequest(t *testing.T) {
 					model.PlanId = utils.Ptr(uuid.NewString())
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			isValid:          false,
+			isValid:             false,
 		},
 		{
 			description: "plan id, no instance name",
@@ -369,10 +369,10 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			expectedRequest: fixtureRequest(),
-			isValid: true,
+			expectedRequest:     fixtureRequest(),
+			isValid:             true,
 		},
 		{
 			description: "plan name, no instance name",
@@ -383,10 +383,10 @@ func TestBuildRequest(t *testing.T) {
 					model.InstanceName = nil
 				},
 			),
-			getPlansResponse: fixturePlansResponse(),
+			getPlansResponse:    fixturePlansResponse(),
 			getInstanceResponse: fixtureGetInstanceResponse(),
-			expectedRequest: fixtureRequest(),
-			isValid: true,
+			expectedRequest:     fixtureRequest(),
+			isValid:             true,
 		},
 		{
 			description: "instance name, no plan info",
