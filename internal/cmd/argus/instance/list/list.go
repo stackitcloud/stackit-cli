@@ -127,10 +127,10 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []argus.Pro
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "PLAN", "NAME", "STATUS")
+		table.SetHeader("ID", "NAME", "PLAN", "STATUS")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.Id, *instance.PlanName, *instance.Name, *instance.Status)
+			table.AddRow(*instance.Id, *instance.Name, *instance.PlanName, *instance.Status)
 		}
 		err := table.Display(cmd)
 		if err != nil {

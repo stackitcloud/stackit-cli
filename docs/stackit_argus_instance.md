@@ -30,5 +30,7 @@ stackit argus instance [flags]
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit argus instance create](./stackit_argus_instance_create.md)	 - Creates an Argus instance
 * [stackit argus instance delete](./stackit_argus_instance_delete.md)	 - Deletes an Argus instance
+* [stackit argus instance describe](./stackit_argus_instance_describe.md)	 - Shows details of an Argus instance
+* [stackit argus instance list](./stackit_argus_instance_list.md)	 - Lists all Argus instances
 * [stackit argus instance update](./stackit_argus_instance_update.md)	 - Updates an Argus instance
 
