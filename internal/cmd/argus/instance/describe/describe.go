@@ -103,9 +103,11 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *argus.GetIn
 		table.AddSeparator()
 		table.AddRow("TRACES (GB)", *instance.Instance.Plan.TracesStorage)
 		table.AddSeparator()
+		table.AddRow("NOTIFICATION RULES", *instance.Instance.Plan.AlertRules)
+		table.AddSeparator()
 		table.AddRow("GRAFANA USERS", *instance.Instance.Plan.GrafanaGlobalUsers)
 		table.AddSeparator()
-		table.AddRow("NOTIFICATION RULES", *instance.Instance.Plan.AlertRules)
+		table.AddRow("GRAFANA URL", *instance.Instance.GrafanaUrl)
 		table.AddSeparator()
 		err := table.Display(cmd)
 		if err != nil {
