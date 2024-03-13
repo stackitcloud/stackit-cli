@@ -91,10 +91,8 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *argus.GetIn
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
 		table.AddSeparator()
-		if *instance.Name != "" {
-			table.AddRow("NAME", *instance.Name)
-			table.AddSeparator()
-		}
+		table.AddRow("NAME", *instance.Name)
+		table.AddSeparator()
 		table.AddRow("STATUS", *instance.Status)
 		table.AddSeparator()
 		table.AddRow("PLAN NAME", *instance.PlanName)
