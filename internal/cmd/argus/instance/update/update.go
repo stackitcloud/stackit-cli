@@ -50,7 +50,7 @@ func NewCmd() *cobra.Command {
 				"$ stackit argus instance update xxx --plan-id yyy"),
 			examples.NewExample(
 				`Update the plan of an Argus instance with ID "xxx" by specifying the plan name`,
-				"$ stackit argus instance update xxx --plan-name yyy"),
+				"$ stackit argus instance update xxx --plan-name Frontend-Starter-EU01"),
 			examples.NewExample(
 				`Update the name of an Argus instance with ID "xxx"`,
 				"$ stackit argus instance update xxx --name new-instance-name"),
@@ -123,7 +123,7 @@ func NewCmd() *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
-	cmd.Flags().String(instanceNameFlag, "", "Instance name")
+	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
