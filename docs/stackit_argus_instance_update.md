@@ -17,7 +17,7 @@ stackit argus instance update INSTANCE_ID [flags]
   $ stackit argus instance update xxx --plan-id yyy
 
   Update the plan of an Argus instance with ID "xxx" by specifying the plan name
-  $ stackit argus instance update xxx --plan-name yyy
+  $ stackit argus instance update xxx --plan-name Frontend-Starter-EU01
 
   Update the name of an Argus instance with ID "xxx"
   $ stackit argus instance update xxx --name new-instance-name
@@ -27,7 +27,7 @@ stackit argus instance update INSTANCE_ID [flags]
 
 ```
   -h, --help               Help for "stackit argus instance update"
-      --name string        Instance name
+  -n, --name string        Instance name
       --plan-id string     Plan ID
       --plan-name string   Plan name
 ```
