@@ -91,7 +91,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	if err != nil {
 		return &inputModel{}
 	}
-	recoveryTimestampString := testRecoveryTimestamp.String()
+	recoveryTimestampString := testRecoveryTimestamp.Format(time.RFC3339)
 
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -111,7 +111,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	if err != nil {
 		return &inputModel{}
 	}
-	recoveryTimestampString := testRecoveryTimestamp.String()
+	recoveryTimestampString := testRecoveryTimestamp.Format(time.RFC3339)
 
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -142,7 +142,7 @@ func fixturePayload(mods ...func(payload *postgresflex.CloneInstancePayload)) po
 	if err != nil {
 		return postgresflex.CloneInstancePayload{}
 	}
-	recoveryTimestampString := testRecoveryTimestamp.String()
+	recoveryTimestampString := testRecoveryTimestamp.Format(time.RFC3339)
 
 	payload := postgresflex.CloneInstancePayload{
 		Timestamp: utils.Ptr(recoveryTimestampString),
@@ -350,7 +350,7 @@ func TestBuildRequest(t *testing.T) {
 	if err != nil {
 		return
 	}
-	recoveryTimestampString := testRecoveryTimestamp.String()
+	recoveryTimestampString := testRecoveryTimestamp.Format(time.RFC3339)
 
 	tests := []struct {
 		description       string
