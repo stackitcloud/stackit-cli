@@ -154,8 +154,33 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) (postgresflex.ApiCloneInstanceRequest, error) {
+type PostgreSQLFlexClient interface {
+	CloneInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiCloneInstanceRequest
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiCloneInstanceRequest, error) {
 	req := apiClient.CloneInstance(ctx, model.ProjectId, model.InstanceId)
+
+	var storages *postgresflex.ListStoragesResponse
+	if model.StorageClass != nil || model.StorageSize != nil {
+		currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
+		if err != nil {
+			return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
+		}
+		validationFlavorId := currentInstance.Item.Flavor.Id
+
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId)
+		if err != nil {
+			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
+		}
+		err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
+		if err != nil {
+			return req, err
+		}
+	}
+
 	req = req.CloneInstancePayload(postgresflex.CloneInstancePayload{
 		Class:     model.StorageClass,
 		Size:      model.StorageSize,

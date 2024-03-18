@@ -2,6 +2,7 @@ package clone
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,9 +21,36 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
+
+type postgresFlexClientMocked struct {
+	listStoragesFails bool
+	listStoragesResp  *postgresflex.ListStoragesResponse
+	getInstanceFails  bool
+	getInstanceResp   *postgresflex.InstanceResponse
+}
+
+func (c *postgresFlexClientMocked) CloneInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiCloneInstanceRequest {
+	return testClient.CloneInstance(ctx, projectId, instanceId)
+}
+
+func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+	if c.getInstanceFails {
+		return nil, fmt.Errorf("get instance failed")
+	}
+	return c.getInstanceResp, nil
+}
+
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
+	if c.listStoragesFails {
+		return nil, fmt.Errorf("list storages failed")
+	}
+	return c.listStoragesResp, nil
+}
+
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRecoveryTimestamp = "2024-03-08T09:28:00+00:00"
+var testFlavorId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -117,8 +145,6 @@ func fixturePayload(mods ...func(payload *postgresflex.CloneInstancePayload)) po
 	recoveryTimestampString := testRecoveryTimestamp.String()
 
 	payload := postgresflex.CloneInstancePayload{
-		Class:     utils.Ptr("premium-perf4-stackit"),
-		Size:      utils.Ptr(int64(10)),
 		Timestamp: utils.Ptr(recoveryTimestampString),
 	}
 	for _, mod := range mods {
@@ -320,21 +346,156 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
+	testRecoveryTimestamp, err := time.Parse(recoveryDateFormat, testRecoveryTimestamp)
+	if err != nil {
+		return
+	}
+	recoveryTimestampString := testRecoveryTimestamp.String()
+
 	tests := []struct {
-		description     string
-		model           *inputModel
-		expectedRequest postgresflex.ApiCloneInstanceRequest
+		description       string
+		model             *inputModel
+		expectedRequest   postgresflex.ApiCloneInstanceRequest
+		getInstanceFails  bool
+		getInstanceResp   *postgresflex.InstanceResponse
+		listStoragesFails bool
+		listStoragesResp  *postgresflex.ListStoragesResponse
+		isValid           bool
 	}{
 		{
 			description:     "base",
-			model:           fixtureStandardInputModel(),
+			model:           fixtureRequiredInputModel(),
+			isValid:         true,
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "specify storage class only",
+			model: fixtureRequiredInputModel(func(model *inputModel) {
+				model.StorageClass = utils.Ptr("class")
+			}),
+			isValid: true,
+			getInstanceResp: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Flavor: &postgresflex.Flavor{
+						Id: utils.Ptr(testFlavorId),
+					},
+				},
+			},
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"class"},
+				StorageRange: &postgresflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			},
+			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testInstanceId).
+				CloneInstancePayload(postgresflex.CloneInstancePayload{
+					Class:     utils.Ptr("class"),
+					Timestamp: utils.Ptr(recoveryTimestampString),
+				}),
+		},
+		{
+			description: "specify storage class and size",
+			model: fixtureRequiredInputModel(func(model *inputModel) {
+				model.StorageClass = utils.Ptr("class")
+				model.StorageSize = utils.Ptr(int64(10))
+			}),
+			isValid: true,
+			getInstanceResp: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Flavor: &postgresflex.Flavor{
+						Id: utils.Ptr(testFlavorId),
+					},
+				},
+			},
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"class"},
+				StorageRange: &postgresflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			},
+			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testInstanceId).
+				CloneInstancePayload(postgresflex.CloneInstancePayload{
+					Class:     utils.Ptr("class"),
+					Size:      utils.Ptr(int64(10)),
+					Timestamp: utils.Ptr(recoveryTimestampString),
+				}),
+		},
+		{
+			description: "get instance fails",
+			model: fixtureRequiredInputModel(
+				func(model *inputModel) {
+					model.StorageClass = utils.Ptr("class")
+					model.RecoveryDate = utils.Ptr(recoveryTimestampString)
+				},
+			),
+			getInstanceFails: true,
+			isValid:          false,
+		},
+		{
+			description: "invalid storage class",
+			model: fixtureRequiredInputModel(
+				func(model *inputModel) {
+					model.StorageClass = utils.Ptr("non-existing-class")
+				},
+			),
+			getInstanceResp: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Flavor: &postgresflex.Flavor{
+						Id: utils.Ptr(testFlavorId),
+					},
+				},
+			},
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"class"},
+				StorageRange: &postgresflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			},
+			isValid: false,
+		},
+		{
+			description: "invalid storage size",
+			model: fixtureRequiredInputModel(
+				func(model *inputModel) {
+					model.StorageSize = utils.Ptr(int64(9))
+				},
+			),
+			getInstanceResp: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Flavor: &postgresflex.Flavor{
+						Id: utils.Ptr(testFlavorId),
+					},
+				},
+			},
+			listStoragesResp: &postgresflex.ListStoragesResponse{
+				StorageClasses: &[]string{"class"},
+				StorageRange: &postgresflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, _ := buildRequest(testCtx, tt.model, testClient)
+			client := &postgresFlexClientMocked{
+				getInstanceFails:  tt.getInstanceFails,
+				getInstanceResp:   tt.getInstanceResp,
+				listStoragesFails: tt.listStoragesFails,
+				listStoragesResp:  tt.listStoragesResp,
+			}
+			request, err := buildRequest(testCtx, tt.model, client)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error building request: %v", err)
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
