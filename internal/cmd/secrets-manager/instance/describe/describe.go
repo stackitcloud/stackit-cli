@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -52,14 +53,21 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			// Call API to get instance details
+			req := buildGetInstanceRequest(ctx, model, apiClient)
+			instance, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Secrets Manager instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			// Call API to get instance acls
+			listACLsReq := buildListACLsRequest(ctx, model, apiClient)
+			aclList, err := listACLsReq.Execute()
+			if err != nil {
+				return fmt.Errorf("read Secrets Manager instance ACLs: %w", err)
+			}
+
+			return outputResult(cmd, model.OutputFormat, instance, aclList)
 		},
 	}
 	return cmd
@@ -79,12 +87,17 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiGetInstanceRequest {
+func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmanager.Instance) error {
+func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiListACLsRequest {
+	req := apiClient.ListACLs(ctx, model.ProjectId, model.InstanceId)
+	return req
+}
+
+func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
@@ -101,6 +114,15 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 		table.AddSeparator()
 		table.AddRow("CREATION DATE", *instance.CreationStartDate)
 		table.AddSeparator()
+		// Only show ACL if it's present and not empty
+		if aclList != nil && aclList.Acls != nil && len(*aclList.Acls) > 0 {
+			var res string
+			for _, acl := range *aclList.Acls {
+				res += *acl.Cidr + ","
+			}
+			res = strings.TrimSuffix(res, ",")
+			table.AddRow("ACL", res)
+		}
 		err := table.Display(cmd)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
