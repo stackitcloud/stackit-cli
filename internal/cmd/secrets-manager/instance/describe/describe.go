@@ -130,7 +130,12 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 
 		return nil
 	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
+		output := struct {
+			*secretsmanager.Instance
+			*secretsmanager.AclList
+		}{instance, aclList}
+
+		details, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
 		}
