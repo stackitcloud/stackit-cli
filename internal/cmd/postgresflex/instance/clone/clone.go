@@ -3,6 +3,7 @@ package clone
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
@@ -26,7 +27,7 @@ const (
 	storageClassFlag      = "storage-class"
 	storageSizeFlag       = "storage-size"
 	recoveryTimestampFlag = "recovery-timestamp"
-	recoveryDateFormat    = "2023-04-17T09:28:00+00:00"
+	recoveryDateFormat    = time.RFC3339
 )
 
 type inputModel struct {
@@ -42,16 +43,17 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("clone %s", instanceIdArg),
 		Short: "Clones a PostgreSQL Flex instance",
-		Long:  "Clones a PostgreSQL Flex instance from a selected point in time.",
+		Long: "Clones a PostgreSQL Flex instance from a selected point in time. " +
+			"The new cloned instance will be an independent instance with the same settings as the original instance unless the flags are specified.",
 		Example: examples.Build(
 			examples.NewExample(
-				`Clone a PostgreSQL Flex instance with ID "xxx" . The recovery timestamp should be specified in UTC time following the format provided in the example.`,
+				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp.`,
 				`$ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00`),
 			examples.NewExample(
-				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage class. If not specified, storage class from the existing instance will be used.`,
+				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage class.`,
 				`$ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-class premium-perf6-stackit`),
 			examples.NewExample(
-				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage size. If not specified, storage size from the existing instance will be used.`,
+				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage size.`,
 				`$ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-size 10`),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
@@ -118,9 +120,9 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, in a date-time with the layout format, e.g. 2024-03-12T09:28:00+00:00")
-	cmd.Flags().String(storageClassFlag, "", "Storage class")
-	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
+	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, specified in UTC time following the format, e.g. 2024-03-12T09:28:00+00:00 ")
+	cmd.Flags().String(storageClassFlag, "", "Storage class. If not specified, storage class from the existing instance will be used.")
+	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB). If not specified, storage size from the existing instance will be used.")
 
 	err := flags.MarkFlagsRequired(cmd, recoveryTimestampFlag)
 	cobra.CheckErr(err)
@@ -134,12 +136,21 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	recoveryTimestamp, err := flags.FlagToDateTimePointer(cmd, recoveryTimestampFlag, recoveryDateFormat)
+	if err != nil {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    recoveryTimestampFlag,
+			Details: err.Error(),
+		}
+	}
+	recoveryTimestampString := recoveryTimestamp.String()
+
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
 		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag),
-		RecoveryDate:    flags.FlagToStringPointer(cmd, recoveryTimestampFlag),
+		RecoveryDate:    utils.Ptr(recoveryTimestampString),
 	}, nil
 }
 

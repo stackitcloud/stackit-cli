@@ -3,6 +3,7 @@ package clone
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -58,12 +59,18 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 }
 
 func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
+	testRecoveryTimestamp, err := time.Parse(recoveryDateFormat, testRecoveryTimestamp)
+	if err != nil {
+		return &inputModel{}
+	}
+	recoveryTimestampString := testRecoveryTimestamp.String()
+
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
 		InstanceId:   testInstanceId,
-		RecoveryDate: utils.Ptr(testRecoveryTimestamp),
+		RecoveryDate: utils.Ptr(recoveryTimestampString),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -72,6 +79,12 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
+	testRecoveryTimestamp, err := time.Parse(recoveryDateFormat, testRecoveryTimestamp)
+	if err != nil {
+		return &inputModel{}
+	}
+	recoveryTimestampString := testRecoveryTimestamp.String()
+
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
@@ -79,7 +92,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:   testInstanceId,
 		StorageClass: utils.Ptr("premium-perf4-stackit"),
 		StorageSize:  utils.Ptr(int64(10)),
-		RecoveryDate: utils.Ptr(testRecoveryTimestamp),
+		RecoveryDate: utils.Ptr(recoveryTimestampString),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -97,10 +110,16 @@ func fixtureRequest(mods ...func(request *postgresflex.ApiCloneInstanceRequest))
 }
 
 func fixturePayload(mods ...func(payload *postgresflex.CloneInstancePayload)) postgresflex.CloneInstancePayload {
+	testRecoveryTimestamp, err := time.Parse(recoveryDateFormat, testRecoveryTimestamp)
+	if err != nil {
+		return postgresflex.CloneInstancePayload{}
+	}
+	recoveryTimestampString := testRecoveryTimestamp.String()
+
 	payload := postgresflex.CloneInstancePayload{
 		Class:     utils.Ptr("premium-perf4-stackit"),
 		Size:      utils.Ptr(int64(10)),
-		Timestamp: utils.Ptr(testRecoveryTimestamp),
+		Timestamp: utils.Ptr(recoveryTimestampString),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -215,6 +234,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "recovery timestamp is missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, recoveryTimestampFlag)
 			}),
@@ -222,6 +242,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "recovery timestamp is empty",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
 				flagValues[recoveryTimestampFlag] = ""
 			}),
@@ -229,6 +250,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "recovery timestamp is invalid",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
 				flagValues[recoveryTimestampFlag] = "test"
 			}),
@@ -236,6 +258,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "recovery timestamp is invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
 				flagValues[recoveryTimestampFlag] = "11:00 12/12/2024"
 			}),
