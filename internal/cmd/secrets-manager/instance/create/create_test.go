@@ -12,6 +12,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
+const (
+	testACL1 = "1.2.3.4/24"
+	testACL2 = "4.3.2.1/12"
+)
+
 var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
@@ -19,11 +24,13 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
+var testInstanceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:    testProjectId,
 		instanceNameFlag: "example",
+		aclFlag:          testACL1,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,6 +44,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceName: utils.Ptr("example"),
+		Acls:         utils.Ptr([]string{testACL1}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -48,6 +56,17 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceReques
 	request := testClient.CreateInstance(testCtx, testProjectId)
 	request = request.CreateInstancePayload(secretsmanager.CreateInstancePayload{
 		Name: utils.Ptr("example"),
+	})
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureCreateACLRequest(mods ...func(request *secretsmanager.ApiCreateACLRequest)) secretsmanager.ApiCreateACLRequest {
+	request := testClient.CreateACL(testCtx, testProjectId, testInstanceId)
+	request = request.CreateACLPayload(secretsmanager.CreateACLPayload{
+		Cidr: utils.Ptr(testACL1),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -93,6 +112,33 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, instanceNameFlag)
 			}),
 			isValid: false,
+		},
+		{
+			description: "acl missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, aclFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = nil
+			}),
+		},
+		{
+			description: "acl empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "multiple acls",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = testACL1 + "," + testACL2
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				*model.Acls = append(*model.Acls, testACL2)
+			}),
 		},
 		{
 			description: "project id missing",
@@ -162,7 +208,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildCreateInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -177,7 +223,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildCreateInstanceRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -185,6 +231,51 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildCreateACLRequests(t *testing.T) {
+	tests := []struct {
+		description      string
+		model            *inputModel
+		expectedRequests []secretsmanager.ApiCreateACLRequest
+	}{
+		{
+			description:      "base",
+			model:            fixtureInputModel(),
+			expectedRequests: []secretsmanager.ApiCreateACLRequest{fixtureCreateACLRequest()},
+		},
+		{
+			description: "multiple ACLs",
+			model: fixtureInputModel(func(model *inputModel) {
+				*model.Acls = append(*model.Acls, testACL2)
+			}),
+			expectedRequests: []secretsmanager.ApiCreateACLRequest{
+				fixtureCreateACLRequest(),
+				fixtureCreateACLRequest().CreateACLPayload(secretsmanager.CreateACLPayload{
+					Cidr: utils.Ptr(testACL2),
+				})},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			requests := buildCreateACLRequests(testCtx, tt.model, testInstanceId, testClient)
+
+			if len(requests) != len(tt.expectedRequests) {
+				t.Fatal("Amount of requests is different")
+			}
+
+			for i := range requests {
+				diff := cmp.Diff(requests[i], tt.expectedRequests[i],
+					cmp.AllowUnexported(tt.expectedRequests[i]),
+					cmpopts.EquateComparable(testCtx),
+				)
+				if diff != "" {
+					t.Fatalf("Data does not match: %s", diff)
+				}
 			}
 		})
 	}
