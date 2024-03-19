@@ -51,6 +51,8 @@ var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRecoveryTimestamp = "2024-03-08T09:28:00+00:00"
 var testFlavorId = uuid.NewString()
+var testStorageClass = "premium-perf4-stackit"
+var testStorageSize = int64(10)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -118,8 +120,8 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceId:   testInstanceId,
-		StorageClass: utils.Ptr("premium-perf4-stackit"),
-		StorageSize:  utils.Ptr(int64(10)),
+		StorageClass: utils.Ptr(testStorageClass),
+		StorageSize:  utils.Ptr(testStorageSize),
 		RecoveryDate: utils.Ptr(recoveryTimestampString),
 	}
 	for _, mod := range mods {
@@ -379,6 +381,10 @@ func TestBuildRequest(t *testing.T) {
 					Flavor: &postgresflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
 					},
+					Storage: &postgresflex.Storage{
+						Class: utils.Ptr(testStorageClass),
+						Size:  utils.Ptr(testStorageSize),
+					},
 				},
 			},
 			listStoragesResp: &postgresflex.ListStoragesResponse{
@@ -405,6 +411,10 @@ func TestBuildRequest(t *testing.T) {
 				Item: &postgresflex.Instance{
 					Flavor: &postgresflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
+					},
+					Storage: &postgresflex.Storage{
+						Class: utils.Ptr(testStorageClass),
+						Size:  utils.Ptr(testStorageSize),
 					},
 				},
 			},
@@ -445,6 +455,10 @@ func TestBuildRequest(t *testing.T) {
 					Flavor: &postgresflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
 					},
+					Storage: &postgresflex.Storage{
+						Class: utils.Ptr(testStorageClass),
+						Size:  utils.Ptr(testStorageSize),
+					},
 				},
 			},
 			listStoragesResp: &postgresflex.ListStoragesResponse{
@@ -467,6 +481,10 @@ func TestBuildRequest(t *testing.T) {
 				Item: &postgresflex.Instance{
 					Flavor: &postgresflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
+					},
+					Storage: &postgresflex.Storage{
+						Class: utils.Ptr(testStorageClass),
+						Size:  utils.Ptr(testStorageSize),
 					},
 				},
 			},

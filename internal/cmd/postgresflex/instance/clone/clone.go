@@ -170,12 +170,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 			return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 		}
 		validationFlavorId := currentInstance.Item.Flavor.Id
+		currentInstanceStorageClass := currentInstance.Item.Storage.Class
+		currentInstanceStorageSize := currentInstance.Item.Storage.Size
 
 		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId)
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
-		err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
+
+		if model.StorageClass == nil {
+			err = postgresflexUtils.ValidateStorage(currentInstanceStorageClass, model.StorageSize, storages, *validationFlavorId)
+		} else if model.StorageSize == nil {
+			err = postgresflexUtils.ValidateStorage(model.StorageClass, currentInstanceStorageSize, storages, *validationFlavorId)
+		} else {
+			err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
+		}
 		if err != nil {
 			return req, err
 		}
