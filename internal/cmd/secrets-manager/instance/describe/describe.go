@@ -116,12 +116,13 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 		table.AddSeparator()
 		// Only show ACL if it's present and not empty
 		if aclList != nil && aclList.Acls != nil && len(*aclList.Acls) > 0 {
-			var res string
+			var cidrs []string
+
 			for _, acl := range *aclList.Acls {
-				res += *acl.Cidr + ","
+				cidrs = append(cidrs, *acl.Cidr)
 			}
-			res = strings.TrimSuffix(res, ",")
-			table.AddRow("ACL", res)
+
+			table.AddRow("ACL", strings.Join(cidrs, ","))
 		}
 		err := table.Display(cmd)
 		if err != nil {
