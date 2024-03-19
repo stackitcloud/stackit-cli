@@ -143,7 +143,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 			Details: err.Error(),
 		}
 	}
-	recoveryTimestampString := recoveryTimestamp.Format(time.RFC3339)
+	recoveryTimestampString := recoveryTimestamp.Format(recoveryDateFormat)
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
