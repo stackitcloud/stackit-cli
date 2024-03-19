@@ -12,6 +12,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		projectIdFlag:    true,
 		outputFormatFlag: true,
 
+		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
 		logMeCustomEndpointFlag:           true,
@@ -36,6 +37,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ProjectId:    true,
 		OutputFormat: true,
 
+		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
 		LogMeCustomEndpoint:           true,
@@ -76,6 +78,7 @@ func TestParseInput(t *testing.T) {
 				model.ProjectId = false
 				model.OutputFormat = false
 
+				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
@@ -108,6 +111,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.OutputFormat = false
+			}),
+		},
+		{
+			description: "argus custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[argusCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ArgusCustomEndpoint = false
 			}),
 		},
 		{
