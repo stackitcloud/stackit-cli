@@ -12,11 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
-const (
-	testACL1 = "1.2.3.4/24"
-	testACL2 = "4.3.2.1/12"
-)
-
 var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
@@ -30,7 +25,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:    testProjectId,
 		instanceNameFlag: "example",
-		aclFlag:          testACL1,
+		aclFlag:          "198.51.100.14/24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,7 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceName: utils.Ptr("example"),
-		Acls:         utils.Ptr([]string{testACL1}),
+		Acls:         utils.Ptr([]string{"198.51.100.14/24"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -67,7 +62,7 @@ func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLs
 	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
 		Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
-			{Cidr: utils.Ptr(testACL1)},
+			{Cidr: utils.Ptr("198.51.100.14/24")},
 		})})
 
 	for _, mod := range mods {
@@ -80,6 +75,7 @@ func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
 		flagValues    map[string]string
+		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -133,13 +129,35 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "repeated acl flags",
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{"198.51.100.14/24", "198.51.100.14/32"},
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = utils.Ptr(
+					append(*model.Acls, "198.51.100.14/24", "198.51.100.14/32"),
+				)
+			}),
+		},
+		{
+			description: "repeated acl flag with list value",
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{"198.51.100.14/24,198.51.100.14/32"},
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = utils.Ptr(
+					append(*model.Acls, "198.51.100.14/24", "198.51.100.14/32"),
+				)
+			}),
+		},
+		{
 			description: "multiple acls",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[aclFlag] = testACL1 + "," + testACL2
+				flagValues[aclFlag] = "198.51.100.14/24,1.2.3.4/32"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				*model.Acls = append(*model.Acls, testACL2)
+				*model.Acls = append(*model.Acls, "1.2.3.4/32")
 			}),
 		},
 		{
@@ -180,6 +198,16 @@ func TestParseInput(t *testing.T) {
 						return
 					}
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
+				}
+			}
+
+			for _, value := range tt.aclValues {
+				err := cmd.Flags().Set(aclFlag, value)
+				if err != nil {
+					if !tt.isValid {
+						return
+					}
+					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
 				}
 			}
 
@@ -251,12 +279,12 @@ func TestBuildCreateACLRequests(t *testing.T) {
 		{
 			description: "multiple ACLs",
 			model: fixtureInputModel(func(model *inputModel) {
-				*model.Acls = append(*model.Acls, testACL2)
+				*model.Acls = append(*model.Acls, "1.2.3.4/32")
 			}),
 			expectedRequest: fixtureUpdateACLsRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
 				Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
-					{Cidr: utils.Ptr(testACL1)},
-					{Cidr: utils.Ptr(testACL2)},
+					{Cidr: utils.Ptr("198.51.100.14/24")},
+					{Cidr: utils.Ptr("1.2.3.4/32")},
 				})}),
 		},
 	}
