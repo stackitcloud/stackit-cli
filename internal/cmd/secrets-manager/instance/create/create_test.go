@@ -19,11 +19,13 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
+var testInstanceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:    testProjectId,
 		instanceNameFlag: "example",
+		aclFlag:          "198.51.100.14/24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,6 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceName: utils.Ptr("example"),
+		Acls:         utils.Ptr([]string{"198.51.100.14/24"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -55,10 +58,24 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceReques
 	return request
 }
 
+func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
+	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
+	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
+		Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+			{Cidr: utils.Ptr("198.51.100.14/24")},
+		})})
+
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
 		flagValues    map[string]string
+		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -93,6 +110,55 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, instanceNameFlag)
 			}),
 			isValid: false,
+		},
+		{
+			description: "acl missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, aclFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = nil
+			}),
+		},
+		{
+			description: "acl empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "repeated acl flags",
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{"198.51.100.14/24", "198.51.100.14/32"},
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = utils.Ptr(
+					append(*model.Acls, "198.51.100.14/24", "198.51.100.14/32"),
+				)
+			}),
+		},
+		{
+			description: "repeated acl flag with list value",
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{"198.51.100.14/24,198.51.100.14/32"},
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = utils.Ptr(
+					append(*model.Acls, "198.51.100.14/24", "198.51.100.14/32"),
+				)
+			}),
+		},
+		{
+			description: "multiple acls",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = "198.51.100.14/24,1.2.3.4/32"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				*model.Acls = append(*model.Acls, "1.2.3.4/32")
+			}),
 		},
 		{
 			description: "project id missing",
@@ -135,6 +201,16 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			for _, value := range tt.aclValues {
+				err := cmd.Flags().Set(aclFlag, value)
+				if err != nil {
+					if !tt.isValid {
+						return
+					}
+					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
+				}
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -162,7 +238,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildCreateInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -177,7 +253,45 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildCreateInstanceRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+func TestBuildCreateACLRequests(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest secretsmanager.ApiUpdateACLsRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureUpdateACLsRequest(),
+		},
+		{
+			description: "multiple ACLs",
+			model: fixtureInputModel(func(model *inputModel) {
+				*model.Acls = append(*model.Acls, "1.2.3.4/32")
+			}),
+			expectedRequest: fixtureUpdateACLsRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
+				Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+					{Cidr: utils.Ptr("198.51.100.14/24")},
+					{Cidr: utils.Ptr("1.2.3.4/32")},
+				})}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildUpdateACLsRequest(testCtx, tt.model, testInstanceId, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
