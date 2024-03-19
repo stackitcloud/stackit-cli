@@ -7,7 +7,8 @@ set -eo pipefail
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 OBJECT_STORAGE_ENDPOINT="https://object.storage.eu01.onstackit.cloud"
-APT_BUCKET_NAME="stackit-cli-apt"
+APT_BUCKET_NAME="distribution"
+APT_REPO_FOLDER="apt/cli"
 PUBLIC_KEY_BUCKET_NAME="stackit-public-key"
 PUBLIC_KEY_FILE="key.gpg"
 CUSTOM_KEYRING_FILE="aptly-keyring.gpg"
@@ -51,4 +52,4 @@ aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapsho
 
 # Publish the new snapshot to the remote repo
 printf "\n>>> Publishing updated snapshot \n"
-aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" updated-snapshot "s3:${APT_BUCKET_NAME}:"
+aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" updated-snapshot "s3:${APT_BUCKET_NAME}:${APT_REPO_FOLDER}"
