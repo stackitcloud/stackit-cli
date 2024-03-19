@@ -107,7 +107,7 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SINGLE_ARG_EXPECTED = `expected 1 argument %q, %d were provided`
 
-	SUBCOMMAND_UNKNOWN = `unkwown subcommand %q`
+	SUBCOMMAND_UNKNOWN = `unknown subcommand %q`
 
 	SUBCOMMAND_MISSING = `missing subcommand`
 
