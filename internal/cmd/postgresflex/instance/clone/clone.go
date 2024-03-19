@@ -120,7 +120,7 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, specified in UTC time following the format, e.g. 2024-03-12T09:28:00+00:00 ")
+	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
 	cmd.Flags().String(storageClassFlag, "", "Storage class. If not specified, storage class from the existing instance will be used.")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB). If not specified, storage size from the existing instance will be used.")
 
