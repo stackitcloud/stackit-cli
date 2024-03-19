@@ -32,4 +32,5 @@ stackit secrets-manager instance [flags]
 * [stackit secrets-manager instance delete](./stackit_secrets-manager_instance_delete.md)	 - Deletes a Secrets Manager instance
 * [stackit secrets-manager instance describe](./stackit_secrets-manager_instance_describe.md)	 - Shows details of a Secrets Manager instance
 * [stackit secrets-manager instance list](./stackit_secrets-manager_instance_list.md)	 - Lists all Secrets Manager instances
+* [stackit secrets-manager instance update](./stackit_secrets-manager_instance_update.md)	 - Updates a Secrets Manager instance
 

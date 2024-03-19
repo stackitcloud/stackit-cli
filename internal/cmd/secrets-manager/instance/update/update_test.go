@@ -119,12 +119,6 @@ func TestParseInput(t *testing.T) {
 				projectIdFlag: testProjectId,
 			},
 			isValid: false,
-			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-				},
-				InstanceId: testInstanceId,
-			},
 		},
 		{
 			description: "zero values",
@@ -134,12 +128,6 @@ func TestParseInput(t *testing.T) {
 				aclFlag:       "",
 			},
 			isValid: false,
-			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-				},
-				InstanceId: testInstanceId,
-			},
 		},
 		{
 			description: "project id missing",
