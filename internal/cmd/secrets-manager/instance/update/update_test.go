@@ -26,8 +26,8 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &secretsmanager.APIClient{}
 
 var (
-	testProjectId            = uuid.NewString()
-	testInstanceId           = uuid.NewString()
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -42,8 +42,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		aclFlag:               testACL1,
+		projectIdFlag: testProjectId,
+		aclFlag:       testACL1,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -56,8 +56,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 		},
-		InstanceId:           testInstanceId,
-		Acls:              utils.Ptr([]string{testACL1}), 
+		InstanceId: testInstanceId,
+		Acls:       utils.Ptr([]string{testACL1}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -83,7 +83,7 @@ func TestParseInput(t *testing.T) {
 		description   string
 		argValues     []string
 		flagValues    map[string]string
-		aclValues  []string
+		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -130,15 +130,15 @@ func TestParseInput(t *testing.T) {
 			description: "zero values",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag:        testProjectId,
-				aclFlag: "",
+				projectIdFlag: testProjectId,
+				aclFlag:       "",
 			},
 			isValid: false,
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 				},
-				InstanceId:       testInstanceId,
+				InstanceId: testInstanceId,
 			},
 		},
 		{
@@ -178,22 +178,22 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description:  "repeated acl flags",
-			argValues:    fixtureArgValues(),
-			flagValues:   fixtureFlagValues(),
-			aclValues: []string{testACL1, testACL1},
-			isValid:      true,
+			description: "repeated acl flags",
+			argValues:   fixtureArgValues(),
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{testACL1, testACL1},
+			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Acls = utils.Ptr(
 					append(*model.Acls, testACL1, testACL1))
 			}),
 		},
 		{
-			description:  "repeated acl flag with list value",
-			argValues:    fixtureArgValues(),
-			flagValues:   fixtureFlagValues(),
-			aclValues: []string{"198.51.100.14/24,198.51.100.14/32"},
-			isValid:      true,
+			description: "repeated acl flag with list value",
+			argValues:   fixtureArgValues(),
+			flagValues:  fixtureFlagValues(),
+			aclValues:   []string{"198.51.100.14/24,198.51.100.14/32"},
+			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Acls = utils.Ptr(
 					append(*model.Acls, "198.51.100.14/24", "198.51.100.14/32"),

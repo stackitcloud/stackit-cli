@@ -76,11 +76,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update Secrets Manager instance: %w", err)
 			}
 
-			operationState := "Updated"
-			if model.Async {
-				operationState = "Triggered update of"
-			}
-			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
+			cmd.Printf("Updated instance %q\n", instanceLabel)
 			return nil
 		},
 	}
