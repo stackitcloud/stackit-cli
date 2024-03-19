@@ -84,7 +84,7 @@ func NewCmd() *cobra.Command {
 				updateReq := buildUpdateACLsRequest(ctx, model, instanceId, apiClient)
 				err = updateReq.Execute()
 				if err != nil {
-					return fmt.Errorf(`the Secrets Manager instance was successfully created, but the configuration of the ACLs failed. The default behaviour is to have no ACL.
+					return fmt.Errorf(`the Secrets Manager instance was successfully created, but the configuration of the ACLs failed. The default behavior is to have no ACL.
 
 If you want to retry configuring the ACLs, you can do it via: 
   $ stackit secrets-manager instance update %s --acl %s`, instanceId, *model.Acls)
