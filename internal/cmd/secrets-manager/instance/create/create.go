@@ -133,10 +133,10 @@ func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClien
 func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId string, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
 	req := apiClient.UpdateACLs(ctx, model.ProjectId, instanceId)
 
-	cidrs := []secretsmanager.AclUpdate{}
+	cidrs := make([]secretsmanager.AclUpdate, len(*model.Acls))
 
-	for _, acl := range *model.Acls {
-		cidrs = append(cidrs, secretsmanager.AclUpdate{Cidr: utils.Ptr(acl)})
+	for i, acl := range *model.Acls {
+		cidrs[i] = secretsmanager.AclUpdate{Cidr: utils.Ptr(acl)}
 	}
 
 	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
