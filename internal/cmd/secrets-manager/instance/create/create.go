@@ -79,14 +79,15 @@ func NewCmd() *cobra.Command {
 			}
 			instanceId := *resp.Id
 
-			// Call API to create ACls for instance, if ACL is provided
-			if model.Acls != nil && len(*model.Acls) > 0 {
-				requests := buildCreateACLRequests(ctx, model, instanceId, apiClient)
-				for _, req := range requests {
-					_, err := req.Execute()
-					if err != nil {
-						return fmt.Errorf("create ACL for Secrets Manager instance: %w", err)
-					}
+			// Call API to create ACLs for instance, if ACLs are provided
+			if model.Acls != nil {
+				updateReq := buildUpdateACLsRequest(ctx, model, instanceId, apiClient)
+				err = updateReq.Execute()
+				if err != nil {
+					return fmt.Errorf(`the Secrets Manager instance was successfully created, but the configuration of the ACLs failed.
+
+If you want to retry configuring the ACLs, you can do it via: 
+  $ stackit secrets-manager instance update %s --acl %s`, instanceId, *model.Acls)
 				}
 			}
 
@@ -119,27 +120,26 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildCreateACLRequests(ctx context.Context, model *inputModel, instanceId string, apiClient *secretsmanager.APIClient) []secretsmanager.ApiCreateACLRequest {
-	var requests []secretsmanager.ApiCreateACLRequest
-
-	for _, acl := range *model.Acls {
-		req := apiClient.CreateACL(ctx, model.ProjectId, instanceId)
-
-		req = req.CreateACLPayload(secretsmanager.CreateACLPayload{
-			Cidr: utils.Ptr(acl),
-		})
-		requests = append(requests, req)
-	}
-
-	return requests
-}
-
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateInstanceRequest {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	req = req.CreateInstancePayload(secretsmanager.CreateInstancePayload{
 		Name: model.InstanceName,
 	})
+
+	return req
+}
+
+func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId string, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
+	req := apiClient.UpdateACLs(ctx, model.ProjectId, instanceId)
+
+	cidrs := []secretsmanager.AclUpdate{}
+
+	for _, acl := range *model.Acls {
+		cidrs = append(cidrs, secretsmanager.AclUpdate{Cidr: utils.Ptr(acl)})
+	}
+
+	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
 
 	return req
 }
