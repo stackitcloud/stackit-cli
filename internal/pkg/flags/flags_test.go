@@ -586,9 +586,10 @@ func TestCIDRSliceFlag(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "invalid empty value",
-			value1:      utils.Ptr(""),
-			isValid:     false,
+			description:   "invalid empty value",
+			value1:        utils.Ptr(""),
+			isValid:       true,
+			expectedValue: []string{},
 		},
 		{
 			description: "invalid empty value in list",
