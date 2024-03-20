@@ -24,7 +24,11 @@ func (f *cidrSliceFlag) String() string {
 
 func (f *cidrSliceFlag) Set(value string) error {
 	if value == "" {
-		f.value = []string{}
+		// If it's the first value to be set to the flag, we set it to an empty list
+		// Otherwise, we just ignore an empty value
+		if len(f.value) == 0 {
+			f.value = []string{}
+		}
 		return nil
 	}
 

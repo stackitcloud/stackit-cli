@@ -592,6 +592,13 @@ func TestCIDRSliceFlag(t *testing.T) {
 			expectedValue: []string{},
 		},
 		{
+			description:   "valid value and empty value",
+			value1:        utils.Ptr("198.51.100.14/24"),
+			value2:        utils.Ptr(""),
+			isValid:       true,
+			expectedValue: []string{"198.51.100.14/24"},
+		},
+		{
 			description: "invalid empty value in list",
 			value1:      utils.Ptr("198.51.100.14/24,198.51.100.14/32,"),
 			isValid:     false,
