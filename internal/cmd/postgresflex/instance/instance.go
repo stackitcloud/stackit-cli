@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/backups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/clone"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/delete"
@@ -32,4 +33,5 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(update.NewCmd())
 	cmd.AddCommand(delete.NewCmd())
 	cmd.AddCommand(clone.NewCmd())
+	cmd.AddCommand(backups.NewCmd())
 }
