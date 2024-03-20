@@ -1,7 +1,6 @@
 package flags
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -25,7 +24,8 @@ func (f *cidrSliceFlag) String() string {
 
 func (f *cidrSliceFlag) Set(value string) error {
 	if value == "" {
-		return fmt.Errorf("value cannot be empty")
+		f.value = []string{}
+		return nil
 	}
 
 	cidrs := strings.Split(value, ",")
