@@ -28,6 +28,7 @@ stackit postgresflex instance [flags]
 ### SEE ALSO
 
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
+* [stackit postgresflex instance backups](./stackit_postgresflex_instance_backups.md)	 - Provides functionality for PostgreSQL Flex instance backups
 * [stackit postgresflex instance clone](./stackit_postgresflex_instance_clone.md)	 - Clones a PostgreSQL Flex instance
 * [stackit postgresflex instance create](./stackit_postgresflex_instance_create.md)	 - Creates a PostgreSQL Flex instance
 * [stackit postgresflex instance delete](./stackit_postgresflex_instance_delete.md)	 - Deletes a PostgreSQL Flex instance
