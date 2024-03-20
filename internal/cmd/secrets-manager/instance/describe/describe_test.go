@@ -54,8 +54,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *secretsmanager.ApiGetInstanceRequest)) secretsmanager.ApiGetInstanceRequest {
+func fixtureGetInstanceRequest(mods ...func(request *secretsmanager.ApiGetInstanceRequest)) secretsmanager.ApiGetInstanceRequest {
 	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureListACLsRequest(mods ...func(request *secretsmanager.ApiListACLsRequest)) secretsmanager.ApiListACLsRequest {
+	request := testClient.ListACLs(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -186,7 +194,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildGetInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -195,13 +203,41 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureGetInstanceRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildGetInstanceRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildGetACLsRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest secretsmanager.ApiListACLsRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureListACLsRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildListACLsRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
