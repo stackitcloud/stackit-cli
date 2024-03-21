@@ -95,6 +95,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: map[string]string{
 				projectIdFlag:    testProjectId,
 				instanceNameFlag: "",
+				aclFlag:          "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -102,6 +103,7 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 				},
 				InstanceName: utils.Ptr(""),
+				Acls:         &[]string{},
 			},
 		},
 		{
@@ -120,13 +122,6 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Acls = nil
 			}),
-		},
-		{
-			description: "acl empty",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[aclFlag] = ""
-			}),
-			isValid: false,
 		},
 		{
 			description: "repeated acl flags",
