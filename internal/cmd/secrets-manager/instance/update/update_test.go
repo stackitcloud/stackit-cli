@@ -127,7 +127,10 @@ func TestParseInput(t *testing.T) {
 				projectIdFlag: testProjectId,
 				aclFlag:       "",
 			},
-			isValid: false,
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = &[]string{}
+			}),
 		},
 		{
 			description: "project id missing",
