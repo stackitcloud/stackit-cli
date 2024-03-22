@@ -252,6 +252,17 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "no acl flag",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureStandardFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, aclFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureStandardInputModel(func(model *inputModel) {
+				model.ACL = nil
+			}),
+		},
+		{
 			description: "repeated acl flags",
 			argValues:   fixtureArgValues(),
 			flagValues:  fixtureRequiredFlagValues(),
