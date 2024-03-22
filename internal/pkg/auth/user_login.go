@@ -41,11 +41,11 @@ func AuthorizeUser() error {
 	if err != nil {
 		return fmt.Errorf("bind port for login redirect: %w", err)
 	}
-	port, ok := listener.Addr().(*net.TCPAddr).Port
-        if !ok {
+	address, ok := listener.Addr().(*net.TCPAddr)
+	if !ok {
 		return fmt.Errorf("assert listener address type to TCP address")
 	}
-	redirectURL := fmt.Sprintf("http://localhost:%d", port)
+	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
 		ClientID: clientId,
