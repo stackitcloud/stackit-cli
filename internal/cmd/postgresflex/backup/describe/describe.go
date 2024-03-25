@@ -63,7 +63,7 @@ func NewCmd() *cobra.Command {
 			resp, err := req.Execute()
 
 			if err != nil {
-				return fmt.Errorf("describe backup for PostgreSQL Flex instance : %w", err)
+				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
 
 			return outputResult(cmd, model.OutputFormat, *resp.Item)
@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.Backup) error {
 	backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
 	if err != nil {
-		return fmt.Errorf("parse backup start time : %w", err)
+		return fmt.Errorf("parse backup start time: %w", err)
 	}
 	backupExpireDate := backupStartTime.AddDate(0, 0, 30).Format(time.DateOnly)
 
@@ -131,7 +131,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 	default:
 		details, err := json.MarshalIndent(backup, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup for PostgreSQL Flex instance : %w", err)
+			return fmt.Errorf("marshal backup for PostgreSQL Flex instance: %w", err)
 		}
 		cmd.Println(string(details))
 
