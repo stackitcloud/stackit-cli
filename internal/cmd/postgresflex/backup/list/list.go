@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+
 	"time"
 
 	"github.com/spf13/cobra"
@@ -141,7 +142,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backups []postgresfle
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "START TIME", "END TIME", "EXPIRES AT", "BACKUP SIZE")
+		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
 		for i := range backups {
 			backup := backups[i]
 
@@ -151,7 +152,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backups []postgresfle
 			}
 			backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
-			table.AddRow(*backup.Id, *backup.Name, *backup.StartTime, *backup.EndTime, backupExpireDate, bytesize.New(float64(*backup.Size)))
+			table.AddRow(*backup.Id, *backup.StartTime, backupExpireDate, bytesize.New(float64(*backup.Size)))
 		}
 		err := table.Display(cmd)
 		if err != nil {

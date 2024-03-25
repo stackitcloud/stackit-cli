@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"time"
 
 	"github.com/inhies/go-bytesize"
@@ -116,11 +117,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 		table := tables.NewTable()
 		table.AddRow("ID", *backup.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", *backup.Name)
-		table.AddSeparator()
 		table.AddRow("START TIME", *backup.StartTime)
-		table.AddSeparator()
-		table.AddRow("END TIME", *backup.EndTime)
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", backupExpireDate)
 		table.AddSeparator()
