@@ -22,6 +22,10 @@ const (
 	backupIdArg = "BACKUP_ID"
 
 	instanceIdFlag = "instance-id"
+
+	backupExpireYearOffset  = 0
+	backupExpireMonthOffset = 0
+	backupExpireDayOffset   = 30
 )
 
 type inputModel struct {
@@ -105,7 +109,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 	if err != nil {
 		return fmt.Errorf("parse backup start time: %w", err)
 	}
-	backupExpireDate := backupStartTime.AddDate(0, 0, 30).Format(time.DateOnly)
+	backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
