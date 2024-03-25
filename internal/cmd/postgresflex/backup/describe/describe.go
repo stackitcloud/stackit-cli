@@ -39,10 +39,10 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy"`,
-				"$ stackit postgresflex instance backups describe xxx --instance-id yyy"),
+				"$ stackit postgresflex backup describe xxx --instance-id yyy"),
 			examples.NewExample(
 				`Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy" in a table format`,
-				"$ stackit postgresflex instance backups describe xxx --instance-id yyy --output-format pretty"),
+				"$ stackit postgresflex backup describe xxx --instance-id yyy --output-format pretty"),
 		),
 		Args: args.SingleArg(backupIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {

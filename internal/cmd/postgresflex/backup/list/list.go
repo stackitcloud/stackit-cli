@@ -39,13 +39,13 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all backups of instance with ID "xxx"`,
-				"$ stackit postgresflex instance backups list --instance-id xxx"),
+				"$ stackit postgresflex backup list --instance-id xxx"),
 			examples.NewExample(
 				`List all backups of instance with ID "xxx" in JSON format`,
-				"$ stackit postgresflex instance backups list --instance-id xxx --output-format json"),
+				"$ stackit postgresflex backup list --instance-id xxx --output-format json"),
 			examples.NewExample(
 				`List up to 10 backups of instance with ID "xxx"`,
-				"$ stackit postgresflex instance backups list --instance-id xxx --limit 10"),
+				"$ stackit postgresflex backup list --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {

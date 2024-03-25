@@ -1,9 +1,9 @@
-package backups
+package backup
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/backups/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/backups/list"
-	updateschedule "github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance/backups/update-schedule"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup/list"
+	updateschedule "github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup/update-schedule"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -12,7 +12,7 @@ import (
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "backups",
+		Use:   "backup",
 		Short: "Provides functionality for PostgreSQL Flex instance backups",
 		Long:  "Provides functionality for PostgreSQL Flex instance backups.",
 		Args:  args.NoArgs,

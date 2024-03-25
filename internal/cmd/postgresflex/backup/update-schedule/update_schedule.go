@@ -37,7 +37,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the backup schedule of a PostgreSQL Flex instance with ID "xxx"`,
-				"$ stackit postgresflex instance backups update-schedule --instance-id xxx --backup-schedule '6 6 * * *'"),
+				"$ stackit postgresflex backup update-schedule --instance-id xxx --backup-schedule '6 6 * * *'"),
 		),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
