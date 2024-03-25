@@ -1,4 +1,4 @@
-## stackit postgresflex instance backups describe
+## stackit postgresflex backup describe
 
 Shows details of a backup for a specific PostgreSQL Flex instance
 
@@ -7,23 +7,23 @@ Shows details of a backup for a specific PostgreSQL Flex instance
 Shows details of a backup for a specific PostgreSQL Flex instance.
 
 ```
-stackit postgresflex instance backups describe BACKUP_ID [flags]
+stackit postgresflex backup describe BACKUP_ID [flags]
 ```
 
 ### Examples
 
 ```
   Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy"
-  $ stackit postgresflex instance backups describe xxx --instance-id yyy
+  $ stackit postgresflex backup describe xxx --instance-id yyy
 
   Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy" in a table format
-  $ stackit postgresflex instance backups describe xxx --instance-id yyy --output-format pretty
+  $ stackit postgresflex backup describe xxx --instance-id yyy --output-format pretty
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit postgresflex instance backups describe"
+  -h, --help                 Help for "stackit postgresflex backup describe"
       --instance-id string   Instance ID
 ```
 
@@ -38,5 +38,5 @@ stackit postgresflex instance backups describe BACKUP_ID [flags]
 
 ### SEE ALSO
 
-* [stackit postgresflex instance backups](./stackit_postgresflex_instance_backups.md)	 - Provides functionality for PostgreSQL Flex instance backups
+* [stackit postgresflex backup](./stackit_postgresflex_backup.md)	 - Provides functionality for PostgreSQL Flex instance backups
 

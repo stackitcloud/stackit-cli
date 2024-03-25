@@ -1,4 +1,4 @@
-## stackit postgresflex instance backups list
+## stackit postgresflex backup list
 
 Lists all backups which are available for a specific PostgreSQL Flex instance
 
@@ -7,26 +7,26 @@ Lists all backups which are available for a specific PostgreSQL Flex instance
 Lists all backups which are available for a specific PostgreSQL Flex instance.
 
 ```
-stackit postgresflex instance backups list [flags]
+stackit postgresflex backup list [flags]
 ```
 
 ### Examples
 
 ```
   List all backups of instance with ID "xxx"
-  $ stackit postgresflex instance backups list --instance-id xxx
+  $ stackit postgresflex backup list --instance-id xxx
 
   List all backups of instance with ID "xxx" in JSON format
-  $ stackit postgresflex instance backups list --instance-id xxx --output-format json
+  $ stackit postgresflex backup list --instance-id xxx --output-format json
 
   List up to 10 backups of instance with ID "xxx"
-  $ stackit postgresflex instance backups list --instance-id xxx --limit 10
+  $ stackit postgresflex backup list --instance-id xxx --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit postgresflex instance backups list"
+  -h, --help                 Help for "stackit postgresflex backup list"
       --instance-id string   Instance ID
       --limit int            Maximum number of entries to list
 ```
@@ -42,5 +42,5 @@ stackit postgresflex instance backups list [flags]
 
 ### SEE ALSO
 
-* [stackit postgresflex instance backups](./stackit_postgresflex_instance_backups.md)	 - Provides functionality for PostgreSQL Flex instance backups
+* [stackit postgresflex backup](./stackit_postgresflex_backup.md)	 - Provides functionality for PostgreSQL Flex instance backups
 
