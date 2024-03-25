@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	instanceIdFlag     = "instance-id"
-	backupScheduleFlag = "backup-schedule"
+	instanceIdFlag = "instance-id"
+	scheduleFlag   = "schedule"
 )
 
 type inputModel struct {
@@ -37,7 +37,7 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the backup schedule of a PostgreSQL Flex instance with ID "xxx"`,
-				"$ stackit postgresflex backup update-schedule --instance-id xxx --backup-schedule '6 6 * * *'"),
+				"$ stackit postgresflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'"),
 		),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -84,9 +84,9 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule, in the cron scheduling system format e.g. '0 0 * * *'")
+	cmd.Flags().String(scheduleFlag, "", "Backup schedule, in the cron scheduling system format e.g. '0 0 * * *'")
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, backupScheduleFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, scheduleFlag)
 	cobra.CheckErr(err)
 }
 
@@ -99,7 +99,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringPointer(cmd, instanceIdFlag),
-		BackupSchedule:  flags.FlagToStringPointer(cmd, backupScheduleFlag),
+		BackupSchedule:  flags.FlagToStringPointer(cmd, scheduleFlag),
 	}, nil
 }
 

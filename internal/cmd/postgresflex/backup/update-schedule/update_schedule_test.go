@@ -21,13 +21,13 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testBackupSchedule = "0 0 * * *"
+var testSchedule = "0 0 * * *"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		backupScheduleFlag: testBackupSchedule,
-		instanceIdFlag:     testInstanceId,
+		projectIdFlag:  testProjectId,
+		scheduleFlag:   testSchedule,
+		instanceIdFlag: testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,7 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		InstanceId:     utils.Ptr(testInstanceId),
-		BackupSchedule: &testBackupSchedule,
+		BackupSchedule: &testSchedule,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *postgresflex.UpdateBackupSchedulePayload)) postgresflex.UpdateBackupSchedulePayload {
 	payload := postgresflex.UpdateBackupSchedulePayload{
-		BackupSchedule: utils.Ptr(testBackupSchedule),
+		BackupSchedule: utils.Ptr(testSchedule),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -125,7 +125,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "backup schedule missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, backupScheduleFlag)
+				delete(flagValues, scheduleFlag)
 			}),
 			isValid: false,
 		},
