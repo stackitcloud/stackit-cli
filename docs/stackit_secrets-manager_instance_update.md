@@ -1,31 +1,27 @@
-## stackit secrets-manager instance create
+## stackit secrets-manager instance update
 
-Creates a Secrets Manager instance
+Updates a Secrets Manager instance
 
 ### Synopsis
 
-Creates a Secrets Manager instance.
+Updates a Secrets Manager instance.
 
 ```
-stackit secrets-manager instance create [flags]
+stackit secrets-manager instance update INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Create a Secrets Manager instance with name "my-instance"
-  $ stackit secrets-manager instance create --name my-instance
-
-  Create a Secrets Manager instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit secrets-manager instance create --name my-instance --acl 1.2.3.0/24
+  Update the range of IPs allowed to access a Secrets Manager instance with ID "xxx"
+  $ stackit secrets-manager instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options
 
 ```
       --acl strings   List of IP networks in CIDR notation which are allowed to access this instance (default [])
-  -h, --help          Help for "stackit secrets-manager instance create"
-  -n, --name string   Instance name
+  -h, --help          Help for "stackit secrets-manager instance update"
 ```
 
 ### Options inherited from parent commands

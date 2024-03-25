@@ -24,7 +24,7 @@ echo -n >~/.gnupg/common.conf
 printf ">>> Creating mirror \n"
 curl ${OBJECT_STORAGE_ENDPOINT}/${PUBLIC_KEY_BUCKET_NAME}/${PUBLIC_KEY_FILE} >public.asc
 gpg --no-default-keyring --keyring=${CUSTOM_KEYRING_FILE} --import public.asc
-aptly mirror create -config "${APTLY_CONFIG_FILE_PATH}" -keyring="${CUSTOM_KEYRING_FILE}" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}" ${DISTRIBUTION}
+aptly mirror create -config "${APTLY_CONFIG_FILE_PATH}" -keyring="${CUSTOM_KEYRING_FILE}" current "${OBJECT_STORAGE_ENDPOINT}/${APT_BUCKET_NAME}/${APT_REPO_FOLDER}" ${DISTRIBUTION}
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
