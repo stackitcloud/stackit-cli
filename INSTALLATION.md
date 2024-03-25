@@ -2,6 +2,30 @@
 
 ## Package managers
 
+### Nix / NixOS (with [Flakes](https://nixos.wiki/wiki/Flakes))
+
+The STACKIT CLI can be build & installed using the [Nix](https://nixos.org/) flake in this repo.
+
+> The Nix experimental features `nix-command` and `flakes` need to be enabled.
+
+```shell
+# Ad hoc / ephemeral execution
+## Build and run
+nix run github:stackitcloud/stackit-cli -- help
+## Build and start subshell (`stackit` command available in $PATH)
+nix shell github:stackitcloud/stackit-cli
+
+# Permanent (imperative) installation
+## development version (main branch)
+nix profile install github:stackitcloud/stackit-cli
+## release version
+nix profile install github:stackitcloud/stackit-cli/$TAG
+## After installation the `stackit` command is available, verify with:
+stackit help
+```
+
+To help with installing this flake declaratively, it provides a simple overlay function (`overlays.default`).
+
 ### macOS
 
 The STACKIT CLI can be installed through the [Homebrew](https://brew.sh/) package manager.

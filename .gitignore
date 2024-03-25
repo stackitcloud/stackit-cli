@@ -7,3 +7,6 @@ dist/
 
 # OS generated files
 .DS_Store
+
+# Nix build output
+result
