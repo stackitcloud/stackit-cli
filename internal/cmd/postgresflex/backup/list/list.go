@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/depp/bytesize"
+	"github.com/inhies/go-bytesize"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -140,7 +140,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backups []postgresfle
 		table.SetHeader("ID", "NAME", "START TIME", "END TIME", "BACKUP SIZE")
 		for i := range backups {
 			backup := backups[i]
-			table.AddRow(*backup.Id, *backup.Name, *backup.StartTime, *backup.EndTime, bytesize.Format(uint64(*backup.Size)))
+			table.AddRow(*backup.Id, *backup.Name, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)))
 		}
 		err := table.Display(cmd)
 		if err != nil {

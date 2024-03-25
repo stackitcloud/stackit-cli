@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/depp/bytesize"
+	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -120,7 +120,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", backupExpireDate)
 		table.AddSeparator()
-		table.AddRow("BACKUP SIZE", bytesize.Format(uint64(*backup.Size)))
+		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
 
 		err := table.Display(cmd)
 		if err != nil {
