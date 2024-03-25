@@ -12,7 +12,7 @@ Your contribution is welcome! Thank you for your interest in contributing to the
 
 Prerequisites:
 
-- [`Go`](https://go.dev/doc/install) 1.21+
+- [`Go`](https://go.dev/doc/install) 1.22+
 - [`yamllint`](https://yamllint.readthedocs.io/en/stable/quickstart.html)
 
 ### Repository structure
