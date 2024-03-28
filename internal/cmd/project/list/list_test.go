@@ -28,6 +28,7 @@ var testClient = &resourcemanager.APIClient{}
 var testParentId = uuid.NewString()
 var testProjectIdLike = uuid.NewString()
 var testCreationTimeAfter = "2023-01-01T00:00:00Z"
+var authUserEmail, _ = auth.GetAuthField(auth.USER_EMAIL)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{

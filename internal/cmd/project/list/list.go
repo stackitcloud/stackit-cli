@@ -131,14 +131,6 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	projectIdLike := flags.FlagToStringSliceValue(cmd, projectIdLikeFlag)
 	member := flags.FlagToStringPointer(cmd, memberFlag)
 
-	if parentId == nil && projectIdLike == nil && member == nil {
-		email, err := auth.GetAuthField(auth.USER_EMAIL)
-		if err != nil {
-			return nil, fmt.Errorf("get email of authenticated user: %w", err)
-		}
-		member = &email
-	}
-
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
 		ParentId:          parentId,
@@ -192,7 +184,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 		// Call API
 		req, err := buildRequest(ctx, model, apiClient, offset)
 		if err != nil {
-			return nil, fmt.Errorf("build list projects request: %w", err)
+			return nil, fmt.Errorf("build fetch projects request: %w", err)
 		}
 		resp, err := req.Execute()
 		if err != nil {
