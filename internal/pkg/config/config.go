@@ -15,6 +15,7 @@ const (
 	OutputFormatKey     = "output_format"
 	ProjectIdKey        = "project_id"
 	SessionTimeLimitKey = "session_time_limit"
+	VerbosityKey        = "verbosity"
 
 	ArgusCustomEndpointKey          = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey  = "authorization_custom_endpoint"
@@ -49,6 +50,7 @@ var ConfigKeys = []string{
 	OutputFormatKey,
 	ProjectIdKey,
 	SessionTimeLimitKey,
+	VerbosityKey,
 
 	DNSCustomEndpointKey,
 	LogMeCustomEndpointKey,

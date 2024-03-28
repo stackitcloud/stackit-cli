@@ -16,12 +16,21 @@ const (
 	AssumeYesFlag    = "assume-yes"
 	OutputFormatFlag = "output-format"
 	ProjectIdFlag    = "project-id"
+	VerbosityFlag    = "verbosity"
 
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
+
+	DebugVerbosity   = "debug"
+	InfoVerbosity    = "info"
+	WarningVerbosity = "warning"
+	ErrorVerbosity   = "error"
+
+	VerbosityDefault = InfoVerbosity
 )
 
 var outputFormatFlagOptions = []string{JSONOutputFormat, PrettyOutputFormat}
+var verbosityFlagOptions = []string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity}
 
 type GlobalFlagModel struct {
 	Async        bool
@@ -50,6 +59,13 @@ func Configure(flagSet *pflag.FlagSet) error {
 	}
 
 	flagSet.BoolP(AssumeYesFlag, "y", false, "If set, skips all confirmation prompts")
+
+	flagSet.Var(flags.EnumFlag(true, VerbosityDefault, verbosityFlagOptions...), VerbosityFlag, fmt.Sprintf("Verbosity of the CLI, one of %q", verbosityFlagOptions))
+	err = viper.BindPFlag(config.VerbosityKey, flagSet.Lookup(VerbosityFlag))
+	if err != nil {
+		return fmt.Errorf("bind --%s flag to config: %w", VerbosityFlag, err)
+	}
+
 	return nil
 }
 
