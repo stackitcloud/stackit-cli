@@ -131,14 +131,6 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	projectIdLike := flags.FlagToStringSliceValue(cmd, projectIdLikeFlag)
 	member := flags.FlagToStringPointer(cmd, memberFlag)
 
-	if parentId == nil && projectIdLike == nil && member == nil {
-		email, err := auth.GetAuthField(auth.USER_EMAIL)
-		if err != nil {
-			return nil, fmt.Errorf("get email of authenticated user: %w", err)
-		}
-		member = &email
-	}
-
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
 		ParentId:          parentId,
@@ -150,7 +142,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) resourcemanager.ApiListProjectsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) (resourcemanager.ApiListProjectsRequest, error) {
 	req := apiClient.ListProjects(ctx)
 	if model.ParentId != nil {
 		req = req.ContainerParentId(*model.ParentId)
@@ -164,9 +156,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 	if model.CreationTimeAfter != nil {
 		req = req.CreationTimeStart(*model.CreationTimeAfter)
 	}
+
+	if model.ParentId == nil && model.ProjectIdLike == nil && model.Member == nil {
+		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		if err != nil {
+			return req, fmt.Errorf("get email of authenticated user: %w", err)
+		}
+		req = req.Member(email)
+	}
 	req = req.Limit(float32(model.PageSize))
 	req = req.Offset(float32(offset))
-	return req
+	return req, nil
 }
 
 type resourceManagerClient interface {
@@ -182,7 +182,10 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	projects := []resourcemanager.ProjectResponse{}
 	for {
 		// Call API
-		req := buildRequest(ctx, model, apiClient, offset)
+		req, err := buildRequest(ctx, model, apiClient, offset)
+		if err != nil {
+			return nil, fmt.Errorf("build fetch projects request: %w", err)
+		}
 		resp, err := req.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("get projects: %w", err)

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -26,6 +27,7 @@ var testClient = &resourcemanager.APIClient{}
 var testParentId = uuid.NewString()
 var testProjectIdLike = uuid.NewString()
 var testCreationTimeAfter = "2023-01-01T00:00:00Z"
+var authUserEmail, _ = auth.GetAuthField(auth.USER_EMAIL)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -139,15 +141,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no values",
 			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "none of required fields provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, parentIdFlag)
-				delete(flagValues, memberFlag)
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ParentId = nil
+				model.Member = nil
+				model.CreationTimeAfter = nil
 			}),
-			isValid: false,
 		},
 		{
 			description:         "projectIdLike invalid",
@@ -278,12 +277,12 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest().Offset(10),
 		},
 		{
-			description: "required fields only",
+			description: "fetch email from auth user",
 			model: &inputModel{
 				PageSize: pageSizeDefault,
 			},
 			offset:          1,
-			expectedRequest: testClient.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault),
+			expectedRequest: testClient.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault).Member(authUserEmail),
 		},
 		{
 			description:     "projectIdLike set",
@@ -299,7 +298,10 @@ func TestBuildRequest(t *testing.T) {
 			if tt.projectIdLike != nil {
 				tt.model.ProjectIdLike = tt.projectIdLike
 			}
-			request := buildRequest(testCtx, tt.model, testClient, tt.offset)
+			request, err := buildRequest(testCtx, tt.model, testClient, tt.offset)
+			if err != nil {
+				t.Fatalf("Failed to build request: %v", err)
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
