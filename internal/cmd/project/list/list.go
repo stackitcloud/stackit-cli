@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -47,6 +48,9 @@ func NewCmd() *cobra.Command {
 		Long:  "Lists all STACKIT projects that match certain criteria.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			examples.NewExample(
+				`List all STACKIT projects that authenticated user is a member of`,
+				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
 				"$ stackit project list --parent-id xxx"),
@@ -94,9 +98,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(creationTimeAfterFlag, "", "Filter by creation timestamp, in a date-time with the RFC3339 layout format, e.g. 2023-01-01T00:00:00Z. The list of projects that were created after the given timestamp will be shown")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
-
-	// At least one of parent-id, project-id-like or member flag must be provided
-	cmd.MarkFlagsOneRequired(parentIdFlag, projectIdLikeFlag, memberFlag)
 }
 
 func parseInput(cmd *cobra.Command) (*inputModel, error) {
@@ -126,11 +127,23 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
+	parentId := flags.FlagToStringPointer(cmd, parentIdFlag)
+	projectIdLike := flags.FlagToStringSliceValue(cmd, projectIdLikeFlag)
+	member := flags.FlagToStringPointer(cmd, memberFlag)
+
+	if parentId == nil && projectIdLike == nil && member == nil {
+		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		if err != nil {
+			return nil, fmt.Errorf("get email of authenticated user: %w", err)
+		}
+		member = &email
+	}
+
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
-		ParentId:          flags.FlagToStringPointer(cmd, parentIdFlag),
-		ProjectIdLike:     flags.FlagToStringSliceValue(cmd, projectIdLikeFlag),
-		Member:            flags.FlagToStringPointer(cmd, memberFlag),
+		ParentId:          parentId,
+		ProjectIdLike:     projectIdLike,
+		Member:            member,
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
