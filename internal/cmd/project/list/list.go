@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all STACKIT projects that the authenticated user is a member of`,
+				`List all STACKIT projects that authenticated user is a member of`,
 				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
@@ -127,11 +127,23 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
+	parentId := flags.FlagToStringPointer(cmd, parentIdFlag)
+	projectIdLike := flags.FlagToStringSliceValue(cmd, projectIdLikeFlag)
+	member := flags.FlagToStringPointer(cmd, memberFlag)
+
+	if parentId == nil && projectIdLike == nil && member == nil {
+		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		if err != nil {
+			return nil, fmt.Errorf("get email of authenticated user: %w", err)
+		}
+		member = &email
+	}
+
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
-		ParentId:          flags.FlagToStringPointer(cmd, parentIdFlag),
-		ProjectIdLike:     flags.FlagToStringSliceValue(cmd, projectIdLikeFlag),
-		Member:            flags.FlagToStringPointer(cmd, memberFlag),
+		ParentId:          parentId,
+		ProjectIdLike:     projectIdLike,
+		Member:            member,
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
