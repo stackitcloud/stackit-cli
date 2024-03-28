@@ -30,4 +30,5 @@ stackit ske credentials [flags]
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit ske credentials describe](./stackit_ske_credentials_describe.md)	 - Shows details of the credentials associated to a SKE cluster
 * [stackit ske credentials rotate](./stackit_ske_credentials_rotate.md)	 - Rotates credentials associated to a SKE cluster
+* [stackit ske credentials start-rotation](./stackit_ske_credentials_start-rotation.md)	 - Starts the rotation of the credentials associated to a SKE cluster
 
