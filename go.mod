@@ -19,7 +19,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.7.7
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.6
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.1
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.11.0
 	github.com/zalando/go-keyring v0.2.4
 	golang.org/x/mod v0.16.0
 	golang.org/x/oauth2 v0.18.0
