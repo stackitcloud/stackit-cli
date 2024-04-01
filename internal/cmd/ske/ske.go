@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/enable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/kubeconfig"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -28,6 +29,7 @@ func NewCmd() *cobra.Command {
 func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(describe.NewCmd())
 	cmd.AddCommand(enable.NewCmd())
+	cmd.AddCommand(kubeconfig.NewCmd())
 	cmd.AddCommand(disable.NewCmd())
 	cmd.AddCommand(cluster.NewCmd())
 	cmd.AddCommand(credentials.NewCmd())
