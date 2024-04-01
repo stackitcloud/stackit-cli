@@ -91,7 +91,7 @@ func NewCmd() *cobra.Command {
 				operationState = "Triggered start of credentials rotation"
 			}
 			cmd.Printf("%s for cluster %q\n", operationState, model.ClusterName)
-			cmd.Printf("Complete the rotation by running:\n$ stackit ske credentials complete-rotation %s\n", model.ClusterName)
+			cmd.Printf("Complete the rotation by running:\n  $ stackit ske credentials complete-rotation %s\n", model.ClusterName)
 			return nil
 		},
 	}
