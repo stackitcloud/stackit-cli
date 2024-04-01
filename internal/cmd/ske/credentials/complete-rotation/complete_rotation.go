@@ -1,4 +1,4 @@
-package startrotation
+package completerotation
 
 import (
 	"context"
@@ -28,24 +28,23 @@ type inputModel struct {
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("start-rotation %s", clusterNameArg),
-		Short: "Starts the rotation of the credentials associated to a SKE cluster",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s",
-			"Starts the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.",
-			"This is step 1 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
-			"  - Rolling recreation of all worker nodes",
-			"  - A new Certificate Authority (CA) will be established and incorporated into the existing CA bundle.",
-			"  - A new etcd encryption key is generated and added to the Certificate Authority (CA) bundle.",
-			"  - A new signing key will be generated for the service account and added to the Certificate Authority (CA) bundle.",
-			"  - The kube-apiserver will rewrite all secrets in the cluster, encrypting them with the new encryption key.",
-			"The old CA, encryption key and signing key will be retained until the rotation is completed.",
-			"Complete the rotation by running:",
-			"  $ stackit ske credentials complete-rotation my-cluster"),
+		Use:   fmt.Sprintf("complete-rotation %s", clusterNameArg),
+		Short: "Completes the rotation of the credentials associated to a SKE cluster",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s",
+			"Completes the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.",
+			"To ensure continued access to the Kubernetes cluster, please update your kubeconfig service account to the newly created account.",
+			"This is step 2 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
+			"  - The old certification authority will be dropped from the package.",
+			"  - The old signing key for the service account will be dropped from the bundle.",
+			"If you haven't, please start the process by running:",
+			"  $ stackit ske credentials start-rotation my-cluster",
+			"After completing the rotation of credentials, you can generate a new kubeconfig file by running:",
+			"  $ stackit ske kubeconfig create my-cluster"),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Start the rotation of the credentials associated to the SKE cluster with name "my-cluster"`,
-				"$ stackit ske credentials start-rotation my-cluster"),
+				`Complete the rotation of the credentials associated to the SKE cluster with name "my-cluster"`,
+				"$ stackit ske credentials complete-rotation my-cluster"),
 			examples.NewExample(
 				`Flow of the 2-step process to rotate all SKE cluster credentials, including generating a new kubeconfig file`,
 				"$ stackit ske credentials start-rotation my-cluster",
@@ -67,7 +66,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to start the rotation of the credentials for SKE cluster %q?", model.ClusterName)
+				prompt := fmt.Sprintf("Are you sure you want to complete the rotation of the credentials for SKE cluster %q?", model.ClusterName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -78,26 +77,26 @@ func NewCmd() *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("start rotation of SKE credentials: %w", err)
+				return fmt.Errorf("complete rotation of SKE credentials: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(cmd)
-				s.Start("Starting credentials rotation")
-				_, err = wait.StartCredentialsRotationWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
+				s.Start("Completing credentials rotation")
+				_, err = wait.CompleteCredentialsRotationWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for start SKE credentials rotation %w", err)
+					return fmt.Errorf("wait for completing SKE credentials rotation %w", err)
 				}
 				s.Stop()
 			}
 
-			operationState := "Rotation of credentials is ready to be completed"
+			operationState := "Rotation of credentials is completed"
 			if model.Async {
-				operationState = "Triggered start of credentials rotation"
+				operationState = "Triggered completion of credentials rotation"
 			}
 			cmd.Printf("%s for cluster %q\n", operationState, model.ClusterName)
-			cmd.Printf("Complete the rotation by running:\n  $ stackit ske credentials complete-rotation %s\n", model.ClusterName)
+			cmd.Printf("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s\n", model.ClusterName)
 			return nil
 		},
 	}
@@ -118,7 +117,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiStartCredentialsRotationRequest {
-	req := apiClient.StartCredentialsRotation(ctx, model.ProjectId, model.ClusterName)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiCompleteCredentialsRotationRequest {
+	req := apiClient.CompleteCredentialsRotation(ctx, model.ProjectId, model.ClusterName)
 	return req
 }
