@@ -33,18 +33,24 @@ func NewCmd() *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s",
 			"Completes the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.",
 			"To ensure continued access to the Kubernetes cluster, please update your kubeconfig service account to the newly created account.",
-			"This is step 1 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
+			"This is step 2 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
 			"  - The old certification authority will be dropped from the package.",
 			"  - The old signing key for the service account will be dropped from the bundle.",
 			"If you haven't, please start the process by running:",
 			"  $ stackit ske credentials start-rotation my-cluster",
-			"Generate a new kubeconfig file by running:",
+			"After completing the rotation of credentials, you can generate a new kubeconfig file by running:",
 			"  $ stackit ske kubeconfig create my-cluster"),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Complete the rotation of the credentials associated to the SKE cluster with name "my-cluster"`,
 				"$ stackit ske credentials complete-rotation my-cluster"),
+			examples.NewExample(
+				`Flow of the 2-step process to rotate all SKE cluster credentials, including generating a new kubeconfig file`,
+				"$ stackit ske credentials start-rotation my-cluster",
+				"$ stackit ske credentials complete-rotation my-cluster",
+				"$ stackit ske kubeconfig create my-cluster",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

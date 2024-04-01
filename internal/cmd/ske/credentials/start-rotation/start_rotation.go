@@ -46,6 +46,12 @@ func NewCmd() *cobra.Command {
 			examples.NewExample(
 				`Start the rotation of the credentials associated to the SKE cluster with name "my-cluster"`,
 				"$ stackit ske credentials start-rotation my-cluster"),
+			examples.NewExample(
+				`Flow of the 2-step process to rotate all SKE cluster credentials, including generating a new kubeconfig file`,
+				"$ stackit ske credentials start-rotation my-cluster",
+				"$ stackit ske credentials complete-rotation my-cluster",
+				"$ stackit ske kubeconfig create my-cluster",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
