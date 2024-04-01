@@ -42,6 +42,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		NameLike:    utils.Ptr("some-pattern"),
 		OrderByName: utils.Ptr("asc"),
@@ -129,6 +130,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				PageSize: pageSizeDefault,
 			},
@@ -297,6 +299,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				PageSize: pageSizeDefault,
 			},
