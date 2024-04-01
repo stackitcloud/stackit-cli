@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -21,10 +22,10 @@ const (
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
 
-	DebugVerbosity   = "debug"
-	InfoVerbosity    = "info"
-	WarningVerbosity = "warning"
-	ErrorVerbosity   = "error"
+	DebugVerbosity   = string(print.DebugVerbosity)
+	InfoVerbosity    = string(print.InfoVerbosity)
+	WarningVerbosity = string(print.WarningVerbosity)
+	ErrorVerbosity   = string(print.ErrorVerbosity)
 
 	VerbosityDefault = InfoVerbosity
 )
@@ -37,6 +38,7 @@ type GlobalFlagModel struct {
 	AssumeYes    bool
 	OutputFormat string
 	ProjectId    string
+	Verbosity    string
 }
 
 func Configure(flagSet *pflag.FlagSet) error {
@@ -75,5 +77,6 @@ func Parse(cmd *cobra.Command) *GlobalFlagModel {
 		AssumeYes:    flags.FlagToBoolValue(cmd, AssumeYesFlag),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
 		ProjectId:    viper.GetString(config.ProjectIdKey),
+		Verbosity:    viper.GetString(config.VerbosityKey),
 	}
 }
