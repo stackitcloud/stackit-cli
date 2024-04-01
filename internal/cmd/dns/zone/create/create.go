@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -52,7 +53,7 @@ type inputModel struct {
 	ContactEmail  *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a DNS zone",
@@ -115,7 +116,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			cmd.Printf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, zoneId)
+			p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, zoneId)
 			return nil
 		},
 	}

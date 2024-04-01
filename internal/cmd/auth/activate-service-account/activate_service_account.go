@@ -9,6 +9,7 @@ import (
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"
@@ -31,7 +32,7 @@ type inputModel struct {
 	JwksCustomEndpoint    string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "activate-service-account",
 		Short: "Authenticates using a service account",
@@ -85,7 +86,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			cmd.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
+			p.Info("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 
 			return nil
 		},

@@ -4,12 +4,13 @@ import (
 	activateserviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/auth/activate-service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/login"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Provides authentication functionality",
@@ -17,11 +18,11 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(login.NewCmd())
-	cmd.AddCommand(activateserviceaccount.NewCmd())
+	cmd.AddCommand(activateserviceaccount.NewCmd(p))
 }
