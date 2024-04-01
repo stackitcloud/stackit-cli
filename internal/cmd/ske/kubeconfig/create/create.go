@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
@@ -13,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ClusterName    string
-	KubeconfigPath *string
+	Location       *string
 	ExpirationTime *string
 }
 
@@ -77,34 +77,26 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return fmt.Errorf("build kubeconfig create request: %w", err)
+			}
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create kubeconfig for SKE cluster: %w", err)
 			}
 
-			// Create a config file in $HOME/.kube/config
-			configPath := model.KubeconfigPath
-
-			if configPath == nil {
-				userHome, err := os.UserHomeDir()
-				if err != nil {
-					return fmt.Errorf("could not get user home directory: %w", err)
-				}
-
-				err = os.MkdirAll(fmt.Sprintf("%s/.kube", userHome), 0o700)
-				if err != nil {
-					return fmt.Errorf("could not create kube directory: %w", err)
-				}
-				configPath = utils.Ptr(fmt.Sprintf("%s/.kube", userHome))
+			// Create the config file
+			if resp.Kubeconfig == nil {
+				return fmt.Errorf("no kubeconfig returned from the API")
 			}
 
-			err = os.WriteFile(fmt.Sprintf("%s/config", *configPath), []byte(*resp.Kubeconfig), 0o600)
+			configPath, err := writeConfigFile(model.Location, *resp.Kubeconfig)
 			if err != nil {
-				return fmt.Errorf("could not write kubeconfig file: %w", err)
+				return fmt.Errorf("write kubeconfig file: %w", err)
 			}
 
-			fmt.Printf("Created kubeconfig file for cluster %s with expiration date %v.\n", model.ClusterName, *resp.ExpirationTimestamp)
+			fmt.Printf("Created kubeconfig file for cluster %s in %q, with expiration date %v\n", model.ClusterName, configPath, *resp.ExpirationTimestamp)
 
 			return nil
 		},
@@ -126,73 +118,50 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	expirationTimeInput := flags.FlagToStringPointer(cmd, expirationFlag)
-	var expirationTime *string
-	if expirationTimeInput != nil {
-		expirationTime = convertToSeconds(*expirationTimeInput)
-		if expirationTime == nil {
-			return nil, fmt.Errorf("invalid expiration time: %s", *expirationTimeInput)
-		}
-	}
-
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
-		KubeconfigPath:  flags.FlagToStringPointer(cmd, locationFlag),
-		ExpirationTime:  expirationTime,
+		Location:        flags.FlagToStringPointer(cmd, locationFlag),
+		ExpirationTime:  flags.FlagToStringPointer(cmd, expirationFlag),
 	}, nil
 }
 
-func convertToSeconds(timeStr string) *string {
-	if len(timeStr) < 2 {
-		return nil
-	}
-
-	unit := timeStr[len(timeStr)-1:]
-	if _, err := strconv.Atoi(unit); err == nil {
-		// If the last character is a digit, assume the whole string is a number of seconds
-		return utils.Ptr(timeStr)
-	}
-
-	valueStr := timeStr[:len(timeStr)-1]
-	value, err := strconv.ParseUint(valueStr, 10, 64)
-	if err != nil {
-		return nil
-	}
-
-	var multiplier uint64
-	switch unit {
-	// second
-	case "s":
-		multiplier = 1
-	// minute
-	case "m":
-		multiplier = 60
-	// hour
-	case "h":
-		multiplier = 60 * 60
-	// day
-	case "d":
-		multiplier = 60 * 60 * 24
-	// month, assume 30 days
-	case "M":
-		multiplier = 60 * 60 * 24 * 30
-	default:
-		return nil
-	}
-
-	result := uint64(value) * multiplier
-	return utils.Ptr(strconv.FormatUint(result, 10))
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiCreateKubeconfigRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiCreateKubeconfigRequest, error) {
 	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
 
 	payload := ske.CreateKubeconfigPayload{}
 
 	if model.ExpirationTime != nil {
-		payload.ExpirationSeconds = model.ExpirationTime
+		expirationTime, err := skeUtils.ConvertToSeconds(*model.ExpirationTime)
+		if err != nil {
+			return req, fmt.Errorf("parsing expiration time: %w", err)
+		}
+
+		payload.ExpirationSeconds = expirationTime
 	}
 
-	return req.CreateKubeconfigPayload(payload)
+	return req.CreateKubeconfigPayload(payload), nil
+}
+
+func writeConfigFile(configPath *string, data string) (string, error) {
+	if configPath == nil {
+		userHome, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("get user home directory: %w", err)
+		}
+
+		err = os.MkdirAll(fmt.Sprintf("%s/.kube", userHome), 0o700)
+		if err != nil {
+			return "", fmt.Errorf("create kube directory: %w", err)
+		}
+		configPath = utils.Ptr(fmt.Sprintf("%s/.kube", userHome))
+	}
+
+	writeLocation := fmt.Sprintf("%s/config", *configPath)
+
+	err := os.WriteFile(writeLocation, []byte(data), 0o600)
+	if err != nil {
+		return "", fmt.Errorf("write file: %w", err)
+	}
+	return writeLocation, nil
 }

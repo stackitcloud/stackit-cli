@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -190,4 +191,42 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	}
 
 	return output, nil
+}
+
+func ConvertToSeconds(timeStr string) (*string, error) {
+	if len(timeStr) < 2 {
+		return nil, fmt.Errorf("invalid time format: %s", timeStr)
+	}
+
+	unit := timeStr[len(timeStr)-1:]
+
+	valueStr := timeStr[:len(timeStr)-1]
+	value, err := strconv.ParseUint(valueStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse uint: %s", timeStr)
+	}
+
+	var multiplier uint64
+	switch unit {
+	// second
+	case "s":
+		multiplier = 1
+	// minute
+	case "m":
+		multiplier = 60
+	// hour
+	case "h":
+		multiplier = 60 * 60
+	// day
+	case "d":
+		multiplier = 60 * 60 * 24
+	// month, assume 30 days
+	case "M":
+		multiplier = 60 * 60 * 24 * 30
+	default:
+		return nil, fmt.Errorf("invalid time format: %s", timeStr)
+	}
+
+	result := uint64(value) * multiplier
+	return utils.Ptr(strconv.FormatUint(result, 10)), nil
 }

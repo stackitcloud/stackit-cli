@@ -441,3 +441,93 @@ func TestGetDefaultPayload(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertToSeconds(t *testing.T) {
+	tests := []struct {
+		description    string
+		expirationTime string
+		isValid        bool
+		expectedOutput string
+	}{
+		{
+			description:    "seconds",
+			expirationTime: "30s",
+			isValid:        true,
+			expectedOutput: "30",
+		},
+		{
+			description:    "minutes",
+			expirationTime: "30m",
+			isValid:        true,
+			expectedOutput: "1800",
+		},
+		{
+			description:    "hours",
+			expirationTime: "30h",
+			isValid:        true,
+			expectedOutput: "108000",
+		},
+		{
+			description:    "days",
+			expirationTime: "30d",
+			isValid:        true,
+			expectedOutput: "2592000",
+		},
+		{
+			description:    "months",
+			expirationTime: "30M",
+			isValid:        true,
+			expectedOutput: "77760000",
+		},
+		{
+			description:    "leading zero",
+			expirationTime: "0030M",
+			isValid:        true,
+			expectedOutput: "77760000",
+		},
+		{
+			description:    "invalid unit",
+			expirationTime: "30x",
+			isValid:        false,
+		},
+		{
+			description:    "invalid unit 2",
+			expirationTime: "3000abcdef",
+			isValid:        false,
+		},
+		{
+			description:    "invalid unit 3",
+			expirationTime: "3000abcdef000",
+			isValid:        false,
+		},
+		{
+			description:    "invalid time",
+			expirationTime: "x",
+			isValid:        false,
+		},
+		{
+			description:    "empty",
+			expirationTime: "",
+			isValid:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output, err := ConvertToSeconds(tt.expirationTime)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if *output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, *output)
+			}
+		})
+	}
+}

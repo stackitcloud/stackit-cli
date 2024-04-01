@@ -80,79 +80,17 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "1000s expiration time",
+			description: "30d expiration time",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "1000s"
+				flagValues["expiration"] = "30d"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("1000")
+				model.ExpirationTime = utils.Ptr("30d")
 			}),
 		},
-		{
-			description: "1000 expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "1000"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("1000")
-			}),
-		},
-		{
-			description: "60m expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "60m"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("3600")
-			}),
-		},
-		{
-			description: "4h expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "4h"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("14400")
-			}),
-		},
-		{
-			description: "2d expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "2d"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("172800")
-			}),
-		},
-		{
-			description: "2M expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "2M"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("5184000")
-			}),
-		},
-		{
-			description: "invalid expiration time",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["expiration"] = "2A"
-			}),
-			isValid: false,
-		},
+
 		{
 			description: "custom location",
 			argValues:   fixtureArgValues(),
@@ -161,7 +99,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.KubeconfigPath = utils.Ptr("/path/to/config")
+				model.Location = utils.Ptr("/path/to/config")
 			}),
 		},
 		{
@@ -275,16 +213,16 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "expiration time",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("30000")
+				model.ExpirationTime = utils.Ptr("30d")
 			}),
 			expectedRequest: fixtureRequest().CreateKubeconfigPayload(ske.CreateKubeconfigPayload{
-				ExpirationSeconds: utils.Ptr("30000")}),
+				ExpirationSeconds: utils.Ptr("2592000")}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request, _ := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
