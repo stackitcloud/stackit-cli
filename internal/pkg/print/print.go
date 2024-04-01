@@ -55,7 +55,7 @@ func (p *Printer) Info(message string, args ...any) {
 	if p.Verbosity != DebugVerbosity && p.Verbosity != InfoVerbosity {
 		return
 	}
-	p.Cmd.PrintErrf(message)
+	p.Cmd.PrintErrf(message, args...)
 }
 
 // Print an Warning level log to the defined Err output (falling back to Stderr if not set).
