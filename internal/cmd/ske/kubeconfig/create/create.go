@@ -92,14 +92,14 @@ func NewCmd() *cobra.Command {
 					return fmt.Errorf("could not get user home directory: %w", err)
 				}
 
-				err = os.MkdirAll(fmt.Sprintf("%s/.kube", userHome), 0700)
+				err = os.MkdirAll(fmt.Sprintf("%s/.kube", userHome), 0o700)
 				if err != nil {
 					return fmt.Errorf("could not create kube directory: %w", err)
 				}
 				configPath = utils.Ptr(fmt.Sprintf("%s/.kube", userHome))
 			}
 
-			err = os.WriteFile(fmt.Sprintf("%s/config", *configPath), []byte(*resp.Kubeconfig), 0600)
+			err = os.WriteFile(fmt.Sprintf("%s/config", *configPath), []byte(*resp.Kubeconfig), 0o600)
 			if err != nil {
 				return fmt.Errorf("could not write kubeconfig file: %w", err)
 			}
