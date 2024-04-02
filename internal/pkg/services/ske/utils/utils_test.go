@@ -596,5 +596,8 @@ func TestWriteConfigFile(t *testing.T) {
 		})
 	}
 	// Cleanup
-	os.RemoveAll("test_data/")
+	err := os.RemoveAll("test_data/")
+	if err != nil {
+		t.Errorf("failed cleaning test data")
+	}
 }

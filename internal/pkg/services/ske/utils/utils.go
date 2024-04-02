@@ -237,7 +237,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 
 // WriteConfigFile writes the given data to the given path.
 // The directory is created if it does not exist.
-func WriteConfigFile(configPath string, data string) error {
+func WriteConfigFile(configPath, data string) error {
 	if data == "" {
 		return fmt.Errorf("no data to write")
 	}
