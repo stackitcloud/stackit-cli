@@ -256,8 +256,8 @@ func WriteConfigFile(configPath, data string) error {
 	return nil
 }
 
-// GetDefaultKubeconfigLocation returns the default location for the kubeconfig file.
-func GetDefaultKubeconfigLocation() (string, error) {
+// GetDefaultKubeconfigPath returns the default location for the kubeconfig file.
+func GetDefaultKubeconfigPath() (string, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("get user home directory: %w", err)

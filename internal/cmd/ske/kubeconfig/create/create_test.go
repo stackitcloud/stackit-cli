@@ -87,19 +87,19 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("30d")
+				model.ExpirationTime = utils.Ptr("2592000")
 			}),
 		},
 
 		{
-			description: "custom location",
+			description: "custom filepath",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["location"] = "/path/to/config"
+				flagValues["filepath"] = "/path/to/config"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Location = utils.Ptr("/path/to/config")
+				model.Filepath = utils.Ptr("/path/to/config")
 			}),
 		},
 		{
@@ -213,7 +213,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "expiration time",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.ExpirationTime = utils.Ptr("30d")
+				model.ExpirationTime = utils.Ptr("2592000")
 			}),
 			expectedRequest: fixtureRequest().CreateKubeconfigPayload(ske.CreateKubeconfigPayload{
 				ExpirationSeconds: utils.Ptr("2592000")}),

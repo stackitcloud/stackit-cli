@@ -27,7 +27,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ClusterName    string
-	Location       *string
+	Filepath       *string
 	ExpirationTime *string
 }
 
@@ -93,13 +93,13 @@ func NewCmd() *cobra.Command {
 			}
 
 			var kubeconfigPath string
-			if model.Location == nil {
-				kubeconfigPath, err = skeUtils.GetDefaultKubeconfigLocation()
+			if model.Filepath == nil {
+				kubeconfigPath, err = skeUtils.GetDefaultKubeconfigPath()
 				if err != nil {
-					return fmt.Errorf("get default kubeconfig location: %w", err)
+					return fmt.Errorf("get default kubeconfig path: %w", err)
 				}
 			} else {
-				kubeconfigPath = *model.Location
+				kubeconfigPath = *model.Filepath
 			}
 
 			err = skeUtils.WriteConfigFile(kubeconfigPath, *resp.Kubeconfig)
@@ -146,7 +146,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
-		Location:        flags.FlagToStringPointer(cmd, filepathFlag),
+		Filepath:        flags.FlagToStringPointer(cmd, filepathFlag),
 		ExpirationTime:  expTimeSeconds,
 	}, nil
 }
