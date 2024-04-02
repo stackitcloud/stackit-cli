@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -535,33 +536,37 @@ func TestConvertToSeconds(t *testing.T) {
 
 func TestWriteConfigFile(t *testing.T) {
 	tests := []struct {
-		description string
-		location    string
-		kubeconfig  string
-		isValid     bool
-		expectedErr string
+		description     string
+		location        string
+		kubeconfig      string
+		isValid         bool
+		isLocationDir   bool
+		isLocationEmpty bool
+		expectedErr     string
 	}{
 		{
 			description: "base",
-			location:    "base/config",
+			location:    filepath.Join("base", "config"),
 			kubeconfig:  "kubeconfig",
 			isValid:     true,
 		},
 		{
-			description: "empty location",
-			location:    "",
-			kubeconfig:  "kubeconfig",
-			isValid:     false,
+			description:     "empty location",
+			location:        "",
+			kubeconfig:      "kubeconfig",
+			isValid:         false,
+			isLocationEmpty: true,
 		},
 		{
-			description: "path is only dir",
-			location:    "only_dir/",
-			kubeconfig:  "kubeconfig",
-			isValid:     false,
+			description:   "path is only dir",
+			location:      "only_dir",
+			kubeconfig:    "kubeconfig",
+			isValid:       false,
+			isLocationDir: true,
 		},
 		{
 			description: "empty kubeconfig",
-			location:    "empty/config",
+			location:    filepath.Join("empty", "config"),
 			kubeconfig:  "",
 			isValid:     false,
 		},
@@ -570,10 +575,14 @@ func TestWriteConfigFile(t *testing.T) {
 	baseTestDir := "test_data/"
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testLocation := baseTestDir + tt.location
+			testLocation := filepath.Join(baseTestDir, tt.location)
 			// make sure empty case still works
-			if tt.location == "" {
+			if tt.isLocationEmpty {
 				testLocation = ""
+			}
+			// filepath Join cleans trailing separators
+			if tt.isLocationDir {
+				testLocation += string(filepath.Separator)
 			}
 			err := WriteConfigFile(testLocation, tt.kubeconfig)
 
