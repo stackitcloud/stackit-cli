@@ -195,6 +195,8 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	return output, nil
 }
 
+// ConvertToSeconds	converts a time string to seconds.
+// The time string must be in the format of <value><unit>, where unit is one of s, m, h, d, M.
 func ConvertToSeconds(timeStr string) (*string, error) {
 	if len(timeStr) < 2 {
 		return nil, fmt.Errorf("invalid time format: %s", timeStr)
@@ -233,6 +235,8 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	return utils.Ptr(strconv.FormatUint(result, 10)), nil
 }
 
+// WriteConfigFile writes the given data to the given path.
+// The directory is created if it does not exist.
 func WriteConfigFile(configPath string, data string) error {
 	if data == "" {
 		return fmt.Errorf("no data to write")
@@ -252,6 +256,7 @@ func WriteConfigFile(configPath string, data string) error {
 	return nil
 }
 
+// GetDefaultKubeconfigLocation returns the default location for the kubeconfig file.
 func GetDefaultKubeconfigLocation() (string, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
