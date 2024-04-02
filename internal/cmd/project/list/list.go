@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all STACKIT projects that authenticated user is a member of`,
+				`List all STACKIT projects that the authenticated user is a member of`,
 				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
@@ -180,7 +180,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 		// Call API
 		req, err := buildRequest(ctx, model, apiClient, offset)
 		if err != nil {
-			return nil, fmt.Errorf("build fetch projects request: %w", err)
+			return nil, fmt.Errorf("build list projects request: %w", err)
 		}
 		resp, err := req.Execute()
 		if err != nil {
