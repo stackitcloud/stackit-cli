@@ -32,6 +32,12 @@ func NewCmd() *cobra.Command {
 		Short: "Rotates credentials associated to a SKE cluster",
 		Long:  "Rotates credentials associated to a STACKIT Kubernetes Engine (SKE) cluster. The old credentials will be invalid after the operation.",
 		Args:  args.SingleArg(clusterNameArg, nil),
+		Deprecated: fmt.Sprintf("%s\n%s\n%s\n%s\n",
+			"and will be removed in a future release.",
+			"Please use the 2-step credential rotation flow instead, by running the commands:",
+			" $ stackit ske credentials start-rotation my-cluster",
+			" $ stackit ske credentials complete-rotation my-cluster",
+		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Rotate credentials associated to the SKE cluster with name "my-cluster"`,
