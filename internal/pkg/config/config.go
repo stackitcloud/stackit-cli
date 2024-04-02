@@ -87,11 +87,6 @@ func InitConfig() {
 	cobra.CheckErr(err)
 	setConfigDefaults()
 
-	err = viper.WriteConfigAs(configFilePath)
-	cobra.CheckErr(err)
-
-	// Needs to be done after WriteConfigAs, otherwise it would write
-	// the environment variables to the config file
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("stackit")
 }
