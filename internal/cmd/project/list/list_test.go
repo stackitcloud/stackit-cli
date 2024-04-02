@@ -27,7 +27,6 @@ var testClient = &resourcemanager.APIClient{}
 var testParentId = uuid.NewString()
 var testProjectIdLike = uuid.NewString()
 var testCreationTimeAfter = "2023-01-01T00:00:00Z"
-var authUserEmail, _ = auth.GetAuthField(auth.USER_EMAIL)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -257,6 +256,12 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
+
+	authUserEmail, err := auth.GetAuthField(auth.USER_EMAIL)
+	if err != nil {
+		t.Fatalf("Failed to get auth user email: %v", err)
+	}
+
 	tests := []struct {
 		description     string
 		model           *inputModel
