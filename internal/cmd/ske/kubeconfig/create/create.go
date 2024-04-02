@@ -89,20 +89,22 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("no kubeconfig returned from the API")
 			}
 
+			var kubeconfigPath string
 			if model.Location == nil {
-				kubeconfigPath, err := skeUtils.GetDefaultKubeconfigLocation()
+				kubeconfigPath, err = skeUtils.GetDefaultKubeconfigLocation()
 				if err != nil {
 					return fmt.Errorf("get default kubeconfig location: %w", err)
 				}
-				model.Location = &kubeconfigPath
+			} else {
+				kubeconfigPath = *model.Location
 			}
 
-			err = skeUtils.WriteConfigFile(*model.Location, *resp.Kubeconfig)
+			err = skeUtils.WriteConfigFile(kubeconfigPath, *resp.Kubeconfig)
 			if err != nil {
 				return fmt.Errorf("write kubeconfig file: %w", err)
 			}
 
-			fmt.Printf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, *model.Location, *resp.ExpirationTimestamp)
+			fmt.Printf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
 
 			return nil
 		},
@@ -140,7 +142,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	if model.ExpirationTime != nil {
 		expirationTime, err := skeUtils.ConvertToSeconds(*model.ExpirationTime)
 		if err != nil {
-			return req, fmt.Errorf("parsing expiration time: %w", err)
+			return req, fmt.Errorf("parse expiration time: %w", err)
 		}
 
 		payload.ExpirationSeconds = expirationTime

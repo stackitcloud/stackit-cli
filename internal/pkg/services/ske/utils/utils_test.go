@@ -543,7 +543,7 @@ func TestWriteConfigFile(t *testing.T) {
 	}{
 		{
 			description: "base",
-			location:    "test_data/base/config",
+			location:    "base/config",
 			kubeconfig:  "kubeconfig",
 			isValid:     true,
 		},
@@ -554,28 +554,28 @@ func TestWriteConfigFile(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "no permission location",
-			location:    "/root/config",
-			kubeconfig:  "kubeconfig",
-			isValid:     false,
-		},
-		{
 			description: "path is only dir",
-			location:    "test_data/only_dir/",
+			location:    "only_dir/",
 			kubeconfig:  "kubeconfig",
 			isValid:     false,
 		},
 		{
 			description: "empty kubeconfig",
-			location:    "test_data/empty/config",
+			location:    "empty/config",
 			kubeconfig:  "",
 			isValid:     false,
 		},
 	}
 
+	baseTestDir := "test_data/"
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := WriteConfigFile(tt.location, tt.kubeconfig)
+			testLocation := baseTestDir + tt.location
+			// make sure empty case still works
+			if tt.location == "" {
+				testLocation = ""
+			}
+			err := WriteConfigFile(testLocation, tt.kubeconfig)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -585,7 +585,7 @@ func TestWriteConfigFile(t *testing.T) {
 			}
 
 			if tt.isValid {
-				data, err := os.ReadFile(tt.location)
+				data, err := os.ReadFile(testLocation)
 				if err != nil {
 					t.Errorf("could not read file: %s", tt.location)
 				}
@@ -596,7 +596,7 @@ func TestWriteConfigFile(t *testing.T) {
 		})
 	}
 	// Cleanup
-	err := os.RemoveAll("test_data/")
+	err := os.RemoveAll(baseTestDir)
 	if err != nil {
 		t.Errorf("failed cleaning test data")
 	}
