@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
@@ -13,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -91,12 +89,20 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("no kubeconfig returned from the API")
 			}
 
-			configPath, err := writeConfigFile(model.Location, *resp.Kubeconfig)
+			if model.Location == nil {
+				kubeconfigPath, err := skeUtils.GetDefaultKubeconfigLocation()
+				if err != nil {
+					return fmt.Errorf("get default kubeconfig location: %w", err)
+				}
+				model.Location = &kubeconfigPath
+			}
+
+			err = skeUtils.WriteConfigFile(*model.Location, *resp.Kubeconfig)
 			if err != nil {
 				return fmt.Errorf("write kubeconfig file: %w", err)
 			}
 
-			fmt.Printf("Created kubeconfig file for cluster %s in %q, with expiration date %v\n", model.ClusterName, configPath, *resp.ExpirationTimestamp)
+			fmt.Printf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, *model.Location, *resp.ExpirationTimestamp)
 
 			return nil
 		},
@@ -141,27 +147,4 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	}
 
 	return req.CreateKubeconfigPayload(payload), nil
-}
-
-func writeConfigFile(configPath *string, data string) (string, error) {
-	if configPath == nil {
-		userHome, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("get user home directory: %w", err)
-		}
-
-		err = os.MkdirAll(fmt.Sprintf("%s/.kube", userHome), 0o700)
-		if err != nil {
-			return "", fmt.Errorf("create kube directory: %w", err)
-		}
-		configPath = utils.Ptr(fmt.Sprintf("%s/.kube", userHome))
-	}
-
-	writeLocation := fmt.Sprintf("%s/config", *configPath)
-
-	err := os.WriteFile(writeLocation, []byte(data), 0o600)
-	if err != nil {
-		return "", fmt.Errorf("write file: %w", err)
-	}
-	return writeLocation, nil
 }

@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -530,4 +531,70 @@ func TestConvertToSeconds(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWriteConfigFile(t *testing.T) {
+	tests := []struct {
+		description string
+		location    string
+		kubeconfig  string
+		isValid     bool
+		expectedErr string
+	}{
+		{
+			description: "base",
+			location:    "test_data/base/config",
+			kubeconfig:  "kubeconfig",
+			isValid:     true,
+		},
+		{
+			description: "empty location",
+			location:    "",
+			kubeconfig:  "kubeconfig",
+			isValid:     false,
+		},
+		{
+			description: "no permission location",
+			location:    "/root/config",
+			kubeconfig:  "kubeconfig",
+			isValid:     false,
+		},
+		{
+			description: "path is only dir",
+			location:    "test_data/only_dir/",
+			kubeconfig:  "kubeconfig",
+			isValid:     false,
+		},
+		{
+			description: "empty kubeconfig",
+			location:    "test_data/empty/config",
+			kubeconfig:  "",
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := WriteConfigFile(tt.location, tt.kubeconfig)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+
+			if tt.isValid {
+				data, err := os.ReadFile(tt.location)
+				if err != nil {
+					t.Errorf("could not read file: %s", tt.location)
+				}
+				if string(data) != tt.kubeconfig {
+					t.Errorf("expected file content to be %s, got %s", tt.kubeconfig, string(data))
+				}
+			}
+		})
+	}
+	// Cleanup
+	os.RemoveAll("test_data/")
 }

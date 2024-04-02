@@ -3,6 +3,8 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -229,4 +231,32 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 
 	result := uint64(value) * multiplier
 	return utils.Ptr(strconv.FormatUint(result, 10)), nil
+}
+
+func WriteConfigFile(configPath string, data string) error {
+	if data == "" {
+		return fmt.Errorf("no data to write")
+	}
+
+	dir := filepath.Dir(configPath)
+
+	err := os.MkdirAll(dir, 0o700)
+	if err != nil {
+		return fmt.Errorf("create config directory: %w", err)
+	}
+
+	err = os.WriteFile(configPath, []byte(data), 0o600)
+	if err != nil {
+		return fmt.Errorf("write file: %w", err)
+	}
+	return nil
+}
+
+func GetDefaultKubeconfigLocation() (string, error) {
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("get user home directory: %w", err)
+	}
+
+	return filepath.Join(userHome, ".kube", "config"), nil
 }
