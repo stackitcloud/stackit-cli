@@ -130,11 +130,10 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}
 
 	expTime := flags.FlagToStringPointer(cmd, expirationFlag)
-	expTimeSeconds := expTime
 
 	if expTime != nil {
 		var err error
-		expTimeSeconds, err = skeUtils.ConvertToSeconds(*expTime)
+		expTime, err = skeUtils.ConvertToSeconds(*expTime)
 		if err != nil {
 			return nil, &errors.FlagValidationError{
 				Flag:    expirationFlag,
@@ -147,7 +146,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
 		Filepath:        flags.FlagToStringPointer(cmd, filepathFlag),
-		ExpirationTime:  expTimeSeconds,
+		ExpirationTime:  expTime,
 	}, nil
 }
 
