@@ -14,6 +14,7 @@ To ensure continued access to the Kubernetes cluster, please update your kubecon
 
 If you haven't, please start the process by running:
   $ stackit ske credentials start-rotation my-cluster
+For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html
 
 ```
 stackit ske credentials complete-rotation CLUSTER_NAME [flags]
