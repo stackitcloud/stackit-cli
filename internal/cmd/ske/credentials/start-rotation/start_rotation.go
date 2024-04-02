@@ -30,7 +30,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("start-rotation %s", clusterNameArg),
 		Short: "Starts the rotation of the credentials associated to a SKE cluster",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s",
+		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s",
 			"Starts the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.",
 			"This is step 1 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
 			"  - Rolling recreation of all worker nodes",
@@ -39,8 +39,11 @@ func NewCmd() *cobra.Command {
 			"  - A new signing key will be generated for the service account and added to the Certificate Authority (CA) bundle.",
 			"  - The kube-apiserver will rewrite all secrets in the cluster, encrypting them with the new encryption key.",
 			"The old CA, encryption key and signing key will be retained until the rotation is completed.",
+			"After completing the rotation of credentials, you can generate a new kubeconfig file by running:",
+			"  $ stackit ske kubeconfig create my-cluster",
 			"Complete the rotation by running:",
-			"  $ stackit ske credentials complete-rotation my-cluster"),
+			"  $ stackit ske credentials complete-rotation my-cluster",
+		),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -49,8 +52,8 @@ func NewCmd() *cobra.Command {
 			examples.NewExample(
 				`Flow of the 2-step process to rotate all SKE cluster credentials, including generating a new kubeconfig file`,
 				"$ stackit ske credentials start-rotation my-cluster",
-				"$ stackit ske credentials complete-rotation my-cluster",
 				"$ stackit ske kubeconfig create my-cluster",
+				"$ stackit ske credentials complete-rotation my-cluster",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -35,9 +35,12 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", clusterNameArg),
 		Short: "Creates a kubeconfig for an SKE cluster",
-		Long: fmt.Sprintf("%s\n%s",
+		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s",
 			"Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster.",
-			"By default the kubeconfig is created in the .kube folder, in the user's home directory. The kubeconfig file will be overwritten if it already exists."),
+			"By default the kubeconfig is created in the .kube folder, in the user's home directory. The kubeconfig file will be overwritten if it already exists.",
+			"You can override this behavior by specifying a custom location with the --location flag.",
+			"An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.",
+			"Note that the format is <value><unit>, e.g. 30d for 30 days and you can't combine units."),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -115,7 +118,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
-	cmd.Flags().String(locationFlag, "", "Folder location to store the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.")
+	cmd.Flags().String(locationFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.")
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
