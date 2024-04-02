@@ -127,15 +127,11 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	parentId := flags.FlagToStringPointer(cmd, parentIdFlag)
-	projectIdLike := flags.FlagToStringSliceValue(cmd, projectIdLikeFlag)
-	member := flags.FlagToStringPointer(cmd, memberFlag)
-
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
-		ParentId:          parentId,
-		ProjectIdLike:     projectIdLike,
-		Member:            member,
+		ParentId:          flags.FlagToStringPointer(cmd, parentIdFlag),
+		ProjectIdLike:     flags.FlagToStringSliceValue(cmd, projectIdLikeFlag),
+		Member:            flags.FlagToStringPointer(cmd, memberFlag),
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
