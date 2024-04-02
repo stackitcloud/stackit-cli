@@ -256,7 +256,6 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
-
 	authUserEmail, err := auth.GetAuthField(auth.USER_EMAIL)
 	if err != nil {
 		t.Fatalf("Failed to get auth user email: %v", err)
