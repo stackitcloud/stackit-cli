@@ -207,7 +207,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	valueStr := timeStr[:len(timeStr)-1]
 	value, err := strconv.ParseUint(valueStr, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse uint: %s", timeStr)
+		return nil, fmt.Errorf("time value is not a number: %s", valueStr)
 	}
 
 	var multiplier uint64
@@ -228,7 +228,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	case "M":
 		multiplier = 60 * 60 * 24 * 30
 	default:
-		return nil, fmt.Errorf("invalid time format: %s", timeStr)
+		return nil, fmt.Errorf("invalid time unit: %s", unit)
 	}
 
 	result := uint64(value) * multiplier

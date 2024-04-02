@@ -21,7 +21,7 @@ const (
 	clusterNameArg = "CLUSTER_NAME"
 
 	expirationFlag = "expiration"
-	locationFlag   = "location"
+	filepathFlag   = "filepath"
 )
 
 type inputModel struct {
@@ -38,7 +38,7 @@ func NewCmd() *cobra.Command {
 		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s",
 			"Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster.",
 			"By default the kubeconfig is created in the .kube folder, in the user's home directory. The kubeconfig file will be overwritten if it already exists.",
-			"You can override this behavior by specifying a custom location with the --location flag.",
+			"You can override this behavior by specifying a custom filepath with the --filepath flag.",
 			"An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.",
 			"Note that the format is <value><unit>, e.g. 30d for 30 days and you can't combine units."),
 		Args: args.SingleArg(clusterNameArg, nil),
@@ -53,8 +53,8 @@ func NewCmd() *cobra.Command {
 				`Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 2 months`,
 				"$ stackit ske kubeconfig create my-cluster --expiration 2M"),
 			examples.NewExample(
-				`Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom location`,
-				"$ stackit ske kubeconfig create my-cluster --location /path/to/config"),
+				`Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath`,
+				"$ stackit ske kubeconfig create my-cluster --filepath /path/to/config"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current configuration, if it exists.", model.ClusterName)
+				prompt := fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -118,7 +118,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
-	cmd.Flags().String(locationFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.")
+	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.")
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -129,11 +129,25 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	expTime := flags.FlagToStringPointer(cmd, expirationFlag)
+	expTimeSeconds := expTime
+
+	if expTime != nil {
+		var err error
+		expTimeSeconds, err = skeUtils.ConvertToSeconds(*expTime)
+		if err != nil {
+			return nil, &errors.FlagValidationError{
+				Flag:    expirationFlag,
+				Details: err.Error(),
+			}
+		}
+	}
+
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
-		Location:        flags.FlagToStringPointer(cmd, locationFlag),
-		ExpirationTime:  flags.FlagToStringPointer(cmd, expirationFlag),
+		Location:        flags.FlagToStringPointer(cmd, filepathFlag),
+		ExpirationTime:  expTimeSeconds,
 	}, nil
 }
 
@@ -143,12 +157,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	payload := ske.CreateKubeconfigPayload{}
 
 	if model.ExpirationTime != nil {
-		expirationTime, err := skeUtils.ConvertToSeconds(*model.ExpirationTime)
-		if err != nil {
-			return req, fmt.Errorf("parse expiration time: %w", err)
-		}
-
-		payload.ExpirationSeconds = expirationTime
+		payload.ExpirationSeconds = model.ExpirationTime
 	}
 
 	return req.CreateKubeconfigPayload(payload), nil

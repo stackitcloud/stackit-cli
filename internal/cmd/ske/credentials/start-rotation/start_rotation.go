@@ -30,7 +30,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("start-rotation %s", clusterNameArg),
 		Short: "Starts the rotation of the credentials associated to a SKE cluster",
-		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s\n%s",
 			"Starts the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.",
 			"This is step 1 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:",
 			"  - Rolling recreation of all worker nodes",
@@ -43,6 +43,7 @@ func NewCmd() *cobra.Command {
 			"  $ stackit ske kubeconfig create my-cluster",
 			"Complete the rotation by running:",
 			"  $ stackit ske credentials complete-rotation my-cluster",
+			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
 		),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
