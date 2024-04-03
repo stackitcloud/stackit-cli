@@ -118,7 +118,7 @@ func NewCmd() *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
-	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.")
+	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
