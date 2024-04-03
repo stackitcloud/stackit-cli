@@ -13,7 +13,7 @@ stackit project list [flags]
 ### Examples
 
 ```
-  List all STACKIT projects that authenticated user is a member of
+  List all STACKIT projects that the authenticated user is a member of
   $ stackit project list
 
   List all STACKIT projects that are children of a specific parent

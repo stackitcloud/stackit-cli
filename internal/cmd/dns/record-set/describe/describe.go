@@ -107,7 +107,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		for _, r := range *recordSet.Records {
 			recordsData = append(recordsData, *r.Content)
 		}
-		recordsDataJoin := strings.Join(recordsData, ",")
+		recordsDataJoin := strings.Join(recordsData, ", ")
 
 		table := tables.NewTable()
 		table.AddRow("ID", *recordSet.Id)

@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all STACKIT projects that the authenticated user is a member of`,
+				`List all STACKIT projects that the authenticated user or service account is a member of`,
 				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
