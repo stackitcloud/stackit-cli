@@ -107,6 +107,8 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SINGLE_ARG_EXPECTED = `expected 1 argument %q, %d were provided`
 
+	SINGLE_OPTIONAL_ARG_EXPECTED = `expected no more than 1 argument %q, %d were provided`
+
 	SUBCOMMAND_UNKNOWN = `unknown subcommand %q`
 
 	SUBCOMMAND_MISSING = `missing subcommand`
@@ -257,6 +259,17 @@ func (e *SingleArgExpectedError) Error() string {
 	} else {
 		err = fmt.Errorf(ARG_MISSING, e.Expected)
 	}
+	return AppendUsageTip(err, e.Cmd).Error()
+}
+
+type SingleOptionalArgExpectedError struct {
+	Cmd      *cobra.Command
+	Expected string
+	Count    int
+}
+
+func (e *SingleOptionalArgExpectedError) Error() string {
+	err := fmt.Errorf(SINGLE_OPTIONAL_ARG_EXPECTED, e.Expected, e.Count)
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 
