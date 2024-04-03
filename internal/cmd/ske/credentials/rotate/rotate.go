@@ -35,8 +35,8 @@ func NewCmd() *cobra.Command {
 		Deprecated: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
 			"and will be removed in a future release.",
 			"Please use the 2-step credential rotation flow instead, by running the commands:",
-			" $ stackit ske credentials start-rotation",
-			" $ stackit ske credentials complete-rotation",
+			" $ stackit ske credentials start-rotation CLUSTER_NAME",
+			" $ stackit ske credentials complete-rotation CLUSTER_NAME",
 			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
 		),
 		Example: examples.Build(

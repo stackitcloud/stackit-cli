@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 		Deprecated: fmt.Sprintf("%s\n%s\n%s\n%s\n",
 			"and will be removed in a future release.",
 			"Please use the following command to obtain a kubeconfig file instead:",
-			" $ stackit ske kubeconfig create",
+			" $ stackit ske kubeconfig create CLUSTER_NAME",
 			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
 		),
 		Example: examples.Build(
