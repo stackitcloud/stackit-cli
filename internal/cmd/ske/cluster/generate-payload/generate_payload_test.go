@@ -36,6 +36,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		ClusterName: utils.Ptr("example-name"),
 	}
@@ -71,7 +72,7 @@ func TestParseInput(t *testing.T) {
 			flagValues:  map[string]string{},
 			isValid:     true,
 			expectedModel: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 			},
 		},
 		{

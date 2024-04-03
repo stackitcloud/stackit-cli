@@ -98,6 +98,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:   testInstanceId,
 		RecoveryDate: utils.Ptr(recoveryTimestampString),
@@ -118,6 +119,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:   testInstanceId,
 		StorageClass: utils.Ptr(testStorageClass),
