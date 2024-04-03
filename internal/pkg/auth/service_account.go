@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 )
@@ -34,7 +35,7 @@ var _ http.RoundTripper = &keyFlowWithStorage{}
 // For the key flow, it fetches an access and refresh token from the Service Account API.
 // For the token flow, it just stores the provided token and doesn't check if it is valid.
 // It returns the email associated with the service account
-func AuthenticateServiceAccount(rt http.RoundTripper) (email string, err error) {
+func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper) (email string, err error) {
 	authFields := make(map[authFieldKey]string)
 	var authFlowType AuthFlow
 	switch flow := rt.(type) {
@@ -43,6 +44,7 @@ func AuthenticateServiceAccount(rt http.RoundTripper) (email string, err error) 
 
 		accessToken, err := flow.GetAccessToken()
 		if err != nil {
+			p.Debug(print.ErrorLevel, "get access token: %v", err)
 			return "", &errors.ActivateServiceAccountError{}
 		}
 		serviceAccountKey := flow.GetConfig().ServiceAccountKey

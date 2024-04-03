@@ -22,11 +22,11 @@ type Printer struct {
 }
 
 // Creates a new printer, including setting up the default logger.
-func NewPrinter() Printer {
+func NewPrinter() *Printer {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
 
-	return Printer{}
+	return &Printer{}
 }
 
 // Print an output using Printf to the defined output (falling back to Stderr if not set).

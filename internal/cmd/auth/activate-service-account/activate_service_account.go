@@ -73,11 +73,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			// Initializes the authentication flow
 			rt, err := sdkAuth.SetupAuth(cfg)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "setup auth: %v", err)
 				return &cliErr.ActivateServiceAccountError{}
 			}
 
 			// Authenticates the service account and stores credentials
-			email, err := auth.AuthenticateServiceAccount(rt)
+			email, err := auth.AuthenticateServiceAccount(p, rt)
 			if err != nil {
 				var activateServiceAccountError *cliErr.ActivateServiceAccountError
 				if !errors.As(err, &activateServiceAccountError) {

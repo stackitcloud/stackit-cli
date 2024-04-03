@@ -120,7 +120,7 @@ func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
 
 func Execute(version, date string) {
 	p := print.NewPrinter()
-	cmd := NewRootCmd(version, date, &p)
+	cmd := NewRootCmd(version, date, p)
 
 	// We need to set the printer and verbosity here because the
 	// PersistentPreRun is not called when the command is wrongly called
