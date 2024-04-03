@@ -1,25 +1,24 @@
 package print
 
 import (
-	"io"
 	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-type VerbosityLevel string
+type Level string
 
 const (
-	DebugVerbosity   VerbosityLevel = "debug"
-	InfoVerbosity    VerbosityLevel = "info"
-	WarningVerbosity VerbosityLevel = "warning"
-	ErrorVerbosity   VerbosityLevel = "error"
+	DebugLevel   Level = "debug"
+	InfoLevel    Level = "info"
+	WarningLevel Level = "warning"
+	ErrorLevel   Level = "error"
 )
 
 type Printer struct {
 	Cmd       *cobra.Command
-	Verbosity VerbosityLevel
+	Verbosity Level
 }
 
 // Creates a new printer, including setting up the default logger.
@@ -31,48 +30,52 @@ func NewPrinter() Printer {
 }
 
 // Print an output using Printf to the defined output (falling back to Stderr if not set).
-func (p *Printer) Outputf(message string, args ...any) {
-	p.Cmd.Printf(message, args...)
+func (p *Printer) Outputf(msg string, args ...any) {
+	p.Cmd.Printf(msg, args...)
 }
 
 // Print an output using Println to the defined output (falling back to Stderr if not set).
-func (p *Printer) Outputln(message string) {
-	p.Cmd.Println(message)
+func (p *Printer) Outputln(msg string) {
+	p.Cmd.Println(msg)
 }
 
 // Print a Debug level log through the "slog" package.
 // If the verbosity level is not Debug, it does nothing
-func (p *Printer) Debug(message string, args ...any) {
-	if p.Verbosity != DebugVerbosity {
+func (p *Printer) Debug(level Level, msg string, args ...any) {
+	if p.Verbosity != DebugLevel {
 		return
 	}
-	slog.Debug(message, args...)
+	switch level {
+	case DebugLevel:
+		slog.Debug(msg, args...)
+	case InfoLevel:
+		slog.Info(msg, args...)
+	case WarningLevel:
+		slog.Warn(msg, args...)
+	case ErrorLevel:
+		slog.Error(msg, args...)
+	}
 }
 
-// Print an Info level log to the defined Err output (falling back to Stderr if not set).
+// Print an Info level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug or Info, it does nothing.
-func (p *Printer) Info(message string, args ...any) {
-	if p.Verbosity != DebugVerbosity && p.Verbosity != InfoVerbosity {
+func (p *Printer) Info(msg string, args ...any) {
+	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel {
 		return
 	}
-	p.Cmd.PrintErrf(message, args...)
+	p.Cmd.PrintErrf(msg, args...)
 }
 
-// Print an Warning level log to the defined Err output (falling back to Stderr if not set).
-// If the verbosity level is not Debug, Info, or Warning, it does nothing.
-func (p *Printer) Warning(message string) {
-	if p.Verbosity != DebugVerbosity && p.Verbosity != InfoVerbosity && p.Verbosity != WarningVerbosity {
+// Print a Warn level output to the defined Err output (falling back to Stderr if not set).
+// If the verbosity level is not Debug, Info, or Warn, it does nothing.
+func (p *Printer) Warn(msg string) {
+	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel && p.Verbosity != WarningLevel {
 		return
 	}
-	p.Cmd.PrintErrf("Warning: %s\n", message)
+	p.Cmd.PrintErrf("Warning: %s\n", msg)
 }
 
-// Print an Error level log to the defined Err output (falling back to Stderr if not set).
-func (p *Printer) Error(message string) {
-	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), message)
-}
-
-// Returns the printer's command defined output
-func (p *Printer) OutOrStdout() io.Writer {
-	return p.Cmd.OutOrStdout()
+// Print an Error level output to the defined Err output (falling back to Stderr if not set).
+func (p *Printer) Error(msg string) {
+	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), msg)
 }

@@ -22,10 +22,10 @@ const (
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
 
-	DebugVerbosity   = string(print.DebugVerbosity)
-	InfoVerbosity    = string(print.InfoVerbosity)
-	WarningVerbosity = string(print.WarningVerbosity)
-	ErrorVerbosity   = string(print.ErrorVerbosity)
+	DebugVerbosity   = string(print.DebugLevel)
+	InfoVerbosity    = string(print.InfoLevel)
+	WarningVerbosity = string(print.WarningLevel)
+	ErrorVerbosity   = string(print.ErrorLevel)
 
 	VerbosityDefault = InfoVerbosity
 )
