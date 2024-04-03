@@ -32,10 +32,11 @@ func NewCmd() *cobra.Command {
 		Short: "Shows details of the credentials associated to a SKE cluster",
 		Long:  "Shows details of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster",
 		Args:  args.SingleArg(clusterNameArg, nil),
-		Deprecated: fmt.Sprintf("%s\n%s\n%s\n",
+		Deprecated: fmt.Sprintf("%s\n%s\n%s\n%s\n",
 			"and will be removed in a future release.",
 			"Please use the following command to obtain a kubeconfig file instead:",
 			" $ stackit ske kubeconfig create my-cluster",
+			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
 		),
 		Example: examples.Build(
 			examples.NewExample(
