@@ -35,7 +35,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 
 ```
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
-      --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.
+      --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
 ```
 
