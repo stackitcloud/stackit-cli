@@ -28,11 +28,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewRootCmd(version, date string) *cobra.Command {
+func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "stackit",
 		Short:             "Manage STACKIT resources using the command line",
@@ -41,6 +42,10 @@ func NewRootCmd(version, date string) *cobra.Command {
 		SilenceErrors:     true, // Error is beautified in a custom way before being printed
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			p.Cmd = cmd
+			p.Verbosity = print.Level(globalflags.Parse(cmd).Verbosity)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(cmd, "version") {
 				cmd.Printf("STACKIT CLI (BETA)\n")
@@ -62,7 +67,7 @@ func NewRootCmd(version, date string) *cobra.Command {
 	err := configureFlags(cmd)
 	cobra.CheckErr(err)
 
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 
 	// Cobra creates the help flag with "help for <command>" as the description
 	// We want to override that message by capitalizing the first letter to match the other flag descriptions
@@ -84,12 +89,12 @@ func configureFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-func addSubcommands(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd())
-	cmd.AddCommand(auth.NewCmd())
+	cmd.AddCommand(auth.NewCmd(p))
 	cmd.AddCommand(config.NewCmd())
 	cmd.AddCommand(curl.NewCmd())
-	cmd.AddCommand(dns.NewCmd())
+	cmd.AddCommand(dns.NewCmd(p))
 	cmd.AddCommand(logme.NewCmd())
 	cmd.AddCommand(mariadb.NewCmd())
 	cmd.AddCommand(mongodbflex.NewCmd())
@@ -97,7 +102,7 @@ func addSubcommands(cmd *cobra.Command) {
 	cmd.AddCommand(opensearch.NewCmd())
 	cmd.AddCommand(organization.NewCmd())
 	cmd.AddCommand(postgresflex.NewCmd())
-	cmd.AddCommand(project.NewCmd())
+	cmd.AddCommand(project.NewCmd(p))
 	cmd.AddCommand(rabbitmq.NewCmd())
 	cmd.AddCommand(redis.NewCmd())
 	cmd.AddCommand(secretsmanager.NewCmd())
@@ -114,11 +119,18 @@ func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
 }
 
 func Execute(version, date string) {
-	cmd := NewRootCmd(version, date)
+	p := print.NewPrinter()
+	cmd := NewRootCmd(version, date, p)
+
+	// We need to set the printer and verbosity here because the
+	// PersistentPreRun is not called when the command is wrongly called
+	p.Cmd = cmd
+	p.Verbosity = print.InfoLevel
+
 	err := cmd.Execute()
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
-		cmd.PrintErrln(cmd.ErrPrefix(), err.Error())
+		p.Error(err.Error())
 		os.Exit(1)
 	}
 }

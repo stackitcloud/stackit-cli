@@ -37,6 +37,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		Limit:  utils.Ptr(int64(10)),
 		SortBy: "subject",

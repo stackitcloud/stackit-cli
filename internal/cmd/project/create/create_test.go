@@ -36,7 +36,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		ParentId:        utils.Ptr(testParentId),
 		Name:            utils.Ptr(nameFlag),
 		Labels: utils.Ptr(map[string]string{

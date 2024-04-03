@@ -35,6 +35,7 @@ func fixtureInputModel(mods ...func(model *InputModel)) *InputModel {
 	model := &InputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 	}
 	for _, mod := range mods {

@@ -7,12 +7,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "zone",
 		Short: "Provides functionality for DNS zones",
@@ -20,13 +21,13 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(create.NewCmd())
+	cmd.AddCommand(create.NewCmd(p))
 	cmd.AddCommand(describe.NewCmd())
 	cmd.AddCommand(update.NewCmd())
 	cmd.AddCommand(delete.NewCmd())

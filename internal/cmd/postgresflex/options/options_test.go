@@ -75,7 +75,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		Flavors:         false,
 		Versions:        false,
 		Storages:        false,
@@ -88,7 +88,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		Flavors:         true,
 		Versions:        true,
 		Storages:        true,

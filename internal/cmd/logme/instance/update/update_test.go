@@ -77,6 +77,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:           testInstanceId,
 		EnableMonitoring:     utils.Ptr(true),
@@ -162,6 +163,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId: testInstanceId,
 			},
@@ -181,6 +183,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId:       testInstanceId,
 				PlanId:           utils.Ptr(testPlanId),
@@ -451,6 +454,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId: testInstanceId,
 			},

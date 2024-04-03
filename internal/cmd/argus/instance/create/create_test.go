@@ -56,6 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName: utils.Ptr("example-name"),
 		PlanId:       utils.Ptr(testPlanId),
@@ -134,6 +135,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId:       utils.Ptr(testPlanId),
 				InstanceName: utils.Ptr(""),

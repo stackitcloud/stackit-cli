@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	}
 
 	model := &inputModel{
-		GlobalFlagModel:   &globalflags.GlobalFlagModel{},
+		GlobalFlagModel:   &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		ParentId:          utils.Ptr(testParentId),
 		Member:            utils.Ptr("member"),
 		CreationTimeAfter: utils.Ptr(testCreationTimeAfter),
