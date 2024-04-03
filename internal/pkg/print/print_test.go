@@ -29,7 +29,7 @@ func TestOutputf(t *testing.T) {
 			verbosity:   InfoLevel,
 		},
 		{
-			description: "info - with args verbosity",
+			description: "info verbosity - with args",
 			message:     "Test message with args: %s, %s",
 			args:        []any{"arg1", "arg2"},
 			verbosity:   DebugLevel,
@@ -125,6 +125,7 @@ func TestDebug(t *testing.T) {
 	tests := []struct {
 		description string
 		message     string
+		args        []any
 		verbosity   Level
 		expectsLog  bool
 		logLevel    Level
@@ -153,6 +154,14 @@ func TestDebug(t *testing.T) {
 		{
 			description: "debug verbosity - error log",
 			message:     "Test message",
+			verbosity:   DebugLevel,
+			expectsLog:  true,
+			logLevel:    ErrorLevel,
+		},
+		{
+			description: "debug verbosity - error log with args",
+			message:     "Test message",
+			args:        []any{"arg1", "arg2"},
 			verbosity:   DebugLevel,
 			expectsLog:  true,
 			logLevel:    ErrorLevel,
@@ -191,7 +200,12 @@ func TestDebug(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
-			p.Debug(tt.logLevel, tt.message)
+			if len(tt.args) == 0 {
+				p.Debug(tt.logLevel, tt.message)
+			}
+			if len(tt.args) > 0 {
+				p.Debug(tt.logLevel, tt.message, tt.args...)
+			}
 
 			output := buf.String()
 			// We only check if a log is printed, as the content of the log as fields that change such as the time
