@@ -54,8 +54,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
+func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
 	request := testClient.DeleteInstance(testCtx, testProjectId, testInstanceId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureForceDeleteRequest(mods ...func(request *postgresflex.ApiForceDeleteInstanceRequest)) postgresflex.ApiForceDeleteInstanceRequest {
+	request := testClient.ForceDeleteInstance(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -186,7 +194,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildDeleteRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -195,13 +203,41 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureDeleteRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildDeleteRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildForceDeleteRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest postgresflex.ApiForceDeleteInstanceRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureForceDeleteRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildForceDeleteRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
