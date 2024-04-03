@@ -44,8 +44,8 @@ func SingleArg(argName string, validate func(value string) error) cobra.Position
 }
 
 // SingleOptionalArg checks if one or no arguments were provided and validates it if provided
-// using the validate function. It returns an error if the argument is invalid.
-// For no validation, you can pass a nil validate function
+// using the validate function. It returns an error if more than one argument is provided, or if 
+// the argument is invalid. For no validation, you can pass a nil validate function
 func SingleOptionalArg(argName string, validate func(value string) error) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
