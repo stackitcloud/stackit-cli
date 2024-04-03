@@ -5,15 +5,16 @@ Completes the rotation of the credentials associated to a SKE cluster
 ### Synopsis
 
 Completes the rotation of the credentials associated to a STACKIT Kubernetes Engine (SKE) cluster.
-To ensure continued access to the Kubernetes cluster, please update your kubeconfig service account to the newly created account.
+
 This is step 2 of a 2-step process to rotate all SKE cluster credentials. Tasks accomplished in this phase include:
   - The old certification authority will be dropped from the package.
   - The old signing key for the service account will be dropped from the bundle.
+To ensure continued access to the Kubernetes cluster, please update your kubeconfig with the new credentials:
+  $ stackit ske kubeconfig create my-cluster
 
 If you haven't, please start the process by running:
   $ stackit ske credentials start-rotation my-cluster
-After completing the rotation of credentials, you can generate a new kubeconfig file by running:
-  $ stackit ske kubeconfig create my-cluster
+For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html
 
 ```
 stackit ske credentials complete-rotation CLUSTER_NAME [flags]
@@ -27,8 +28,8 @@ stackit ske credentials complete-rotation CLUSTER_NAME [flags]
 
   Flow of the 2-step process to rotate all SKE cluster credentials, including generating a new kubeconfig file
   $ stackit ske credentials start-rotation my-cluster
-  $ stackit ske credentials complete-rotation my-cluster
   $ stackit ske kubeconfig create my-cluster
+  $ stackit ske credentials complete-rotation my-cluster
 ```
 
 ### Options

@@ -5,7 +5,11 @@ Creates a kubeconfig for an SKE cluster
 ### Synopsis
 
 Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster.
+
 By default the kubeconfig is created in the .kube folder, in the user's home directory. The kubeconfig file will be overwritten if it already exists.
+You can override this behavior by specifying a custom filepath with the --filepath flag.
+An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.
+Note that the format is <value><unit>, e.g. 30d for 30 days and you can't combine units.
 
 ```
 stackit ske kubeconfig create CLUSTER_NAME [flags]
@@ -23,16 +27,16 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 2 months
   $ stackit ske kubeconfig create my-cluster --expiration 2M
 
-  Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom location
-  $ stackit ske kubeconfig create my-cluster --location /path/to/config
+  Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath
+  $ stackit ske kubeconfig create my-cluster --filepath /path/to/config
 ```
 
 ### Options
 
 ```
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
+      --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
-      --location string     Folder location to store the kubeconfig file. By default, the kubeconfig is created in the .kube folder, in the user's home directory.
 ```
 
 ### Options inherited from parent commands

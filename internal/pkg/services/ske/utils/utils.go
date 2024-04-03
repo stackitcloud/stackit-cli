@@ -199,7 +199,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 // The time string must be in the format of <value><unit>, where unit is one of s, m, h, d, M.
 func ConvertToSeconds(timeStr string) (*string, error) {
 	if len(timeStr) < 2 {
-		return nil, fmt.Errorf("invalid time format: %s", timeStr)
+		return nil, fmt.Errorf("invalid time: %s", timeStr)
 	}
 
 	unit := timeStr[len(timeStr)-1:]
@@ -207,7 +207,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	valueStr := timeStr[:len(timeStr)-1]
 	value, err := strconv.ParseUint(valueStr, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse uint: %s", timeStr)
+		return nil, fmt.Errorf("invalid time value: %s", valueStr)
 	}
 
 	var multiplier uint64
@@ -228,7 +228,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	case "M":
 		multiplier = 60 * 60 * 24 * 30
 	default:
-		return nil, fmt.Errorf("invalid time format: %s", timeStr)
+		return nil, fmt.Errorf("invalid time unit: %s", unit)
 	}
 
 	result := uint64(value) * multiplier
@@ -256,8 +256,8 @@ func WriteConfigFile(configPath, data string) error {
 	return nil
 }
 
-// GetDefaultKubeconfigLocation returns the default location for the kubeconfig file.
-func GetDefaultKubeconfigLocation() (string, error) {
+// GetDefaultKubeconfigPath returns the default location for the kubeconfig file.
+func GetDefaultKubeconfigPath() (string, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("get user home directory: %w", err)
