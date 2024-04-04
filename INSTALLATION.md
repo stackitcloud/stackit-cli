@@ -27,6 +27,7 @@ The STACKIT CLI can be installed through the [`APT`](https://ubuntu.com/server/d
 ##### Before you begin
 
 To install the STACKIT CLI package, you will need to have the `curl` and `gnupg` packages installed:
+
 ```shell
 sudo apt-get update
 sudo apt-get install curl gnupg
@@ -37,13 +38,13 @@ sudo apt-get install curl gnupg
 1. Import the STACKIT public key:
 
 ```shell
-curl https://object.storage.eu01.onstackit.cloud/stackit-public-key/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/stackit.gpg
+curl https://packages.stackit.cloud/keys/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/stackit.gpg
 ```
 
 2. Add the STACKIT CLI package repository as a package source:
 
 ```shell
-echo "deb [signed-by=/usr/share/keyrings/stackit.gpg] https://object.storage.eu01.onstackit.cloud/stackit-cli-apt stackit main" | sudo tee -a /etc/apt/sources.list.d/stackit.list
+echo "deb [signed-by=/usr/share/keyrings/stackit.gpg] https://packages.stackit.cloud/apt/cli stackit main" | sudo tee -a /etc/apt/sources.list.d/stackit.list
 ```
 
 3. Update repository information and install the `stackit` package:
