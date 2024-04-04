@@ -115,13 +115,29 @@ func NewCmd() *cobra.Command {
 					return fmt.Errorf("force delete PostgreSQL Flex instance: %w", err)
 				}
 
-				// TODO: Wait for async operation, if async mode not enabled
+				// Wait for async operation, if async mode not enabled
+				if !model.Async {
+					s := spinner.New(cmd)
+					s.Start("Forcing deletion of instance")
+					_, err = wait.ForceDeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+					if err != nil {
+						return fmt.Errorf("wait for PostgreSQL Flex instance force deletion: %w", err)
+					}
+					s.Stop()
+				}
 			}
 
 			operationState := "Deleted"
+			if model.ForceDelete {
+				operationState = "Forcefully deleted"
+			}
 			if model.Async {
 				operationState = "Triggered deletion of"
+				if model.ForceDelete {
+					operationState = "Triggered forced deletion of"
+				}
 			}
+
 			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
