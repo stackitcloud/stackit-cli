@@ -24,8 +24,6 @@ const (
 	instanceIdArg = "INSTANCE_ID"
 
 	forceDeleteFlag = "force"
-
-	deletedStatus = "Deleted"
 )
 
 type inputModel struct {
@@ -41,7 +39,7 @@ func NewCmd() *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Deletes a PostgreSQL Flex instance.",
 			"By default, instances will be kept in a delayed deleted state for 7 days before being permanently deleted.",
-			"Use the --force flag to force the deletion of a delayed deleted instance.",
+			"Use the --force flag to force the immediate deletion of a delayed deleted instance.",
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
@@ -78,16 +76,12 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
-			instanceStatus, err := postgresflexUtils.GetInstanceStatus(ctx, apiClient, model.ProjectId, model.InstanceId)
+			toDelete, toForceDelete, err := checkIfInstanceIsDeleted(ctx, model, apiClient)
 			if err != nil {
-				return fmt.Errorf("get PostgreSQL Flex instance status: %w", err)
+				return err
 			}
 
-			if instanceStatus == deletedStatus && !model.ForceDelete {
-				return fmt.Errorf("instance %q is already deleted, use --force to force the deletion of a delayed deleted instance", instanceLabel)
-			}
-
-			if instanceStatus != deletedStatus {
+			if toDelete {
 				// Call API
 				delReq := buildDeleteRequest(ctx, model, apiClient)
 				err = delReq.Execute()
@@ -107,7 +101,7 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
-			if model.ForceDelete {
+			if toForceDelete {
 				// Call API
 				forceDelReq := buildForceDeleteRequest(ctx, model, apiClient)
 				err = forceDelReq.Execute()
@@ -128,12 +122,12 @@ func NewCmd() *cobra.Command {
 			}
 
 			operationState := "Deleted"
-			if model.ForceDelete {
+			if toForceDelete {
 				operationState = "Forcefully deleted"
 			}
 			if model.Async {
 				operationState = "Triggered deletion of"
-				if model.ForceDelete {
+				if toForceDelete {
 					operationState = "Triggered forced deletion of"
 				}
 			}
@@ -173,4 +167,27 @@ func buildDeleteRequest(ctx context.Context, model *inputModel, apiClient *postg
 func buildForceDeleteRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiForceDeleteInstanceRequest {
 	req := apiClient.ForceDeleteInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
+}
+
+type PostgreSQLFlexClient interface {
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
+}
+
+func checkIfInstanceIsDeleted(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (toDelete, toForceDelete bool, err error) {
+	instanceStatus, err := postgresflexUtils.GetInstanceStatus(ctx, apiClient, model.ProjectId, model.InstanceId)
+	if err != nil {
+		return false, false, fmt.Errorf("get PostgreSQL Flex instance status: %w", err)
+	}
+
+	if instanceStatus == wait.InstanceStateDeleted {
+		if !model.ForceDelete {
+			return false, false, fmt.Errorf("instance is already deleted, use --force to force the deletion of a delayed deleted instance")
+		}
+
+		return false, model.ForceDelete, nil
+	}
+
+	return true, model.ForceDelete, nil
 }
