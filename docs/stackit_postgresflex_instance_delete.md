@@ -6,7 +6,7 @@ Deletes a PostgreSQL Flex instance
 
 Deletes a PostgreSQL Flex instance.
 By default, instances will be kept in a delayed deleted state for 7 days before being permanently deleted.
-Use the --force flag to force the deletion of a delayed deleted instance.
+Use the --force flag to force the immediate deletion of a delayed deleted instance.
 
 ```
 stackit postgresflex instance delete INSTANCE_ID [flags]

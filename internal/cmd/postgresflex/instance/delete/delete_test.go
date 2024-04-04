@@ -36,11 +36,11 @@ func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ st
 	return c.getInstanceResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error) {
+func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
 	// Not used in testing
 	return nil, nil
 }
-func (c *postgresFlexClientMocked) GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error) {
+func (c *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*postgresflex.GetUserResponse, error) {
 	// Not used in testing
 	return nil, nil
 }
