@@ -349,7 +349,7 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 				getInstanceFails: tt.getInstanceFails,
 			}
 
-			toDelete, toForceDelete, err := checkIfInstanceIsDeleted(testCtx, tt.model, client)
+			toDelete, toForceDelete, err := getNextOperations(testCtx, tt.model, client)
 			if err != nil {
 				if !tt.isValid {
 					return
