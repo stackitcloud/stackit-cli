@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 			if len(projects) == 0 {
-				cmd.Print("No projects found matching the criteria\n")
+				p.Info("No projects found matching the criteria\n")
 				return nil
 			}
 

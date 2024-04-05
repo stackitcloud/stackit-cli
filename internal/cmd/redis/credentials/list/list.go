@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					instanceLabel = model.InstanceId
 				}
-				cmd.Printf("No credentials found for instance %q\n", instanceLabel)
+				p.Info("No credentials found for instance %q\n", instanceLabel)
 				return nil
 			}
 

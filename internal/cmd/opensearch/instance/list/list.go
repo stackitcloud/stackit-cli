@@ -70,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No instances found for project %q\n", projectLabel)
+				p.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
 
