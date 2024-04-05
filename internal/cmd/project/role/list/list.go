@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists roles and permissions of a project",
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No roles found for project %q\n", projectLabel)
+				p.Info("No roles found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -81,7 +82,7 @@ func NewCmd() *cobra.Command {
 				roles = roles[:*model.Limit]
 			}
 
-			return outputRolesResult(cmd, model.OutputFormat, roles)
+			return outputRolesResult(cmd, model.OutputFormat, roles, p)
 		},
 	}
 	configureFlags(cmd)
@@ -116,7 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return apiClient.ListRoles(ctx, projectResourceType, model.GlobalFlagModel.ProjectId)
 }
 
-func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authorization.Role) error {
+func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authorization.Role, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details
@@ -124,7 +125,7 @@ func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authoriz
 		if err != nil {
 			return fmt.Errorf("marshal roles: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -40,7 +41,7 @@ type inputModel struct {
 	PageSize          int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists STACKIT projects",
@@ -80,7 +81,7 @@ func NewCmd() *cobra.Command {
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, projects)
+			return outputResult(cmd, model.OutputFormat, projects, p)
 		},
 	}
 	configureFlags(cmd)
@@ -194,14 +195,14 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	return projects, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcemanager.ProjectResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcemanager.ProjectResponse, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -35,7 +36,7 @@ type inputModel struct {
 	DisableWrite *bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", userIdArg),
 		Short: "Updates the write privileges Secrets Manager user",
@@ -91,7 +92,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update Secrets Manager user: %w", err)
 			}
 
-			cmd.Printf("Updated user %s of instance %q\n", userLabel, instanceLabel)
+			p.Info("Updated user %s of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

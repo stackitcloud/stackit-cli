@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
 		Short: "Resets the password of a MongoDB Flex user",
@@ -83,10 +84,10 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("reset MongoDB Flex user password: %w", err)
 			}
 
-			cmd.Printf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-			cmd.Printf("Username: %s\n", *user.Username)
-			cmd.Printf("New password: %s\n", *user.Password)
-			cmd.Printf("New URI: %s\n", *user.Uri)
+			p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
+			p.Outputf("Username: %s\n", *user.Username)
+			p.Outputf("New password: %s\n", *user.Password)
+			p.Outputf("New URI: %s\n", *user.Uri)
 			return nil
 		},
 	}

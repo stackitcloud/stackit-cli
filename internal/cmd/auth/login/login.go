@@ -6,11 +6,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Logs in to the STACKIT CLI",
@@ -27,7 +28,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("authorization failed: %w", err)
 			}
 
-			cmd.Println("Successfully logged into STACKIT CLI.")
+			p.Info("Successfully logged into STACKIT CLI.")
 			return nil
 		},
 	}

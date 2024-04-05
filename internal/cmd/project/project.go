@@ -33,11 +33,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(update.NewCmd())
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(member.NewCmd())
-	cmd.AddCommand(role.NewCmd())
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(member.NewCmd(p))
+	cmd.AddCommand(role.NewCmd(p))
 }

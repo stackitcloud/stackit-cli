@@ -8,11 +8,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instance",
 		Short: "Provides functionality for MongoDB Flex instances",
@@ -20,14 +21,14 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(update.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 }

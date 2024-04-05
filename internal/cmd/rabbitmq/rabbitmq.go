@@ -6,11 +6,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq/plans"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rabbitmq",
 		Short: "Provides functionality for RabbitMQ",
@@ -18,12 +19,12 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(instance.NewCmd())
-	cmd.AddCommand(plans.NewCmd())
-	cmd.AddCommand(credentials.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(instance.NewCmd(p))
+	cmd.AddCommand(plans.NewCmd(p))
+	cmd.AddCommand(credentials.NewCmd(p))
 }

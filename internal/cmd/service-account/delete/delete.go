@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ type inputModel struct {
 	Email string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", emailArg),
 		Short: "Deletes a service account",
@@ -66,7 +67,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete service account: %w", err)
 			}
 
-			cmd.Printf("Service account %s deleted\n", model.Email)
+			p.Info("Service account %s deleted\n", model.Email)
 			return nil
 		},
 	}

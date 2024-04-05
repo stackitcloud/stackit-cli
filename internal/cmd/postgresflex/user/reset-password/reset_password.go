@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
 		Short: "Resets the password of a PostgreSQL Flex user",
@@ -82,10 +83,10 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("reset PostgreSQL Flex user password: %w", err)
 			}
 
-			cmd.Printf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-			cmd.Printf("Username: %s\n", *user.Item.Username)
-			cmd.Printf("New password: %s\n", *user.Item.Password)
-			cmd.Printf("New URI: %s\n", *user.Item.Uri)
+			p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
+			p.Outputf("Username: %s\n", *user.Item.Username)
+			p.Outputf("New password: %s\n", *user.Item.Password)
+			p.Outputf("New URI: %s\n", *user.Item.Uri)
 			return nil
 		},
 	}

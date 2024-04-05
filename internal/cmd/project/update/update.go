@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
@@ -35,7 +36,7 @@ type inputModel struct {
 	Labels   *map[string]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Updates a STACKIT project",
@@ -86,7 +87,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update project: %w", err)
 			}
 
-			cmd.Printf("Updated project %q\n", projectLabel)
+			p.Info("Updated project %q\n", projectLabel)
 			return nil
 		},
 	}

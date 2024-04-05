@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -26,7 +27,7 @@ type inputModel struct {
 	CredentialsGroupId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsGroupIdArg),
 		Short: "Deletes a credentials group that holds Object Storage access credentials",
@@ -70,7 +71,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials group %q\n", credentialsGroupLabel)
+			p.Info("Deleted credentials group %q\n", credentialsGroupLabel)
 			return nil
 		},
 	}

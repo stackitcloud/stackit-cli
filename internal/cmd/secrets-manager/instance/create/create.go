@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Acls         *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager instance",
@@ -91,7 +92,7 @@ If you want to retry configuring the ACLs, you can do it via:
 				}
 			}
 
-			cmd.Printf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
+			p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
 			return nil
 		},
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	KeyId               string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", keyIdArg),
 		Short: "Deletes a service account key",
@@ -69,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete key: %w", err)
 			}
 
-			cmd.Printf("Deleted key %s from service account %s\n", model.KeyId, model.ServiceAccountEmail)
+			p.Info("Deleted key %s from service account %s\n", model.KeyId, model.ServiceAccountEmail)
 			return nil
 		},
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -44,7 +45,7 @@ type flavorStorages struct {
 	Storages *mongodbflex.ListStoragesResponse `json:"storages"`
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists MongoDB Flex options",

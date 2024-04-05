@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", userIdArg),
 		Short: "Deletes a MongoDB Flex user",
@@ -83,7 +84,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete MongoDB Flex user: %w", err)
 			}
 
-			cmd.Printf("Deleted user %q of instance %q\n", userLabel, instanceLabel)
+			p.Info("Deleted user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	logmeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -30,7 +31,7 @@ type inputModel struct {
 	CredentialsId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
 		Short: "Deletes credentials of a LogMe instance",
@@ -79,7 +80,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete LogMe credentials: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials %s of instance %q\n", credentialsLabel, instanceLabel)
+			p.Info("Deleted credentials %s of instance %q\n", credentialsLabel, instanceLabel)
 			return nil
 		},
 	}

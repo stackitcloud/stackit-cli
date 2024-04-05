@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Secrets Manager users",
@@ -71,7 +72,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					instanceLabel = *model.InstanceId
 				}
-				cmd.Printf("No users found for instance %q\n", instanceLabel)
+				p.Info("No users found for instance %q\n", instanceLabel)
 				return nil
 			}
 			users := *resp.Users
@@ -81,7 +82,7 @@ func NewCmd() *cobra.Command {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, users)
+			return outputResult(cmd, model.OutputFormat, users, p)
 		},
 	}
 
@@ -123,14 +124,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, users []secretsmanager.User) error {
+func outputResult(cmd *cobra.Command, outputFormat string, users []secretsmanager.User, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(users, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

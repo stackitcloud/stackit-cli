@@ -165,7 +165,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -288,7 +288,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			client := &mongoDBFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listVersionsFails: tt.listVersionsFails,

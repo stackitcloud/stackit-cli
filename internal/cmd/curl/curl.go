@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ type inputModel struct {
 	OutputFile             *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("curl %s", urlArg),
 		Short: "Executes an authenticated HTTP request to an endpoint",
@@ -97,7 +98,7 @@ func NewCmd() *cobra.Command {
 				}
 			}()
 
-			err = outputResponse(cmd, model, resp)
+			err = outputResponse(model, resp, p)
 			if err != nil {
 				return err
 			}
@@ -199,7 +200,7 @@ func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) 
 	return req, nil
 }
 
-func outputResponse(cmd *cobra.Command, model *inputModel, resp *http.Response) error {
+func outputResponse(model *inputModel, resp *http.Response, p *print.Printer) error {
 	output := make([]byte, 0)
 	if model.IncludeResponseHeaders {
 		respHeader, err := httputil.DumpResponse(resp, false)
@@ -215,7 +216,7 @@ func outputResponse(cmd *cobra.Command, model *inputModel, resp *http.Response) 
 	output = append(output, respBody...)
 
 	if model.OutputFile == nil {
-		cmd.Println(string(output))
+		p.Outputf(string(output))
 	} else {
 		err = os.WriteFile(*model.OutputFile, output, 0o600)
 		if err != nil {

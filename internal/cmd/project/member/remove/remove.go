@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -35,7 +36,7 @@ type inputModel struct {
 	Force   bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("remove %s", subjectArg),
 		Short: "Removes a member from a project",
@@ -89,7 +90,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			cmd.Printf("Removed the role %q from %s on project %q\n", *model.Role, model.Subject, projectLabel)
+			p.Info("Removed the role %q from %s on project %q\n", *model.Role, model.Subject, projectLabel)
 			return nil
 		},
 	}

@@ -48,14 +48,14 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(cmd, "version") {
-				cmd.Printf("STACKIT CLI (BETA)\n")
+				p.Outputf("STACKIT CLI (BETA)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {
-					cmd.Printf("Version: %s\n", version)
+					p.Outputf("Version: %s\n", version)
 					return nil
 				}
-				cmd.Printf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
+				p.Outputf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
 				return nil
 			}
 
@@ -90,24 +90,24 @@ func configureFlags(cmd *cobra.Command) error {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(argus.NewCmd())
+	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
-	cmd.AddCommand(config.NewCmd())
-	cmd.AddCommand(curl.NewCmd())
+	cmd.AddCommand(config.NewCmd(p))
+	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
-	cmd.AddCommand(logme.NewCmd())
-	cmd.AddCommand(mariadb.NewCmd())
-	cmd.AddCommand(mongodbflex.NewCmd())
-	cmd.AddCommand(objectstorage.NewCmd())
-	cmd.AddCommand(opensearch.NewCmd())
-	cmd.AddCommand(organization.NewCmd())
-	cmd.AddCommand(postgresflex.NewCmd())
+	cmd.AddCommand(logme.NewCmd(p))
+	cmd.AddCommand(mariadb.NewCmd(p))
+	cmd.AddCommand(mongodbflex.NewCmd(p))
+	cmd.AddCommand(objectstorage.NewCmd(p))
+	cmd.AddCommand(opensearch.NewCmd(p))
+	cmd.AddCommand(organization.NewCmd(p))
+	cmd.AddCommand(postgresflex.NewCmd(p))
 	cmd.AddCommand(project.NewCmd(p))
-	cmd.AddCommand(rabbitmq.NewCmd())
-	cmd.AddCommand(redis.NewCmd())
-	cmd.AddCommand(secretsmanager.NewCmd())
-	cmd.AddCommand(serviceaccount.NewCmd())
-	cmd.AddCommand(ske.NewCmd())
+	cmd.AddCommand(rabbitmq.NewCmd(p))
+	cmd.AddCommand(redis.NewCmd(p))
+	cmd.AddCommand(secretsmanager.NewCmd(p))
+	cmd.AddCommand(serviceaccount.NewCmd(p))
+	cmd.AddCommand(ske.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
@@ -21,7 +22,7 @@ type inputModel struct {
 	Email string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("get-jwks %s", emailArg),
 		Short: "Shows the JWKS for a service account",
@@ -53,7 +54,7 @@ func NewCmd() *cobra.Command {
 			}
 			jwks := *resp.Keys
 			if len(jwks) == 0 {
-				cmd.Printf("Empty JWKS for service account %s\n", model.Email)
+				p.Info("Empty JWKS for service account %s\n", model.Email)
 				return nil
 			}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -32,7 +33,7 @@ type inputModel struct {
 	Acls *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
 		Short: "Updates a Secrets Manager instance",
@@ -76,7 +77,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update Secrets Manager instance: %w", err)
 			}
 
-			cmd.Printf("Updated instance %q\n", instanceLabel)
+			p.Info("Updated instance %q\n", instanceLabel)
 			return nil
 		},
 	}

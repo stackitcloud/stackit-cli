@@ -15,6 +15,7 @@ import (
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -39,7 +40,7 @@ type inputModel struct {
 	RecoveryDate *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("clone %s", instanceIdArg),
 		Short: "Clones a PostgreSQL Flex instance",
@@ -111,7 +112,7 @@ func NewCmd() *cobra.Command {
 				operationState = "Triggered cloning of"
 			}
 
-			cmd.Printf("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
+			p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
 			return nil
 		},
 	}
