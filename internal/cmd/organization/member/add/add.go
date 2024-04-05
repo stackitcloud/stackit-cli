@@ -9,9 +9,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			cmd.Println("Member added")
+			p.Info("Member added")
 			return nil
 		},
 	}

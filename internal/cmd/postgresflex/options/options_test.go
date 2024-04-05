@@ -295,7 +295,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				listStoragesFails: tt.listStoragesFails,
 			}
 
-			err := buildAndExecuteRequest(testCtx, cmd, tt.model, client)
+			err := buildAndExecuteRequest(testCtx, cmd, tt.model, client, nil)
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}

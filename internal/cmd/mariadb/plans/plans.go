@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans)
+			return outputResult(cmd, model.OutputFormat, plans, p)
 		},
 	}
 
@@ -116,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []mariadb.Offering) error {
+func outputResult(cmd *cobra.Command, outputFormat string, plans []mariadb.Offering, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB plans: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -132,8 +132,8 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []mariadb.Offer
 		for i := range plans {
 			o := plans[i]
 			for j := range *o.Plans {
-				p := (*o.Plans)[j]
-				table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
+				plan := (*o.Plans)[j]
+				table.AddRow(*o.Name, *plan.Id, *plan.Name, *plan.Description)
 			}
 			table.AddSeparator()
 		}

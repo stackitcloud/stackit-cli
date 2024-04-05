@@ -10,9 +10,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read service account key: %w", err)
 			}
 
-			return outputResult(cmd, resp)
+			return outputResult(resp, p)
 		},
 	}
 	configureFlags(cmd)
@@ -103,11 +103,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, key *serviceaccount.GetServiceAccountKeyResponse) error {
+func outputResult(key *serviceaccount.GetServiceAccountKeyResponse, p *print.Printer) error {
 	marshaledKey, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal service account key: %w", err)
 	}
-	cmd.Println(string(marshaledKey))
+	p.Outputln(string(marshaledKey))
 	return nil
 }

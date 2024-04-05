@@ -10,10 +10,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe OpenSearch credentials: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(cmd, model.OutputFormat, resp, p)
 		},
 	}
 	configureFlags(cmd)
@@ -99,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials *opensearch.CredentialsResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *opensearch.CredentialsResponse, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -125,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials *opensear
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

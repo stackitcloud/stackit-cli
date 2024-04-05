@@ -10,9 +10,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -83,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			return outputResult(cmd, payload)
+			return outputResult(payload, p)
 		},
 	}
 	configureFlags(cmd)
@@ -114,12 +114,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, payload *ske.CreateOrUpdateClusterPayload) error {
+func outputResult(payload *ske.CreateOrUpdateClusterPayload, p *print.Printer) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
-	cmd.Println(string(payloadBytes))
+	p.Outputln(string(payloadBytes))
 
 	return nil
 }

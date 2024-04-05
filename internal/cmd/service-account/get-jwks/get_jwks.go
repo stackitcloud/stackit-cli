@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return nil
 			}
 
-			return outputResult(cmd, jwks)
+			return outputResult(jwks, p)
 		},
 	}
 
@@ -78,11 +78,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, serviceAccounts []serviceaccount.JWK) error {
+func outputResult(serviceAccounts []serviceaccount.JWK, p *print.Printer) error {
 	details, err := json.MarshalIndent(serviceAccounts, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal JWK list: %w", err)
 	}
-	cmd.Println(string(details))
+	p.Outputln(string(details))
 	return nil
 }

@@ -10,9 +10,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get MongoDB Flex user: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, *resp.Item)
+			return outputResult(cmd, model.OutputFormat, *resp.Item, p)
 		},
 	}
 
@@ -104,7 +104,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, user postgresflex.UserResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, user postgresflex.UserResponse, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -129,7 +129,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, user postgresflex.Use
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

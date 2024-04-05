@@ -7,8 +7,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

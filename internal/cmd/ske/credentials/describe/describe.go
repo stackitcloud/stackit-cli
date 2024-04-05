@@ -9,10 +9,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -70,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get SKE credentials: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(cmd, model.OutputFormat, resp, p)
 		},
 	}
 	return cmd
@@ -95,7 +95,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials *ske.Credentials) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *ske.Credentials, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -113,7 +113,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials *ske.Cred
 		if err != nil {
 			return fmt.Errorf("marshal SKE credentials: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

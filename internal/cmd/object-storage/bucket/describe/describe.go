@@ -9,9 +9,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read Object Storage bucket: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Bucket)
+			return outputResult(cmd, model.OutputFormat, resp.Bucket, p)
 		},
 	}
 	return cmd
@@ -84,7 +84,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage.Bucket) error {
+func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage.Bucket, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -107,7 +107,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage bucket: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

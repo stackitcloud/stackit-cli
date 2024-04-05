@@ -10,11 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read MongoDB Flex instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Item)
+			return outputResult(cmd, model.OutputFormat, resp.Item, p)
 		},
 	}
 	return cmd
@@ -87,7 +87,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex.Instance) error {
+func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex.Instance, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
@@ -133,7 +133,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex instance: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

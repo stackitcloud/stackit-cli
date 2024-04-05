@@ -10,13 +10,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -64,7 +64,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Item)
+			return outputResult(cmd, model.OutputFormat, resp.Item, p)
 		},
 	}
 	return cmd
@@ -89,7 +89,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresflex.Instance) error {
+func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresflex.Instance, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
@@ -135,7 +135,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}
