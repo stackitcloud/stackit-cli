@@ -10,7 +10,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,7 +41,7 @@ type inputModel struct {
 	ProjectIdSet bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
@@ -71,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if model.SessionTimeLimit != nil {
-				p.Info("Authenticate again to apply changes to session time limit")
+				cmd.Println("Authenticate again to apply changes to session time limit")
 				viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
 			}
 

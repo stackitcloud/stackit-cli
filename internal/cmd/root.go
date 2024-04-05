@@ -92,7 +92,7 @@ func configureFlags(cmd *cobra.Command) error {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
-	cmd.AddCommand(config.NewCmd(p))
+	cmd.AddCommand(config.NewCmd())
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
 	cmd.AddCommand(logme.NewCmd(p))
