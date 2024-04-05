@@ -123,7 +123,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []argus.Plan, p
 		if err != nil {
 			return fmt.Errorf("marshal Argus plans: %w", err)
 		}
-		p.Outputf(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

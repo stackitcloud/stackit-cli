@@ -28,7 +28,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("authorization failed: %w", err)
 			}
 
-			p.Info("Successfully logged into STACKIT CLI.")
+			p.Info("Successfully logged into STACKIT CLI.\n")
 			return nil
 		},
 	}
