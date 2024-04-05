@@ -216,7 +216,7 @@ func outputResponse(model *inputModel, resp *http.Response, p *print.Printer) er
 	output = append(output, respBody...)
 
 	if model.OutputFile == nil {
-		p.Outputf(string(output))
+		p.Outputln(string(output))
 	} else {
 		err = os.WriteFile(*model.OutputFile, output, 0o600)
 		if err != nil {
