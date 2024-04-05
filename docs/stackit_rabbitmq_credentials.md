@@ -28,8 +28,8 @@ stackit rabbitmq credentials [flags]
 ### SEE ALSO
 
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
-* [stackit rabbitmq credentials create](./stackit_rabbitmq_credentials_create.md)	 - Creates credentials for an RabbitMQ instance
-* [stackit rabbitmq credentials delete](./stackit_rabbitmq_credentials_delete.md)	 - Deletes credentials of an RabbitMQ instance
-* [stackit rabbitmq credentials describe](./stackit_rabbitmq_credentials_describe.md)	 - Shows details of credentials of an RabbitMQ instance
-* [stackit rabbitmq credentials list](./stackit_rabbitmq_credentials_list.md)	 - Lists all credentials' IDs for an RabbitMQ instance
+* [stackit rabbitmq credentials create](./stackit_rabbitmq_credentials_create.md)	 - Creates credentials for a RabbitMQ instance
+* [stackit rabbitmq credentials delete](./stackit_rabbitmq_credentials_delete.md)	 - Deletes credentials of a RabbitMQ instance
+* [stackit rabbitmq credentials describe](./stackit_rabbitmq_credentials_describe.md)	 - Shows details of credentials of a RabbitMQ instance
+* [stackit rabbitmq credentials list](./stackit_rabbitmq_credentials_list.md)	 - Lists all credentials' IDs for a RabbitMQ instance
 

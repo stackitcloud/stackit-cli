@@ -1,10 +1,10 @@
 ## stackit rabbitmq credentials create
 
-Creates credentials for an RabbitMQ instance
+Creates credentials for a RabbitMQ instance
 
 ### Synopsis
 
-Creates credentials (username and password) for an RabbitMQ instance.
+Creates credentials (username and password) for a RabbitMQ instance.
 
 ```
 stackit rabbitmq credentials create [flags]
@@ -13,10 +13,10 @@ stackit rabbitmq credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for an RabbitMQ instance
+  Create credentials for a RabbitMQ instance
   $ stackit rabbitmq credentials create --instance-id xxx
 
-  Create credentials for an RabbitMQ instance and hide the password in the output
+  Create credentials for a RabbitMQ instance and hide the password in the output
   $ stackit rabbitmq credentials create --instance-id xxx --hide-password
 ```
 

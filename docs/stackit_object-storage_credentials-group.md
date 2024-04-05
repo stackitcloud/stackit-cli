@@ -29,6 +29,6 @@ stackit object-storage credentials-group [flags]
 
 * [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
 * [stackit object-storage credentials-group create](./stackit_object-storage_credentials-group_create.md)	 - Creates a credentials group to hold Object Storage access credentials
-* [stackit object-storage credentials-group delete](./stackit_object-storage_credentials-group_delete.md)	 - Deletes a credentials group
-* [stackit object-storage credentials-group list](./stackit_object-storage_credentials-group_list.md)	 - Lists all credentials groups
+* [stackit object-storage credentials-group delete](./stackit_object-storage_credentials-group_delete.md)	 - Deletes a credentials group that holds Object Storage access credentials
+* [stackit object-storage credentials-group list](./stackit_object-storage_credentials-group_list.md)	 - Lists all credentials groups that hold Object Storage access credentials
 

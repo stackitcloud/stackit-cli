@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsGroupIdArg),
-		Short: "Deletes a credentials group",
-		Long:  "Deletes a credentials group. Only possible if there are no valid credentials (access-keys) left in the group, otherwise it will throw an error.",
+		Short: "Deletes a credentials group that holds Object Storage access credentials",
+		Long:  "Deletes a credentials group that holds Object Storage access credentials. Only possible if there are no valid credentials (access-keys) left in the group, otherwise it will throw an error.",
 		Args:  args.SingleArg(credentialsGroupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

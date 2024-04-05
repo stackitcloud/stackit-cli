@@ -18,12 +18,12 @@ import (
 )
 
 const (
-	nameFlag = "name"
+	credentialsGroupNameFlag = "name"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	DisplayName string
+	CredentialsGroupName string
 }
 
 func NewCmd() *cobra.Command {
@@ -51,7 +51,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a credentials group with name %q?", model.DisplayName)
+				prompt := fmt.Sprintf("Are you sure you want to create a credentials group with name %q?", model.CredentialsGroupName)
 				err = confirm.PromptForConfirmation(cmd, prompt)
 				if err != nil {
 					return err
@@ -75,9 +75,9 @@ func NewCmd() *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(nameFlag, "", "Name of the group holding credentials")
+	cmd.Flags().String(credentialsGroupNameFlag, "", "Name of the group holding credentials")
 
-	err := flags.MarkFlagsRequired(cmd, nameFlag)
+	err := flags.MarkFlagsRequired(cmd, credentialsGroupNameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -88,15 +88,15 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	return &inputModel{
-		GlobalFlagModel: globalFlags,
-		DisplayName:     flags.FlagToStringValue(cmd, nameFlag),
+		GlobalFlagModel:      globalFlags,
+		CredentialsGroupName: flags.FlagToStringValue(cmd, credentialsGroupNameFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateCredentialsGroupRequest {
 	req := apiClient.CreateCredentialsGroup(ctx, model.ProjectId)
 	req = req.CreateCredentialsGroupPayload(objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(model.DisplayName),
+		DisplayName: utils.Ptr(model.CredentialsGroupName),
 	})
 	return req
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -47,6 +48,9 @@ func NewCmd() *cobra.Command {
 		Long:  "Lists all STACKIT projects that match certain criteria.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			examples.NewExample(
+				`List all STACKIT projects that the authenticated user or service account is a member of`,
+				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
 				"$ stackit project list --parent-id xxx"),
@@ -94,9 +98,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(creationTimeAfterFlag, "", "Filter by creation timestamp, in a date-time with the RFC3339 layout format, e.g. 2023-01-01T00:00:00Z. The list of projects that were created after the given timestamp will be shown")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
-
-	// At least one of parent-id, project-id-like or member flag must be provided
-	cmd.MarkFlagsOneRequired(parentIdFlag, projectIdLikeFlag, memberFlag)
 }
 
 func parseInput(cmd *cobra.Command) (*inputModel, error) {
@@ -137,7 +138,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) resourcemanager.ApiListProjectsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) (resourcemanager.ApiListProjectsRequest, error) {
 	req := apiClient.ListProjects(ctx)
 	if model.ParentId != nil {
 		req = req.ContainerParentId(*model.ParentId)
@@ -151,9 +152,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 	if model.CreationTimeAfter != nil {
 		req = req.CreationTimeStart(*model.CreationTimeAfter)
 	}
+
+	if model.ParentId == nil && model.ProjectIdLike == nil && model.Member == nil {
+		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		if err != nil {
+			return req, fmt.Errorf("get email of authenticated user: %w", err)
+		}
+		req = req.Member(email)
+	}
 	req = req.Limit(float32(model.PageSize))
 	req = req.Offset(float32(offset))
-	return req
+	return req, nil
 }
 
 type resourceManagerClient interface {
@@ -169,7 +178,10 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	projects := []resourcemanager.ProjectResponse{}
 	for {
 		// Call API
-		req := buildRequest(ctx, model, apiClient, offset)
+		req, err := buildRequest(ctx, model, apiClient, offset)
+		if err != nil {
+			return nil, fmt.Errorf("build list projects request: %w", err)
+		}
 		resp, err := req.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("get projects: %w", err)

@@ -232,10 +232,15 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.Reco
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE")
+		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE", "RECORD DATA")
 		for i := range recordSets {
 			rs := recordSets[i]
-			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type)
+			recordData := make([]string, 0, len(*rs.Records))
+			for _, r := range *rs.Records {
+				recordData = append(recordData, *r.Content)
+			}
+			recordDataJoin := strings.Join(recordData, ", ")
+			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type, recordDataJoin)
 		}
 		err := table.Display(cmd)
 		if err != nil {

@@ -1,8 +1,8 @@
 # STACKIT CLI release workflow.
 name: Release
 
-# This GitHub action creates a release when a tag that matches the pattern
-# "v*" (e.g. v0.1.0) is created.
+# This GitHub action creates a release when a tag that matches one of the patterns below
+# E.g. v0.1.0, v0.1.0-something.1, etc 
 on:
   push:
     tags:
@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   goreleaser:
+    name: Release
     runs-on: macOS-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
@@ -68,8 +69,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
       - name: Publish packages to APT repo
-        if: contains(github.ref_name, '-') == false
+        # Temporarily not skipping prereleases to test integration with APT
+        # if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_PRIVATE_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./scripts/publish-apt-packages.sh

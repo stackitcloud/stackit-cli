@@ -150,9 +150,21 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
 	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
 	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
 	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
+	acl := flags.FlagToStringSlicePointer(cmd, aclFlag)
+	backupSchedule := flags.FlagToStringPointer(cmd, backupScheduleFlag)
+	storageClass := flags.FlagToStringPointer(cmd, storageClassFlag)
+	storageSize := flags.FlagToInt64Pointer(cmd, storageSizeFlag)
+	version := flags.FlagToStringPointer(cmd, versionFlag)
+	instanceType := flags.FlagToStringPointer(cmd, typeFlag)
+
+	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
+		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {
+		return nil, &cliErr.EmptyUpdateError{}
+	}
 
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -164,16 +176,16 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(cmd, aclFlag),
-		BackupSchedule:  flags.FlagToStringPointer(cmd, backupScheduleFlag),
+		InstanceName:    instanceName,
+		ACL:             acl,
+		BackupSchedule:  backupSchedule,
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag),
-		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag),
-		Version:         flags.FlagToStringPointer(cmd, versionFlag),
-		Type:            flags.FlagToStringPointer(cmd, typeFlag),
+		StorageClass:    storageClass,
+		StorageSize:     storageSize,
+		Version:         version,
+		Type:            instanceType,
 	}, nil
 }
 

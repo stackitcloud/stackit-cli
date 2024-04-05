@@ -48,6 +48,11 @@ archives:
       - goos: windows
         format: zip
 
+release:
+  # If set to auto, the GitHub release will be marked as "Pre-release"
+  # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+  prerelease: auto
+
 changelog:
   sort: asc
   filters:
@@ -60,11 +65,15 @@ nfpms:
     # IDs of the builds for which to create packages for
     builds:
       - linux-builds
+    package_name: stackit
     vendor: STACKIT
     homepage: https://github.com/stackitcloud/stackit-cli
-    maintainer: STACKIT <sit-stackit-developer-tools@mail.schwarz>
+    maintainer: STACKIT Developer Tools Team <developer-tools@stackit.cloud>
     description: A command-line interface to manage STACKIT resources.
     license: Apache 2.0
+    contents:
+      - src: LICENSE.md
+        dst: LICENSE.md
     formats:
       - deb
       - rpm
@@ -87,7 +96,8 @@ brews:
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    skip_upload: auto
+    # Temporarily not skipping prereleases to test integration with Homebrew
+    # skip_upload: auto
 
 snapcrafts:
   # IDs of the builds for which to create packages for

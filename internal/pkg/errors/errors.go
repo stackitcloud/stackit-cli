@@ -36,6 +36,24 @@ Please double check if they are correctly configured.
 For more details run:
   $ stackit auth activate-service-account -h`
 
+	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
+
+Either provide the plan ID:
+  $ %[1]s --plan-id <PLAN ID> [flags]
+
+or provide plan name:
+  $ %[1]s --plan-name <PLAN NAME> [flags]
+
+For more details on the available plans, run:
+  $ stackit %[2]s plans`
+
+	ARGUS_INVALID_PLAN = `the provided instance plan is not valid.
+	
+  %s
+  
+  For more details on the available plans, run:
+	$ stackit %s plans`
+
 	DSA_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
@@ -89,7 +107,9 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SINGLE_ARG_EXPECTED = `expected 1 argument %q, %d were provided`
 
-	SUBCOMMAND_UNKNOWN = `unkwown subcommand %q`
+	SINGLE_OPTIONAL_ARG_EXPECTED = `expected no more than 1 argument %q, %d were provided`
+
+	SUBCOMMAND_UNKNOWN = `unknown subcommand %q`
 
 	SUBCOMMAND_MISSING = `missing subcommand`
 
@@ -119,6 +139,31 @@ type ActivateServiceAccountError struct{}
 
 func (e *ActivateServiceAccountError) Error() string {
 	return FAILED_SERVICE_ACCOUNT_ACTIVATION
+}
+
+type ArgusInputPlanError struct {
+	Cmd  *cobra.Command
+	Args []string
+}
+
+func (e *ArgusInputPlanError) Error() string {
+	fullCommandPath := e.Cmd.CommandPath()
+	if len(e.Args) > 0 {
+		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
+	}
+	// Assumes a structure of the form "stackit <service> <resource> <operation>"
+	service := e.Cmd.Parent().Parent().Use
+
+	return fmt.Sprintf(ARGUS_INVALID_INPUT_PLAN, fullCommandPath, service)
+}
+
+type ArgusInvalidPlanError struct {
+	Service string
+	Details string
+}
+
+func (e *ArgusInvalidPlanError) Error() string {
+	return fmt.Sprintf(ARGUS_INVALID_PLAN, e.Details, e.Service)
 }
 
 type DSAInputPlanError struct {
@@ -214,6 +259,17 @@ func (e *SingleArgExpectedError) Error() string {
 	} else {
 		err = fmt.Errorf(ARG_MISSING, e.Expected)
 	}
+	return AppendUsageTip(err, e.Cmd).Error()
+}
+
+type SingleOptionalArgExpectedError struct {
+	Cmd      *cobra.Command
+	Expected string
+	Count    int
+}
+
+func (e *SingleOptionalArgExpectedError) Error() string {
+	err := fmt.Errorf(SINGLE_OPTIONAL_ARG_EXPECTED, e.Expected, e.Count)
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 

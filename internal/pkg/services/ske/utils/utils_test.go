@@ -3,6 +3,8 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -439,5 +441,172 @@ func TestGetDefaultPayload(t *testing.T) {
 				t.Fatalf("Output is not as expected: %s", diff)
 			}
 		})
+	}
+}
+
+func TestConvertToSeconds(t *testing.T) {
+	tests := []struct {
+		description    string
+		expirationTime string
+		isValid        bool
+		expectedOutput string
+	}{
+		{
+			description:    "seconds",
+			expirationTime: "30s",
+			isValid:        true,
+			expectedOutput: "30",
+		},
+		{
+			description:    "minutes",
+			expirationTime: "30m",
+			isValid:        true,
+			expectedOutput: "1800",
+		},
+		{
+			description:    "hours",
+			expirationTime: "30h",
+			isValid:        true,
+			expectedOutput: "108000",
+		},
+		{
+			description:    "days",
+			expirationTime: "30d",
+			isValid:        true,
+			expectedOutput: "2592000",
+		},
+		{
+			description:    "months",
+			expirationTime: "30M",
+			isValid:        true,
+			expectedOutput: "77760000",
+		},
+		{
+			description:    "leading zero",
+			expirationTime: "0030M",
+			isValid:        true,
+			expectedOutput: "77760000",
+		},
+		{
+			description:    "invalid unit",
+			expirationTime: "30x",
+			isValid:        false,
+		},
+		{
+			description:    "invalid unit 2",
+			expirationTime: "3000abcdef",
+			isValid:        false,
+		},
+		{
+			description:    "invalid unit 3",
+			expirationTime: "3000abcdef000",
+			isValid:        false,
+		},
+		{
+			description:    "invalid time",
+			expirationTime: "x",
+			isValid:        false,
+		},
+		{
+			description:    "empty",
+			expirationTime: "",
+			isValid:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output, err := ConvertToSeconds(tt.expirationTime)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if *output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, *output)
+			}
+		})
+	}
+}
+
+func TestWriteConfigFile(t *testing.T) {
+	tests := []struct {
+		description     string
+		location        string
+		kubeconfig      string
+		isValid         bool
+		isLocationDir   bool
+		isLocationEmpty bool
+		expectedErr     string
+	}{
+		{
+			description: "base",
+			location:    filepath.Join("base", "config"),
+			kubeconfig:  "kubeconfig",
+			isValid:     true,
+		},
+		{
+			description:     "empty location",
+			location:        "",
+			kubeconfig:      "kubeconfig",
+			isValid:         false,
+			isLocationEmpty: true,
+		},
+		{
+			description:   "path is only dir",
+			location:      "only_dir",
+			kubeconfig:    "kubeconfig",
+			isValid:       false,
+			isLocationDir: true,
+		},
+		{
+			description: "empty kubeconfig",
+			location:    filepath.Join("empty", "config"),
+			kubeconfig:  "",
+			isValid:     false,
+		},
+	}
+
+	baseTestDir := "test_data/"
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			testLocation := filepath.Join(baseTestDir, tt.location)
+			// make sure empty case still works
+			if tt.isLocationEmpty {
+				testLocation = ""
+			}
+			// filepath Join cleans trailing separators
+			if tt.isLocationDir {
+				testLocation += string(filepath.Separator)
+			}
+			err := WriteConfigFile(testLocation, tt.kubeconfig)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+
+			if tt.isValid {
+				data, err := os.ReadFile(testLocation)
+				if err != nil {
+					t.Errorf("could not read file: %s", tt.location)
+				}
+				if string(data) != tt.kubeconfig {
+					t.Errorf("expected file content to be %s, got %s", tt.kubeconfig, string(data))
+				}
+			}
+		})
+	}
+	// Cleanup
+	err := os.RemoveAll(baseTestDir)
+	if err != nil {
+		t.Errorf("failed cleaning test data")
 	}
 }

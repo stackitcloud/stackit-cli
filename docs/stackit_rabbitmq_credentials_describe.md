@@ -1,10 +1,10 @@
 ## stackit rabbitmq credentials describe
 
-Shows details of credentials of an RabbitMQ instance
+Shows details of credentials of a RabbitMQ instance
 
 ### Synopsis
 
-Shows details of credentials of an RabbitMQ instance. The password will be shown in plain text in the output.
+Shows details of credentials of a RabbitMQ instance. The password will be shown in plain text in the output.
 
 ```
 stackit rabbitmq credentials describe CREDENTIALS_ID [flags]

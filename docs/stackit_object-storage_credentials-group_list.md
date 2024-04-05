@@ -1,10 +1,10 @@
 ## stackit object-storage credentials-group list
 
-Lists all credentials groups
+Lists all credentials groups that hold Object Storage access credentials
 
 ### Synopsis
 
-Lists all credentials groups.
+Lists all credentials groups that hold Object Storage access credentials.
 
 ```
 stackit object-storage credentials-group list [flags]

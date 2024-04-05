@@ -1,10 +1,10 @@
 ## stackit rabbitmq credentials delete
 
-Deletes credentials of an RabbitMQ instance
+Deletes credentials of a RabbitMQ instance
 
 ### Synopsis
 
-Deletes credentials of an RabbitMQ instance.
+Deletes credentials of a RabbitMQ instance.
 
 ```
 stackit rabbitmq credentials delete CREDENTIALS_ID [flags]
