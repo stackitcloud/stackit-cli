@@ -70,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get MongoDB Flex user: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, *resp.Item, p)
+			return outputResult(p, model.OutputFormat, *resp.Item)
 		},
 	}
 
@@ -105,7 +105,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, user mongodbflex.InstanceResponseUser, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, user mongodbflex.InstanceResponseUser) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -121,7 +121,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, user mongodbflex.Inst
 		table.AddSeparator()
 		table.AddRow("PORT", *user.Port)
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

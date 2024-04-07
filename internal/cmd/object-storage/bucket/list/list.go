@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				buckets = buckets[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, buckets, p)
+			return outputResult(p, model.OutputFormat, buckets)
 		},
 	}
 
@@ -116,7 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstorage.Bucket, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, buckets []objectstorage.Bucket) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(buckets, "", "  ")
@@ -133,7 +133,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstora
 			bucket := buckets[i]
 			table.AddRow(*bucket.Name, *bucket.Region, *bucket.UrlPathStyle, *bucket.UrlVirtualHostedStyle)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

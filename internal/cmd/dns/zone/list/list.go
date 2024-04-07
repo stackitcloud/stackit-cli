@@ -92,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, zones, p)
+			return outputResult(p, model.OutputFormat, zones)
 		},
 	}
 	configureFlags(cmd)
@@ -209,7 +209,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	return zones, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details
@@ -227,7 +227,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone, p *
 			z := zones[i]
 			table.AddRow(*z.Id, *z.Name, *z.State, *z.Type, *z.DnsName, *z.RecordCount)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

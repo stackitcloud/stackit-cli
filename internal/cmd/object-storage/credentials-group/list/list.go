@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Limit != nil && len(credentialsGroups) > int(*model.Limit) {
 				credentialsGroups = credentialsGroups[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentialsGroups, p)
+			return outputResult(p, model.OutputFormat, credentialsGroups)
 		},
 	}
 	configureFlags(cmd)
@@ -109,7 +109,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentialsGroups, "", "  ")
@@ -126,7 +126,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []o
 			c := credentialsGroups[i]
 			table.AddRow(*c.CredentialsGroupId, *c.DisplayName, *c.Urn)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

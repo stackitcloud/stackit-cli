@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get Secrets Manager user: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, *resp, p)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 
@@ -101,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.User, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, user secretsmanager.User) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -119,7 +119,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.U
 		}
 		table.AddRow("WRITE ACCESS", *user.Write)
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

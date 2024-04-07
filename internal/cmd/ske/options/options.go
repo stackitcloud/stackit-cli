@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get SKE provider options: %w", err)
 			}
 
-			return outputResult(cmd, model, resp, p)
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,7 +123,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, options *ske.ProviderOptions, p *print.Printer) error {
+func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
 	switch model.OutputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
@@ -133,11 +133,11 @@ func outputResult(cmd *cobra.Command, model *inputModel, options *ske.ProviderOp
 		p.Outputln(string(details))
 		return nil
 	default:
-		return outputResultAsTable(cmd, model, options)
+		return outputResultAsTable(p, model, options)
 	}
 }
 
-func outputResultAsTable(cmd *cobra.Command, model *inputModel, options *ske.ProviderOptions) error {
+func outputResultAsTable(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
 	content := ""
 	if model.AvailabilityZones {
 		content += renderAvailabilityZones(options)
@@ -159,7 +159,7 @@ func outputResultAsTable(cmd *cobra.Command, model *inputModel, options *ske.Pro
 		content += renderVolumeTypes(options)
 	}
 
-	err := pager.Display(cmd, content)
+	err := pager.Display(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}

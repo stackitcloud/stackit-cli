@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				keys = keys[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, keys, p)
+			return outputResult(p, model.OutputFormat, keys)
 		},
 	}
 
@@ -127,7 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(keys, "", "  ")
@@ -148,7 +148,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, keys []serviceaccount
 			}
 			table.AddRow(*k.Id, *k.Active, *k.CreatedAt, validUntil)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

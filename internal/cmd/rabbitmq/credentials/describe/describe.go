@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe RabbitMQ credentials: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp, p)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -99,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials *rabbitmq.CredentialsResponse, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.CredentialsResponse) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -114,7 +114,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials *rabbitmq
 		table.AddRow("PASSWORD", *credentials.Raw.Credentials.Password)
 		table.AddSeparator()
 		table.AddRow("URI", *credentials.Raw.Credentials.Uri)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
