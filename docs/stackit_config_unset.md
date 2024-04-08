@@ -46,6 +46,7 @@ stackit config unset [flags]
       --service-account-custom-endpoint    SKE API base URL. If unset, uses the default base URL
       --session-time-limit                 Maximum time before authentication is required again. If unset, defaults to 2h
       --ske-custom-endpoint                SKE API base URL. If unset, uses the default base URL
+      --verbosity                          Verbosity of the CLI
 ```
 
 ### Options inherited from parent commands

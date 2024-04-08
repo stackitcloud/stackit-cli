@@ -35,6 +35,7 @@ stackit opensearch credentials create [flags]
       --async                  If set, runs the command asynchronously
   -o, --output-format string   Output format, one of ["json" "pretty"]
   -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 
 ### SEE ALSO
