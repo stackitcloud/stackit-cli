@@ -165,7 +165,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClie
 func outputResult(cmd *cobra.Command, outputFormat string, resources []foo.Resource) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
-		details, err := json.MarshalIndent(instances, "", "  ")
+		details, err := json.MarshalIndent(resources, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal resource list: %w", err)
 		}
