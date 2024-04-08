@@ -30,7 +30,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(describe.NewCmd(p))
 	cmd.AddCommand(enable.NewCmd(p))
-	cmd.AddCommand(kubeconfig.NewCmd())
+	cmd.AddCommand(kubeconfig.NewCmd(p))
 	cmd.AddCommand(disable.NewCmd(p))
 	cmd.AddCommand(cluster.NewCmd(p))
 	cmd.AddCommand(credentials.NewCmd(p))

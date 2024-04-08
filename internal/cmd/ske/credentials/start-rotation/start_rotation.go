@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
@@ -26,7 +26,7 @@ type inputModel struct {
 	ClusterName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("start-rotation %s", clusterNameArg),
 		Short: "Starts the rotation of the credentials associated to a SKE cluster",
@@ -72,7 +72,7 @@ func NewCmd() *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to start the rotation of the credentials for SKE cluster %q?", model.ClusterName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -87,7 +87,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Starting credentials rotation")
 				_, err = wait.StartCredentialsRotationWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
@@ -100,8 +100,8 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered start of credentials rotation"
 			}
-			cmd.Printf("%s for cluster %q\n", operationState, model.ClusterName)
-			cmd.Printf("Complete the rotation by running:\n  $ stackit ske credentials complete-rotation %s\n", model.ClusterName)
+			p.Info("%s for cluster %q\n", operationState, model.ClusterName)
+			p.Info("Complete the rotation by running:\n  $ stackit ske credentials complete-rotation %s\n", model.ClusterName)
 			return nil
 		},
 	}

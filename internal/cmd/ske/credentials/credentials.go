@@ -27,6 +27,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(describe.NewCmd(p))
 	cmd.AddCommand(rotate.NewCmd(p))
-	cmd.AddCommand(startrotation.NewCmd())
-	cmd.AddCommand(completerotation.NewCmd())
+	cmd.AddCommand(startrotation.NewCmd(p))
+	cmd.AddCommand(completerotation.NewCmd(p))
 }
