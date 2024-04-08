@@ -12,7 +12,7 @@ import (
 func Display(p *print.Printer, content string) error {
 	lessCmd := exec.Command("less", "-F", "-S", "-w")
 	lessCmd.Stdin = strings.NewReader(content)
-	lessCmd.Stdout = p.OutOrStdout()
+	lessCmd.Stdout = p.Cmd.OutOrStdout()
 
 	err := lessCmd.Run()
 	if err != nil {
