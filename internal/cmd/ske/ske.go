@@ -9,12 +9,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/kubeconfig"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ske",
 		Short: "Provides functionality for SKE",
@@ -22,7 +23,7 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 

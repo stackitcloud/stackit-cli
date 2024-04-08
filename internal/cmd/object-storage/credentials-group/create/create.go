@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	CredentialsGroupName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a credentials group to hold Object Storage access credentials",
@@ -65,8 +66,8 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-			cmd.Printf("URN: %s\n", *resp.CredentialsGroup.Urn)
+			p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
+			p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
 			return nil
 		},
 	}

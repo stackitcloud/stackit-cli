@@ -23,6 +23,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(login.NewCmd())
+	cmd.AddCommand(login.NewCmd(p))
 	cmd.AddCommand(activateserviceaccount.NewCmd(p))
 }

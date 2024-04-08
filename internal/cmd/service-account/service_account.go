@@ -8,12 +8,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "service-account",
 		Short: "Provides functionality for service accounts",
@@ -21,16 +22,16 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(getjwks.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(getjwks.NewCmd(p))
 
-	cmd.AddCommand(key.NewCmd())
-	cmd.AddCommand(token.NewCmd())
+	cmd.AddCommand(key.NewCmd(p))
+	cmd.AddCommand(token.NewCmd(p))
 }

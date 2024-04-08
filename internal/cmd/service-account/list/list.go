@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all service accounts",
@@ -63,7 +64,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No service accounts found for project %q\n", projectLabel)
+				p.Info("No service accounts found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 				serviceAccounts = serviceAccounts[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, serviceAccounts)
+			return outputResult(cmd, model.OutputFormat, serviceAccounts, p)
 		},
 	}
 
@@ -109,14 +110,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
+func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "EMAIL")

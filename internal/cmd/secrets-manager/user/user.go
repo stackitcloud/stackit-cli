@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -12,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/update"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Provides functionality for Secrets Manager users",
@@ -20,14 +21,14 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(update.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 }

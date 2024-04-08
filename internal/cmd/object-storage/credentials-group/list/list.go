@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials groups that hold Object Storage access credentials",
@@ -64,7 +65,7 @@ func NewCmd() *cobra.Command {
 			}
 			credentialsGroups := *resp.CredentialsGroups
 			if len(credentialsGroups) == 0 {
-				cmd.Println("No credentials groups found for your project")
+				p.Info("No credentials groups found for your project")
 				return nil
 			}
 
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentialsGroups) > int(*model.Limit) {
 				credentialsGroups = credentialsGroups[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentialsGroups)
+			return outputResult(cmd, model.OutputFormat, credentialsGroups, p)
 		},
 	}
 	configureFlags(cmd)
@@ -108,14 +109,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentialsGroups, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials group list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

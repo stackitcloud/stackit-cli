@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -38,7 +39,7 @@ type inputModel struct {
 	Deactivate          bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", keyIdArg),
 		Short: "Updates a service account key",
@@ -90,7 +91,7 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			cmd.Println(string(key))
+			p.Info(string(key))
 			return nil
 		},
 	}

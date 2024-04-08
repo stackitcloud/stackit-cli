@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -35,7 +36,7 @@ type inputModel struct {
 	Roles      *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", userIdArg),
 		Short: "Updates a MongoDB Flex user",
@@ -84,7 +85,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update MongoDB Flex user: %w", err)
 			}
 
-			cmd.Printf("Updated user %q of instance %q\n", userLabel, instanceLabel)
+			p.Info("Updated user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

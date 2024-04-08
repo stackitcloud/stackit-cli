@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	Name *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a service account",
@@ -70,7 +71,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account: %w", err)
 			}
 
-			cmd.Printf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
+			p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
 			return nil
 		},
 	}

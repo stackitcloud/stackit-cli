@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,7 @@ type inputModel struct {
 	TTLDays             *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates an access token for a service account",
@@ -76,9 +77,9 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create access token: %w", err)
 			}
 
-			cmd.Printf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
-			cmd.Printf("Valid until: %s\n", *token.ValidUntil)
-			cmd.Printf("Token: %s\n", *token.Token)
+			p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
+			p.Outputf("Valid until: %s\n", *token.ValidUntil)
+			p.Outputf("Token: %s\n", *token.Token)
 			return nil
 		},
 	}

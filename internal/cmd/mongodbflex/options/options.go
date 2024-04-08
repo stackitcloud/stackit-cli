@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -44,7 +45,7 @@ type flavorStorages struct {
 	Storages *mongodbflex.ListStoragesResponse `json:"storages"`
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists MongoDB Flex options",
@@ -75,7 +76,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, cmd, model, apiClient)
+			err = buildAndExecuteRequest(ctx, cmd, model, apiClient, p)
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex options: %w", err)
 			}
@@ -129,7 +130,7 @@ type mongoDBFlexOptionsClient interface {
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*mongodbflex.ListStoragesResponse, error)
 }
 
-func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
+func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inputModel, apiClient mongoDBFlexOptionsClient, p *print.Printer) error {
 	var flavors *mongodbflex.ListFlavorsResponse
 	var versions *mongodbflex.ListVersionsResponse
 	var storages *mongodbflex.ListStoragesResponse
@@ -154,10 +155,10 @@ func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inpu
 		}
 	}
 
-	return outputResult(cmd, model, flavors, versions, storages)
+	return outputResult(cmd, model, flavors, versions, storages, p)
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, flavors *mongodbflex.ListFlavorsResponse, versions *mongodbflex.ListVersionsResponse, storages *mongodbflex.ListStoragesResponse) error {
+func outputResult(cmd *cobra.Command, model *inputModel, flavors *mongodbflex.ListFlavorsResponse, versions *mongodbflex.ListVersionsResponse, storages *mongodbflex.ListStoragesResponse, p *print.Printer) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -178,7 +179,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, flavors *mongodbflex.Li
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 		return nil
 	default:
 		return outputResultAsTable(cmd, model, options)

@@ -8,12 +8,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cluster",
 		Short: "Provides functionality for SKE cluster",
@@ -21,15 +22,15 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(generatepayload.NewCmd())
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(update.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(generatepayload.NewCmd(p))
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 }

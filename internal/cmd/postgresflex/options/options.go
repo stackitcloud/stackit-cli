@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -44,7 +45,7 @@ type flavorStorages struct {
 	Storages *postgresflex.ListStoragesResponse `json:"storages"`
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists PostgreSQL Flex options",
@@ -75,7 +76,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, cmd, model, apiClient)
+			err = buildAndExecuteRequest(ctx, cmd, model, apiClient, p)
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex options: %w", err)
 			}
@@ -129,7 +130,7 @@ type postgresFlexOptionsClient interface {
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
-func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inputModel, apiClient postgresFlexOptionsClient) error {
+func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inputModel, apiClient postgresFlexOptionsClient, p *print.Printer) error {
 	var flavors *postgresflex.ListFlavorsResponse
 	var versions *postgresflex.ListVersionsResponse
 	var storages *postgresflex.ListStoragesResponse
@@ -154,10 +155,10 @@ func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inpu
 		}
 	}
 
-	return outputResult(cmd, model, flavors, versions, storages)
+	return outputResult(cmd, model, flavors, versions, storages, p)
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
+func outputResult(cmd *cobra.Command, model *inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse, p *print.Printer) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -178,7 +179,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, flavors *postgresflex.L
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex options: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 		return nil
 	default:
 		return outputResultAsTable(cmd, model, options)

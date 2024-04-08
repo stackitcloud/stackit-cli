@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Object Storage buckets",
@@ -68,7 +69,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No buckets found for project %s\n", projectLabel)
+				p.Info("No buckets found for project %s\n", projectLabel)
 				return nil
 			}
 			buckets := *resp.Buckets
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				buckets = buckets[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, buckets)
+			return outputResult(cmd, model.OutputFormat, buckets, p)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstorage.Bucket) error {
+func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstorage.Bucket, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(buckets, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage bucket list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

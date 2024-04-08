@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -36,7 +37,7 @@ type inputModel struct {
 	Labels   *map[string]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a STACKIT project",
@@ -81,7 +82,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create project: %w", err)
 			}
 
-			cmd.Printf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
+			p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
 			return nil
 		},
 	}

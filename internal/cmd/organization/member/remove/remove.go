@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -35,7 +36,7 @@ type inputModel struct {
 	Force          bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("remove %s", subjectArg),
 		Short: "Removes a member from an organization",
@@ -84,7 +85,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			cmd.Println("Member removed")
+			p.Info("Member removed")
 			return nil
 		},
 	}

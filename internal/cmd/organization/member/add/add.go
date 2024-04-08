@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -33,7 +34,7 @@ type inputModel struct {
 	Role           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("add %s", subjectArg),
 		Short: "Adds a member to an organization",
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			cmd.Println("Member added")
+			p.Info("Member added")
 			return nil
 		},
 	}

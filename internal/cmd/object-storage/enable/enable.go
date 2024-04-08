@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 
@@ -20,7 +21,7 @@ type InputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
 		Short: "Enables Object Storage for a project",
@@ -68,7 +69,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered enablement of"
 			}
-			cmd.Printf("%s Object Storage for project %q\n", operationState, projectLabel)
+			p.Info("%s Object Storage for project %q\n", operationState, projectLabel)
 			return nil
 		},
 	}

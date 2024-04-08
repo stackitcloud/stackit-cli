@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
 		Short: "Shows details of a Secrets Manager user",
@@ -65,7 +66,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("get Secrets Manager user: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, *resp)
+			return outputResult(cmd, model.OutputFormat, *resp, p)
 		},
 	}
 
@@ -100,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.User) error {
+func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.User, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -129,7 +130,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, user secretsmanager.U
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

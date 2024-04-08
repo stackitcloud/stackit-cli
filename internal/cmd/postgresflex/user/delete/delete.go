@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", userIdArg),
 		Short: "Deletes a PostgreSQL Flex user",
@@ -83,7 +84,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete PostgreSQL Flex user: %w", err)
 			}
 
-			cmd.Printf("Deleted user %q of instance %q\n", userLabel, instanceLabel)
+			p.Info("Deleted user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	rabbitmqUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -28,7 +29,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
 		Short: "Deletes a RabbitMQ instance",
@@ -87,7 +88,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
+			p.Info("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}

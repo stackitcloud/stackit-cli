@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -30,7 +31,7 @@ type inputModel struct {
 	CredentialsId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialsIdArg),
 		Short: "Shows details of credentials of a LogMe instance",
@@ -64,7 +65,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("describe LogMe credentials: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(cmd, model.OutputFormat, resp, p)
 		},
 	}
 	configureFlags(cmd)
@@ -98,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials *logme.CredentialsResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials *logme.CredentialsResponse, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -124,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials *logme.Cr
 		if err != nil {
 			return fmt.Errorf("marshal LogMe credentials: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}
