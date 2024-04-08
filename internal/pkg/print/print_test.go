@@ -2,6 +2,7 @@ package print
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -428,6 +429,189 @@ func TestOutOrStdout(t *testing.T) {
 			expected := tt.writer
 			if got != expected {
 				t.Errorf("unexpected output: got %v, want %v", got, expected)
+			}
+		})
+	}
+}
+
+func TestPromptForConfirmation(t *testing.T) {
+	tests := []struct {
+		description string
+		input       string
+		verbosity   Level
+		isValid     bool
+		isAborted   bool
+	}{
+		// Note: Some of these inputs have normal spaces, others have tabs
+		{
+			description: "yes - simple 1",
+			input:       "y\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - simple 2",
+			input:       "  Y  \r\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - simple 3",
+			input:       "	yes\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - simple 4",
+			input:       "YES\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - retries 1",
+			input:       "yrs\nyes\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - retries 2",
+			input:       "foo\nbar  \n	y\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "yes - retries 3",
+			input:       "foo\r\nbar  \nY	\n",
+			verbosity:   DebugLevel,
+			isValid:     true,
+		},
+		{
+			description: "no - simple 1",
+			input:       "n\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - simple 2",
+			input:       "  N	\r\n",
+			isValid:     false,
+			verbosity:   DebugLevel,
+			isAborted:   true,
+		},
+		{
+			description: "no - simple 3",
+			input:       "no\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - simple 4",
+			input:       "  \n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - simple 5",
+			input:       "  \r\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - retries 1",
+			input:       "ni\n no	\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - retries 2",
+			input:       "foo\nbar\nn\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - retries 3",
+			input:       "foo\r\nbar\nN\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - retries 4",
+			input:       "m\n  \n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "no - retries 5",
+			input:       "m\r\n	\r\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+			isAborted:   true,
+		},
+		{
+			description: "max retries 1",
+			input:       "foo\nbar\nbaz\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+		},
+		{
+			description: "max retries 2",
+			input:       "foo\r\nbar\r\nbaz\r\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+		},
+		{
+			description: "max retries 3",
+			input:       "foo\nbar\nbaz\ny\n",
+			verbosity:   DebugLevel,
+			isValid:     false,
+		},
+		{
+			description: "no input",
+			input:       "",
+			verbosity:   DebugLevel,
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			buffer := &bytes.Buffer{}
+			_, err := buffer.WriteString(tt.input)
+			if err != nil {
+				t.Fatalf("failed to initialize mock input: %v", err)
+			}
+
+			cmd := &cobra.Command{}
+			cmd.SetOut(io.Discard) // Suppresses console prints
+			cmd.SetErr(io.Discard)
+			cmd.SetIn(buffer)
+
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			err = p.PromptForConfirmation(cmd, "")
+
+			if tt.isValid && err != nil {
+				t.Errorf("should not have failed: %v", err)
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("should have failed")
+			}
+			if tt.isAborted && !errors.Is(err, errAborted) {
+				t.Errorf("should have returned aborted error, instead returned: %v", err)
+			}
+			if !tt.isAborted && errors.Is(err, errAborted) {
+				t.Errorf("should not have returned aborted error")
 			}
 		})
 	}

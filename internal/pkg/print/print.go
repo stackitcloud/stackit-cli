@@ -1,9 +1,13 @@
 package print
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -16,6 +20,8 @@ const (
 	WarningLevel Level = "warning"
 	ErrorLevel   Level = "error"
 )
+
+var errAborted = errors.New("operation aborted")
 
 type Printer struct {
 	Cmd       *cobra.Command
@@ -84,4 +90,28 @@ func (p *Printer) Error(msg string) {
 // Returns the printer's command defined output
 func (p *Printer) OutOrStdout() io.Writer {
 	return p.Cmd.OutOrStdout()
+}
+
+// Prompts the user for confirmation.
+//
+// Returns nil only if the user (explicitly) answers positive.
+// Returns ErrAborted if the user answers negative.
+func (p *Printer) PromptForConfirmation(cmd *cobra.Command, prompt string) error {
+	question := fmt.Sprintf("%s [y/N] ", prompt)
+	reader := bufio.NewReader(cmd.InOrStdin())
+	for i := 0; i < 3; i++ {
+		cmd.PrintErr(question)
+		answer, err := reader.ReadString('\n')
+		if err != nil {
+			continue
+		}
+		answer = strings.ToLower(strings.TrimSpace(answer))
+		if answer == "y" || answer == "yes" {
+			return nil
+		}
+		if answer == "" || answer == "n" || answer == "no" {
+			return errAborted
+		}
+	}
+	return fmt.Errorf("max number of wrong inputs")
 }
