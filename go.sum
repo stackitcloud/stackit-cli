@@ -91,8 +91,8 @@ github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.8.6 h1:+mcoBKs6
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.8.6/go.mod h1:W9BML8bqZb2dOZe1K+M+qBBs8/QNirr3jA0xxy9tNRY=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.10.1 h1:LKic8dXtXKsRst2+wY9dNjjkMyJ05QIDpOJuRmVb410=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.10.1/go.mod h1:g1o1bmqtTliy9UkFlRV/6bn6GQk+hkvnny3UjMI69S0=
-github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.10.0 h1:+pGOyx15jkU6PcS6wqjBd7gxNIwB72vofzJ1rhGEt3M=
-github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.10.0/go.mod h1:qzbM0fmR9YiUzu3S+XnbOvvjIGzIV+Dz59zEizg6xvw=
+github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.12.0 h1:W2WSYUyhKaHQ+BZfmyRw9PKv5q7ihGRyNhNgIlyM+Y8=
+github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.12.0/go.mod h1:P0YyvgwIsVKJijdWGVJVOp/ac7PVX99Oj+dr4v1zECc=
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.10.0 h1:Fle394socpyf662g3jMrtZpZaWVgBMBIEFnh4fnGock=
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.10.0/go.mod h1:JvqOSrTCiynS0x6Y9OsK54yvdB6AtIWLwXDEjoCkAIg=
 github.com/stackitcloud/stackit-sdk-go/services/redis v0.10.1 h1:/tRad17HUcGRm448l8XyX6uhnnHVfj3VdUQquIwNq2Q=
@@ -103,8 +103,8 @@ github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.6.0 h1:VC7VWad
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.6.0/go.mod h1:KRoLXZdH8yuO6FBu2Grl5VGqW9arH03qYAC0P6H8h9o=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.6 h1:3kkNh2kHi55w9dgh0MC1Zbn8fDpYxcXl3tvYjH8t9xo=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.3.6/go.mod h1:OOciROyQxPOYLo8OM/DE5ESH11+DvAyRt6wg7R+HVkg=
-github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.1 h1:MZABtJ8HFOKG3KCCv5duibxBSAU1zTFAO0V9bso3N9M=
-github.com/stackitcloud/stackit-sdk-go/services/ske v0.10.1/go.mod h1:7M7bsVHN0REuwoZRYz5nK2yBwsMJcHTsVFHlG83QP2A=
+github.com/stackitcloud/stackit-sdk-go/services/ske v0.11.0 h1:BJ1Op7f3KJPNROkEXzqAREl55JCqyIAyQJ+Gfu4LYCM=
+github.com/stackitcloud/stackit-sdk-go/services/ske v0.11.0/go.mod h1:yFLjTx58pjHCp0KZTaqHlW9Qk60CY5HpnBWR/zztv8Y=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=
@@ -158,8 +158,8 @@ google.golang.org/appengine v1.6.8 h1:IhEN5q69dyKagZPYMSdIjS2HqprW324FRQZJcGqPAs
 google.golang.org/appengine v1.6.8/go.mod h1:1jJ3jBArFh5pcgW8gCtRJnepW8FzD1V44FJffLiz/Ds=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
-google.golang.org/protobuf v1.32.0 h1:pPC6BG5ex8PDFnkbrGU3EixyhKcQ2aDuBS36lqK/C7I=
-google.golang.org/protobuf v1.32.0/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
+google.golang.org/protobuf v1.33.0 h1:uNO2rsAINq/JlFpSdYEKIZ0uKD/R9cpdv0T+yoGwGmI=
+google.golang.org/protobuf v1.33.0/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f h1:BLraFXnmrev5lT+xlilqcH8XK9/i0At2xKjWk4p6zsU=
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

@@ -1,4 +1,4 @@
-package describe
+package startrotation
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -17,13 +17,13 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
-var testProjectId2 = uuid.NewString()
+var testClusterName = "cluster"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testProjectId,
+		testClusterName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -33,7 +33,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		includeParentsFlag: "false",
+		projectIdFlag: testProjectId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -45,10 +45,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Verbosity: globalflags.VerbosityDefault,
 		},
-		IncludeParents: false,
-		ArgProjectId:   testProjectId,
+		ClusterName: testClusterName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -56,8 +54,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *resourcemanager.ApiGetProjectRequest)) resourcemanager.ApiGetProjectRequest {
-	request := testClient.GetProject(testCtx, testProjectId)
+func fixtureRequest(mods ...func(request *ske.ApiStartCredentialsRotationRequest)) ske.ApiStartCredentialsRotationRequest {
+	request := testClient.StartCredentialsRotation(testCtx, testProjectId, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -69,7 +67,6 @@ func TestParseInput(t *testing.T) {
 		description   string
 		argValues     []string
 		flagValues    map[string]string
-		labelValues   []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -87,30 +84,20 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "project id arg takes precedence",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = testProjectId2
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ProjectId = testProjectId2
-			}),
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
-			description: "project id arg missing",
-			argValues:   []string{},
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = testProjectId
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ProjectId = testProjectId
-			}),
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
 			description: "project id missing",
-			argValues:   []string{},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -118,6 +105,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -125,6 +113,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
@@ -134,7 +123,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd(nil)
+			cmd := NewCmd()
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -189,7 +178,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest resourcemanager.ApiGetProjectRequest
+		expectedRequest ske.ApiStartCredentialsRotationRequest
 	}{
 		{
 			description:     "base",

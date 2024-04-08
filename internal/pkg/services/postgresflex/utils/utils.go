@@ -149,6 +149,14 @@ func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectI
 	return *resp.Item.Name, nil
 }
 
+func GetInstanceStatus(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId string) (string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
+	if err != nil {
+		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
+	}
+	return *resp.Item.Status, nil
+}
+
 func GetUserName(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId, userId string) (string, error) {
 	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
 	if err != nil {

@@ -13,6 +13,9 @@ stackit project list [flags]
 ### Examples
 
 ```
+  List all STACKIT projects that the authenticated user or service account is a member of
+  $ stackit project list
+
   List all STACKIT projects that are children of a specific parent
   $ stackit project list --parent-id xxx
 

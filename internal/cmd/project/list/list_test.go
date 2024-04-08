@@ -9,8 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/zalando/go-keyring"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -139,15 +141,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no values",
 			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "none of required fields provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, parentIdFlag)
-				delete(flagValues, memberFlag)
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ParentId = nil
+				model.Member = nil
+				model.CreationTimeAfter = nil
 			}),
-			isValid: false,
 		},
 		{
 			description:         "projectIdLike invalid",
@@ -258,6 +257,17 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
+	keyring.MockInit()
+	err := auth.SetAuthField(auth.USER_EMAIL, "test@test.com")
+	if err != nil {
+		t.Fatalf("Failed to set auth user email: %v", err)
+	}
+
+	authUserEmail, err := auth.GetAuthField(auth.USER_EMAIL)
+	if err != nil {
+		t.Fatalf("Failed to get auth user email: %v", err)
+	}
+
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -278,12 +288,12 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest().Offset(10),
 		},
 		{
-			description: "required fields only",
+			description: "fetch email from auth user",
 			model: &inputModel{
 				PageSize: pageSizeDefault,
 			},
 			offset:          1,
-			expectedRequest: testClient.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault),
+			expectedRequest: testClient.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault).Member(authUserEmail),
 		},
 		{
 			description:     "projectIdLike set",
@@ -299,7 +309,10 @@ func TestBuildRequest(t *testing.T) {
 			if tt.projectIdLike != nil {
 				tt.model.ProjectIdLike = tt.projectIdLike
 			}
-			request := buildRequest(testCtx, tt.model, testClient, tt.offset)
+			request, err := buildRequest(testCtx, tt.model, testClient, tt.offset)
+			if err != nil {
+				t.Fatalf("Failed to build request: %v", err)
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

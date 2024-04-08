@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
@@ -20,10 +20,13 @@ import (
 
 const (
 	includeParentsFlag = "include-parents"
+
+	projectIdArg = "PROJECT_ID"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	ArgProjectId   string
 	IncludeParents bool
 }
 
@@ -32,21 +35,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Use:   "describe",
 		Short: "Shows details of a STACKIT project",
 		Long:  "Shows details of a STACKIT project.",
-		Args:  args.NoArgs,
+		Args:  args.SingleOptionalArg(projectIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get the details of the configured STACKIT project`,
 				"$ stackit project describe"),
 			examples.NewExample(
 				`Get the details of a STACKIT project by explicitly providing the project ID`,
-				"$ stackit project describe --project-id xxx"),
+				"$ stackit project describe xxx"),
 			examples.NewExample(
 				`Get the details of the configured STACKIT project, including details of the parent resources`,
 				"$ stackit project describe --include-parents"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -75,20 +78,30 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(includeParentsFlag, false, "When true, the details of the parent resources will be included in the output")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	var projectId string
+	if len(inputArgs) > 0 {
+		projectId = inputArgs[0]
+	}
+
 	globalFlags := globalflags.Parse(cmd)
-	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+	if globalFlags.ProjectId == "" && projectId == "" {
+		return nil, fmt.Errorf("Project ID needs to be provided either as an argument or as a flag")
+	}
+
+	if projectId == "" {
+		projectId = globalFlags.ProjectId
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
+		ArgProjectId:    projectId,
 		IncludeParents:  flags.FlagToBoolValue(cmd, includeParentsFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiGetProjectRequest {
-	req := apiClient.GetProject(ctx, model.ProjectId)
+	req := apiClient.GetProject(ctx, model.ArgProjectId)
 	req.IncludeParents(model.IncludeParents)
 	return req
 }
