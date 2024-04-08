@@ -49,7 +49,7 @@ Let's suppose you want to want to implement a new command `bar`, that would be t
 3. To register the command `bar` as a child of the exisitng command `foo`, add `cmd.AddCommand(bar.NewCmd(p))` to the `addSubcommands` method of the constructor of the `foo` command
    1. In this case, `p` in this case is the `printer` that is passed from the root command to all subcommands of the tree (refer to the [Outputs, prints and debug logs](./CONTRIBUTION.md/#outputs-prints-and-debug-logs) section for more details regarding the `printer`)
 
-Please remeber to run `make generate docs` after your changes to keep the commands' documentation updated.
+Please remeber to run `make generate-docs` after your changes to keep the commands' documentation updated.
 
 #### Command file structure
 
