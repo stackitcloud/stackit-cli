@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	RecordSetId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", recordSetIdArg),
 		Short: "Shows details  of a DNS record set",
@@ -66,7 +67,7 @@ func NewCmd() *cobra.Command {
 			}
 			recordSet := resp.Rrset
 
-			return outputResult(cmd, model.OutputFormat, recordSet)
+			return outputResult(cmd, model.OutputFormat, recordSet, p)
 		},
 	}
 	configureFlags(cmd)
@@ -100,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.RecordSet) error {
+func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.RecordSet, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		records := *recordSet.Records
@@ -133,7 +134,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all MariaDB instances",
@@ -69,7 +70,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No instances found for project %q\n", projectLabel)
+				p.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, instances)
+			return outputResult(cmd, model.OutputFormat, instances, p)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instances []mariadb.Instance) error {
+func outputResult(cmd *cobra.Command, outputFormat string, instances []mariadb.Instance, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB instance list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

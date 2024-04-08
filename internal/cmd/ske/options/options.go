@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -35,7 +36,7 @@ type inputModel struct {
 	VolumeTypes        bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists SKE provider options",
@@ -75,7 +76,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("get SKE provider options: %w", err)
 			}
 
-			return outputResult(cmd, model, resp)
+			return outputResult(cmd, model, resp, p)
 		},
 	}
 	configureFlags(cmd)
@@ -122,14 +123,14 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, options *ske.ProviderOptions) error {
+func outputResult(cmd *cobra.Command, model *inputModel, options *ske.ProviderOptions, p *print.Printer) error {
 	switch model.OutputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE options: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 		return nil
 	default:
 		return outputResultAsTable(cmd, model, options)

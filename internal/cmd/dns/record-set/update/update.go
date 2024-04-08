@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -40,7 +41,7 @@ type inputModel struct {
 	TTL         *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", recordSetIdArg),
 		Short: "Updates a DNS record set",
@@ -104,7 +105,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
+			p.Info("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
 			return nil
 		},
 	}

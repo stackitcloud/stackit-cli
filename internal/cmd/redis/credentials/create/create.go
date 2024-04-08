@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
 
@@ -28,7 +29,7 @@ type inputModel struct {
 	HidePassword bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates credentials for a Redis instance",
@@ -75,20 +76,20 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Redis credentials: %w", err)
 			}
 
-			cmd.Printf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+			p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
 			// The username field cannot be set by the user so we only display it if it's not returned empty
 			username := *resp.Raw.Credentials.Username
 			if username != "" {
-				cmd.Printf("Username: %s\n", *resp.Raw.Credentials.Username)
+				p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
 			}
 			if model.HidePassword {
-				cmd.Printf("Password: <hidden>\n")
+				p.Outputf("Password: <hidden>\n")
 			} else {
-				cmd.Printf("Password: %s\n", *resp.Raw.Credentials.Password)
+				p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
 			}
-			cmd.Printf("Host: %s\n", *resp.Raw.Credentials.Host)
-			cmd.Printf("Port: %d\n", *resp.Raw.Credentials.Port)
-			cmd.Printf("URI: %s\n", *resp.Uri)
+			p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
+			p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
+			p.Outputf("URI: %s\n", *resp.Uri)
 			return nil
 		},
 	}

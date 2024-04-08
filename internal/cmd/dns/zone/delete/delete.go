@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -28,7 +29,7 @@ type inputModel struct {
 	ZoneId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", zoneIdArg),
 		Short: "Deletes a DNS zone",
@@ -89,7 +90,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			cmd.Printf("%s zone %s\n", operationState, zoneLabel)
+			p.Info("%s zone %s\n", operationState, zoneLabel)
 			return nil
 		},
 	}

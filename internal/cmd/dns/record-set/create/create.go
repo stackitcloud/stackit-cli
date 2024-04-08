@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -41,7 +42,7 @@ type inputModel struct {
 	Type    string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a DNS record set",
@@ -101,7 +102,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			cmd.Printf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
+			p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
 			return nil
 		},
 	}

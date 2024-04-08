@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	opensearchUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials' IDs for an OpenSearch instance",
@@ -71,7 +72,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					instanceLabel = model.InstanceId
 				}
-				cmd.Printf("No credentials found for instance %q\n", instanceLabel)
+				p.Info("No credentials found for instance %q\n", instanceLabel)
 				return nil
 			}
 
@@ -79,7 +80,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentials)
+			return outputResult(cmd, model.OutputFormat, credentials, p)
 		},
 	}
 	configureFlags(cmd)
@@ -120,14 +121,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials []opensearch.CredentialsListItem) error {
+func outputResult(cmd *cobra.Command, outputFormat string, credentials []opensearch.CredentialsListItem, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch credentials list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

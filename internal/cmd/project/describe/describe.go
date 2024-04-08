@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	IncludeParents bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Shows details of a STACKIT project",
@@ -63,7 +64,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read project details: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(cmd, model.OutputFormat, resp, p)
 		},
 	}
 	configureFlags(cmd)
@@ -92,7 +93,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, project *resourcemanager.ProjectResponseWithParents) error {
+func outputResult(cmd *cobra.Command, outputFormat string, project *resourcemanager.ProjectResponseWithParents, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -116,7 +117,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, project *resourcemana
 		if err != nil {
 			return fmt.Errorf("marshal project details: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

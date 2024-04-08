@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all RabbitMQ service plans",
@@ -69,7 +70,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No plans found for project %q\n", projectLabel)
+				p.Info("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans)
+			return outputResult(cmd, model.OutputFormat, plans, p)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offering) error {
+func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offering, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ plans: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -131,8 +132,8 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offe
 		for i := range plans {
 			o := plans[i]
 			for j := range *o.Plans {
-				p := (*o.Plans)[j]
-				table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
+				plan := (*o.Plans)[j]
+				table.AddRow(*o.Name, *plan.Id, *plan.Name, *plan.Description)
 			}
 			table.AddSeparator()
 		}

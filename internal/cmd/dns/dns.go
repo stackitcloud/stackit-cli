@@ -24,5 +24,5 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(zone.NewCmd(p))
-	cmd.AddCommand(recordset.NewCmd())
+	cmd.AddCommand(recordset.NewCmd(p))
 }

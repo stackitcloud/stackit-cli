@@ -6,12 +6,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/bucket/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/bucket/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bucket",
 		Short: "Provides functionality for Object Storage buckets",
@@ -19,13 +20,13 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(list.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
 }

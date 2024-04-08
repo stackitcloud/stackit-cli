@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	BucketName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", bucketNameArg),
 		Short: "Deletes an Object Storage bucket",
@@ -80,7 +81,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			cmd.Printf("%s bucket %q\n", operationState, model.BucketName)
+			p.Info("%s bucket %q\n", operationState, model.BucketName)
 			return nil
 		},
 	}

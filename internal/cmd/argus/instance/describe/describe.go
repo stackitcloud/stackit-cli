@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -26,7 +27,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of an Argus instance",
@@ -59,7 +60,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read Argus instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(cmd, model.OutputFormat, resp, p)
 		},
 	}
 	return cmd
@@ -84,7 +85,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *argus.GetInstanceResponse) error {
+func outputResult(cmd *cobra.Command, outputFormat string, instance *argus.GetInstanceResponse, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
@@ -120,7 +121,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *argus.GetIn
 		if err != nil {
 			return fmt.Errorf("marshal Argus instance: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

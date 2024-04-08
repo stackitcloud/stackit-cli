@@ -7,12 +7,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/enable"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "object-storage",
 		Short: "Provides functionality regarding Object Storage",
@@ -20,14 +21,14 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(bucket.NewCmd())
-	cmd.AddCommand(disable.NewCmd())
-	cmd.AddCommand(enable.NewCmd())
-	cmd.AddCommand(credentialsGroup.NewCmd())
-	cmd.AddCommand(credentials.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(bucket.NewCmd(p))
+	cmd.AddCommand(disable.NewCmd(p))
+	cmd.AddCommand(enable.NewCmd(p))
+	cmd.AddCommand(credentialsGroup.NewCmd(p))
+	cmd.AddCommand(credentials.NewCmd(p))
 }

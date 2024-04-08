@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -35,7 +36,7 @@ type inputModel struct {
 	SortBy  string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of a project",
@@ -77,7 +78,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No members found for project %q\n", projectLabel)
+				p.Info("No members found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -86,7 +87,7 @@ func NewCmd() *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(cmd, model, members)
+			return outputResult(cmd, model, members, p)
 		},
 	}
 	configureFlags(cmd)
@@ -131,7 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member) error {
+func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member, p *print.Printer) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -151,7 +152,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 		if err != nil {
 			return fmt.Errorf("marshal members: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

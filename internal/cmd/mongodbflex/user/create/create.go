@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 
@@ -37,7 +38,7 @@ type inputModel struct {
 	Roles      *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a MongoDB Flex user",
@@ -90,14 +91,14 @@ func NewCmd() *cobra.Command {
 			}
 			user := resp.Item
 
-			cmd.Printf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-			cmd.Printf("Username: %s\n", *user.Username)
-			cmd.Printf("Password: %s\n", *user.Password)
-			cmd.Printf("Roles: %v\n", *user.Roles)
-			cmd.Printf("Database: %s\n", *user.Database)
-			cmd.Printf("Host: %s\n", *user.Host)
-			cmd.Printf("Port: %d\n", *user.Port)
-			cmd.Printf("URI: %s\n", *user.Uri)
+			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+			p.Outputf("Username: %s\n", *user.Username)
+			p.Outputf("Password: %s\n", *user.Password)
+			p.Outputf("Roles: %v\n", *user.Roles)
+			p.Outputf("Database: %s\n", *user.Database)
+			p.Outputf("Host: %s\n", *user.Host)
+			p.Outputf("Port: %d\n", *user.Port)
+			p.Outputf("URI: %s\n", *user.Uri)
 
 			return nil
 		},

@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -33,7 +34,7 @@ type inputModel struct {
 	PublicKey           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a service account key",
@@ -86,13 +87,13 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			cmd.PrintErrf("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
+			p.Info("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
 
 			key, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			cmd.Println(string(key))
+			p.Outputln(string(key))
 			return nil
 		},
 	}

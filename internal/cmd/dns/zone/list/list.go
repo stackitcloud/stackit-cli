@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -44,7 +45,7 @@ type inputModel struct {
 	PageSize       int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List DNS zones",
@@ -87,11 +88,11 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No zones found for project %q matching the criteria\n", projectLabel)
+				p.Info("No zones found for project %q matching the criteria\n", projectLabel)
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, zones)
+			return outputResult(cmd, model.OutputFormat, zones, p)
 		},
 	}
 	configureFlags(cmd)
@@ -208,7 +209,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	return zones, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) error {
+func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details
@@ -216,7 +217,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:

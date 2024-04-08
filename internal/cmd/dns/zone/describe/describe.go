@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -26,7 +27,7 @@ type inputModel struct {
 	ZoneId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", zoneIdArg),
 		Short: "Shows details  of a DNS zone",
@@ -60,7 +61,7 @@ func NewCmd() *cobra.Command {
 			}
 			zone := resp.Zone
 
-			return outputResult(cmd, model.OutputFormat, zone)
+			return outputResult(cmd, model.OutputFormat, zone, p)
 		},
 	}
 	return cmd
@@ -85,7 +86,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone) error {
+func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone, p *print.Printer) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -129,7 +130,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone) error
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}
