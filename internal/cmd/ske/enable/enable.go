@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Enabling SKE")
 				_, err = wait.EnableServiceWaitHandler(ctx, apiClient, model.ProjectId).WaitWithContext(ctx)
 				if err != nil {
