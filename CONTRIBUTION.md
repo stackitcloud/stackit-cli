@@ -117,7 +117,7 @@ func NewCmd() *cobra.Command {
 					projectLabel = model.ProjectId
 				}
 
-         // Check API response "resp" an output accordingly
+         // Check API response "resp" and output accordingly
          if resp.Item == nil {
             p.Info("(...)", projectLabel)
 				return nil
