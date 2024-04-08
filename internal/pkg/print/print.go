@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"strings"
@@ -85,11 +84,6 @@ func (p *Printer) Warn(msg string) {
 // Print an Error level output to the defined Err output (falling back to Stderr if not set).
 func (p *Printer) Error(msg string) {
 	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), msg)
-}
-
-// Returns the printer's command defined output
-func (p *Printer) OutOrStdout() io.Writer {
-	return p.Cmd.OutOrStdout()
 }
 
 // Prompts the user for confirmation.

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -392,43 +391,6 @@ func TestError(t *testing.T) {
 				if output != "" {
 					t.Errorf("unexpected output: got %q, want %q", output, "")
 				}
-			}
-		})
-	}
-}
-
-func TestOutOrStdout(t *testing.T) {
-	tests := []struct {
-		description string
-		writer      io.Writer
-	}{
-		{
-			description: "os stdout",
-			writer:      os.Stdout,
-		},
-		{
-			description: "os stderr",
-			writer:      os.Stderr,
-		},
-		{
-			description: "custom bytes buffer",
-			writer:      &bytes.Buffer{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
-			cmd.SetOutput(tt.writer)
-			p := &Printer{
-				Cmd:       cmd,
-				Verbosity: DebugLevel,
-			}
-
-			got := p.OutOrStdout()
-
-			expected := tt.writer
-			if got != expected {
-				t.Errorf("unexpected output: got %v, want %v", got, expected)
 			}
 		})
 	}
