@@ -89,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				clusters = clusters[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, clusters, p)
+			return outputResult(p, model.OutputFormat, clusters)
 		},
 	}
 
@@ -126,7 +126,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, clusters []ske.Cluster, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(clusters, "", "  ")
@@ -147,7 +147,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, clusters []ske.Cluste
 			}
 			table.AddRow(*c.Name, *c.Status.Aggregated, *c.Kubernetes.Version, len(*c.Nodepools), monitoring)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

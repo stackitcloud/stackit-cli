@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read Secrets Manager instance ACLs: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, instance, aclList, p)
+			return outputResult(p, model.OutputFormat, instance, aclList)
 		},
 	}
 	return cmd
@@ -98,7 +98,7 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
@@ -125,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 
 			table.AddRow("ACL", strings.Join(cidrs, ","))
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

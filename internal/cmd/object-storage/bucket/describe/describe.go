@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read Object Storage bucket: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Bucket, p)
+			return outputResult(p, model.OutputFormat, resp.Bucket)
 		},
 	}
 	return cmd
@@ -84,7 +84,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage.Bucket, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -96,7 +96,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage
 		table.AddSeparator()
 		table.AddRow("URL (Virtual Hosted Style)", *bucket.UrlVirtualHostedStyle)
 		table.AddSeparator()
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

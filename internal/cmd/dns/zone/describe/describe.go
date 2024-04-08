@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			zone := resp.Zone
 
-			return outputResult(cmd, model.OutputFormat, zone, p)
+			return outputResult(p, model.OutputFormat, zone)
 		},
 	}
 	return cmd
@@ -86,7 +86,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -119,7 +119,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zone *dns.Zone, p *pr
 		table.AddRow("EXPIRE TIME", *zone.ExpireTime)
 		table.AddSeparator()
 		table.AddRow("NEGATIVE CACHE", *zone.NegativeCache)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

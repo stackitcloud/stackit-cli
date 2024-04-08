@@ -49,12 +49,15 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(cmd, "version") {
 				p.Outputf("STACKIT CLI (BETA)\n")
+				p.Outputf("STACKIT CLI (BETA)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {
 					p.Outputf("Version: %s\n", version)
+					p.Outputf("Version: %s\n", version)
 					return nil
 				}
+				p.Outputf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
 				p.Outputf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
 				return nil
 			}
@@ -91,8 +94,9 @@ func configureFlags(cmd *cobra.Command) error {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd(p))
+	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
-	cmd.AddCommand(config.NewCmd())
+	cmd.AddCommand(config.NewCmd(p))
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
 	cmd.AddCommand(logme.NewCmd(p))
@@ -102,7 +106,19 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(opensearch.NewCmd(p))
 	cmd.AddCommand(organization.NewCmd(p))
 	cmd.AddCommand(postgresflex.NewCmd(p))
+	cmd.AddCommand(logme.NewCmd(p))
+	cmd.AddCommand(mariadb.NewCmd(p))
+	cmd.AddCommand(mongodbflex.NewCmd(p))
+	cmd.AddCommand(objectstorage.NewCmd(p))
+	cmd.AddCommand(opensearch.NewCmd(p))
+	cmd.AddCommand(organization.NewCmd(p))
+	cmd.AddCommand(postgresflex.NewCmd(p))
 	cmd.AddCommand(project.NewCmd(p))
+	cmd.AddCommand(rabbitmq.NewCmd(p))
+	cmd.AddCommand(redis.NewCmd(p))
+	cmd.AddCommand(secretsmanager.NewCmd(p))
+	cmd.AddCommand(serviceaccount.NewCmd(p))
+	cmd.AddCommand(ske.NewCmd(p))
 	cmd.AddCommand(rabbitmq.NewCmd(p))
 	cmd.AddCommand(redis.NewCmd(p))
 	cmd.AddCommand(secretsmanager.NewCmd(p))

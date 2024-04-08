@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans, p)
+			return outputResult(p, model.OutputFormat, plans)
 		},
 	}
 
@@ -116,7 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offering, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offering) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")

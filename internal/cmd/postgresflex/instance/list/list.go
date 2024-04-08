@@ -81,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, instances, p)
+			return outputResult(p, model.OutputFormat, instances)
 		},
 	}
 
@@ -118,7 +118,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instances []postgresflex.InstanceListInstance, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, instances []postgresflex.InstanceListInstance) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
@@ -136,7 +136,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []postgresf
 			instance := instances[i]
 			table.AddRow(*instance.Id, *instance.Name, caser.String(*instance.Status))
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

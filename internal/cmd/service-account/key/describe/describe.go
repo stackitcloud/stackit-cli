@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read service account key: %w", err)
 			}
 
-			return outputResult(resp, p)
+			return outputResult(p, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(key *serviceaccount.GetServiceAccountKeyResponse, p *print.Printer) error {
+func outputResult(p *print.Printer, key *serviceaccount.GetServiceAccountKeyResponse) error {
 	marshaledKey, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal service account key: %w", err)

@@ -10,13 +10,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists the current CLI configuration values",
@@ -83,7 +84,7 @@ func NewCmd() *cobra.Command {
 				table.AddRow(key, valueString)
 				table.AddSeparator()
 			}
-			err = table.Display(cmd)
+			err = table.Display(p)
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}

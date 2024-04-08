@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(cmd, model, members, p)
+			return outputResult(p, model, members)
 		},
 	}
 	configureFlags(cmd)
@@ -132,7 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member, p *print.Printer) error {
+func outputResult(p *print.Printer, model *inputModel, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -173,7 +173,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 			table.EnableAutoMergeOnColumns(2)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

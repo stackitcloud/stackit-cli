@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read project details: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp, p)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -106,7 +106,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, project *resourcemanager.ProjectResponseWithParents, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.ProjectResponseWithParents) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -119,7 +119,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, project *resourcemana
 		table.AddRow("STATE", *project.LifecycleState)
 		table.AddSeparator()
 		table.AddRow("PARENT ID", *project.Parent.Id)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

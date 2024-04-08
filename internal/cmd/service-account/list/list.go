@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				serviceAccounts = serviceAccounts[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, serviceAccounts, p)
+			return outputResult(p, model.OutputFormat, serviceAccounts)
 		},
 	}
 
@@ -110,7 +110,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
@@ -125,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []ser
 			account := serviceAccounts[i]
 			table.AddRow(*account.Id, *account.Email)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

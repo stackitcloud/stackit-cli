@@ -81,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				tokensMetadata = tokensMetadata[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, tokensMetadata, p)
+			return outputResult(p, model.OutputFormat, tokensMetadata)
 		},
 	}
 
@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(tokensMetadata, "", "  ")
@@ -148,7 +148,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, tokensMetadata []serv
 			t := tokensMetadata[i]
 			table.AddRow(*t.Id, *t.Active, *t.CreatedAt, *t.ValidUntil)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

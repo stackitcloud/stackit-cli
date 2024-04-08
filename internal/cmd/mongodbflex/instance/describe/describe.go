@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read MongoDB Flex instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Item, p)
+			return outputResult(p, model.OutputFormat, resp.Item)
 		},
 	}
 	return cmd
@@ -87,7 +87,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex.Instance, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
@@ -122,7 +122,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *mongodbflex
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
 		table.AddSeparator()
-		err = table.Display(cmd)
+		err = table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

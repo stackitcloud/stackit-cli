@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				roles = roles[:*model.Limit]
 			}
 
-			return outputRolesResult(cmd, model.OutputFormat, roles, p)
+			return outputRolesResult(p, model.OutputFormat, roles)
 		},
 	}
 	configureFlags(cmd)
@@ -117,7 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return apiClient.ListRoles(ctx, projectResourceType, model.GlobalFlagModel.ProjectId)
 }
 
-func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authorization.Role, p *print.Printer) error {
+func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details
@@ -140,7 +140,7 @@ func outputRolesResult(cmd *cobra.Command, outputFormat string, roles []authoriz
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

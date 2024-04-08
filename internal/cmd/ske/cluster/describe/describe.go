@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read SKE cluster: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp, p)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -84,7 +84,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.Cluster, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
@@ -101,7 +101,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.Cluster,
 		table.AddRow("VERSION", *cluster.Kubernetes.Version)
 		table.AddSeparator()
 		table.AddRow("ACL", acl)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
