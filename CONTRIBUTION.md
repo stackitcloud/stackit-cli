@@ -82,7 +82,7 @@ func NewCmd() *cobra.Command {
 		Use:   "bar",
 		Short: "Short description of the command (is shown in the help of parent command)",
 		Long:  "Long description of the command. Can contain some more information about the command usage. It is shown in the help of the current command.",
-		Args:  args.SingleArg(instanceIdArg, (utils.ValidateUUID)), // Validate argument
+		Args:  args.SingleArg(someArg, utils.ValidateUUID), // Validate argument, with an optional validation function
 		Example: examples.Build(
 			examples.NewExample(
 				`Do something with command "bar"`,
