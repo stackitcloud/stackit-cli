@@ -17,7 +17,7 @@ stackit project describe [flags]
   $ stackit project describe
 
   Get the details of a STACKIT project by explicitly providing the project ID
-  $ stackit project describe --project-id xxx
+  $ stackit project describe xxx
 
   Get the details of the configured STACKIT project, including details of the parent resources
   $ stackit project describe --include-parents

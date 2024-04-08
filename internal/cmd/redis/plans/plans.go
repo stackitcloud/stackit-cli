@@ -128,16 +128,16 @@ func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering)
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("OFFERING NAME", "ID", "NAME", "DESCRIPTION")
+		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
 			for j := range *o.Plans {
 				plan := (*o.Plans)[j]
-				table.AddRow(*o.Name, *plan.Id, *plan.Name, *plan.Description)
+				table.AddRow(*o.Name, *o.Version, *plan.Id, *plan.Name, *plan.Description)
 			}
 			table.AddSeparator()
 		}
-		table.EnableAutoMergeOnColumns(1)
+		table.EnableAutoMergeOnColumns(1, 2)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

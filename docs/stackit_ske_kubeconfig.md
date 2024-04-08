@@ -1,19 +1,19 @@
-## stackit ske credentials
+## stackit ske kubeconfig
 
-Provides functionality for SKE credentials
+Provides functionality for SKE kubeconfig
 
 ### Synopsis
 
-Provides functionality for STACKIT Kubernetes Engine (SKE) credentials.
+Provides functionality for STACKIT Kubernetes Engine (SKE) kubeconfig.
 
 ```
-stackit ske credentials [flags]
+stackit ske kubeconfig [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske credentials"
+  -h, --help   Help for "stackit ske kubeconfig"
 ```
 
 ### Options inherited from parent commands
@@ -29,6 +29,5 @@ stackit ske credentials [flags]
 ### SEE ALSO
 
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
-* [stackit ske credentials complete-rotation](./stackit_ske_credentials_complete-rotation.md)	 - Completes the rotation of the credentials associated to a SKE cluster
-* [stackit ske credentials start-rotation](./stackit_ske_credentials_start-rotation.md)	 - Starts the rotation of the credentials associated to a SKE cluster
+* [stackit ske kubeconfig create](./stackit_ske_kubeconfig_create.md)	 - Creates a kubeconfig for an SKE cluster
 

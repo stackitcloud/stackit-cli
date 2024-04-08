@@ -34,5 +34,6 @@ stackit ske [flags]
 * [stackit ske describe](./stackit_ske_describe.md)	 - Shows overall details regarding SKE
 * [stackit ske disable](./stackit_ske_disable.md)	 - Disables SKE for a project
 * [stackit ske enable](./stackit_ske_enable.md)	 - Enables SKE for a project
+* [stackit ske kubeconfig](./stackit_ske_kubeconfig.md)	 - Provides functionality for SKE kubeconfig
 * [stackit ske options](./stackit_ske_options.md)	 - Lists SKE provider options
 

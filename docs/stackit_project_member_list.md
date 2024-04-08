@@ -14,13 +14,13 @@ stackit project member list [flags]
 
 ```
   List all members of a project
-  $ stackit project role list --project-id xxx
+  $ stackit project member list --project-id xxx
 
   List all members of a project, sorted by role
-  $ stackit project role list --project-id xxx --sort-by role
+  $ stackit project member list --project-id xxx --sort-by role
 
   List up to 10 members of a project
-  $ stackit project role list --project-id xxx --limit 10
+  $ stackit project member list --project-id xxx --limit 10
 ```
 
 ### Options

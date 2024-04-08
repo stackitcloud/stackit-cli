@@ -45,13 +45,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all members of a project`,
-				"$ stackit project role list --project-id xxx"),
+				"$ stackit project member list --project-id xxx"),
 			examples.NewExample(
 				`List all members of a project, sorted by role`,
-				"$ stackit project role list --project-id xxx --sort-by role"),
+				"$ stackit project member list --project-id xxx --sort-by role"),
 			examples.NewExample(
 				`List up to 10 members of a project`,
-				"$ stackit project role list --project-id xxx --limit 10"),
+				"$ stackit project member list --project-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
