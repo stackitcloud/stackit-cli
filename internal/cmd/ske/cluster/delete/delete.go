@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Deleting cluster")
 				_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
