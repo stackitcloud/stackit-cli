@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
 				}
 				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = p.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}

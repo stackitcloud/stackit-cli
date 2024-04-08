@@ -96,11 +96,11 @@ func (p *Printer) OutOrStdout() io.Writer {
 //
 // Returns nil only if the user (explicitly) answers positive.
 // Returns ErrAborted if the user answers negative.
-func (p *Printer) PromptForConfirmation(cmd *cobra.Command, prompt string) error {
+func (p *Printer) PromptForConfirmation(prompt string) error {
 	question := fmt.Sprintf("%s [y/N] ", prompt)
-	reader := bufio.NewReader(cmd.InOrStdin())
+	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	for i := 0; i < 3; i++ {
-		cmd.PrintErr(question)
+		p.Cmd.PrintErr(question)
 		answer, err := reader.ReadString('\n')
 		if err != nil {
 			continue

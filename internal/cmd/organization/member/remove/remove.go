@@ -71,7 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if model.Force {
 					prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
 				}
-				err = p.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}

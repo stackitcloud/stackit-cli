@@ -599,7 +599,7 @@ func TestPromptForConfirmation(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
-			err = p.PromptForConfirmation(cmd, "")
+			err = p.PromptForConfirmation("")
 
 			if tt.isValid && err != nil {
 				t.Errorf("should not have failed: %v", err)
