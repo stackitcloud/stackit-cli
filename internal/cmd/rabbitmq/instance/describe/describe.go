@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read RabbitMQ instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp, p)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -87,7 +87,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *rabbitmq.Instance, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		table := tables.NewTable()
@@ -109,7 +109,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *rabbitmq.In
 				table.AddRow("ACL", aclStr)
 			}
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

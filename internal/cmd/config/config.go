@@ -5,12 +5,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/unset"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "Provides functionality for CLI configuration options",
@@ -18,12 +19,12 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(list.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(list.NewCmd(p))
 	cmd.AddCommand(set.NewCmd())
 	cmd.AddCommand(unset.NewCmd())
 }

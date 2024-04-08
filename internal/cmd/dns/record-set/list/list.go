@@ -96,7 +96,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
 				return nil
 			}
-			return outputResult(cmd, model.OutputFormat, recordSets, p)
+			return outputResult(p, model.OutputFormat, recordSets)
 		},
 	}
 
@@ -221,7 +221,7 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 	return recordSets, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.RecordSet, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(recordSets, "", "  ")
@@ -238,7 +238,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.Reco
 			rs := recordSets[i]
 			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

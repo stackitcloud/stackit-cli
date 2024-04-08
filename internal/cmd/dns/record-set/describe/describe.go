@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			recordSet := resp.Rrset
 
-			return outputResult(cmd, model.OutputFormat, recordSet, p)
+			return outputResult(p, model.OutputFormat, recordSet)
 		},
 	}
 	configureFlags(cmd)
@@ -101,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.RecordSet, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		records := *recordSet.Records
@@ -123,7 +123,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		table.AddRow("TYPE", *recordSet.Type)
 		table.AddSeparator()
 		table.AddRow("RECORDS DATA", recordsDataJoin)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

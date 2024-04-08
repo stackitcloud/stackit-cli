@@ -83,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			return outputResult(payload, p)
+			return outputResult(p, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -114,7 +114,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(payload *ske.CreateOrUpdateClusterPayload, p *print.Printer) error {
+func outputResult(p *print.Printer, payload *ske.CreateOrUpdateClusterPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -288,14 +289,16 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd(nil)
+			p := &print.Printer{}
+			cmd := NewCmd(p)
+			p.Cmd = cmd
 			client := &postgresFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listVersionsFails: tt.listVersionsFails,
 				listStoragesFails: tt.listStoragesFails,
 			}
 
-			err := buildAndExecuteRequest(testCtx, cmd, tt.model, client, nil)
+			err := buildAndExecuteRequest(testCtx, p, tt.model, client)
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}

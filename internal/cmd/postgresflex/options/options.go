@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, cmd, model, apiClient, p)
+			err = buildAndExecuteRequest(ctx, p, model, apiClient)
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex options: %w", err)
 			}
@@ -130,7 +130,7 @@ type postgresFlexOptionsClient interface {
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
-func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inputModel, apiClient postgresFlexOptionsClient, p *print.Printer) error {
+func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient postgresFlexOptionsClient) error {
 	var flavors *postgresflex.ListFlavorsResponse
 	var versions *postgresflex.ListVersionsResponse
 	var storages *postgresflex.ListStoragesResponse
@@ -155,10 +155,10 @@ func buildAndExecuteRequest(ctx context.Context, cmd *cobra.Command, model *inpu
 		}
 	}
 
-	return outputResult(cmd, model, flavors, versions, storages, p)
+	return outputResult(p, model, flavors, versions, storages)
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse, p *print.Printer) error {
+func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -182,11 +182,11 @@ func outputResult(cmd *cobra.Command, model *inputModel, flavors *postgresflex.L
 		p.Outputln(string(details))
 		return nil
 	default:
-		return outputResultAsTable(cmd, model, options)
+		return outputResultAsTable(p, model, options)
 	}
 }
 
-func outputResultAsTable(cmd *cobra.Command, model *inputModel, options *options) error {
+func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
 	content := ""
 	if model.Flavors {
 		content += renderFlavors(*options.Flavors)
@@ -198,7 +198,7 @@ func outputResultAsTable(cmd *cobra.Command, model *inputModel, options *options
 		content += renderStorages(options.Storages.Storages)
 	}
 
-	err := pager.Display(cmd, content)
+	err := pager.Display(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}

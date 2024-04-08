@@ -98,7 +98,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}()
 
-			err = outputResponse(model, resp, p)
+			err = outputResponse(p, model, resp)
 			if err != nil {
 				return err
 			}
@@ -200,7 +200,7 @@ func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) 
 	return req, nil
 }
 
-func outputResponse(model *inputModel, resp *http.Response, p *print.Printer) error {
+func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) error {
 	output := make([]byte, 0)
 	if model.IncludeResponseHeaders {
 		respHeader, err := httputil.DumpResponse(resp, false)

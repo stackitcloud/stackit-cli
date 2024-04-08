@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, instances, p)
+			return outputResult(p, model.OutputFormat, instances)
 		},
 	}
 
@@ -116,7 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instances []argus.ProjectInstanceFull, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, instances []argus.ProjectInstanceFull) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
@@ -133,7 +133,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []argus.Pro
 			instance := instances[i]
 			table.AddRow(*instance.Id, *instance.Name, *instance.PlanName, *instance.Status)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

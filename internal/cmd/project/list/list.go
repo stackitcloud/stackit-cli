@@ -81,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, projects, p)
+			return outputResult(p, model.OutputFormat, projects)
 		},
 	}
 	configureFlags(cmd)
@@ -195,7 +195,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	return projects, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcemanager.ProjectResponse, p *print.Printer) error {
+func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
@@ -213,7 +213,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcema
 			table.AddRow(*p.ProjectId, *p.Name, *p.LifecycleState, *p.Parent.Id)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
