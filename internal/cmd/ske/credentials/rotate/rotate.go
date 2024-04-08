@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -60,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to rotate credentials for SKE cluster %q? (The old credentials will be invalid after this operation)", model.ClusterName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}

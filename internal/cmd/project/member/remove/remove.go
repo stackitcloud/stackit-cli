@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -77,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if model.Force {
 					prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
 				}
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}

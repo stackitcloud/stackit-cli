@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -74,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
 				}
 				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
