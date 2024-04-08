@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 )
@@ -22,7 +22,7 @@ type tokenClaims struct {
 // It returns the configuration option that can be used to create an authenticated SDK client.
 //
 // If the user was logged in and the user session expired, reauthorizeUserRoutine is called to reauthenticate the user again.
-func AuthenticationConfig(cmd *cobra.Command, reauthorizeUserRoutine func() error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
+func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func() error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
 	flow, err := GetAuthFlow()
 	if err != nil {
 		return nil, fmt.Errorf("get authentication flow: %w", err)
@@ -57,13 +57,13 @@ func AuthenticationConfig(cmd *cobra.Command, reauthorizeUserRoutine func() erro
 		authCfgOption = sdkConfig.WithCustomAuth(keyFlow)
 	case AUTH_FLOW_USER_TOKEN:
 		if userSessionExpired {
-			cmd.Println("Session expired, logging in again...")
+			p.Warn("Session expired, logging in again...")
 			err = reauthorizeUserRoutine()
 			if err != nil {
 				return nil, fmt.Errorf("user login: %w", err)
 			}
 		}
-		userTokenFlow := UserTokenFlow(cmd)
+		userTokenFlow := UserTokenFlow(p)
 		authCfgOption = sdkConfig.WithCustomAuth(userTokenFlow)
 	default:
 		return nil, fmt.Errorf("the provided authentication flow (%s) is not supported", flow)

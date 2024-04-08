@@ -41,12 +41,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 			if err != nil {
 				projectLabel = model.ProjectId
 			}

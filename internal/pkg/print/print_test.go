@@ -337,6 +337,70 @@ func TestWarn(t *testing.T) {
 	}
 }
 
+func TestWarnf(t *testing.T) {
+	tests := []struct {
+		description string
+		message     string
+		args        []any
+		verbosity   Level
+		shouldPrint bool
+	}{
+		{
+			description: "debug verbosity",
+			message:     "Test message",
+			args:        []any{"arg1", "arg2"},
+			verbosity:   DebugLevel,
+			shouldPrint: true,
+		},
+		{
+			description: "info verbosity",
+			message:     "Test message",
+			args:        []any{"arg1", "arg2"},
+			verbosity:   InfoLevel,
+			shouldPrint: true,
+		},
+		{
+			description: "warning verbosity",
+			message:     "Test message",
+			args:        []any{"arg1", "arg2"},
+			verbosity:   WarningLevel,
+			shouldPrint: true,
+		},
+		{
+			description: "error verbosity",
+			message:     "Test message",
+			args:        []any{"arg1", "arg2"},
+			verbosity:   ErrorLevel,
+			shouldPrint: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var buf bytes.Buffer
+			cmd := &cobra.Command{}
+			cmd.SetOutput(&buf)
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			p.Warnf(tt.message, tt.args...)
+
+			expectedOutput := fmt.Sprintf("Warning: %s\n", fmt.Sprintf(tt.message, tt.args...))
+			output := buf.String()
+			if tt.shouldPrint {
+				if output != expectedOutput {
+					t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
+				}
+			} else {
+				if output != "" {
+					t.Errorf("unexpected output: got %q, want %q", output, "")
+				}
+			}
+		})
+	}
+}
+
 func TestError(t *testing.T) {
 	tests := []struct {
 		description string
