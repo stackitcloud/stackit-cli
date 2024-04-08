@@ -4,18 +4,16 @@ Your contribution is welcome! Thank you for your interest in contributing to the
 
 ## Table of contents
 
-- [Contribute to the STACKIT CLI](#contribute-to-the-stackit-cli)
-  - [Table of contents](#table-of-contents)
-  - [Developer Guide](#developer-guide)
-    - [Useful Make commands](#useful-make-commands)
-    - [Repository structure](#repository-structure)
-    - [Implementing a new command](#implementing-a-new-command)
-      - [Command file structure](#command-file-structure)
-      - [Outputs, prints and debug logs](#outputs-prints-and-debug-logs)
-    - [Onboarding a new STACKIT service](#onboarding-a-new-stackit-service)
-    - [Local development](#local-development)
-  - [Code Contributions](#code-contributions)
-  - [Bug Reports](#bug-reports)
+- [Developer Guide](#developer-guide)
+- [Useful Make commands](#useful-make-commands)
+- [Repository structure](#repository-structure)
+- [Implementing a new command](#implementing-a-new-command)
+	- [Command file structure](#command-file-structure)
+	- [Outputs, prints and debug logs](#outputs-prints-and-debug-logs)
+- [Onboarding a new STACKIT service](#onboarding-a-new-stackit-service)
+- [Local development](#local-development)
+- [Code Contributions](#code-contributions)
+- [Bug Reports](#bug-reports)
 
 ## Developer Guide
 
@@ -65,14 +63,13 @@ import (
 // Define consts for command flags
 const (
    someArg = "MY_ARG"
-	someFlag = "my-flag"
+   someFlag = "my-flag"
 )
 
 // Struct to model user input (arguments and/or flags)
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	MyArg string
-
 	MyFlag *string
 }
 
@@ -104,9 +101,6 @@ func NewCmd() *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-         if err != nil {
-				return fmt.Errorf("(...): %w", err)
-			}
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("(...): %w", err)
@@ -152,11 +146,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 }
 
 // Build request to the API
-func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClient) (foo.ApiListInstancesRequest error) {
-   someParam, err := utils.GetParam(model.MyFlag) // Util function to get API parameter based on flag value
-   if err != nil {
-      return fmt.Errorf("(...): %w", err)
-   }
+func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClient) foo.ApiListInstancesRequest {
 	req := apiClient.GetBar(ctx, model.ProjectId, model.MyArg, someParam)
 	return req
 }
@@ -202,13 +192,15 @@ The CLI has 4 different verbosity levels:
 
 For prints that are specific to a certain log level, you can use the methods defined in the `print` package: `Error`, `Warn`, `Info`, and `Debug`.
 
-For command outputs that should always be displayed, no matter the defined verbosity, you should use the `print` methods `Outputf` and `Outputln`.
+For command outputs that should always be displayed, no matter the defined verbosity, you should use the `print` methods `Outputf` and `Outputln`. These should only be used for the actual output of the commands, which can usually be described by "I ran the command to see _this_".
 
 ### Onboarding a new STACKIT service
 
 If you want to add a command that uses a STACKIT service `foo` that was not yet used by the CLI, you will first need to implement a few extra steps to configure the new service:
 
-1.  Setup the SDK client configuration, using the authentication method configured in the CLI
+1.  Add a `FooCustomEndpointKey` key in `internal/pkg/config/config.go` (and add it to `ConfigKeys` and set the to default to `""` using `viper.SetDefault`)
+2.  Update the `stackit config unset` and `stackit config unset` commands by adding flags to set and unset a custom endpoint for the `foo` service API, respectively, and update their unit tests
+3.  Setup the SDK client configuration, using the authentication method configured in the CLI
 
     1.  This is done in `internal/pkg/services/foo/client/client.go`
     2.  Below is an example of a typical `client.go` file structure:
@@ -246,9 +238,6 @@ If you want to add a command that uses a STACKIT service `foo` that was not yet 
            return apiClient, nil
         }
         ```
-
-2.  Add a `FooCustomEndpointKey` key in `internal/pkg/config/config.go` (and add it to `ConfigKeys` and set the to default to `""` using `viper.SetDefault`)
-3.  Update the `stackit config unset` and `stackit config unset` commands by adding flags to set and unset a custom endpoint for the `foo` service API, respectively, and update their unit tests
 
 ### Local development
 
