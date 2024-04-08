@@ -44,7 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			ProjectId: testProjectId,
+			ProjectId: "",
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		IncludeParents: false,
