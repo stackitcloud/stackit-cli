@@ -79,7 +79,7 @@ func (p *Printer) Warn(msg string, args ...any) {
 		return
 	}
 	warning := fmt.Sprintf(msg, args...)
-	p.Cmd.PrintErrf("Warning: %s\n", warning)
+	p.Cmd.PrintErrf("Warning: %s", warning)
 }
 
 // Print an Error level output to the defined Err output (falling back to Stderr if not set).

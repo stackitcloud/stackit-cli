@@ -57,7 +57,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func() error)
 		authCfgOption = sdkConfig.WithCustomAuth(keyFlow)
 	case AUTH_FLOW_USER_TOKEN:
 		if userSessionExpired {
-			p.Warn("Session expired, logging in again...")
+			p.Warn("Session expired, logging in again...\n")
 			err = reauthorizeUserRoutine()
 			if err != nil {
 				return nil, fmt.Errorf("user login: %w", err)

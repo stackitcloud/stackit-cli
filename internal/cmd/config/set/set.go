@@ -71,7 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if model.SessionTimeLimit != nil {
-				p.Warn("Authenticate again to apply changes to session time limit")
+				p.Warn("Authenticate again to apply changes to session time limit\n")
 				viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
 			}
 

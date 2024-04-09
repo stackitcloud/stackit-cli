@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			p.Info("Deleted project %q\n", projectLabel)
-			p.Warn(fmt.Sprintf("%s\n%s",
+			p.Warn(fmt.Sprintf("%s\n%s\n",
 				"If this was your default project, consider configuring a new project ID by running:",
 				"  $ stackit config set --project-id <PROJECT_ID>",
 			))

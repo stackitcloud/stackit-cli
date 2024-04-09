@@ -98,7 +98,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				operationState = "Triggered completion of credentials rotation"
 			}
 			p.Info("%s for cluster %q\n", operationState, model.ClusterName)
-			p.Warn("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s", model.ClusterName)
+			p.Warn("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s\n", model.ClusterName)
 			return nil
 		},
 	}
