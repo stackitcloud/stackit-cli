@@ -74,16 +74,18 @@ func (p *Printer) Info(msg string, args ...any) {
 
 // Print a Warn level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug, Info, or Warn, it does nothing.
-func (p *Printer) Warn(msg string) {
+func (p *Printer) Warn(msg string, args ...any) {
 	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel && p.Verbosity != WarningLevel {
 		return
 	}
-	p.Cmd.PrintErrf("Warning: %s\n", msg)
+	warning := fmt.Sprintf(msg, args...)
+	p.Cmd.PrintErrf("Warning: %s", warning)
 }
 
 // Print an Error level output to the defined Err output (falling back to Stderr if not set).
-func (p *Printer) Error(msg string) {
-	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), msg)
+func (p *Printer) Error(msg string, args ...any) {
+	err := fmt.Sprintf(msg, args...)
+	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), err)
 }
 
 // Prompts the user for confirmation.

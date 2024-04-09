@@ -74,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			bearerToken, err := getBearerToken(cmd)
+			bearerToken, err := getBearerToken(p)
 			if err != nil {
 				return err
 			}
@@ -168,8 +168,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}, nil
 }
 
-func getBearerToken(cmd *cobra.Command) (string, error) {
-	_, err := auth.AuthenticationConfig(cmd, auth.AuthorizeUser)
+func getBearerToken(p *print.Printer) (string, error) {
+	_, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		return "", &errors.AuthError{}
 	}

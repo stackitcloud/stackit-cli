@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -98,7 +98,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				operationState = "Triggered completion of credentials rotation"
 			}
 			p.Info("%s for cluster %q\n", operationState, model.ClusterName)
-			p.Info("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s\n", model.ClusterName)
+			p.Warn("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s\n", model.ClusterName)
 			return nil
 		},
 	}

@@ -42,12 +42,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 			if err != nil {
 				projectLabel = model.ProjectId
 			}
@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			p.Info("Deleted project %q\n", projectLabel)
-			p.Warn(fmt.Sprintf("%s\n%s",
+			p.Warn(fmt.Sprintf("%s\n%s\n",
 				"If this was your default project, consider configuring a new project ID by running:",
 				"  $ stackit config set --project-id <PROJECT_ID>",
 			))

@@ -4,19 +4,19 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
-func ConfigureClient(cmd *cobra.Command) (*authorization.APIClient, error) {
+func ConfigureClient(p *print.Printer) (*authorization.APIClient, error) {
 	var err error
 	var apiClient *authorization.APIClient
 	var cfgOptions []sdkConfig.ConfigurationOption
 
-	authCfgOption, err := auth.AuthenticationConfig(cmd, auth.AuthorizeUser)
+	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		return nil, &errors.AuthError{}
 	}

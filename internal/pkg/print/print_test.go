@@ -322,7 +322,7 @@ func TestWarn(t *testing.T) {
 
 			p.Warn(tt.message)
 
-			expectedOutput := fmt.Sprintf("Warning: %s\n", tt.message)
+			expectedOutput := fmt.Sprintf("Warning: %s", tt.message)
 			output := buf.String()
 			if tt.shouldPrint {
 				if output != expectedOutput {
