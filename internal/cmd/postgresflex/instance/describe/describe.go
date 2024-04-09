@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -30,7 +31,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of a PostgreSQL Flex instance",
@@ -51,7 +52,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -63,7 +64,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Item)
+			return outputResult(p, model.OutputFormat, resp.Item)
 		},
 	}
 	return cmd
@@ -88,7 +89,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresflex.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
@@ -123,7 +124,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
 		table.AddSeparator()
-		err = table.Display(cmd)
+		err = table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
@@ -134,7 +135,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *postgresfle
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

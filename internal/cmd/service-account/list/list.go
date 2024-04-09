@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all service accounts",
@@ -46,7 +47,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -59,11 +60,11 @@ func NewCmd() *cobra.Command {
 			}
 			serviceAccounts := *resp.Items
 			if len(serviceAccounts) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No service accounts found for project %q\n", projectLabel)
+				p.Info("No service accounts found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 				serviceAccounts = serviceAccounts[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, serviceAccounts)
+			return outputResult(p, model.OutputFormat, serviceAccounts)
 		},
 	}
 
@@ -109,14 +110,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
+func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "EMAIL")
@@ -124,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, serviceAccounts []ser
 			account := serviceAccounts[i]
 			table.AddRow(*account.Id, *account.Email)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

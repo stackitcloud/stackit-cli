@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -44,7 +45,7 @@ type inputModel struct {
 	PageSize       int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List DNS zones",
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -83,15 +84,15 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(zones) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No zones found for project %q matching the criteria\n", projectLabel)
+				p.Info("No zones found for project %q matching the criteria\n", projectLabel)
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, zones)
+			return outputResult(p, model.OutputFormat, zones)
 		},
 	}
 	configureFlags(cmd)
@@ -208,7 +209,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	return zones, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) error {
+func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		// Show details
@@ -216,7 +217,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -226,7 +227,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 			z := zones[i]
 			table.AddRow(*z.Id, *z.Name, *z.State, *z.Type, *z.DnsName, *z.RecordCount)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

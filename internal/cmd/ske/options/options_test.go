@@ -32,7 +32,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{},
+		GlobalFlagModel:    &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  false,
 		KubernetesVersions: false,
 		MachineImages:      false,
@@ -47,7 +47,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{},
+		GlobalFlagModel:    &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  true,
 		KubernetesVersions: true,
 		MachineImages:      true,
@@ -116,7 +116,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)

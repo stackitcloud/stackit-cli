@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -32,7 +32,7 @@ type inputModel struct {
 	Write       *bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager user",
@@ -58,7 +58,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -83,11 +83,11 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Secrets Manager user: %w", err)
 			}
 
-			cmd.Printf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
-			cmd.Printf("Username: %s\n", *resp.Username)
-			cmd.Printf("Password: %s\n", *resp.Password)
-			cmd.Printf("Description: %s\n", *resp.Description)
-			cmd.Printf("Write Access: %t\n", *resp.Write)
+			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
+			p.Outputf("Username: %s\n", *resp.Username)
+			p.Outputf("Password: %s\n", *resp.Password)
+			p.Outputf("Description: %s\n", *resp.Description)
+			p.Outputf("Write Access: %t\n", *resp.Write)
 
 			return nil
 		},

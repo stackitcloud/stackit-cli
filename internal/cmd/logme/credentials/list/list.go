@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	logmeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials' IDs for a LogMe instance",
@@ -54,7 +55,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -71,7 +72,7 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					instanceLabel = model.InstanceId
 				}
-				cmd.Printf("No credentials found for instance %q\n", instanceLabel)
+				p.Info("No credentials found for instance %q\n", instanceLabel)
 				return nil
 			}
 
@@ -79,7 +80,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentials)
+			return outputResult(p, model.OutputFormat, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -120,14 +121,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials []logme.CredentialsListItem) error {
+func outputResult(p *print.Printer, outputFormat string, credentials []logme.CredentialsListItem) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal LogMe credentials list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -137,7 +138,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials []logme.C
 			c := credentials[i]
 			table.AddRow(*c.Id)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

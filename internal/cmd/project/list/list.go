@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -41,7 +42,7 @@ type inputModel struct {
 	PageSize          int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists STACKIT projects",
@@ -69,7 +70,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -80,11 +81,11 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(projects) == 0 {
-				cmd.Print("No projects found matching the criteria\n")
+				p.Info("No projects found matching the criteria\n")
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, projects)
+			return outputResult(p, model.OutputFormat, projects)
 		},
 	}
 	configureFlags(cmd)
@@ -206,14 +207,14 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	return projects, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcemanager.ProjectResponse) error {
+func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -224,7 +225,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcema
 			table.AddRow(*p.ProjectId, *p.Name, *p.LifecycleState, *p.Parent.Id)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

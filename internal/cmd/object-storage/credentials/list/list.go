@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit              *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials for an Object Storage credentials group",
@@ -55,7 +56,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -73,7 +74,7 @@ func NewCmd() *cobra.Command {
 					credentialsGroupLabel = model.CredentialsGroupId
 				}
 
-				cmd.Printf("No credentials found for credentials group %q\n", credentialsGroupLabel)
+				p.Info("No credentials found for credentials group %q\n", credentialsGroupLabel)
 				return nil
 			}
 
@@ -81,7 +82,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentials)
+			return outputResult(p, model.OutputFormat, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -123,14 +124,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials []objectstorage.AccessKey) error {
+func outputResult(p *print.Printer, outputFormat string, credentials []objectstorage.AccessKey) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -145,7 +146,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials []objects
 			}
 			table.AddRow(*c.KeyId, *c.DisplayName, expiresAt)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

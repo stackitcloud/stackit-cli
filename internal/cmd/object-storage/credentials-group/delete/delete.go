@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -26,7 +26,7 @@ type inputModel struct {
 	CredentialsGroupId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsGroupIdArg),
 		Short: "Deletes a credentials group that holds Object Storage access credentials",
@@ -45,7 +45,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -57,7 +57,7 @@ func NewCmd() *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete credentials group %q? (This cannot be undone)", credentialsGroupLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -70,7 +70,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Deleted credentials group %q\n", credentialsGroupLabel)
+			p.Info("Deleted credentials group %q\n", credentialsGroupLabel)
 			return nil
 		},
 	}

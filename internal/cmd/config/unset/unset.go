@@ -17,6 +17,7 @@ const (
 	asyncFlag        = globalflags.AsyncFlag
 	outputFormatFlag = globalflags.OutputFormatFlag
 	projectIdFlag    = globalflags.ProjectIdFlag
+	verbosityFlag    = globalflags.VerbosityFlag
 
 	sessionTimeLimitFlag = "session-time-limit"
 
@@ -38,11 +39,11 @@ const (
 )
 
 type inputModel struct {
-	AsyncFlag    bool
-	OutputFormat bool
-	ProjectId    bool
-
+	Async            bool
+	OutputFormat     bool
+	ProjectId        bool
 	SessionTimeLimit bool
+	Verbosity        bool
 
 	ArgusCustomEndpoint           bool
 	AuthorizationCustomEndpoint   bool
@@ -81,7 +82,7 @@ func NewCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model := parseInput(cmd)
 
-			if model.AsyncFlag {
+			if model.Async {
 				viper.Set(config.AsyncKey, config.AsyncDefault)
 			}
 			if model.OutputFormat {
@@ -90,9 +91,11 @@ func NewCmd() *cobra.Command {
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
 			}
-
 			if model.SessionTimeLimit {
 				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
+			}
+			if model.Verbosity {
+				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -156,8 +159,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(asyncFlag, false, "Configuration option to run commands asynchronously")
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
-
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
+	cmd.Flags().Bool(verbosityFlag, false, "Verbosity of the CLI")
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
@@ -178,11 +181,12 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(cmd *cobra.Command) *inputModel {
 	return &inputModel{
-		AsyncFlag:    flags.FlagToBoolValue(cmd, asyncFlag),
-		OutputFormat: flags.FlagToBoolValue(cmd, outputFormatFlag),
-		ProjectId:    flags.FlagToBoolValue(cmd, projectIdFlag),
+		Async:            flags.FlagToBoolValue(cmd, asyncFlag),
+		OutputFormat:     flags.FlagToBoolValue(cmd, outputFormatFlag),
+		ProjectId:        flags.FlagToBoolValue(cmd, projectIdFlag),
+		SessionTimeLimit: flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
+		Verbosity:        flags.FlagToBoolValue(cmd, verbosityFlag),
 
-		SessionTimeLimit:              flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
 		ArgusCustomEndpoint:           flags.FlagToBoolValue(cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),

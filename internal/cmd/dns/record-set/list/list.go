@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -46,7 +47,7 @@ type inputModel struct {
 	PageSize    int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List DNS record sets",
@@ -77,7 +78,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -92,10 +93,10 @@ func NewCmd() *cobra.Command {
 				if err != nil {
 					zoneLabel = model.ZoneId
 				}
-				cmd.Printf("No record sets found for zone %s matching the criteria\n", zoneLabel)
+				p.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
 				return nil
 			}
-			return outputResult(cmd, model.OutputFormat, recordSets)
+			return outputResult(p, model.OutputFormat, recordSets)
 		},
 	}
 
@@ -220,14 +221,14 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 	return recordSets, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.RecordSet) error {
+func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(recordSets, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -242,7 +243,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSets []dns.Reco
 			recordDataJoin := strings.Join(recordData, ", ")
 			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type, recordDataJoin)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

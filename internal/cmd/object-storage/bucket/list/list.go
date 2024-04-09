@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Object Storage buckets",
@@ -52,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -64,11 +65,11 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("get Object Storage buckets: %w", err)
 			}
 			if resp.Buckets == nil || len(*resp.Buckets) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No buckets found for project %s\n", projectLabel)
+				p.Info("No buckets found for project %s\n", projectLabel)
 				return nil
 			}
 			buckets := *resp.Buckets
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				buckets = buckets[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, buckets)
+			return outputResult(p, model.OutputFormat, buckets)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstorage.Bucket) error {
+func outputResult(p *print.Printer, outputFormat string, buckets []objectstorage.Bucket) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(buckets, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage bucket list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -132,7 +133,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, buckets []objectstora
 			bucket := buckets[i]
 			table.AddRow(*bucket.Name, *bucket.Region, *bucket.UrlPathStyle, *bucket.UrlVirtualHostedStyle)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

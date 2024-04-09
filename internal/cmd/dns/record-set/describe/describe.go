@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	RecordSetId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", recordSetIdArg),
 		Short: "Shows details  of a DNS record set",
@@ -53,7 +54,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -66,7 +67,7 @@ func NewCmd() *cobra.Command {
 			}
 			recordSet := resp.Rrset
 
-			return outputResult(cmd, model.OutputFormat, recordSet)
+			return outputResult(p, model.OutputFormat, recordSet)
 		},
 	}
 	configureFlags(cmd)
@@ -100,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.RecordSet) error {
+func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 		recordsData := make([]string, 0, len(*recordSet.Records))
@@ -121,7 +122,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		table.AddRow("TYPE", *recordSet.Type)
 		table.AddSeparator()
 		table.AddRow("RECORDS DATA", recordsDataJoin)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
@@ -132,7 +133,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, recordSet *dns.Record
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

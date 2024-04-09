@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
 	"github.com/spf13/cobra"
@@ -16,7 +17,7 @@ import (
 // Returns the project name associated to the project ID set in config
 //
 // Uses the one stored in config if it's valid, otherwise gets it from the API
-func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
+func GetProjectName(ctx context.Context, cmd *cobra.Command, p *print.Printer) (string, error) {
 	// If we can use the project name from config, return it
 	if useProjectNameFromConfig(cmd) {
 		return viper.GetString(config.ProjectNameKey), nil
@@ -27,7 +28,7 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
 		return "", fmt.Errorf("found empty project ID and name")
 	}
 
-	apiClient, err := client.ConfigureClient(cmd)
+	apiClient, err := client.ConfigureClient(p)
 	if err != nil {
 		return "", fmt.Errorf("configure resource manager client: %w", err)
 	}

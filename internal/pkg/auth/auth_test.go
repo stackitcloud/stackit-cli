@@ -15,6 +15,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/zalando/go-keyring"
@@ -201,8 +202,9 @@ func TestAuthenticationConfig(t *testing.T) {
 
 			cmd := &cobra.Command{}
 			cmd.SetOut(io.Discard) // Suppresses console prints
+			p := &print.Printer{Cmd: cmd}
 
-			authCfgOption, err := AuthenticationConfig(cmd, reauthenticateUser)
+			authCfgOption, err := AuthenticationConfig(p, reauthenticateUser)
 
 			if !tt.isValid {
 				if err == nil {

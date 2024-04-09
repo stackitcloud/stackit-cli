@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
@@ -26,7 +26,7 @@ type inputModel struct {
 	ClusterName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("rotate %s", clusterNameArg),
 		Short: "Rotates credentials associated to a SKE cluster",
@@ -52,14 +52,14 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to rotate credentials for SKE cluster %q? (The old credentials will be invalid after this operation)", model.ClusterName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -74,7 +74,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Rotating credentials")
 				_, err = wait.RotateCredentialsWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
@@ -87,7 +87,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered rotation of"
 			}
-			cmd.Printf("%s credentials for cluster %q\n", operationState, model.ClusterName)
+			p.Info("%s credentials for cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}

@@ -6,12 +6,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/rotate"
 	startrotation "github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/start-rotation"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credentials",
 		Short: "Provides functionality for SKE credentials",
@@ -19,13 +20,13 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(rotate.NewCmd())
-	cmd.AddCommand(startrotation.NewCmd())
-	cmd.AddCommand(completerotation.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(rotate.NewCmd(p))
+	cmd.AddCommand(startrotation.NewCmd(p))
+	cmd.AddCommand(completerotation.NewCmd(p))
 }

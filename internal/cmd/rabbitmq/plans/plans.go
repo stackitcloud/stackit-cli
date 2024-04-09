@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all RabbitMQ service plans",
@@ -52,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -65,11 +66,11 @@ func NewCmd() *cobra.Command {
 			}
 			plans := *resp.Offerings
 			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No plans found for project %q\n", projectLabel)
+				p.Info("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans)
+			return outputResult(p, model.OutputFormat, plans)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offering) error {
+func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offering) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ plans: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -131,13 +132,13 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []rabbitmq.Offe
 		for i := range plans {
 			o := plans[i]
 			for j := range *o.Plans {
-				p := (*o.Plans)[j]
-				table.AddRow(*o.Name, *o.Version, *p.Id, *p.Name, *p.Description)
+				plan := (*o.Plans)[j]
+				table.AddRow(*o.Name, *o.Version, *plan.Id, *plan.Name, *plan.Description)
 			}
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

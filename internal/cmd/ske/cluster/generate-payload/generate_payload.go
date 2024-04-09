@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	ClusterName *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate-payload",
 		Short: "Generates a payload to create/update SKE clusters",
@@ -55,7 +56,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -82,7 +83,7 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
-			return outputResult(cmd, payload)
+			return outputResult(p, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -113,12 +114,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, payload *ske.CreateOrUpdateClusterPayload) error {
+func outputResult(p *print.Printer, payload *ske.CreateOrUpdateClusterPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
-	cmd.Println(string(payloadBytes))
+	p.Outputln(string(payloadBytes))
 
 	return nil
 }

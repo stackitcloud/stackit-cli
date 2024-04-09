@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit               *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all service account keys",
@@ -54,7 +55,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -67,7 +68,7 @@ func NewCmd() *cobra.Command {
 			}
 			keys := *resp.Items
 			if len(keys) == 0 {
-				cmd.Printf("No keys found for service account %s\n", model.ServiceAccountEmail)
+				p.Info("No keys found for service account %s\n", model.ServiceAccountEmail)
 				return nil
 			}
 
@@ -76,7 +77,7 @@ func NewCmd() *cobra.Command {
 				keys = keys[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, keys)
+			return outputResult(p, model.OutputFormat, keys)
 		},
 	}
 
@@ -126,14 +127,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
+func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(keys, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal keys metadata: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -147,7 +148,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, keys []serviceaccount
 			}
 			table.AddRow(*k.Id, *k.Active, *k.CreatedAt, validUntil)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

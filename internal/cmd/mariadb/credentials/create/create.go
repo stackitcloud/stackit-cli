@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	mariadbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/utils"
 
@@ -28,7 +28,7 @@ type inputModel struct {
 	HidePassword bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates credentials for a MariaDB instance",
@@ -50,7 +50,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -62,7 +62,7 @@ func NewCmd() *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %q?", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -75,20 +75,20 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create MariaDB credentials: %w", err)
 			}
 
-			cmd.Printf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+			p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
 			// The username field cannot be set by the user so we only display it if it's not returned empty
 			username := *resp.Raw.Credentials.Username
 			if username != "" {
-				cmd.Printf("Username: %s\n", *resp.Raw.Credentials.Username)
+				p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
 			}
 			if model.HidePassword {
-				cmd.Printf("Password: <hidden>\n")
+				p.Outputf("Password: <hidden>\n")
 			} else {
-				cmd.Printf("Password: %s\n", *resp.Raw.Credentials.Password)
+				p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
 			}
-			cmd.Printf("Host: %s\n", *resp.Raw.Credentials.Host)
-			cmd.Printf("Port: %d\n", *resp.Raw.Credentials.Port)
-			cmd.Printf("URI: %s\n", *resp.Uri)
+			p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
+			p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
+			p.Outputf("URI: %s\n", *resp.Uri)
 			return nil
 		},
 	}

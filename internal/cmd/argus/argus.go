@@ -4,12 +4,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "argus",
 		Short: "Provides functionality for Argus",
@@ -17,11 +18,11 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(plans.NewCmd())
-	cmd.AddCommand(instance.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(plans.NewCmd(p))
+	cmd.AddCommand(instance.NewCmd(p))
 }

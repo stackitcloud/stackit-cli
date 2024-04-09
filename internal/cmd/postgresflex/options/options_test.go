@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -75,7 +76,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		Flavors:         false,
 		Versions:        false,
 		Storages:        false,
@@ -88,7 +89,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 		Flavors:         true,
 		Versions:        true,
 		Storages:        true,
@@ -165,7 +166,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -288,14 +289,16 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			p := &print.Printer{}
+			cmd := NewCmd(p)
+			p.Cmd = cmd
 			client := &postgresFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listVersionsFails: tt.listVersionsFails,
 				listStoragesFails: tt.listStoragesFails,
 			}
 
-			err := buildAndExecuteRequest(testCtx, cmd, tt.model, client)
+			err := buildAndExecuteRequest(testCtx, p, tt.model, client)
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}

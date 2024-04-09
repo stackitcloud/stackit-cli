@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/zalando/go-keyring"
 )
 
@@ -277,9 +278,11 @@ func TestRoundTrip(t *testing.T) {
 			cmd := &cobra.Command{}
 			cmd.SetOut(io.Discard) // Suppresses console prints
 
+			p := &print.Printer{Cmd: cmd}
+
 			// Test RoundTripper
 			rt := userTokenFlow{
-				cmd:                    cmd,
+				printer:                p,
 				reauthorizeUserRoutine: authorizeUserRoutine,
 				client:                 client,
 			}

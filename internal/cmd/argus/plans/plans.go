@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all Argus service plans",
@@ -52,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -65,11 +66,11 @@ func NewCmd() *cobra.Command {
 			}
 			plans := *resp.Plans
 			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No plans found for project %q\n", projectLabel)
+				p.Info("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +79,7 @@ func NewCmd() *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans)
+			return outputResult(p, model.OutputFormat, plans)
 		},
 	}
 
@@ -115,14 +116,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []argus.Plan) error {
+func outputResult(p *print.Printer, outputFormat string, plans []argus.Plan) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Argus plans: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -134,7 +135,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, plans []argus.Plan) e
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

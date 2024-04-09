@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
@@ -21,7 +22,7 @@ type inputModel struct {
 	Email string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("get-jwks %s", emailArg),
 		Short: "Shows the JWKS for a service account",
@@ -40,7 +41,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -53,11 +54,11 @@ func NewCmd() *cobra.Command {
 			}
 			jwks := *resp.Keys
 			if len(jwks) == 0 {
-				cmd.Printf("Empty JWKS for service account %s\n", model.Email)
+				p.Info("Empty JWKS for service account %s\n", model.Email)
 				return nil
 			}
 
-			return outputResult(cmd, jwks)
+			return outputResult(p, jwks)
 		},
 	}
 
@@ -77,11 +78,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, serviceAccounts []serviceaccount.JWK) error {
+func outputResult(p *print.Printer, serviceAccounts []serviceaccount.JWK) error {
 	details, err := json.MarshalIndent(serviceAccounts, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal JWK list: %w", err)
 	}
-	cmd.Println(string(details))
+	p.Outputln(string(details))
 	return nil
 }

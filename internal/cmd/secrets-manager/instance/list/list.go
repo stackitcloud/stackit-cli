@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Secrets Manager instances",
@@ -52,7 +53,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -65,11 +66,11 @@ func NewCmd() *cobra.Command {
 			}
 
 			if resp.Instances == nil || len(*resp.Instances) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No instances found for project %q\n", projectLabel)
+				p.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
 			instances := *resp.Instances
@@ -79,7 +80,7 @@ func NewCmd() *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, instances)
+			return outputResult(p, model.OutputFormat, instances)
 		},
 	}
 
@@ -116,14 +117,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instances []secretsmanager.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instances []secretsmanager.Instance) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -133,7 +134,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []secretsma
 			instance := instances[i]
 			table.AddRow(*instance.Id, *instance.Name, *instance.State, *instance.SecretCount)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

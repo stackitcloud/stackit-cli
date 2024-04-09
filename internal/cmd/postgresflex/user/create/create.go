@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 
@@ -35,7 +35,7 @@ type inputModel struct {
 	Roles      *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a PostgreSQL Flex user",
@@ -62,7 +62,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -74,7 +74,7 @@ func NewCmd() *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -88,13 +88,13 @@ func NewCmd() *cobra.Command {
 			}
 			user := resp.Item
 
-			cmd.Printf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-			cmd.Printf("Username: %s\n", *user.Username)
-			cmd.Printf("Password: %s\n", *user.Password)
-			cmd.Printf("Roles: %v\n", *user.Roles)
-			cmd.Printf("Host: %s\n", *user.Host)
-			cmd.Printf("Port: %d\n", *user.Port)
-			cmd.Printf("URI: %s\n", *user.Uri)
+			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+			p.Outputf("Username: %s\n", *user.Username)
+			p.Outputf("Password: %s\n", *user.Password)
+			p.Outputf("Roles: %v\n", *user.Roles)
+			p.Outputf("Host: %s\n", *user.Host)
+			p.Outputf("Port: %d\n", *user.Port)
+			p.Outputf("URI: %s\n", *user.Uri)
 
 			return nil
 		},

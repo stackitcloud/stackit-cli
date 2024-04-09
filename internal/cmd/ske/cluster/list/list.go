@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
@@ -28,7 +29,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all SKE clusters",
@@ -53,7 +54,7 @@ func NewCmd() *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -75,11 +76,11 @@ func NewCmd() *cobra.Command {
 			}
 			clusters := *resp.Items
 			if len(clusters) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No clusters found for project %q\n", projectLabel)
+				p.Info("No clusters found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -88,7 +89,7 @@ func NewCmd() *cobra.Command {
 				clusters = clusters[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, clusters)
+			return outputResult(p, model.OutputFormat, clusters)
 		},
 	}
 
@@ -125,14 +126,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, clusters []ske.Cluster) error {
+func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster) error {
 	switch outputFormat {
 	case globalflags.JSONOutputFormat:
 		details, err := json.MarshalIndent(clusters, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE cluster list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -146,7 +147,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, clusters []ske.Cluste
 			}
 			table.AddRow(*c.Name, *c.Status.Aggregated, *c.Kubernetes.Version, len(*c.Nodepools), monitoring)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
