@@ -37,11 +37,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config list"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := viper.ReadInConfig()
-			if err != nil {
-				return fmt.Errorf("read config file: %w", err)
-			}
-
 			configData := viper.AllSettings()
 
 			// Sort the config options by key
@@ -84,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				table.AddRow(key, valueString)
 				table.AddSeparator()
 			}
-			err = table.Display(p)
+			err := table.Display(p)
 			if err != nil {
 				return fmt.Errorf("render table: %w", err)
 			}

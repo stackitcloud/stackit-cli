@@ -80,9 +80,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				viper.Set(config.ProjectNameKey, "")
 			}
 
-			err = viper.WriteConfig()
+			err = config.Write()
 			if err != nil {
-				return fmt.Errorf("write new config to file: %w", err)
+				return fmt.Errorf("writing config file: %w", err)
 			}
 			return nil
 		},
