@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(_ *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "test",
 		Short: "test",
