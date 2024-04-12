@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
@@ -32,11 +33,16 @@ type inputModel struct {
 	CacheKey    string
 }
 
+const (
+	expirationSeconds     = 30 * 60          // 30 min
+	refreshBeforeDuration = 15 * time.Minute // 15 min
+)
+
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "login plugin for kubectl",
-		Long:  "login plugin for kubectl to create a short-lived kubeconfig to authenticate against a STACKIT Kubernetes Engine (SKE) cluster. To get a kubeconfig to use with the login command use the 'kubeconfig create' command",
+		Long:  "login plugin for kubectl to create a short-lived kubeconfig to authenticate against a STACKIT Kubernetes Engine (SKE) cluster. To obtain a kubeconfig for use with the login command, use the 'kubeconfig create' command.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -57,34 +63,36 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			kubeconfig := getCachedKubeConfig(model.CacheKey)
+			cachedKubeconfig := getCachedKubeConfig(model.CacheKey)
 
-			if kubeconfig == nil {
-				return getCacheAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+			if cachedKubeconfig == nil {
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
 			}
 
-			certPem, _ := pem.Decode(kubeconfig.CertData)
+			certPem, _ := pem.Decode(cachedKubeconfig.CertData)
 			if certPem == nil {
 				_ = cache.DeleteObject(model.CacheKey)
-				return getCacheAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
 			}
 
 			certificate, err := x509.ParseCertificate(certPem.Bytes)
 			if err != nil {
 				_ = cache.DeleteObject(model.CacheKey)
-				return getCacheAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
 			}
 
+			// cert is expired, request new
 			if time.Now().After(certificate.NotAfter.UTC()) {
-				// cert expired, request new
 				_ = cache.DeleteObject(model.CacheKey)
-				return getCacheAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
-			} else if time.Now().Add(time.Minute * 15).After(certificate.NotAfter.UTC()) {
-				// cert expires in 15min, refresh
-				return getCacheAndOutputKubeconfig(ctx, cmd, apiClient, model, true, kubeconfig)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+			}
+			// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
+			if time.Now().Add(refreshBeforeDuration).After(certificate.NotAfter.UTC()) {
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, true, cachedKubeconfig)
 			}
 
-			if err := output(cmd, model.CacheKey, kubeconfig); err != nil {
+			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
+			if err := output(cmd, model.CacheKey, cachedKubeconfig); err != nil {
 				return err
 			}
 			return nil
@@ -110,7 +118,7 @@ func parseInput() (*inputModel, error) {
 
 	execCredential, ok := obj.(*clientauthenticationv1.ExecCredential)
 	if !ok {
-		return nil, fmt.Errorf("Conversion to ExecCredential failed")
+		return nil, fmt.Errorf("conversion to ExecCredential failed")
 	}
 	if execCredential == nil || execCredential.Spec.Cluster == nil {
 		return nil, fmt.Errorf("ExecCredential contains not all needed fields")
@@ -130,7 +138,7 @@ func parseInput() (*inputModel, error) {
 
 func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiCreateKubeconfigRequest {
 	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
-	expirationSeconds := "1800" // 30 min
+	expirationSeconds := strconv.Itoa(expirationSeconds)
 
 	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
 }
@@ -179,26 +187,26 @@ type SKEClusterConfig struct {
 	ClusterName      string `json:"clusterName"`
 }
 
-func getCacheAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *ske.APIClient, model *inputModel, refresh bool, oldKubeconfig *rest.Config) error {
+func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *ske.APIClient, model *inputModel, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
 	req := buildRequest(ctx, apiClient, model)
 	kubeconfigResponse, err := req.Execute()
 	if err != nil {
-		if refresh {
-			return output(cmd, model.CacheKey, oldKubeconfig)
+		if fallbackToCache {
+			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("login SKE kubeconfig: requesting kubeconfig: %w", err)
 	}
 
 	kubeconfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(*kubeconfigResponse.Kubeconfig))
 	if err != nil {
-		if refresh {
-			return output(cmd, model.CacheKey, oldKubeconfig)
+		if fallbackToCache {
+			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("login SKE kubeconfig: parsing kubeconfig: %w", err)
 	}
 	if err = cache.PutObject(model.CacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
-		if refresh {
-			return output(cmd, model.CacheKey, oldKubeconfig)
+		if fallbackToCache {
+			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("login SKE kubeconfig: caching kubeconfig: %w", err)
 	}
