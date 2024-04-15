@@ -62,7 +62,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		metricsFrequencyFlag:     "100",
 		metricsPrefixFlag:        "example-prefix",
 		monitoringInstanceIdFlag: testMonitoringInstanceId,
-		pluginFlag:               "example-plugin",
 		sgwAclFlag:               "198.51.100.14/24",
 		syslogFlag:               "example-syslog",
 		planIdFlag:               testPlanId,
@@ -85,7 +84,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		MetricsFrequency:     utils.Ptr(int64(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-		Plugin:               utils.Ptr([]string{"example-plugin"}),
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
 		Syslog:               utils.Ptr([]string{"example-syslog"}),
 		PlanId:               utils.Ptr(testPlanId),
@@ -105,7 +103,6 @@ func fixtureRequest(mods ...func(request *logme.ApiPartialUpdateInstanceRequest)
 			MetricsFrequency:     utils.Ptr(int64(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-			Plugins:              utils.Ptr([]string{"example-plugin"}),
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
 			Syslog:               utils.Ptr([]string{"example-syslog"}),
 		},
@@ -123,7 +120,6 @@ func TestParseInput(t *testing.T) {
 		argValues     []string
 		flagValues    map[string]string
 		sgwAclValues  []string
-		pluginValues  []string
 		syslogValues  []string
 		isValid       bool
 		expectedModel *inputModel
@@ -254,18 +250,6 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description:  "repeated plugin flags",
-			argValues:    fixtureArgValues(),
-			flagValues:   fixtureFlagValues(),
-			pluginValues: []string{"example-plugin-1", "example-plugin-2"},
-			isValid:      true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Plugin = utils.Ptr(
-					append(*model.Plugin, "example-plugin-1", "example-plugin-2"),
-				)
-			}),
-		},
-		{
 			description:  "repeated syslog flags",
 			argValues:    fixtureArgValues(),
 			flagValues:   fixtureFlagValues(),
@@ -304,16 +288,6 @@ func TestParseInput(t *testing.T) {
 						return
 					}
 					t.Fatalf("setting flag --%s=%s: %v", sgwAclFlag, value, err)
-				}
-			}
-
-			for _, value := range tt.pluginValues {
-				err := cmd.Flags().Set(pluginFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", pluginFlag, value, err)
 				}
 			}
 

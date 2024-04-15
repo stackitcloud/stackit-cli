@@ -31,7 +31,6 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -50,7 +49,6 @@ type inputModel struct {
 	MetricsFrequency     *int64
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
 	SgwAcl               *[]string
 	Syslog               *[]string
 	PlanId               *string
@@ -140,7 +138,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -161,7 +158,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	graphite := flags.FlagToStringPointer(cmd, graphiteFlag)
 	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag)
-	plugin := flags.FlagToStringSlicePointer(cmd, pluginFlag)
 	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag)
 	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(cmd, planIdFlag)
@@ -176,7 +172,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}
 
 	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
-		metricsFrequency == nil && metricsPrefix == nil && plugin == nil &&
+		metricsFrequency == nil && metricsPrefix == nil &&
 		sgwAcl == nil && syslog == nil && planId == nil &&
 		planName == "" && version == "" {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -190,7 +186,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		Graphite:             graphite,
 		MetricsFrequency:     metricsFrequency,
 		MetricsPrefix:        metricsPrefix,
-		Plugin:               plugin,
 		SgwAcl:               sgwAcl,
 		Syslog:               syslog,
 		PlanId:               planId,
@@ -247,7 +242,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariaDBClien
 			MonitoringInstanceId: model.MonitoringInstanceId,
 			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
-			Plugins:              model.Plugin,
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},
