@@ -71,6 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(credentials) == 0 {
 				credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 					credentialsGroupLabel = model.CredentialsGroupId
 				}
 

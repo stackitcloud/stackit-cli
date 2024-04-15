@@ -70,6 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = *model.InstanceId
 				}
 				p.Info("No users found for instance %q\n", instanceLabel)

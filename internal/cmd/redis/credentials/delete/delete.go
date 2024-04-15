@@ -56,11 +56,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			credentialsLabel, err := redisUtils.GetCredentialsUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get credentials user name: %v", err)
 				credentialsLabel = model.CredentialsId
 			}
 

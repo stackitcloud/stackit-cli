@@ -58,11 +58,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
 			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
 			}
 

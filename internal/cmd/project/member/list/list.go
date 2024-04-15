@@ -76,6 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(members) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
 				p.Info("No members found for project %q\n", projectLabel)

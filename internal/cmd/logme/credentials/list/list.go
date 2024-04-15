@@ -70,6 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(credentials) == 0 {
 				instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = model.InstanceId
 				}
 				p.Info("No credentials found for instance %q\n", instanceLabel)

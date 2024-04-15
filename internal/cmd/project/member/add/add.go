@@ -65,6 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 

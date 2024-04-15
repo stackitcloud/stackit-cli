@@ -91,6 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(recordSets) == 0 {
 				zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get zone name: %v", err)
 					zoneLabel = model.ZoneId
 				}
 				p.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)

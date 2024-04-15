@@ -68,6 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if resp.Instances == nil || len(*resp.Instances) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
 				p.Info("No instances found for project %q\n", projectLabel)

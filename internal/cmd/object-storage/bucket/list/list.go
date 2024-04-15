@@ -67,6 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if resp.Buckets == nil || len(*resp.Buckets) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
 				p.Info("No buckets found for project %s\n", projectLabel)
