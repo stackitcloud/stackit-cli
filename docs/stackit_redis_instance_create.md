@@ -36,6 +36,7 @@ stackit redis instance create [flags]
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
       --plan-name string                Plan name
+      --plugin strings                  Plugin
       --syslog strings                  Syslog
       --version string                  Instance Redis version
 ```

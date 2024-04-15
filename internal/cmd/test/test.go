@@ -16,6 +16,5 @@ func NewCmd(_ *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	// TEST comment
 	return cmd
 }

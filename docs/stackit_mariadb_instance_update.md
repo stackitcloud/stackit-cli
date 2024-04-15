@@ -32,6 +32,7 @@ stackit mariadb instance update INSTANCE_ID [flags]
       --monitoring-instance-id string   Monitoring instance ID
       --plan-id string                  Plan ID
       --plan-name string                Plan name
+      --plugin strings                  Plugin
       --syslog strings                  Syslog
       --version string                  Instance MariaDB version
 ```

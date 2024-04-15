@@ -30,6 +30,7 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
+	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -48,6 +49,7 @@ type inputModel struct {
 	MetricsFrequency     *int64
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
+	Plugin               *[]string
 	SgwAcl               *[]string
 	Syslog               *[]string
 	PlanId               *string
@@ -141,6 +143,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
+	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -180,6 +183,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag),
 		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
 		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag),
+		Plugin:               flags.FlagToStringSlicePointer(cmd, pluginFlag),
 		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag),
 		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag),
 		PlanId:               planId,
@@ -234,6 +238,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 			MonitoringInstanceId: model.MonitoringInstanceId,
 			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
+			Plugins:              model.Plugin,
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},
