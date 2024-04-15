@@ -18,6 +18,7 @@ func ConfigureClient(p *print.Printer) (*mongodbflex.APIClient, error) {
 
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "auth err: %v", err)
 		return nil, &errors.AuthError{}
 	}
 	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
@@ -30,6 +31,7 @@ func ConfigureClient(p *print.Printer) (*mongodbflex.APIClient, error) {
 
 	apiClient, err = mongodbflex.NewAPIClient(cfgOptions...)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "auth err: %v", err)
 		return nil, &errors.AuthError{}
 	}
 

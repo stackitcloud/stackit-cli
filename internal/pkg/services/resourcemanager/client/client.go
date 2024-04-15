@@ -18,6 +18,7 @@ func ConfigureClient(p *print.Printer) (*resourcemanager.APIClient, error) {
 
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "auth err: %v", err)
 		return nil, &errors.AuthError{}
 	}
 	cfgOptions = append(cfgOptions, authCfgOption)
@@ -30,6 +31,7 @@ func ConfigureClient(p *print.Printer) (*resourcemanager.APIClient, error) {
 
 	apiClient, err = resourcemanager.NewAPIClient(cfgOptions...)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "auth err: %v", err)
 		return nil, &errors.AuthError{}
 	}
 
