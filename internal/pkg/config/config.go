@@ -71,7 +71,7 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 }
 
-var FolderPath string
+var folderPath string
 
 func InitConfig() {
 	home, err := os.UserHomeDir()
@@ -80,20 +80,18 @@ func InitConfig() {
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
 	viper.SetConfigName(configFileName)
-	viper.SetConfigType(configFileExtension)
-	viper.AddConfigPath(configFolderPath)
 
 	// Write config dir path to global variable
-	FolderPath = configFolderPath
+	folderPath = configFolderPath
+
+	// This hack is required to allow creating the config file with `viper.WriteConfig`
+	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
+	viper.SetConfigFile(configFilePath)
 
 	err = viper.ReadInConfig()
 	if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
 		cobra.CheckErr(err)
 	}
-
-	// This hack is required to allow creating the config file with `viper.WriteConfig`
-	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
-	viper.SetConfigFile(configFilePath)
 
 	setConfigDefaults()
 
@@ -101,10 +99,10 @@ func InitConfig() {
 	viper.SetEnvPrefix("stackit")
 }
 
-func CreateFolderIfNotExists() error {
-	_, err := os.Stat(FolderPath)
+func createFolderIfNotExists() error {
+	_, err := os.Stat(folderPath)
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(FolderPath, os.ModePerm)
+		err := os.MkdirAll(folderPath, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -116,7 +114,7 @@ func CreateFolderIfNotExists() error {
 
 // Write saves the config file (wrapping `viper.WriteConfig`) and ensures that its directory exists
 func Write() error {
-	if err := CreateFolderIfNotExists(); err != nil {
+	if err := createFolderIfNotExists(); err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}
 	return viper.WriteConfig()

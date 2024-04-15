@@ -146,7 +146,7 @@ func NewCmd() *cobra.Command {
 
 			err := config.Write()
 			if err != nil {
-				return fmt.Errorf("writing config file: %w", err)
+				return fmt.Errorf("write config to file: %w", err)
 			}
 			return nil
 		},
