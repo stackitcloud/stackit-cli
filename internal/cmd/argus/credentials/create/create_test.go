@@ -38,7 +38,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceId: testInstanceId,
+		InstanceId:   testInstanceId,
+		HidePassword: false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -111,6 +112,38 @@ func TestParseInput(t *testing.T) {
 			description: "instance id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "hide password true",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[hidePasswordFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.HidePassword = true
+			}),
+		},
+		{
+			description: "hide password false",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[hidePasswordFlag] = "false"
+			}),
+			expectedModel: fixtureInputModel(),
+			isValid:       true,
+		},
+		{
+			description: "hide password invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[hidePasswordFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "hide password invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[hidePasswordFlag] = ""
 			}),
 			isValid: false,
 		},

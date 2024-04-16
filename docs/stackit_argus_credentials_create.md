@@ -13,10 +13,10 @@ stackit argus credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for Argus instance with id "xxx"
+  Create credentials for Argus instance with ID "xxx"
   $ stackit argus credentials create --instance-id xxx
 
-  Create credentials for Argus instance with id "xxx" and hide the password in the output
+  Create credentials for Argus instance with ID "xxx" and hide the password in the output
   $ stackit argus credentials create --instance-id xxx --hide-password
 ```
 

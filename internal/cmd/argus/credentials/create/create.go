@@ -37,10 +37,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create credentials for Argus instance with id "xxx"`,
+				`Create credentials for Argus instance with ID "xxx"`,
 				"$ stackit argus credentials create --instance-id xxx"),
 			examples.NewExample(
-				`Create credentials for Argus instance with id "xxx" and hide the password in the output`,
+				`Create credentials for Argus instance with ID "xxx" and hide the password in the output`,
 				"$ stackit argus credentials create --instance-id xxx --hide-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
