@@ -18,15 +18,13 @@ import (
 )
 
 const (
-	instanceIdFlag   = "instance-id"
-	hidePasswordFlag = "hide-password"
+	instanceIdFlag = "instance-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	HidePassword bool
-	InstanceId   string
+	InstanceId string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -39,9 +37,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create credentials for Argus instance with ID "xxx"`,
 				"$ stackit argus credentials create --instance-id xxx"),
-			examples.NewExample(
-				`Create credentials for Argus instance with ID "xxx" and hide the password in the output`,
-				"$ stackit argus credentials create --instance-id xxx --hide-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -85,11 +80,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if username != "" {
 				p.Outputf("Username: %s\n", username)
 			}
-			if model.HidePassword {
-				p.Outputf("Password: <hidden>\n")
-			} else {
-				p.Outputf("Password: %s\n", *resp.Credentials.Password)
-			}
+
+			p.Outputf("Password: %s\n", *resp.Credentials.Password)
 			return nil
 		},
 	}
@@ -99,7 +91,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Bool(hidePasswordFlag, false, "Hide password in output")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -114,7 +105,6 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		HidePassword:    flags.FlagToBoolValue(cmd, hidePasswordFlag),
 	}, nil
 }
 
