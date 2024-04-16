@@ -46,8 +46,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *argus.ApiGetGrafanaConfigsRequest)) argus.ApiGetGrafanaConfigsRequest {
+func fixtureGrafanaConfigsRequest(mods ...func(request *argus.ApiGetGrafanaConfigsRequest)) argus.ApiGetGrafanaConfigsRequest {
 	request := testClient.GetGrafanaConfigs(testCtx, testInstanceId, testProjectId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureInstanceRequest(mods ...func(request *argus.ApiGetInstanceRequest)) argus.ApiGetInstanceRequest {
+	request := testClient.GetInstance(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -188,7 +196,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildGrafanaConfigsRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -197,13 +205,41 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureGrafanaConfigsRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildGrafanaConfigRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildInstanceRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest argus.ApiGetInstanceRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureInstanceRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildInstanceRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

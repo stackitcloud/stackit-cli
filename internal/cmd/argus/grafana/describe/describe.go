@@ -54,13 +54,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			grafanaConfigsReq := buildGrafanaConfigRequest(ctx, model, apiClient)
+			grafanaConfigsResp, err := grafanaConfigsReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get Grafana configs: %w", err)
 			}
+			instanceReq := buildInstanceRequest(ctx, model, apiClient)
+			instanceResp, err := instanceReq.Execute()
+			if err != nil {
+				return fmt.Errorf("get instance: %w", err)
+			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, grafanaConfigsResp, instanceResp)
 		},
 	}
 	configureFlags(cmd)
@@ -86,19 +91,26 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetGrafanaConfigsRequest {
+func buildGrafanaConfigRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetGrafanaConfigsRequest {
 	req := apiClient.GetGrafanaConfigs(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, gc *argus.GrafanaConfigs) error {
+func buildInstanceRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetInstanceRequest {
+	req := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId)
+	return req
+}
+
+func outputResult(p *print.Printer, outputFormat string, grafanaConfigs *argus.GrafanaConfigs, instance *argus.GetInstanceResponse) error {
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
 		table := tables.NewTable()
-		table.AddRow("PUBLIC READ ACCESS", *gc.PublicReadAccess)
+		table.AddRow("GRAFANA DASHBOARD", *instance.Instance.GrafanaUrl)
 		table.AddSeparator()
-		table.AddRow("SINGLE SIGN-ON", *gc.UseStackitSso)
+		table.AddRow("PUBLIC READ ACCESS", *grafanaConfigs.PublicReadAccess)
+		table.AddSeparator()
+		table.AddRow("SINGLE SIGN-ON", *grafanaConfigs.UseStackitSso)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -106,7 +118,7 @@ func outputResult(p *print.Printer, outputFormat string, gc *argus.GrafanaConfig
 
 		return nil
 	default:
-		details, err := json.MarshalIndent(gc, "", "  ")
+		details, err := json.MarshalIndent(grafanaConfigs, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Grafana configs: %w", err)
 		}
