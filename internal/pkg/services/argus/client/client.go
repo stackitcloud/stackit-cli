@@ -31,7 +31,7 @@ func ConfigureClient(p *print.Printer) (*argus.APIClient, error) {
 
 	apiClient, err = argus.NewAPIClient(cfgOptions...)
 	if err != nil {
-		p.Debug(print.ErrorLevel, "auth err: %v", err)
+		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}
 	}
 
