@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -79,8 +78,6 @@ func InitConfig() {
 	configFolderPath := filepath.Join(home, configFolder)
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
-	viper.SetConfigName(configFileName)
-
 	// Write config dir path to global variable
 	folderPath = configFolderPath
 
@@ -88,10 +85,13 @@ func InitConfig() {
 	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
 	viper.SetConfigFile(configFilePath)
 
-	err = viper.ReadInConfig()
-	if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
-		cobra.CheckErr(err)
+	f, err := os.Open(configFilePath)
+	if !os.IsNotExist(err) {
+		if err := viper.ReadConfig(f); err != nil {
+			cobra.CheckErr(err)
+		}
 	}
+	defer f.Close() //nolint:errcheck // file close errors are hard to handle
 
 	setConfigDefaults()
 
