@@ -53,7 +53,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -125,19 +125,19 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	recordSetId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	zoneId := flags.FlagToStringValue(cmd, zoneIdFlag)
-	comment := flags.FlagToStringPointer(cmd, commentFlag)
-	name := flags.FlagToStringPointer(cmd, nameFlag)
-	records := flags.FlagToStringSlicePointer(cmd, recordFlag)
-	ttl := flags.FlagToInt64Pointer(cmd, ttlFlag)
+	zoneId := flags.FlagToStringValue(cmd, zoneIdFlag, p)
+	comment := flags.FlagToStringPointer(cmd, commentFlag, p)
+	name := flags.FlagToStringPointer(cmd, nameFlag, p)
+	records := flags.FlagToStringSlicePointer(cmd, recordFlag, p)
+	ttl := flags.FlagToInt64Pointer(cmd, ttlFlag, p)
 
 	if comment == nil && name == nil && records == nil && ttl == nil {
 		return nil, &errors.EmptyUpdateError{}

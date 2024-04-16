@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -103,13 +103,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "subject", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(cmd, limitFlag, p)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -119,9 +119,9 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Subject:         flags.FlagToStringPointer(cmd, subjectFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag),
+		Subject:         flags.FlagToStringPointer(cmd, subjectFlag, p),
+		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag, p),
+		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag, p),
 	}, nil
 }
 

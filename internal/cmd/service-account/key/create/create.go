@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -110,13 +110,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag, p)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -124,7 +124,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	expriresInDays := flags.FlagToInt64Pointer(cmd, expiredInDaysFlag)
+	expriresInDays := flags.FlagToInt64Pointer(cmd, expiredInDaysFlag, p)
 	if expriresInDays != nil && *expriresInDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    expiredInDaysFlag,
@@ -136,7 +136,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel:     globalFlags,
 		ServiceAccountEmail: email,
 		ExpiresInDays:       expriresInDays,
-		PublicKey:           flags.FlagToStringPointer(cmd, publicKeyFlag),
+		PublicKey:           flags.FlagToStringPointer(cmd, publicKeyFlag, p),
 	}, nil
 }
 

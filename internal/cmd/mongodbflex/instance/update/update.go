@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -143,24 +143,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
-	acl := flags.FlagToStringSlicePointer(cmd, aclFlag)
-	backupSchedule := flags.FlagToStringPointer(cmd, backupScheduleFlag)
-	storageClass := flags.FlagToStringPointer(cmd, storageClassFlag)
-	storageSize := flags.FlagToInt64Pointer(cmd, storageSizeFlag)
-	version := flags.FlagToStringPointer(cmd, versionFlag)
-	instanceType := flags.FlagToStringPointer(cmd, typeFlag)
+	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag, p)
+	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag, p)
+	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag, p)
+	ram := flags.FlagToInt64Pointer(cmd, ramFlag, p)
+	acl := flags.FlagToStringSlicePointer(cmd, aclFlag, p)
+	backupSchedule := flags.FlagToStringPointer(cmd, backupScheduleFlag, p)
+	storageClass := flags.FlagToStringPointer(cmd, storageClassFlag, p)
+	storageSize := flags.FlagToInt64Pointer(cmd, storageSizeFlag, p)
+	version := flags.FlagToStringPointer(cmd, versionFlag, p)
+	instanceType := flags.FlagToStringPointer(cmd, typeFlag, p)
 
 	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
 		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {

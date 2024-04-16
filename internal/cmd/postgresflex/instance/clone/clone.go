@@ -60,7 +60,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -129,15 +129,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	recoveryTimestamp, err := flags.FlagToDateTimePointer(cmd, recoveryTimestampFlag, recoveryDateFormat)
+	recoveryTimestamp, err := flags.FlagToDateTimePointer(cmd, recoveryTimestampFlag, recoveryDateFormat, p)
 	if err != nil {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    recoveryTimestampFlag,
@@ -149,8 +149,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag),
-		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag),
+		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag, p),
+		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag, p),
 		RecoveryDate:    utils.Ptr(recoveryTimestampString),
 	}, nil
 }

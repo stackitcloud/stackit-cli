@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Args: args.SingleArg(urlArg, validateURL),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -150,9 +150,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(outputFileFlag, "", "Writes output to provided file instead of printing to console")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	urlString := inputArgs[0]
-	requestMethod := flags.FlagToStringValue(cmd, requestMethodFlag)
+	requestMethod := flags.FlagToStringValue(cmd, requestMethodFlag, p)
 	if requestMethod == "" {
 		requestMethod = http.MethodGet
 	}
@@ -160,11 +160,11 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		URL:                    urlString,
 		RequestMethod:          strings.ToUpper(requestMethod),
-		Headers:                flags.FlagToStringSliceValue(cmd, headerFlag),
-		Data:                   flags.FlagToStringPointer(cmd, dataFlag),
-		IncludeResponseHeaders: flags.FlagToBoolValue(cmd, includeResponseHeadersFlag),
-		FailOnHTTPError:        flags.FlagToBoolValue(cmd, failOnHTTPErrorFlag),
-		OutputFile:             flags.FlagToStringPointer(cmd, outputFileFlag),
+		Headers:                flags.FlagToStringSliceValue(cmd, headerFlag, p),
+		Data:                   flags.FlagToStringPointer(cmd, dataFlag, p),
+		IncludeResponseHeaders: flags.FlagToBoolValue(cmd, includeResponseHeadersFlag, p),
+		FailOnHTTPError:        flags.FlagToBoolValue(cmd, failOnHTTPErrorFlag, p),
+		OutputFile:             flags.FlagToStringPointer(cmd, outputFileFlag, p),
 	}, nil
 }
 

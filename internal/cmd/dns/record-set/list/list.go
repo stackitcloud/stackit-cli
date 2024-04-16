@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -121,13 +121,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(cmd, limitFlag, p)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -135,7 +135,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag, p)
 	if pageSize < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    pageSizeFlag,
@@ -143,21 +143,21 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	active := flags.FlagToBoolValue(cmd, activeFlag)
-	inactive := flags.FlagToBoolValue(cmd, inactiveFlag)
+	active := flags.FlagToBoolValue(cmd, activeFlag, p)
+	inactive := flags.FlagToBoolValue(cmd, inactiveFlag, p)
 	if active && inactive {
 		return nil, fmt.Errorf("only one of %s and %s can be set", activeFlag, inactiveFlag)
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag),
+		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag, p),
 		Active:          active,
 		Inactive:        inactive,
-		Deleted:         flags.FlagToBoolValue(cmd, deletedFlag),
-		NameLike:        flags.FlagToStringPointer(cmd, nameLikeFlag),
-		OrderByName:     flags.FlagToStringPointer(cmd, orderByNameFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
+		Deleted:         flags.FlagToBoolValue(cmd, deletedFlag, p),
+		NameLike:        flags.FlagToStringPointer(cmd, nameLikeFlag, p),
+		OrderByName:     flags.FlagToStringPointer(cmd, orderByNameFlag, p),
+		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag, p),
 		PageSize:        pageSize,
 	}, nil
 }

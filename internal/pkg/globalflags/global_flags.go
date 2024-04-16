@@ -71,10 +71,10 @@ func Configure(flagSet *pflag.FlagSet) error {
 	return nil
 }
 
-func Parse(cmd *cobra.Command) *GlobalFlagModel {
+func Parse(cmd *cobra.Command, p *print.Printer) *GlobalFlagModel {
 	return &GlobalFlagModel{
 		Async:        viper.GetBool(config.AsyncKey),
-		AssumeYes:    flags.FlagToBoolValue(cmd, AssumeYesFlag),
+		AssumeYes:    flags.FlagToBoolValue(cmd, AssumeYesFlag, p),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
 		ProjectId:    viper.GetString(config.ProjectIdKey),
 		Verbosity:    viper.GetString(config.VerbosityKey),

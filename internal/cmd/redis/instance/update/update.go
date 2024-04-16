@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -145,24 +145,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(versionFlag, "", "Instance Redis version")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	enableMonitoring := flags.FlagToBoolPointer(cmd, enableMonitoringFlag)
-	monitoringInstanceId := flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag)
-	graphite := flags.FlagToStringPointer(cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
-	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag)
-	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag)
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	version := flags.FlagToStringValue(cmd, versionFlag)
+	enableMonitoring := flags.FlagToBoolPointer(cmd, enableMonitoringFlag, p)
+	monitoringInstanceId := flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag, p)
+	graphite := flags.FlagToStringPointer(cmd, graphiteFlag, p)
+	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag, p)
+	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag, p)
+	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag, p)
+	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag, p)
+	planId := flags.FlagToStringPointer(cmd, planIdFlag, p)
+	planName := flags.FlagToStringValue(cmd, planNameFlag, p)
+	version := flags.FlagToStringValue(cmd, versionFlag, p)
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{

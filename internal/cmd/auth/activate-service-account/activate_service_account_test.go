@@ -106,7 +106,7 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			model := parseInput(cmd)
+			model := parseInput(cmd, nil)
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")

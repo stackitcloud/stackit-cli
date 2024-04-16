@@ -75,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -161,17 +161,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	storageSize := flags.FlagWithDefaultToInt64Value(cmd, storageSizeFlag)
+	storageSize := flags.FlagWithDefaultToInt64Value(cmd, storageSizeFlag, p)
 
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
+	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag, p)
+	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag, p)
+	ram := flags.FlagToInt64Pointer(cmd, ramFlag, p)
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -186,16 +186,16 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(cmd, aclFlag),
-		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, backupScheduleFlag)),
+		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag, p),
+		ACL:             flags.FlagToStringSlicePointer(cmd, aclFlag, p),
+		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, backupScheduleFlag, p)),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, storageClassFlag)),
+		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, storageClassFlag, p)),
 		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringPointer(cmd, versionFlag),
-		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, typeFlag)),
+		Version:         flags.FlagToStringPointer(cmd, versionFlag, p),
+		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, typeFlag, p)),
 	}, nil
 }
 

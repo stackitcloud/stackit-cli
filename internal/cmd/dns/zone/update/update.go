@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -134,24 +134,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(contactEmailFlag, "", "Contact email for the zone")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	zoneId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	name := flags.FlagToStringPointer(cmd, nameFlag)
-	defaultTTL := flags.FlagToInt64Pointer(cmd, defaultTTLFlag)
-	primaries := flags.FlagToStringSlicePointer(cmd, primaryFlag)
-	acl := flags.FlagToStringPointer(cmd, aclFlag)
-	retryTime := flags.FlagToInt64Pointer(cmd, retryTimeFlag)
-	refreshTime := flags.FlagToInt64Pointer(cmd, refreshTimeFlag)
-	negativeCache := flags.FlagToInt64Pointer(cmd, negativeCacheFlag)
-	expireTime := flags.FlagToInt64Pointer(cmd, expireTimeFlag)
-	description := flags.FlagToStringPointer(cmd, descriptionFlag)
-	contactEmail := flags.FlagToStringPointer(cmd, contactEmailFlag)
+	name := flags.FlagToStringPointer(cmd, nameFlag, p)
+	defaultTTL := flags.FlagToInt64Pointer(cmd, defaultTTLFlag, p)
+	primaries := flags.FlagToStringSlicePointer(cmd, primaryFlag, p)
+	acl := flags.FlagToStringPointer(cmd, aclFlag, p)
+	retryTime := flags.FlagToInt64Pointer(cmd, retryTimeFlag, p)
+	refreshTime := flags.FlagToInt64Pointer(cmd, refreshTimeFlag, p)
+	negativeCache := flags.FlagToInt64Pointer(cmd, negativeCacheFlag, p)
+	expireTime := flags.FlagToInt64Pointer(cmd, expireTimeFlag, p)
+	description := flags.FlagToStringPointer(cmd, descriptionFlag, p)
+	contactEmail := flags.FlagToStringPointer(cmd, contactEmailFlag, p)
 
 	if name == nil && defaultTTL == nil && primaries == nil &&
 		acl == nil && retryTime == nil && refreshTime == nil &&

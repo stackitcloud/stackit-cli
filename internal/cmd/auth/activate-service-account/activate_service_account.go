@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model := parseInput(cmd)
+			model := parseInput(cmd, p)
 
 			err := storeFlags(model)
 			if err != nil {
@@ -104,13 +104,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
-func parseInput(cmd *cobra.Command) *inputModel {
+func parseInput(cmd *cobra.Command, p *print.Printer) *inputModel {
 	return &inputModel{
-		ServiceAccountToken:   flags.FlagToStringValue(cmd, serviceAccountTokenFlag),
-		ServiceAccountKeyPath: flags.FlagToStringValue(cmd, serviceAccountKeyPathFlag),
-		PrivateKeyPath:        flags.FlagToStringValue(cmd, privateKeyPathFlag),
-		TokenCustomEndpoint:   flags.FlagToStringValue(cmd, tokenCustomEndpointFlag),
-		JwksCustomEndpoint:    flags.FlagToStringValue(cmd, jwksCustomEndpointFlag),
+		ServiceAccountToken:   flags.FlagToStringValue(cmd, serviceAccountTokenFlag, p),
+		ServiceAccountKeyPath: flags.FlagToStringValue(cmd, serviceAccountKeyPathFlag, p),
+		PrivateKeyPath:        flags.FlagToStringValue(cmd, privateKeyPathFlag, p),
+		TokenCustomEndpoint:   flags.FlagToStringValue(cmd, tokenCustomEndpointFlag, p),
+		JwksCustomEndpoint:    flags.FlagToStringValue(cmd, jwksCustomEndpointFlag, p),
 	}
 }
 

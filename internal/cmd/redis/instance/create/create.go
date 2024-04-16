@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -152,15 +152,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	version := flags.FlagToStringValue(cmd, versionFlag)
+	planId := flags.FlagToStringPointer(cmd, planIdFlag, p)
+	planName := flags.FlagToStringValue(cmd, planNameFlag, p)
+	version := flags.FlagToStringValue(cmd, versionFlag, p)
 
 	if planId == nil && (planName == "" || version == "") {
 		return nil, &cliErr.DSAInputPlanError{
@@ -175,14 +175,14 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(cmd, instanceNameFlag),
-		EnableMonitoring:     flags.FlagToBoolPointer(cmd, enableMonitoringFlag),
-		MonitoringInstanceId: flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
-		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
-		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag),
-		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag),
+		InstanceName:         flags.FlagToStringPointer(cmd, instanceNameFlag, p),
+		EnableMonitoring:     flags.FlagToBoolPointer(cmd, enableMonitoringFlag, p),
+		MonitoringInstanceId: flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag, p),
+		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag, p),
+		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag, p),
+		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag, p),
+		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag, p),
+		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag, p),
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,

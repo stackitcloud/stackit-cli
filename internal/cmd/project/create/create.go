@@ -52,7 +52,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, p)
 			if err != nil {
 				return err
 			}
@@ -98,10 +98,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
+	globalFlags := globalflags.Parse(cmd, p)
 
-	labels := flags.FlagToStringToStringPointer(cmd, labelFlag)
+	labels := flags.FlagToStringToStringPointer(cmd, labelFlag, p)
 	if labels != nil {
 		labelKeyRegex := regexp.MustCompile(labelKeyRegex)
 		labelValueRegex := regexp.MustCompile(labelValueRegex)
@@ -124,8 +124,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ParentId:        flags.FlagToStringPointer(cmd, parentIdFlag),
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
+		ParentId:        flags.FlagToStringPointer(cmd, parentIdFlag, p),
+		Name:            flags.FlagToStringPointer(cmd, nameFlag, p),
 		Labels:          labels,
 	}, nil
 }

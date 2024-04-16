@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(cmd, args, p)
 			if err != nil {
 				return err
 			}
@@ -148,15 +148,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit ske cluster generate-payload")`)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(cmd, p)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	payloadValue := flags.FlagToStringPointer(cmd, payloadFlag)
+	payloadValue := flags.FlagToStringPointer(cmd, payloadFlag, p)
 	var payload *ske.CreateOrUpdateClusterPayload
 	if payloadValue != nil {
 		payload = &ske.CreateOrUpdateClusterPayload{}
