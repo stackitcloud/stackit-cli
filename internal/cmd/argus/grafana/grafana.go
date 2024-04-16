@@ -12,8 +12,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "grafana",
-		Short: "Provides functionality for Grafana configuration",
-		Long:  "Provides functionality for Grafana configuration.",
+		Short: "Provides functionality for the Grafana configuration of Argus instances",
+		Long:  "Provides functionality for the Grafana configuration of Argus instances.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

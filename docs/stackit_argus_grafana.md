@@ -1,10 +1,10 @@
 ## stackit argus grafana
 
-Provides functionality for Grafana configuration
+Provides functionality for the Grafana configuration of Argus instances
 
 ### Synopsis
 
-Provides functionality for Grafana configuration.
+Provides functionality for the Grafana configuration of Argus instances.
 
 ```
 stackit argus grafana [flags]

@@ -39,5 +39,5 @@ stackit argus grafana describe [flags]
 
 ### SEE ALSO
 
-* [stackit argus grafana](./stackit_argus_grafana.md)	 - Provides functionality for Grafana configuration
+* [stackit argus grafana](./stackit_argus_grafana.md)	 - Provides functionality for the Grafana configuration of Argus instances
 
