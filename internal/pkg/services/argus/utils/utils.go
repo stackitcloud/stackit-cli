@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/argus"
 )
@@ -56,6 +57,99 @@ func LoadPlanId(planName string, resp *argus.PlansResponse) (*string, error) {
 	}
 }
 
+func MapToUpdateScrapeConfigPayload(resp *argus.GetScrapeConfigResponse) *argus.UpdateScrapeConfigPayload {
+	data := resp.Data
+
+	basicAuth := mapBasicAuth(data.BasicAuth)
+
+	httpSdConfigs := make([]argus.CreateScrapeConfigPayloadHttpSdConfigsInner, 0)
+	if data.HttpSdConfigs != nil {
+		for _, config := range *data.HttpSdConfigs {
+			httpSdConfigs = append(httpSdConfigs, mapHttpSdConfig(config))
+		}
+	}
+
+	staticConfigs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
+	if data.StaticConfigs != nil {
+		for _, config := range *data.StaticConfigs {
+			staticConfigs = append(staticConfigs, mapStaticConfig(config))
+		}
+	}
+
+	tlsConfig := mapTlsConfig(data.TlsConfig)
+
+	return &argus.UpdateScrapeConfigPayload{
+		BasicAuth:       basicAuth,
+		BearerToken:     data.BearerToken,
+		HonorLabels:     data.HonorLabels,
+		HonorTimeStamps: data.HonorTimeStamps,
+		MetricsPath:     data.MetricsPath,
+		// MetricsRelabelConfigs: metricsRelabelConfigs,
+		// Params: 	   convertMapStringToInterface(data.Params),
+		SampleLimit:    utils.Ptr(float64(*data.SampleLimit)),
+		Scheme:         data.Scheme,
+		ScrapeInterval: data.ScrapeInterval,
+		ScrapeTimeout:  data.ScrapeTimeout,
+		StaticConfigs:  &staticConfigs,
+		TlsConfig:      tlsConfig,
+	}
+}
+
+func mapOAuth2(oauth2 *argus.OAuth2) *argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2 {
+	return nil
+}
+
+func mapHttpSdConfig(httpSdConfig argus.HTTPServiceSD) argus.CreateScrapeConfigPayloadHttpSdConfigsInner {
+	oauth2 := mapOAuth2(httpSdConfig.Oauth2)
+	tlsConfig := mapTlsConfig(httpSdConfig.TlsConfig)
+	return argus.CreateScrapeConfigPayloadHttpSdConfigsInner{
+		Oauth2:    oauth2,
+		TlsConfig: tlsConfig,
+	}
+
+}
+
+func mapStaticConfig(staticConfig argus.StaticConfigs) argus.UpdateScrapeConfigPayloadStaticConfigsInner {
+	labels := convertMapStringToInterface(staticConfig.Labels)
+	return argus.UpdateScrapeConfigPayloadStaticConfigsInner{
+		Labels:  labels,
+		Targets: staticConfig.Targets,
+	}
+}
+
+func mapBasicAuth(basicAuth *argus.BasicAuth) *argus.CreateScrapeConfigPayloadBasicAuth {
+	if basicAuth == nil {
+		return nil
+	}
+
+	return &argus.CreateScrapeConfigPayloadBasicAuth{
+		Password: basicAuth.Password,
+		Username: basicAuth.Username,
+	}
+}
+
+func mapTlsConfig(tlsConfig *argus.TLSConfig) *argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig {
+	if tlsConfig == nil {
+		return nil
+	}
+
+	return &argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+		InsecureSkipVerify: tlsConfig.InsecureSkipVerify,
+	}
+}
+
+func convertMapStringToInterface(m *map[string]string) *map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+
+	newMap := make(map[string]interface{})
+	for k, v := range *m {
+		newMap[k] = v
+	}
+	return &newMap
+}
+
 type ArgusClient interface {
 	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*argus.GetInstanceResponse, error)
 }
@@ -66,4 +160,8 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 		return "", fmt.Errorf("get Argus instance: %w", err)
 	}
 	return *resp.Name, nil
+}
+
+func GetDefaultCreateScrapeConfigPayload(ctx context.Context, apiClient ArgusClient) (*argus.CreateScrapeConfigPayload, error) {
+	return nil, nil
 }
