@@ -16,7 +16,7 @@ stackit argus grafana describe [flags]
   Get details of the Grafana configuration of an Argus instance with ID "xxx"
   $ stackit argus credentials describe --instance-id xxx
 
-  Get details of of the Grafana configuration of an Argus instance with ID "xxx" in a table format
+  Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format
   $ stackit argus credentials describe --instance-id xxx --output-format pretty
 ```
 

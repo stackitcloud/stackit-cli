@@ -46,7 +46,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureGrafanaConfigsRequest(mods ...func(request *argus.ApiGetGrafanaConfigsRequest)) argus.ApiGetGrafanaConfigsRequest {
+func fixtureGetGrafanaConfigsRequest(mods ...func(request *argus.ApiGetGrafanaConfigsRequest)) argus.ApiGetGrafanaConfigsRequest {
 	request := testClient.GetGrafanaConfigs(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
@@ -54,7 +54,7 @@ func fixtureGrafanaConfigsRequest(mods ...func(request *argus.ApiGetGrafanaConfi
 	return request
 }
 
-func fixtureInstanceRequest(mods ...func(request *argus.ApiGetInstanceRequest)) argus.ApiGetInstanceRequest {
+func fixtureGetInstanceRequest(mods ...func(request *argus.ApiGetInstanceRequest)) argus.ApiGetInstanceRequest {
 	request := testClient.GetInstance(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
@@ -196,7 +196,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildGrafanaConfigsRequest(t *testing.T) {
+func TestBuildGetGrafanaConfigsRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -205,13 +205,13 @@ func TestBuildGrafanaConfigsRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureGrafanaConfigsRequest(),
+			expectedRequest: fixtureGetGrafanaConfigsRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildGrafanaConfigRequest(testCtx, tt.model, testClient)
+			request := buildGetGrafanaConfigRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -224,7 +224,7 @@ func TestBuildGrafanaConfigsRequest(t *testing.T) {
 	}
 }
 
-func TestBuildInstanceRequest(t *testing.T) {
+func TestBuildGetInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -233,13 +233,13 @@ func TestBuildInstanceRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureInstanceRequest(),
+			expectedRequest: fixtureGetInstanceRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildInstanceRequest(testCtx, tt.model, testClient)
+			request := buildGetInstanceRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

@@ -38,7 +38,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx"`,
 				"$ stackit argus credentials describe --instance-id xxx"),
 			examples.NewExample(
-				`Get details of of the Grafana configuration of an Argus instance with ID "xxx" in a table format`,
+				`Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format`,
 				"$ stackit argus credentials describe --instance-id xxx --output-format pretty"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -54,12 +54,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			grafanaConfigsReq := buildGrafanaConfigRequest(ctx, model, apiClient)
+			grafanaConfigsReq := buildGetGrafanaConfigRequest(ctx, model, apiClient)
 			grafanaConfigsResp, err := grafanaConfigsReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get Grafana configs: %w", err)
 			}
-			instanceReq := buildInstanceRequest(ctx, model, apiClient)
+			instanceReq := buildGetInstanceRequest(ctx, model, apiClient)
 			instanceResp, err := instanceReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get instance: %w", err)
@@ -91,12 +91,12 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func buildGrafanaConfigRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetGrafanaConfigsRequest {
+func buildGetGrafanaConfigRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetGrafanaConfigsRequest {
 	req := apiClient.GetGrafanaConfigs(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
 
-func buildInstanceRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetInstanceRequest {
+func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
