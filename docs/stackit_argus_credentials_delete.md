@@ -14,7 +14,7 @@ stackit argus credentials delete USERNAME [flags]
 
 ```
   Delete credentials of username "xxx" for Argus instance with ID "yyy"
-  $ stackit logme credentials delete xxx --instance-id yyy
+  $ stackit argus credentials delete xxx --instance-id yyy
 ```
 
 ### Options
