@@ -46,6 +46,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format`,
 				"$ stackit argus credentials describe --instance-id xxx --output-format pretty"),
+			examples.NewExample(
+				`Get details of the Grafana configuration of an Argus instance with ID "xxx" and show the initial admin password`,
+				"$ stackit argus credentials describe --instance-id xxx --output-format pretty --show-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
