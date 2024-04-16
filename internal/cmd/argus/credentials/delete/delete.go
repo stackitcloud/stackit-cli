@@ -38,7 +38,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete credentials of username "xxx" for Argus instance with ID "yyy"`,
-				"$ stackit logme credentials delete xxx --instance-id yyy"),
+				"$ stackit argus credentials delete xxx --instance-id yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
