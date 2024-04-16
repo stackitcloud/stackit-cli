@@ -4,29 +4,24 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
+
+	"github.com/adrg/xdg"
 )
 
-const (
-	cacheFolder = ".stackit/cache"
+var (
+	cacheFolderPath = xdg.CacheHome + "/stackit"
+
+	identifierRegex             = regexp.MustCompile("^[a-zA-Z0-9-]+$")
+	ErrorInvalidCacheIdentifier = fmt.Errorf("invalid cache identifier")
 )
-
-var ErrorInvalidCacheIdentifier = fmt.Errorf("invalid cache identifier")
-
-var identifierRegex = regexp.MustCompile("^[a-zA-Z0-9-]+$")
 
 func GetObject(identifier string) ([]byte, error) {
 	if !identifierRegex.MatchString(identifier) {
 		return nil, ErrorInvalidCacheIdentifier
 	}
 
-	cacheFolderPath, err := getCacheFolderPath()
-	if err != nil {
-		return nil, err
-	}
-
-	return os.ReadFile(cacheFolderPath + "/" + identifier + ".txt")
+	return os.ReadFile(cacheFolderPath + "/" + identifier)
 }
 
 func PutObject(identifier string, data []byte) error {
@@ -34,17 +29,12 @@ func PutObject(identifier string, data []byte) error {
 		return ErrorInvalidCacheIdentifier
 	}
 
-	cacheFolderPath, err := getCacheFolderPath()
+	err := createFolderIfNotExists(cacheFolderPath)
 	if err != nil {
 		return err
 	}
 
-	err = createFolderIfNotExists(cacheFolderPath)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(cacheFolderPath+"/"+identifier+".txt", data, 0o600)
+	return os.WriteFile(cacheFolderPath+"/"+identifier, data, 0o600)
 }
 
 func DeleteObject(identifier string) error {
@@ -52,24 +42,10 @@ func DeleteObject(identifier string) error {
 		return ErrorInvalidCacheIdentifier
 	}
 
-	cacheFolderPath, err := getCacheFolderPath()
-	if err != nil {
-		return err
-	}
-
-	if err = os.Remove(cacheFolderPath + "/" + identifier + ".txt"); !errors.Is(err, os.ErrNotExist) {
+	if err := os.Remove(cacheFolderPath + "/" + identifier); !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	return nil
-}
-
-func getCacheFolderPath() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	configFolderPath := filepath.Join(home, cacheFolder)
-	return configFolderPath, nil
 }
 
 func createFolderIfNotExists(folderPath string) error {
