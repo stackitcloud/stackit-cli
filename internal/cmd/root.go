@@ -8,6 +8,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/bar"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
@@ -108,6 +109,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(secretsmanager.NewCmd(p))
 	cmd.AddCommand(serviceaccount.NewCmd(p))
 	cmd.AddCommand(ske.NewCmd(p))
+	cmd.AddCommand(bar.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.
