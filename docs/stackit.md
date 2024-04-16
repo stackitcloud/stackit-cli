@@ -27,34 +27,21 @@ stackit [flags]
 ### SEE ALSO
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
-* [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
-* [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
-* [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
-* [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
-* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
 * [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
-* [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
 * [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
-* [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
-* [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
 * [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
-* [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
-* [stackit redis](./stackit_redis.md)	 - Provides functionality for Redis
 * [stackit redis](./stackit_redis.md)	 - Provides functionality for Redis
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
-* [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
-* [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 

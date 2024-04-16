@@ -1,9 +1,7 @@
-package argus
+package credentials
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/credentials"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/credentials/create"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -13,9 +11,9 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "argus",
-		Short: "Provides functionality for Argus",
-		Long:  "Provides functionality for Argus.",
+		Use:   "credentials",
+		Short: "Provides functionality for Argus credentials",
+		Long:  "Provides functionality for Argus credentials.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
@@ -24,7 +22,5 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(plans.NewCmd(p))
-	cmd.AddCommand(instance.NewCmd(p))
-	cmd.AddCommand(credentials.NewCmd(p))
+	cmd.AddCommand(create.NewCmd(p))
 }
