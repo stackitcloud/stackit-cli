@@ -91,7 +91,13 @@ func InitConfig() {
 			cobra.CheckErr(err)
 		}
 	}
-	defer f.Close() //nolint:errcheck // file close errors are hard to handle
+	defer func() {
+		if f != nil {
+			if err := f.Close(); err != nil {
+				cobra.CheckErr(err)
+			}
+		}
+	}()
 
 	setConfigDefaults()
 
