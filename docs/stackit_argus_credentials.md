@@ -30,8 +30,5 @@ stackit argus credentials [flags]
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit argus credentials create](./stackit_argus_credentials_create.md)	 - Creates credentials for an Argus instance.
-<<<<<<< HEAD
-=======
 * [stackit argus credentials delete](./stackit_argus_credentials_delete.md)	 - Deletes credentials of an Argus instance
->>>>>>> 8644ca4 (argus credentials delete command implementation)
 
