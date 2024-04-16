@@ -137,16 +137,6 @@ func FlagToDateTimePointer(p *print.Printer, cmd *cobra.Command, flag, format st
 	return nil, nil
 }
 
-// Returns a pointer to the flag's value.
-// Returns nil if the flag is not set, or if the flag does not exist.
-func FlagToDurationPointer(cmd *cobra.Command, flag string) *time.Duration {
-	value, err := cmd.Flags().GetDuration(flag)
-	if err != nil {
-		return nil
-	}
-	return &value
-}
-
 // Returns the int64 value set on the flag. If no value is set, returns the flag's default value.
 // Returns 0 if the flag value can not be converted to int64 or if the flag does not exist.
 func FlagWithDefaultToInt64Value(p *print.Printer, cmd *cobra.Command, flag string) int64 {
