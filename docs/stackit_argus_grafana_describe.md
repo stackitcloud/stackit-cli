@@ -5,6 +5,8 @@ Shows details of the Grafana configuration of an Argus instance
 ### Synopsis
 
 Shows details of the Grafana configuration of an Argus instance.
+The initial admin user and password will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.
+The initial password is hidden by default, if you want to see it use the "--show-password" flag.
 
 ```
 stackit argus grafana describe [flags]
@@ -25,6 +27,7 @@ stackit argus grafana describe [flags]
 ```
   -h, --help                 Help for "stackit argus grafana describe"
       --instance-id string   Instance ID
+      --show-password        Show the initial admin password in the "pretty" output format
 ```
 
 ### Options inherited from parent commands
