@@ -27,12 +27,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-type inputModel struct {
-	ProjectId   string
-	ClusterName string
-	CacheKey    string
-}
-
 const (
 	expirationSeconds     = 30 * 60          // 30 min
 	refreshBeforeDuration = 15 * time.Minute // 15 min
@@ -54,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			model, err := parseInput()
 			if err != nil {
-				return fmt.Errorf("login SKE kubeconfig: parseInput: %w", err)
+				return fmt.Errorf("parseInput: %w", err)
 			}
 
 			// Configure API client
@@ -101,6 +95,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
+type inputModel struct {
+	ProjectId   string
+	ClusterName string
+	CacheKey    string
+}
+
+type SKEClusterConfig struct {
+	STACKITProjectID string `json:"stackitProjectId"`
+	ClusterName      string `json:"clusterName"`
+}
+
 func parseInput() (*inputModel, error) {
 	obj, _, err := exec.LoadExecCredentialFromEnv()
 	if err != nil {
@@ -136,38 +141,6 @@ func parseInput() (*inputModel, error) {
 	}, nil
 }
 
-func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiCreateKubeconfigRequest {
-	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
-	expirationSeconds := strconv.Itoa(expirationSeconds)
-
-	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
-}
-
-func parseKubeConfigToExecCredential(kubeconfig *rest.Config) (*clientauthenticationv1.ExecCredential, error) {
-	certPem, _ := pem.Decode(kubeconfig.CertData)
-	if certPem == nil {
-		return nil, fmt.Errorf("login SKE kubeconfig")
-	}
-
-	certificate, err := x509.ParseCertificate(certPem.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("login SKE kubeconfig: %w", err)
-	}
-
-	outputExecCredential := clientauthenticationv1.ExecCredential{
-		TypeMeta: v1.TypeMeta{
-			APIVersion: clientauthenticationv1.SchemeGroupVersion.String(),
-			Kind:       "ExecCredential",
-		},
-		Status: &clientauthenticationv1.ExecCredentialStatus{
-			ExpirationTimestamp:   &v1.Time{Time: certificate.NotAfter.Add(-time.Minute * 15)},
-			ClientCertificateData: string(kubeconfig.CertData),
-			ClientKeyData:         string(kubeconfig.KeyData),
-		},
-	}
-	return &outputExecCredential, nil
-}
-
 func getCachedKubeConfig(key string) *rest.Config {
 	cachedKubeconfig, err := cache.GetObject(key)
 	if err != nil {
@@ -182,11 +155,6 @@ func getCachedKubeConfig(key string) *rest.Config {
 	return restConfig
 }
 
-type SKEClusterConfig struct {
-	STACKITProjectID string `json:"stackitProjectId"`
-	ClusterName      string `json:"clusterName"`
-}
-
 func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *ske.APIClient, model *inputModel, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
 	req := buildRequest(ctx, apiClient, model)
 	kubeconfigResponse, err := req.Execute()
@@ -194,7 +162,7 @@ func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *
 		if fallbackToCache {
 			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
-		return fmt.Errorf("login SKE kubeconfig: requesting kubeconfig: %w", err)
+		return fmt.Errorf("request kubeconfig: %w", err)
 	}
 
 	kubeconfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(*kubeconfigResponse.Kubeconfig))
@@ -202,31 +170,63 @@ func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *
 		if fallbackToCache {
 			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
-		return fmt.Errorf("login SKE kubeconfig: parsing kubeconfig: %w", err)
+		return fmt.Errorf("parse kubeconfig: %w", err)
 	}
 	if err = cache.PutObject(model.CacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
 		if fallbackToCache {
 			return output(cmd, model.CacheKey, cachedKubeconfig)
 		}
-		return fmt.Errorf("login SKE kubeconfig: caching kubeconfig: %w", err)
+		return fmt.Errorf("cache kubeconfig: %w", err)
 	}
 
 	return output(cmd, model.CacheKey, kubeconfig)
+}
+
+func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiCreateKubeconfigRequest {
+	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
+	expirationSeconds := strconv.Itoa(expirationSeconds)
+
+	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
 }
 
 func output(cmd *cobra.Command, cacheKey string, kubeconfig *rest.Config) error {
 	outputExecCredential, err := parseKubeConfigToExecCredential(kubeconfig)
 	if err != nil {
 		_ = cache.DeleteObject(cacheKey)
-		return fmt.Errorf("login SKE kubeconfig: converting to ExecCredential: %w", err)
+		return fmt.Errorf("convert to ExecCredential: %w", err)
 	}
 
 	output, err := json.Marshal(outputExecCredential)
 	if err != nil {
 		_ = cache.DeleteObject(cacheKey)
-		return fmt.Errorf("login SKE kubeconfig: marshal ExecCredential: %w", err)
+		return fmt.Errorf("marshal ExecCredential: %w", err)
 	}
 
 	cmd.Print(string(output))
 	return nil
+}
+
+func parseKubeConfigToExecCredential(kubeconfig *rest.Config) (*clientauthenticationv1.ExecCredential, error) {
+	certPem, _ := pem.Decode(kubeconfig.CertData)
+	if certPem == nil {
+		return nil, fmt.Errorf("decoded pem is nil")
+	}
+
+	certificate, err := x509.ParseCertificate(certPem.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parse certificate: %w", err)
+	}
+
+	outputExecCredential := clientauthenticationv1.ExecCredential{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: clientauthenticationv1.SchemeGroupVersion.String(),
+			Kind:       "ExecCredential",
+		},
+		Status: &clientauthenticationv1.ExecCredentialStatus{
+			ExpirationTimestamp:   &v1.Time{Time: certificate.NotAfter.Add(-time.Minute * 15)},
+			ClientCertificateData: string(kubeconfig.CertData),
+			ClientKeyData:         string(kubeconfig.KeyData),
+		},
+	}
+	return &outputExecCredential, nil
 }
