@@ -77,13 +77,13 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "show password",
+			description: "hide password",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[showPasswordFlag] = "true"
+				flagValues[hidePasswordFlag] = "true"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ShowPassword = true
+				model.HidePassword = true
 			}),
 		},
 		{
