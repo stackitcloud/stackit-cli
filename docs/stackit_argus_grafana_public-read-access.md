@@ -5,7 +5,7 @@ Enable or disable public read access for Grafana in Argus instances
 ### Synopsis
 
 Enable or disable public read access for Grafana in Argus instances.
-When enabled, anyone can access the Grafana dashboards without of the instance logging in. Otherwise, a login is required.
+When enabled, anyone can access the Grafana dashboards of the instance without logging in. Otherwise, a login is required.
 
 ```
 stackit argus grafana public-read-access [flags]

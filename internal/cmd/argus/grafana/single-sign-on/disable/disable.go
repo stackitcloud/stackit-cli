@@ -60,7 +60,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to disable single sign-on for instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to disable single sign-on for Grafana for instance %q?", instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -74,10 +74,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("disable single sign-on: %w", err)
+				return fmt.Errorf("disable single sign-on for grafana: %w", err)
 			}
 
-			p.Info("Disabled single sign-on for instance %q\n", instanceLabel)
+			p.Info("Disabled single sign-on for Grafana for instance %q\n", instanceLabel)
 			return nil
 		},
 	}

@@ -33,7 +33,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Short: "Enables public read access for Grafana on Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
 			"Enables public read access for Grafana on Argus instances.",
-			"When enabled, anyone can access the Grafana dashboards without of the instance logging in. Otherwise, a login is required.",
+			"When enabled, anyone can access the Grafana dashboards of the instance without logging in. Otherwise, a login is required.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
@@ -60,7 +60,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to enable public read access for instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to enable Grafana public read access for instance %q?", instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -74,10 +74,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("enable public read access: %w", err)
+				return fmt.Errorf("enable grafana public read access: %w", err)
 			}
 
-			p.Info("Enabled public read access for instance %q\n", instanceLabel)
+			p.Info("Enabled Grafana public read access for instance %q\n", instanceLabel)
 			return nil
 		},
 	}

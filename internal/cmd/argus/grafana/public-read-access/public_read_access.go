@@ -18,7 +18,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Short: "Enable or disable public read access for Grafana in Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
 			"Enable or disable public read access for Grafana in Argus instances.",
-			"When enabled, anyone can access the Grafana dashboards without of the instance logging in. Otherwise, a login is required.",
+			"When enabled, anyone can access the Grafana dashboards of the instance without logging in. Otherwise, a login is required.",
 		),
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
