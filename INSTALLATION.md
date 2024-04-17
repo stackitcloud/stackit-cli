@@ -2,6 +2,8 @@
 
 ## Package managers
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/stackit-cli.svg?columns=3)](https://repology.org/project/stackit-cli/versions)
+
 ### macOS
 
 The STACKIT CLI can be installed through the [Homebrew](https://brew.sh/) package manager.
