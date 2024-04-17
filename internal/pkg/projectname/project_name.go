@@ -43,7 +43,7 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command, p *print.Printer) (
 	// (So next time we can just pull it from there)
 	if !isProjectIdSetInFlags(cmd) {
 		viper.Set(config.ProjectNameKey, projectName)
-		err = viper.WriteConfig()
+		err = config.Write()
 		if err != nil {
 			return "", fmt.Errorf("write new config to file: %w", err)
 		}

@@ -144,9 +144,9 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.SKECustomEndpointKey, "")
 			}
 
-			err := viper.WriteConfig()
+			err := config.Write()
 			if err != nil {
-				return fmt.Errorf("write updated config to file: %w", err)
+				return fmt.Errorf("write config to file: %w", err)
 			}
 			return nil
 		},
