@@ -70,22 +70,22 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 	return *resp.Name, nil
 }
 
-func ToPayloadGenericOAuth(response *argus.GrafanaOauth) *argus.UpdateGrafanaConfigsPayloadGenericOauth {
-	if response == nil {
+func ToPayloadGenericOAuth(respOAuth *argus.GrafanaOauth) *argus.UpdateGrafanaConfigsPayloadGenericOauth {
+	if respOAuth == nil {
 		return nil
 	}
 	return &argus.UpdateGrafanaConfigsPayloadGenericOauth{
-		ApiUrl:              response.ApiUrl,
-		AuthUrl:             response.AuthUrl,
-		Enabled:             response.Enabled,
-		Name:                response.Name,
-		OauthClientId:       response.OauthClientId,
-		OauthClientSecret:   response.OauthClientSecret,
-		RoleAttributePath:   response.RoleAttributePath,
-		RoleAttributeStrict: response.RoleAttributeStrict,
-		Scopes:              response.Scopes,
-		TokenUrl:            response.TokenUrl,
-		UsePkce:             response.UsePkce,
+		ApiUrl:              respOAuth.ApiUrl,
+		AuthUrl:             respOAuth.AuthUrl,
+		Enabled:             respOAuth.Enabled,
+		Name:                respOAuth.Name,
+		OauthClientId:       respOAuth.OauthClientId,
+		OauthClientSecret:   respOAuth.OauthClientSecret,
+		RoleAttributePath:   respOAuth.RoleAttributePath,
+		RoleAttributeStrict: respOAuth.RoleAttributeStrict,
+		Scopes:              respOAuth.Scopes,
+		TokenUrl:            respOAuth.TokenUrl,
+		UsePkce:             respOAuth.UsePkce,
 	}
 }
 

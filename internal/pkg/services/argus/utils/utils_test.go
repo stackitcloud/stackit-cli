@@ -297,7 +297,7 @@ func TestToPayloadGenericOAuth(t *testing.T) {
 			},
 		},
 		{
-			description: "nil response",
+			description: "nil response oauth",
 			response:    nil,
 			expected:    nil,
 		},
@@ -399,6 +399,18 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    fixtureGrafanaConfigs().UseStackitSso,
 				PublicReadAccess: utils.Ptr(false),
+			},
+		},
+		{
+			description:           "nil generic oauth",
+			singleSignOn:          utils.Ptr(true),
+			publicReadAccess:      utils.Ptr(true),
+			getGrafanaConfigsResp: &argus.GrafanaConfigs{},
+			isValid:               true,
+			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
+				GenericOauth:     nil,
+				UseStackitSso:    utils.Ptr(true),
+				PublicReadAccess: utils.Ptr(true),
 			},
 		},
 		{

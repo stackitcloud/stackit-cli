@@ -93,8 +93,21 @@ func fixtureGrafanaConfigs(mods ...func(gc *argus.GrafanaConfigs)) *argus.Grafan
 	return &gc
 }
 
+func fixturePayload(mods ...func(payload *argus.UpdateGrafanaConfigsPayload)) *argus.UpdateGrafanaConfigsPayload {
+	payload := &argus.UpdateGrafanaConfigsPayload{
+		GenericOauth:     argusUtils.ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+		PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
+		UseStackitSso:    utils.Ptr(true),
+	}
+	for _, mod := range mods {
+		mod(payload)
+	}
+	return payload
+}
+
 func fixtureRequest(mods ...func(request *argus.ApiUpdateGrafanaConfigsRequest)) argus.ApiUpdateGrafanaConfigsRequest {
 	request := testClient.UpdateGrafanaConfigs(testCtx, testInstanceId, testProjectId)
+	request = request.UpdateGrafanaConfigsPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -197,32 +210,24 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest        argus.ApiUpdateGrafanaConfigsRequest
 	}{
 		{
-			description:            "base",
-			model:                  fixtureInputModel(),
-			getGrafanaConfigsFails: false,
-			getGrafanaConfigsResp:  fixtureGrafanaConfigs(),
-			isValid:                true,
-			expectedRequest: fixtureRequest().UpdateGrafanaConfigsPayload(
-				argus.UpdateGrafanaConfigsPayload{
-					GenericOauth:     argusUtils.ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
-					PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
-					UseStackitSso:    utils.Ptr(true),
-				}),
+			description:           "base",
+			model:                 fixtureInputModel(),
+			getGrafanaConfigsResp: fixtureGrafanaConfigs(),
+			isValid:               true,
+			expectedRequest:       fixtureRequest(),
 		},
 		{
-			description:            "nil generic oauth",
-			model:                  fixtureInputModel(),
-			getGrafanaConfigsFails: false,
+			description: "nil generic oauth",
+			model:       fixtureInputModel(),
 			getGrafanaConfigsResp: fixtureGrafanaConfigs(func(gc *argus.GrafanaConfigs) {
 				gc.GenericOauth = nil
 			}),
 			isValid: true,
-			expectedRequest: fixtureRequest().UpdateGrafanaConfigsPayload(
-				argus.UpdateGrafanaConfigsPayload{
-					GenericOauth:     nil,
-					PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
-					UseStackitSso:    utils.Ptr(true),
-				}),
+			expectedRequest: fixtureRequest(func(request *argus.ApiUpdateGrafanaConfigsRequest) {
+				*request = request.UpdateGrafanaConfigsPayload(*fixturePayload(func(payload *argus.UpdateGrafanaConfigsPayload) {
+					payload.GenericOauth = nil
+				}))
+			}),
 		},
 		{
 			description:            "get grafana configs fails",
@@ -231,11 +236,10 @@ func TestBuildRequest(t *testing.T) {
 			isValid:                false,
 		},
 		{
-			description:            "no grafana configs",
-			model:                  fixtureInputModel(),
-			getGrafanaConfigsFails: false,
-			getGrafanaConfigsResp:  nil,
-			isValid:                false,
+			description:           "no grafana configs",
+			model:                 fixtureInputModel(),
+			getGrafanaConfigsResp: nil,
+			isValid:               false,
 		},
 	}
 
