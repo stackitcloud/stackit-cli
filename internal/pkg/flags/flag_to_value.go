@@ -13,7 +13,7 @@ import (
 func FlagToStringValue(cmd *cobra.Command, flag string, p *print.Printer) string {
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
-		p.Debug(print.ErrorLevel, "convert flag to string value err: %v", err)
+		p.Debug(print.ErrorLevel, "convert flag to string value: %v", err)
 		return ""
 	}
 	if cmd.Flag(flag).Changed {
