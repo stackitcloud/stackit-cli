@@ -8,7 +8,7 @@ Disables public read access for Grafana on Argus instances.
 When disabled, a login is required to access the Grafana dashboards of the instance. Otherwise, anyone can access the dashboards.
 
 ```
-stackit argus grafana public-read-access disable [flags]
+stackit argus grafana public-read-access disable INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -21,8 +21,7 @@ stackit argus grafana public-read-access disable [flags]
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus grafana public-read-access disable"
-      --instance-id string   Instance ID
+  -h, --help   Help for "stackit argus grafana public-read-access disable"
 ```
 
 ### Options inherited from parent commands

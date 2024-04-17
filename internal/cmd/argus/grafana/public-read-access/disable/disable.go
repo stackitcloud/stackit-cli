@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
@@ -19,7 +18,7 @@ import (
 )
 
 const (
-	instanceIdFlag = "instance-id"
+	instanceIdArg = "INSTANCE_ID"
 )
 
 type inputModel struct {
@@ -29,13 +28,13 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "disable",
+		Use:   fmt.Sprintf("disable %s", instanceIdArg),
 		Short: "Disables public read access for Grafana on Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
 			"Disables public read access for Grafana on Argus instances.",
 			"When disabled, a login is required to access the Grafana dashboards of the instance. Otherwise, anyone can access the dashboards.",
 		),
-		Args: args.NoArgs,
+		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Disable public read access for Grafana on an Argus instance with ID "xxx"`,
@@ -43,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -81,18 +80,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
-	cobra.CheckErr(err)
-}
-
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -100,7 +93,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      instanceId,
 	}, nil
 }
 

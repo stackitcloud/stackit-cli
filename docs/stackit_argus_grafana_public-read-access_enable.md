@@ -8,7 +8,7 @@ Enables public read access for Grafana on Argus instances.
 When enabled, anyone can access the Grafana dashboards of the instance without logging in. Otherwise, a login is required.
 
 ```
-stackit argus grafana public-read-access enable [flags]
+stackit argus grafana public-read-access enable INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -21,8 +21,7 @@ stackit argus grafana public-read-access enable [flags]
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus grafana public-read-access enable"
-      --instance-id string   Instance ID
+  -h, --help   Help for "stackit argus grafana public-read-access enable"
 ```
 
 ### Options inherited from parent commands

@@ -8,7 +8,7 @@ Disables single sign-on for Grafana on Argus instances.
 When disabled for an instance, the generic OAuth2 authentication is used for that instance.
 
 ```
-stackit argus grafana single-sign-on disable [flags]
+stackit argus grafana single-sign-on disable INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -21,8 +21,7 @@ stackit argus grafana single-sign-on disable [flags]
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus grafana single-sign-on disable"
-      --instance-id string   Instance ID
+  -h, --help   Help for "stackit argus grafana single-sign-on disable"
 ```
 
 ### Options inherited from parent commands
