@@ -1,27 +1,26 @@
-## stackit argus credentials create
+## stackit argus credentials delete
 
-Creates credentials for an Argus instance.
+Deletes credentials of an Argus instance
 
 ### Synopsis
 
-Creates credentials (username and password) for an Argus instance.
-The credentials will be generated and included in the response. You won't be able to retrieve the password later.
+Deletes credentials of an Argus instance.
 
 ```
-stackit argus credentials create [flags]
+stackit argus credentials delete USERNAME [flags]
 ```
 
 ### Examples
 
 ```
-  Create credentials for Argus instance with ID "xxx"
-  $ stackit argus credentials create --instance-id xxx
+  Delete credentials of username "xxx" for Argus instance with ID "yyy"
+  $ stackit argus credentials delete xxx --instance-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus credentials create"
+  -h, --help                 Help for "stackit argus credentials delete"
       --instance-id string   Instance ID
 ```
 

@@ -1,15 +1,16 @@
-package create
+package list
 
 import (
 	"context"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-sdk-go/services/argus"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-sdk-go/services/argus"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -25,6 +26,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
+		limitFlag:      "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,6 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
+		Limit:      utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -46,8 +49,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *argus.ApiCreateCredentialsRequest)) argus.ApiCreateCredentialsRequest {
-	request := testClient.CreateCredentials(testCtx, testInstanceId, testProjectId)
+func fixtureRequest(mods ...func(request *argus.ApiListCredentialsRequest)) argus.ApiListCredentialsRequest {
+	request := testClient.ListCredentials(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -114,6 +117,20 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -165,7 +182,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest argus.ApiCreateCredentialsRequest
+		expectedRequest argus.ApiListCredentialsRequest
 	}{
 		{
 			description:     "base",

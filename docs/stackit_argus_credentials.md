@@ -30,4 +30,6 @@ stackit argus credentials [flags]
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit argus credentials create](./stackit_argus_credentials_create.md)	 - Creates credentials for an Argus instance.
+* [stackit argus credentials delete](./stackit_argus_credentials_delete.md)	 - Deletes credentials of an Argus instance
+* [stackit argus credentials list](./stackit_argus_credentials_list.md)	 - Lists the usernames of all credentials for an Argus instance
 
