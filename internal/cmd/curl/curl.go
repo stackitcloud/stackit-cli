@@ -171,6 +171,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inpu
 func getBearerToken(p *print.Printer) (string, error) {
 	_, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return "", &errors.AuthError{}
 	}
 	token, err := auth.GetAuthField(auth.ACCESS_TOKEN)
