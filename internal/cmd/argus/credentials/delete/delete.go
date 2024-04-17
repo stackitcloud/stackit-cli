@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credentials %s of instance %q? (This cannot be undone)", model.Username, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials for username %q of instance %q? (This cannot be undone)", model.Username, instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete Argus credentials: %w", err)
 			}
 
-			p.Info("Deleted credentials %s of instance %q\n", model.Username, instanceLabel)
+			p.Info("Deleted credentials for username %q of instance %q\n", model.Username, instanceLabel)
 			return nil
 		},
 	}
