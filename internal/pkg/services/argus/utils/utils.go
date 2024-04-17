@@ -17,6 +17,7 @@ const (
 type ArgusClient interface {
 	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*argus.GetInstanceResponse, error)
 	GetGrafanaConfigsExecute(ctx context.Context, instanceId, projectId string) (*argus.GrafanaConfigs, error)
+	UpdateGrafanaConfigs(ctx context.Context, instanceId string, projectId string) argus.ApiUpdateGrafanaConfigsRequest
 }
 
 func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
@@ -69,7 +70,7 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 	return *resp.Name, nil
 }
 
-func toPayloadGenericOAuth(response *argus.GrafanaOauth) *argus.UpdateGrafanaConfigsPayloadGenericOauth {
+func ToPayloadGenericOAuth(response *argus.GrafanaOauth) *argus.UpdateGrafanaConfigsPayloadGenericOauth {
 	if response == nil {
 		return nil
 	}
@@ -88,37 +89,17 @@ func toPayloadGenericOAuth(response *argus.GrafanaOauth) *argus.UpdateGrafanaCon
 	}
 }
 
-func toRespGenericOAuth(payloadModel *argus.UpdateGrafanaConfigsPayloadGenericOauth) *argus.GrafanaOauth {
-	if payloadModel == nil {
-		return nil
-	}
-	return &argus.GrafanaOauth{
-		ApiUrl:              payloadModel.ApiUrl,
-		AuthUrl:             payloadModel.AuthUrl,
-		Enabled:             payloadModel.Enabled,
-		Name:                payloadModel.Name,
-		OauthClientId:       payloadModel.OauthClientId,
-		OauthClientSecret:   payloadModel.OauthClientSecret,
-		RoleAttributePath:   payloadModel.RoleAttributePath,
-		RoleAttributeStrict: payloadModel.RoleAttributeStrict,
-		Scopes:              payloadModel.Scopes,
-		TokenUrl:            payloadModel.TokenUrl,
-		UsePkce:             payloadModel.UsePkce,
-	}
-}
-
 func GetPartialUpdateGrafanaConfigsPayload(ctx context.Context, apiClient ArgusClient, instanceId, projectId string, singleSignOn, publicReadAccess *bool) (*argus.UpdateGrafanaConfigsPayload, error) {
 	currentConfigs, err := apiClient.GetGrafanaConfigsExecute(ctx, instanceId, projectId)
 	if err != nil {
 		return nil, fmt.Errorf("get current Grafana configs: %w", err)
 	}
-
-	if currentConfigs == nil || currentConfigs.GenericOauth == nil {
+	if currentConfigs == nil {
 		return nil, fmt.Errorf("no Grafana configs found for instance %q", instanceId)
 	}
 
 	payload := &argus.UpdateGrafanaConfigsPayload{
-		GenericOauth:     toPayloadGenericOAuth(currentConfigs.GenericOauth),
+		GenericOauth:     ToPayloadGenericOAuth(currentConfigs.GenericOauth),
 		PublicReadAccess: currentConfigs.PublicReadAccess,
 		UseStackitSso:    currentConfigs.UseStackitSso,
 	}

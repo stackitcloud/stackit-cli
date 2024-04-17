@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	testClient     = &argus.APIClient{}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testPlanId     = uuid.NewString()
@@ -52,6 +53,10 @@ func (m *argusClientMocked) GetGrafanaConfigsExecute(_ context.Context, _, _ str
 		return nil, fmt.Errorf("could not get grafana configs")
 	}
 	return m.getGrafanaConfigsResp, nil
+}
+
+func (c *argusClientMocked) UpdateGrafanaConfigs(ctx context.Context, instanceId, projectId string) argus.ApiUpdateGrafanaConfigsRequest {
+	return testClient.UpdateGrafanaConfigs(ctx, instanceId, projectId)
 }
 
 func fixtureGrafanaConfigs(mods ...func(gc *argus.GrafanaConfigs)) *argus.GrafanaConfigs {
@@ -300,61 +305,7 @@ func TestToPayloadGenericOAuth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			output := toPayloadGenericOAuth(tt.response)
-
-			diff := cmp.Diff(output, tt.expected)
-			if diff != "" {
-				t.Errorf("expected output to be %+v, got %+v", tt.expected, output)
-			}
-		})
-	}
-}
-
-func TestToRespGenericOAuth(t *testing.T) {
-	tests := []struct {
-		description string
-		payload     *argus.UpdateGrafanaConfigsPayloadGenericOauth
-		expected    *argus.GrafanaOauth
-	}{
-		{
-			description: "base",
-			payload: &argus.UpdateGrafanaConfigsPayloadGenericOauth{
-				ApiUrl:              utils.Ptr("apiUrl"),
-				AuthUrl:             utils.Ptr("authUrl"),
-				Enabled:             utils.Ptr(true),
-				Name:                utils.Ptr("name"),
-				OauthClientId:       utils.Ptr("oauthClientId"),
-				OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-				RoleAttributePath:   utils.Ptr("roleAttributePath"),
-				RoleAttributeStrict: utils.Ptr(true),
-				Scopes:              utils.Ptr("scopes"),
-				TokenUrl:            utils.Ptr("tokenUrl"),
-				UsePkce:             utils.Ptr(true),
-			},
-			expected: &argus.GrafanaOauth{
-				ApiUrl:              utils.Ptr("apiUrl"),
-				AuthUrl:             utils.Ptr("authUrl"),
-				Enabled:             utils.Ptr(true),
-				Name:                utils.Ptr("name"),
-				OauthClientId:       utils.Ptr("oauthClientId"),
-				OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-				RoleAttributePath:   utils.Ptr("roleAttributePath"),
-				RoleAttributeStrict: utils.Ptr(true),
-				Scopes:              utils.Ptr("scopes"),
-				TokenUrl:            utils.Ptr("tokenUrl"),
-				UsePkce:             utils.Ptr(true),
-			},
-		},
-		{
-			description: "nil payload",
-			payload:     nil,
-			expected:    nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			output := toRespGenericOAuth(tt.payload)
+			output := ToPayloadGenericOAuth(tt.response)
 
 			diff := cmp.Diff(output, tt.expected)
 			if diff != "" {
@@ -381,7 +332,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			getGrafanaConfigsResp: fixtureGrafanaConfigs(),
 			isValid:               true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    utils.Ptr(true),
 				PublicReadAccess: utils.Ptr(true),
 			},
@@ -393,7 +344,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			getGrafanaConfigsResp: fixtureGrafanaConfigs(),
 			isValid:               true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    utils.Ptr(false),
 				PublicReadAccess: utils.Ptr(false),
 			},
@@ -405,7 +356,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			getGrafanaConfigsResp: fixtureGrafanaConfigs(),
 			isValid:               true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    utils.Ptr(true),
 				PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
 			},
@@ -417,7 +368,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			getGrafanaConfigsResp: fixtureGrafanaConfigs(),
 			isValid:               true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    fixtureGrafanaConfigs().UseStackitSso,
 				PublicReadAccess: utils.Ptr(true),
 			},
@@ -431,7 +382,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			}),
 			isValid: true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    utils.Ptr(false),
 				PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
 			},
@@ -445,7 +396,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			}),
 			isValid: true,
 			expectedPayload: &argus.UpdateGrafanaConfigsPayload{
-				GenericOauth:     toPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
+				GenericOauth:     ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
 				UseStackitSso:    fixtureGrafanaConfigs().UseStackitSso,
 				PublicReadAccess: utils.Ptr(false),
 			},
@@ -461,7 +412,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			description:           "no grafana configs",
 			singleSignOn:          utils.Ptr(true),
 			publicReadAccess:      utils.Ptr(true),
-			getGrafanaConfigsResp: &argus.GrafanaConfigs{},
+			getGrafanaConfigsResp: nil,
 			isValid:               false,
 		},
 	}
