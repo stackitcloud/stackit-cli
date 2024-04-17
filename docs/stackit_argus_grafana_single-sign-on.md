@@ -30,5 +30,6 @@ stackit argus grafana single-sign-on [flags]
 ### SEE ALSO
 
 * [stackit argus grafana](./stackit_argus_grafana.md)	 - Provides functionality for the Grafana configuration of Argus instances
+* [stackit argus grafana single-sign-on disable](./stackit_argus_grafana_single-sign-on_disable.md)	 - Disables single sign-on for Grafana on Argus instances
 * [stackit argus grafana single-sign-on enable](./stackit_argus_grafana_single-sign-on_enable.md)	 - Enables single sign-on for Grafana on Argus instances
 
