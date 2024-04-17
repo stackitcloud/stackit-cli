@@ -31,8 +31,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates credentials for an Argus instance.",
-		Long:  "Creates credentials for an Argus instance.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s",
+			"Creates credentials (username and password) for an Argus instance.",
+			"The credentials will be generated and included in the response. You won't be able to retrieve the password later."),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create credentials for Argus instance with ID "xxx"`,

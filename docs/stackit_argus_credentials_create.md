@@ -4,7 +4,8 @@ Creates credentials for an Argus instance.
 
 ### Synopsis
 
-Creates credentials for an Argus instance.
+Creates credentials (username and password) for an Argus instance.
+The credentials will be generated and included in the response. You won't be able to retrieve the password later.
 
 ```
 stackit argus credentials create [flags]
@@ -15,16 +16,12 @@ stackit argus credentials create [flags]
 ```
   Create credentials for Argus instance with ID "xxx"
   $ stackit argus credentials create --instance-id xxx
-
-  Create credentials for Argus instance with ID "xxx" and hide the password in the output
-  $ stackit argus credentials create --instance-id xxx --hide-password
 ```
 
 ### Options
 
 ```
   -h, --help                 Help for "stackit argus credentials create"
-      --hide-password        Hide password in output
       --instance-id string   Instance ID
 ```
 
