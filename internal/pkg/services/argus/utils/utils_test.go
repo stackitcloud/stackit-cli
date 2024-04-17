@@ -136,6 +136,31 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*argus.UpdateScrapeConfigPayl
 	return payload
 }
 
+func fixtureCreateScrapeConfigPayload(mods ...func(*argus.CreateScrapeConfigPayload)) *argus.CreateScrapeConfigPayload {
+	staticConfigs := []argus.CreateScrapeConfigPayloadStaticConfigsInner{
+		{
+			Targets: utils.Ptr([]string{
+				"url-target",
+			}),
+		},
+	}
+
+	payload := &argus.CreateScrapeConfigPayload{
+		JobName:        utils.Ptr("default-name"),
+		MetricsPath:    utils.Ptr("/metrics"),
+		Scheme:         utils.Ptr("https"),
+		ScrapeInterval: utils.Ptr("5m"),
+		ScrapeTimeout:  utils.Ptr("2m"),
+		StaticConfigs:  &staticConfigs,
+	}
+
+	for _, mod := range mods {
+		mod(payload)
+	}
+
+	return payload
+}
+
 type argusClientMocked struct {
 	getInstanceFails bool
 	getInstanceResp  *argus.GetInstanceResponse
@@ -383,5 +408,30 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 
 		})
 	}
+}
 
+func TestGetDefaultCreateScrapeConfigPayload(t *testing.T) {
+	tests := []struct {
+		description     string
+		expectedPayload *argus.CreateScrapeConfigPayload
+	}{
+		{
+			description:     "base case",
+			expectedPayload: fixtureCreateScrapeConfigPayload(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			payload := GetDefaultCreateScrapeConfigPayload()
+
+			diff := cmp.Diff(*payload, *tt.expectedPayload,
+				cmp.AllowUnexported(*tt.expectedPayload),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+
+		})
+	}
 }

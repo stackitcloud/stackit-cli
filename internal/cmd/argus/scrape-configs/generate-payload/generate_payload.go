@@ -66,10 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if model.JobName == nil {
-				createPayload, err := argusUtils.GetDefaultCreateScrapeConfigPayload(ctx, apiClient)
-				if err != nil {
-					return err
-				}
+				createPayload := argusUtils.GetDefaultCreateScrapeConfigPayload()
 				return outputCreateResult(p, createPayload)
 			} else {
 				req := buildRequest(ctx, model, apiClient)

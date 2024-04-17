@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/argus"
 )
@@ -207,6 +208,20 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 	return *resp.Name, nil
 }
 
-func GetDefaultCreateScrapeConfigPayload(ctx context.Context, apiClient ArgusClient) (*argus.CreateScrapeConfigPayload, error) {
-	return nil, nil
+func GetDefaultCreateScrapeConfigPayload() *argus.CreateScrapeConfigPayload {
+	staticConfigs := []argus.CreateScrapeConfigPayloadStaticConfigsInner{
+		{
+			Targets: utils.Ptr([]string{
+				"url-target",
+			}),
+		},
+	}
+	return &argus.CreateScrapeConfigPayload{
+		JobName:        utils.Ptr("default-name"),
+		MetricsPath:    utils.Ptr("/metrics"),
+		Scheme:         utils.Ptr("https"),
+		ScrapeInterval: utils.Ptr("5m"),
+		ScrapeTimeout:  utils.Ptr("2m"),
+		StaticConfigs:  &staticConfigs,
+	}
 }
