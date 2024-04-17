@@ -1,10 +1,10 @@
-package singlesignon
+package publicreadaccess
 
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/grafana/single-sign-on/disable"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/grafana/single-sign-on/enable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/grafana/public-read-access/disable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/grafana/public-read-access/enable"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -14,11 +14,11 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "single-sign-on",
-		Short: "Enable or disable single sign-on for Grafana in Argus instances",
+		Use:   "public-read-access",
+		Short: "Enable or disable public read access for Grafana in Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
-			"Enable or disable single sign-on for Grafana in Argus instances.",
-			"When enabled for an instance, overwrites the generic OAuth2 authentication and configures STACKIT single sign-on for that instance.",
+			"Enable or disable public read access for Grafana in Argus instances.",
+			"When enabled, anyone can access the Grafana dashboards without of the instance logging in. Otherwise, a login is required.",
 		),
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
