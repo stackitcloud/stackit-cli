@@ -105,8 +105,8 @@ func fixtureGrafanaConfigs(mods ...func(gc *argus.GrafanaConfigs)) *argus.Grafan
 func fixturePayload(mods ...func(payload *argus.UpdateGrafanaConfigsPayload)) *argus.UpdateGrafanaConfigsPayload {
 	payload := &argus.UpdateGrafanaConfigsPayload{
 		GenericOauth:     argusUtils.ToPayloadGenericOAuth(fixtureGrafanaConfigs().GenericOauth),
-		PublicReadAccess: fixtureGrafanaConfigs().PublicReadAccess,
-		UseStackitSso:    utils.Ptr(false),
+		PublicReadAccess: utils.Ptr(false),
+		UseStackitSso:    fixtureGrafanaConfigs().UseStackitSso,
 	}
 	for _, mod := range mods {
 		mod(payload)

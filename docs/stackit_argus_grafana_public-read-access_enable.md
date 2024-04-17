@@ -1,19 +1,27 @@
-## stackit argus grafana
+## stackit argus grafana public-read-access enable
 
-Provides functionality for the Grafana configuration of Argus instances
+Enables public read access for Grafana on Argus instances
 
 ### Synopsis
 
-Provides functionality for the Grafana configuration of Argus instances.
+Enables public read access for Grafana on Argus instances.
+When enabled, anyone can access the Grafana dashboards of the instance without logging in. Otherwise, a login is required.
 
 ```
-stackit argus grafana [flags]
+stackit argus grafana public-read-access enable INSTANCE_ID [flags]
+```
+
+### Examples
+
+```
+  Enable public read access for Grafana on an Argus instance with ID "xxx"
+  $ stackit argus grafana public-read-access enable xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit argus grafana"
+  -h, --help   Help for "stackit argus grafana public-read-access enable"
 ```
 
 ### Options inherited from parent commands
@@ -28,8 +36,5 @@ stackit argus grafana [flags]
 
 ### SEE ALSO
 
-* [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
-* [stackit argus grafana describe](./stackit_argus_grafana_describe.md)	 - Shows details of the Grafana configuration of an Argus instance
 * [stackit argus grafana public-read-access](./stackit_argus_grafana_public-read-access.md)	 - Enable or disable public read access for Grafana in Argus instances
-* [stackit argus grafana single-sign-on](./stackit_argus_grafana_single-sign-on.md)	 - Enable or disable single sign-on for Grafana in Argus instances
 

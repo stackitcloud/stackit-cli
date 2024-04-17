@@ -29,16 +29,16 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("disable %s", instanceIdArg),
-		Short: "Disables single sign-on for Grafana on Argus instances",
+		Short: "Disables public read access for Grafana on Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
-			"Disables single sign-on for Grafana on Argus instances.",
-			"When disabled for an instance, the generic OAuth2 authentication is used for that instance.",
+			"Disables public read access for Grafana on Argus instances.",
+			"When disabled, a login is required to access the Grafana dashboards of the instance. Otherwise, anyone can access the dashboards.",
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Disable single sign-on for Grafana on an Argus instance with ID "xxx"`,
-				"$ stackit argus grafana single-sign-on disable xxx"),
+				`Disable public read access for Grafana on an Argus instance with ID "xxx"`,
+				"$ stackit argus grafana public-read-access disable xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to disable single sign-on for Grafana for instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to disable Grafana public read access for instance %q?", instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -73,10 +73,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("disable single sign-on for grafana: %w", err)
+				return fmt.Errorf("disable grafana public read access: %w", err)
 			}
 
-			p.Info("Disabled single sign-on for Grafana for instance %q\n", instanceLabel)
+			p.Info("Disabled Grafana public read access for instance %q\n", instanceLabel)
 			return nil
 		},
 	}
@@ -99,7 +99,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient argusUtils.ArgusClient) (argus.ApiUpdateGrafanaConfigsRequest, error) {
 	req := apiClient.UpdateGrafanaConfigs(ctx, model.InstanceId, model.ProjectId)
-	payload, err := argusUtils.GetPartialUpdateGrafanaConfigsPayload(ctx, apiClient, model.InstanceId, model.ProjectId, utils.Ptr(false), nil)
+	payload, err := argusUtils.GetPartialUpdateGrafanaConfigsPayload(ctx, apiClient, model.InstanceId, model.ProjectId, nil, utils.Ptr(false))
 	if err != nil {
 		return req, fmt.Errorf("build request payload: %w", err)
 	}

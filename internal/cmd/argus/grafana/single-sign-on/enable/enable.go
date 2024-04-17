@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
@@ -19,7 +18,7 @@ import (
 )
 
 const (
-	instanceIdFlag = "instance-id"
+	instanceIdArg = "INSTANCE_ID"
 )
 
 type inputModel struct {
@@ -29,21 +28,21 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enable",
+		Use:   fmt.Sprintf("enable %s", instanceIdArg),
 		Short: "Enables single sign-on for Grafana on Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
 			"Enables single sign-on for Grafana on Argus instances.",
 			"When enabled for an instance, overwrites the generic OAuth2 authentication and configures STACKIT single sign-on for that instance.",
 		),
-		Args: args.NoArgs,
+		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Enable single sign-on for Grafana on an Argus instance with ID "xxx"`,
-				"$ stackit argus grafana single-sign-on enable --instance-id xxx"),
+				"$ stackit argus grafana single-sign-on enable xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -60,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to enable single sign-on for instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to enable single sign-on for Grafana for instance %q?", instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -74,25 +73,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("enable single sign-on: %w", err)
+				return fmt.Errorf("enable single sign-on for grafana: %w", err)
 			}
 
-			p.Info("Enabled single sign-on for instance %q\n", instanceLabel)
+			p.Info("Enabled single sign-on for Grafana for instance %q\n", instanceLabel)
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
 
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
-	cobra.CheckErr(err)
-}
-
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -100,7 +93,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      instanceId,
 	}, nil
 }
 

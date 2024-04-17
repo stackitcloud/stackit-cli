@@ -8,21 +8,20 @@ Enables single sign-on for Grafana on Argus instances.
 When enabled for an instance, overwrites the generic OAuth2 authentication and configures STACKIT single sign-on for that instance.
 
 ```
-stackit argus grafana single-sign-on enable [flags]
+stackit argus grafana single-sign-on enable INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
   Enable single sign-on for Grafana on an Argus instance with ID "xxx"
-  $ stackit argus grafana single-sign-on enable --instance-id xxx
+  $ stackit argus grafana single-sign-on enable xxx
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus grafana single-sign-on enable"
-      --instance-id string   Instance ID
+  -h, --help   Help for "stackit argus grafana single-sign-on enable"
 ```
 
 ### Options inherited from parent commands
