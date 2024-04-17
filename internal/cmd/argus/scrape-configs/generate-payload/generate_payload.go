@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -33,21 +32,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate-payload",
 		Short: "Generates a payload to create/update Scrape Configurations for an Argus instance ",
-		Long: fmt.Sprintf("%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
 			"Generates a JSON payload with values to be used as --payload input for Scrape Configurations creation or update.",
-			"If --job-name is set, an Update payload will be generated with the current state of the given configuration. If unset, a Create payload will be generated with default values.",
+			"This command can be used to generate a payload to update an existing Scrape Config job or to create a new Scrape Config job.",
+			"To obtain an Update payload, provide the job name and instance ID of the desired Scrape Config Job and respective Argus instance.",
+			"To obtain a Create payload, run the command with no flags",
 			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
+				`Generate a Create payload with default values, and adapt it with custom values for the different configuration options`,
 				`$ stackit argus scrape-configs generate-payload > ./payload.json`,
 				`<Modify payload in file, if needed>`,
 				`$ stackit argus scrape-configs create my-config --payload @./payload.json`),
 			examples.NewExample(
-				`Generate a payload with values of an existing configuration, and adapt it with custom values for the different configuration options`,
-				`$ stackit argus scrape-configs generate-payload --job-name my-config > ./payload.json`,
+				`Generate an Update payload with the values of an existing configuration named "my-config" for Argus instance xxx, and adapt it with custom values for the different configuration options`,
+				`$ stackit argus scrape-configs generate-payload --job-name my-config --instance-id xxx > ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit argus scrape-configs update my-config --payload @./payload.json`),
 		),
@@ -74,10 +75,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				req := buildRequest(ctx, model, apiClient)
 				resp, err := req.Execute()
 				if err != nil {
-					return fmt.Errorf("read SKE cluster: %w", err)
+					return fmt.Errorf("read Argus Scrape Config: %w", err)
 				}
 
-				payload := argusUtils.MapToUpdateScrapeConfigPayload(resp)
+				payload, err := argusUtils.MapToUpdateScrapeConfigPayload(resp)
+				if err != nil {
+					return fmt.Errorf("map update scrape config payloads: %w", err)
+				}
 
 				return outputUpdateResult(p, payload)
 			}
@@ -90,21 +94,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().StringP(jobNameFlag, "n", "", "If set, generates the payload with the current state of the given cluster. If unset, generates the payload with default values")
+	cmd.Flags().StringP(jobNameFlag, "n", "", "If set, generates an update payload with the current state of the given scrape config. If unset, generates a create payload with default values")
 }
 
 func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(cmd)
 
 	jobName := flags.FlagToStringPointer(cmd, jobNameFlag)
-	// If jobName is provided, projectId and instanceId are needed as well
-	if jobName != nil {
-		err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
-		cobra.CheckErr(err)
+	instanceId := flags.FlagToStringValue(cmd, instanceIdFlag)
 
-		if globalFlags.ProjectId == "" {
-			return nil, &errors.ProjectIdError{}
-		}
+	if jobName != nil && (globalFlags.ProjectId == "" || instanceId == "") {
+		return nil, fmt.Errorf("if a job-name is provided then instance-id and project-id must to be provided")
+	}
+
+	if jobName == nil && (globalFlags.ProjectId != "" || instanceId != "") {
+		return nil, fmt.Errorf("if a job-name is not provided then instance-id and project-id can't be provided")
 	}
 
 	return &inputModel{
