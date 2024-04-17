@@ -15,7 +15,7 @@ stackit argus grafana single-sign-on enable INSTANCE_ID [flags]
 
 ```
   Enable single sign-on for Grafana on an Argus instance with ID "xxx"
-  $ stackit argus grafana single-sign-on enable --instance-id xxx
+  $ stackit argus grafana single-sign-on enable xxx
 ```
 
 ### Options

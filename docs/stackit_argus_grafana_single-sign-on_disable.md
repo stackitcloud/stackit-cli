@@ -15,7 +15,7 @@ stackit argus grafana single-sign-on disable INSTANCE_ID [flags]
 
 ```
   Disable single sign-on for Grafana on an Argus instance with ID "xxx"
-  $ stackit argus grafana single-sign-on disable --instance-id xxx
+  $ stackit argus grafana single-sign-on disable xxx
 ```
 
 ### Options

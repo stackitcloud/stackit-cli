@@ -38,7 +38,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Enable public read access for Grafana on an Argus instance with ID "xxx"`,
-				"$ stackit argus grafana public-read-access enable --instance-id xxx"),
+				"$ stackit argus grafana public-read-access enable xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

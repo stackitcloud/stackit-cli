@@ -15,7 +15,7 @@ stackit argus grafana public-read-access enable INSTANCE_ID [flags]
 
 ```
   Enable public read access for Grafana on an Argus instance with ID "xxx"
-  $ stackit argus grafana public-read-access enable --instance-id xxx
+  $ stackit argus grafana public-read-access enable xxx
 ```
 
 ### Options

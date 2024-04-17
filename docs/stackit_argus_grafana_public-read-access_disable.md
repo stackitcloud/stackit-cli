@@ -15,7 +15,7 @@ stackit argus grafana public-read-access disable INSTANCE_ID [flags]
 
 ```
   Disable public read access for Grafana on an Argus instance with ID "xxx"
-  $ stackit argus grafana public-read-access disable --instance-id xxx
+  $ stackit argus grafana public-read-access disable xxx
 ```
 
 ### Options
