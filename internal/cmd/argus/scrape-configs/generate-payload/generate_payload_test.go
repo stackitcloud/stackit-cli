@@ -91,8 +91,33 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "job name missing, instance id provided",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, jobNameFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.JobName = nil
+			}),
+		},
+		{
 			description: "instance id missing, job name provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id missing, job name provided",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, projectIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id and instance id missing, job name provided",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, projectIdFlag)
 				delete(flagValues, instanceIdFlag)
 			}),
 			isValid: false,
@@ -108,13 +133,6 @@ func TestParseInput(t *testing.T) {
 			description: "instance id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id missing, job name provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
 			}),
 			isValid: false,
 		},
