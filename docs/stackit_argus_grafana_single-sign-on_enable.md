@@ -1,19 +1,27 @@
-## stackit argus grafana
+## stackit argus grafana single-sign-on enable
 
-Provides functionality for the Grafana configuration of Argus instances
+Enables single sign-on for Grafana on Argus instances
 
 ### Synopsis
 
-Provides functionality for the Grafana configuration of Argus instances.
+Enables single sign-on for Grafana on Argus instances.
+When enabled for an instance, overwrites the generic OAuth2 authentication and configures STACKIT single sign-on for that instance.
 
 ```
-stackit argus grafana [flags]
+stackit argus grafana single-sign-on enable INSTANCE_ID [flags]
+```
+
+### Examples
+
+```
+  Enable single sign-on for Grafana on an Argus instance with ID "xxx"
+  $ stackit argus grafana single-sign-on enable xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit argus grafana"
+  -h, --help   Help for "stackit argus grafana single-sign-on enable"
 ```
 
 ### Options inherited from parent commands
@@ -28,8 +36,5 @@ stackit argus grafana [flags]
 
 ### SEE ALSO
 
-* [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
-* [stackit argus grafana describe](./stackit_argus_grafana_describe.md)	 - Shows details of the Grafana configuration of an Argus instance
-* [stackit argus grafana public-read-access](./stackit_argus_grafana_public-read-access.md)	 - Enable or disable public read access for Grafana in Argus instances
 * [stackit argus grafana single-sign-on](./stackit_argus_grafana_single-sign-on.md)	 - Enable or disable single sign-on for Grafana in Argus instances
 
