@@ -32,11 +32,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate-payload",
 		Short: "Generates a payload to create/update Scrape Configurations for an Argus instance ",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n",
 			"Generates a JSON payload with values to be used as --payload input for Scrape Configurations creation or update.",
 			"This command can be used to generate a payload to update an existing Scrape Config job or to create a new Scrape Config job.",
 			"To update an existing Scrape Config job, provide the job name and the instance ID of the Argus instance.",
-			"To obtain a default payload to create a new Scrape Config job, run the command with no flags.",
+			"To obtain a default payload to create a new Scrape Config job, run the command with no flags. Note that some fields, like the url of the target, are required and must be provided in the payload.",
+			"Note that the default values provided for jobName, metricsPath and targets should be changed to make sense for the use case inteded.",
 			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.",
 		),
 		Args: args.NoArgs,
@@ -66,8 +67,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if model.JobName == nil {
-				createPayload := argusUtils.GetDefaultCreateScrapeConfigPayload()
-				return outputCreateResult(p, createPayload)
+				createPayload := argusUtils.DefaultCreateScrapeConfigPayload
+				return outputCreateResult(p, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)

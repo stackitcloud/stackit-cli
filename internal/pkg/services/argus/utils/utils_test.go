@@ -136,31 +136,6 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*argus.UpdateScrapeConfigPayl
 	return payload
 }
 
-func fixtureCreateScrapeConfigPayload(mods ...func(*argus.CreateScrapeConfigPayload)) *argus.CreateScrapeConfigPayload {
-	staticConfigs := []argus.CreateScrapeConfigPayloadStaticConfigsInner{
-		{
-			Targets: utils.Ptr([]string{
-				"url-target",
-			}),
-		},
-	}
-
-	payload := &argus.CreateScrapeConfigPayload{
-		JobName:        utils.Ptr("default-name"),
-		MetricsPath:    utils.Ptr("/metrics"),
-		Scheme:         utils.Ptr("https"),
-		ScrapeInterval: utils.Ptr("5m"),
-		ScrapeTimeout:  utils.Ptr("2m"),
-		StaticConfigs:  &staticConfigs,
-	}
-
-	for _, mod := range mods {
-		mod(payload)
-	}
-
-	return payload
-}
-
 type argusClientMocked struct {
 	getInstanceFails bool
 	getInstanceResp  *argus.GetInstanceResponse
@@ -380,8 +355,7 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 			resp: &argus.GetScrapeConfigResponse{
 				Data: &argus.Job{},
 			},
-			expectedPayload: &argus.UpdateScrapeConfigPayload{},
-			isValid:         true,
+			isValid: false,
 		},
 	}
 
@@ -409,24 +383,277 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 	}
 }
 
-func TestGetDefaultCreateScrapeConfigPayload(t *testing.T) {
+func TestMapMetricsRelabelConfig(t *testing.T) {
 	tests := []struct {
-		description     string
-		expectedPayload *argus.CreateScrapeConfigPayload
+		description string
+		config      *[]argus.MetricsRelabelConfig
+		expected    *[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
 	}{
 		{
-			description:     "base case",
-			expectedPayload: fixtureCreateScrapeConfigPayload(),
+			description: "base case",
+			config: &[]argus.MetricsRelabelConfig{
+				{
+					Action:       utils.Ptr("replace"),
+					Modulus:      utils.Int64Ptr(1),
+					Regex:        utils.Ptr("regex"),
+					Replacement:  utils.Ptr("replacement"),
+					Separator:    utils.Ptr("separator"),
+					SourceLabels: utils.Ptr([]string{"sourceLabel", "sourceLabel2"}),
+					TargetLabel:  utils.Ptr("targetLabel"),
+				},
+			},
+			expected: &[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+				{
+					Action:       utils.Ptr("replace"),
+					Modulus:      utils.Float64Ptr(1.0),
+					Regex:        utils.Ptr("regex"),
+					Replacement:  utils.Ptr("replacement"),
+					Separator:    utils.Ptr("separator"),
+					SourceLabels: utils.Ptr([]string{"sourceLabel", "sourceLabel2"}),
+					TargetLabel:  utils.Ptr("targetLabel"),
+				},
+			},
+		},
+		{
+			description: "empty data",
+			config:      &[]argus.MetricsRelabelConfig{},
+			expected:    &[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{},
+		},
+		{
+			description: "nil",
+			config:      nil,
+			expected:    nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			payload := GetDefaultCreateScrapeConfigPayload()
+			output := mapMetricsRelabelConfig(tt.config)
 
-			diff := cmp.Diff(*payload, *tt.expectedPayload,
-				cmp.AllowUnexported(*tt.expectedPayload),
-			)
+			if tt.expected == nil && output == nil && tt.config == nil {
+				return
+			}
+
+			diff := cmp.Diff(*output, *tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestMapStaticConfig(t *testing.T) {
+	tests := []struct {
+		description string
+		config      *[]argus.StaticConfigs
+		expected    *[]argus.UpdateScrapeConfigPayloadStaticConfigsInner
+	}{
+		{
+			description: "base case",
+			config: &[]argus.StaticConfigs{
+				{
+					Labels: &map[string]string{
+						"label":  "value",
+						"label2": "value2",
+					},
+					Targets: &[]string{"target", "target2"},
+				},
+			},
+			expected: &[]argus.UpdateScrapeConfigPayloadStaticConfigsInner{
+				{
+					Labels: utils.Ptr(map[string]interface{}{
+						"label":  "value",
+						"label2": "value2",
+					}),
+					Targets: utils.Ptr([]string{"target", "target2"}),
+				},
+			},
+		},
+		{
+			description: "empty data",
+			config:      &[]argus.StaticConfigs{},
+			expected:    &[]argus.UpdateScrapeConfigPayloadStaticConfigsInner{},
+		},
+		{
+			description: "nil",
+			config:      nil,
+			expected:    nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := mapStaticConfig(tt.config)
+
+			if tt.expected == nil && output == nil && tt.config == nil {
+				return
+			}
+
+			diff := cmp.Diff(*output, *tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestMapBasicAuth(t *testing.T) {
+	tests := []struct {
+		description string
+		auth        *argus.BasicAuth
+		expected    *argus.CreateScrapeConfigPayloadBasicAuth
+	}{
+		{
+			description: "base case",
+			auth: &argus.BasicAuth{
+				Username: utils.Ptr("username"),
+				Password: utils.Ptr("password"),
+			},
+			expected: &argus.CreateScrapeConfigPayloadBasicAuth{
+				Username: utils.Ptr("username"),
+				Password: utils.Ptr("password"),
+			},
+		},
+		{
+			description: "empty data",
+			auth:        &argus.BasicAuth{},
+			expected:    &argus.CreateScrapeConfigPayloadBasicAuth{},
+		},
+		{
+			description: "nil",
+			auth:        nil,
+			expected:    nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := mapBasicAuth(tt.auth)
+
+			if tt.expected == nil && output == nil && tt.auth == nil {
+				return
+			}
+
+			diff := cmp.Diff(*output, *tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestMapTlsConfig(t *testing.T) {
+	tests := []struct {
+		description string
+		config      *argus.TLSConfig
+		expected    *argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig
+	}{
+		{
+			description: "base case",
+			config: &argus.TLSConfig{
+				InsecureSkipVerify: utils.Ptr(true),
+			},
+			expected: &argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+				InsecureSkipVerify: utils.Ptr(true),
+			},
+		},
+		{
+			description: "empty data",
+			config:      &argus.TLSConfig{},
+			expected:    &argus.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{},
+		},
+		{
+			description: "nil",
+			config:      nil,
+			expected:    nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := mapTlsConfig(tt.config)
+
+			if tt.expected == nil && output == nil && tt.config == nil {
+				return
+			}
+
+			diff := cmp.Diff(*output, *tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestMapParams(t *testing.T) {
+	tests := []struct {
+		description string
+		params      map[string][]string
+		expected    map[string]interface{}
+	}{
+		{
+			description: "base case",
+			params: map[string][]string{
+				"key":  {"value1", "value2"},
+				"key2": {},
+			},
+			expected: map[string]interface{}{
+				"key":  []string{"value1", "value2"},
+				"key2": []string{},
+			},
+		},
+		{
+			description: "empty data",
+			params:      map[string][]string{},
+			expected:    map[string]interface{}{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := mapParams(tt.params)
+
+			if tt.expected == nil && output == nil && tt.params == nil {
+				return
+			}
+
+			diff := cmp.Diff(output, tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestMapStaticConfigLabels(t *testing.T) {
+	tests := []struct {
+		description string
+		labels      map[string]string
+		expected    map[string]interface{}
+	}{
+		{
+			description: "base case",
+			labels: map[string]string{
+				"label":  "value",
+				"label2": "value2",
+			},
+			expected: map[string]interface{}{
+				"label":  "value",
+				"label2": "value2",
+			},
+		},
+		{
+			description: "empty data",
+			labels:      map[string]string{},
+			expected:    map[string]interface{}{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := mapStaticConfigLabels(tt.labels)
+
+			diff := cmp.Diff(output, tt.expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}

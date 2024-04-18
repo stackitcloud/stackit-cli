@@ -15,6 +15,24 @@ const (
 	service = "argus"
 )
 
+var (
+	defaultStaticConfigs = []argus.CreateScrapeConfigPayloadStaticConfigsInner{
+		{
+			Targets: utils.Ptr([]string{
+				"url-target",
+			}),
+		},
+	}
+	DefaultCreateScrapeConfigPayload = argus.CreateScrapeConfigPayload{
+		JobName:        utils.Ptr("default-name"),
+		MetricsPath:    utils.Ptr("/metrics"),
+		Scheme:         utils.Ptr("https"),
+		ScrapeInterval: utils.Ptr("5m"),
+		ScrapeTimeout:  utils.Ptr("2m"),
+		StaticConfigs:  utils.Ptr(defaultStaticConfigs),
+	}
+)
+
 func ValidatePlanId(planId string, resp *argus.PlansResponse) error {
 	if resp == nil {
 		return fmt.Errorf("no Argus plans provided")
@@ -65,42 +83,16 @@ func MapToUpdateScrapeConfigPayload(resp *argus.GetScrapeConfigResponse) (*argus
 	data := resp.Data
 
 	basicAuth := mapBasicAuth(data.BasicAuth)
-
-	var staticConfigs *[]argus.UpdateScrapeConfigPayloadStaticConfigsInner
-	if data.StaticConfigs != nil {
-		configs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
-		for _, config := range *data.StaticConfigs {
-			newConfig, err := mapStaticConfig(config)
-			if err != nil {
-				return nil, fmt.Errorf("map static config: %w", err)
-			}
-			configs = append(configs, newConfig)
-		}
-		staticConfigs = &configs
-	}
-
+	staticConfigs := mapStaticConfig(data.StaticConfigs)
 	tlsConfig := mapTlsConfig(data.TlsConfig)
-
-	var metricsRelabelConfigs *[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
-	if data.MetricsRelabelConfigs != nil {
-		configs := make([]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner, 0)
-		for _, config := range *data.MetricsRelabelConfigs {
-			configs = append(configs, mapMetricsRelabelConfig(config))
-		}
-		metricsRelabelConfigs = &configs
-	}
+	metricsRelabelConfigs := mapMetricsRelabelConfig(data.MetricsRelabelConfigs)
 
 	var params *map[string]interface{}
-
 	if data.Params != nil {
-		paramsMap, err := convertMapAnyToInterface(*data.Params)
-		if err != nil {
-			return nil, fmt.Errorf("convert params: %w", err)
-		}
-		params = &paramsMap
+		params = utils.Ptr(mapParams(*data.Params))
 	}
 
-	return &argus.UpdateScrapeConfigPayload{
+	payload := argus.UpdateScrapeConfigPayload{
 		BasicAuth:             basicAuth,
 		BearerToken:           data.BearerToken,
 		HonorLabels:           data.HonorLabels,
@@ -108,50 +100,59 @@ func MapToUpdateScrapeConfigPayload(resp *argus.GetScrapeConfigResponse) (*argus
 		MetricsPath:           data.MetricsPath,
 		MetricsRelabelConfigs: metricsRelabelConfigs,
 		Params:                params,
-		SampleLimit:           convertIntToFloat64(data.SampleLimit),
+		SampleLimit:           utils.ConvertInt64PToFloat64P(data.SampleLimit),
 		Scheme:                data.Scheme,
 		ScrapeInterval:        data.ScrapeInterval,
 		ScrapeTimeout:         data.ScrapeTimeout,
 		StaticConfigs:         staticConfigs,
 		TlsConfig:             tlsConfig,
-	}, nil
+	}
+
+	if payload == (argus.UpdateScrapeConfigPayload{}) {
+		return nil, fmt.Errorf("the provided Argus Scrape Sonfig payload is empty")
+	}
+
+	return &payload, nil
 }
 
-func convertIntToFloat64(i *int64) *float64 {
-	if i == nil {
+func mapMetricsRelabelConfig(metricsRelabelConfigs *[]argus.MetricsRelabelConfig) *[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner {
+	if metricsRelabelConfigs == nil {
 		return nil
 	}
-	f := float64(*i)
-	return &f
-}
-
-func mapMetricsRelabelConfig(metricsRelabelConfig argus.MetricsRelabelConfig) argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner {
-	return argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
-		Action:       metricsRelabelConfig.Action,
-		Modulus:      convertIntToFloat64(metricsRelabelConfig.Modulus),
-		Regex:        metricsRelabelConfig.Regex,
-		Replacement:  metricsRelabelConfig.Replacement,
-		Separator:    metricsRelabelConfig.Separator,
-		SourceLabels: metricsRelabelConfig.SourceLabels,
-		TargetLabel:  metricsRelabelConfig.TargetLabel,
-	}
-}
-
-func mapStaticConfig(staticConfig argus.StaticConfigs) (argus.UpdateScrapeConfigPayloadStaticConfigsInner, error) {
-	var labels map[string]interface{}
-	var err error
-	if staticConfig.Labels != nil {
-		labels, err = convertMapAnyToInterface(*staticConfig.Labels)
-
-		if err != nil {
-			return argus.UpdateScrapeConfigPayloadStaticConfigsInner{}, fmt.Errorf("convert labels: %w", err)
+	configs := make([]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner, 0)
+	for _, config := range *metricsRelabelConfigs {
+		mappedConfig := argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+			Action:       config.Action,
+			Modulus:      utils.ConvertInt64PToFloat64P(config.Modulus),
+			Regex:        config.Regex,
+			Replacement:  config.Replacement,
+			Separator:    config.Separator,
+			SourceLabels: config.SourceLabels,
+			TargetLabel:  config.TargetLabel,
 		}
+		configs = append(configs, mappedConfig)
+	}
+	return &configs
+}
+
+func mapStaticConfig(staticConfigs *[]argus.StaticConfigs) *[]argus.UpdateScrapeConfigPayloadStaticConfigsInner {
+	if staticConfigs == nil {
+		return nil
+	}
+	configs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
+	for _, config := range *staticConfigs {
+		var labels *map[string]interface{}
+		if config.Labels != nil {
+			labels = utils.Ptr(mapStaticConfigLabels(*config.Labels))
+		}
+		mappedConfig := argus.UpdateScrapeConfigPayloadStaticConfigsInner{
+			Labels:  labels,
+			Targets: config.Targets,
+		}
+		configs = append(configs, mappedConfig)
 	}
 
-	return argus.UpdateScrapeConfigPayloadStaticConfigsInner{
-		Labels:  &labels,
-		Targets: staticConfig.Targets,
-	}, nil
+	return &configs
 }
 
 func mapBasicAuth(basicAuth *argus.BasicAuth) *argus.CreateScrapeConfigPayloadBasicAuth {
@@ -175,23 +176,20 @@ func mapTlsConfig(tlsConfig *argus.TLSConfig) *argus.CreateScrapeConfigPayloadHt
 	}
 }
 
-func convertMapAnyToInterface(m interface{}) (map[string]interface{}, error) {
-	newMap := make(map[string]interface{})
-
-	switch convertedMap := m.(type) {
-	case map[string]string:
-		for k, v := range convertedMap {
-			newMap[k] = v
-		}
-	case map[string][]string:
-		for k, v := range convertedMap {
-			newMap[k] = v
-		}
-	default:
-		return nil, fmt.Errorf("unsupported map type")
+func mapParams(params map[string][]string) map[string]interface{} {
+	paramsMap := make(map[string]interface{})
+	for k, v := range params {
+		paramsMap[k] = v
 	}
+	return paramsMap
+}
 
-	return newMap, nil
+func mapStaticConfigLabels(labels map[string]string) map[string]interface{} {
+	labelsMap := make(map[string]interface{})
+	for k, v := range labels {
+		labelsMap[k] = v
+	}
+	return labelsMap
 }
 
 type ArgusClient interface {
@@ -204,22 +202,4 @@ func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, pro
 		return "", fmt.Errorf("get Argus instance: %w", err)
 	}
 	return *resp.Name, nil
-}
-
-func GetDefaultCreateScrapeConfigPayload() *argus.CreateScrapeConfigPayload {
-	staticConfigs := []argus.CreateScrapeConfigPayloadStaticConfigsInner{
-		{
-			Targets: utils.Ptr([]string{
-				"url-target",
-			}),
-		},
-	}
-	return &argus.CreateScrapeConfigPayload{
-		JobName:        utils.Ptr("default-name"),
-		MetricsPath:    utils.Ptr("/metrics"),
-		Scheme:         utils.Ptr("https"),
-		ScrapeInterval: utils.Ptr("5m"),
-		ScrapeTimeout:  utils.Ptr("2m"),
-		StaticConfigs:  &staticConfigs,
-	}
 }

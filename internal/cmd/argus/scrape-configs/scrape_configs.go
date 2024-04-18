@@ -12,8 +12,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "scrape-configs",
-		Short: "Provides functionality for scraping configs in Argus.",
-		Long:  "Provides functionality for scraping configurations in Argus.",
+		Short: "Provides functionality for scrape configs in Argus.",
+		Long:  "Provides functionality for scrape configurations in Argus.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

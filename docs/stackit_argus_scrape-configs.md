@@ -1,10 +1,10 @@
 ## stackit argus scrape-configs
 
-Provides functionality for scraping configs in Argus.
+Provides functionality for scrape configs in Argus.
 
 ### Synopsis
 
-Provides functionality for scraping configurations in Argus.
+Provides functionality for scrape configurations in Argus.
 
 ```
 stackit argus scrape-configs [flags]
