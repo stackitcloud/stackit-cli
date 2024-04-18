@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get PostgreSQL Flex instances: %w", err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
@@ -94,13 +94,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag, p)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -110,7 +110,7 @@ func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag, p),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}, nil
 }
 

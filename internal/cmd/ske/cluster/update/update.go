@@ -57,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args, p)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -123,15 +123,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd, p)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	payloadString := flags.FlagToStringValue(cmd, payloadFlag, p)
+	payloadString := flags.FlagToStringValue(p, cmd, payloadFlag)
 	var payload ske.CreateOrUpdateClusterPayload
 	err := json.Unmarshal([]byte(payloadString), &payload)
 	if err != nil {

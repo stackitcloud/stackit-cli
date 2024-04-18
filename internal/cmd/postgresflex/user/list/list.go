@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -99,13 +99,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag, p)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -115,8 +115,8 @@ func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringPointer(cmd, instanceIdFlag, p),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag, p),
+		InstanceId:      flags.FlagToStringPointer(p, cmd, instanceIdFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}, nil
 }
 

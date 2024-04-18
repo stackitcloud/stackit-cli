@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -91,13 +91,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(volumeTypesFlag, false, "Lists supported volume types")
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
-	availabilityZones := flags.FlagToBoolValue(cmd, availabilityZonesFlag, p)
-	kubernetesVersions := flags.FlagToBoolValue(cmd, kubernetesVersionsFlag, p)
-	machineImages := flags.FlagToBoolValue(cmd, machineImagesFlag, p)
-	machineTypes := flags.FlagToBoolValue(cmd, machineTypesFlag, p)
-	volumeTypes := flags.FlagToBoolValue(cmd, volumeTypesFlag, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
+	availabilityZones := flags.FlagToBoolValue(p, cmd, availabilityZonesFlag)
+	kubernetesVersions := flags.FlagToBoolValue(p, cmd, kubernetesVersionsFlag)
+	machineImages := flags.FlagToBoolValue(p, cmd, machineImagesFlag)
+	machineTypes := flags.FlagToBoolValue(p, cmd, machineTypesFlag)
+	volumeTypes := flags.FlagToBoolValue(p, cmd, volumeTypesFlag)
 
 	// If no flag was passed, take it as if every flag were passed
 	if !availabilityZones && !kubernetesVersions && !machineImages && !machineTypes && !volumeTypes {

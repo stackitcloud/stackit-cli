@@ -57,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args, p)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -127,17 +127,17 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd, p)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planId := flags.FlagToStringPointer(cmd, planIdFlag, p)
-	planName := flags.FlagToStringValue(cmd, planNameFlag, p)
-	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag, p)
+	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
+	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "") {
 		return nil, &cliErr.ArgusInputPlanError{

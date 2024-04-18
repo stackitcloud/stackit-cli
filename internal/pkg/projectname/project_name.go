@@ -17,9 +17,9 @@ import (
 // Returns the project name associated to the project ID set in config
 //
 // Uses the one stored in config if it's valid, otherwise gets it from the API
-func GetProjectName(ctx context.Context, cmd *cobra.Command, p *print.Printer) (string, error) {
+func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (string, error) {
 	// If we can use the project name from config, return it
-	if useProjectNameFromConfig(cmd, p) {
+	if useProjectNameFromConfig(p, cmd) {
 		return viper.GetString(config.ProjectNameKey), nil
 	}
 
@@ -41,7 +41,7 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command, p *print.Printer) (
 
 	// If project ID is set in config, we store the project name in config
 	// (So next time we can just pull it from there)
-	if !isProjectIdSetInFlags(cmd, p) {
+	if !isProjectIdSetInFlags(p, cmd) {
 		viper.Set(config.ProjectNameKey, projectName)
 		err = viper.WriteConfig()
 		if err != nil {
@@ -53,11 +53,11 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command, p *print.Printer) (
 }
 
 // Returns True if project name from config should be used, False otherwise
-func useProjectNameFromConfig(cmd *cobra.Command, p *print.Printer) bool {
+func useProjectNameFromConfig(p *print.Printer, cmd *cobra.Command) bool {
 	// We use the project name from the config file, if:
 	// - Project id is not set to a different value than the one in the config file
 	// - Project name in the config file is not empty
-	projectIdSet := isProjectIdSetInFlags(cmd, p)
+	projectIdSet := isProjectIdSetInFlags(p, cmd)
 	projectName := viper.GetString(config.ProjectNameKey)
 	projectNameSet := false
 	if projectName != "" {
@@ -66,11 +66,11 @@ func useProjectNameFromConfig(cmd *cobra.Command, p *print.Printer) bool {
 	return !projectIdSet && projectNameSet
 }
 
-func isProjectIdSetInFlags(cmd *cobra.Command, p *print.Printer) bool {
+func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
 	// FlagToStringPointer pulls the projectId from passed flags
 	// viper.GetString uses the flags, and fallsback to config file
 	// To check if projectId was passed, we use the first rather than the second
-	projectIdFromFlag := flags.FlagToStringPointer(cmd, globalflags.ProjectIdFlag, p)
+	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
 	projectIdSetInFlag := false
 	if projectIdFromFlag != nil {
 		projectIdSetInFlag = true

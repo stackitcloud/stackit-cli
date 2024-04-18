@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args, p)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -121,15 +121,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd, p)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	expTime := flags.FlagToStringPointer(cmd, expirationFlag, p)
+	expTime := flags.FlagToStringPointer(p, cmd, expirationFlag)
 
 	if expTime != nil {
 		var err error
@@ -145,7 +145,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inpu
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
-		Filepath:        flags.FlagToStringPointer(cmd, filepathFlag, p),
+		Filepath:        flags.FlagToStringPointer(p, cmd, filepathFlag),
 		ExpirationTime:  expTime,
 	}, nil
 }

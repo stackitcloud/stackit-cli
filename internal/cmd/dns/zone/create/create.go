@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
@@ -143,27 +143,27 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(cmd, nameFlag, p),
-		DnsName:         flags.FlagToStringPointer(cmd, dnsNameFlag, p),
-		DefaultTTL:      flags.FlagToInt64Pointer(cmd, defaultTTLFlag, p),
-		Primaries:       flags.FlagToStringSlicePointer(cmd, primaryFlag, p),
-		Acl:             flags.FlagToStringPointer(cmd, aclFlag, p),
-		Type:            flags.FlagToStringPointer(cmd, typeFlag, p),
-		RetryTime:       flags.FlagToInt64Pointer(cmd, retryTimeFlag, p),
-		RefreshTime:     flags.FlagToInt64Pointer(cmd, refreshTimeFlag, p),
-		NegativeCache:   flags.FlagToInt64Pointer(cmd, negativeCacheFlag, p),
-		IsReverseZone:   flags.FlagToBoolPointer(cmd, isReverseZoneFlag, p),
-		ExpireTime:      flags.FlagToInt64Pointer(cmd, expireTimeFlag, p),
-		Description:     flags.FlagToStringPointer(cmd, descriptionFlag, p),
-		ContactEmail:    flags.FlagToStringPointer(cmd, contactEmailFlag, p),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		DnsName:         flags.FlagToStringPointer(p, cmd, dnsNameFlag),
+		DefaultTTL:      flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag),
+		Primaries:       flags.FlagToStringSlicePointer(p, cmd, primaryFlag),
+		Acl:             flags.FlagToStringPointer(p, cmd, aclFlag),
+		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
+		RetryTime:       flags.FlagToInt64Pointer(p, cmd, retryTimeFlag),
+		RefreshTime:     flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag),
+		NegativeCache:   flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag),
+		IsReverseZone:   flags.FlagToBoolPointer(p, cmd, isReverseZoneFlag),
+		ExpireTime:      flags.FlagToInt64Pointer(p, cmd, expireTimeFlag),
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
+		ContactEmail:    flags.FlagToStringPointer(p, cmd, contactEmailFlag),
 	}, nil
 }
 

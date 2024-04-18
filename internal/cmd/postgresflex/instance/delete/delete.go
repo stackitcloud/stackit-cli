@@ -52,7 +52,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args, p)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -144,10 +144,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(forceDeleteFlag, "f", false, "Force deletion of a delayed deleted instance")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd, p)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -155,7 +155,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inpu
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-		ForceDelete:     flags.FlagToBoolValue(cmd, forceDeleteFlag, p),
+		ForceDelete:     flags.FlagToBoolValue(p, cmd, forceDeleteFlag),
 	}, nil
 }
 

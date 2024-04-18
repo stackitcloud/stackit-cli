@@ -52,7 +52,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -107,17 +107,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag, p),
-		Description:     utils.Ptr(flags.FlagToStringValue(cmd, descriptionFlag, p)),
-		Write:           utils.Ptr(flags.FlagToBoolValue(cmd, writeFlag, p)),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		Description:     utils.Ptr(flags.FlagToStringValue(p, cmd, descriptionFlag)),
+		Write:           utils.Ptr(flags.FlagToBoolValue(p, cmd, writeFlag)),
 	}, nil
 }
 

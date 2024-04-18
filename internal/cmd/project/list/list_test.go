@@ -237,7 +237,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating one of required flags: %v", err)
 			}
 
-			model, err := parseInput(cmd, nil)
+			model, err := parseInput(nil, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

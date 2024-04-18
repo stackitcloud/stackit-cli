@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -95,13 +95,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag, p)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -109,7 +109,7 @@ func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
 		}
 	}
 
-	ttlDays := flags.FlagWithDefaultToInt64Value(cmd, ttlDaysFlag, p)
+	ttlDays := flags.FlagWithDefaultToInt64Value(p, cmd, ttlDaysFlag)
 	if ttlDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,

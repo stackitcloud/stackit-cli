@@ -101,7 +101,7 @@ func TestEnumFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
-			value := FlagToStringValue(cmd, "test-flag", nil)
+			value := FlagToStringValue(nil, cmd, "test-flag")
 			if !tt.ignoreCase && value != tt.value {
 				t.Fatalf("flag did not return set value")
 			}
@@ -320,7 +320,7 @@ func TestUUIDFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
-			value := FlagToStringValue(cmd, "test-flag", nil)
+			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.value {
 				t.Fatalf("flag did not return set value")
 			}
@@ -427,7 +427,7 @@ func TestUUIDSliceFlag(t *testing.T) {
 			if err2 != nil {
 				t.Fatalf("failed on valid input: %v", err2)
 			}
-			value := FlagToStringSliceValue(cmd, "test-flag", nil)
+			value := FlagToStringSliceValue(nil, cmd, "test-flag")
 			if !reflect.DeepEqual(tt.expectedValue, value) {
 				t.Fatalf("flag did not return set value (expected %s, got %s)", tt.expectedValue, value)
 			}
@@ -531,7 +531,7 @@ func TestCIDRFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
-			value := FlagToStringValue(cmd, "test-flag", nil)
+			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.value {
 				t.Fatalf("flag did not return set value")
 			}
@@ -642,7 +642,7 @@ func TestCIDRSliceFlag(t *testing.T) {
 			if err2 != nil {
 				t.Fatalf("failed on valid input: %v", err2)
 			}
-			value := FlagToStringSliceValue(cmd, "test-flag", nil)
+			value := FlagToStringSliceValue(nil, cmd, "test-flag")
 			if !reflect.DeepEqual(tt.expectedValue, value) {
 				t.Fatalf("flag did not return set value (expected %s, got %s)", tt.expectedValue, value)
 			}
@@ -741,7 +741,7 @@ func TestReadFromFileFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
-			value := FlagToStringValue(cmd, "test-flag", nil)
+			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.expectedValue {
 				t.Fatalf("flag returned %q, expected %q", value, tt.expectedValue)
 			}

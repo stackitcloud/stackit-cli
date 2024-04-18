@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(cmd, p)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -142,8 +142,8 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
-	sessionTimeLimit, err := parseSessionTimeLimit(cmd, p)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	sessionTimeLimit, err := parseSessionTimeLimit(p, cmd)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
 			Flag:    sessionTimeLimitFlag,
@@ -154,7 +154,7 @@ func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
 	// values.FlagToStringPointer pulls the projectId from passed flags
 	// globalflags.Parse uses the flags, and fallsback to config file
 	// To check if projectId was passed, we use the first rather than the second
-	projectIdFromFlag := flags.FlagToStringPointer(cmd, globalflags.ProjectIdFlag, p)
+	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
 	projectIdSet := false
 	if projectIdFromFlag != nil {
 		projectIdSet = true
@@ -166,8 +166,8 @@ func parseInput(cmd *cobra.Command, p *print.Printer) (*inputModel, error) {
 	}, nil
 }
 
-func parseSessionTimeLimit(cmd *cobra.Command, p *print.Printer) (*string, error) {
-	sessionTimeLimit := flags.FlagToStringPointer(cmd, sessionTimeLimitFlag, p)
+func parseSessionTimeLimit(p *print.Printer, cmd *cobra.Command) (*string, error) {
+	sessionTimeLimit := flags.FlagToStringPointer(p, cmd, sessionTimeLimitFlag)
 	if sessionTimeLimit == nil {
 		return nil, nil
 	}

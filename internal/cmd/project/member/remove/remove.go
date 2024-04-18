@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args, p)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
@@ -106,10 +106,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	subject := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd, p)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -117,8 +117,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string, p *print.Printer) (*inpu
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		Subject:         subject,
-		Role:            flags.FlagToStringPointer(cmd, roleFlag, p),
-		Force:           flags.FlagToBoolValue(cmd, forceFlag, p),
+		Role:            flags.FlagToStringPointer(p, cmd, roleFlag),
+		Force:           flags.FlagToBoolValue(p, cmd, forceFlag),
 	}, nil
 }
 
