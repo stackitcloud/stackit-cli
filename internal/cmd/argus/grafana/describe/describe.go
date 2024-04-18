@@ -87,7 +87,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(hidePasswordFlag, false, `Show the initial admin password in the "pretty" output format`)
 }
 
-
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
