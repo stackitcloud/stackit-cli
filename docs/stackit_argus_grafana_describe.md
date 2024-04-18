@@ -9,28 +9,27 @@ The Grafana dashboard URL and initial credentials (admin user and password) will
 The initial password is shown by default, if you want to hide it use the "--hide-password" flag.
 
 ```
-stackit argus grafana describe [flags]
+stackit argus grafana describe INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
   Get details of the Grafana configuration of an Argus instance with ID "xxx"
-  $ stackit argus credentials describe --instance-id xxx
+  $ stackit argus credentials describe xxx
 
   Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format
-  $ stackit argus credentials describe --instance-id xxx --output-format pretty
+  $ stackit argus credentials describe xxx --output-format pretty
 
   Get details of the Grafana configuration of an Argus instance with ID "xxx" and hide the initial admin password
-  $ stackit argus credentials describe --instance-id xxx --output-format pretty --hide-password
+  $ stackit argus credentials describe xxx --output-format pretty --hide-password
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit argus grafana describe"
-      --hide-password        Show the initial admin password in the "pretty" output format
-      --instance-id string   Instance ID
+  -h, --help            Help for "stackit argus grafana describe"
+      --hide-password   Show the initial admin password in the "pretty" output format
 ```
 
 ### Options inherited from parent commands

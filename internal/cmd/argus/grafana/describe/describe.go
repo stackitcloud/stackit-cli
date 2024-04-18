@@ -13,13 +13,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/argus"
 )
 
 const (
-	instanceIdFlag   = "instance-id"
+	instanceIdArg    = "INSTANCE_ID"
 	hidePasswordFlag = "hide-password"
 )
 
@@ -31,28 +32,29 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of the Grafana configuration of an Argus instance",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Shows details of the Grafana configuration of an Argus instance.",
 			`The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.`,
 			`The initial password is shown by default, if you want to hide it use the "--hide-password" flag.`,
 		),
-		Args: args.NoArgs,
+		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx"`,
-				"$ stackit argus credentials describe --instance-id xxx"),
+				"$ stackit argus credentials describe xxx"),
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format`,
-				"$ stackit argus credentials describe --instance-id xxx --output-format pretty"),
+				"$ stackit argus credentials describe xxx --output-format pretty"),
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx" and hide the initial admin password`,
-				"$ stackit argus credentials describe --instance-id xxx --output-format pretty --hide-password"),
+				"$ stackit argus credentials describe xxx --output-format pretty --hide-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, args)
+
 			if err != nil {
 				return err
 			}
@@ -82,22 +84,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().Bool(hidePasswordFlag, false, `Show the initial admin password in the "pretty" output format`)
-
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
-	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		InstanceId:      instanceId,
 		HidePassword:    flags.FlagToBoolValue(p, cmd, hidePasswordFlag),
 	}, nil
 }

@@ -21,10 +21,19 @@ var testClient = &argus.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testInstanceId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		instanceIdFlag: testInstanceId,
+		projectIdFlag: testProjectId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -72,12 +81,20 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
 			description: "hide password",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[hidePasswordFlag] = "true"
 			}),
@@ -94,11 +111,13 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no flag values",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -106,6 +125,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -113,31 +133,23 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "instance id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, instanceIdFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "instance id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[instanceIdFlag] = ""
-			}),
-			isValid: false,
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "instance id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[instanceIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "credentials id invalid 1",
@@ -187,7 +199,8 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(nil, cmd)
+			model, err := parseInput(nil, cmd, tt.argValues)
+
 			if err != nil {
 				if !tt.isValid {
 					return
