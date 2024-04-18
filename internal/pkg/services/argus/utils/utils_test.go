@@ -405,7 +405,6 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
-
 		})
 	}
 }
@@ -431,7 +430,6 @@ func TestGetDefaultCreateScrapeConfigPayload(t *testing.T) {
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
-
 		})
 	}
 }

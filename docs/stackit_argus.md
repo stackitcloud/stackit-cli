@@ -31,4 +31,5 @@ stackit argus [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit argus instance](./stackit_argus_instance.md)	 - Provides functionality for Argus instances
 * [stackit argus plans](./stackit_argus_plans.md)	 - Lists all Argus service plans
+* [stackit argus scrape-configs](./stackit_argus_scrape-configs.md)	 - Provides functionality for scraping configs in Argus.
 

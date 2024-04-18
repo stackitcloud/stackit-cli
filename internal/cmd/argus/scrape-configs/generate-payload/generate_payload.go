@@ -35,8 +35,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
 			"Generates a JSON payload with values to be used as --payload input for Scrape Configurations creation or update.",
 			"This command can be used to generate a payload to update an existing Scrape Config job or to create a new Scrape Config job.",
-			"To obtain an Update payload, provide the job name and instance ID of the desired Scrape Config Job and respective Argus instance.",
-			"To obtain a Create payload, run the command with no flags",
+			"To update an existing Scrape Config job, provide the job name and the instance ID of the Argus instance.",
+			"To obtain a default payload to create a new Scrape Config job, run the command with no flags.",
 			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.",
 		),
 		Args: args.NoArgs,
@@ -68,21 +68,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.JobName == nil {
 				createPayload := argusUtils.GetDefaultCreateScrapeConfigPayload()
 				return outputCreateResult(p, createPayload)
-			} else {
-				req := buildRequest(ctx, model, apiClient)
-				resp, err := req.Execute()
-				if err != nil {
-					return fmt.Errorf("read Argus Scrape Config: %w", err)
-				}
-
-				payload, err := argusUtils.MapToUpdateScrapeConfigPayload(resp)
-				if err != nil {
-					return fmt.Errorf("map update scrape config payloads: %w", err)
-				}
-
-				return outputUpdateResult(p, payload)
 			}
 
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read Argus Scrape Config: %w", err)
+			}
+
+			payload, err := argusUtils.MapToUpdateScrapeConfigPayload(resp)
+			if err != nil {
+				return fmt.Errorf("map update scrape config payloads: %w", err)
+			}
+
+			return outputUpdateResult(p, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -102,10 +101,6 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	if jobName != nil && (globalFlags.ProjectId == "" || instanceId == "") {
 		return nil, fmt.Errorf("if a job-name is provided then instance-id and project-id must to be provided")
-	}
-
-	if jobName == nil && (globalFlags.ProjectId != "" || instanceId != "") {
-		return nil, fmt.Errorf("if a job-name is not provided then instance-id and project-id can't be provided")
 	}
 
 	return &inputModel{

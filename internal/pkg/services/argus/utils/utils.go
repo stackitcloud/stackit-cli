@@ -91,13 +91,13 @@ func MapToUpdateScrapeConfigPayload(resp *argus.GetScrapeConfigResponse) (*argus
 	}
 
 	var params *map[string]interface{}
-	var err error
 
 	if data.Params != nil {
-		params, err = convertMapAnyToInterface(*data.Params)
+		paramsMap, err := convertMapAnyToInterface(*data.Params)
 		if err != nil {
 			return nil, fmt.Errorf("convert params: %w", err)
 		}
+		params = &paramsMap
 	}
 
 	return &argus.UpdateScrapeConfigPayload{
@@ -138,7 +138,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfig argus.MetricsRelabelConfig) ar
 }
 
 func mapStaticConfig(staticConfig argus.StaticConfigs) (argus.UpdateScrapeConfigPayloadStaticConfigsInner, error) {
-	var labels *map[string]interface{}
+	var labels map[string]interface{}
 	var err error
 	if staticConfig.Labels != nil {
 		labels, err = convertMapAnyToInterface(*staticConfig.Labels)
@@ -149,7 +149,7 @@ func mapStaticConfig(staticConfig argus.StaticConfigs) (argus.UpdateScrapeConfig
 	}
 
 	return argus.UpdateScrapeConfigPayloadStaticConfigsInner{
-		Labels:  labels,
+		Labels:  &labels,
 		Targets: staticConfig.Targets,
 	}, nil
 }
@@ -175,17 +175,15 @@ func mapTlsConfig(tlsConfig *argus.TLSConfig) *argus.CreateScrapeConfigPayloadHt
 	}
 }
 
-func convertMapAnyToInterface(m interface{}) (*map[string]interface{}, error) {
+func convertMapAnyToInterface(m interface{}) (map[string]interface{}, error) {
 	newMap := make(map[string]interface{})
 
-	switch m.(type) {
+	switch convertedMap := m.(type) {
 	case map[string]string:
-		convertedMap := m.(map[string]string)
 		for k, v := range convertedMap {
 			newMap[k] = v
 		}
 	case map[string][]string:
-		convertedMap := m.(map[string][]string)
 		for k, v := range convertedMap {
 			newMap[k] = v
 		}
@@ -193,7 +191,7 @@ func convertMapAnyToInterface(m interface{}) (*map[string]interface{}, error) {
 		return nil, fmt.Errorf("unsupported map type")
 	}
 
-	return &newMap, nil
+	return newMap, nil
 }
 
 type ArgusClient interface {
