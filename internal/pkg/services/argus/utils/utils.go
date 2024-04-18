@@ -119,7 +119,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs *[]argus.MetricsRelabelConfig
 	if metricsRelabelConfigs == nil {
 		return nil
 	}
-	configs := make([]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner, 0)
+	mappedConfigs := make([]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner, 0)
 	for _, config := range *metricsRelabelConfigs {
 		mappedConfig := argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 			Action:       config.Action,
@@ -130,16 +130,16 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs *[]argus.MetricsRelabelConfig
 			SourceLabels: config.SourceLabels,
 			TargetLabel:  config.TargetLabel,
 		}
-		configs = append(configs, mappedConfig)
+		mappedConfigs = append(mappedConfigs, mappedConfig)
 	}
-	return &configs
+	return &mappedConfigs
 }
 
 func mapStaticConfig(staticConfigs *[]argus.StaticConfigs) *[]argus.UpdateScrapeConfigPayloadStaticConfigsInner {
 	if staticConfigs == nil {
 		return nil
 	}
-	configs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
+	mappedConfigs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
 	for _, config := range *staticConfigs {
 		var labels *map[string]interface{}
 		if config.Labels != nil {
@@ -149,10 +149,10 @@ func mapStaticConfig(staticConfigs *[]argus.StaticConfigs) *[]argus.UpdateScrape
 			Labels:  labels,
 			Targets: config.Targets,
 		}
-		configs = append(configs, mappedConfig)
+		mappedConfigs = append(mappedConfigs, mappedConfig)
 	}
 
-	return &configs
+	return &mappedConfigs
 }
 
 func mapBasicAuth(basicAuth *argus.BasicAuth) *argus.CreateScrapeConfigPayloadBasicAuth {
