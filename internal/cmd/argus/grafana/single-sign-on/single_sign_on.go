@@ -14,8 +14,9 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "single-sign-on",
-		Short: "Enable or disable single sign-on for Grafana in Argus instances",
+		Use:     "single-sign-on",
+		Aliases: []string{"sso"},
+		Short:   "Enable or disable single sign-on for Grafana in Argus instances",
 		Long: fmt.Sprintf("%s\n%s",
 			"Enable or disable single sign-on for Grafana in Argus instances.",
 			"When enabled for an instance, overwrites the generic OAuth2 authentication and configures STACKIT single sign-on for that instance.",
