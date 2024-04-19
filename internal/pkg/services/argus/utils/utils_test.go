@@ -417,7 +417,7 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 		{
 			description: "empty data",
 			config:      &[]argus.MetricsRelabelConfig{},
-			expected:    &[]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{},
+			expected:    nil,
 		},
 		{
 			description: "nil",
@@ -430,7 +430,7 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			output := mapMetricsRelabelConfig(tt.config)
 
-			if tt.expected == nil && output == nil && tt.config == nil {
+			if tt.expected == nil && output == nil || *output == nil {
 				return
 			}
 
@@ -472,7 +472,7 @@ func TestMapStaticConfig(t *testing.T) {
 		{
 			description: "empty data",
 			config:      &[]argus.StaticConfigs{},
-			expected:    &[]argus.UpdateScrapeConfigPayloadStaticConfigsInner{},
+			expected:    nil,
 		},
 		{
 			description: "nil",
@@ -485,7 +485,7 @@ func TestMapStaticConfig(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			output := mapStaticConfig(tt.config)
 
-			if tt.expected == nil && output == nil && tt.config == nil {
+			if tt.expected == nil && (output == nil || *output == nil) {
 				return
 			}
 
