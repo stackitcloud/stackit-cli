@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -62,7 +63,7 @@ type inputModel struct {
 	SKECustomEndpoint             bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
@@ -80,7 +81,7 @@ func NewCmd() *cobra.Command {
 				"$ stackit config unset --dns-custom-endpoint"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model := parseInput(cmd)
+			model := parseInput(p, cmd)
 
 			if model.Async {
 				viper.Set(config.AsyncKey, config.AsyncDefault)
@@ -179,28 +180,28 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 }
 
-func parseInput(cmd *cobra.Command) *inputModel {
+func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	return &inputModel{
-		Async:            flags.FlagToBoolValue(cmd, asyncFlag),
-		OutputFormat:     flags.FlagToBoolValue(cmd, outputFormatFlag),
-		ProjectId:        flags.FlagToBoolValue(cmd, projectIdFlag),
-		SessionTimeLimit: flags.FlagToBoolValue(cmd, sessionTimeLimitFlag),
-		Verbosity:        flags.FlagToBoolValue(cmd, verbosityFlag),
+		Async:            flags.FlagToBoolValue(p, cmd, asyncFlag),
+		OutputFormat:     flags.FlagToBoolValue(p, cmd, outputFormatFlag),
+		ProjectId:        flags.FlagToBoolValue(p, cmd, projectIdFlag),
+		SessionTimeLimit: flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
+		Verbosity:        flags.FlagToBoolValue(p, cmd, verbosityFlag),
 
-		ArgusCustomEndpoint:           flags.FlagToBoolValue(cmd, argusCustomEndpointFlag),
-		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(cmd, authorizationCustomEndpointFlag),
-		DNSCustomEndpoint:             flags.FlagToBoolValue(cmd, dnsCustomEndpointFlag),
-		LogMeCustomEndpoint:           flags.FlagToBoolValue(cmd, logMeCustomEndpointFlag),
-		MariaDBCustomEndpoint:         flags.FlagToBoolValue(cmd, mariaDBCustomEndpointFlag),
-		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(cmd, mongoDBFlexCustomEndpointFlag),
-		ObjectStorageCustomEndpoint:   flags.FlagToBoolValue(cmd, objectStorageCustomEndpointFlag),
-		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(cmd, openSearchCustomEndpointFlag),
-		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(cmd, postgresFlexCustomEndpointFlag),
-		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(cmd, rabbitMQCustomEndpointFlag),
-		RedisCustomEndpoint:           flags.FlagToBoolValue(cmd, redisCustomEndpointFlag),
-		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(cmd, resourceManagerCustomEndpointFlag),
-		SecretsManagerCustomEndpoint:  flags.FlagToBoolValue(cmd, secretsManagerCustomEndpointFlag),
-		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(cmd, serviceAccountCustomEndpointFlag),
-		SKECustomEndpoint:             flags.FlagToBoolValue(cmd, skeCustomEndpointFlag),
+		ArgusCustomEndpoint:           flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
+		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
+		DNSCustomEndpoint:             flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
+		LogMeCustomEndpoint:           flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
+		MariaDBCustomEndpoint:         flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
+		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
+		ObjectStorageCustomEndpoint:   flags.FlagToBoolValue(p, cmd, objectStorageCustomEndpointFlag),
+		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(p, cmd, openSearchCustomEndpointFlag),
+		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(p, cmd, postgresFlexCustomEndpointFlag),
+		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(p, cmd, rabbitMQCustomEndpointFlag),
+		RedisCustomEndpoint:           flags.FlagToBoolValue(p, cmd, redisCustomEndpointFlag),
+		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(p, cmd, resourceManagerCustomEndpointFlag),
+		SecretsManagerCustomEndpoint:  flags.FlagToBoolValue(p, cmd, secretsManagerCustomEndpointFlag),
+		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
+		SKECustomEndpoint:             flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 	}
 }

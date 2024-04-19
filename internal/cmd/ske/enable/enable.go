@@ -35,7 +35,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -46,8 +46,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
@@ -88,8 +89,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command) (*InputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*InputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}

@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -74,8 +74,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			members := *resp.Members
 			if len(members) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
 				p.Info("No members found for project %q\n", projectLabel)
@@ -102,13 +103,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "subject", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -118,9 +119,9 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Subject:         flags.FlagToStringPointer(cmd, subjectFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag),
+		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
 	}, nil
 }
 

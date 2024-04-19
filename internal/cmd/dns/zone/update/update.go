@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -76,6 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
@@ -133,24 +134,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(contactEmailFlag, "", "Contact email for the zone")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	zoneId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	name := flags.FlagToStringPointer(cmd, nameFlag)
-	defaultTTL := flags.FlagToInt64Pointer(cmd, defaultTTLFlag)
-	primaries := flags.FlagToStringSlicePointer(cmd, primaryFlag)
-	acl := flags.FlagToStringPointer(cmd, aclFlag)
-	retryTime := flags.FlagToInt64Pointer(cmd, retryTimeFlag)
-	refreshTime := flags.FlagToInt64Pointer(cmd, refreshTimeFlag)
-	negativeCache := flags.FlagToInt64Pointer(cmd, negativeCacheFlag)
-	expireTime := flags.FlagToInt64Pointer(cmd, expireTimeFlag)
-	description := flags.FlagToStringPointer(cmd, descriptionFlag)
-	contactEmail := flags.FlagToStringPointer(cmd, contactEmailFlag)
+	name := flags.FlagToStringPointer(p, cmd, nameFlag)
+	defaultTTL := flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag)
+	primaries := flags.FlagToStringSlicePointer(p, cmd, primaryFlag)
+	acl := flags.FlagToStringPointer(p, cmd, aclFlag)
+	retryTime := flags.FlagToInt64Pointer(p, cmd, retryTimeFlag)
+	refreshTime := flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag)
+	negativeCache := flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag)
+	expireTime := flags.FlagToInt64Pointer(p, cmd, expireTimeFlag)
+	description := flags.FlagToStringPointer(p, cmd, descriptionFlag)
+	contactEmail := flags.FlagToStringPointer(p, cmd, contactEmailFlag)
 
 	if name == nil && defaultTTL == nil && primaries == nil &&
 		acl == nil && retryTime == nil && refreshTime == nil &&

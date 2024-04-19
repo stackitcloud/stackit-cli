@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -70,6 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(credentials) == 0 {
 				instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = model.InstanceId
 				}
 				p.Info("No credentials found for instance %q\n", instanceLabel)
@@ -95,13 +96,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -111,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Limit:           limit,
 	}, nil
 }

@@ -29,7 +29,7 @@ type Printer struct {
 
 // Creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: false, Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
 
 	return &Printer{}
@@ -51,15 +51,16 @@ func (p *Printer) Debug(level Level, msg string, args ...any) {
 	if p.Verbosity != DebugLevel {
 		return
 	}
+	msg = fmt.Sprintf(msg, args...)
 	switch level {
 	case DebugLevel:
-		slog.Debug(msg, args...)
+		slog.Debug(msg)
 	case InfoLevel:
-		slog.Info(msg, args...)
+		slog.Info(msg)
 	case WarningLevel:
-		slog.Warn(msg, args...)
+		slog.Warn(msg)
 	case ErrorLevel:
-		slog.Error(msg, args...)
+		slog.Error(msg)
 	}
 }
 

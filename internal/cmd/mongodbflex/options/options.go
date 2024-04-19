@@ -64,7 +64,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -95,12 +95,12 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
-	flavors := flags.FlagToBoolValue(cmd, flavorsFlag)
-	versions := flags.FlagToBoolValue(cmd, versionsFlag)
-	storages := flags.FlagToBoolValue(cmd, storagesFlag)
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
+	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
+	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)
+	storages := flags.FlagToBoolValue(p, cmd, storagesFlag)
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
 
 	if !flavors && !versions && !storages {
 		return nil, fmt.Errorf("%s\n\n%s",
@@ -120,7 +120,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		Flavors:         flavors,
 		Versions:        versions,
 		Storages:        storages,
-		FlavorId:        flags.FlagToStringPointer(cmd, flavorIdFlag),
+		FlavorId:        flags.FlagToStringPointer(p, cmd, flavorIdFlag),
 	}, nil
 }
 

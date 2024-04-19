@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -91,6 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(recordSets) == 0 {
 				zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get zone name: %v", err)
 					zoneLabel = model.ZoneId
 				}
 				p.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
@@ -120,13 +121,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -134,7 +135,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	pageSize := flags.FlagWithDefaultToInt64Value(p, cmd, pageSizeFlag)
 	if pageSize < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    pageSizeFlag,
@@ -142,21 +143,21 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	active := flags.FlagToBoolValue(cmd, activeFlag)
-	inactive := flags.FlagToBoolValue(cmd, inactiveFlag)
+	active := flags.FlagToBoolValue(p, cmd, activeFlag)
+	inactive := flags.FlagToBoolValue(p, cmd, inactiveFlag)
 	if active && inactive {
 		return nil, fmt.Errorf("only one of %s and %s can be set", activeFlag, inactiveFlag)
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag),
+		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
 		Active:          active,
 		Inactive:        inactive,
-		Deleted:         flags.FlagToBoolValue(cmd, deletedFlag),
-		NameLike:        flags.FlagToStringPointer(cmd, nameLikeFlag),
-		OrderByName:     flags.FlagToStringPointer(cmd, orderByNameFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
+		Deleted:         flags.FlagToBoolValue(p, cmd, deletedFlag),
+		NameLike:        flags.FlagToStringPointer(p, cmd, nameLikeFlag),
+		OrderByName:     flags.FlagToStringPointer(p, cmd, orderByNameFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 		PageSize:        pageSize,
 	}, nil
 }
