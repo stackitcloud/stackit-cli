@@ -109,7 +109,7 @@ func MapToUpdateScrapeConfigPayload(resp *argus.GetScrapeConfigResponse) (*argus
 	}
 
 	if payload == (argus.UpdateScrapeConfigPayload{}) {
-		return nil, fmt.Errorf("the provided Argus Scrape Sonfig payload is empty")
+		return nil, fmt.Errorf("the provided Argus scrape config payload is empty")
 	}
 
 	return &payload, nil
@@ -119,7 +119,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs *[]argus.MetricsRelabelConfig
 	if metricsRelabelConfigs == nil {
 		return nil
 	}
-	mappedConfigs := make([]argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner, 0)
+	var mappedConfigs []argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
 	for _, config := range *metricsRelabelConfigs {
 		mappedConfig := argus.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 			Action:       config.Action,
@@ -139,7 +139,7 @@ func mapStaticConfig(staticConfigs *[]argus.StaticConfigs) *[]argus.UpdateScrape
 	if staticConfigs == nil {
 		return nil
 	}
-	mappedConfigs := make([]argus.UpdateScrapeConfigPayloadStaticConfigsInner, 0)
+	var mappedConfigs []argus.UpdateScrapeConfigPayloadStaticConfigsInner
 	for _, config := range *staticConfigs {
 		var labels *map[string]interface{}
 		if config.Labels != nil {
