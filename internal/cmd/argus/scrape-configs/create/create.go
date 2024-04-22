@@ -117,7 +117,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s Scrape Config for Argus instance %q, with job name %q\n", operationState, instanceLabel, *jobName)
+			p.Outputf("%s Scrape Config job with name %q for Argus instance %q\n", operationState, *jobName, instanceLabel)
 			return nil
 		},
 	}
