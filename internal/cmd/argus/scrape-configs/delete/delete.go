@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
+	argusUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
@@ -38,7 +39,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(jobNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an Argus Scrape config with name "my-config" from Argus instance "xxx"`,
+				`Delete a Scrape Config job with name "my-config" from Argus instance "xxx"`,
 				"$ stackit argus scrape-configs delete my-config --instance-id xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -54,8 +55,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			instanceLabel, err := argusUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			if err != nil {
+				instanceLabel = model.InstanceId
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete Scrape Config %q? (This cannot be undone)", model.JobName)
+				prompt := fmt.Sprintf("Are you sure you want to delete Scrape Config job %q on Argus instance %q? (This cannot be undone)", model.JobName, instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -84,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s Scrape Config %q\n", operationState, model.JobName)
+			p.Info("%s Scrape Config job with name %q for Argus instance %q\n", operationState, model.JobName, instanceLabel)
 			return nil
 		},
 	}

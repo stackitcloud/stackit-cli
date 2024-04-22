@@ -13,7 +13,7 @@ stackit argus scrape-configs delete JOB_NAME [flags]
 ### Examples
 
 ```
-  Delete an Argus Scrape config with name "my-config" from Argus instance "xxx"
+  Delete a Scrape Config job with name "my-config" from Argus instance "xxx"
   $ stackit argus scrape-configs delete my-config --instance-id xxx
 ```
 
