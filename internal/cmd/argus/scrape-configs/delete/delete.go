@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", jobNameArg),
-		Short: "Deletes an Argus Scrape Config",
-		Long:  "Deletes an Argus Scrape Config.",
+		Short: "Deletes a Scrape Config job from an Argus instance",
+		Long:  "Deletes a Scrape Config job from an Argus instance.",
 		Args:  args.SingleArg(jobNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(

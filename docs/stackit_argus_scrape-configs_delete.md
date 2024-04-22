@@ -1,10 +1,10 @@
 ## stackit argus scrape-configs delete
 
-Deletes an Argus Scrape Config
+Deletes a Scrape Config job from an Argus instance
 
 ### Synopsis
 
-Deletes an Argus Scrape Config.
+Deletes a Scrape Config job from an Argus instance.
 
 ```
 stackit argus scrape-configs delete JOB_NAME [flags]
