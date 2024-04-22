@@ -34,13 +34,13 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", jobNameArg),
-		Short: "Deletes a Scrape Config job from an Argus instance",
-		Long:  "Deletes a Scrape Config job from an Argus instance.",
+		Short: "Deletes a scrape configuration from an Argus instance",
+		Long:  "Deletes a scrape configuration from an Argus instance.",
 		Args:  args.SingleArg(jobNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a Scrape Config job with name "my-config" from Argus instance "xxx"`,
-				"$ stackit argus scrape-configs delete my-config --instance-id xxx"),
+				`Delete a scrape configuration job with name "my-config" from Argus instance "xxx"`,
+				"$ stackit argus scrape-config delete my-config --instance-id xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete Scrape Config job %q on Argus instance %q? (This cannot be undone)", model.JobName, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete scrape configuration %q on Argus instance %q? (This cannot be undone)", model.JobName, instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete Scrape Config: %w", err)
+				return fmt.Errorf("delete scrape configuration: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
@@ -81,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Start("Deleting scrape config")
 				_, err = wait.DeleteScrapeConfigWaitHandler(ctx, apiClient, model.InstanceId, model.JobName, model.ProjectId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Scrape Config deletion: %w", err)
+					return fmt.Errorf("wait for scrape config deletion: %w", err)
 				}
 				s.Stop()
 			}
@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s Scrape Config job with name %q for Argus instance %q\n", operationState, model.JobName, instanceLabel)
+			p.Info("%s scrape configuration with name %q for Argus instance %q\n", operationState, model.JobName, instanceLabel)
 			return nil
 		},
 	}
@@ -106,7 +106,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	clusterName := inputArgs[0]
+	jobName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
@@ -115,7 +115,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		JobName:         clusterName,
+		JobName:         jobName,
 		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
 	}, nil
 }

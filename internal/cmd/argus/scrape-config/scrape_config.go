@@ -1,9 +1,9 @@
-package scrapeconfigs
+package scrapeconfig
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-configs/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-configs/delete"
-	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-configs/generate-payload"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/delete"
+	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/generate-payload"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -13,8 +13,8 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "scrape-configs",
-		Short: "Provides functionality for scrape configs in Argus.",
+		Use:   "scrape-config",
+		Short: "Provides functionality for scrape configurations in Argus",
 		Long:  "Provides functionality for scrape configurations in Argus.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
