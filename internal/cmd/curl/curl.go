@@ -212,7 +212,7 @@ func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) er
 	}
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("read respose body: %w", err)
+		return fmt.Errorf("read response body: %w", err)
 	}
 	output = append(output, respBody...)
 
