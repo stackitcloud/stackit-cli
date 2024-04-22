@@ -4,6 +4,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/delete"
 	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/generate-payload"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

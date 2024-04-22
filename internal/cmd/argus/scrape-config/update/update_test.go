@@ -11,7 +11,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/argus"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -62,9 +61,32 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		projectIdFlag:  testProjectId,
+		instanceIdFlag: testInstanceId,
 		payloadFlag: `{
-
+			"basicAuth": {
+				"username": "username",
+				"password": "password"
+			},
+			"bearerToken": "bearerToken",
+			"honorLabels": true,
+			"honorTimestamps": true,
+			"metricsPath": "/metrics",
+			"metricsRelabelConfigs": [
+				{
+					"action": "replace",
+					"modulus": 1.0,
+					"regex": "regex",
+					"replacement": "replacement",
+					"separator": "separator",
+					"sourceLabels": ["sourceLabel"],
+					"targetLabel": "targetLabel"
+				}
+			],
+			"params": {
+				"key": ["value1", "value2"],
+				"key2": []
+			}
 		  }`,
 	}
 	for _, mod := range mods {
@@ -79,8 +101,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ClusterName: testJobName,
-		Payload:     testPayload,
+		JobName:    testJobName,
+		InstanceId: testInstanceId,
+		Payload:    testPayload,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -89,8 +112,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *argus.ApiUpdateScrapeConfigRequest)) argus.ApiUpdateScrapeConfigRequest {
-	request := testClient.ScrapeConfig(testCtx, testProjectId, fixtureInputModel().ClusterName)
-	request = request.CreateOrUpdateClusterPayload(testPayload)
+	request := testClient.UpdateScrapeConfig(testCtx, testInstanceId, testJobName, testProjectId)
+	request = request.UpdateScrapeConfigPayload(testPayload)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -151,6 +174,30 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -221,7 +268,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest ske.ApiCreateOrUpdateClusterRequest
+		expectedRequest argus.ApiUpdateScrapeConfigRequest
 		isValid         bool
 	}{
 		{
