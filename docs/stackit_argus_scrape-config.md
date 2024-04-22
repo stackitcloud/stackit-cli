@@ -32,4 +32,5 @@ stackit argus scrape-config [flags]
 * [stackit argus scrape-config create](./stackit_argus_scrape-config_create.md)	 - Creates a scrape configuration for an Argus instance
 * [stackit argus scrape-config delete](./stackit_argus_scrape-config_delete.md)	 - Deletes a scrape configuration from an Argus instance
 * [stackit argus scrape-config generate-payload](./stackit_argus_scrape-config_generate-payload.md)	 - Generates a payload to create/update scrape configurations for an Argus instance 
+* [stackit argus scrape-config update](./stackit_argus_scrape-config_update.md)	 - Updates a scrape configuration of an Argus instance
 
