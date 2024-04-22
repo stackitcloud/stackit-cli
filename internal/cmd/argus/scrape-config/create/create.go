@@ -34,9 +34,9 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a Scrape Config job for an Argus instance",
+		Short: "Creates a scrape configuration for an Argus instance",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
-			"Creates a Scrape Config job for an Argus instance.",
+			"Creates a scrape configuration job for an Argus instance.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
 			"If no payload is provided, a default payload will be used.",
 			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.",
@@ -44,19 +44,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Scrape Config job on Argus instance "xxx" using default configuration`,
-				"$ stackit argus scrape-configs create"),
+				`Create a scrape configuration on Argus instance "xxx" using default configuration`,
+				"$ stackit argus scrape-config create"),
 			examples.NewExample(
-				`Create a Scrape Config job on Argus instance "xxx" using an API payload sourced from the file "./payload.json"`,
-				"$ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx"),
+				`Create a scrape configuration on Argus instance "xxx" using an API payload sourced from the file "./payload.json"`,
+				"$ stackit argus scrape-config create --payload @./payload.json --instance-id xxx"),
 			examples.NewExample(
-				`Create a Scrape Config job on Argus instance "xxx" using an API payload provided as a JSON string`,
-				`$ stackit argus scrape-configs create --payload "{...}" --instance-id xxx`),
+				`Create a scrape configuration on Argus instance "xxx" using an API payload provided as a JSON string`,
+				`$ stackit argus scrape-config create --payload "{...}" --instance-id xxx`),
 			examples.NewExample(
 				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
-				`$ stackit argus scrape-configs generate-payload > ./payload.json`,
+				`$ stackit argus scrape-config generate-payload > ./payload.json`,
 				`<Modify payload in file, if needed>`,
-				`$ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx`),
+				`$ stackit argus scrape-config create --payload @./payload.json --instance-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Scrape Config job on Argus instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a scrape configuration on Argus instance %q?", instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -97,7 +97,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Scrape Config job: %w", err)
+				return fmt.Errorf("create scrape configuration: %w", err)
 			}
 
 			jobName := model.Payload.JobName
@@ -108,7 +108,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Start("Creating scrape config")
 				_, err = wait.CreateScrapeConfigWaitHandler(ctx, apiClient, model.InstanceId, *jobName, model.ProjectId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Scrape Config job creation: %w", err)
+					return fmt.Errorf("wait for scrape configuration creation: %w", err)
 				}
 				s.Stop()
 			}
@@ -117,7 +117,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s Scrape Config job with name %q for Argus instance %q\n", operationState, *jobName, instanceLabel)
+			p.Outputf("%s scrape configuration with name %q for Argus instance %q\n", operationState, *jobName, instanceLabel)
 			return nil
 		},
 	}
@@ -126,7 +126,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit argus scrape-configs generate-payload")`)
+	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit argus scrape-config generate-payload")`)
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
