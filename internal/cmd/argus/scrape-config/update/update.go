@@ -83,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// The API has no status to wait on, so async mode is default
-			p.Info("Triggered update of Argus scrape configuration with name %q\n", model.JobName)
+			p.Info("Updated Argus scrape configuration with name %q\n", model.JobName)
 			return nil
 		},
 	}
@@ -113,8 +113,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	if err != nil {
 		return nil, fmt.Errorf("encode payload: %w", err)
 	}
-
-	fmt.Println("Payload: ", payload)
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
