@@ -84,8 +84,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			// TODO: confirm if it makes sense to check if JobName already exists
-
 			// Fill in default payload, if needed
 			if model.Payload == nil {
 				defaultPayload := argusUtils.DefaultCreateScrapeConfigPayload
