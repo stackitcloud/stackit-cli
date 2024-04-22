@@ -63,11 +63,10 @@ func TestOutputf(t *testing.T) {
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
+			viper.Reset()
 
 			if tt.outputFormatNone {
 				viper.Set(config.OutputFormatKey, NoneOutputFormat)
-			} else {
-				viper.Set(config.OutputFormatKey, "") // needed to prevent conflict with other tests
 			}
 
 			if len(tt.args) == 0 {
@@ -135,11 +134,10 @@ func TestOutputln(t *testing.T) {
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
+			viper.Reset()
 
 			if tt.outputFormatNone {
 				viper.Set(config.OutputFormatKey, NoneOutputFormat)
-			} else {
-				viper.Set(config.OutputFormatKey, "") // needed to prevent conflict with other tests
 			}
 
 			p.Outputln(tt.message)
@@ -147,6 +145,72 @@ func TestOutputln(t *testing.T) {
 			var expectedOutput string
 			if !tt.outputFormatNone {
 				expectedOutput = fmt.Sprintf("%s\n", tt.message)
+			}
+
+			output := buf.String()
+			if output != expectedOutput {
+				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
+			}
+		})
+	}
+}
+
+func TestPagerDisplay(t *testing.T) {
+	tests := []struct {
+		description      string
+		content          string
+		verbosity        Level
+		outputFormatNone bool
+	}{
+		{
+			description: "debug verbosity",
+			content:     "Test message",
+			verbosity:   DebugLevel,
+		},
+		{
+			description: "info verbosity",
+			content:     "Test message",
+			verbosity:   InfoLevel,
+		},
+		{
+			description: "warning verbosity",
+			content:     "Test message",
+			verbosity:   WarningLevel,
+		},
+		{
+			description: "error verbosity",
+			content:     "Test message",
+			verbosity:   ErrorLevel,
+		},
+		{
+			description:      "output format none",
+			content:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var buf bytes.Buffer
+			cmd := &cobra.Command{}
+			cmd.SetOutput(&buf)
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+			viper.Reset()
+
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			}
+
+			err := p.PagerDisplay(tt.content)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err.Error())
+			}
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = tt.content
 			}
 
 			output := buf.String()

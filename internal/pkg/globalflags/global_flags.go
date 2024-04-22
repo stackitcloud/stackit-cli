@@ -19,9 +19,6 @@ const (
 	ProjectIdFlag    = "project-id"
 	VerbosityFlag    = "verbosity"
 
-	JSONOutputFormat   = "json"
-	PrettyOutputFormat = "pretty"
-
 	DebugVerbosity   = string(print.DebugLevel)
 	InfoVerbosity    = string(print.InfoLevel)
 	WarningVerbosity = string(print.WarningLevel)
@@ -30,7 +27,7 @@ const (
 	VerbosityDefault = InfoVerbosity
 )
 
-var outputFormatFlagOptions = []string{JSONOutputFormat, PrettyOutputFormat, print.NoneOutputFormat}
+var outputFormatFlagOptions = []string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat}
 var verbosityFlagOptions = []string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity}
 
 type GlobalFlagModel struct {

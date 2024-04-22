@@ -22,7 +22,9 @@ const (
 	WarningLevel Level = "warning"
 	ErrorLevel   Level = "error"
 
-	NoneOutputFormat = "none"
+	JSONOutputFormat   = "json"
+	PrettyOutputFormat = "pretty"
+	NoneOutputFormat   = "none"
 )
 
 var errAborted = errors.New("operation aborted")
