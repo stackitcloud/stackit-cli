@@ -119,7 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 
 func outputResult(p *print.Printer, outputFormat string, plans []logme.Offering) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal LogMe plans: %w", err)

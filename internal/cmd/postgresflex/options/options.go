@@ -173,7 +173,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.Lis
 	}
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex options: %w", err)

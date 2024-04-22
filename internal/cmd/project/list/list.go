@@ -209,7 +209,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 
 func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)

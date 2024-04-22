@@ -124,7 +124,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE options: %w", err)

@@ -224,7 +224,7 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 
 func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(recordSets, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set list: %w", err)

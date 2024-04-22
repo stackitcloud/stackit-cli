@@ -127,7 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 
 func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.User) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(users, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user list: %w", err)

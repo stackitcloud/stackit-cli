@@ -127,7 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 
 func outputResult(p *print.Printer, outputFormat string, users []mongodbflex.ListUser) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(users, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex user list: %w", err)

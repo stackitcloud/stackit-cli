@@ -133,7 +133,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 
 func outputResult(p *print.Printer, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(tokensMetadata, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal tokens metadata: %w", err)

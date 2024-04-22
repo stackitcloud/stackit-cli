@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 
 func outputResult(p *print.Printer, outputFormat string, user secretsmanager.User) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *user.Id)
 		table.AddSeparator()
