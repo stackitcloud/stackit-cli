@@ -9,14 +9,17 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestOutputf(t *testing.T) {
 	tests := []struct {
-		description string
-		message     string
-		args        []any
-		verbosity   Level
+		description      string
+		message          string
+		args             []any
+		verbosity        Level
+		outputFormatNone bool
 	}{
 		{
 			description: "debug verbosity",
@@ -44,6 +47,12 @@ func TestOutputf(t *testing.T) {
 			message:     "Test message",
 			verbosity:   ErrorLevel,
 		},
+		{
+			description:      "output format none",
+			message:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -55,16 +64,26 @@ func TestOutputf(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			} else {
+				viper.Set(config.OutputFormatKey, "") // needed to prevent conflict with other tests
+			}
+
 			if len(tt.args) == 0 {
 				p.Outputf(tt.message)
 			} else {
 				p.Outputf(tt.message, tt.args...)
 			}
 
-			expectedOutput := tt.message
-			if len(tt.args) > 0 {
-				expectedOutput = fmt.Sprintf(tt.message, tt.args...)
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = tt.message
+				if len(tt.args) > 0 {
+					expectedOutput = fmt.Sprintf(tt.message, tt.args...)
+				}
 			}
+
 			output := buf.String()
 			if output != expectedOutput {
 				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
@@ -75,9 +94,10 @@ func TestOutputf(t *testing.T) {
 
 func TestOutputln(t *testing.T) {
 	tests := []struct {
-		description string
-		message     string
-		verbosity   Level
+		description      string
+		message          string
+		verbosity        Level
+		outputFormatNone bool
 	}{
 		{
 			description: "debug verbosity",
@@ -99,6 +119,12 @@ func TestOutputln(t *testing.T) {
 			message:     "Test message",
 			verbosity:   ErrorLevel,
 		},
+		{
+			description:      "output format none",
+			message:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -110,9 +136,19 @@ func TestOutputln(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			} else {
+				viper.Set(config.OutputFormatKey, "") // needed to prevent conflict with other tests
+			}
+
 			p.Outputln(tt.message)
 
-			expectedOutput := fmt.Sprintf("%s\n", tt.message)
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = fmt.Sprintf("%s\n", tt.message)
+			}
+
 			output := buf.String()
 			if output != expectedOutput {
 				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
