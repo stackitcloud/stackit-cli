@@ -25,7 +25,6 @@ import (
 const (
 	instanceIdArg = "INSTANCE_ID"
 
-	instanceNameFlag         = "name"
 	enableMonitoringFlag     = "enable-monitoring"
 	graphiteFlag             = "graphite"
 	metricsFrequencyFlag     = "metrics-frequency"
