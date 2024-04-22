@@ -27,4 +27,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(generatepayload.NewCmd(p))
 	cmd.AddCommand(create.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 }
