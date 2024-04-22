@@ -29,5 +29,6 @@ stackit argus scrape-configs [flags]
 ### SEE ALSO
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
+* [stackit argus scrape-configs create](./stackit_argus_scrape-configs_create.md)	 - Creates a Scrape Config Job for an Argus instance
 * [stackit argus scrape-configs generate-payload](./stackit_argus_scrape-configs_generate-payload.md)	 - Generates a payload to create/update Scrape Configurations for an Argus instance 
 
