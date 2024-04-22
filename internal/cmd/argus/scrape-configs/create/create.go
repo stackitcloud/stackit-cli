@@ -34,9 +34,9 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a Scrape Config Job for an Argus instance",
+		Short: "Creates a Scrape Config job for an Argus instance",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
-			"Creates a Scrape Config Job for an Argus instance.",
+			"Creates a Scrape Config job for an Argus instance.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
 			"If no payload is provided, a default payload will be used.",
 			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.",
@@ -44,19 +44,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Scrape Config job using default configuration`,
+				`Create a Scrape Config job on Argus instance "xxx" using default configuration`,
 				"$ stackit argus scrape-configs create"),
 			examples.NewExample(
-				`Create a Scrape Config job using an API payload sourced from the file "./payload.json"`,
-				"$ stackit argus scrape-configs create --payload @./payload.json"),
+				`Create a Scrape Config job on Argus instance "xxx" using an API payload sourced from the file "./payload.json"`,
+				"$ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx"),
 			examples.NewExample(
-				`Create a Scrape Config job using an API payload provided as a JSON string`,
-				`$ stackit argus scrape-configs create --payload "{...}"`),
+				`Create a Scrape Config job on Argus instance "xxx" using an API payload provided as a JSON string`,
+				`$ stackit argus scrape-configs create --payload "{...}" --instance-id xxx`),
 			examples.NewExample(
 				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
 				`$ stackit argus scrape-configs generate-payload > ./payload.json`,
 				`<Modify payload in file, if needed>`,
-				`$ stackit argus scrape-configs create --payload @./payload.json`),
+				`$ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -117,7 +117,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s Scrape Configuration for Argus instance %q, with job name %q\n", operationState, instanceLabel, *jobName)
+			p.Outputf("%s Scrape Config for Argus instance %q, with job name %q\n", operationState, instanceLabel, *jobName)
 			return nil
 		},
 	}

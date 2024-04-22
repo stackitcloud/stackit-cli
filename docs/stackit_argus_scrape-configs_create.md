@@ -1,10 +1,10 @@
 ## stackit argus scrape-configs create
 
-Creates a Scrape Config Job for an Argus instance
+Creates a Scrape Config job for an Argus instance
 
 ### Synopsis
 
-Creates a Scrape Config Job for an Argus instance.
+Creates a Scrape Config job for an Argus instance.
 The payload can be provided as a JSON string or a file path prefixed with "@".
 If no payload is provided, a default payload will be used.
 See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.
@@ -16,19 +16,19 @@ stackit argus scrape-configs create [flags]
 ### Examples
 
 ```
-  Create a Scrape Config job using default configuration
+  Create a Scrape Config job on Argus instance "xxx" using default configuration
   $ stackit argus scrape-configs create
 
-  Create a Scrape Config job using an API payload sourced from the file "./payload.json"
-  $ stackit argus scrape-configs create --payload @./payload.json
+  Create a Scrape Config job on Argus instance "xxx" using an API payload sourced from the file "./payload.json"
+  $ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx
 
-  Create a Scrape Config job using an API payload provided as a JSON string
-  $ stackit argus scrape-configs create --payload "{...}"
+  Create a Scrape Config job on Argus instance "xxx" using an API payload provided as a JSON string
+  $ stackit argus scrape-configs create --payload "{...}" --instance-id xxx
 
   Generate a payload with default values, and adapt it with custom values for the different configuration options
   $ stackit argus scrape-configs generate-payload > ./payload.json
   <Modify payload in file, if needed>
-  $ stackit argus scrape-configs create --payload @./payload.json
+  $ stackit argus scrape-configs create --payload @./payload.json --instance-id xxx
 ```
 
 ### Options
