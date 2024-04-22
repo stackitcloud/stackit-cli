@@ -130,8 +130,8 @@ func Execute(version, date string) {
 	err := cmd.Execute()
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
-		p.Error(err.Error())
 		p.Debug(print.ErrorLevel, "execute command: %v", err)
+		p.Error(err.Error())
 		os.Exit(1)
 	}
 }
