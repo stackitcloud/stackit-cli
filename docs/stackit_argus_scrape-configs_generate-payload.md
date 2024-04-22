@@ -8,7 +8,7 @@ Generates a JSON payload with values to be used as --payload input for Scrape Co
 This command can be used to generate a payload to update an existing Scrape Config job or to create a new Scrape Config job.
 To update an existing Scrape Config job, provide the job name and the instance ID of the Argus instance.
 To obtain a default payload to create a new Scrape Config job, run the command with no flags.
-Note that the default values provided, particularly for the job name, the metrics path and URL of the targets, should be changed to your use case.
+Note that some of the default values provided, such as the job name, the metrics path and URL of the targets, should be adapted to your use case.
 See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_create for information regarding the payload structure.
 
 
