@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, credentials *ske.Credentials) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("SERVER", *credentials.Server)
 		table.AddSeparator()

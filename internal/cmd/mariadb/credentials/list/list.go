@@ -124,7 +124,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 
 func outputResult(p *print.Printer, outputFormat string, credentials []mariadb.CredentialsListItem) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB credentials list: %w", err)

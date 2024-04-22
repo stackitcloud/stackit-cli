@@ -120,7 +120,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 
 func outputResult(p *print.Printer, outputFormat string, instances []secretsmanager.Instance) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance list: %w", err)

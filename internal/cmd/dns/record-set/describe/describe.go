@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		recordsData := make([]string, 0, len(*recordSet.Records))
 		for _, r := range *recordSet.Records {
 			recordsData = append(recordsData, *r.Content)

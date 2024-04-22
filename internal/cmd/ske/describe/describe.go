@@ -75,7 +75,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, project *ske.ProjectResponse) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *project.ProjectId)
 		table.AddSeparator()

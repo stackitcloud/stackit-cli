@@ -118,7 +118,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 
 func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(roles, "", "  ")
 		if err != nil {

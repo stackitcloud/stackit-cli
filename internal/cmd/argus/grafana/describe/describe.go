@@ -114,7 +114,7 @@ func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *
 
 func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argus.GrafanaConfigs, instance *argus.GetInstanceResponse) error {
 	switch inputModel.OutputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		initialAdminPassword := *instance.Instance.GrafanaAdminPassword
 		if inputModel.HidePassword {
 			initialAdminPassword = "<hidden>"

@@ -100,7 +100,7 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 
 func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)

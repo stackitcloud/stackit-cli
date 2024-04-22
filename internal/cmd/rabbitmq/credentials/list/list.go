@@ -124,7 +124,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 
 func outputResult(p *print.Printer, outputFormat string, credentials []rabbitmq.CredentialsListItem) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ credentials list: %w", err)

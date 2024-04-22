@@ -121,7 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 
 func outputResult(p *print.Printer, outputFormat string, instances []postgresflex.InstanceListInstance) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)

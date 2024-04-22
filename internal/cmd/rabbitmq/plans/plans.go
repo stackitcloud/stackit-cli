@@ -119,7 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 
 func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offering) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ plans: %w", err)

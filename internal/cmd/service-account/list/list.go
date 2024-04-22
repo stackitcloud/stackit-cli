@@ -113,7 +113,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 
 func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)

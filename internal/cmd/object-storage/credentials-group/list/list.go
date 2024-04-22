@@ -111,7 +111,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 
 func outputResult(p *print.Printer, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentialsGroups, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials group list: %w", err)

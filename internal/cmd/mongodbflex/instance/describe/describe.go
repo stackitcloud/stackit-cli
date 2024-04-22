@@ -89,7 +89,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 

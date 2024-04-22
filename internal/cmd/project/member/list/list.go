@@ -147,7 +147,7 @@ func outputResult(p *print.Printer, model *inputModel, members []authorization.M
 	sort.SliceStable(members, sortFn)
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")
 		if err != nil {

@@ -86,7 +86,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 
 func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("Name", *bucket.Name)
 		table.AddSeparator()

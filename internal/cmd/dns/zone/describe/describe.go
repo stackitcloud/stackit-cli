@@ -88,7 +88,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *zone.Id)
 		table.AddSeparator()
