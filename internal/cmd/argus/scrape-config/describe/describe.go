@@ -154,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 		}
 		table.AddSeparator()
 		for i, target := range targets {
-			table.AddRow(fmt.Sprintf("TARGET %d", i+1), target)
+			table.AddRow(fmt.Sprintf("TARGET #%d", i+1), target)
 			table.AddSeparator()
 		}
 
