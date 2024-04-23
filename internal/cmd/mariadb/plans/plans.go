@@ -119,7 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 
 func outputResult(p *print.Printer, outputFormat string, plans []mariadb.Offering) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB plans: %w", err)

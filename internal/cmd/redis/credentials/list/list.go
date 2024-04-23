@@ -124,7 +124,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 
 func outputResult(p *print.Printer, outputFormat string, credentials []redis.CredentialsListItem) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Redis credentials list: %w", err)

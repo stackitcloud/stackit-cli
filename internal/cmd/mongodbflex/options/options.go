@@ -9,7 +9,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -174,7 +173,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 	}
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
@@ -198,7 +197,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 		content += renderStorages(options.Storages.Storages)
 	}
 
-	err := pager.Display(p, content)
+	err := p.PagerDisplay(content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}

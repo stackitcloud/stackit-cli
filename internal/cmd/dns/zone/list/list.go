@@ -212,7 +212,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 
 func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(zones, "", "  ")
 		if err != nil {

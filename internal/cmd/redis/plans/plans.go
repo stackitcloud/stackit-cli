@@ -119,7 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 
 func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Redis plans: %w", err)

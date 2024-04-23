@@ -119,7 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 
 func outputResult(p *print.Printer, outputFormat string, instances []opensearch.Instance) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch instance list: %w", err)

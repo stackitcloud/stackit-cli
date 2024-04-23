@@ -89,7 +89,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 
 func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Instance) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.InstanceId)
 		table.AddSeparator()

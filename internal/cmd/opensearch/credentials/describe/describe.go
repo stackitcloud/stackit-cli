@@ -101,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 
 func outputResult(p *print.Printer, outputFormat string, credentials *opensearch.CredentialsResponse) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()

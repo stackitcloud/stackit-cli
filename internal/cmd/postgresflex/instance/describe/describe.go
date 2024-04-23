@@ -91,7 +91,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 
 func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 

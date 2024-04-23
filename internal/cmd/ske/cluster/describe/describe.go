@@ -86,7 +86,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 
 		acl := []string{}
 		if cluster.Extensions != nil && cluster.Extensions.Acl != nil {

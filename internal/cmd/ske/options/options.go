@@ -10,7 +10,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -125,7 +124,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE options: %w", err)
@@ -159,7 +158,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *ske.Provi
 		content += renderVolumeTypes(options)
 	}
 
-	err := pager.Display(p, content)
+	err := p.PagerDisplay(content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
