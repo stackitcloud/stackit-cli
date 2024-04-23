@@ -3,7 +3,9 @@ package scrapeconfig
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/describe"
 	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/generate-payload"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -29,4 +31,6 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(create.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
 	cmd.AddCommand(update.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
 }
