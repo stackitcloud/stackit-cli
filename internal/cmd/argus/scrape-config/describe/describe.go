@@ -102,12 +102,37 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 	case globalflags.PrettyOutputFormat:
 
 		saml2Enabled := "Enabled"
-
 		if config.Params != nil {
 			saml2 := (*config.Params)["saml2"]
 			if len(saml2) > 0 && saml2[0] == "disabled" {
 				saml2Enabled = "Disabled"
 			}
+		}
+
+		targets := []string{}
+		for _, target := range *config.StaticConfigs {
+			targetFmt := ""
+			if target.Labels != nil {
+				// make map prettier
+				for k, v := range *target.Labels {
+					if targetFmt != "" {
+						targetFmt += " "
+					} else {
+						targetFmt += "labels: ["
+					}
+					targetFmt += fmt.Sprintf("%s:%s", k, v)
+				}
+				if targetFmt != "" {
+					targetFmt += "]"
+				}
+			}
+			if target.Targets != nil {
+				if targetFmt != "" {
+					targetFmt += "; "
+				}
+				targetFmt += fmt.Sprintf("urls: %v", *target.Targets)
+			}
+			targets = append(targets, targetFmt)
 		}
 
 		table := tables.NewTable()
@@ -131,6 +156,11 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 			table.AddRow("USERNAME", *config.BasicAuth.Username)
 			table.AddSeparator()
 			table.AddRow("PASSWORD", *config.BasicAuth.Password)
+		}
+		table.AddSeparator()
+		for i, target := range targets {
+			table.AddRow(fmt.Sprintf("TARGET %d", i+1), target)
+			table.AddSeparator()
 		}
 
 		err := table.Display(p)
