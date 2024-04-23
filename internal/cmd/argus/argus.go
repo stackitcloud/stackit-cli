@@ -1,6 +1,7 @@
 package argus
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/grafana"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/plans"
 	scrapeconfig "github.com/stackitcloud/stackit-cli/internal/cmd/argus/scrape-config"
@@ -24,7 +25,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(plans.NewCmd(p))
+	cmd.AddCommand(grafana.NewCmd(p))
 	cmd.AddCommand(instance.NewCmd(p))
 	cmd.AddCommand(scrapeconfig.NewCmd(p))
+	cmd.AddCommand(plans.NewCmd(p))
 }

@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -71,6 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(configs) == 0 {
 				instanceLabel, err := argusUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = model.InstanceId
 				}
 				p.Info("No scrape configurations found for instance %q\n", instanceLabel)
@@ -98,13 +99,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -114,8 +115,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 	}, nil
 }
 
@@ -126,7 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 
 func outputResult(p *print.Printer, outputFormat string, configs []argus.Job) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(configs, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal scrape configurations list: %w", err)

@@ -18,6 +18,7 @@ func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
 
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
 	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
@@ -30,6 +31,7 @@ func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
 
 	apiClient, err = logme.NewAPIClient(cfgOptions...)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}
 	}
 

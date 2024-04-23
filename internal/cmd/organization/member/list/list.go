@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -103,10 +103,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -116,10 +116,10 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(cmd, organizationIdFlag),
-		Subject:         flags.FlagToStringPointer(cmd, subjectFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag),
+		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
 	}, nil
 }
 
@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, model *inputModel, members []authorization.M
 	sort.SliceStable(members, sortFn)
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")
 		if err != nil {
