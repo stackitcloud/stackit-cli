@@ -54,7 +54,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 			return outputResult(p, model.OutputFormat, configData)
-
 		},
 	}
 	return cmd
@@ -76,7 +75,6 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 			return fmt.Errorf("marshal config list: %w", err)
 		}
 		p.Outputln(string(details))
-
 		return nil
 	default:
 		// Sort the config options by key
@@ -125,5 +123,4 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 		}
 		return nil
 	}
-
 }

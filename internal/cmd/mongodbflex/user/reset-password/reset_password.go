@@ -96,7 +96,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Outputf("New URI: %s\n", *user.Uri)
 				return nil
 			}
-
 		},
 	}
 
