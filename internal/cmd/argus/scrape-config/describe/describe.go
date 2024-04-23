@@ -101,10 +101,13 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 	switch outputFormat {
 	case globalflags.PrettyOutputFormat:
 
-		saml2 := (*config.Params)["saml2"]
 		saml2Enabled := "Enabled"
-		if len(saml2) > 0 && saml2[0] == "disabled" {
-			saml2Enabled = "Disabled"
+
+		if config.Params != nil {
+			saml2 := (*config.Params)["saml2"]
+			if len(saml2) > 0 && saml2[0] == "disabled" {
+				saml2Enabled = "Disabled"
+			}
 		}
 
 		table := tables.NewTable()
