@@ -6,7 +6,7 @@ Updates a scrape configuration of an Argus instance
 
 Updates a scrape configuration of an Argus instance.
 The payload can be provided as a JSON string or a file path prefixed with "@".
-See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_partial_update for information regarding the payload structure.
+See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_update for information regarding the payload structure.
 
 ```
 stackit argus scrape-config update JOB_NAME [flags]
@@ -15,10 +15,10 @@ stackit argus scrape-config update JOB_NAME [flags]
 ### Examples
 
 ```
-  Update a scrape configuration from Argus instance "xxx", using an API payload sourced from the file "./payload.json"
+  Update a scrape configuration with name "my-config" from Argus instance "xxx", using an API payload sourced from the file "./payload.json"
   $ stackit argus scrape-config update my-config --payload @./payload.json --instance-id xxx
 
-  Update an scrape configuration from Argus instance "xxx", using an API payload provided as a JSON string
+  Update an scrape configuration with name "my-config" from Argus instance "xxx", using an API payload provided as a JSON string
   $ stackit argus scrape-config update my-config --payload "{...}" --instance-id xxx
 
   Generate a payload with the current values of a scrape configuration, and adapt it with custom values for the different configuration options
