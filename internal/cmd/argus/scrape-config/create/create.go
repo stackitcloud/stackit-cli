@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a scrape configuration on Argus instance %q?", instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Argus instance %q?", *model.Payload.JobName, instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
