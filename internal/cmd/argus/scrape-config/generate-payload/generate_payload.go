@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -94,11 +94,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(jobNameFlag, "n", "", "If set, generates an update payload with the current state of the given scrape config. If unset, generates a create payload with default values")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	jobName := flags.FlagToStringPointer(cmd, jobNameFlag)
-	instanceId := flags.FlagToStringValue(cmd, instanceIdFlag)
+	jobName := flags.FlagToStringPointer(p, cmd, jobNameFlag)
+	instanceId := flags.FlagToStringValue(p, cmd, instanceIdFlag)
 
 	if jobName != nil && (globalFlags.ProjectId == "" || instanceId == "") {
 		return nil, fmt.Errorf("if a job-name is provided then instance-id and project-id must be provided")
@@ -107,7 +107,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		JobName:         jobName,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 	}, nil
 }
 
