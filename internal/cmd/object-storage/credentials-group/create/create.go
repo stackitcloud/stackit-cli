@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)

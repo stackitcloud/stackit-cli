@@ -125,7 +125,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				operationState := "Created"

@@ -83,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)

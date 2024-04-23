@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)

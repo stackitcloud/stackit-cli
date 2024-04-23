@@ -78,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, token)
 			default:
 				p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)

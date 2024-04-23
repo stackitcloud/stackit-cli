@@ -69,7 +69,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func outputResult(p *print.Printer, outputFormat string, configData map[string]any) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(configData, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)

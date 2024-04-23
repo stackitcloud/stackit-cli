@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, user)
 			default:
 				p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)

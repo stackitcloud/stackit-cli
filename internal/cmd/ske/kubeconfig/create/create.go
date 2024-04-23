@@ -109,7 +109,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)

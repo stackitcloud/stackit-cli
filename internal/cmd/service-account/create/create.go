@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)

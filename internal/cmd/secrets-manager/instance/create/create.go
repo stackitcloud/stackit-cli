@@ -94,7 +94,7 @@ If you want to retry configuring the ACLs, you can do it via:
 			}
 
 			switch model.OutputFormat {
-			case globalflags.JSONOutputFormat:
+			case print.JSONOutputFormat:
 				return outputResult(p, resp)
 			default:
 				p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
