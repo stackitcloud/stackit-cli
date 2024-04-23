@@ -49,22 +49,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configData := viper.AllSettings()
 
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				return err
-			}
+			model := parseInput(p, cmd)
 			return outputResult(p, model.OutputFormat, configData)
 		},
 	}
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-	}, nil
+	}
 }
 
 func outputResult(p *print.Printer, outputFormat string, configData map[string]any) error {
