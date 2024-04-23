@@ -198,8 +198,6 @@ func mapStaticConfigLabels(labels map[string]string) map[string]interface{} {
 	return labelsMap
 }
 
-=======
->>>>>>> main
 func GetInstanceName(ctx context.Context, apiClient ArgusClient, instanceId, projectId string) (string, error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, instanceId, projectId)
 	if err != nil {
