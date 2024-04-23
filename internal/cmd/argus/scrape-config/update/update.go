@@ -38,15 +38,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Updates a scrape configuration of an Argus instance.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
-			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_partial_update for information regarding the payload structure.",
+			"See https://docs.api.stackit.cloud/documentation/argus/version/v1#tag/scrape-config/operation/v1_projects_instances_scrapeconfigs_update for information regarding the payload structure.",
 		),
 		Args: args.SingleArg(jobNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update a scrape configuration from Argus instance "xxx", using an API payload sourced from the file "./payload.json"`,
+				`Update a scrape configuration with name "my-config" from Argus instance "xxx", using an API payload sourced from the file "./payload.json"`,
 				"$ stackit argus scrape-config update my-config --payload @./payload.json --instance-id xxx"),
 			examples.NewExample(
-				`Update an scrape configuration from Argus instance "xxx", using an API payload provided as a JSON string`,
+				`Update an scrape configuration with name "my-config" from Argus instance "xxx", using an API payload provided as a JSON string`,
 				`$ stackit argus scrape-config update my-config --payload "{...}" --instance-id xxx`),
 			examples.NewExample(
 				`Generate a payload with the current values of a scrape configuration, and adapt it with custom values for the different configuration options`,
@@ -82,7 +82,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update scrape config: %w", err)
 			}
 
-			// The API has no status to wait on, so async mode is default
 			p.Info("Updated Argus scrape configuration with name %q\n", model.JobName)
 			return nil
 		},

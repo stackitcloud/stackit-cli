@@ -206,8 +206,14 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[payloadFlag] = "not json"
 			}),
-			isValid:       false,
-			expectedModel: fixtureInputModel(),
+			isValid: false,
+		},
+		{
+			description: "payload missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, payloadFlag)
+			}),
+			isValid: false,
 		},
 	}
 
