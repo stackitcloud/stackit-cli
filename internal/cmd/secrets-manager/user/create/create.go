@@ -85,18 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Secrets Manager user: %w", err)
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
-				p.Outputf("Username: %s\n", *resp.Username)
-				p.Outputf("Password: %s\n", *resp.Password)
-				p.Outputf("Description: %s\n", *resp.Description)
-				p.Outputf("Write Access: %t\n", *resp.Write)
-
-				return nil
-			}
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 
@@ -136,12 +125,23 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(p *print.Printer, resp *secretsmanager.User) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal Secrets Manager user: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *secretsmanager.User) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager user: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
+		p.Outputf("Username: %s\n", *resp.Username)
+		p.Outputf("Password: %s\n", *resp.Password)
+		p.Outputf("Description: %s\n", *resp.Description)
+		p.Outputf("Write Access: %t\n", *resp.Write)
+
+		return nil
+	}
 }

@@ -66,14 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-				p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
-				return nil
-			}
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -107,12 +100,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, resp *objectstorage.CreateCredentialsGroupResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal Object Storage credentials group: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateCredentialsGroupResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials group: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
+		p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
+		return nil
+	}
 }

@@ -77,17 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				operationState := "Created"
-				if model.Async {
-					operationState = "Triggered creation of"
-				}
-				p.Outputf("%s bucket %q\n", operationState, model.BucketName)
-				return nil
-			}
+			return outputResult(p, model, resp)
 		},
 	}
 	return cmd
@@ -112,12 +102,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, resp *objectstorage.CreateBucketResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal Object Storage bucket: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateBucketResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage bucket: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s bucket %q\n", operationState, model.BucketName)
+		return nil
+	}
 }

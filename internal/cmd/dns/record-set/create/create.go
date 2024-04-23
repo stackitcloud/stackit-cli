@@ -99,17 +99,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				operationState := "Created"
-				if model.Async {
-					operationState = "Triggered creation of"
-				}
-				p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
-				return nil
-			}
+			return outputResult(p, model, zoneLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -164,12 +154,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, resp *dns.RecordSetResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal DNS record-set: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *dns.RecordSetResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record-set: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, *resp.Rrset.Id)
+		return nil
+	}
 }

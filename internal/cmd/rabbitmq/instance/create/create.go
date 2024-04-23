@@ -126,17 +126,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				operationState := "Created"
-				if model.Async {
-					operationState = "Triggered creation of"
-				}
-				p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
-				return nil
-			}
+			return outputResult(p, model, projectLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -254,12 +244,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	return req, nil
 }
 
-func outputResult(p *print.Printer, resp *rabbitmq.CreateInstanceResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal RabbitMQ instance: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *rabbitmq.CreateInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal RabbitMQ instance: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
+		return nil
+	}
 }

@@ -93,13 +93,7 @@ If you want to retry configuring the ACLs, you can do it via:
 				}
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
-				return nil
-			}
+			return outputResult(p, model, projectLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -151,12 +145,18 @@ func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId s
 	return req
 }
 
-func outputResult(p *print.Printer, resp *secretsmanager.Instance) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal Secrets Manager instance: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *secretsmanager.Instance) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
+		return nil
+	}
 }

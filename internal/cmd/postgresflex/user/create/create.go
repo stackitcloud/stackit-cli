@@ -89,21 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create PostgreSQL Flex user: %w", err)
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				user := resp.Item
-				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-				p.Outputf("Username: %s\n", *user.Username)
-				p.Outputf("Password: %s\n", *user.Password)
-				p.Outputf("Roles: %v\n", *user.Roles)
-				p.Outputf("Host: %s\n", *user.Host)
-				p.Outputf("Port: %d\n", *user.Port)
-				p.Outputf("URI: %s\n", *user.Uri)
-
-				return nil
-			}
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 
@@ -145,12 +131,26 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, resp *postgresflex.CreateUserResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal PostgresFlex user: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *postgresflex.CreateUserResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgresFlex user: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		user := resp.Item
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+		p.Outputf("Username: %s\n", *user.Username)
+		p.Outputf("Password: %s\n", *user.Password)
+		p.Outputf("Roles: %v\n", *user.Roles)
+		p.Outputf("Host: %s\n", *user.Host)
+		p.Outputf("Port: %d\n", *user.Port)
+		p.Outputf("URI: %s\n", *user.Uri)
+
+		return nil
+	}
 }

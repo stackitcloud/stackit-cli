@@ -91,21 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			user := resp.Item
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, user)
-			default:
-				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-				p.Outputf("Username: %s\n", *user.Username)
-				p.Outputf("Password: %s\n", *user.Password)
-				p.Outputf("Roles: %v\n", *user.Roles)
-				p.Outputf("Database: %s\n", *user.Database)
-				p.Outputf("Host: %s\n", *user.Host)
-				p.Outputf("Port: %d\n", *user.Port)
-				p.Outputf("URI: %s\n", *user.Uri)
-
-				return nil
-			}
+			return outputResult(p, model, instanceLabel, user)
 		},
 	}
 
@@ -150,12 +136,26 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, user *mongodbflex.User) error {
-	details, err := json.MarshalIndent(user, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal MongoDB Flex user: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *mongodbflex.User) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+		p.Outputf("Username: %s\n", *user.Username)
+		p.Outputf("Password: %s\n", *user.Password)
+		p.Outputf("Roles: %v\n", *user.Roles)
+		p.Outputf("Database: %s\n", *user.Database)
+		p.Outputf("Host: %s\n", *user.Host)
+		p.Outputf("Port: %d\n", *user.Port)
+		p.Outputf("URI: %s\n", *user.Uri)
+
+		return nil
+	}
 }

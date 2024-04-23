@@ -80,22 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials: %w", err)
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				return outputResult(p, resp)
-			default:
-				expireDate := "Never"
-				if resp.Expires != nil && *resp.Expires != "" {
-					expireDate = *resp.Expires
-				}
-
-				p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
-				p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
-				p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
-				p.Outputf("Expire Date: %s\n", expireDate)
-
-				return nil
-			}
+			return outputResult(p, model, credentialsGroupLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -140,12 +125,27 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, resp *objectstorage.CreateAccessKeyResponse) error {
-	details, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal Object Storage credentials: %w", err)
-	}
-	p.Outputln(string(details))
+func outputResult(p *print.Printer, model *inputModel, credentialsGroupLabel string, resp *objectstorage.CreateAccessKeyResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials: %w", err)
+		}
+		p.Outputln(string(details))
 
-	return nil
+		return nil
+	default:
+		expireDate := "Never"
+		if resp.Expires != nil && *resp.Expires != "" {
+			expireDate = *resp.Expires
+		}
+
+		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
+		p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
+		p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
+		p.Outputf("Expire Date: %s\n", expireDate)
+
+		return nil
+	}
 }
