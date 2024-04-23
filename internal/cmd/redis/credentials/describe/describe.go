@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -79,17 +79,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	credentialsId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		CredentialsId:   credentialsId,
 	}, nil
 }
@@ -101,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 
 func outputResult(p *print.Printer, outputFormat string, credentials *redis.CredentialsResponse) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()

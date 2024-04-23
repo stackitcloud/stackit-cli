@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -60,11 +60,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := secretsManagerUtils.GetUserLabel(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get user label: %v", err)
 				userLabel = fmt.Sprintf("%q", model.UserId)
 			}
 
@@ -98,17 +100,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	userId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		UserId:          userId,
 	}, nil
 }

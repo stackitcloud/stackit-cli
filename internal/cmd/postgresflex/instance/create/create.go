@@ -75,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -86,8 +86,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
@@ -160,17 +161,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	storageSize := flags.FlagWithDefaultToInt64Value(cmd, storageSizeFlag)
+	storageSize := flags.FlagWithDefaultToInt64Value(p, cmd, storageSizeFlag)
 
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -185,16 +186,16 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(cmd, aclFlag),
-		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, backupScheduleFlag)),
+		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag)),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, storageClassFlag)),
+		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringPointer(cmd, versionFlag),
-		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, typeFlag)),
+		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
+		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)),
 	}, nil
 }
 

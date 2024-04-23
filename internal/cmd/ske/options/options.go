@@ -10,7 +10,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -58,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -91,13 +90,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(volumeTypesFlag, false, "Lists supported volume types")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
-	availabilityZones := flags.FlagToBoolValue(cmd, availabilityZonesFlag)
-	kubernetesVersions := flags.FlagToBoolValue(cmd, kubernetesVersionsFlag)
-	machineImages := flags.FlagToBoolValue(cmd, machineImagesFlag)
-	machineTypes := flags.FlagToBoolValue(cmd, machineTypesFlag)
-	volumeTypes := flags.FlagToBoolValue(cmd, volumeTypesFlag)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
+	availabilityZones := flags.FlagToBoolValue(p, cmd, availabilityZonesFlag)
+	kubernetesVersions := flags.FlagToBoolValue(p, cmd, kubernetesVersionsFlag)
+	machineImages := flags.FlagToBoolValue(p, cmd, machineImagesFlag)
+	machineTypes := flags.FlagToBoolValue(p, cmd, machineTypesFlag)
+	volumeTypes := flags.FlagToBoolValue(p, cmd, volumeTypesFlag)
 
 	// If no flag was passed, take it as if every flag were passed
 	if !availabilityZones && !kubernetesVersions && !machineImages && !machineTypes && !volumeTypes {
@@ -125,7 +124,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE options: %w", err)
@@ -159,7 +158,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *ske.Provi
 		content += renderVolumeTypes(options)
 	}
 
-	err := pager.Display(p, content)
+	err := p.PagerDisplay(content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}

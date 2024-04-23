@@ -52,7 +52,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -65,6 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -106,17 +107,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		Description:     utils.Ptr(flags.FlagToStringValue(cmd, descriptionFlag)),
-		Write:           utils.Ptr(flags.FlagToBoolValue(cmd, writeFlag)),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		Description:     utils.Ptr(flags.FlagToStringValue(p, cmd, descriptionFlag)),
+		Write:           utils.Ptr(flags.FlagToBoolValue(p, cmd, writeFlag)),
 	}, nil
 }
 

@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -78,13 +78,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(includeParentsFlag, false, "When true, the details of the parent resources will be included in the output")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	var projectId string
 	if len(inputArgs) > 0 {
 		projectId = inputArgs[0]
 	}
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" && projectId == "" {
 		return nil, fmt.Errorf("Project ID needs to be provided either as an argument or as a flag")
 	}
@@ -96,7 +96,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ArgProjectId:    projectId,
-		IncludeParents:  flags.FlagToBoolValue(cmd, includeParentsFlag),
+		IncludeParents:  flags.FlagToBoolValue(p, cmd, includeParentsFlag),
 	}, nil
 }
 
@@ -108,7 +108,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 
 func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.ProjectResponseWithParents) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *project.ProjectId)
 		table.AddSeparator()

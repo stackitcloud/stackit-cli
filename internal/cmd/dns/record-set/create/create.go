@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -67,6 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
@@ -123,20 +124,20 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag),
-		Comment:         flags.FlagToStringPointer(cmd, commentFlag),
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
-		Records:         flags.FlagToStringSliceValue(cmd, recordFlag),
-		TTL:             flags.FlagToInt64Pointer(cmd, ttlFlag),
-		Type:            flags.FlagWithDefaultToStringValue(cmd, typeFlag),
+		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
+		Comment:         flags.FlagToStringPointer(p, cmd, commentFlag),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
+		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
+		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
 	}, nil
 }
 

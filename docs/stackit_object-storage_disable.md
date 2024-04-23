@@ -28,7 +28,7 @@ stackit object-storage disable [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
   -p, --project-id string      Project ID
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```

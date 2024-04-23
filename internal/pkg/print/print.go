@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 type Level string
@@ -18,6 +21,10 @@ const (
 	InfoLevel    Level = "info"
 	WarningLevel Level = "warning"
 	ErrorLevel   Level = "error"
+
+	JSONOutputFormat   = "json"
+	PrettyOutputFormat = "pretty"
+	NoneOutputFormat   = "none"
 )
 
 var errAborted = errors.New("operation aborted")
@@ -29,19 +36,29 @@ type Printer struct {
 
 // Creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: false, Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
 
 	return &Printer{}
 }
 
 // Print an output using Printf to the defined output (falling back to Stderr if not set).
+// If output format is set to none, it does nothing
 func (p *Printer) Outputf(msg string, args ...any) {
+	outputFormat := viper.GetString(config.OutputFormatKey)
+	if outputFormat == NoneOutputFormat {
+		return
+	}
 	p.Cmd.Printf(msg, args...)
 }
 
 // Print an output using Println to the defined output (falling back to Stderr if not set).
+// If output format is set to none, it does nothing
 func (p *Printer) Outputln(msg string) {
+	outputFormat := viper.GetString(config.OutputFormatKey)
+	if outputFormat == NoneOutputFormat {
+		return
+	}
 	p.Cmd.Println(msg)
 }
 
@@ -51,15 +68,16 @@ func (p *Printer) Debug(level Level, msg string, args ...any) {
 	if p.Verbosity != DebugLevel {
 		return
 	}
+	msg = fmt.Sprintf(msg, args...)
 	switch level {
 	case DebugLevel:
-		slog.Debug(msg, args...)
+		slog.Debug(msg)
 	case InfoLevel:
-		slog.Info(msg, args...)
+		slog.Info(msg)
 	case WarningLevel:
-		slog.Warn(msg, args...)
+		slog.Warn(msg)
 	case ErrorLevel:
-		slog.Error(msg, args...)
+		slog.Error(msg)
 	}
 }
 
@@ -110,4 +128,22 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 		}
 	}
 	return fmt.Errorf("max number of wrong inputs")
+}
+
+// Shows the content in the command's stdout using the "less" command
+// If output format is set to none, it does nothing
+func (p *Printer) PagerDisplay(content string) error {
+	outputFormat := viper.GetString(config.OutputFormatKey)
+	if outputFormat == NoneOutputFormat {
+		return nil
+	}
+	lessCmd := exec.Command("less", "-F", "-S", "-w")
+	lessCmd.Stdin = strings.NewReader(content)
+	lessCmd.Stdout = p.Cmd.OutOrStdout()
+
+	err := lessCmd.Run()
+	if err != nil {
+		return fmt.Errorf("run less command: %w", err)
+	}
+	return nil
 }

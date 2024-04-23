@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -94,10 +94,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(clusterNameFlag, "n", "", "If set, generates the payload with the current state of the given cluster. If unset, generates the payload with default values")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	clusterName := flags.FlagToStringPointer(cmd, clusterNameFlag)
+	clusterName := flags.FlagToStringPointer(p, cmd, clusterNameFlag)
 	// If clusterName is provided, projectId is needed as well
 	if clusterName != nil && globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
