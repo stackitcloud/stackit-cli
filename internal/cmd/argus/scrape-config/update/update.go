@@ -82,6 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update scrape config: %w", err)
 			}
 
+			// The API has no status to wait on, so async mode is default
 			p.Info("Updated Argus scrape configuration with name %q\n", model.JobName)
 			return nil
 		},
