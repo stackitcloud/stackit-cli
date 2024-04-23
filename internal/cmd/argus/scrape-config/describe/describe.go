@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -109,30 +110,24 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 			}
 		}
 
-		targets := []string{}
+		var targets []string
 		for _, target := range *config.StaticConfigs {
-			targetFmt := ""
+			targetLabels := []string{}
+			targetLabelStr := "N/A"
 			if target.Labels != nil {
 				// make map prettier
 				for k, v := range *target.Labels {
-					if targetFmt != "" {
-						targetFmt += " "
-					} else {
-						targetFmt += "labels: ["
-					}
-					targetFmt += fmt.Sprintf("%s:%s", k, v)
+					targetLabels = append(targetLabels, fmt.Sprintf("%s:%s", k, v))
 				}
-				if targetFmt != "" {
-					targetFmt += "]"
+				if targetLabels != nil {
+					targetLabelStr = strings.Join(targetLabels, ",")
 				}
 			}
+			targetUrlsStr := "N/A"
 			if target.Targets != nil {
-				if targetFmt != "" {
-					targetFmt += "; "
-				}
-				targetFmt += fmt.Sprintf("urls: %v", *target.Targets)
+				targetUrlsStr = strings.Join(*target.Targets, ",")
 			}
-			targets = append(targets, targetFmt)
+			targets = append(targets, fmt.Sprintf("labels: %s\nurls: %s", targetLabelStr, targetUrlsStr))
 		}
 
 		table := tables.NewTable()
