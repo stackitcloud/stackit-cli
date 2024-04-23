@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 func outputResult(p *print.Printer, resp *opensearch.CredentialsResponse) error {
 	details, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
-		return fmt.Errorf("marshal OpenSearch credential: %w", err)
+		return fmt.Errorf("marshal OpenSearch credentials: %w", err)
 	}
 	p.Outputln(string(details))
 
