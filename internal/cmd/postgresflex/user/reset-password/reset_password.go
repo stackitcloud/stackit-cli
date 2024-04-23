@@ -2,6 +2,7 @@ package resetpassword
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -84,11 +85,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("reset PostgreSQL Flex user password: %w", err)
 			}
 
-			p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-			p.Outputf("Username: %s\n", *user.Item.Username)
-			p.Outputf("New password: %s\n", *user.Item.Password)
-			p.Outputf("New URI: %s\n", *user.Item.Uri)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, user)
+			default:
+				p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
+				p.Outputf("Username: %s\n", *user.Item.Username)
+				p.Outputf("New password: %s\n", *user.Item.Password)
+				p.Outputf("New URI: %s\n", *user.Item.Uri)
+				return nil
+			}
 		},
 	}
 
@@ -121,4 +127,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiResetUserRequest {
 	req := apiClient.ResetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
+}
+
+func outputResult(p *print.Printer, resp *postgresflex.ResetUserResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal PostgresFlex user: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

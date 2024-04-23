@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -84,13 +85,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Secrets Manager user: %w", err)
 			}
 
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
-			p.Outputf("Username: %s\n", *resp.Username)
-			p.Outputf("Password: %s\n", *resp.Password)
-			p.Outputf("Description: %s\n", *resp.Description)
-			p.Outputf("Write Access: %t\n", *resp.Write)
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
+				p.Outputf("Username: %s\n", *resp.Username)
+				p.Outputf("Password: %s\n", *resp.Password)
+				p.Outputf("Description: %s\n", *resp.Description)
+				p.Outputf("Write Access: %t\n", *resp.Write)
 
-			return nil
+				return nil
+			}
 		},
 	}
 
@@ -128,4 +134,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 		Write:       model.Write,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, resp *secretsmanager.User) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal Secrets Manager user: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

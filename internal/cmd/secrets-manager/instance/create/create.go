@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -92,8 +93,13 @@ If you want to retry configuring the ACLs, you can do it via:
 				}
 			}
 
-			p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
+				return nil
+			}
 		},
 	}
 	configureFlags(cmd)
@@ -143,4 +149,14 @@ func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId s
 	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
 
 	return req
+}
+
+func outputResult(p *print.Printer, resp *secretsmanager.Instance) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

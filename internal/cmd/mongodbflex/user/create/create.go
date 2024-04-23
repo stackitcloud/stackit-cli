@@ -2,8 +2,10 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -12,8 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
@@ -91,16 +91,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			user := resp.Item
 
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-			p.Outputf("Username: %s\n", *user.Username)
-			p.Outputf("Password: %s\n", *user.Password)
-			p.Outputf("Roles: %v\n", *user.Roles)
-			p.Outputf("Database: %s\n", *user.Database)
-			p.Outputf("Host: %s\n", *user.Host)
-			p.Outputf("Port: %d\n", *user.Port)
-			p.Outputf("URI: %s\n", *user.Uri)
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, user)
+			default:
+				p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+				p.Outputf("Username: %s\n", *user.Username)
+				p.Outputf("Password: %s\n", *user.Password)
+				p.Outputf("Roles: %v\n", *user.Roles)
+				p.Outputf("Database: %s\n", *user.Database)
+				p.Outputf("Host: %s\n", *user.Host)
+				p.Outputf("Port: %d\n", *user.Port)
+				p.Outputf("URI: %s\n", *user.Uri)
 
-			return nil
+				return nil
+			}
 		},
 	}
 
@@ -143,4 +148,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 		Roles:    model.Roles,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, user *mongodbflex.User) error {
+	details, err := json.MarshalIndent(user, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

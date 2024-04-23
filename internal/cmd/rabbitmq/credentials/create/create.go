@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -76,21 +77,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create RabbitMQ credentials: %w", err)
 			}
 
-			p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
-			// The username field cannot be set by the user so we only display it if it's not returned empty
-			username := *resp.Raw.Credentials.Username
-			if username != "" {
-				p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+				// The username field cannot be set by the user so we only display it if it's not returned empty
+				username := *resp.Raw.Credentials.Username
+				if username != "" {
+					p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
+				}
+				if model.HidePassword {
+					p.Outputf("Password: <hidden>\n")
+				} else {
+					p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
+				}
+				p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
+				p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
+				p.Outputf("URI: %s\n", *resp.Uri)
+				return nil
 			}
-			if model.HidePassword {
-				p.Outputf("Password: <hidden>\n")
-			} else {
-				p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
-			}
-			p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
-			p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
-			p.Outputf("URI: %s\n", *resp.Uri)
-			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -121,4 +127,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.APIClient) rabbitmq.ApiCreateCredentialsRequest {
 	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
 	return req
+}
+
+func outputResult(p *print.Printer, resp *rabbitmq.CredentialsResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

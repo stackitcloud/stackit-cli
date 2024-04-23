@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -65,9 +66,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-			p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
+				p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
+				return nil
+			}
 		},
 	}
 	configureFlags(cmd)
@@ -99,4 +105,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 		DisplayName: utils.Ptr(model.CredentialsGroupName),
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, resp *objectstorage.CreateCredentialsGroupResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal Object Storage credentials group: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

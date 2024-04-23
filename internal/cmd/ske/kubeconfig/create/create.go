@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -107,9 +108,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("write kubeconfig file: %w", err)
 			}
 
-			p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
 
-			return nil
+				return nil
+			}
 		},
 	}
 	configureFlags(cmd)
@@ -160,4 +166,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	}
 
 	return req.CreateKubeconfigPayload(payload), nil
+}
+
+func outputResult(p *print.Printer, resp *ske.Kubeconfig) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

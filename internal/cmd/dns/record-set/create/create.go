@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -98,12 +99,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				operationState := "Created"
+				if model.Async {
+					operationState = "Triggered creation of"
+				}
+				p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
+				return nil
 			}
-			p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
-			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -156,4 +162,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Type:    &model.Type,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, resp *dns.RecordSetResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal DNS record-set: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

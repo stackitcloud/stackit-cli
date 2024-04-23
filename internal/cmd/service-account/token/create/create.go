@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -76,10 +77,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create access token: %w", err)
 			}
 
-			p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
-			p.Outputf("Valid until: %s\n", *token.ValidUntil)
-			p.Outputf("Token: %s\n", *token.Token)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, token)
+			default:
+				p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
+				p.Outputf("Valid until: %s\n", *token.ValidUntil)
+				p.Outputf("Token: %s\n", *token.Token)
+				return nil
+			}
 		},
 	}
 
@@ -130,4 +136,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 		TtlDays: model.TTLDays,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, token *serviceaccount.AccessToken) error {
+	details, err := json.MarshalIndent(token, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal service account access token: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 
@@ -81,8 +82,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create project: %w", err)
 			}
 
-			p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
+				return nil
+			}
 		},
 	}
 	configureFlags(cmd)
@@ -175,4 +181,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	})
 
 	return req, nil
+}
+
+func outputResult(p *print.Printer, resp *resourcemanager.ProjectResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal project: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

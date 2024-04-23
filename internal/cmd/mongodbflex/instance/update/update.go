@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -116,12 +117,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Updated"
-			if model.Async {
-				operationState = "Triggered update of"
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				operationState := "Updated"
+				if model.Async {
+					operationState = "Triggered update of"
+				}
+				p.Info("%s instance %q\n", operationState, instanceLabel)
+				return nil
 			}
-			p.Info("%s instance %q\n", operationState, instanceLabel)
-			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -297,4 +303,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		Options:        payloadOptions,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, resp *mongodbflex.UpdateInstanceResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal update MongoDBFlex instance: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -71,8 +72,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create service account: %w", err)
 			}
 
-			p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
-			return nil
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, *resp.Email)
+				return nil
+			}
 		},
 	}
 	configureFlags(cmd)
@@ -104,4 +110,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 		Name: model.Name,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, serviceAccount *serviceaccount.ServiceAccount) error {
+	details, err := json.MarshalIndent(serviceAccount, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal service account: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }

@@ -2,6 +2,7 @@ package clone
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -107,13 +108,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Cloned"
-			if model.Async {
-				operationState = "Triggered cloning of"
+			switch model.OutputFormat {
+			case globalflags.JSONOutputFormat:
+				return outputResult(p, resp)
+			default:
+				operationState := "Cloned"
+				if model.Async {
+					operationState = "Triggered cloning of"
+				}
+				p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
+				return nil
 			}
-
-			p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
-			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -197,4 +202,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		Timestamp: model.RecoveryDate,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, resp *postgresflex.CloneInstanceResponse) error {
+	details, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal PostgresFlex instance clone: %w", err)
+	}
+	p.Outputln(string(details))
+
+	return nil
 }
