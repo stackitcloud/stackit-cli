@@ -132,12 +132,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, name)
-			return nil
+			return outputResult(p, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -178,4 +173,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 	req = req.CreateOrUpdateClusterPayload(*model.Payload)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *ske.Cluster) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, *resp.Name)
+		return nil
+	}
 }

@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -87,17 +88,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create PostgreSQL Flex user: %w", err)
 			}
-			user := resp.Item
 
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-			p.Outputf("Username: %s\n", *user.Username)
-			p.Outputf("Password: %s\n", *user.Password)
-			p.Outputf("Roles: %v\n", *user.Roles)
-			p.Outputf("Host: %s\n", *user.Host)
-			p.Outputf("Port: %d\n", *user.Port)
-			p.Outputf("URI: %s\n", *user.Uri)
-
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 
@@ -137,4 +129,28 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 		Roles:    model.Roles,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *postgresflex.CreateUserResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgresFlex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		user := resp.Item
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+		p.Outputf("Username: %s\n", *user.Username)
+		p.Outputf("Password: %s\n", *user.Password)
+		p.Outputf("Roles: %v\n", *user.Roles)
+		p.Outputf("Host: %s\n", *user.Host)
+		p.Outputf("Port: %d\n", *user.Port)
+		p.Outputf("URI: %s\n", *user.Uri)
+
+		return nil
+	}
 }

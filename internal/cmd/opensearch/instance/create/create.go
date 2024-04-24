@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -125,12 +126,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
-			return nil
+			return outputResult(p, model, projectLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -246,4 +242,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchCl
 		PlanId: planId,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *opensearch.CreateInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal OpenSearch instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
+		return nil
+	}
 }

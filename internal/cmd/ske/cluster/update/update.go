@@ -104,12 +104,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Updated"
-			if model.Async {
-				operationState = "Triggered update of"
-			}
-			p.Info("%s cluster %q\n", operationState, model.ClusterName)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -150,4 +145,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 	req = req.CreateOrUpdateClusterPayload(model.Payload)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *ske.Cluster) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Updated"
+		if model.Async {
+			operationState = "Triggered update of"
+		}
+		p.Info("%s cluster %q\n", operationState, model.ClusterName)
+		return nil
+	}
 }

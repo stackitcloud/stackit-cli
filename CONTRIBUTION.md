@@ -74,7 +74,7 @@ type inputModel struct {
 }
 
 // "bar" command constructor
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bar",
 		Short: "Short description of the command (is shown in the help of parent command)",
@@ -88,13 +88,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -106,7 +106,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("(...): %w", err)
 			}
 
-         projectLabel, err := projectname.GetProjectName(ctx, cmd)
+         projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
 					projectLabel = model.ProjectId
 				}
@@ -116,7 +116,7 @@ func NewCmd() *cobra.Command {
             p.Info("(...)", projectLabel)
 				return nil
          }
-			return outputResult(cmd, model.OutputFormat, instances)
+			return outputResult(p, cmd, model.OutputFormat, instances)
 		},
 	}
 
@@ -152,9 +152,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClie
 }
 
 // Output result based on the configured output format
-func outputResult(cmd *cobra.Command, outputFormat string, resources []foo.Resource) error {
+func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, resources []foo.Resource) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resources, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal resource list: %w", err)
@@ -177,7 +177,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, resources []foo.Resou
 }
 ```
 
-Please remeber to always add unit tests for `parseInput`, `buildRequest` (in `bar_test.go`), and any other util functions used.
+Please remember to always add unit tests for `parseInput`, `buildRequest` (in `bar_test.go`), and any other util functions used.
 
 If the new command `bar` is the first command in the CLI using a STACKIT service `foo`, please refer to [Onboarding a new STACKIT service](./CONTRIBUTION.md/#onboarding-a-new-stackit-service).
 

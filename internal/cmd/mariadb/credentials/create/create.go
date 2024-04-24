@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -76,21 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create MariaDB credentials: %w", err)
 			}
 
-			p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
-			// The username field cannot be set by the user so we only display it if it's not returned empty
-			username := *resp.Raw.Credentials.Username
-			if username != "" {
-				p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
-			}
-			if model.HidePassword {
-				p.Outputf("Password: <hidden>\n")
-			} else {
-				p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
-			}
-			p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
-			p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
-			p.Outputf("URI: %s\n", *resp.Uri)
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -121,4 +108,33 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiCreateCredentialsRequest {
 	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *mariadb.CredentialsResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MariaDB credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+		// The username field cannot be set by the user so we only display it if it's not returned empty
+		username := *resp.Raw.Credentials.Username
+		if username != "" {
+			p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
+		}
+		if model.HidePassword {
+			p.Outputf("Password: <hidden>\n")
+		} else {
+			p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
+		}
+		p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
+		p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
+		p.Outputf("URI: %s\n", *resp.Uri)
+		return nil
+	}
 }
