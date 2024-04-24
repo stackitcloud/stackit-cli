@@ -12,6 +12,18 @@ func Ptr[T any](v T) *T {
 	return &v
 }
 
+// Int64Ptr returns a pointer to an int64
+// Needed because the Ptr function only returns pointer to int
+func Int64Ptr(i int64) *int64 {
+	return &i
+}
+
+// Float64Ptr returns a pointer to a float64
+// Needed because the Ptr function only returns pointer to float
+func Float64Ptr(f float64) *float64 {
+	return &f
+}
+
 // CmdHelp is used to explicitly set the Run function for non-leaf commands to the command help function, so that we can catch invalid commands
 // This is a workaround needed due to the open issue on the Cobra repo: https://github.com/spf13/cobra/issues/706
 func CmdHelp(cmd *cobra.Command, _ []string) {
@@ -25,4 +37,14 @@ func ValidateUUID(value string) error {
 		return fmt.Errorf("parse %s as UUID: %w", value, err)
 	}
 	return nil
+}
+
+// ConvertInt64PToFloat64P converts an int64 pointer to a float64 pointer
+// This function will return nil if the input is nil
+func ConvertInt64PToFloat64P(i *int64) *float64 {
+	if i == nil {
+		return nil
+	}
+	f := float64(*i)
+	return &f
 }
