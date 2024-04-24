@@ -104,8 +104,7 @@ brews:
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    # Temporarily not skipping prereleases to test integration with Homebrew
-    # skip_upload: auto
+    skip_upload: auto
 
 snapcrafts:
   # IDs of the builds for which to create packages for
