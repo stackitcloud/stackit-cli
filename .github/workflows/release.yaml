@@ -2,7 +2,7 @@
 name: Release
 
 # This GitHub action creates a release when a tag that matches one of the patterns below
-# E.g. v0.1.0, v0.1.0-something.1, etc 
+# E.g. v0.1.0, v0.1.0-something.1, etc
 on:
   push:
     tags:
@@ -69,8 +69,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
       - name: Publish packages to APT repo
-        # Temporarily not skipping prereleases to test integration with APT
-        # if: contains(github.ref_name, '-') == false
+        if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
