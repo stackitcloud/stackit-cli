@@ -77,14 +77,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Argus instance %q?", *model.Payload.JobName, instanceLabel)
-				err = p.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Fill in default payload, if needed
 			if model.Payload == nil {
 				defaultPayload := argusUtils.DefaultCreateScrapeConfigPayload
@@ -92,6 +84,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					return fmt.Errorf("get default payload: %w", err)
 				}
 				model.Payload = &defaultPayload
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Argus instance %q?", *model.Payload.JobName, instanceLabel)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Call API
