@@ -25,7 +25,6 @@ import (
 const (
 	instanceIdArg = "INSTANCE_ID"
 
-	instanceNameFlag         = "name"
 	enableMonitoringFlag     = "enable-monitoring"
 	graphiteFlag             = "graphite"
 	metricsFrequencyFlag     = "metrics-frequency"
@@ -70,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -83,6 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := mariadbUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -145,24 +145,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(versionFlag, "", "Instance MariaDB version")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	enableMonitoring := flags.FlagToBoolPointer(cmd, enableMonitoringFlag)
-	monitoringInstanceId := flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag)
-	graphite := flags.FlagToStringPointer(cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
-	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag)
-	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag)
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	version := flags.FlagToStringValue(cmd, versionFlag)
+	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
+	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
+	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
+	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
+	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
+	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
+	version := flags.FlagToStringValue(p, cmd, versionFlag)
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{

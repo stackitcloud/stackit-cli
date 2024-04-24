@@ -9,14 +9,17 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestOutputf(t *testing.T) {
 	tests := []struct {
-		description string
-		message     string
-		args        []any
-		verbosity   Level
+		description      string
+		message          string
+		args             []any
+		verbosity        Level
+		outputFormatNone bool
 	}{
 		{
 			description: "debug verbosity",
@@ -44,6 +47,12 @@ func TestOutputf(t *testing.T) {
 			message:     "Test message",
 			verbosity:   ErrorLevel,
 		},
+		{
+			description:      "output format none",
+			message:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -54,6 +63,11 @@ func TestOutputf(t *testing.T) {
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
+			viper.Reset()
+
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			}
 
 			if len(tt.args) == 0 {
 				p.Outputf(tt.message)
@@ -61,10 +75,14 @@ func TestOutputf(t *testing.T) {
 				p.Outputf(tt.message, tt.args...)
 			}
 
-			expectedOutput := tt.message
-			if len(tt.args) > 0 {
-				expectedOutput = fmt.Sprintf(tt.message, tt.args...)
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = tt.message
+				if len(tt.args) > 0 {
+					expectedOutput = fmt.Sprintf(tt.message, tt.args...)
+				}
 			}
+
 			output := buf.String()
 			if output != expectedOutput {
 				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
@@ -75,9 +93,10 @@ func TestOutputf(t *testing.T) {
 
 func TestOutputln(t *testing.T) {
 	tests := []struct {
-		description string
-		message     string
-		verbosity   Level
+		description      string
+		message          string
+		verbosity        Level
+		outputFormatNone bool
 	}{
 		{
 			description: "debug verbosity",
@@ -99,6 +118,12 @@ func TestOutputln(t *testing.T) {
 			message:     "Test message",
 			verbosity:   ErrorLevel,
 		},
+		{
+			description:      "output format none",
+			message:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -109,10 +134,85 @@ func TestOutputln(t *testing.T) {
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
+			viper.Reset()
+
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			}
 
 			p.Outputln(tt.message)
 
-			expectedOutput := fmt.Sprintf("%s\n", tt.message)
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = fmt.Sprintf("%s\n", tt.message)
+			}
+
+			output := buf.String()
+			if output != expectedOutput {
+				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
+			}
+		})
+	}
+}
+
+func TestPagerDisplay(t *testing.T) {
+	tests := []struct {
+		description      string
+		content          string
+		verbosity        Level
+		outputFormatNone bool
+	}{
+		{
+			description: "debug verbosity",
+			content:     "Test message",
+			verbosity:   DebugLevel,
+		},
+		{
+			description: "info verbosity",
+			content:     "Test message",
+			verbosity:   InfoLevel,
+		},
+		{
+			description: "warning verbosity",
+			content:     "Test message",
+			verbosity:   WarningLevel,
+		},
+		{
+			description: "error verbosity",
+			content:     "Test message",
+			verbosity:   ErrorLevel,
+		},
+		{
+			description:      "output format none",
+			content:          "Test message",
+			verbosity:        InfoLevel,
+			outputFormatNone: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var buf bytes.Buffer
+			cmd := &cobra.Command{}
+			cmd.SetOutput(&buf)
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+			viper.Reset()
+
+			if tt.outputFormatNone {
+				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+			}
+
+			err := p.PagerDisplay(tt.content)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err.Error())
+			}
+			var expectedOutput string
+			if !tt.outputFormatNone {
+				expectedOutput = tt.content
+			}
+
 			output := buf.String()
 			if output != expectedOutput {
 				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)

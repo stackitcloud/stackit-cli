@@ -19,9 +19,6 @@ const (
 	ProjectIdFlag    = "project-id"
 	VerbosityFlag    = "verbosity"
 
-	JSONOutputFormat   = "json"
-	PrettyOutputFormat = "pretty"
-
 	DebugVerbosity   = string(print.DebugLevel)
 	InfoVerbosity    = string(print.InfoLevel)
 	WarningVerbosity = string(print.WarningLevel)
@@ -30,7 +27,7 @@ const (
 	VerbosityDefault = InfoVerbosity
 )
 
-var outputFormatFlagOptions = []string{JSONOutputFormat, PrettyOutputFormat}
+var outputFormatFlagOptions = []string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat}
 var verbosityFlagOptions = []string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity}
 
 type GlobalFlagModel struct {
@@ -71,10 +68,10 @@ func Configure(flagSet *pflag.FlagSet) error {
 	return nil
 }
 
-func Parse(cmd *cobra.Command) *GlobalFlagModel {
+func Parse(p *print.Printer, cmd *cobra.Command) *GlobalFlagModel {
 	return &GlobalFlagModel{
 		Async:        viper.GetBool(config.AsyncKey),
-		AssumeYes:    flags.FlagToBoolValue(cmd, AssumeYesFlag),
+		AssumeYes:    flags.FlagToBoolValue(p, cmd, AssumeYesFlag),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
 		ProjectId:    viper.GetString(config.ProjectIdKey),
 		Verbosity:    viper.GetString(config.VerbosityKey),

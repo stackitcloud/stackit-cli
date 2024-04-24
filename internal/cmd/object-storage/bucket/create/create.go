@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -39,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -60,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			_, err = req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Object Storage bucket: %w", err)
 			}
@@ -76,21 +77,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			p.Outputf("%s bucket %q\n", operationState, model.BucketName)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	bucketName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -104,4 +100,24 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateBucketRequest {
 	req := apiClient.CreateBucket(ctx, model.ProjectId, model.BucketName)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateBucketResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage bucket: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s bucket %q\n", operationState, model.BucketName)
+		return nil
+	}
 }

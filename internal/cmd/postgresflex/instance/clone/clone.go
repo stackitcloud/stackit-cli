@@ -2,6 +2,7 @@ package clone
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -60,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -73,6 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -106,13 +108,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Cloned"
-			if model.Async {
-				operationState = "Triggered cloning of"
-			}
-
-			p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
-			return nil
+			return outputResult(p, model, instanceLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -128,15 +124,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	recoveryTimestamp, err := flags.FlagToDateTimePointer(cmd, recoveryTimestampFlag, recoveryDateFormat)
+	recoveryTimestamp, err := flags.FlagToDateTimePointer(p, cmd, recoveryTimestampFlag, recoveryDateFormat)
 	if err != nil {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    recoveryTimestampFlag,
@@ -148,8 +144,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-		StorageClass:    flags.FlagToStringPointer(cmd, storageClassFlag),
-		StorageSize:     flags.FlagToInt64Pointer(cmd, storageSizeFlag),
+		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
+		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
 		RecoveryDate:    utils.Ptr(recoveryTimestampString),
 	}, nil
 }
@@ -196,4 +192,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		Timestamp: model.RecoveryDate,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel, instanceId string, resp *postgresflex.CloneInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgresFlex instance clone: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Cloned"
+		if model.Async {
+			operationState = "Triggered cloning of"
+		}
+		p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
+		return nil
+	}
 }

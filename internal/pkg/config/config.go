@@ -70,30 +70,42 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 }
 
+var folderPath string
+
 func InitConfig() {
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
 	configFolderPath := filepath.Join(home, configFolder)
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
-	viper.SetConfigName(configFileName)
-	viper.SetConfigType(configFileExtension)
-	viper.AddConfigPath(configFolderPath)
+	// Write config dir path to global variable
+	folderPath = configFolderPath
 
-	err = createFolderIfNotExists(configFolderPath)
-	cobra.CheckErr(err)
-	err = createFileIfNotExists(configFilePath)
-	cobra.CheckErr(err)
+	// This hack is required to allow creating the config file with `viper.WriteConfig`
+	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
+	viper.SetConfigFile(configFilePath)
 
-	err = viper.ReadInConfig()
-	cobra.CheckErr(err)
+	f, err := os.Open(configFilePath)
+	if !os.IsNotExist(err) {
+		if err := viper.ReadConfig(f); err != nil {
+			cobra.CheckErr(err)
+		}
+	}
+	defer func() {
+		if f != nil {
+			if err := f.Close(); err != nil {
+				cobra.CheckErr(err)
+			}
+		}
+	}()
+
 	setConfigDefaults()
 
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("stackit")
 }
 
-func createFolderIfNotExists(folderPath string) error {
+func createFolderIfNotExists() error {
 	_, err := os.Stat(folderPath)
 	if os.IsNotExist(err) {
 		err := os.MkdirAll(folderPath, os.ModePerm)
@@ -106,17 +118,12 @@ func createFolderIfNotExists(folderPath string) error {
 	return nil
 }
 
-func createFileIfNotExists(filePath string) error {
-	_, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
-		err := viper.SafeWriteConfigAs(filePath)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
+// Write saves the config file (wrapping `viper.WriteConfig`) and ensures that its directory exists
+func Write() error {
+	if err := createFolderIfNotExists(); err != nil {
+		return fmt.Errorf("create config directory: %w", err)
 	}
-	return nil
+	return viper.WriteConfig()
 }
 
 // All config keys should be set to a default value so that they can be set as an environment variable

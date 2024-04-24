@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -44,7 +45,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -57,6 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -75,21 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create RabbitMQ credentials: %w", err)
 			}
 
-			p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
-			// The username field cannot be set by the user so we only display it if it's not returned empty
-			username := *resp.Raw.Credentials.Username
-			if username != "" {
-				p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
-			}
-			if model.HidePassword {
-				p.Outputf("Password: <hidden>\n")
-			} else {
-				p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
-			}
-			p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
-			p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
-			p.Outputf("URI: %s\n", *resp.Uri)
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -104,20 +92,49 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		HidePassword:    flags.FlagToBoolValue(cmd, hidePasswordFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		HidePassword:    flags.FlagToBoolValue(p, cmd, hidePasswordFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.APIClient) rabbitmq.ApiCreateCredentialsRequest {
 	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *rabbitmq.CredentialsResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+		// The username field cannot be set by the user so we only display it if it's not returned empty
+		username := *resp.Raw.Credentials.Username
+		if username != "" {
+			p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
+		}
+		if model.HidePassword {
+			p.Outputf("Password: <hidden>\n")
+		} else {
+			p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
+		}
+		p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
+		p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
+		p.Outputf("URI: %s\n", *resp.Uri)
+		return nil
+	}
 }

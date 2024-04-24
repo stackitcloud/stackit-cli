@@ -3,7 +3,6 @@ package tables
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -58,5 +57,5 @@ func (t *Table) Render() string {
 
 // Displays the table in the command's stdout
 func (t *Table) Display(p *print.Printer) error {
-	return pager.Display(p, t.Render())
+	return p.PagerDisplay(t.Render())
 }

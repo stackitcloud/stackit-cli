@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -58,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -107,9 +108,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("write kubeconfig file: %w", err)
 			}
 
-			p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
-
-			return nil
+			return outputResult(p, model, kubeconfigPath, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -121,15 +120,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	expTime := flags.FlagToStringPointer(cmd, expirationFlag)
+	expTime := flags.FlagToStringPointer(p, cmd, expirationFlag)
 
 	if expTime != nil {
 		var err error
@@ -145,7 +144,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
-		Filepath:        flags.FlagToStringPointer(cmd, filepathFlag),
+		Filepath:        flags.FlagToStringPointer(p, cmd, filepathFlag),
 		ExpirationTime:  expTime,
 	}, nil
 }
@@ -160,4 +159,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	}
 
 	return req.CreateKubeconfigPayload(payload), nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, resp *ske.Kubeconfig) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
+
+		return nil
+	}
 }

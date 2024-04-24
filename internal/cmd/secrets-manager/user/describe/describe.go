@@ -48,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -81,17 +81,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	userId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		UserId:          userId,
 	}, nil
 }
@@ -103,7 +103,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 
 func outputResult(p *print.Printer, outputFormat string, user secretsmanager.User) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *user.Id)
 		table.AddSeparator()

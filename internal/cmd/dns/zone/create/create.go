@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -68,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -79,8 +80,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd, p)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
@@ -111,12 +113,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, zoneId)
-			return nil
+			return outputResult(p, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -142,27 +139,27 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
-		DnsName:         flags.FlagToStringPointer(cmd, dnsNameFlag),
-		DefaultTTL:      flags.FlagToInt64Pointer(cmd, defaultTTLFlag),
-		Primaries:       flags.FlagToStringSlicePointer(cmd, primaryFlag),
-		Acl:             flags.FlagToStringPointer(cmd, aclFlag),
-		Type:            flags.FlagToStringPointer(cmd, typeFlag),
-		RetryTime:       flags.FlagToInt64Pointer(cmd, retryTimeFlag),
-		RefreshTime:     flags.FlagToInt64Pointer(cmd, refreshTimeFlag),
-		NegativeCache:   flags.FlagToInt64Pointer(cmd, negativeCacheFlag),
-		IsReverseZone:   flags.FlagToBoolPointer(cmd, isReverseZoneFlag),
-		ExpireTime:      flags.FlagToInt64Pointer(cmd, expireTimeFlag),
-		Description:     flags.FlagToStringPointer(cmd, descriptionFlag),
-		ContactEmail:    flags.FlagToStringPointer(cmd, contactEmailFlag),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		DnsName:         flags.FlagToStringPointer(p, cmd, dnsNameFlag),
+		DefaultTTL:      flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag),
+		Primaries:       flags.FlagToStringSlicePointer(p, cmd, primaryFlag),
+		Acl:             flags.FlagToStringPointer(p, cmd, aclFlag),
+		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
+		RetryTime:       flags.FlagToInt64Pointer(p, cmd, retryTimeFlag),
+		RefreshTime:     flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag),
+		NegativeCache:   flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag),
+		IsReverseZone:   flags.FlagToBoolPointer(p, cmd, isReverseZoneFlag),
+		ExpireTime:      flags.FlagToInt64Pointer(p, cmd, expireTimeFlag),
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
+		ContactEmail:    flags.FlagToStringPointer(p, cmd, contactEmailFlag),
 	}, nil
 }
 
@@ -184,4 +181,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		ContactEmail:  model.ContactEmail,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *dns.ZoneResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS zone: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, *resp.Zone.Id)
+		return nil
+	}
 }

@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -47,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -60,6 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
@@ -78,17 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials: %w", err)
 			}
 
-			expireDate := "Never"
-			if resp.Expires != nil && *resp.Expires != "" {
-				expireDate = *resp.Expires
-			}
-
-			p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
-			p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
-			p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
-			p.Outputf("Expire Date: %s\n", expireDate)
-
-			return nil
+			return outputResult(p, model, credentialsGroupLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -103,13 +95,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	expireDate, err := flags.FlagToDateTimePointer(cmd, expireDateFlag, expirationTimeFormat)
+	expireDate, err := flags.FlagToDateTimePointer(p, cmd, expireDateFlag, expirationTimeFormat)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
 			Flag:    expireDateFlag,
@@ -120,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	return &inputModel{
 		GlobalFlagModel:    globalFlags,
 		ExpireDate:         expireDate,
-		CredentialsGroupId: flags.FlagToStringValue(cmd, credentialsGroupIdFlag),
+		CredentialsGroupId: flags.FlagToStringValue(p, cmd, credentialsGroupIdFlag),
 	}, nil
 }
 
@@ -131,4 +123,29 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 		Expires: model.ExpireDate,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, credentialsGroupLabel string, resp *objectstorage.CreateAccessKeyResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		expireDate := "Never"
+		if resp.Expires != nil && *resp.Expires != "" {
+			expireDate = *resp.Expires
+		}
+
+		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
+		p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
+		p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
+		p.Outputf("Expire Date: %s\n", expireDate)
+
+		return nil
+	}
 }
