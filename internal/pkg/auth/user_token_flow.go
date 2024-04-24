@@ -53,6 +53,8 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 		err = refreshTokens(utf)
 		if err == nil {
 			accessTokenValid = true
+		} else {
+			utf.printer.Debug(print.ErrorLevel, "refresh access token: %v", err)
 		}
 	}
 

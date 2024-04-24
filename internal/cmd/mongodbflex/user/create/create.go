@@ -2,8 +2,10 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -12,8 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -71,6 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -90,16 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			user := resp.Item
 
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-			p.Outputf("Username: %s\n", *user.Username)
-			p.Outputf("Password: %s\n", *user.Password)
-			p.Outputf("Roles: %v\n", *user.Roles)
-			p.Outputf("Database: %s\n", *user.Database)
-			p.Outputf("Host: %s\n", *user.Host)
-			p.Outputf("Port: %d\n", *user.Port)
-			p.Outputf("URI: %s\n", *user.Uri)
-
-			return nil
+			return outputResult(p, model, instanceLabel, user)
 		},
 	}
 
@@ -119,18 +111,18 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		Username:        flags.FlagToStringPointer(cmd, usernameFlag),
-		Database:        flags.FlagToStringPointer(cmd, databaseFlag),
-		Roles:           flags.FlagWithDefaultToStringSlicePointer(cmd, roleFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
+		Database:        flags.FlagToStringPointer(p, cmd, databaseFlag),
+		Roles:           flags.FlagWithDefaultToStringSlicePointer(p, cmd, roleFlag),
 	}, nil
 }
 
@@ -142,4 +134,28 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 		Roles:    model.Roles,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *mongodbflex.User) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
+		p.Outputf("Username: %s\n", *user.Username)
+		p.Outputf("Password: %s\n", *user.Password)
+		p.Outputf("Roles: %v\n", *user.Roles)
+		p.Outputf("Database: %s\n", *user.Database)
+		p.Outputf("Host: %s\n", *user.Host)
+		p.Outputf("Port: %d\n", *user.Port)
+		p.Outputf("URI: %s\n", *user.Uri)
+
+		return nil
+	}
 }

@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -52,7 +53,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -65,6 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
@@ -83,13 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Secrets Manager user: %w", err)
 			}
 
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
-			p.Outputf("Username: %s\n", *resp.Username)
-			p.Outputf("Password: %s\n", *resp.Password)
-			p.Outputf("Description: %s\n", *resp.Description)
-			p.Outputf("Write Access: %t\n", *resp.Write)
-
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 
@@ -106,17 +102,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
-		Description:     utils.Ptr(flags.FlagToStringValue(cmd, descriptionFlag)),
-		Write:           utils.Ptr(flags.FlagToBoolValue(cmd, writeFlag)),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		Description:     utils.Ptr(flags.FlagToStringValue(p, cmd, descriptionFlag)),
+		Write:           utils.Ptr(flags.FlagToBoolValue(p, cmd, writeFlag)),
 	}, nil
 }
 
@@ -127,4 +123,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 		Write:       model.Write,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *secretsmanager.User) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
+		p.Outputf("Username: %s\n", *resp.Username)
+		p.Outputf("Password: %s\n", *resp.Password)
+		p.Outputf("Description: %s\n", *resp.Description)
+		p.Outputf("Write Access: %t\n", *resp.Write)
+
+		return nil
+	}
 }

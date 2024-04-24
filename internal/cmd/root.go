@@ -44,10 +44,10 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		DisableAutoGenTag: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			p.Cmd = cmd
-			p.Verbosity = print.Level(globalflags.Parse(cmd).Verbosity)
+			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if flags.FlagToBoolValue(cmd, "version") {
+			if flags.FlagToBoolValue(p, cmd, "version") {
 				p.Outputf("STACKIT CLI (BETA)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
@@ -130,6 +130,7 @@ func Execute(version, date string) {
 	err := cmd.Execute()
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
+		p.Debug(print.ErrorLevel, "execute command: %v", err)
 		p.Error(err.Error())
 		os.Exit(1)
 	}

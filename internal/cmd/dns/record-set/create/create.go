@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -54,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -67,6 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
@@ -97,12 +99,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
-			return nil
+			return outputResult(p, model, zoneLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,20 +120,20 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag),
-		Comment:         flags.FlagToStringPointer(cmd, commentFlag),
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
-		Records:         flags.FlagToStringSliceValue(cmd, recordFlag),
-		TTL:             flags.FlagToInt64Pointer(cmd, ttlFlag),
-		Type:            flags.FlagWithDefaultToStringValue(cmd, typeFlag),
+		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
+		Comment:         flags.FlagToStringPointer(p, cmd, commentFlag),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
+		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
+		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
 	}, nil
 }
 
@@ -155,4 +152,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Type:    &model.Type,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *dns.RecordSetResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record-set: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, *resp.Rrset.Id)
+		return nil
+	}
 }

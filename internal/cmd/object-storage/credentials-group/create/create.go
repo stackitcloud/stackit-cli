@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -39,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -65,9 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-			p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -81,15 +80,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel:      globalFlags,
-		CredentialsGroupName: flags.FlagToStringValue(cmd, credentialsGroupNameFlag),
+		CredentialsGroupName: flags.FlagToStringValue(p, cmd, credentialsGroupNameFlag),
 	}, nil
 }
 
@@ -99,4 +98,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 		DisplayName: utils.Ptr(model.CredentialsGroupName),
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateCredentialsGroupResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials group: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
+		p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
+		return nil
+	}
 }

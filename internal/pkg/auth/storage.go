@@ -136,7 +136,7 @@ func GetAuthField(key authFieldKey) (string, error) {
 		var errFallback error
 		value, errFallback = getAuthFieldFromEncodedTextFile(key)
 		if errFallback != nil {
-			return "", fmt.Errorf("write to keyring failed (%w), tried write to encoded text file: %w", err, errFallback)
+			return "", fmt.Errorf("read from keyring: %w, read from encoded file as fallback: %w", err, errFallback)
 		}
 	}
 	return value, nil

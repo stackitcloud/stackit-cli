@@ -64,7 +64,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -101,10 +101,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	creationTimeAfter, err := flags.FlagToDateTimePointer(cmd, creationTimeAfterFlag, creationTimeAfterFormat)
+	creationTimeAfter, err := flags.FlagToDateTimePointer(p, cmd, creationTimeAfterFlag, creationTimeAfterFormat)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
 			Flag:    creationTimeAfterFlag,
@@ -112,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -120,7 +120,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	pageSize := flags.FlagWithDefaultToInt64Value(p, cmd, pageSizeFlag)
 	if pageSize < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    pageSizeFlag,
@@ -130,9 +130,9 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
-		ParentId:          flags.FlagToStringPointer(cmd, parentIdFlag),
-		ProjectIdLike:     flags.FlagToStringSliceValue(cmd, projectIdLikeFlag),
-		Member:            flags.FlagToStringPointer(cmd, memberFlag),
+		ParentId:          flags.FlagToStringPointer(p, cmd, parentIdFlag),
+		ProjectIdLike:     flags.FlagToStringSliceValue(p, cmd, projectIdLikeFlag),
+		Member:            flags.FlagToStringPointer(p, cmd, memberFlag),
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
@@ -209,7 +209,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 
 func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
