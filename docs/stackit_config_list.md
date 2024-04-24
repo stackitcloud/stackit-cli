@@ -21,6 +21,9 @@ stackit config list [flags]
 ```
   List your active configuration
   $ stackit config list
+
+  List your active configuration in a json format
+  $ stackit config list --output-format json
 ```
 
 ### Options
