@@ -192,7 +192,7 @@ func TestAuthenticationConfig(t *testing.T) {
 			}
 
 			reauthorizeUserCalled := false
-			reauthenticateUser := func() error {
+			reauthenticateUser := func(p *print.Printer, isReauthentication bool) error {
 				if reauthorizeUserCalled {
 					t.Errorf("user reauthorized more than once")
 				}

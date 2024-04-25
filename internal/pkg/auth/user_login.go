@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"golang.org/x/oauth2"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 const (
@@ -36,7 +38,14 @@ type User struct {
 }
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
-func AuthorizeUser() error {
+func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
+	if isReauthentication {
+		err := p.PromptForConfirmation("Your session has expired! Do you want to login again? ")
+		if err != nil {
+			return err
+		}
+	}
+
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return fmt.Errorf("bind port for login redirect: %w", err)
