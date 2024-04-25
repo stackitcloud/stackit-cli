@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stackitcloud/stackit-sdk-go/core v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.0
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.13.0
