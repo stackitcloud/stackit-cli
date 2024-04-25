@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -33,7 +33,7 @@ type inputModel struct {
 	Role           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("add %s", subjectArg),
 		Short: "Adds a member to an organization",
@@ -52,21 +52,21 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to add the %s role to %s on organization with ID %q?", *model.Role, model.Subject, *model.OrganizationId)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -78,7 +78,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			cmd.Println("Member added")
+			p.Info("Member added")
 			return nil
 		},
 	}
@@ -94,16 +94,16 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	subject := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(cmd, organizationIdFlag),
+		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
 		Subject:         subject,
-		Role:            flags.FlagToStringPointer(cmd, roleFlag),
+		Role:            flags.FlagToStringPointer(p, cmd, roleFlag),
 	}, nil
 }
 

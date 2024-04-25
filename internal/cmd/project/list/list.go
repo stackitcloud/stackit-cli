@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -40,13 +42,16 @@ type inputModel struct {
 	PageSize          int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists STACKIT projects",
 		Long:  "Lists all STACKIT projects that match certain criteria.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			examples.NewExample(
+				`List all STACKIT projects that the authenticated user or service account is a member of`,
+				"$ stackit project list"),
 			examples.NewExample(
 				`List all STACKIT projects that are children of a specific parent`,
 				"$ stackit project list --parent-id xxx"),
@@ -59,13 +64,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -76,11 +81,11 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(projects) == 0 {
-				cmd.Print("No projects found matching the criteria\n")
+				p.Info("No projects found matching the criteria\n")
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, projects)
+			return outputResult(p, model.OutputFormat, projects)
 		},
 	}
 	configureFlags(cmd)
@@ -94,15 +99,12 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(creationTimeAfterFlag, "", "Filter by creation timestamp, in a date-time with the RFC3339 layout format, e.g. 2023-01-01T00:00:00Z. The list of projects that were created after the given timestamp will be shown")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
-
-	// At least one of parent-id, project-id-like or member flag must be provided
-	cmd.MarkFlagsOneRequired(parentIdFlag, projectIdLikeFlag, memberFlag)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	creationTimeAfter, err := flags.FlagToDateTimePointer(cmd, creationTimeAfterFlag, creationTimeAfterFormat)
+	creationTimeAfter, err := flags.FlagToDateTimePointer(p, cmd, creationTimeAfterFlag, creationTimeAfterFormat)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
 			Flag:    creationTimeAfterFlag,
@@ -110,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -118,7 +120,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	pageSize := flags.FlagWithDefaultToInt64Value(p, cmd, pageSizeFlag)
 	if pageSize < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    pageSizeFlag,
@@ -128,16 +130,16 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:   globalFlags,
-		ParentId:          flags.FlagToStringPointer(cmd, parentIdFlag),
-		ProjectIdLike:     flags.FlagToStringSliceValue(cmd, projectIdLikeFlag),
-		Member:            flags.FlagToStringPointer(cmd, memberFlag),
+		ParentId:          flags.FlagToStringPointer(p, cmd, parentIdFlag),
+		ProjectIdLike:     flags.FlagToStringSliceValue(p, cmd, projectIdLikeFlag),
+		Member:            flags.FlagToStringPointer(p, cmd, memberFlag),
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) resourcemanager.ApiListProjectsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) (resourcemanager.ApiListProjectsRequest, error) {
 	req := apiClient.ListProjects(ctx)
 	if model.ParentId != nil {
 		req = req.ContainerParentId(*model.ParentId)
@@ -151,9 +153,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 	if model.CreationTimeAfter != nil {
 		req = req.CreationTimeStart(*model.CreationTimeAfter)
 	}
+
+	if model.ParentId == nil && model.ProjectIdLike == nil && model.Member == nil {
+		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		if err != nil {
+			return req, fmt.Errorf("get email of authenticated user: %w", err)
+		}
+		req = req.Member(email)
+	}
 	req = req.Limit(float32(model.PageSize))
 	req = req.Offset(float32(offset))
-	return req
+	return req, nil
 }
 
 type resourceManagerClient interface {
@@ -169,7 +179,10 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	projects := []resourcemanager.ProjectResponse{}
 	for {
 		// Call API
-		req := buildRequest(ctx, model, apiClient, offset)
+		req, err := buildRequest(ctx, model, apiClient, offset)
+		if err != nil {
+			return nil, fmt.Errorf("build list projects request: %w", err)
+		}
 		resp, err := req.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("get projects: %w", err)
@@ -194,14 +207,14 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	return projects, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcemanager.ProjectResponse) error {
+func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -212,7 +225,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, projects []resourcema
 			table.AddRow(*p.ProjectId, *p.Name, *p.LifecycleState, *p.Parent.Id)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit               *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists access tokens of a service account",
@@ -52,13 +53,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -71,7 +72,7 @@ func NewCmd() *cobra.Command {
 			}
 			tokensMetadata := *resp.Items
 			if len(tokensMetadata) == 0 {
-				cmd.Printf("No tokens found for service account with email %q\n", model.ServiceAccountEmail)
+				p.Info("No tokens found for service account with email %q\n", model.ServiceAccountEmail)
 				return nil
 			}
 
@@ -80,7 +81,7 @@ func NewCmd() *cobra.Command {
 				tokensMetadata = tokensMetadata[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, tokensMetadata)
+			return outputResult(p, model.OutputFormat, tokensMetadata)
 		},
 	}
 
@@ -96,13 +97,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -110,7 +111,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -130,14 +131,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
+func outputResult(p *print.Printer, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(tokensMetadata, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal tokens metadata: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -147,7 +148,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, tokensMetadata []serv
 			t := tokensMetadata[i]
 			table.AddRow(*t.Id, *t.Active, *t.CreatedAt, *t.ValidUntil)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

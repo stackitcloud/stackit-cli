@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 type userTokenFlow struct {
-	cmd                    *cobra.Command
+	printer                *print.Printer
 	reauthorizeUserRoutine func() error // Called if the user needs to login again
 	client                 *http.Client
 	authFlow               AuthFlow
@@ -25,9 +25,9 @@ type userTokenFlow struct {
 var _ http.RoundTripper = &userTokenFlow{}
 
 // Returns a round tripper that adds authentication according to the user token flow
-func UserTokenFlow(cmd *cobra.Command) *userTokenFlow {
+func UserTokenFlow(p *print.Printer) *userTokenFlow {
 	return &userTokenFlow{
-		cmd:                    cmd,
+		printer:                p,
 		reauthorizeUserRoutine: AuthorizeUser,
 		client:                 &http.Client{},
 	}
@@ -53,11 +53,13 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 		err = refreshTokens(utf)
 		if err == nil {
 			accessTokenValid = true
+		} else {
+			utf.printer.Debug(print.ErrorLevel, "refresh access token: %v", err)
 		}
 	}
 
 	if !accessTokenValid {
-		utf.cmd.Println("Session expired, logging in again...")
+		utf.printer.Warn("Session expired, logging in again...")
 		err = reauthenticateUser(utf)
 		if err != nil {
 			return nil, fmt.Errorf("reauthenticate user: %w", err)

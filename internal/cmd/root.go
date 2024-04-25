@@ -28,11 +28,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewRootCmd(version, date string) *cobra.Command {
+func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "stackit",
 		Short:             "Manage STACKIT resources using the command line",
@@ -41,16 +42,20 @@ func NewRootCmd(version, date string) *cobra.Command {
 		SilenceErrors:     true, // Error is beautified in a custom way before being printed
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			p.Cmd = cmd
+			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if flags.FlagToBoolValue(cmd, "version") {
-				cmd.Printf("STACKIT CLI (BETA)\n")
+			if flags.FlagToBoolValue(p, cmd, "version") {
+				p.Outputf("STACKIT CLI (BETA)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {
-					cmd.Printf("Version: %s\n", version)
+					p.Outputf("Version: %s\n", version)
 					return nil
 				}
-				cmd.Printf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
+				p.Outputf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
 				return nil
 			}
 
@@ -62,7 +67,7 @@ func NewRootCmd(version, date string) *cobra.Command {
 	err := configureFlags(cmd)
 	cobra.CheckErr(err)
 
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 
 	// Cobra creates the help flag with "help for <command>" as the description
 	// We want to override that message by capitalizing the first letter to match the other flag descriptions
@@ -84,25 +89,25 @@ func configureFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(argus.NewCmd())
-	cmd.AddCommand(auth.NewCmd())
-	cmd.AddCommand(config.NewCmd())
-	cmd.AddCommand(curl.NewCmd())
-	cmd.AddCommand(dns.NewCmd())
-	cmd.AddCommand(logme.NewCmd())
-	cmd.AddCommand(mariadb.NewCmd())
-	cmd.AddCommand(mongodbflex.NewCmd())
-	cmd.AddCommand(objectstorage.NewCmd())
-	cmd.AddCommand(opensearch.NewCmd())
-	cmd.AddCommand(organization.NewCmd())
-	cmd.AddCommand(postgresflex.NewCmd())
-	cmd.AddCommand(project.NewCmd())
-	cmd.AddCommand(rabbitmq.NewCmd())
-	cmd.AddCommand(redis.NewCmd())
-	cmd.AddCommand(secretsmanager.NewCmd())
-	cmd.AddCommand(serviceaccount.NewCmd())
-	cmd.AddCommand(ske.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(argus.NewCmd(p))
+	cmd.AddCommand(auth.NewCmd(p))
+	cmd.AddCommand(config.NewCmd(p))
+	cmd.AddCommand(curl.NewCmd(p))
+	cmd.AddCommand(dns.NewCmd(p))
+	cmd.AddCommand(logme.NewCmd(p))
+	cmd.AddCommand(mariadb.NewCmd(p))
+	cmd.AddCommand(mongodbflex.NewCmd(p))
+	cmd.AddCommand(objectstorage.NewCmd(p))
+	cmd.AddCommand(opensearch.NewCmd(p))
+	cmd.AddCommand(organization.NewCmd(p))
+	cmd.AddCommand(postgresflex.NewCmd(p))
+	cmd.AddCommand(project.NewCmd(p))
+	cmd.AddCommand(rabbitmq.NewCmd(p))
+	cmd.AddCommand(redis.NewCmd(p))
+	cmd.AddCommand(secretsmanager.NewCmd(p))
+	cmd.AddCommand(serviceaccount.NewCmd(p))
+	cmd.AddCommand(ske.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.
@@ -114,11 +119,19 @@ func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
 }
 
 func Execute(version, date string) {
-	cmd := NewRootCmd(version, date)
+	p := print.NewPrinter()
+	cmd := NewRootCmd(version, date, p)
+
+	// We need to set the printer and verbosity here because the
+	// PersistentPreRun is not called when the command is wrongly called
+	p.Cmd = cmd
+	p.Verbosity = print.InfoLevel
+
 	err := cmd.Execute()
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
-		cmd.PrintErrln(cmd.ErrPrefix(), err.Error())
+		p.Debug(print.ErrorLevel, "execute command: %v", err)
+		p.Error(err.Error())
 		os.Exit(1)
 	}
 }

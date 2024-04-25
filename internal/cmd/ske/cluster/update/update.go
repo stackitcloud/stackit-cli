@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -32,7 +32,7 @@ type inputModel struct {
 	Payload     ske.CreateOrUpdateClusterPayload
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", clusterNameArg),
 		Short: "Updates an SKE cluster",
@@ -57,20 +57,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update cluster %q?", model.ClusterName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -95,7 +95,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Updating cluster")
 				_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.ProjectId, name).WaitWithContext(ctx)
 				if err != nil {
@@ -104,12 +104,7 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Updated"
-			if model.Async {
-				operationState = "Triggered update of"
-			}
-			cmd.Printf("%s cluster %q\n", operationState, model.ClusterName)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,15 +118,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	payloadString := flags.FlagToStringValue(cmd, payloadFlag)
+	payloadString := flags.FlagToStringValue(p, cmd, payloadFlag)
 	var payload ske.CreateOrUpdateClusterPayload
 	err := json.Unmarshal([]byte(payloadString), &payload)
 	if err != nil {
@@ -150,4 +145,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 	req = req.CreateOrUpdateClusterPayload(model.Payload)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *ske.Cluster) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Updated"
+		if model.Async {
+			operationState = "Triggered update of"
+		}
+		p.Info("%s cluster %q\n", operationState, model.ClusterName)
+		return nil
+	}
 }

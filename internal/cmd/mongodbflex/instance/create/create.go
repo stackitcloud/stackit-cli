@@ -2,15 +2,16 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
@@ -55,7 +56,7 @@ type inputModel struct {
 	Type           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a MongoDB Flex instance",
@@ -75,25 +76,26 @@ func NewCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a MongoDB Flex instance for project %q?", projectLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -121,7 +123,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Creating instance")
 				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -130,12 +132,7 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			cmd.Printf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
-			return nil
+			return outputResult(p, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -160,17 +157,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	storageSize := flags.FlagWithDefaultToInt64Value(cmd, storageSizeFlag)
+	storageSize := flags.FlagWithDefaultToInt64Value(p, cmd, storageSizeFlag)
 
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -185,16 +182,16 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(cmd, aclFlag),
-		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, backupScheduleFlag)),
+		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag)),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, storageClassFlag)),
+		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringPointer(cmd, versionFlag),
-		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(cmd, typeFlag)),
+		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
+		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)),
 	}, nil
 }
 
@@ -262,4 +259,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		}),
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *mongodbflex.CreateInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDBFlex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, *resp.Id)
+		return nil
+	}
 }

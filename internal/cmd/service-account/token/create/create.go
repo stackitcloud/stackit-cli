@@ -2,14 +2,15 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,7 @@ type inputModel struct {
 	TTLDays             *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates an access token for a service account",
@@ -50,20 +51,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create an access token for service account %s?", model.ServiceAccountEmail)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -76,10 +77,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create access token: %w", err)
 			}
 
-			cmd.Printf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
-			cmd.Printf("Valid until: %s\n", *token.ValidUntil)
-			cmd.Printf("Token: %s\n", *token.Token)
-			return nil
+			return outputResult(p, model, token)
 		},
 	}
 
@@ -95,13 +93,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -109,7 +107,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	ttlDays := flags.FlagWithDefaultToInt64Value(cmd, ttlDaysFlag)
+	ttlDays := flags.FlagWithDefaultToInt64Value(p, cmd, ttlDaysFlag)
 	if ttlDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -130,4 +128,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 		TtlDays: model.TTLDays,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, token *serviceaccount.AccessToken) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(token, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal service account access token: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
+		p.Outputf("Valid until: %s\n", *token.ValidUntil)
+		p.Outputf("Token: %s\n", *token.Token)
+		return nil
+	}
 }

@@ -3,11 +3,11 @@ package spinner
 import (
 	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 type Spinner struct {
-	cmd       *cobra.Command
+	printer   *print.Printer
 	message   string
 	states    []string
 	startTime time.Time
@@ -15,9 +15,9 @@ type Spinner struct {
 	done      chan bool
 }
 
-func New(cmd *cobra.Command) *Spinner {
+func New(p *print.Printer) *Spinner {
 	return &Spinner{
-		cmd:       cmd,
+		printer:   p,
 		states:    []string{"|", "/", "-", "\\"},
 		startTime: time.Now(),
 		delay:     100 * time.Millisecond,
@@ -33,7 +33,7 @@ func (s *Spinner) Start(message string) {
 func (s *Spinner) Stop() {
 	s.done <- true
 	close(s.done)
-	s.cmd.Printf("\r%s ✓ \n", s.message)
+	s.printer.Info("\r%s ✓ \n", s.message)
 }
 
 func (s *Spinner) animate() {
@@ -43,7 +43,7 @@ func (s *Spinner) animate() {
 		case <-s.done:
 			return
 		default:
-			s.cmd.Printf("\r%s %s ", s.message, s.states[i%len(s.states)])
+			s.printer.Info("\r%s %s ", s.message, s.states[i%len(s.states)])
 			i++
 			time.Sleep(s.delay)
 		}

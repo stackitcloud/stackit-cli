@@ -9,8 +9,11 @@ import (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
 	flagValues := map[string]bool{
-		projectIdFlag:    true,
-		outputFormatFlag: true,
+		asyncFlag:            true,
+		outputFormatFlag:     true,
+		projectIdFlag:        true,
+		sessionTimeLimitFlag: true,
+		verbosityFlag:        true,
 
 		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
@@ -34,8 +37,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		ProjectId:    true,
-		OutputFormat: true,
+		Async:            true,
+		OutputFormat:     true,
+		ProjectId:        true,
+		SessionTimeLimit: true,
+		Verbosity:        true,
 
 		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
@@ -75,8 +81,11 @@ func TestParseInput(t *testing.T) {
 			flagValues:  map[string]bool{},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ProjectId = false
+				model.Async = false
 				model.OutputFormat = false
+				model.ProjectId = false
+				model.SessionTimeLimit = false
+				model.Verbosity = false
 
 				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
@@ -176,7 +185,7 @@ func TestParseInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 
 			for flag, value := range tt.flagValues {
 				stringBool := fmt.Sprintf("%v", value)
@@ -197,7 +206,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model := parseInput(cmd)
+			model := parseInput(nil, cmd)
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")

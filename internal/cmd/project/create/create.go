@@ -2,16 +2,17 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -36,7 +37,7 @@ type inputModel struct {
 	Labels   *map[string]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a STACKIT project",
@@ -52,20 +53,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %q?", *model.ParentId)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -81,8 +82,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create project: %w", err)
 			}
 
-			cmd.Printf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -98,10 +98,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	labels := flags.FlagToStringToStringPointer(cmd, labelFlag)
+	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
 	if labels != nil {
 		labelKeyRegex := regexp.MustCompile(labelKeyRegex)
 		labelValueRegex := regexp.MustCompile(labelValueRegex)
@@ -124,8 +124,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ParentId:        flags.FlagToStringPointer(cmd, parentIdFlag),
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
+		ParentId:        flags.FlagToStringPointer(p, cmd, parentIdFlag),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Labels:          labels,
 	}, nil
 }
@@ -175,4 +175,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	})
 
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *resourcemanager.ProjectResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal project: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
+		return nil
+	}
 }

@@ -2,13 +2,14 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	BucketName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", bucketNameArg),
 		Short: "Creates an Object Storage bucket",
@@ -39,20 +40,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create bucket %q? (This cannot be undone)", model.BucketName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -60,14 +61,14 @@ func NewCmd() *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			_, err = req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Object Storage bucket: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Creating bucket")
 				_, err = wait.CreateBucketWaitHandler(ctx, apiClient, model.ProjectId, model.BucketName).WaitWithContext(ctx)
 				if err != nil {
@@ -76,21 +77,16 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			cmd.Printf("%s bucket %q\n", operationState, model.BucketName)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	bucketName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -104,4 +100,24 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateBucketRequest {
 	req := apiClient.CreateBucket(ctx, model.ProjectId, model.BucketName)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateBucketResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage bucket: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s bucket %q\n", operationState, model.BucketName)
+		return nil
+	}
 }

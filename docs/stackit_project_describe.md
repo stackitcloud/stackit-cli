@@ -17,7 +17,7 @@ stackit project describe [flags]
   $ stackit project describe
 
   Get the details of a STACKIT project by explicitly providing the project ID
-  $ stackit project describe --project-id xxx
+  $ stackit project describe xxx
 
   Get the details of the configured STACKIT project, including details of the parent resources
   $ stackit project describe --include-parents
@@ -35,8 +35,9 @@ stackit project describe [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
   -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 
 ### SEE ALSO

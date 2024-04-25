@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Secrets Manager users",
@@ -49,13 +50,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -69,9 +70,10 @@ func NewCmd() *cobra.Command {
 			if resp.Users == nil || len(*resp.Users) == 0 {
 				instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = *model.InstanceId
 				}
-				cmd.Printf("No users found for instance %q\n", instanceLabel)
+				p.Info("No users found for instance %q\n", instanceLabel)
 				return nil
 			}
 			users := *resp.Users
@@ -81,7 +83,7 @@ func NewCmd() *cobra.Command {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, users)
+			return outputResult(p, model.OutputFormat, users)
 		},
 	}
 
@@ -97,13 +99,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -113,8 +115,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringPointer(cmd, instanceIdFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
+		InstanceId:      flags.FlagToStringPointer(p, cmd, instanceIdFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}, nil
 }
 
@@ -123,14 +125,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, users []secretsmanager.User) error {
+func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.User) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(users, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -140,7 +142,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, users []secretsmanage
 			user := users[i]
 			table.AddRow(*user.Id, *user.Username, *user.Description, *user.Write)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

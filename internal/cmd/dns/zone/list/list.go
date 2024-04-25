@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -44,7 +45,7 @@ type inputModel struct {
 	PageSize       int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List DNS zones",
@@ -66,13 +67,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -83,15 +84,16 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 			if len(zones) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No zones found for project %q matching the criteria\n", projectLabel)
+				p.Info("No zones found for project %q matching the criteria\n", projectLabel)
 				return nil
 			}
 
-			return outputResult(cmd, model.OutputFormat, zones)
+			return outputResult(p, model.OutputFormat, zones)
 		},
 	}
 	configureFlags(cmd)
@@ -110,13 +112,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -124,7 +126,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	pageSize := flags.FlagWithDefaultToInt64Value(cmd, pageSizeFlag)
+	pageSize := flags.FlagWithDefaultToInt64Value(p, cmd, pageSizeFlag)
 	if pageSize < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    pageSizeFlag,
@@ -132,8 +134,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	active := flags.FlagToBoolValue(cmd, activeFlag)
-	inactive := flags.FlagToBoolValue(cmd, inactiveFlag)
+	active := flags.FlagToBoolValue(p, cmd, activeFlag)
+	inactive := flags.FlagToBoolValue(p, cmd, inactiveFlag)
 	if active && inactive {
 		return nil, fmt.Errorf("only one of %s and %s can be set", activeFlag, inactiveFlag)
 	}
@@ -142,9 +144,9 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		Active:          active,
 		Inactive:        inactive,
-		IncludeDeleted:  flags.FlagToBoolValue(cmd, includeDeletedFlag),
-		NameLike:        flags.FlagToStringPointer(cmd, nameLikeFlag),
-		OrderByName:     flags.FlagToStringPointer(cmd, orderByNameFlag),
+		IncludeDeleted:  flags.FlagToBoolValue(p, cmd, includeDeletedFlag),
+		NameLike:        flags.FlagToStringPointer(p, cmd, nameLikeFlag),
+		OrderByName:     flags.FlagToStringPointer(p, cmd, orderByNameFlag),
 		Limit:           limit,
 		PageSize:        pageSize,
 	}, nil
@@ -208,15 +210,15 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	return zones, nil
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) error {
+func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(zones, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -226,7 +228,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, zones []dns.Zone) err
 			z := zones[i]
 			table.AddRow(*z.Id, *z.Name, *z.State, *z.Type, *z.DnsName, *z.RecordCount)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

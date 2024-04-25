@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -35,7 +36,7 @@ type inputModel struct {
 	SortBy  string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of a project",
@@ -44,23 +45,23 @@ func NewCmd() *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all members of a project`,
-				"$ stackit project role list --project-id xxx"),
+				"$ stackit project member list --project-id xxx"),
 			examples.NewExample(
 				`List all members of a project, sorted by role`,
-				"$ stackit project role list --project-id xxx --sort-by role"),
+				"$ stackit project member list --project-id xxx --sort-by role"),
 			examples.NewExample(
 				`List up to 10 members of a project`,
-				"$ stackit project role list --project-id xxx --limit 10"),
+				"$ stackit project member list --project-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -73,11 +74,12 @@ func NewCmd() *cobra.Command {
 			}
 			members := *resp.Members
 			if len(members) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No members found for project %q\n", projectLabel)
+				p.Info("No members found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -86,7 +88,7 @@ func NewCmd() *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(cmd, model, members)
+			return outputResult(p, model, members)
 		},
 	}
 	configureFlags(cmd)
@@ -101,13 +103,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "subject", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -117,9 +119,9 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Subject:         flags.FlagToStringPointer(cmd, subjectFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag),
+		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
 	}, nil
 }
 
@@ -131,7 +133,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member) error {
+func outputResult(p *print.Printer, model *inputModel, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -145,13 +147,13 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 	sort.SliceStable(members, sortFn)
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal members: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -172,7 +174,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 			table.EnableAutoMergeOnColumns(2)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

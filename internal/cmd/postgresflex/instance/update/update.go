@@ -2,15 +2,16 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -52,7 +53,7 @@ type inputModel struct {
 	Type           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
 		Short: "Updates a PostgreSQL Flex instance",
@@ -69,25 +70,26 @@ func NewCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update instance %q? (This may cause downtime)", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -106,7 +108,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Updating instance")
 				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -115,12 +117,7 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Updated"
-			if model.Async {
-				operationState = "Triggered update of"
-			}
-			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -142,24 +139,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.EnumFlag(false, "", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
-	flavorId := flags.FlagToStringPointer(cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(cmd, ramFlag)
-	acl := flags.FlagToStringSlicePointer(cmd, aclFlag)
-	backupSchedule := flags.FlagToStringPointer(cmd, backupScheduleFlag)
-	storageClass := flags.FlagToStringPointer(cmd, storageClassFlag)
-	storageSize := flags.FlagToInt64Pointer(cmd, storageSizeFlag)
-	version := flags.FlagToStringPointer(cmd, versionFlag)
-	instanceType := flags.FlagToStringPointer(cmd, typeFlag)
+	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
+	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
+	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
+	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
+	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
+	version := flags.FlagToStringPointer(p, cmd, versionFlag)
+	instanceType := flags.FlagToStringPointer(p, cmd, typeFlag)
 
 	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
 		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {
@@ -296,4 +293,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		Options:        payloadOptions,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgresFlex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Updated"
+		if model.Async {
+			operationState = "Triggered update of"
+		}
+		p.Info("%s instance %q\n", operationState, instanceLabel)
+		return nil
+	}
 }

@@ -40,6 +40,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
 		Username:   utils.Ptr("johndoe"),
@@ -172,7 +173,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(nil, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

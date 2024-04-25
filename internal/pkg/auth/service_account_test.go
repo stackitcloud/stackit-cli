@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
@@ -151,7 +152,8 @@ func TestAuthenticateServiceAccount(t *testing.T) {
 				flow = &http.Transport{}
 			}
 
-			email, err := AuthenticateServiceAccount(flow)
+			p := print.NewPrinter()
+			email, err := AuthenticateServiceAccount(p, flow)
 
 			if !tt.isValid {
 				if err == nil {

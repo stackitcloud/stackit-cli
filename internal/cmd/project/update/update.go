@@ -6,11 +6,11 @@ import (
 	"regexp"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
@@ -35,7 +35,7 @@ type inputModel struct {
 	Labels   *map[string]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Updates a STACKIT project",
@@ -55,25 +55,26 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update project %q?", projectLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -86,7 +87,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("update project: %w", err)
 			}
 
-			cmd.Printf("Updated project %q\n", projectLabel)
+			p.Info("Updated project %q\n", projectLabel)
 			return nil
 		},
 	}
@@ -100,15 +101,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a project. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	labels := flags.FlagToStringToStringPointer(cmd, labelFlag)
-	parentId := flags.FlagToStringPointer(cmd, parentIdFlag)
-	name := flags.FlagToStringPointer(cmd, nameFlag)
+	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	parentId := flags.FlagToStringPointer(p, cmd, parentIdFlag)
+	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 
 	if labels == nil && parentId == nil && name == nil {
 		return nil, &errors.EmptyUpdateError{}

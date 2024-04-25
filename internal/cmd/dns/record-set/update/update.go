@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -40,7 +40,7 @@ type inputModel struct {
 	TTL         *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", recordSetIdArg),
 		Short: "Updates a DNS record set",
@@ -53,30 +53,32 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
 			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update record set %s of zone %s?", recordSetLabel, zoneLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -91,7 +93,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Updating record set")
 				_, err = wait.PartialUpdateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 				if err != nil {
@@ -104,7 +106,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
+			p.Info("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
 			return nil
 		},
 	}
@@ -123,19 +125,19 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	recordSetId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	zoneId := flags.FlagToStringValue(cmd, zoneIdFlag)
-	comment := flags.FlagToStringPointer(cmd, commentFlag)
-	name := flags.FlagToStringPointer(cmd, nameFlag)
-	records := flags.FlagToStringSlicePointer(cmd, recordFlag)
-	ttl := flags.FlagToInt64Pointer(cmd, ttlFlag)
+	zoneId := flags.FlagToStringValue(p, cmd, zoneIdFlag)
+	comment := flags.FlagToStringPointer(p, cmd, commentFlag)
+	name := flags.FlagToStringPointer(p, cmd, nameFlag)
+	records := flags.FlagToStringSlicePointer(p, cmd, recordFlag)
+	ttl := flags.FlagToInt64Pointer(p, cmd, ttlFlag)
 
 	if comment == nil && name == nil && records == nil && ttl == nil {
 		return nil, &errors.EmptyUpdateError{}

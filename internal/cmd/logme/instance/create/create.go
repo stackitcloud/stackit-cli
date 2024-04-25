@@ -2,16 +2,17 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	logmeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/utils"
@@ -30,7 +31,6 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -49,13 +49,12 @@ type inputModel struct {
 	MetricsFrequency     *int64
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
 	SgwAcl               *[]string
 	Syslog               *[]string
 	PlanId               *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a LogMe instance",
@@ -74,25 +73,26 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a LogMe instance for project %q?", projectLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -115,7 +115,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Creating instance")
 				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -124,12 +124,7 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			cmd.Printf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
-			return nil
+			return outputResult(p, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -143,7 +138,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -154,15 +148,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	version := flags.FlagToStringValue(cmd, versionFlag)
+	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
+	version := flags.FlagToStringValue(p, cmd, versionFlag)
 
 	if planId == nil && (planName == "" || version == "") {
 		return nil, &cliErr.DSAInputPlanError{
@@ -177,15 +171,14 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(cmd, instanceNameFlag),
-		EnableMonitoring:     flags.FlagToBoolPointer(cmd, enableMonitoringFlag),
-		MonitoringInstanceId: flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag),
-		Graphite:             flags.FlagToStringPointer(cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag),
-		MetricsPrefix:        flags.FlagToStringPointer(cmd, metricsPrefixFlag),
-		Plugin:               flags.FlagToStringSlicePointer(cmd, pluginFlag),
-		SgwAcl:               flags.FlagToStringSlicePointer(cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(cmd, syslogFlag),
+		InstanceName:         flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
+		MonitoringInstanceId: flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag),
+		Graphite:             flags.FlagToStringPointer(p, cmd, graphiteFlag),
+		MetricsFrequency:     flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag),
+		MetricsPrefix:        flags.FlagToStringPointer(p, cmd, metricsPrefixFlag),
+		SgwAcl:               flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag),
+		Syslog:               flags.FlagToStringSlicePointer(p, cmd, syslogFlag),
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
@@ -238,11 +231,30 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient)
 			MonitoringInstanceId: model.MonitoringInstanceId,
 			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
-			Plugins:              model.Plugin,
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},
 		PlanId: planId,
 	})
 	return req, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *logme.CreateInstanceResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal LogMe instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, *resp.InstanceId)
+		return nil
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	KeyId               string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", keyIdArg),
 		Short: "Shows details of a service account key",
@@ -43,12 +44,12 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -60,7 +61,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read service account key: %w", err)
 			}
 
-			return outputResult(cmd, resp)
+			return outputResult(p, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -74,15 +75,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	keyId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -102,11 +103,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(cmd *cobra.Command, key *serviceaccount.GetServiceAccountKeyResponse) error {
+func outputResult(p *print.Printer, key *serviceaccount.GetServiceAccountKeyResponse) error {
 	marshaledKey, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal service account key: %w", err)
 	}
-	cmd.Println(string(marshaledKey))
+	p.Outputln(string(marshaledKey))
 	return nil
 }

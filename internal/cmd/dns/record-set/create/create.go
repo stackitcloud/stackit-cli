@@ -2,14 +2,15 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -41,7 +42,7 @@ type inputModel struct {
 	Type    string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a DNS record set",
@@ -54,25 +55,26 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a record set for zone %s?", zoneLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -88,7 +90,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Creating record set")
 				_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
 				if err != nil {
@@ -97,12 +99,7 @@ func NewCmd() *cobra.Command {
 				s.Stop()
 			}
 
-			operationState := "Created"
-			if model.Async {
-				operationState = "Triggered creation of"
-			}
-			cmd.Printf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, recordSetId)
-			return nil
+			return outputResult(p, model, zoneLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,20 +120,20 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		ZoneId:          flags.FlagToStringValue(cmd, zoneIdFlag),
-		Comment:         flags.FlagToStringPointer(cmd, commentFlag),
-		Name:            flags.FlagToStringPointer(cmd, nameFlag),
-		Records:         flags.FlagToStringSliceValue(cmd, recordFlag),
-		TTL:             flags.FlagToInt64Pointer(cmd, ttlFlag),
-		Type:            flags.FlagWithDefaultToStringValue(cmd, typeFlag),
+		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
+		Comment:         flags.FlagToStringPointer(p, cmd, commentFlag),
+		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
+		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
+		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
 	}, nil
 }
 
@@ -155,4 +152,24 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Type:    &model.Type,
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *dns.RecordSetResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record-set: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, *resp.Rrset.Id)
+		return nil
+	}
 }

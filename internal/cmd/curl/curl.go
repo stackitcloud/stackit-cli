@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ type inputModel struct {
 	OutputFile             *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("curl %s", urlArg),
 		Short: "Executes an authenticated HTTP request to an endpoint",
@@ -68,12 +69,12 @@ func NewCmd() *cobra.Command {
 		),
 		Args: args.SingleArg(urlArg, validateURL),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
-			bearerToken, err := getBearerToken(cmd)
+			bearerToken, err := getBearerToken(p)
 			if err != nil {
 				return err
 			}
@@ -97,7 +98,7 @@ func NewCmd() *cobra.Command {
 				}
 			}()
 
-			err = outputResponse(cmd, model, resp)
+			err = outputResponse(p, model, resp)
 			if err != nil {
 				return err
 			}
@@ -149,9 +150,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(outputFileFlag, "", "Writes output to provided file instead of printing to console")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	urlString := inputArgs[0]
-	requestMethod := flags.FlagToStringValue(cmd, requestMethodFlag)
+	requestMethod := flags.FlagToStringValue(p, cmd, requestMethodFlag)
 	if requestMethod == "" {
 		requestMethod = http.MethodGet
 	}
@@ -159,17 +160,18 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	return &inputModel{
 		URL:                    urlString,
 		RequestMethod:          strings.ToUpper(requestMethod),
-		Headers:                flags.FlagToStringSliceValue(cmd, headerFlag),
-		Data:                   flags.FlagToStringPointer(cmd, dataFlag),
-		IncludeResponseHeaders: flags.FlagToBoolValue(cmd, includeResponseHeadersFlag),
-		FailOnHTTPError:        flags.FlagToBoolValue(cmd, failOnHTTPErrorFlag),
-		OutputFile:             flags.FlagToStringPointer(cmd, outputFileFlag),
+		Headers:                flags.FlagToStringSliceValue(p, cmd, headerFlag),
+		Data:                   flags.FlagToStringPointer(p, cmd, dataFlag),
+		IncludeResponseHeaders: flags.FlagToBoolValue(p, cmd, includeResponseHeadersFlag),
+		FailOnHTTPError:        flags.FlagToBoolValue(p, cmd, failOnHTTPErrorFlag),
+		OutputFile:             flags.FlagToStringPointer(p, cmd, outputFileFlag),
 	}, nil
 }
 
-func getBearerToken(cmd *cobra.Command) (string, error) {
-	_, err := auth.AuthenticationConfig(cmd, auth.AuthorizeUser)
+func getBearerToken(p *print.Printer) (string, error) {
+	_, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return "", &errors.AuthError{}
 	}
 	token, err := auth.GetAuthField(auth.ACCESS_TOKEN)
@@ -199,7 +201,7 @@ func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) 
 	return req, nil
 }
 
-func outputResponse(cmd *cobra.Command, model *inputModel, resp *http.Response) error {
+func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) error {
 	output := make([]byte, 0)
 	if model.IncludeResponseHeaders {
 		respHeader, err := httputil.DumpResponse(resp, false)
@@ -210,12 +212,12 @@ func outputResponse(cmd *cobra.Command, model *inputModel, resp *http.Response) 
 	}
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("read respose body: %w", err)
+		return fmt.Errorf("read response body: %w", err)
 	}
 	output = append(output, respBody...)
 
 	if model.OutputFile == nil {
-		cmd.Println(string(output))
+		p.Outputln(string(output))
 	} else {
 		err = os.WriteFile(*model.OutputFile, output, 0o600)
 		if err != nil {

@@ -14,13 +14,13 @@ stackit project member list [flags]
 
 ```
   List all members of a project
-  $ stackit project role list --project-id xxx
+  $ stackit project member list --project-id xxx
 
   List all members of a project, sorted by role
-  $ stackit project role list --project-id xxx --sort-by role
+  $ stackit project member list --project-id xxx --sort-by role
 
   List up to 10 members of a project
-  $ stackit project role list --project-id xxx --limit 10
+  $ stackit project member list --project-id xxx --limit 10
 ```
 
 ### Options
@@ -37,8 +37,9 @@ stackit project member list [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
   -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 
 ### SEE ALSO

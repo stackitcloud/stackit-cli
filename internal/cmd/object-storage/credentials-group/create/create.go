@@ -2,14 +2,15 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	CredentialsGroupName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a credentials group to hold Object Storage access credentials",
@@ -39,20 +40,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a credentials group with name %q?", model.CredentialsGroupName)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -65,9 +66,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			cmd.Printf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-			cmd.Printf("URN: %s\n", *resp.CredentialsGroup.Urn)
-			return nil
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -81,15 +80,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel:      globalFlags,
-		CredentialsGroupName: flags.FlagToStringValue(cmd, credentialsGroupNameFlag),
+		CredentialsGroupName: flags.FlagToStringValue(p, cmd, credentialsGroupNameFlag),
 	}, nil
 }
 
@@ -99,4 +98,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 		DisplayName: utils.Ptr(model.CredentialsGroupName),
 	})
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateCredentialsGroupResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials group: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
+		p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
+		return nil
+	}
 }

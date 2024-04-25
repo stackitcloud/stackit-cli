@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -41,7 +42,7 @@ type inputModel struct {
 	ProjectIdSet bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
@@ -64,13 +65,13 @@ func NewCmd() *cobra.Command {
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			if model.SessionTimeLimit != nil {
-				cmd.Println("Authenticate again to apply changes to session time limit")
+				p.Warn("Authenticate again to apply changes to session time limit\n")
 				viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
 			}
 
@@ -79,9 +80,9 @@ func NewCmd() *cobra.Command {
 				viper.Set(config.ProjectNameKey, "")
 			}
 
-			err = viper.WriteConfig()
+			err = config.Write()
 			if err != nil {
-				return fmt.Errorf("write new config to file: %w", err)
+				return fmt.Errorf("write config to file: %w", err)
 			}
 			return nil
 		},
@@ -141,8 +142,8 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	sessionTimeLimit, err := parseSessionTimeLimit(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	sessionTimeLimit, err := parseSessionTimeLimit(p, cmd)
 	if err != nil {
 		return nil, &errors.FlagValidationError{
 			Flag:    sessionTimeLimitFlag,
@@ -153,7 +154,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	// values.FlagToStringPointer pulls the projectId from passed flags
 	// globalflags.Parse uses the flags, and fallsback to config file
 	// To check if projectId was passed, we use the first rather than the second
-	projectIdFromFlag := flags.FlagToStringPointer(cmd, globalflags.ProjectIdFlag)
+	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
 	projectIdSet := false
 	if projectIdFromFlag != nil {
 		projectIdSet = true
@@ -165,8 +166,8 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 	}, nil
 }
 
-func parseSessionTimeLimit(cmd *cobra.Command) (*string, error) {
-	sessionTimeLimit := flags.FlagToStringPointer(cmd, sessionTimeLimitFlag)
+func parseSessionTimeLimit(p *print.Printer, cmd *cobra.Command) (*string, error) {
+	sessionTimeLimit := flags.FlagToStringPointer(p, cmd, sessionTimeLimitFlag)
 	if sessionTimeLimit == nil {
 		return nil, nil
 	}

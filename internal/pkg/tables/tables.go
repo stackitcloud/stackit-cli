@@ -3,10 +3,9 @@ package tables
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/pager"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/spf13/cobra"
 )
 
 type Table struct {
@@ -57,6 +56,6 @@ func (t *Table) Render() string {
 }
 
 // Displays the table in the command's stdout
-func (t *Table) Display(cmd *cobra.Command) error {
-	return pager.Display(cmd, t.Render())
+func (t *Table) Display(p *print.Printer) error {
+	return p.PagerDisplay(t.Render())
 }

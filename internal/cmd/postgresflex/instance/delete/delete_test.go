@@ -2,14 +2,17 @@ package delete
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,6 +23,27 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
+
+type postgresFlexClientMocked struct {
+	getInstanceFails bool
+	getInstanceResp  *postgresflex.InstanceResponse
+}
+
+func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+	if c.getInstanceFails {
+		return nil, fmt.Errorf("get instance failed")
+	}
+	return c.getInstanceResp, nil
+}
+
+func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
+	// Not used in testing
+	return nil, nil
+}
+func (c *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*postgresflex.GetUserResponse, error) {
+	// Not used in testing
+	return nil, nil
+}
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -45,6 +69,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
 	}
@@ -54,8 +79,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
+func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
 	request := testClient.DeleteInstance(testCtx, testProjectId, testInstanceId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureForceDeleteRequest(mods ...func(request *postgresflex.ApiForceDeleteInstanceRequest)) postgresflex.ApiForceDeleteInstanceRequest {
+	request := testClient.ForceDeleteInstance(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -135,7 +168,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -167,7 +200,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd, tt.argValues)
+			model, err := parseInput(nil, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -186,7 +219,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildDeleteRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -195,13 +228,13 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureDeleteRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildDeleteRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -209,6 +242,128 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildForceDeleteRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest postgresflex.ApiForceDeleteInstanceRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureForceDeleteRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildForceDeleteRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestCheckIfInstanceIsDeleted(t *testing.T) {
+	tests := []struct {
+		description           string
+		model                 *inputModel
+		expectedToDelete      bool
+		expectedToForceDelete bool
+		getInstanceResponse   *postgresflex.InstanceResponse
+		getInstanceFails      bool
+		isValid               bool
+	}{
+		{
+			description:           "delete instance state Ready",
+			model:                 fixtureInputModel(),
+			expectedToDelete:      true,
+			expectedToForceDelete: false,
+			getInstanceResponse: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Status: utils.Ptr(wait.InstanceStateSuccess),
+				},
+			},
+			isValid: true,
+		},
+		{
+			description: "force delete instance state Ready",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ForceDelete = true
+			}),
+			expectedToDelete:      true,
+			expectedToForceDelete: true,
+			getInstanceResponse: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Status: utils.Ptr(wait.InstanceStateSuccess),
+				},
+			},
+			isValid: true,
+		},
+		{
+			description: "force delete instance state Deleted",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ForceDelete = true
+			}),
+			expectedToDelete:      false,
+			expectedToForceDelete: true,
+			getInstanceResponse: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Status: utils.Ptr(wait.InstanceStateDeleted),
+				},
+			},
+			isValid: true,
+		},
+		{
+			description: "delete instance state Deleted",
+			model:       fixtureInputModel(),
+			getInstanceResponse: &postgresflex.InstanceResponse{
+				Item: &postgresflex.Instance{
+					Status: utils.Ptr(wait.InstanceStateDeleted),
+				},
+			},
+			isValid: false,
+		},
+		{
+			description:      "delete instance get instance fails",
+			model:            fixtureInputModel(),
+			getInstanceFails: true,
+			isValid:          false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &postgresFlexClientMocked{
+				getInstanceResp:  tt.getInstanceResponse,
+				getInstanceFails: tt.getInstanceFails,
+			}
+
+			toDelete, toForceDelete, err := getNextOperations(testCtx, tt.model, client)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error checking if instance is deleted: %v", err)
+			}
+
+			if toDelete != tt.expectedToDelete {
+				t.Fatalf("toDelete does not match: got %v, expected %v", toDelete, tt.expectedToDelete)
+			}
+
+			if toForceDelete != tt.expectedToForceDelete {
+				t.Fatalf("toForceDelete does not match: got %v, expected %v", toForceDelete, tt.expectedToForceDelete)
 			}
 		})
 	}

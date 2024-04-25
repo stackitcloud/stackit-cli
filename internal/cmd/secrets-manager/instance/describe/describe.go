@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -27,7 +28,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of a Secrets Manager instance",
@@ -43,12 +44,12 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -67,16 +68,16 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read Secrets Manager instance ACLs: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, instance, aclList)
+			return outputResult(p, model.OutputFormat, instance, aclList)
 		},
 	}
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -97,9 +98,9 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
+func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
@@ -124,7 +125,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 
 			table.AddRow("ACL", strings.Join(cidrs, ","))
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
@@ -140,7 +141,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instance *secretsmana
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

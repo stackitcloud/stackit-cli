@@ -11,12 +11,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project/role"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project",
 		Short: "Provides functionality regarding projects",
@@ -27,16 +28,16 @@ func NewCmd() *cobra.Command {
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(create.NewCmd())
-	cmd.AddCommand(update.NewCmd())
-	cmd.AddCommand(delete.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(member.NewCmd())
-	cmd.AddCommand(role.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(member.NewCmd(p))
+	cmd.AddCommand(role.NewCmd(p))
 }

@@ -9,6 +9,7 @@ import (
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"
@@ -31,7 +32,7 @@ type inputModel struct {
 	JwksCustomEndpoint    string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "activate-service-account",
 		Short: "Authenticates using a service account",
@@ -53,7 +54,7 @@ func NewCmd() *cobra.Command {
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model := parseInput(cmd)
+			model := parseInput(p, cmd)
 
 			err := storeFlags(model)
 			if err != nil {
@@ -72,11 +73,12 @@ func NewCmd() *cobra.Command {
 			// Initializes the authentication flow
 			rt, err := sdkAuth.SetupAuth(cfg)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "setup auth: %v", err)
 				return &cliErr.ActivateServiceAccountError{}
 			}
 
 			// Authenticates the service account and stores credentials
-			email, err := auth.AuthenticateServiceAccount(rt)
+			email, err := auth.AuthenticateServiceAccount(p, rt)
 			if err != nil {
 				var activateServiceAccountError *cliErr.ActivateServiceAccountError
 				if !errors.As(err, &activateServiceAccountError) {
@@ -85,7 +87,7 @@ func NewCmd() *cobra.Command {
 				return err
 			}
 
-			cmd.Printf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
+			p.Info("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 
 			return nil
 		},
@@ -102,13 +104,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
-func parseInput(cmd *cobra.Command) *inputModel {
+func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	return &inputModel{
-		ServiceAccountToken:   flags.FlagToStringValue(cmd, serviceAccountTokenFlag),
-		ServiceAccountKeyPath: flags.FlagToStringValue(cmd, serviceAccountKeyPathFlag),
-		PrivateKeyPath:        flags.FlagToStringValue(cmd, privateKeyPathFlag),
-		TokenCustomEndpoint:   flags.FlagToStringValue(cmd, tokenCustomEndpointFlag),
-		JwksCustomEndpoint:    flags.FlagToStringValue(cmd, jwksCustomEndpointFlag),
+		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
+		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
+		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
+		TokenCustomEndpoint:   flags.FlagToStringValue(p, cmd, tokenCustomEndpointFlag),
+		JwksCustomEndpoint:    flags.FlagToStringValue(p, cmd, jwksCustomEndpointFlag),
 	}
 }
 

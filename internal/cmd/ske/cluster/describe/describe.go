@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -25,7 +26,7 @@ type inputModel struct {
 	ClusterName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", clusterNameArg),
 		Short: "Shows details  of a SKE cluster",
@@ -41,12 +42,12 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -58,16 +59,16 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read SKE cluster: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	clusterName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -83,9 +84,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.Cluster) error {
+func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 
 		acl := []string{}
 		if cluster.Extensions != nil && cluster.Extensions.Acl != nil {
@@ -100,7 +101,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.Cluster)
 		table.AddRow("VERSION", *cluster.Kubernetes.Version)
 		table.AddSeparator()
 		table.AddRow("ACL", acl)
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
@@ -111,7 +112,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, cluster *ske.Cluster)
 		if err != nil {
 			return fmt.Errorf("marshal SKE cluster: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

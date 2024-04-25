@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials groups that hold Object Storage access credentials",
@@ -45,13 +46,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -64,7 +65,7 @@ func NewCmd() *cobra.Command {
 			}
 			credentialsGroups := *resp.CredentialsGroups
 			if len(credentialsGroups) == 0 {
-				cmd.Println("No credentials groups found for your project")
+				p.Info("No credentials groups found for your project")
 				return nil
 			}
 
@@ -72,7 +73,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentialsGroups) > int(*model.Limit) {
 				credentialsGroups = credentialsGroups[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentialsGroups)
+			return outputResult(p, model.OutputFormat, credentialsGroups)
 		},
 	}
 	configureFlags(cmd)
@@ -83,13 +84,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -108,14 +109,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
+func outputResult(p *print.Printer, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentialsGroups, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials group list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -125,7 +126,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentialsGroups []o
 			c := credentialsGroups[i]
 			table.AddRow(*c.CredentialsGroupId, *c.DisplayName, *c.Urn)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

@@ -8,14 +8,14 @@ You can use a [service account](https://docs.stackit.cloud/stackit/en/service-ac
 The CLI will search for service account credentials similarly to the [STACKIT SDK](https://github.com/stackitcloud/stackit-sdk-go) and [Terraform Provider](https://github.com/stackitcloud/terraform-provider-stackit), so if you have setup you environment previously for those tools, you can just run:
 
 ```bash
-$ ./bin/stackit auth activate-service-account
+$ stackit auth activate-service-account
 ```
 
 You can also configure the service account credentials directly in the CLI. To get help and to get a list of the available options run the command with the `-h` flag.
 
 ### Overview
 
-If you dont have a service account, create one in the STACKIT Portal an assign it the necessary permissions, e.g. `project.owner`. There are two ways to authenticate:
+If you dont have a service account, create one in the STACKIT Portal an assign it the necessary permissions, e.g. `owner`. There are two ways to authenticate:
 
 - Key flow (recommended)
 - Token flow
@@ -39,7 +39,7 @@ When setting up authentication, the CLI will always try to use the key flow firs
 
 ### Key flow
 
-    The following instructions assume that you have created a service account and assigned it the necessary permissions, e.g. `project.owner`.
+    The following instructions assume that you have created a service account and assigned it the necessary permissions, e.g. `owner`.
 
 To use the key flow, you need to have a service account key, which must have an RSA key-pair attached to it.
 

@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
 	"github.com/spf13/cobra"
@@ -16,9 +17,9 @@ import (
 // Returns the project name associated to the project ID set in config
 //
 // Uses the one stored in config if it's valid, otherwise gets it from the API
-func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
+func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (string, error) {
 	// If we can use the project name from config, return it
-	if useProjectNameFromConfig(cmd) {
+	if useProjectNameFromConfig(p, cmd) {
 		return viper.GetString(config.ProjectNameKey), nil
 	}
 
@@ -27,7 +28,7 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
 		return "", fmt.Errorf("found empty project ID and name")
 	}
 
-	apiClient, err := client.ConfigureClient(cmd)
+	apiClient, err := client.ConfigureClient(p)
 	if err != nil {
 		return "", fmt.Errorf("configure resource manager client: %w", err)
 	}
@@ -40,9 +41,9 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
 
 	// If project ID is set in config, we store the project name in config
 	// (So next time we can just pull it from there)
-	if !isProjectIdSetInFlags(cmd) {
+	if !isProjectIdSetInFlags(p, cmd) {
 		viper.Set(config.ProjectNameKey, projectName)
-		err = viper.WriteConfig()
+		err = config.Write()
 		if err != nil {
 			return "", fmt.Errorf("write new config to file: %w", err)
 		}
@@ -52,11 +53,11 @@ func GetProjectName(ctx context.Context, cmd *cobra.Command) (string, error) {
 }
 
 // Returns True if project name from config should be used, False otherwise
-func useProjectNameFromConfig(cmd *cobra.Command) bool {
+func useProjectNameFromConfig(p *print.Printer, cmd *cobra.Command) bool {
 	// We use the project name from the config file, if:
 	// - Project id is not set to a different value than the one in the config file
 	// - Project name in the config file is not empty
-	projectIdSet := isProjectIdSetInFlags(cmd)
+	projectIdSet := isProjectIdSetInFlags(p, cmd)
 	projectName := viper.GetString(config.ProjectNameKey)
 	projectNameSet := false
 	if projectName != "" {
@@ -65,11 +66,11 @@ func useProjectNameFromConfig(cmd *cobra.Command) bool {
 	return !projectIdSet && projectNameSet
 }
 
-func isProjectIdSetInFlags(cmd *cobra.Command) bool {
+func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
 	// FlagToStringPointer pulls the projectId from passed flags
 	// viper.GetString uses the flags, and fallsback to config file
 	// To check if projectId was passed, we use the first rather than the second
-	projectIdFromFlag := flags.FlagToStringPointer(cmd, globalflags.ProjectIdFlag)
+	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
 	projectIdSetInFlag := false
 	if projectIdFromFlag != nil {
 		projectIdSetInFlag = true

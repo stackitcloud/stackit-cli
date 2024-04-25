@@ -14,13 +14,13 @@ stackit postgresflex instance create [flags]
 
 ```
   Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by CPU and RAM. Other parameters are set to default values
-  $ stackit postgresflex instance create --name my-instance --cpu 1 --ram 4 --acl 0.0.0.0/0
+  $ stackit postgresflex instance create --name my-instance --cpu 2 --ram 4 --acl 0.0.0.0/0
 
   Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by ID. Other parameters are set to default values
   $ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0
 
   Create a PostgreSQL Flex instance with name "my-instance", allow access to a specific range of IP addresses, specify flavor by CPU and RAM and set storage size to 20 GB. Other parameters are set to default values
-  $ stackit postgresflex instance create --name my-instance --cpu 1 --ram 4 --acl 1.2.3.0/24 --storage-size 20
+  $ stackit postgresflex instance create --name my-instance --cpu 2 --ram 4 --acl 1.2.3.0/24 --storage-size 20
 ```
 
 ### Options
@@ -44,8 +44,9 @@ stackit postgresflex instance create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
   -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 
 ### SEE ALSO

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Redis instances",
@@ -46,13 +47,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -65,11 +66,12 @@ func NewCmd() *cobra.Command {
 			}
 			instances := *resp.Instances
 			if len(instances) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No instances found for project %q\n", projectLabel)
+				p.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +80,7 @@ func NewCmd() *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, instances)
+			return outputResult(p, model.OutputFormat, instances)
 		},
 	}
 
@@ -90,13 +92,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -106,7 +108,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}, nil
 }
 
@@ -115,14 +117,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, instances []redis.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instances []redis.Instance) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Redis instance list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -132,7 +134,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, instances []redis.Ins
 			instance := instances[i]
 			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

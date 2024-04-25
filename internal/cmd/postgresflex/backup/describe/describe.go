@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
@@ -36,7 +37,7 @@ type inputModel struct {
 	BackupId   string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", backupIdArg),
 		Short: "Shows details of a backup for a specific PostgreSQL Flex instance",
@@ -52,13 +53,13 @@ func NewCmd() *cobra.Command {
 		Args: args.SingleArg(backupIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -71,7 +72,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, *resp.Item)
+			return outputResult(p, cmd, model.OutputFormat, *resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -85,17 +86,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	backupId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		BackupId:        backupId,
 	}, nil
 }
@@ -105,7 +106,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.Backup) error {
+func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, backup postgresflex.Backup) error {
 	backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
 	if err != nil {
 		return fmt.Errorf("parse backup start time: %w", err)
@@ -113,7 +114,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 	backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("ID", *backup.Id)
 		table.AddSeparator()
@@ -123,7 +124,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, backup postgresflex.B
 		table.AddSeparator()
 		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

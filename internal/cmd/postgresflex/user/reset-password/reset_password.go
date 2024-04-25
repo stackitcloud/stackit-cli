@@ -2,14 +2,15 @@ package resetpassword
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 
@@ -30,7 +31,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
 		Short: "Resets the password of a PostgreSQL Flex user",
@@ -46,30 +47,32 @@ func NewCmd() *cobra.Command {
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -82,11 +85,7 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("reset PostgreSQL Flex user password: %w", err)
 			}
 
-			cmd.Printf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-			cmd.Printf("Username: %s\n", *user.Item.Username)
-			cmd.Printf("New password: %s\n", *user.Item.Password)
-			cmd.Printf("New URI: %s\n", *user.Item.Uri)
-			return nil
+			return outputResult(p, model, userLabel, instanceLabel, user)
 		},
 	}
 
@@ -101,17 +100,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	userId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		UserId:          userId,
 	}, nil
 }
@@ -119,4 +118,23 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiResetUserRequest {
 	req := apiClient.ResetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *postgresflex.ResetUserResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgresFlex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
+		p.Outputf("Username: %s\n", *user.Item.Username)
+		p.Outputf("New password: %s\n", *user.Item.Password)
+		p.Outputf("New URI: %s\n", *user.Item.Uri)
+		return nil
+	}
 }

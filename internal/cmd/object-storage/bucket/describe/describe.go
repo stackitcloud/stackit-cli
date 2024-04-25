@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -25,7 +26,7 @@ type inputModel struct {
 	BucketName string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", bucketNameArg),
 		Short: "Shows details of an Object Storage bucket",
@@ -41,12 +42,12 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -58,16 +59,16 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("read Object Storage bucket: %w", err)
 			}
 
-			return outputResult(cmd, model.OutputFormat, resp.Bucket)
+			return outputResult(p, model.OutputFormat, resp.Bucket)
 		},
 	}
 	return cmd
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	bucketName := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -83,9 +84,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage.Bucket) error {
+func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
 	switch outputFormat {
-	case globalflags.PrettyOutputFormat:
+	case print.PrettyOutputFormat:
 		table := tables.NewTable()
 		table.AddRow("Name", *bucket.Name)
 		table.AddSeparator()
@@ -95,7 +96,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage
 		table.AddSeparator()
 		table.AddRow("URL (Virtual Hosted Style)", *bucket.UrlVirtualHostedStyle)
 		table.AddSeparator()
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
@@ -106,7 +107,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, bucket *objectstorage
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage bucket: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	}

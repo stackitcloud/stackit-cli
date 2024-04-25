@@ -2,14 +2,15 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Acls         *[]string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Secrets Manager instance",
@@ -47,25 +48,26 @@ func NewCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a Secrets Manager instance for project %q?", projectLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -91,8 +93,7 @@ If you want to retry configuring the ACLs, you can do it via:
 				}
 			}
 
-			cmd.Printf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
-			return nil
+			return outputResult(p, model, projectLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -107,16 +108,16 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(cmd, instanceNameFlag),
-		Acls:            flags.FlagToStringSlicePointer(cmd, aclFlag),
+		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		Acls:            flags.FlagToStringSlicePointer(p, cmd, aclFlag),
 	}, nil
 }
 
@@ -142,4 +143,20 @@ func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId s
 	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
 
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *secretsmanager.Instance) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
+		return nil
+	}
 }

@@ -90,7 +90,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -106,7 +106,7 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			model := parseInput(cmd)
+			model := parseInput(nil, cmd)
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")

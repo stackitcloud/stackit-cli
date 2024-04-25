@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -27,7 +28,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all OpenSearch service plans",
@@ -46,13 +47,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -65,11 +66,12 @@ func NewCmd() *cobra.Command {
 			}
 			plans := *resp.Offerings
 			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				cmd.Printf("No plans found for project %q\n", projectLabel)
+				p.Info("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -78,7 +80,7 @@ func NewCmd() *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(cmd, model.OutputFormat, plans)
+			return outputResult(p, model.OutputFormat, plans)
 		},
 	}
 
@@ -90,13 +92,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -115,29 +117,29 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, plans []opensearch.Offering) error {
+func outputResult(p *print.Printer, outputFormat string, plans []opensearch.Offering) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(plans, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch plans: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("OFFERING NAME", "ID", "NAME", "DESCRIPTION")
+		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
 			for j := range *o.Plans {
-				p := (*o.Plans)[j]
-				table.AddRow(*o.Name, *p.Id, *p.Name, *p.Description)
+				plan := (*o.Plans)[j]
+				table.AddRow(*o.Name, *o.Version, *plan.Id, *plan.Name, *plan.Description)
 			}
 			table.AddSeparator()
 		}
-		table.EnableAutoMergeOnColumns(1)
-		err := table.Display(cmd)
+		table.EnableAutoMergeOnColumns(1, 2)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

@@ -36,7 +36,6 @@ stackit logme instance create [flags]
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
       --plan-name string                Plan name
-      --plugin strings                  Plugin
       --syslog strings                  Syslog
       --version string                  Instance LogMe version
 ```
@@ -46,8 +45,9 @@ stackit logme instance create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
   -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 
 ### SEE ALSO

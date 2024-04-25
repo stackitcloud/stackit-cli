@@ -6,12 +6,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/user"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "postgresflex",
 		Aliases: []string{"postgresqlflex"},
@@ -20,13 +21,13 @@ func NewCmd() *cobra.Command {
 		Args:    args.NoArgs,
 		Run:     utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(instance.NewCmd())
-	cmd.AddCommand(user.NewCmd())
-	cmd.AddCommand(options.NewCmd())
-	cmd.AddCommand(backup.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(instance.NewCmd(p))
+	cmd.AddCommand(user.NewCmd(p))
+	cmd.AddCommand(options.NewCmd(p))
+	cmd.AddCommand(backup.NewCmd(p))
 }

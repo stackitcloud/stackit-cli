@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -36,7 +37,7 @@ type inputModel struct {
 	SortBy         string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of an organization",
@@ -55,13 +56,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -74,7 +75,7 @@ func NewCmd() *cobra.Command {
 			}
 			members := *resp.Members
 			if len(members) == 0 {
-				cmd.Printf("No members found for organization with ID %q\n", *model.OrganizationId)
+				p.Info("No members found for organization with ID %q\n", *model.OrganizationId)
 				return nil
 			}
 
@@ -83,7 +84,7 @@ func NewCmd() *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(cmd, model, members)
+			return outputResult(p, model, members)
 		},
 	}
 	configureFlags(cmd)
@@ -102,10 +103,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -115,10 +116,10 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(cmd, organizationIdFlag),
-		Subject:         flags.FlagToStringPointer(cmd, subjectFlag),
-		Limit:           flags.FlagToInt64Pointer(cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(cmd, sortByFlag),
+		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
 	}, nil
 }
 
@@ -130,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(cmd *cobra.Command, model *inputModel, members []authorization.Member) error {
+func outputResult(p *print.Printer, model *inputModel, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -144,13 +145,13 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 	sort.SliceStable(members, sortFn)
 
 	switch model.OutputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal members: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -171,7 +172,7 @@ func outputResult(cmd *cobra.Command, model *inputModel, members []authorization
 			table.EnableAutoMergeOnColumns(2)
 		}
 
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

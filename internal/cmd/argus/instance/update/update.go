@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/client"
 	argusUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -38,7 +38,7 @@ type inputModel struct {
 	PlanId       *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
 		Short: "Updates an Argus instance",
@@ -57,25 +57,26 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := argusUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
 			if err != nil || instanceLabel == "" {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -99,7 +100,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Updating instance")
 				_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, instanceId, model.ProjectId).WaitWithContext(ctx)
 				if err != nil {
@@ -112,7 +113,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
+			p.Info("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}
@@ -126,17 +127,17 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	instanceName := flags.FlagToStringPointer(cmd, instanceNameFlag)
+	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
+	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "") {
 		return nil, &cliErr.ArgusInputPlanError{

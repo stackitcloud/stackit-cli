@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -33,7 +33,7 @@ type inputModel struct {
 	PublicKey           *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a service account key",
@@ -56,13 +56,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
 				}
 				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -86,13 +86,13 @@ func NewCmd() *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			cmd.PrintErrf("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
+			p.Info("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
 
 			key, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			cmd.Println(string(key))
+			p.Outputln(string(key))
 			return nil
 		},
 	}
@@ -110,13 +110,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -124,7 +124,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	expriresInDays := flags.FlagToInt64Pointer(cmd, expiredInDaysFlag)
+	expriresInDays := flags.FlagToInt64Pointer(p, cmd, expiredInDaysFlag)
 	if expriresInDays != nil && *expriresInDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    expiredInDaysFlag,
@@ -136,7 +136,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel:     globalFlags,
 		ServiceAccountEmail: email,
 		ExpiresInDays:       expriresInDays,
-		PublicKey:           flags.FlagToStringPointer(cmd, publicKeyFlag),
+		PublicKey:           flags.FlagToStringPointer(p, cmd, publicKeyFlag),
 	}, nil
 }
 

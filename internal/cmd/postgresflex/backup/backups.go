@@ -5,12 +5,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup/list"
 	updateschedule "github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup/update-schedule"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
 		Short: "Provides functionality for PostgreSQL Flex instance backups",
@@ -18,12 +19,12 @@ func NewCmd() *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd)
+	addSubcommands(cmd, p)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command) {
-	cmd.AddCommand(list.NewCmd())
-	cmd.AddCommand(describe.NewCmd())
-	cmd.AddCommand(updateschedule.NewCmd())
+func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(updateschedule.NewCmd(p))
 }

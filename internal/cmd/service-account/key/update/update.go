@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -38,7 +38,7 @@ type inputModel struct {
 	Deactivate          bool
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", keyIdArg),
 		Short: "Updates a service account key",
@@ -60,20 +60,20 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update the key with ID %q?", model.KeyId)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -90,7 +90,7 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			cmd.Println(string(key))
+			p.Info(string(key))
 			return nil
 		},
 	}
@@ -109,15 +109,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	keyId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	email := flags.FlagToStringValue(cmd, serviceAccountEmailFlag)
+	email := flags.FlagToStringValue(p, cmd, serviceAccountEmailFlag)
 	if email == "" {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -125,7 +125,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		}
 	}
 
-	expriresInDays := flags.FlagToInt64Pointer(cmd, expiredInDaysFlag)
+	expriresInDays := flags.FlagToInt64Pointer(p, cmd, expiredInDaysFlag)
 	if expriresInDays != nil && *expriresInDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    expiredInDaysFlag,
@@ -133,8 +133,8 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		}
 	}
 
-	activate := flags.FlagToBoolValue(cmd, activateFlag)
-	deactivate := flags.FlagToBoolValue(cmd, deactivateFlag)
+	activate := flags.FlagToBoolValue(p, cmd, activateFlag)
+	deactivate := flags.FlagToBoolValue(p, cmd, deactivateFlag)
 	if activate && deactivate {
 		return nil, fmt.Errorf("only one of %q and %q can be set", activateFlag, deactivateFlag)
 	}

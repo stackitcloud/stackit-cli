@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/confirm"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	mariadbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -25,13 +25,11 @@ import (
 const (
 	instanceIdArg = "INSTANCE_ID"
 
-	instanceNameFlag         = "name"
 	enableMonitoringFlag     = "enable-monitoring"
 	graphiteFlag             = "graphite"
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -50,13 +48,12 @@ type inputModel struct {
 	MetricsFrequency     *int64
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
 	SgwAcl               *[]string
 	Syslog               *[]string
 	PlanId               *string
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
 		Short: "Updates a MariaDB instance",
@@ -72,25 +69,26 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := mariadbUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
-				err = confirm.PromptForConfirmation(cmd, prompt)
+				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -113,7 +111,7 @@ func NewCmd() *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(cmd)
+				s := spinner.New(p)
 				s.Start("Updating instance")
 				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -126,7 +124,7 @@ func NewCmd() *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			cmd.Printf("%s instance %q\n", operationState, instanceLabel)
+			p.Info("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}
@@ -140,7 +138,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -148,25 +145,24 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(versionFlag, "", "Instance MariaDB version")
 }
 
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	enableMonitoring := flags.FlagToBoolPointer(cmd, enableMonitoringFlag)
-	monitoringInstanceId := flags.FlagToStringPointer(cmd, monitoringInstanceIdFlag)
-	graphite := flags.FlagToStringPointer(cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(cmd, metricsFrequencyFlag)
-	metricsPrefix := flags.FlagToStringPointer(cmd, metricsPrefixFlag)
-	plugin := flags.FlagToStringSlicePointer(cmd, pluginFlag)
-	sgwAcl := flags.FlagToStringSlicePointer(cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(cmd, syslogFlag)
-	planId := flags.FlagToStringPointer(cmd, planIdFlag)
-	planName := flags.FlagToStringValue(cmd, planNameFlag)
-	version := flags.FlagToStringValue(cmd, versionFlag)
+	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
+	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
+	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
+	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
+	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
+	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
+	version := flags.FlagToStringValue(p, cmd, versionFlag)
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
@@ -176,7 +172,7 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	}
 
 	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
-		metricsFrequency == nil && metricsPrefix == nil && plugin == nil &&
+		metricsFrequency == nil && metricsPrefix == nil &&
 		sgwAcl == nil && syslog == nil && planId == nil &&
 		planName == "" && version == "" {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -190,7 +186,6 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		Graphite:             graphite,
 		MetricsFrequency:     metricsFrequency,
 		MetricsPrefix:        metricsPrefix,
-		Plugin:               plugin,
 		SgwAcl:               sgwAcl,
 		Syslog:               syslog,
 		PlanId:               planId,
@@ -247,7 +242,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariaDBClien
 			MonitoringInstanceId: model.MonitoringInstanceId,
 			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
-			Plugins:              model.Plugin,
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},

@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	rabbitmqUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd() *cobra.Command {
+func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials' IDs for a RabbitMQ instance",
@@ -48,13 +49,13 @@ func NewCmd() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(cmd)
+			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
@@ -69,9 +70,10 @@ func NewCmd() *cobra.Command {
 			if len(credentials) == 0 {
 				instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 				if err != nil {
+					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = model.InstanceId
 				}
-				cmd.Printf("No credentials found for instance %q\n", instanceLabel)
+				p.Info("No credentials found for instance %q\n", instanceLabel)
 				return nil
 			}
 
@@ -79,7 +81,7 @@ func NewCmd() *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(cmd, model.OutputFormat, credentials)
+			return outputResult(p, model.OutputFormat, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -94,13 +96,13 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(cmd *cobra.Command) (*inputModel, error) {
-	globalFlags := globalflags.Parse(cmd)
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	limit := flags.FlagToInt64Pointer(cmd, limitFlag)
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -110,7 +112,7 @@ func parseInput(cmd *cobra.Command) (*inputModel, error) {
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringValue(cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Limit:           limit,
 	}, nil
 }
@@ -120,14 +122,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(cmd *cobra.Command, outputFormat string, credentials []rabbitmq.CredentialsListItem) error {
+func outputResult(p *print.Printer, outputFormat string, credentials []rabbitmq.CredentialsListItem) error {
 	switch outputFormat {
-	case globalflags.JSONOutputFormat:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ credentials list: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	default:
@@ -137,7 +139,7 @@ func outputResult(cmd *cobra.Command, outputFormat string, credentials []rabbitm
 			c := credentials[i]
 			table.AddRow(*c.Id)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

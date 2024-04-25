@@ -37,6 +37,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName: utils.Ptr("example"),
 		Acls:         utils.Ptr([]string{"198.51.100.14/24"}),
@@ -101,6 +102,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceName: utils.Ptr(""),
 				Acls:         &[]string{},
@@ -180,7 +182,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd()
+			cmd := NewCmd(nil)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -214,7 +216,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(cmd)
+			model, err := parseInput(nil, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
