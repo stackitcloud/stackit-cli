@@ -2,7 +2,7 @@
 
 ## Package managers
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/stackit-cli.svg?columns=3)](https://repology.org/project/stackit-cli/versions)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/stackit-cli.svg?columns=1)](https://repology.org/project/stackit-cli/versions)
 
 ### macOS
 
@@ -21,6 +21,16 @@ brew install stackit
 ```
 
 ### Linux
+
+#### Snapcraft
+
+The STACKIT CLI is available as a [Snap](https://snapcraft.io/stackit), and can be installed via:
+
+```shell
+sudo snap install stackit --beta --classic
+```
+
+or via the [Snap Store](https://snapcraft.io/snap-store) for desktop.
 
 #### Debian/Ubuntu (`APT`)
 
