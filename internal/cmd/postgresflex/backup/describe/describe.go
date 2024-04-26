@@ -40,8 +40,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", backupIdArg),
-		Short: "Shows details of a backup for a specific PostgreSQL Flex instance",
-		Long:  "Shows details of a backup for a specific PostgreSQL Flex instance.",
+		Short: "Shows details of a backup for a PostgreSQL Flex instance",
+		Long:  "Shows details of a backup for a PostgreSQL Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy"`,
