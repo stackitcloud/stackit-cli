@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/mattn/go-tty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -132,20 +134,31 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 
 // Prompts the user for confirmation by pressing Enter.
 //
-// Returns nil only if the user (explicitly) answers positive.
-// Returns ErrAborted if the user answers negative.
+// Returns nil only if the user (explicitly) press directly enter.
+// Returns ErrAborted if the user press anything else.
 func (p *Printer) PromptForEnter(prompt string) error {
-	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
+	question := fmt.Sprintf("%s \n", prompt)
 
-	p.Cmd.PrintErr(prompt)
-	answer, err := reader.ReadByte()
-	p.Cmd.Printf("Answer: %v\n", answer)
+	tty_, err := tty.Open()
 	if err != nil {
-		return fmt.Errorf("run less command: %w", err)
+		return fmt.Errorf("open tty: %w", err)
 	}
-	if answer == 10 {
+
+	p.Cmd.PrintErr(question)
+	r, err := tty_.ReadRune()
+	if err != nil {
+		return fmt.Errorf("read rune: %w", err)
+	}
+
+	if r == 13 {
 		return nil
 	}
+
+	err = tty_.Close()
+	if err != nil {
+		return fmt.Errorf("close tty: %w", err)
+	}
+
 	return errAborted
 }
 
