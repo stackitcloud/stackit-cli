@@ -33,7 +33,7 @@ stackit config set [flags]
       --authorization-custom-endpoint string      Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                DNS API base URL, used in calls to this API
   -h, --help                                      Help for "stackit config set"
-      --load-balancer-custom-endpoint string      LoadBalancer API base URL, used in calls to this API
+      --load-balancer-custom-endpoint string      Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string              LogMe API base URL, used in calls to this API
       --mariadb-custom-endpoint string            MariaDB API base URL, used in calls to this API
       --mongodbflex-custom-endpoint string        MongoDB Flex API base URL, used in calls to this API
