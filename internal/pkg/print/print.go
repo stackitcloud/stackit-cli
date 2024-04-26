@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/mattn/go-tty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -135,30 +134,18 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 // Prompts the user for confirmation by pressing Enter.
 //
 // Returns nil only if the user (explicitly) press directly enter.
-// Returns ErrAborted if the user press anything else.
+// Returns ErrAborted if the user press anything else before pressing enter.
 func (p *Printer) PromptForEnter(prompt string) error {
-	question := fmt.Sprintf("%s \n", prompt)
+	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
 
-	tty_, err := tty.Open()
+	p.Cmd.PrintErr(prompt)
+	answer, err := reader.ReadByte()
 	if err != nil {
-		return fmt.Errorf("open tty: %w", err)
+		return fmt.Errorf("read user response: %w", err)
 	}
-
-	p.Cmd.PrintErr(question)
-	r, err := tty_.ReadRune()
-	if err != nil {
-		return fmt.Errorf("read rune: %w", err)
-	}
-
-	if r == 13 {
+	if answer == 10 {
 		return nil
 	}
-
-	err = tty_.Close()
-	if err != nil {
-		return fmt.Errorf("close tty: %w", err)
-	}
-
 	return errAborted
 }
 
