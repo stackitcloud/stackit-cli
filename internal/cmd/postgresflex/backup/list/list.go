@@ -40,8 +40,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all backups which are available for a specific PostgreSQL Flex instance",
-		Long:  "Lists all backups which are available for a specific PostgreSQL Flex instance.",
+		Short: "Lists all backups which are available for a PostgreSQL Flex instance",
+		Long:  "Lists all backups which are available for a PostgreSQL Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`List all backups of instance with ID "xxx"`,
