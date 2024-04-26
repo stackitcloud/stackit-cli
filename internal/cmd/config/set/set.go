@@ -88,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
-	cmd.SetHelpTemplate( // Slighly modified help template to merge the command level Flags and Global Flags in a single section
+	cmd.SetHelpTemplate( // Slightly modified help template to merge the command level Flags and Global Flags in a single section
 		`Usage:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
