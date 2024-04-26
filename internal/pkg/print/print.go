@@ -144,8 +144,7 @@ func (p *Printer) PromptForEnter(prompt string) error {
 		return fmt.Errorf("read user response: %w", err)
 	}
 
-	// Normally the ASCII code for enter is 13. But the returned answer from ReadByte method when enter is pressed is 10
-	// That is why the condition is checking with using 10
+	// ASCII code for Enter (newline) is 10.
 	if answer == 10 {
 		return nil
 	}
