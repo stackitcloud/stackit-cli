@@ -1,10 +1,10 @@
 ## stackit postgresflex backup list
 
-Lists all backups which are available for a specific PostgreSQL Flex instance
+Lists all backups which are available for a PostgreSQL Flex instance
 
 ### Synopsis
 
-Lists all backups which are available for a specific PostgreSQL Flex instance.
+Lists all backups which are available for a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex backup list [flags]

@@ -1,10 +1,10 @@
 ## stackit postgresflex backup describe
 
-Shows details of a backup for a specific PostgreSQL Flex instance
+Shows details of a backup for a PostgreSQL Flex instance
 
 ### Synopsis
 
-Shows details of a backup for a specific PostgreSQL Flex instance.
+Shows details of a backup for a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex backup describe BACKUP_ID [flags]

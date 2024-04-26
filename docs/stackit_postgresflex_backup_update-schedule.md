@@ -1,10 +1,10 @@
 ## stackit postgresflex backup update-schedule
 
-Updates backup schedule for a specific PostgreSQL Flex instance
+Updates backup schedule for a PostgreSQL Flex instance
 
 ### Synopsis
 
-Updates backup schedule for a specific PostgreSQL Flex instance.
+Updates backup schedule for a PostgreSQL Flex instance.
 
 ```
 stackit postgresflex backup update-schedule [flags]
