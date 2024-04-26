@@ -111,6 +111,13 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "instance id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
 			description: "limit invalid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[limitFlag] = "invalid"
