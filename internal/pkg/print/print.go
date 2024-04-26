@@ -130,6 +130,25 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 	return fmt.Errorf("max number of wrong inputs")
 }
 
+// Prompts the user for confirmation by pressing Enter.
+//
+// Returns nil only if the user (explicitly) answers positive.
+// Returns ErrAborted if the user answers negative.
+func (p *Printer) PromptForEnter(prompt string) error {
+	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
+
+	p.Cmd.PrintErr(prompt)
+	answer, err := reader.ReadByte()
+	p.Cmd.Printf("Answer: %v\n", answer)
+	if err != nil {
+		return fmt.Errorf("run less command: %w", err)
+	}
+	if answer == 10 {
+		return nil
+	}
+	return errAborted
+}
+
 // Shows the content in the command's stdout using the "less" command
 // If output format is set to none, it does nothing
 func (p *Printer) PagerDisplay(content string) error {

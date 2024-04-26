@@ -40,7 +40,7 @@ type User struct {
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	if isReauthentication {
-		err := p.PromptForConfirmation("Your session has expired! Do you want to login again? ")
+		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
 		if err != nil {
 			return err
 		}
