@@ -1,10 +1,10 @@
 ## stackit load-balancer quota
 
-Shows the configured load balancer quota
+Shows the configured Load Balancer quota
 
 ### Synopsis
 
-Shows the configured load balancer quota for the project. If you want to change the quota, please create a support ticket in the STACKIT Help Center (https://support.stackit.cloud)
+Shows the configured Load Balancer quota for the project. If you want to change the quota, please create a support ticket in the STACKIT Help Center (https://support.stackit.cloud)
 
 ```
 stackit load-balancer quota [flags]

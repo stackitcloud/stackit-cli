@@ -25,8 +25,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "quota",
-		Short: "Shows the configured load balancer quota",
-		Long:  "Shows the configured load balancer quota for the project. If you want to change the quota, please create a support ticket in the STACKIT Help Center (https://support.stackit.cloud)",
+		Short: "Shows the configured Load Balancer quota",
+		Long:  "Shows the configured Load Balancer quota for the project. If you want to change the quota, please create a support ticket in the STACKIT Help Center (https://support.stackit.cloud)",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

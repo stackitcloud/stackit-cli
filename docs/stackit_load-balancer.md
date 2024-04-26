@@ -31,5 +31,5 @@ stackit load-balancer [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit load-balancer describe](./stackit_load-balancer_describe.md)	 - Shows details of a Load Balancer
 * [stackit load-balancer list](./stackit_load-balancer_list.md)	 - Lists all Load Balancers
-* [stackit load-balancer quota](./stackit_load-balancer_quota.md)	 - Shows the configured load balancer quota
+* [stackit load-balancer quota](./stackit_load-balancer_quota.md)	 - Shows the configured Load Balancer quota
 
