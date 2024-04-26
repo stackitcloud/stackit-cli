@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-schedule",
-		Short: "Updates backup schedule for a specific PostgreSQL Flex instance",
-		Long:  "Updates backup schedule for a specific PostgreSQL Flex instance.",
+		Short: "Updates backup schedule for a PostgreSQL Flex instance",
+		Long:  "Updates backup schedule for a PostgreSQL Flex instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
