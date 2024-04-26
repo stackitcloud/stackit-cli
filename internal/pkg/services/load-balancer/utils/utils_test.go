@@ -82,7 +82,6 @@ func fixtureGetDefaultPayload(mods ...func(payload *loadbalancer.CreateLoadBalan
 				},
 			},
 		},
-		Version: utils.Ptr(""),
 	}
 	for _, mod := range mods {
 		mod(payload)

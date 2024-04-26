@@ -45,7 +45,6 @@ func GetDefaultPayload() *loadbalancer.CreateLoadBalancerPayload {
 		TargetPools: &[]loadbalancer.TargetPool{
 			*payloadTargetPool,
 		},
-		Version: utils.Ptr(""),
 	}
 	return payload
 }
