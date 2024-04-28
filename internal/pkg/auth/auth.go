@@ -38,6 +38,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func() error)
 
 	switch flow {
 	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN:
+		p.Debug(print.DebugLevel, "authenticating using service account token")
 		if userSessionExpired {
 			return nil, fmt.Errorf("session expired")
 		}
@@ -47,6 +48,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func() error)
 		}
 		authCfgOption = sdkConfig.WithToken(accessToken)
 	case AUTH_FLOW_SERVICE_ACCOUNT_KEY:
+		p.Debug(print.DebugLevel, "authenticating using service account key")
 		if userSessionExpired {
 			return nil, fmt.Errorf("session expired")
 		}
@@ -56,6 +58,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func() error)
 		}
 		authCfgOption = sdkConfig.WithCustomAuth(keyFlow)
 	case AUTH_FLOW_USER_TOKEN:
+		p.Debug(print.DebugLevel, "authenticating using user token")
 		if userSessionExpired {
 			p.Warn("Session expired, logging in again...\n")
 			err = reauthorizeUserRoutine()

@@ -147,3 +147,8 @@ func (p *Printer) PagerDisplay(content string) error {
 	}
 	return nil
 }
+
+// Returns True if the verbosity level is set to Debug, False otherwise.
+func (p *Printer) IsVerbosityDebug() bool {
+	return p.Verbosity == DebugLevel
+}

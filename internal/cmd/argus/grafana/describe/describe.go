@@ -58,6 +58,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			if p.IsVerbosityDebug() {
+				modelStr, err := utils.ConvertModelToString(*model)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+				} else {
+					p.Debug(print.DebugLevel, "input model: %s", modelStr)
+				}
+			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
@@ -110,6 +120,11 @@ func buildGetGrafanaConfigRequest(ctx context.Context, model *inputModel, apiCli
 func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId)
 	return req
+}
+
+func PrintJSON(obj interface{}) {
+	bytes, _ := json.MarshalIndent(obj, "\t", "\t")
+	fmt.Println(string(bytes))
 }
 
 func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argus.GrafanaConfigs, instance *argus.GetInstanceResponse) error {

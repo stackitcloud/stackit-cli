@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -144,4 +145,25 @@ func setConfigDefaults() {
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
+}
+
+// GetConfigKeysStr returns a string representation of the config keys and their values
+// Ignores empty values
+func GetConfigKeysStr() string {
+	var builder strings.Builder
+	builder.WriteString("[")
+	first := true
+	for _, key := range ConfigKeys {
+		value := viper.GetString(key)
+		if value != "" {
+			if !first {
+				builder.WriteString(", ")
+			} else {
+				first = false
+			}
+			builder.WriteString(fmt.Sprintf("%s: %s", key, value))
+		}
+	}
+	builder.WriteString("]")
+	return builder.String()
 }
