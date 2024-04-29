@@ -45,6 +45,8 @@ func BuildDebugStrFromInputModel(model interface{}) (string, error) {
 	return builder.String(), nil
 }
 
+// BuildDebugStrFromMap converts a map to a user-friendly string representation.
+// This function removes empty values and generates a string representation of the map.
 func BuildDebugStrFromMap(inputMap map[string]string) string {
 	var builder strings.Builder
 	builder.WriteString("[")
@@ -61,6 +63,7 @@ func BuildDebugStrFromMap(inputMap map[string]string) string {
 	return builder.String()
 }
 
+// BuildDebugStrFromSlice converts a slice to a user-friendly string representation.
 func BuildDebugStrFromSlice(inputSlice []string) string {
 	sliceStr := strings.Join(inputSlice, ", ")
 	return fmt.Sprintf("[%s]", sliceStr)
