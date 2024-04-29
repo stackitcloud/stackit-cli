@@ -54,6 +54,7 @@ var ConfigKeys = []string{
 	VerbosityKey,
 
 	DNSCustomEndpointKey,
+	LoadBalancerCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
 	ObjectStorageCustomEndpointKey,
