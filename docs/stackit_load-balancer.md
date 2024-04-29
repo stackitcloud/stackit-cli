@@ -29,4 +29,5 @@ stackit load-balancer [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit load-balancer generate-payload](./stackit_load-balancer_generate-payload.md)	 - Generates a payload to create/update a Load Balancer
 
