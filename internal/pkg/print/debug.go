@@ -38,8 +38,7 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 	}
 	sort.Strings(keys)
 
-	var builder strings.Builder
-	builder.WriteString("[")
+	result := "["
 	first := true
 	for _, key := range keys {
 		value := inputMap[key]
@@ -48,15 +47,15 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 		}
 
 		if !first {
-			builder.WriteString(", ")
+			result += ", "
 		} else {
 			first = false
 		}
 
-		builder.WriteString(fmt.Sprintf("%s: %v", key, value))
+		result += fmt.Sprintf("%s: %v", key, value)
 	}
-	builder.WriteString("]")
-	return builder.String()
+	result += "]"
+	return result
 }
 
 // BuildDebugStrFromSlice converts a slice to a user-friendly string representation.

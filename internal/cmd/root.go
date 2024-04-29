@@ -48,7 +48,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
 
 			argsString := print.BuildDebugStrFromSlice(os.Args)
-			p.Debug(print.DebugLevel, "arguments entered to the CLI: %s", argsString)
+			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
 			configKeys := viper.AllSettings()
 			configKeysStr := print.BuildDebugStrFromMap(configKeys)
