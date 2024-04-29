@@ -12,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
@@ -79,19 +78,11 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 	case print.PrettyOutputFormat:
 
 		maxLoadBalancers := "Unlimited"
-		if quota.MaxLoadBalancers != nil && strconv.FormatInt(*quota.MaxLoadBalancers, 10) != "-1" {
+		if quota.MaxLoadBalancers != nil && *quota.MaxLoadBalancers != -1 {
 			maxLoadBalancers = strconv.FormatInt(*quota.MaxLoadBalancers, 10)
 		}
 
-		table := tables.NewTable()
-		table.AddRow("MAXIMUM LOAD BALANCERS")
-		table.AddSeparator()
-		table.AddRow(maxLoadBalancers)
-		table.AddSeparator()
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
+		p.Outputf("Maximum number of load balancers allowed: %s\n", maxLoadBalancers)
 
 		return nil
 	default:
@@ -99,6 +90,7 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 		if err != nil {
 			return fmt.Errorf("marshal quota: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil

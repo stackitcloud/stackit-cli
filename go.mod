@@ -49,7 +49,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/argus v0.10.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.9.0
