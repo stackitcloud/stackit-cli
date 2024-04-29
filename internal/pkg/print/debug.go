@@ -3,6 +3,7 @@ package print
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -27,11 +28,21 @@ func BuildDebugStrFromInputModel(model any) (string, error) {
 
 // BuildDebugStrFromMap converts a map to a user-friendly string representation.
 // This function removes empty values and generates a string representation of the map.
+// The string representation is in the format: [key1: value1, key2: value2, ...]
+// The keys are ordered alphabetically to make the output deterministic.
 func BuildDebugStrFromMap(inputMap map[string]any) string {
+	// Sort the keys to make the output deterministic
+	keys := make([]string, 0, len(inputMap))
+	for key := range inputMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
 	var builder strings.Builder
 	builder.WriteString("[")
 	first := true
-	for key, value := range inputMap {
+	for _, key := range keys {
+		value := inputMap[key]
 		if isEmpty(value) {
 			continue
 		}
