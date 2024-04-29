@@ -75,6 +75,14 @@ func isEmpty(value interface{}) bool {
 		return v == ""
 	case []interface{}:
 		return len(v) == 0
+	case []string:
+		return len(v) == 0
+	case []int:
+		return len(v) == 0
+	case []bool:
+		return len(v) == 0
+	case []float64:
+		return len(v) == 0
 	case map[string]any:
 		return len(v) == 0
 	default:
