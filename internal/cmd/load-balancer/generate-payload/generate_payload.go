@@ -12,7 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
-	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
 	"github.com/spf13/cobra"
@@ -26,6 +26,87 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceName *string
 }
+
+var (
+	defaultPayloadListener = &loadbalancer.Listener{
+		DisplayName: utils.Ptr(""),
+		Name:        utils.Ptr(""),
+		Port:        utils.Ptr(int64(0)),
+		Protocol:    utils.Ptr(""),
+		ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+			{
+				Name: utils.Ptr(""),
+			},
+		},
+		TargetPool: utils.Ptr(""),
+		Tcp: &loadbalancer.OptionsTCP{
+			IdleTimeout: utils.Ptr(""),
+		},
+		Udp: &loadbalancer.OptionsUDP{
+			IdleTimeout: utils.Ptr(""),
+		},
+	}
+
+	defaultPayloadNetwork = &loadbalancer.Network{
+		NetworkId: utils.Ptr(""),
+		Role:      utils.Ptr(""),
+	}
+
+	defaultPayloadTargetPool = &loadbalancer.TargetPool{
+		ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
+			HealthyThreshold:   utils.Ptr(int64(0)),
+			Interval:           utils.Ptr(""),
+			IntervalJitter:     utils.Ptr(""),
+			Timeout:            utils.Ptr(""),
+			UnhealthyThreshold: utils.Ptr(int64(0)),
+		},
+		Name: utils.Ptr(""),
+		SessionPersistence: &loadbalancer.SessionPersistence{
+			UseSourceIpAddress: utils.Ptr(false),
+		},
+		TargetPort: utils.Ptr(int64(0)),
+		Targets: &[]loadbalancer.Target{
+			{
+				DisplayName: utils.Ptr(""),
+				Ip:          utils.Ptr(""),
+			},
+		},
+	}
+
+	DefaultCreateLoadBalancerPayload = loadbalancer.CreateLoadBalancerPayload{
+		ExternalAddress: utils.Ptr(""),
+		Listeners: &[]loadbalancer.Listener{
+			*defaultPayloadListener,
+		},
+		Name: utils.Ptr(""),
+		Networks: &[]loadbalancer.Network{
+			*defaultPayloadNetwork,
+		},
+		Options: &loadbalancer.LoadBalancerOptions{
+			AccessControl: &loadbalancer.LoadbalancerOptionAccessControl{
+				AllowedSourceRanges: &[]string{
+					"",
+				},
+			},
+			EphemeralAddress: utils.Ptr(false),
+			Observability: &loadbalancer.LoadbalancerOptionObservability{
+				Logs: &loadbalancer.LoadbalancerOptionLogs{
+					CredentialsRef: utils.Ptr(""),
+					PushUrl:        utils.Ptr(""),
+				},
+				Metrics: &loadbalancer.LoadbalancerOptionMetrics{
+					CredentialsRef: utils.Ptr(""),
+					PushUrl:        utils.Ptr(""),
+				},
+			},
+			PrivateNetworkOnly: utils.Ptr(false),
+		},
+		PrivateAddress: utils.Ptr(""),
+		TargetPools: &[]loadbalancer.TargetPool{
+			*defaultPayloadTargetPool,
+		},
+	}
+)
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -64,9 +145,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			var updatePayload *loadbalancer.UpdateLoadBalancerPayload
 
 			if model.InstanceName == nil {
-				var createPayload *loadbalancer.CreateLoadBalancerPayload
-				createPayload = lbUtils.GetDefaultPayload()
-				return outputCreateResult(p, createPayload)
+				createPayload := DefaultCreateLoadBalancerPayload
+				return outputCreateResult(p, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)
