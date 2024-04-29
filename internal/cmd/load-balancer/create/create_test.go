@@ -29,7 +29,6 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 	Listeners: &[]loadbalancer.Listener{
 		{
 			DisplayName: utils.Ptr(""),
-			Name:        utils.Ptr(""),
 			Port:        utils.Ptr(int64(0)),
 			Protocol:    utils.Ptr(""),
 			ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
@@ -72,7 +71,6 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		},
 		PrivateNetworkOnly: utils.Ptr(false),
 	},
-	PrivateAddress: utils.Ptr(""),
 	TargetPools: &[]loadbalancer.TargetPool{
 		{
 			ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
@@ -105,7 +103,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
   "listeners": [
     {
       "displayName": "",
-      "name": "",
       "port": 0,
       "protocol": "",
       "serverNameIndicators": [
@@ -148,7 +145,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
     },
     "privateNetworkOnly": false
   },
-  "privateAddress": "",
   "targetPools": [
     {
       "activeHealthCheck": {
