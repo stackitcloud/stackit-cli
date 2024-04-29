@@ -118,7 +118,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		table := tables.NewTable()
 		table.AddRow("ID", *backup.Id)
 		table.AddSeparator()
-		table.AddRow("START TIME", *backup.StartTime)
+		table.AddRow("CREATED AT", *backup.StartTime)
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", backupExpireDate)
 		table.AddSeparator()
