@@ -6,13 +6,14 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
-	github.com/jedib0t/go-pretty/v6 v6.5.8
+	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
+	github.com/jedib0t/go-pretty/v6 v6.5.6
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
 	github.com/stackitcloud/stackit-sdk-go/core v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.0
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.13.0
@@ -48,7 +49,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/argus v0.10.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.9.0
