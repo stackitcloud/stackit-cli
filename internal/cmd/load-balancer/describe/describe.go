@@ -155,7 +155,7 @@ func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
 
 func renderListeners(listeners []loadbalancer.Listener) string {
 	table := tables.NewTable()
-	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
+	table.SetHeader("LISTENER NAME", "PORT", "PROTOCOL", "TARGET POOL")
 	for i := range listeners {
 		listener := listeners[i]
 		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
@@ -166,7 +166,7 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 
 func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 	table := tables.NewTable()
-	table.SetHeader("NAME", "PORT", "TARGETS", "SESSION PERSISTENCE", "HEALTH CHECK INTERVAL (S)", "DOWN AFTER (CHECKS)", "UP AFTER (CHECKS)")
+	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS", "SESSION PERSISTENCE", "HEALTH CHECK INTERVAL (S)", "DOWN AFTER (CHECKS)", "UP AFTER (CHECKS)")
 	for _, targetPool := range targetPools {
 		var targetsArray []string
 		for _, t := range *targetPool.Targets {
