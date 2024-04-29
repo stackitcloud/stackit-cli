@@ -723,7 +723,6 @@ func TestIsVerbosityDebug(t *testing.T) {
 	}
 }
 
-
 func TestIsVerbosityInfo(t *testing.T) {
 	tests := []struct {
 		description string
