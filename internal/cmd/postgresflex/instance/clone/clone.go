@@ -146,13 +146,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 	recoveryTimestampString := recoveryTimestamp.Format(recoveryDateFormat)
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
 		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
 		RecoveryDate:    utils.Ptr(recoveryTimestampString),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type PostgreSQLFlexClient interface {

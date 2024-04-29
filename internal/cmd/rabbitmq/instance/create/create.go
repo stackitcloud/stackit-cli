@@ -176,7 +176,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel:      globalFlags,
 		InstanceName:         flags.FlagToStringPointer(p, cmd, instanceNameFlag),
 		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
@@ -190,7 +190,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type rabbitMQClient interface {

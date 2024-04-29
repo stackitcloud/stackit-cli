@@ -179,7 +179,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel:      globalFlags,
 		InstanceId:           instanceId,
 		EnableMonitoring:     enableMonitoring,
@@ -192,7 +192,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type mariaDBClient interface {

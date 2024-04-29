@@ -157,7 +157,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		requestMethod = http.MethodGet
 	}
 
-	return &inputModel{
+	model := inputModel{
 		URL:                    urlString,
 		RequestMethod:          strings.ToUpper(requestMethod),
 		Headers:                flags.FlagToStringSliceValue(p, cmd, headerFlag),
@@ -165,7 +165,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		IncludeResponseHeaders: flags.FlagToBoolValue(p, cmd, includeResponseHeadersFlag),
 		FailOnHTTPError:        flags.FlagToBoolValue(p, cmd, failOnHTTPErrorFlag),
 		OutputFile:             flags.FlagToStringPointer(p, cmd, outputFileFlag),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func getBearerToken(p *print.Printer) (string, error) {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/zalando/go-keyring"
 
@@ -193,7 +194,8 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd(nil)
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -237,7 +239,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating one of required flags: %v", err)
 			}
 
-			model, err := parseInput(nil, cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

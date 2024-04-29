@@ -184,7 +184,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
 		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
@@ -196,7 +196,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		StorageSize:     &storageSize,
 		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
 		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type PostgreSQLFlexClient interface {

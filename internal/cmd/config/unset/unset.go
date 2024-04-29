@@ -181,7 +181,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
-	return &inputModel{
+	model := inputModel{
 		Async:            flags.FlagToBoolValue(p, cmd, asyncFlag),
 		OutputFormat:     flags.FlagToBoolValue(p, cmd, outputFormatFlag),
 		ProjectId:        flags.FlagToBoolValue(p, cmd, projectIdFlag),
@@ -204,4 +204,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
 		SKECustomEndpoint:             flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model
 }

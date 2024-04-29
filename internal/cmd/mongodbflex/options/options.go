@@ -114,13 +114,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 			"  $ stackit mongodbflex options --flavors")
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Flavors:         flavors,
 		Versions:        versions,
 		Storages:        storages,
 		FlavorId:        flags.FlagToStringPointer(p, cmd, flavorIdFlag),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type mongoDBFlexOptionsClient interface {
