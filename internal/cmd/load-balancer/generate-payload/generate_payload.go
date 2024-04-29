@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(instanceNameFlag, "n", "", "If set, generates the payload with the current values of the given instance. If unset, generates the payload with empty values")
+	cmd.Flags().StringP(instanceNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
