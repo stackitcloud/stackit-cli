@@ -142,8 +142,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			var updatePayload *loadbalancer.UpdateLoadBalancerPayload
-
 			if model.InstanceName == nil {
 				createPayload := DefaultCreateLoadBalancerPayload
 				return outputCreateResult(p, &createPayload)
@@ -154,7 +152,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
-			updatePayload = &loadbalancer.UpdateLoadBalancerPayload{
+			updatePayload := &loadbalancer.UpdateLoadBalancerPayload{
 				ExternalAddress: resp.ExternalAddress,
 				Listeners:       resp.Listeners,
 				Name:            resp.Name,
