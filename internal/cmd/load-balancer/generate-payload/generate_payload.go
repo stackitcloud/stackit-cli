@@ -61,28 +61,30 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			var payload *loadbalancer.CreateLoadBalancerPayload
+			var updatePayload *loadbalancer.UpdateLoadBalancerPayload
+
 			if model.InstanceName == nil {
-				payload = lbUtils.GetDefaultPayload()
-			} else {
-				req := buildRequest(ctx, model, apiClient)
-				resp, err := req.Execute()
-				if err != nil {
-					return fmt.Errorf("read load balancer: %w", err)
-				}
-				payload = &loadbalancer.CreateLoadBalancerPayload{
-					ExternalAddress: resp.ExternalAddress,
-					Listeners:       resp.Listeners,
-					Name:            resp.Name,
-					Networks:        resp.Networks,
-					Options:         resp.Options,
-					PrivateAddress:  resp.PrivateAddress,
-					TargetPools:     resp.TargetPools,
-					Version:         resp.Version,
-				}
+				var createPayload *loadbalancer.CreateLoadBalancerPayload
+				createPayload = lbUtils.GetDefaultPayload()
+				return outputCreateResult(p, createPayload)
 			}
 
-			return outputResult(p, payload)
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("read load balancer: %w", err)
+			}
+			updatePayload = &loadbalancer.UpdateLoadBalancerPayload{
+				ExternalAddress: resp.ExternalAddress,
+				Listeners:       resp.Listeners,
+				Name:            resp.Name,
+				Networks:        resp.Networks,
+				Options:         resp.Options,
+				PrivateAddress:  resp.PrivateAddress,
+				TargetPools:     resp.TargetPools,
+				Version:         resp.Version,
+			}
+			return outputUpdateResult(p, updatePayload)
 		},
 	}
 	configureFlags(cmd)
@@ -113,10 +115,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, payload *loadbalancer.CreateLoadBalancerPayload) error {
+func outputCreateResult(p *print.Printer, payload *loadbalancer.CreateLoadBalancerPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
-		return fmt.Errorf("marshal payload: %w", err)
+		return fmt.Errorf("marshal create load balancer payload: %w", err)
+	}
+	p.Outputln(string(payloadBytes))
+
+	return nil
+}
+
+func outputUpdateResult(p *print.Printer, payload *loadbalancer.UpdateLoadBalancerPayload) error {
+	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal update load balancer payload: %w", err)
 	}
 	p.Outputln(string(payloadBytes))
 
