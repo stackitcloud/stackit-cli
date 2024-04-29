@@ -30,8 +30,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", zoneIdArg),
-		Short: "Shows details  of a DNS zone",
-		Long:  "Shows details  of a DNS zone.",
+		Short: "Shows details of a DNS zone",
+		Long:  "Shows details of a DNS zone.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
