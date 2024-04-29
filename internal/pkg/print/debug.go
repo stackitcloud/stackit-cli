@@ -38,24 +38,17 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 	}
 	sort.Strings(keys)
 
-	result := "["
-	first := true
+	var keyValues []string
 	for _, key := range keys {
 		value := inputMap[key]
 		if isEmpty(value) {
 			continue
 		}
-
-		if !first {
-			result += ", "
-		} else {
-			first = false
-		}
-
-		result += fmt.Sprintf("%s: %v", key, value)
+		keyValues = append(keyValues, fmt.Sprintf("%s: %v", key, value))
 	}
-	result += "]"
-	return result
+
+	result := strings.Join(keyValues, ", ")
+	return fmt.Sprintf("[%s]", result)
 }
 
 // BuildDebugStrFromSlice converts a slice to a user-friendly string representation.
