@@ -30,7 +30,6 @@ type inputModel struct {
 var (
 	defaultPayloadListener = &loadbalancer.Listener{
 		DisplayName: utils.Ptr(""),
-		Name:        utils.Ptr(""),
 		Port:        utils.Ptr(int64(0)),
 		Protocol:    utils.Ptr(""),
 		ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
@@ -101,7 +100,6 @@ var (
 			},
 			PrivateNetworkOnly: utils.Ptr(false),
 		},
-		PrivateAddress: utils.Ptr(""),
 		TargetPools: &[]loadbalancer.TargetPool{
 			*defaultPayloadTargetPool,
 		},
