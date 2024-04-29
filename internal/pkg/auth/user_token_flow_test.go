@@ -271,7 +271,7 @@ func TestRoundTrip(t *testing.T) {
 				authorizeUserCalled: &authorizeUserCalled,
 				tokensRefreshed:     &tokensRefreshed,
 			}
-			authorizeUserRoutine := func() error {
+			authorizeUserRoutine := func(p *print.Printer, isReauthentication bool) error {
 				return reauthorizeUser(authorizeUserContext)
 			}
 

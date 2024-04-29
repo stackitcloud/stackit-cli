@@ -1,6 +1,7 @@
 package postgresflex
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/user"
@@ -28,4 +29,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(instance.NewCmd(p))
 	cmd.AddCommand(user.NewCmd(p))
 	cmd.AddCommand(options.NewCmd(p))
+	cmd.AddCommand(backup.NewCmd(p))
 }

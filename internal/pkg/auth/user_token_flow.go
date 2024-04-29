@@ -14,7 +14,7 @@ import (
 
 type userTokenFlow struct {
 	printer                *print.Printer
-	reauthorizeUserRoutine func() error // Called if the user needs to login again
+	reauthorizeUserRoutine func(p *print.Printer, isReauthentication bool) error // Called if the user needs to login again
 	client                 *http.Client
 	authFlow               AuthFlow
 	accessToken            string
@@ -59,7 +59,6 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	if !accessTokenValid {
-		utf.printer.Warn("Session expired, logging in again...")
 		err = reauthenticateUser(utf)
 		if err != nil {
 			return nil, fmt.Errorf("reauthenticate user: %w", err)
@@ -91,7 +90,7 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 }
 
 func reauthenticateUser(utf *userTokenFlow) error {
-	err := utf.reauthorizeUserRoutine()
+	err := utf.reauthorizeUserRoutine(utf.printer, true)
 	if err != nil {
 		return fmt.Errorf("authenticate user: %w", err)
 	}
