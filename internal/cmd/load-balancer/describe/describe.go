@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -179,9 +180,16 @@ func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 			sessionPersistence = "Use Source IP"
 		}
 
-		healthCheck := targetPool.ActiveHealthCheck
+		healthCheckInterval := "-"
+		healthCheckUnhealthyThreshold := "-"
+		healthCheckHealthyThreshold := "-"
+		if targetPool.ActiveHealthCheck != nil {
+			healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
+			healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
+			healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
+		}
 
-		table.AddRow(*targetPool.Name, *targetPool.TargetPort, targets, sessionPersistence, *healthCheck.Interval, *healthCheck.UnhealthyThreshold, *healthCheck.HealthyThreshold)
+		table.AddRow(*targetPool.Name, *targetPool.TargetPort, targets, sessionPersistence, healthCheckInterval, healthCheckUnhealthyThreshold, healthCheckHealthyThreshold)
 	}
 
 	return table.Render()

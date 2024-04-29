@@ -32,7 +32,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-schedule",
 		Short: "Updates backup schedule for a PostgreSQL Flex instance",
-		Long:  "Updates backup schedule for a PostgreSQL Flex instance.",
+		Long:  `Updates backup schedule for a PostgreSQL Flex instance. The current backup schedule can be seen in the output of the "stackit postgresflex instance describe" command.`,
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
