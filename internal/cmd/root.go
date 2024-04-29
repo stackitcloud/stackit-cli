@@ -25,13 +25,13 @@ import (
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	pkgConfig "github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
@@ -50,7 +50,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			argsString := print.BuildDebugStrFromSlice(os.Args)
 			p.Debug(print.DebugLevel, "arguments entered to the CLI: %s", argsString)
 
-			configKeys := pkgConfig.GetConfigKeys()
+			configKeys := viper.AllSettings()
 			configKeysStr := print.BuildDebugStrFromMap(configKeys)
 			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
 		},

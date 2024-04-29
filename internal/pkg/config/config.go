@@ -145,16 +145,3 @@ func setConfigDefaults() {
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 }
-
-// GetConfigKeys returns a map of the config keys and their values
-// Ignores empty values
-func GetConfigKeys() map[string]string {
-	configKeys := make(map[string]string)
-	for _, key := range ConfigKeys {
-		value := viper.GetString(key)
-		if value != "" {
-			configKeys[key] = value
-		}
-	}
-	return configKeys
-}
