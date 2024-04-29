@@ -4,7 +4,7 @@ Updates backup schedule for a PostgreSQL Flex instance
 
 ### Synopsis
 
-Updates backup schedule for a PostgreSQL Flex instance.
+Updates backup schedule for a PostgreSQL Flex instance. The current backup schedule can be seen in the output of the "stackit postgresflex instance describe" command.
 
 ```
 stackit postgresflex backup update-schedule [flags]
