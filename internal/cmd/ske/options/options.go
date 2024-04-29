@@ -170,6 +170,7 @@ func renderAvailabilityZones(resp *ske.ProviderOptions) string {
 	zones := *resp.AvailabilityZones
 
 	table := tables.NewTable()
+	table.SetTitle("Availability Zones")
 	table.SetHeader("AVAILABILITY ZONES")
 	for i := range zones {
 		z := zones[i]
@@ -182,6 +183,7 @@ func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
 	versions := *resp.KubernetesVersions
 
 	table := tables.NewTable()
+	table.SetTitle("Kubernetes Versions")
 	table.SetHeader("KUBERNETES VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
 	for i := range versions {
 		v := versions[i]
@@ -202,6 +204,7 @@ func renderMachineImages(resp *ske.ProviderOptions) string {
 	images := *resp.MachineImages
 
 	table := tables.NewTable()
+	table.SetTitle("Machine Images")
 	table.SetHeader("MACHINE IMAGE NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
 	for i := range images {
 		image := images[i]
@@ -230,6 +233,7 @@ func renderMachineTypes(resp *ske.ProviderOptions) string {
 	types := *resp.MachineTypes
 
 	table := tables.NewTable()
+	table.SetTitle("Machine Types")
 	table.SetHeader("MACHINE TYPE", "CPU", "MEMORY")
 	for i := range types {
 		t := types[i]
@@ -242,6 +246,7 @@ func renderVolumeTypes(resp *ske.ProviderOptions) string {
 	types := *resp.VolumeTypes
 
 	table := tables.NewTable()
+	table.SetTitle("Volume Types")
 	table.SetHeader("VOLUME TYPE")
 	for i := range types {
 		z := types[i]
