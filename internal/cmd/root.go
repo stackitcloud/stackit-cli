@@ -47,12 +47,12 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			p.Cmd = cmd
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
 
-			argsString := strings.Join(os.Args, ", ")
-			p.Debug(print.DebugLevel, "arguments entered to the CLI: [%s]", argsString)
+			argsString := print.BuildDebugStrFromSlice(os.Args)
+			p.Debug(print.DebugLevel, "arguments entered to the CLI: %s", argsString)
 
-			configKeys := pkgConfig.GetConfigKeysStr()
-			p.Debug(print.DebugLevel, "config keys: %s", configKeys)
-
+			configKeys := pkgConfig.GetConfigKeys()
+			configKeysStr := print.BuildDebugStrFromMap(configKeys)
+			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {

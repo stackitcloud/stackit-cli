@@ -54,13 +54,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd, args)
-
 			if err != nil {
 				return err
 			}
 
+			// check avoids unnecessary processing
 			if p.IsVerbosityDebug() {
-				modelStr, err := utils.ConvertModelToString(*model)
+				modelStr, err := print.BuildDebugStrFromInputModel(*model)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
 				} else {
