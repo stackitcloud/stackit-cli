@@ -122,11 +122,6 @@ func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *
 	return req
 }
 
-func PrintJSON(obj interface{}) {
-	bytes, _ := json.MarshalIndent(obj, "\t", "\t")
-	fmt.Println(string(bytes))
-}
-
 func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argus.GrafanaConfigs, instance *argus.GetInstanceResponse) error {
 	switch inputModel.OutputFormat {
 	case print.PrettyOutputFormat:

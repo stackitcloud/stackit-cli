@@ -679,7 +679,7 @@ func TestPromptForConfirmation(t *testing.T) {
 	}
 }
 
-func TestIsDebug(t *testing.T) {
+func TestIsVerbosityDebug(t *testing.T) {
 	tests := []struct {
 		description string
 		verbosity   Level
