@@ -23,7 +23,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit auth login"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := auth.AuthorizeUser()
+			err := auth.AuthorizeUser(p, false)
 			if err != nil {
 				return fmt.Errorf("authorization failed: %w", err)
 			}

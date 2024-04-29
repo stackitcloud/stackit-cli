@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+
 	"log/slog"
 	"os"
 	"os/exec"
@@ -128,6 +129,26 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 		}
 	}
 	return fmt.Errorf("max number of wrong inputs")
+}
+
+// Prompts the user for confirmation by pressing Enter.
+//
+// Returns nil only if the user (explicitly) press directly enter.
+// Returns ErrAborted if the user press anything else before pressing enter.
+func (p *Printer) PromptForEnter(prompt string) error {
+	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
+
+	p.Cmd.PrintErr(prompt)
+	answer, err := reader.ReadByte()
+	if err != nil {
+		return fmt.Errorf("read user response: %w", err)
+	}
+
+	// ASCII code for Enter (newline) is 10.
+	if answer == 10 {
+		return nil
+	}
+	return errAborted
 }
 
 // Shows the content in the command's stdout using the "less" command
