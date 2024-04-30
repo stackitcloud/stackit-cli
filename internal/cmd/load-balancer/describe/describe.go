@@ -160,8 +160,8 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 	for i := range listeners {
 		listener := listeners[i]
 		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
+		table.AddSeparator()
 	}
-
 	return table.Render()
 }
 
@@ -184,13 +184,19 @@ func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 		healthCheckUnhealthyThreshold := "-"
 		healthCheckHealthyThreshold := "-"
 		if targetPool.ActiveHealthCheck != nil {
-			healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
-			healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
-			healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
+			if targetPool.ActiveHealthCheck.Interval != nil {
+				healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
+			}
+			if targetPool.ActiveHealthCheck.UnhealthyThreshold != nil {
+				healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
+			}
+			if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
+				healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
+			}
 		}
 
 		table.AddRow(*targetPool.Name, *targetPool.TargetPort, targets, sessionPersistence, healthCheckInterval, healthCheckUnhealthyThreshold, healthCheckHealthyThreshold)
+		table.AddSeparator()
 	}
-
 	return table.Render()
 }
