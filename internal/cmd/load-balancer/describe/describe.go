@@ -158,7 +158,6 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 	for i := range listeners {
 		listener := listeners[i]
 		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
-		table.AddSeparator()
 	}
 	return table.Render()
 }
@@ -168,7 +167,6 @@ func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
 		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
-		table.AddSeparator()
 	}
 	return table.Render()
 }
