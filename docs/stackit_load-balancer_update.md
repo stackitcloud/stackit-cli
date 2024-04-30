@@ -1,6 +1,6 @@
 ## stackit load-balancer update
 
-Updates a load balancer
+Updates a Load Balancer
 
 ### Synopsis
 

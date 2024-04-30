@@ -31,7 +31,7 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", loadBalancerNameArg),
-		Short: "Updates a load balancer",
+		Short: "Updates a Load Balancer",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Updates a load balancer.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
