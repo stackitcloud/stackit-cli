@@ -156,7 +156,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				Name:            resp.Name,
 				Networks:        resp.Networks,
 				Options:         resp.Options,
-				PrivateAddress:  resp.PrivateAddress,
 				TargetPools:     resp.TargetPools,
 				Version:         resp.Version,
 			}
