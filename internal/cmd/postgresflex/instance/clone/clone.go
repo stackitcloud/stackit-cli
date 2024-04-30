@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,7 +27,7 @@ const (
 	storageClassFlag      = "storage-class"
 	storageSizeFlag       = "storage-size"
 	recoveryTimestampFlag = "recovery-timestamp"
-	recoveryDateFormat    = time.RFC3339
+	recoveryDateFormat    = "2006-01-02T15:04:05-07:00"
 )
 
 type inputModel struct {
