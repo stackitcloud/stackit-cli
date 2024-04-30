@@ -40,6 +40,7 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper) (email s
 	var authFlowType AuthFlow
 	switch flow := rt.(type) {
 	case keyFlowInterface:
+		p.Debug(print.DebugLevel, "authenticating using service account key")
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_KEY
 
 		accessToken, err := flow.GetAccessToken()
@@ -58,6 +59,7 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper) (email s
 		authFields[SERVICE_ACCOUNT_KEY] = string(saKeyBytes)
 		authFields[PRIVATE_KEY] = flow.GetConfig().PrivateKey
 	case tokenFlowInterface:
+		p.Debug(print.DebugLevel, "authenticating using service account token")
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_TOKEN
 
 		authFields[ACCESS_TOKEN] = flow.GetConfig().ServiceAccountToken

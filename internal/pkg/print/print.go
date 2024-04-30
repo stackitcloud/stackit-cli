@@ -66,7 +66,7 @@ func (p *Printer) Outputln(msg string) {
 // Print a Debug level log through the "slog" package.
 // If the verbosity level is not Debug, it does nothing
 func (p *Printer) Debug(level Level, msg string, args ...any) {
-	if p.Verbosity != DebugLevel {
+	if !p.IsVerbosityDebug() {
 		return
 	}
 	msg = fmt.Sprintf(msg, args...)
@@ -85,7 +85,7 @@ func (p *Printer) Debug(level Level, msg string, args ...any) {
 // Print an Info level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug or Info, it does nothing.
 func (p *Printer) Info(msg string, args ...any) {
-	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel {
+	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() {
 		return
 	}
 	p.Cmd.PrintErrf(msg, args...)
@@ -94,7 +94,7 @@ func (p *Printer) Info(msg string, args ...any) {
 // Print a Warn level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug, Info, or Warn, it does nothing.
 func (p *Printer) Warn(msg string, args ...any) {
-	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel && p.Verbosity != WarningLevel {
+	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() && !p.IsVerbosityWarning() {
 		return
 	}
 	warning := fmt.Sprintf(msg, args...)
@@ -167,4 +167,24 @@ func (p *Printer) PagerDisplay(content string) error {
 		return fmt.Errorf("run less command: %w", err)
 	}
 	return nil
+}
+
+// Returns True if the verbosity level is set to Debug, False otherwise.
+func (p *Printer) IsVerbosityDebug() bool {
+	return p.Verbosity == DebugLevel
+}
+
+// Returns True if the verbosity level is set to Info, False otherwise.
+func (p *Printer) IsVerbosityInfo() bool {
+	return p.Verbosity == InfoLevel
+}
+
+// Returns True if the verbosity level is set to Warning, False otherwise.
+func (p *Printer) IsVerbosityWarning() bool {
+	return p.Verbosity == WarningLevel
+}
+
+// Returns True if the verbosity level is set to Error, False otherwise.
+func (p *Printer) IsVerbosityError() bool {
+	return p.Verbosity == ErrorLevel
 }
