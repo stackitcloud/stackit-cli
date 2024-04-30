@@ -140,7 +140,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, fmt.Errorf("only one of %s and %s can be set", activeFlag, inactiveFlag)
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Active:          active,
 		Inactive:        inactive,
@@ -149,7 +149,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		OrderByName:     flags.FlagToStringPointer(p, cmd, orderByNameFlag),
 		Limit:           limit,
 		PageSize:        pageSize,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, page int) dns.ApiListZonesRequest {

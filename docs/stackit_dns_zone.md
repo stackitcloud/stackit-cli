@@ -31,7 +31,7 @@ stackit dns zone [flags]
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit dns zone create](./stackit_dns_zone_create.md)	 - Creates a DNS zone
 * [stackit dns zone delete](./stackit_dns_zone_delete.md)	 - Deletes a DNS zone
-* [stackit dns zone describe](./stackit_dns_zone_describe.md)	 - Shows details  of a DNS zone
+* [stackit dns zone describe](./stackit_dns_zone_describe.md)	 - Shows details of a DNS zone
 * [stackit dns zone list](./stackit_dns_zone_list.md)	 - List DNS zones
 * [stackit dns zone update](./stackit_dns_zone_update.md)	 - Updates a DNS zone
 
