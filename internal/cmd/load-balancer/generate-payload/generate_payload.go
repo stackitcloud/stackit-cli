@@ -123,9 +123,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit load-balancer create --payload @./payload.json`),
 			examples.NewExample(
 				`Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload --instance-name my-lb > ./payload.json`,
+				`$ stackit load-balancer generate-payload --instance-name xxx > ./payload.json`,
 				`<Modify payload in file>`,
-				`$ stackit load-balancer update my-lb --payload @./payload.json`),
+				`$ stackit load-balancer update xxx --payload @./payload.json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -150,9 +150,34 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
+
+			listeners := *resp.Listeners
+
+			for i := range listeners {
+				listener := listeners[i]
+				listeners[i] = loadbalancer.Listener{
+					DisplayName: listener.DisplayName,
+					Port:        listener.Port,
+					Protocol:    listener.Protocol,
+					TargetPool:  listener.TargetPool,
+				}
+
+				if listener.ServerNameIndicators != nil {
+					listeners[i].ServerNameIndicators = listener.ServerNameIndicators
+				}
+
+				if listener.Tcp != nil {
+					listeners[i].Tcp = listener.Tcp
+				}
+
+				if listener.Udp != nil {
+					listeners[i].Udp = listener.Udp
+				}
+			}
+
 			updatePayload := &loadbalancer.UpdateLoadBalancerPayload{
 				ExternalAddress: resp.ExternalAddress,
-				Listeners:       resp.Listeners,
+				Listeners:       &listeners,
 				Name:            resp.Name,
 				Networks:        resp.Networks,
 				Options:         resp.Options,
