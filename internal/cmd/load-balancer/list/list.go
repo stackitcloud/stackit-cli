@@ -134,7 +134,6 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 		for i := range loadBalancers {
 			l := loadBalancers[i]
 			table.AddRow(*l.Name, *l.Status, *l.ExternalAddress, len(*l.Listeners), len(*l.TargetPools))
-			table.AddSeparator()
 		}
 		err := table.Display(p)
 		if err != nil {
