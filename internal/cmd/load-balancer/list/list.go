@@ -64,8 +64,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get load balancers: %w", err)
 			}
-			loadBalancers := *resp.LoadBalancers
-			if len(loadBalancers) == 0 {
+
+			if resp.LoadBalancers == nil || (resp.LoadBalancers != nil && len(*resp.LoadBalancers) == 0) {
 				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
@@ -75,6 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return nil
 			}
 
+			loadBalancers := *resp.LoadBalancers
 			// Truncate output
 			if model.Limit != nil && len(loadBalancers) > int(*model.Limit) {
 				loadBalancers = loadBalancers[:*model.Limit]
