@@ -20,9 +20,9 @@ stackit load-balancer generate-payload [flags]
   $ stackit load-balancer create --payload @./payload.json
 
   Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options
-  $ stackit load-balancer generate-payload --instance-name my-lb > ./payload.json
+  $ stackit load-balancer generate-payload --instance-name xxx > ./payload.json
   <Modify payload in file>
-  $ stackit load-balancer update my-lb --payload @./payload.json
+  $ stackit load-balancer update xxx --payload @./payload.json
 ```
 
 ### Options
