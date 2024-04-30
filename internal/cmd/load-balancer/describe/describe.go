@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -167,35 +165,9 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 
 func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 	table := tables.NewTable()
-	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS", "SESSION PERSISTENCE", "HEALTH CHECK INTERVAL (S)", "DOWN AFTER (CHECKS)", "UP AFTER (CHECKS)")
+	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
-		var targetsArray []string
-		for _, t := range *targetPool.Targets {
-			targetsArray = append(targetsArray, fmt.Sprintf("%s (%s)", *t.DisplayName, *t.Ip))
-		}
-		targets := strings.Join(targetsArray, "\n")
-
-		sessionPersistence := "None"
-		if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
-			sessionPersistence = "Use Source IP"
-		}
-
-		healthCheckInterval := "-"
-		healthCheckUnhealthyThreshold := "-"
-		healthCheckHealthyThreshold := "-"
-		if targetPool.ActiveHealthCheck != nil {
-			if targetPool.ActiveHealthCheck.Interval != nil {
-				healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
-			}
-			if targetPool.ActiveHealthCheck.UnhealthyThreshold != nil {
-				healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
-			}
-			if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
-				healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
-			}
-		}
-
-		table.AddRow(*targetPool.Name, *targetPool.TargetPort, targets, sessionPersistence, healthCheckInterval, healthCheckUnhealthyThreshold, healthCheckHealthyThreshold)
+		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
 		table.AddSeparator()
 	}
 	return table.Render()
