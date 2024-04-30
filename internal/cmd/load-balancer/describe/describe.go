@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -160,29 +159,14 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 		listener := listeners[i]
 		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
 	}
-
 	return table.Render()
 }
 
 func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
 	table := tables.NewTable()
-	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS", "SESSION PERSISTENCE", "HEALTH CHECK INTERVAL (S)", "DOWN AFTER (CHECKS)", "UP AFTER (CHECKS)")
+	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
-		var targetsArray []string
-		for _, t := range *targetPool.Targets {
-			targetsArray = append(targetsArray, fmt.Sprintf("%s (%s)", *t.DisplayName, *t.Ip))
-		}
-		targets := strings.Join(targetsArray, "\n")
-
-		sessionPersistence := "None"
-		if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
-			sessionPersistence = "Use Source IP"
-		}
-
-		healthCheck := targetPool.ActiveHealthCheck
-
-		table.AddRow(*targetPool.Name, *targetPool.TargetPort, targets, sessionPersistence, *healthCheck.Interval, *healthCheck.UnhealthyThreshold, *healthCheck.HealthyThreshold)
+		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
 	}
-
 	return table.Render()
 }
