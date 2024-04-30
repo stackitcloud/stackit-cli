@@ -678,3 +678,179 @@ func TestPromptForConfirmation(t *testing.T) {
 		})
 	}
 }
+
+func TestIsVerbosityDebug(t *testing.T) {
+	tests := []struct {
+		description string
+		verbosity   Level
+		expected    bool
+	}{
+		{
+			description: "debug verbosity",
+			verbosity:   DebugLevel,
+			expected:    true,
+		},
+		{
+			description: "info verbosity",
+			verbosity:   InfoLevel,
+			expected:    false,
+		},
+		{
+			description: "warning verbosity",
+			verbosity:   WarningLevel,
+			expected:    false,
+		},
+		{
+			description: "error verbosity",
+			verbosity:   ErrorLevel,
+			expected:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			result := p.IsVerbosityDebug()
+
+			if result != tt.expected {
+				t.Errorf("unexpected result: got %t, want %t", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsVerbosityInfo(t *testing.T) {
+	tests := []struct {
+		description string
+		verbosity   Level
+		expected    bool
+	}{
+		{
+			description: "debug verbosity",
+			verbosity:   DebugLevel,
+			expected:    false,
+		},
+		{
+			description: "info verbosity",
+			verbosity:   InfoLevel,
+			expected:    true,
+		},
+		{
+			description: "warning verbosity",
+			verbosity:   WarningLevel,
+			expected:    false,
+		},
+		{
+			description: "error verbosity",
+			verbosity:   ErrorLevel,
+			expected:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			result := p.IsVerbosityInfo()
+
+			if result != tt.expected {
+				t.Errorf("unexpected result: got %t, want %t", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsVerbosityWarning(t *testing.T) {
+	tests := []struct {
+		description string
+		verbosity   Level
+		expected    bool
+	}{
+		{
+			description: "debug verbosity",
+			verbosity:   DebugLevel,
+			expected:    false,
+		},
+		{
+			description: "info verbosity",
+			verbosity:   InfoLevel,
+			expected:    false,
+		},
+		{
+			description: "warning verbosity",
+			verbosity:   WarningLevel,
+			expected:    true,
+		},
+		{
+			description: "error verbosity",
+			verbosity:   ErrorLevel,
+			expected:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			result := p.IsVerbosityWarning()
+
+			if result != tt.expected {
+				t.Errorf("unexpected result: got %t, want %t", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsVerbosityError(t *testing.T) {
+	tests := []struct {
+		description string
+		verbosity   Level
+		expected    bool
+	}{
+		{
+			description: "debug verbosity",
+			verbosity:   DebugLevel,
+			expected:    false,
+		},
+		{
+			description: "info verbosity",
+			verbosity:   InfoLevel,
+			expected:    false,
+		},
+		{
+			description: "warning verbosity",
+			verbosity:   WarningLevel,
+			expected:    false,
+		},
+		{
+			description: "error verbosity",
+			verbosity:   ErrorLevel,
+			expected:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: tt.verbosity,
+			}
+
+			result := p.IsVerbosityError()
+
+			if result != tt.expected {
+				t.Errorf("unexpected result: got %t, want %t", result, tt.expected)
+			}
+		})
+	}
+}

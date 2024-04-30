@@ -31,6 +31,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
@@ -45,6 +46,13 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			p.Cmd = cmd
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
+
+			argsString := print.BuildDebugStrFromSlice(os.Args)
+			p.Debug(print.DebugLevel, "arguments: %s", argsString)
+
+			configKeys := viper.AllSettings()
+			configKeysStr := print.BuildDebugStrFromMap(configKeys)
+			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {

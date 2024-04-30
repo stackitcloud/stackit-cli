@@ -105,13 +105,24 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
-	return &inputModel{
+	model := inputModel{
 		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
 		TokenCustomEndpoint:   flags.FlagToStringValue(p, cmd, tokenCustomEndpointFlag),
 		JwksCustomEndpoint:    flags.FlagToStringValue(p, cmd, jwksCustomEndpointFlag),
 	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model
 }
 
 func storeFlags(model *inputModel) error {
