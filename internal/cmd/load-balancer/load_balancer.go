@@ -1,6 +1,7 @@
 package loadbalancer
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/describe"
 	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/generate-payload"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/list"
@@ -28,6 +29,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(delete.NewCmd(p))
 	cmd.AddCommand(list.NewCmd(p))
 	cmd.AddCommand(quota.NewCmd(p))
 	cmd.AddCommand(generatepayload.NewCmd(p))
