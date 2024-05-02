@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -69,6 +70,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
+			}
+
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
