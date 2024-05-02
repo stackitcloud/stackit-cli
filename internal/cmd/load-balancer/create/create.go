@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create load balancer %q?", *model.Payload.Name)
+				prompt := fmt.Sprintf("Are you sure you want to create a load balancer for project %q?", projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
