@@ -51,7 +51,7 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 		if isEmpty(value) {
 			continue
 		}
-		// If the value is a map, convert it to a string representation
+
 		if valueMap, ok := value.(map[string]any); ok {
 			value = BuildDebugStrFromMap(valueMap)
 		}
@@ -139,7 +139,6 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 	}
 
 	// restore body
-	// no need to close the body because the sdk will do it
 	req.Body = io.NopCloser(strings.NewReader(string(body)))
 	payload := fmt.Sprintf("request body: %v", BuildDebugStrFromMap(bodyMap))
 
@@ -178,7 +177,6 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 	}
 
 	// restore body
-	// no need to close the body because the sdk will do it
 	resp.Body = io.NopCloser(strings.NewReader(string(body)))
 	payload := fmt.Sprintf("response body: %v", BuildDebugStrFromMap(bodyMap))
 
