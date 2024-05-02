@@ -19,12 +19,12 @@ import (
 )
 
 const (
-	instanceNameFlag = "instance-name"
+	loadBalancerNameFlag = "lb-name"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	InstanceName *string
+	LoadBalancerName *string
 }
 
 var (
@@ -123,7 +123,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit load-balancer create --payload @./payload.json`),
 			examples.NewExample(
 				`Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload --instance-name xxx > ./payload.json`,
+				`$ stackit load-balancer generate-payload --lb-name xxx > ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit load-balancer update xxx --payload @./payload.json`),
 		),
@@ -140,7 +140,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			if model.InstanceName == nil {
+			if model.LoadBalancerName == nil {
 				createPayload := DefaultCreateLoadBalancerPayload
 				return outputCreateResult(p, &createPayload)
 			}
@@ -192,26 +192,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(instanceNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
+	cmd.Flags().StringP(loadBalancerNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
-	// If instanceName is provided, projectId is needed as well
-	if instanceName != nil && globalFlags.ProjectId == "" {
+	loadBalancerName := flags.FlagToStringPointer(p, cmd, loadBalancerNameFlag)
+	// If load balancer name is provided, projectId is needed as well
+	if loadBalancerName != nil && globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
 	return &inputModel{
-		GlobalFlagModel: globalFlags,
-		InstanceName:    instanceName,
+		GlobalFlagModel:  globalFlags,
+		LoadBalancerName: loadBalancerName,
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetLoadBalancerRequest {
-	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, *model.InstanceName)
+	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, *model.LoadBalancerName)
 	return req
 }
 

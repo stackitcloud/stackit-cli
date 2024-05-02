@@ -24,8 +24,8 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:    testProjectId,
-		instanceNameFlag: "example-name",
+		projectIdFlag:        testProjectId,
+		loadBalancerNameFlag: "example-name",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,7 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName: utils.Ptr("example-name"),
+		LoadBalancerName: utils.Ptr("example-name"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,11 +79,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "name missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, instanceNameFlag)
+				delete(flagValues, loadBalancerNameFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.InstanceName = nil
+				model.LoadBalancerName = nil
 			}),
 		},
 		{
