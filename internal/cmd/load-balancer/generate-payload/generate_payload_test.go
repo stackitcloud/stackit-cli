@@ -190,3 +190,68 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestToModifyListeners(t *testing.T) {
+	tests := []struct {
+		description string
+		response    *loadbalancer.LoadBalancer
+		expected    *[]loadbalancer.Listener
+	}{
+		{
+			description: "base",
+			response: &loadbalancer.LoadBalancer{
+				Listeners: &[]loadbalancer.Listener{
+					{
+						DisplayName: utils.Ptr(""),
+						Port:        utils.Ptr(int64(0)),
+						Protocol:    utils.Ptr(""),
+						Name:        utils.Ptr(""),
+						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+							{
+								Name: utils.Ptr(""),
+							},
+						},
+						TargetPool: utils.Ptr(""),
+						Tcp: &loadbalancer.OptionsTCP{
+							IdleTimeout: utils.Ptr(""),
+						},
+						Udp: &loadbalancer.OptionsUDP{
+							IdleTimeout: utils.Ptr(""),
+						},
+					},
+				},
+			},
+			expected: &[]loadbalancer.Listener{
+				{
+					DisplayName: utils.Ptr(""),
+					Port:        utils.Ptr(int64(0)),
+					Protocol:    utils.Ptr(""),
+					Name:        nil,
+					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						{
+							Name: utils.Ptr(""),
+						},
+					},
+					TargetPool: utils.Ptr(""),
+					Tcp: &loadbalancer.OptionsTCP{
+						IdleTimeout: utils.Ptr(""),
+					},
+					Udp: &loadbalancer.OptionsUDP{
+						IdleTimeout: utils.Ptr(""),
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := modifyListener(tt.response)
+
+			diff := cmp.Diff(output, tt.expected)
+			if diff != "" {
+				t.Errorf("expected output to be %+v, got %+v", tt.expected, output)
+			}
+		})
+	}
+}

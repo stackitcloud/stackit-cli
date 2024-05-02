@@ -151,15 +151,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
 
-			listeners := *resp.Listeners
-
-			for i := range listeners {
-				listeners[i].Name = nil
-			}
+			listeners := modifyListener(resp)
 
 			updatePayload := &loadbalancer.UpdateLoadBalancerPayload{
 				ExternalAddress: resp.ExternalAddress,
-				Listeners:       &listeners,
+				Listeners:       listeners,
 				Name:            resp.Name,
 				Networks:        resp.Networks,
 				Options:         resp.Options,
@@ -215,4 +211,14 @@ func outputUpdateResult(p *print.Printer, payload *loadbalancer.UpdateLoadBalanc
 	p.Outputln(string(payloadBytes))
 
 	return nil
+}
+
+func modifyListener(resp *loadbalancer.LoadBalancer) *[]loadbalancer.Listener {
+	listeners := *resp.Listeners
+
+	for i := range listeners {
+		listeners[i].Name = nil
+	}
+
+	return &listeners
 }
