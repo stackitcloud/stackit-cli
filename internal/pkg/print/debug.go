@@ -62,6 +62,8 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 			for i, item := range valueSlice {
 				if itemMap, ok := item.(map[string]any); ok {
 					sliceStr[i] = BuildDebugStrFromMap(itemMap)
+				} else {
+					sliceStr[i] = fmt.Sprintf("%v", item)
 				}
 			}
 			value = BuildDebugStrFromSlice(sliceStr)
@@ -110,6 +112,13 @@ func buildHeaderMap(headers http.Header, includeHeaders []string) map[string]any
 // This function also receives a list of headers to include in the output, if empty, the default headers are used.
 // The return value is a list of strings that should be printed separately.
 func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([]string, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is nil")
+	}
+	if req.URL == nil || req.Proto == "" || req.Method == "" {
+		return nil, fmt.Errorf("request is invalid")
+	}
+
 	status := fmt.Sprintf("request to %s: %s %s", req.URL, req.Method, req.Proto)
 
 	headersMap := buildHeaderMap(req.Header, includeHeaders)
@@ -132,7 +141,7 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 	// restore body
 	// no need to close the body because the sdk will do it
 	req.Body = io.NopCloser(strings.NewReader(string(body)))
-	payload := fmt.Sprintf("response body: %v", BuildDebugStrFromMap(bodyMap))
+	payload := fmt.Sprintf("request body: %v", BuildDebugStrFromMap(bodyMap))
 
 	return []string{status, headers, payload}, nil
 }
@@ -141,6 +150,14 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 // This function also receives a list of headers to include in the output, if empty, the default headers are used.
 // The return value is a list of strings that should be printed separately.
 func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string) ([]string, error) {
+	if resp == nil {
+		return nil, fmt.Errorf("response is nil")
+	}
+
+	if resp.Request == nil || resp.Proto == "" || resp.Status == "" {
+		return nil, fmt.Errorf("response is invalid")
+	}
+
 	status := fmt.Sprintf("response from %s: %s %s", resp.Request.URL, resp.Proto, resp.Status)
 
 	headersMap := buildHeaderMap(resp.Header, includeHeaders)
@@ -187,7 +204,7 @@ type roundTripperWithCapture struct {
 func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, error) {
 	reqStr, err := BuildDebugStrFromHTTPRequest(req, rt.debugHeaders)
 	if err != nil {
-		rt.p.Debug(ErrorLevel, "build request debug string: %v", err)
+		rt.p.Debug(ErrorLevel, "printing request to debug logs: %v", err)
 	}
 	for _, line := range reqStr {
 		rt.p.Debug(DebugLevel, line)
@@ -197,7 +214,7 @@ func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, 
 		if err == nil {
 			respStrSlice, err := BuildDebugStrFromHTTPResponse(resp, rt.debugHeaders)
 			if err != nil {
-				rt.p.Debug(ErrorLevel, "build response debug string: %v", err)
+				rt.p.Debug(ErrorLevel, "printing response to debug logs: %v", err)
 			}
 			for _, line := range respStrSlice {
 				rt.p.Debug(DebugLevel, line)
