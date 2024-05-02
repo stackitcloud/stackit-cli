@@ -20,6 +20,7 @@ const (
 	ArgusCustomEndpointKey          = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey  = "authorization_custom_endpoint"
 	DNSCustomEndpointKey            = "dns_custom_endpoint"
+	LoadBalancerCustomEndpointKey   = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey          = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
@@ -53,6 +54,7 @@ var ConfigKeys = []string{
 	VerbosityKey,
 
 	DNSCustomEndpointKey,
+	LoadBalancerCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
 	ObjectStorageCustomEndpointKey,

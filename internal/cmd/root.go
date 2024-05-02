@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
+	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
@@ -31,6 +32,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
@@ -45,6 +47,13 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			p.Cmd = cmd
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
+
+			argsString := print.BuildDebugStrFromSlice(os.Args)
+			p.Debug(print.DebugLevel, "arguments: %s", argsString)
+
+			configKeys := viper.AllSettings()
+			configKeysStr := print.BuildDebugStrFromMap(configKeys)
+			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
@@ -95,6 +104,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(config.NewCmd(p))
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
+	cmd.AddCommand(loadbalancer.NewCmd(p))
 	cmd.AddCommand(logme.NewCmd(p))
 	cmd.AddCommand(mariadb.NewCmd(p))
 	cmd.AddCommand(mongodbflex.NewCmd(p))

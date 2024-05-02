@@ -78,6 +78,8 @@ github.com/stackitcloud/stackit-sdk-go/services/authorization v0.2.0 h1:vdv8DiG9
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.2.0/go.mod h1:1sLuXa7Qvp9f+wKWdRjyNe8B2F8JX7nSTd8fBKadri4=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.1 h1:pj2nAJvgzFSckA56rCPdi7StXGrr06go8qejI1weNJ8=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.1/go.mod h1:MdZcRbs19s2NLeJmSLSoqTzm9IPIQhE1ZEMpo9gePq0=
+github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0 h1:LAteZO46XmqTsmPw0QV8n8WiGM205pxrcqHqWznNmyY=
+github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.12.0/go.mod h1:wsO3+vXe1XiKLeCIctWAptaHQZ07Un7kmLTQ+drbj7w=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.13.0 h1:/wqs+pfHSjFWTakJVQGD/KwArxmFN8qdYrJDUgA1Gxw=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.13.0/go.mod h1:bj9cn1treNSxKTRCEmESwqfENN8vCYn60HUnEA0P83c=
 github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.13.0 h1:qioXHNeQ2xdwT5iGOk0c3hQIpct7zlAYzLRqXvsJ7CA=

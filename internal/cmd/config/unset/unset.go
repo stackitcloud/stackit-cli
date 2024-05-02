@@ -25,6 +25,7 @@ const (
 	argusCustomEndpointFlag           = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag             = "dns-custom-endpoint"
+	loadBalancerCustomEndpointFlag    = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag           = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
@@ -49,6 +50,7 @@ type inputModel struct {
 	ArgusCustomEndpoint           bool
 	AuthorizationCustomEndpoint   bool
 	DNSCustomEndpoint             bool
+	LoadBalancerCustomEndpoint    bool
 	LogMeCustomEndpoint           bool
 	MariaDBCustomEndpoint         bool
 	MongoDBFlexCustomEndpoint     bool
@@ -108,6 +110,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
 			}
+			if model.LoadBalancerCustomEndpoint {
+				viper.Set(config.LoadBalancerCustomEndpointKey, "")
+			}
 			if model.LogMeCustomEndpoint {
 				viper.Set(config.LogMeCustomEndpointKey, "")
 			}
@@ -166,6 +171,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(loadBalancerCustomEndpointFlag, false, "Load Balancer API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex API base URL. If unset, uses the default base URL")
@@ -181,7 +187,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
-	return &inputModel{
+	model := inputModel{
 		Async:            flags.FlagToBoolValue(p, cmd, asyncFlag),
 		OutputFormat:     flags.FlagToBoolValue(p, cmd, outputFormatFlag),
 		ProjectId:        flags.FlagToBoolValue(p, cmd, projectIdFlag),
@@ -191,6 +197,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ArgusCustomEndpoint:           flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:             flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
+		LoadBalancerCustomEndpoint:    flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
 		LogMeCustomEndpoint:           flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:         flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
@@ -204,4 +211,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
 		SKECustomEndpoint:             flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model
 }

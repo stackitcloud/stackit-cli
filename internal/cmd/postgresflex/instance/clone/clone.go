@@ -115,7 +115,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
+	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, in a date-time with the layout format YYYY-MM-DDTHH:mm:ss±HH:mm, e.g. 2006-01-02T15:04:05-07:00")
 	cmd.Flags().String(storageClassFlag, "", "Storage class. If not specified, storage class from the existing instance will be used.")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB). If not specified, storage size from the existing instance will be used.")
 
@@ -140,13 +140,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 	recoveryTimestampString := recoveryTimestamp.Format(recoveryDateFormat)
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
 		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
 		RecoveryDate:    utils.Ptr(recoveryTimestampString),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 type PostgreSQLFlexClient interface {
