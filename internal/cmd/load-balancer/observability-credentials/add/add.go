@@ -36,8 +36,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
-		Short: "Adds observability credentials to a Load Balancer",
-		Long:  "Adds existing observability credentials (username and password) to a Load Balancer. The credentials can be for Argus or another monitoring tool.",
+		Short: "Adds observability credentials to Load Balancer",
+		Long:  "Adds existing observability credentials (username and password) to Load Balancer. The credentials can be for Argus or another monitoring tool.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -147,7 +147,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 
 		return nil
 	default:
-		p.Outputf("Added credentials for project %q. Credentials reference: %q\n", projectLabel, *resp.Credential.CredentialsRef)
+		p.Outputf("Added load balancer observability credentials for project %q. Credentials reference: %q\n", projectLabel, *resp.Credential.CredentialsRef)
 		return nil
 	}
 }

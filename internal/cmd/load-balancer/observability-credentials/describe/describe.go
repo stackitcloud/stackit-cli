@@ -1,0 +1,110 @@
+package describe
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+
+	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+)
+
+const (
+	credentialsRefArg = "CREDENTIALS_REF" //nolint:gosec // linter false positive
+)
+
+type inputModel struct {
+	*globalflags.GlobalFlagModel
+	CredentialsRef string
+}
+
+func NewCmd(p *print.Printer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   fmt.Sprintf("describe %s", credentialsRefArg),
+		Short: "Shows details of observability credentials for load balancers",
+		Long:  "Shows details of observability credentials for load balancers.",
+		Args:  args.SingleArg(credentialsRefArg, nil),
+		Example: examples.Build(
+			examples.NewExample(
+				`Get details of credentials with reference "credentials-xxx"`,
+				"$ stackit load-balancer credentials describe credentials-xxx"),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseInput(p, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("describe Load Balancer observability credentials: %w", err)
+			}
+
+			return outputResult(p, model.OutputFormat, resp)
+		},
+	}
+	return cmd
+}
+
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	credentialsRef := inputArgs[0]
+
+	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &errors.ProjectIdError{}
+	}
+
+	return &inputModel{
+		GlobalFlagModel: globalFlags,
+		CredentialsRef:  credentialsRef,
+	}, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetCredentialsRequest {
+	req := apiClient.GetCredentials(ctx, model.ProjectId, model.CredentialsRef)
+	return req
+}
+
+func outputResult(p *print.Printer, outputFormat string, credentials *loadbalancer.GetCredentialsResponse) error {
+	switch outputFormat {
+	case print.PrettyOutputFormat:
+		table := tables.NewTable()
+		table.AddRow("REFERENCE", *credentials.Credential.CredentialsRef)
+		table.AddSeparator()
+		table.AddRow("DISPLAY NAME", *credentials.Credential.DisplayName)
+		table.AddSeparator()
+		table.AddRow("USERNAME", *credentials.Credential.Username)
+		table.AddSeparator()
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	default:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	}
+}
