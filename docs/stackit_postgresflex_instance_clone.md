@@ -27,7 +27,7 @@ stackit postgresflex instance clone INSTANCE_ID [flags]
 
 ```
   -h, --help                        Help for "stackit postgresflex instance clone"
-      --recovery-timestamp string   Recovery timestamp for the instance, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z
+      --recovery-timestamp string   Recovery timestamp for the instance, in a date-time with the layout format YYYY-MM-DDTHH:mm:ss±HH:mm, e.g. 2006-01-02T15:04:05-07:00
       --storage-class string        Storage class. If not specified, storage class from the existing instance will be used.
       --storage-size int            Storage size (in GB). If not specified, storage size from the existing instance will be used.
 ```

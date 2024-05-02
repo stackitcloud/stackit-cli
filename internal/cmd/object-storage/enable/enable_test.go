@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -31,8 +32,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func fixtureInputModel(mods ...func(model *InputModel)) *InputModel {
-	model := &InputModel{
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
+	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
@@ -57,7 +58,7 @@ func TestParseInput(t *testing.T) {
 		description   string
 		flagValues    map[string]string
 		isValid       bool
-		expectedModel *InputModel
+		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
@@ -119,7 +120,8 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(nil, cmd)
+			p := print.NewPrinter()
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -141,7 +143,7 @@ func TestParseInput(t *testing.T) {
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
-		model           *InputModel
+		model           *inputModel
 		expectedRequest objectstorage.ApiEnableServiceRequest
 	}{
 		{
