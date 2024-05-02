@@ -128,7 +128,9 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 			return []string{status, headers}, fmt.Errorf("unmarshal request body: %w", err)
 		}
 	}
+
 	// restore body
+	// no need to close the body because the sdk will do it
 	req.Body = io.NopCloser(strings.NewReader(string(body)))
 	payload := fmt.Sprintf("response body: %v", BuildDebugStrFromMap(bodyMap))
 
@@ -157,7 +159,9 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 			return []string{status, headers}, fmt.Errorf("unmarshal response body: %w", err)
 		}
 	}
+
 	// restore body
+	// no need to close the body because the sdk will do it
 	resp.Body = io.NopCloser(strings.NewReader(string(body)))
 	payload := fmt.Sprintf("response body: %v", BuildDebugStrFromMap(bodyMap))
 
