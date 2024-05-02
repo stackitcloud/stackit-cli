@@ -24,7 +24,7 @@ var testLoadBalancerName = "loadBalancer"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testloadBalancerName,
+		testLoadBalancerName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		LoadBalancerName: testloadBalancerName,
+		LoadBalancerName: testLoadBalancerName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiDeleteLoadBalancerRequest)) loadbalancer.ApiDeleteLoadBalancerRequest {
-	request := testClient.DeleteLoadBalancer(testCtx, testProjectId, testloadBalancerName)
+	request := testClient.DeleteLoadBalancer(testCtx, testProjectId, testLoadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}
