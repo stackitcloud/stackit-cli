@@ -118,7 +118,6 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 	if req.Body == nil {
 		return []string{status, headers}, nil
 	}
-	// defer req.Body.Close()
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("read request body: %w", err)
@@ -148,7 +147,6 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 	if resp.Body == nil {
 		return []string{status, headers}, nil
 	}
-	// defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("read response body: %w", err)
