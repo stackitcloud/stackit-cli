@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
 				`$ stackit load-balancer generate-payload > ./payload.json`,
-				`<Modify payload in file, if needed>`,
+				`<Modify payload in file>`,
 				`$ stackit load-balancer create --payload @./payload.json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
