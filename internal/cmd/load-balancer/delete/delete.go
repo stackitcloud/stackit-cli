@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s instance %q\n", operationState, model.LoadBalancerName)
+			p.Info("%s load balancer %q\n", operationState, model.LoadBalancerName)
 			return nil
 		},
 	}
