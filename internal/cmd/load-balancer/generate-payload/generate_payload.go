@@ -154,25 +154,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			listeners := *resp.Listeners
 
 			for i := range listeners {
-				listener := listeners[i]
-				listeners[i] = loadbalancer.Listener{
-					DisplayName: listener.DisplayName,
-					Port:        listener.Port,
-					Protocol:    listener.Protocol,
-					TargetPool:  listener.TargetPool,
-				}
-
-				if listener.ServerNameIndicators != nil {
-					listeners[i].ServerNameIndicators = listener.ServerNameIndicators
-				}
-
-				if listener.Tcp != nil {
-					listeners[i].Tcp = listener.Tcp
-				}
-
-				if listener.Udp != nil {
-					listeners[i].Udp = listener.Udp
-				}
+				listeners[i].Name = nil
 			}
 
 			updatePayload := &loadbalancer.UpdateLoadBalancerPayload{
