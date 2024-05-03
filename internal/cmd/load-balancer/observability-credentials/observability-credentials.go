@@ -17,7 +17,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "observability-credentials",
 		Short:   "Provides functionality for Load Balancer observability credentials",
-		Long:    `Provides functionality for Load Balancer observability credentials. These commands can be used to store and update existing credentials, which are valid to be used for Load Balancer Observability. This means, e.g. when using Argus, that credentials first must be created for that Argus instance (by using "stackit argus credentials create") and then can be managed for a Load Balancer by using the commands in this group.`,
+		Long:    `Provides functionality for Load Balancer observability credentials. These commands can be used to store and update existing credentials, which are valid to be used for Load Balancer observability. This means, e.g. when using Argus, first of all these credentials must be created for that Argus instance (by using "stackit argus credentials create") and then can be managed for a Load Balancer by using the commands in this group.`,
 		Args:    args.NoArgs,
 		Aliases: []string{"credentials"},
 		Run:     utils.CmdHelp,
