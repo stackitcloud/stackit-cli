@@ -31,7 +31,7 @@ func ConfigureClient(p *print.Printer) (*argus.APIClient, error) {
 
 	if p.IsVerbosityDebug() {
 		cfgOptions = append(cfgOptions,
-			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, []string{})),
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
 		)
 	}
 

@@ -84,11 +84,12 @@ func fixtureHTTPResponse(mods ...func(resp *http.Response)) *http.Response {
 		return nil
 	}
 	response := &http.Response{
-		Body:       io.NopCloser(bytes.NewReader(testBody)),
-		StatusCode: http.StatusOK,
-		Proto:      "HTTP/1.1",
-		Status:     "200 OK",
-		Request:    &http.Request{Method: "GET", URL: &url.URL{Host: "example.com", Scheme: "http"}},
+		Body:          io.NopCloser(bytes.NewReader(testBody)),
+		StatusCode:    http.StatusOK,
+		Proto:         "HTTP/1.1",
+		Status:        "200 OK",
+		ContentLength: int64(len(testBody)),
+		Request:       &http.Request{Method: "GET", URL: &url.URL{Host: "example.com", Scheme: "http"}},
 		Header: http.Header{
 			"Content-Type":   []string{"application/json"},
 			"Accept":         []string{"application/json"},
@@ -585,6 +586,140 @@ func TestIsEmpty(t *testing.T) {
 			actual := isEmpty(tt.value)
 			if actual != tt.expected {
 				t.Fatalf("expected: %t, actual: %t", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestDumpRespBody(t *testing.T) {
+	tests := []struct {
+		description string
+		resp        *http.Response
+		expected    map[string]any
+		isValid     bool
+	}{
+		{
+			description: "base",
+			resp:        fixtureHTTPResponse(), // nolint:bodyclose // false positive, body is closed in the test
+			expected: map[string]any{
+				"key": "value",
+			},
+			isValid: true,
+		},
+		{
+			description: "empty response",
+			resp:        &http.Response{},
+			isValid:     true,
+			expected:    nil,
+		},
+		{
+			description: "nil response",
+			resp:        nil,
+			isValid:     false,
+		},
+		{
+			description: "empty body",
+			resp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
+				resp.Body = nil
+			}),
+			isValid: true,
+		},
+		{
+			description: "invalid body",
+			resp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
+				resp.Body = io.NopCloser(bytes.NewReader([]byte("invalid")))
+			}),
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if tt.resp != nil && tt.resp.Body != nil {
+				defer func() {
+					_ = tt.resp.Body.Close()
+				}()
+			}
+			actual, err := dumpRespBody(tt.resp)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !tt.isValid {
+				t.Fatalf("expected error, got nil")
+			}
+			diff := cmp.Diff(actual, tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestDumpReqBody(t *testing.T){
+	tests := []struct {
+		description string
+		req        *http.Request
+		expected    map[string]any
+		isValid     bool
+	}{
+		{
+			description: "base",
+			req:        fixtureHTTPRequest(),
+			expected: map[string]any{
+				"key": "value",
+			},
+			isValid: true,
+		},
+		{
+			description: "empty request",
+			req:        &http.Request{},
+			isValid:     true,
+			expected:    nil,
+		},
+		{
+			description: "nil request",
+			req:        nil,
+			isValid:     false,
+		},
+		{
+			description: "empty body",
+			req: fixtureHTTPRequest(func(req *http.Request) {
+				req.Body = nil
+			}),
+			isValid: true,
+		},
+		{
+			description: "invalid body",
+			req: fixtureHTTPRequest(func(req *http.Request) {
+				req.Body = io.NopCloser(bytes.NewReader([]byte("invalid")))
+			}),
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if tt.req != nil && tt.req.Body != nil {
+				defer func() {
+					_ = tt.req.Body.Close()
+				}()
+			}
+			actual, err := dumpReqBody(tt.req)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !tt.isValid {
+				t.Fatalf("expected error, got nil")
+			}
+			diff := cmp.Diff(actual, tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}
