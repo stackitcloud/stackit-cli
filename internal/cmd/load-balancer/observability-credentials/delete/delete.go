@@ -35,7 +35,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete observability credentials with reference "credentials-xxx" for Load Balancer`,
-				"$ stackit loadbalancer credentials delete credentials-xxx"),
+				"$ stackit load-balancer observability-credentials delete credentials-xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
