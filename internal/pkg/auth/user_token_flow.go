@@ -50,6 +50,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	} else if refreshTokenExpired, err := tokenExpired(utf.refreshToken); err != nil {
 		return nil, fmt.Errorf("check if refresh token has expired: %w", err)
 	} else if !refreshTokenExpired {
+		utf.printer.Debug(print.DebugLevel, "access token expired, refreshing...")
 		err = refreshTokens(utf)
 		if err == nil {
 			accessTokenValid = true
@@ -59,6 +60,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	if !accessTokenValid {
+		utf.printer.Debug(print.DebugLevel, "user access token is not valid, reauthenticating...")
 		err = reauthenticateUser(utf)
 		if err != nil {
 			return nil, fmt.Errorf("reauthenticate user: %w", err)

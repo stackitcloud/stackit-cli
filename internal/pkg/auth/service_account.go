@@ -72,6 +72,8 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper) (email s
 		return "", fmt.Errorf("get email from access token: %w", err)
 	}
 
+	p.Debug(print.DebugLevel, "successfully authenticated service account %s", email)
+
 	authFields[SERVICE_ACCOUNT_EMAIL] = email
 
 	sessionExpiresAtUnix, err := getStartingSessionExpiresAtUnix()
