@@ -143,7 +143,7 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 //
 // It returns an error if the initial slurp of all bytes fails. It does not attempt
 // to make the returned ReadClosers have identical error-matching behavior.
-// Taken direclty from the httputil package
+// Taken directly from the httputil package
 // https://cs.opensource.google/go/go/+/refs/tags/go1.22.2:src/net/http/httputil/dump.go;drc=1d45a7ef560a76318ed59dfdb178cecd58caf948;l=25
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if b == nil || b == http.NoBody {

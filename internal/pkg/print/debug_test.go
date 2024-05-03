@@ -658,16 +658,16 @@ func TestDumpRespBody(t *testing.T) {
 	}
 }
 
-func TestDumpReqBody(t *testing.T){
+func TestDumpReqBody(t *testing.T) {
 	tests := []struct {
 		description string
-		req        *http.Request
+		req         *http.Request
 		expected    map[string]any
 		isValid     bool
 	}{
 		{
 			description: "base",
-			req:        fixtureHTTPRequest(),
+			req:         fixtureHTTPRequest(),
 			expected: map[string]any{
 				"key": "value",
 			},
@@ -675,13 +675,13 @@ func TestDumpReqBody(t *testing.T){
 		},
 		{
 			description: "empty request",
-			req:        &http.Request{},
+			req:         &http.Request{},
 			isValid:     true,
 			expected:    nil,
 		},
 		{
 			description: "nil request",
-			req:        nil,
+			req:         nil,
 			isValid:     false,
 		},
 		{
