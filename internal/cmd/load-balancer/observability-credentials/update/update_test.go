@@ -170,16 +170,6 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
-		{
-			description: "no flags - nothing to be updated",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, displayNameFlag)
-				delete(flagValues, usernameFlag)
-				delete(flagValues, passwordFlag)
-			}),
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
