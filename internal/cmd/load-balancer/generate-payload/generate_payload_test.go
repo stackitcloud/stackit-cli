@@ -221,9 +221,45 @@ func TestModifyListeners(t *testing.T) {
 							IdleTimeout: utils.Ptr(""),
 						},
 					},
+					{
+						DisplayName: utils.Ptr(""),
+						Port:        utils.Ptr(int64(0)),
+						Protocol:    utils.Ptr(""),
+						Name:        utils.Ptr(""),
+						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+							{
+								Name: utils.Ptr(""),
+							},
+						},
+						TargetPool: utils.Ptr(""),
+						Tcp: &loadbalancer.OptionsTCP{
+							IdleTimeout: utils.Ptr(""),
+						},
+						Udp: &loadbalancer.OptionsUDP{
+							IdleTimeout: utils.Ptr(""),
+						},
+					},
 				},
 			},
 			expected: &[]loadbalancer.Listener{
+				{
+					DisplayName: utils.Ptr(""),
+					Port:        utils.Ptr(int64(0)),
+					Protocol:    utils.Ptr(""),
+					Name:        nil,
+					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						{
+							Name: utils.Ptr(""),
+						},
+					},
+					TargetPool: utils.Ptr(""),
+					Tcp: &loadbalancer.OptionsTCP{
+						IdleTimeout: utils.Ptr(""),
+					},
+					Udp: &loadbalancer.OptionsUDP{
+						IdleTimeout: utils.Ptr(""),
+					},
+				},
 				{
 					DisplayName: utils.Ptr(""),
 					Port:        utils.Ptr(int64(0)),
