@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -24,8 +25,8 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:    testProjectId,
-		instanceNameFlag: "example-name",
+		projectIdFlag:        testProjectId,
+		loadBalancerNameFlag: "example-name",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,7 +40,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName: utils.Ptr("example-name"),
+		LoadBalancerName: utils.Ptr("example-name"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,11 +80,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "name missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, instanceNameFlag)
+				delete(flagValues, loadBalancerNameFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.InstanceName = nil
+				model.LoadBalancerName = nil
 			}),
 		},
 		{
@@ -111,7 +112,8 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd(nil)
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -143,7 +145,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(nil, cmd)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -186,6 +188,107 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestModifyListeners(t *testing.T) {
+	tests := []struct {
+		description string
+		response    *loadbalancer.LoadBalancer
+		expected    *[]loadbalancer.Listener
+	}{
+		{
+			description: "base",
+			response: &loadbalancer.LoadBalancer{
+				Listeners: &[]loadbalancer.Listener{
+					{
+						DisplayName: utils.Ptr(""),
+						Port:        utils.Ptr(int64(0)),
+						Protocol:    utils.Ptr(""),
+						Name:        utils.Ptr(""),
+						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+							{
+								Name: utils.Ptr(""),
+							},
+						},
+						TargetPool: utils.Ptr(""),
+						Tcp: &loadbalancer.OptionsTCP{
+							IdleTimeout: utils.Ptr(""),
+						},
+						Udp: &loadbalancer.OptionsUDP{
+							IdleTimeout: utils.Ptr(""),
+						},
+					},
+					{
+						DisplayName: utils.Ptr(""),
+						Port:        utils.Ptr(int64(0)),
+						Protocol:    utils.Ptr(""),
+						Name:        utils.Ptr(""),
+						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+							{
+								Name: utils.Ptr(""),
+							},
+						},
+						TargetPool: utils.Ptr(""),
+						Tcp: &loadbalancer.OptionsTCP{
+							IdleTimeout: utils.Ptr(""),
+						},
+						Udp: &loadbalancer.OptionsUDP{
+							IdleTimeout: utils.Ptr(""),
+						},
+					},
+				},
+			},
+			expected: &[]loadbalancer.Listener{
+				{
+					DisplayName: utils.Ptr(""),
+					Port:        utils.Ptr(int64(0)),
+					Protocol:    utils.Ptr(""),
+					Name:        nil,
+					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						{
+							Name: utils.Ptr(""),
+						},
+					},
+					TargetPool: utils.Ptr(""),
+					Tcp: &loadbalancer.OptionsTCP{
+						IdleTimeout: utils.Ptr(""),
+					},
+					Udp: &loadbalancer.OptionsUDP{
+						IdleTimeout: utils.Ptr(""),
+					},
+				},
+				{
+					DisplayName: utils.Ptr(""),
+					Port:        utils.Ptr(int64(0)),
+					Protocol:    utils.Ptr(""),
+					Name:        nil,
+					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						{
+							Name: utils.Ptr(""),
+						},
+					},
+					TargetPool: utils.Ptr(""),
+					Tcp: &loadbalancer.OptionsTCP{
+						IdleTimeout: utils.Ptr(""),
+					},
+					Udp: &loadbalancer.OptionsUDP{
+						IdleTimeout: utils.Ptr(""),
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := modifyListener(tt.response)
+
+			diff := cmp.Diff(output, tt.expected)
+			if diff != "" {
+				t.Errorf("expected output to be %+v, got %+v", tt.expected, output)
 			}
 		})
 	}

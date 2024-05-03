@@ -19,18 +19,17 @@ import (
 )
 
 const (
-	instanceNameFlag = "instance-name"
+	loadBalancerNameFlag = "lb-name"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	InstanceName *string
+	LoadBalancerName *string
 }
 
 var (
 	defaultPayloadListener = &loadbalancer.Listener{
 		DisplayName: utils.Ptr(""),
-		Name:        utils.Ptr(""),
 		Port:        utils.Ptr(int64(0)),
 		Protocol:    utils.Ptr(""),
 		ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
@@ -101,7 +100,6 @@ var (
 			},
 			PrivateNetworkOnly: utils.Ptr(false),
 		},
-		PrivateAddress: utils.Ptr(""),
 		TargetPools: &[]loadbalancer.TargetPool{
 			*defaultPayloadTargetPool,
 		},
@@ -125,9 +123,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit load-balancer create --payload @./payload.json`),
 			examples.NewExample(
 				`Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload --instance-name my-lb > ./payload.json`,
+				`$ stackit load-balancer generate-payload --lb-name xxx > ./payload.json`,
 				`<Modify payload in file>`,
-				`$ stackit load-balancer update my-lb --payload @./payload.json`),
+				`$ stackit load-balancer update xxx --payload @./payload.json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -142,7 +140,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			if model.InstanceName == nil {
+			if model.LoadBalancerName == nil {
 				createPayload := DefaultCreateLoadBalancerPayload
 				return outputCreateResult(p, &createPayload)
 			}
@@ -152,13 +150,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
+
+			listeners := modifyListener(resp)
+
 			updatePayload := &loadbalancer.UpdateLoadBalancerPayload{
 				ExternalAddress: resp.ExternalAddress,
-				Listeners:       resp.Listeners,
+				Listeners:       listeners,
 				Name:            resp.Name,
 				Networks:        resp.Networks,
 				Options:         resp.Options,
-				PrivateAddress:  resp.PrivateAddress,
 				TargetPools:     resp.TargetPools,
 				Version:         resp.Version,
 			}
@@ -170,26 +170,37 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(instanceNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
+	cmd.Flags().StringP(loadBalancerNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
-	// If instanceName is provided, projectId is needed as well
-	if instanceName != nil && globalFlags.ProjectId == "" {
+	loadBalancerName := flags.FlagToStringPointer(p, cmd, loadBalancerNameFlag)
+	// If load balancer name is provided, projectId is needed as well
+	if loadBalancerName != nil && globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
-		GlobalFlagModel: globalFlags,
-		InstanceName:    instanceName,
-	}, nil
+	model := inputModel{
+		GlobalFlagModel:  globalFlags,
+		LoadBalancerName: loadBalancerName,
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetLoadBalancerRequest {
-	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, *model.InstanceName)
+	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, *model.LoadBalancerName)
 	return req
 }
 
@@ -211,4 +222,14 @@ func outputUpdateResult(p *print.Printer, payload *loadbalancer.UpdateLoadBalanc
 	p.Outputln(string(payloadBytes))
 
 	return nil
+}
+
+func modifyListener(resp *loadbalancer.LoadBalancer) *[]loadbalancer.Listener {
+	listeners := *resp.Listeners
+
+	for i := range listeners {
+		listeners[i].Name = nil
+	}
+
+	return &listeners
 }
