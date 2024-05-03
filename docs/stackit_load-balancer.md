@@ -29,8 +29,10 @@ stackit load-balancer [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit load-balancer create](./stackit_load-balancer_create.md)	 - Creates a Load Balancer
 * [stackit load-balancer describe](./stackit_load-balancer_describe.md)	 - Shows details of a Load Balancer
 * [stackit load-balancer generate-payload](./stackit_load-balancer_generate-payload.md)	 - Generates a payload to create/update a Load Balancer
 * [stackit load-balancer list](./stackit_load-balancer_list.md)	 - Lists all Load Balancers
 * [stackit load-balancer quota](./stackit_load-balancer_quota.md)	 - Shows the configured Load Balancer quota
+* [stackit load-balancer update](./stackit_load-balancer_update.md)	 - Updates a Load Balancer
 
