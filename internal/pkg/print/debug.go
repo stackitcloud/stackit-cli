@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"slices"
 	"sort"
 	"strings"
@@ -100,7 +99,6 @@ func buildHeaderMap(headers http.Header, includeHeaders []string) map[string]any
 	if len(includeHeaders) != 0 {
 		headersToInclude = includeHeaders
 	}
-
 	for key := range headersMap {
 		if !slices.Contains(headersToInclude, key) {
 			delete(headersMap, key)
@@ -108,34 +106,6 @@ func buildHeaderMap(headers http.Header, includeHeaders []string) map[string]any
 	}
 
 	return headersMap
-}
-
-// BuildDebugStrFromHTTPRequest converts an HTTP request to a user-friendly string representation.
-// This function also receives a list of headers to include in the output, if empty, the default headers are used.
-// The return value is a list of strings that should be printed separately.
-func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([]string, error) {
-	if req == nil {
-		return nil, fmt.Errorf("request is nil")
-	}
-	if req.URL == nil || req.Proto == "" || req.Method == "" {
-		return nil, fmt.Errorf("request is invalid")
-	}
-
-	status := fmt.Sprintf("request to %s: %s %s", req.URL, req.Method, req.Proto)
-
-	headersMap := buildHeaderMap(req.Header, includeHeaders)
-	headers := fmt.Sprintf("request headers: %v", BuildDebugStrFromMap(headersMap))
-
-	bodyMap, err := dumpReqBody(req)
-	if err != nil {
-		return []string{status, headers}, fmt.Errorf("read request body: %w", err)
-	}
-	if bodyMap == nil {
-		return []string{status, headers}, nil
-	}
-	body := fmt.Sprintf("request body: %s", BuildDebugStrFromMap(bodyMap))
-
-	return []string{status, headers, body}, nil
 }
 
 // drainBody reads all of b to memory and then returns two equivalent
@@ -160,6 +130,48 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
+// BuildDebugStrFromHTTPRequest converts an HTTP request to a user-friendly string representation.
+// This function also receives a list of headers to include in the output, if empty, the default headers are used.
+// The return value is a list of strings that should be printed separately.
+func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([]string, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is nil")
+	}
+	if req.URL == nil || req.Proto == "" || req.Method == "" {
+		return nil, fmt.Errorf("request is invalid")
+	}
+
+	status := fmt.Sprintf("request to %s: %s %s", req.URL, req.Method, req.Proto)
+
+	headersMap := buildHeaderMap(req.Header, includeHeaders)
+	headers := fmt.Sprintf("request headers: %v", BuildDebugStrFromMap(headersMap))
+
+	var save io.ReadCloser
+	var err error
+
+	save, req.Body, err = drainBody(req.Body)
+	if err != nil {
+		return []string{status, headers}, fmt.Errorf("drain response body: %w", err)
+	}
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		return []string{status, headers}, fmt.Errorf("read response body: %w", err)
+	}
+	req.Body = save
+	var bodyMap map[string]any
+	if len(bodyBytes) != 0 {
+		if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
+			return nil, fmt.Errorf("unmarshal response body: %w", err)
+		}
+	}
+	if len(bodyMap) == 0 {
+		return []string{status, headers}, nil
+	}
+	body := fmt.Sprintf("request body: %s", BuildDebugStrFromMap(bodyMap))
+
+	return []string{status, headers, body}, nil
+}
+
 // BuildDebugStrFromHTTPResponse converts an HTTP response to a user-friendly string representation.
 // This function also receives a list of headers to include in the output, if empty, the default headers are used.
 // The return value is a list of strings that should be printed separately.
@@ -177,110 +189,30 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 	headersMap := buildHeaderMap(resp.Header, includeHeaders)
 	headers := fmt.Sprintf("response headers: %v", BuildDebugStrFromMap(headersMap))
 
-	bodyMap, err := dumpRespBody(resp)
+	var save io.ReadCloser
+	var err error
+
+	save, resp.Body, err = drainBody(resp.Body)
+	if err != nil {
+		return []string{status, headers}, fmt.Errorf("drain response body: %w", err)
+	}
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("read response body: %w", err)
 	}
-	if bodyMap == nil {
+	resp.Body = save
+	var bodyMap map[string]any
+	if len(bodyBytes) != 0 {
+		if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
+			return nil, fmt.Errorf("unmarshal response body: %w", err)
+		}
+	}
+	if len(bodyMap) == 0 {
 		return []string{status, headers}, nil
 	}
 	body := fmt.Sprintf("response body: %s", BuildDebugStrFromMap(bodyMap))
 
 	return []string{status, headers, body}, nil
-}
-
-// dumpRespBody reads the response body and returns a string representation of it.
-// Based on code from httputil package
-// https://pkg.go.dev/net/http/httputil#DumpResponse
-func dumpRespBody(resp *http.Response) (map[string]any, error) {
-	if resp == nil {
-		return nil, fmt.Errorf("response is nil")
-	}
-	if resp.Body == nil || resp.ContentLength == 0 {
-		return nil, nil
-	}
-	var err error
-	var buf bytes.Buffer
-	var save io.ReadCloser
-
-	savecl := resp.ContentLength
-
-	save, resp.Body, err = drainBody(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if _, err = buf.ReadFrom(resp.Body); err != nil {
-		return nil, fmt.Errorf("read response body: %w", err)
-	}
-	if err = resp.Body.Close(); err != nil {
-		return nil, fmt.Errorf("close response body: %w", err)
-	}
-
-	resp.Body = save
-	resp.ContentLength = savecl
-
-	var bodyMap map[string]any
-	if len(buf.Bytes()) != 0 {
-		if err := json.Unmarshal(buf.Bytes(), &bodyMap); err != nil {
-			return nil, fmt.Errorf("unmarshal response body: %w", err)
-		}
-	}
-
-	return bodyMap, nil
-}
-
-// dumpReqBody reads the request body and returns a string representation of it.
-// Based on code from httputil package
-// https://pkg.go.dev/net/http/httputil#DumpRequest
-func dumpReqBody(req *http.Request) (map[string]any, error) {
-	if req == nil {
-		return nil, fmt.Errorf("request is nil")
-	}
-	if req.Body == nil {
-		return nil, nil
-	}
-	var err error
-	var b bytes.Buffer
-	var save io.ReadCloser
-
-	save, req.Body, err = drainBody(req.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var dest io.Writer = &b
-	chunked := len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked"
-	if chunked {
-		dest = httputil.NewChunkedWriter(&b)
-	}
-	_, err = io.Copy(dest, req.Body)
-	if chunked {
-		if closer, ok := dest.(io.Closer); ok {
-			err = closer.Close()
-			if err != nil {
-				return nil, fmt.Errorf("close chunked writer: %w", err)
-			}
-		}
-		_, err = b.WriteString("\r\n")
-		if err != nil {
-			return nil, fmt.Errorf("write chunked trailer: %w", err)
-		}
-	}
-
-	req.Body = save
-	if err != nil {
-		return nil, err
-	}
-
-	// marshall body to map
-	var bodyMap map[string]any
-	if len(b.Bytes()) != 0 {
-		if err := json.Unmarshal(b.Bytes(), &bodyMap); err != nil {
-			return nil, fmt.Errorf("unmarshal request body: %w", err)
-		}
-	}
-
-	return bodyMap, nil
 }
 
 // RequestResponseCapturer is a middleware that captures the request and response of an HTTP request.
