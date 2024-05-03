@@ -14,7 +14,7 @@ stackit load-balancer observability-credentials delete CREDENTIALS_REF [flags]
 
 ```
   Delete observability credentials with reference "credentials-xxx" for Load Balancer
-  $ stackit loadbalancer credentials delete credentials-xxx
+  $ stackit load-balancer observability-credentials delete credentials-xxx
 ```
 
 ### Options
