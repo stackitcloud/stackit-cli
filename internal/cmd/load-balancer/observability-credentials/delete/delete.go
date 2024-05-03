@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	loadbalancerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 
@@ -33,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(credentialsRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete credentials with reference "credentials-xxx" for Load Balancer`,
+				`Delete observability credentials with reference "credentials-xxx" for Load Balancer`,
 				"$ stackit loadbalancer credentials delete credentials-xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -49,14 +50,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
 			credentialsLabel, err := loadbalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.CredentialsRef)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get credentials display name: %v", err)
+				p.Debug(print.ErrorLevel, "get observability credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete observability credentials %q? (This cannot be undone)", credentialsLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete observability credentials %q on project %q?(This cannot be undone)", credentialsLabel, projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -70,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete Load Balancer observability credentials: %w", err)
 			}
 
-			p.Info("Deleted credentials %q\n", credentialsLabel)
+			p.Info("Deleted observability credentials %q on project %q\n", credentialsLabel, projectLabel)
 			return nil
 		},
 	}
@@ -85,10 +92,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		CredentialsRef:  credentialsRef,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiDeleteCredentialsRequest {

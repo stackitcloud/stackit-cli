@@ -1,10 +1,10 @@
 ## stackit load-balancer observability-credentials describe
 
-Shows details of observability credentials for load balancers
+Shows details of observability credentials for Load Balancer
 
 ### Synopsis
 
-Shows details of observability credentials for load balancers.
+Shows details of observability credentials for Load Balancer.
 
 ```
 stackit load-balancer observability-credentials describe CREDENTIALS_REF [flags]
@@ -13,8 +13,8 @@ stackit load-balancer observability-credentials describe CREDENTIALS_REF [flags]
 ### Examples
 
 ```
-  Get details of credentials with reference "credentials-xxx"
-  $ stackit load-balancer credentials describe credentials-xxx
+  Get details of observability credentials with reference "credentials-xxx"
+  $ stackit load-balancer observability-credentials describe credentials-xxx
 ```
 
 ### Options

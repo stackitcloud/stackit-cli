@@ -41,10 +41,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Add credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal`,
+				`Add observability credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal`,
 				"$ stackit load-balancer observability-credentials add --username xxx --display-name yyy"),
 			examples.NewExample(
-				`Add credentials to a load balancer with username "xxx" and display name "yyy", providing the password as flag`,
+				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the password as flag`,
 				"$ stackit load-balancer observability-credentials add --username xxx --password pwd --display-name yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to add observability credentials for your Load Balancers on project %q?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("add Load Balancer credentials: %w", err)
+				return fmt.Errorf("add Load Balancer observability credentials: %w", err)
 			}
 
 			return outputResult(p, model, projectLabel, resp)
@@ -112,12 +112,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiCreateCredentialsRequest {
@@ -134,20 +145,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *loadbalancer.CreateCredentialsResponse) error {
 	if resp.Credential == nil {
-		return fmt.Errorf("nil credentials response")
+		return fmt.Errorf("nil observability credentials response")
 	}
 
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Load Balancer credentials: %w", err)
+			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
-		p.Outputf("Added load balancer observability credentials for project %q. Credentials reference: %q\n", projectLabel, *resp.Credential.CredentialsRef)
+		p.Outputf("Added Load Balancer observability credentials on project %q. Credentials reference: %q\n", projectLabel, *resp.Credential.CredentialsRef)
 		return nil
 	}
 }

@@ -13,13 +13,13 @@ stackit load-balancer observability-credentials update [flags]
 ### Examples
 
 ```
-  Update the password of credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal
+  Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal
   $ stackit load-balancer observability-credentials update credentials-xxx --password 
 
-  Update the password of credentials of Load Balancer with credentials reference "credentials-xxx", by providing it in the flag
+  Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing it in the flag
   $ stackit load-balancer observability-credentials update credentials-xxx --password new-pwd
 
-  Update the display name of credentials of Load Balancer with credentials reference "credentials-xxx".
+  Update the display name of observability credentials of Load Balancer with credentials reference "credentials-xxx".
   $ stackit load-balancer observability-credentials update credentials-xxx --display-name yyy
 ```
 

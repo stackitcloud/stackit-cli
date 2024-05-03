@@ -13,10 +13,10 @@ stackit load-balancer observability-credentials add [flags]
 ### Examples
 
 ```
-  Add credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal
+  Add observability credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal
   $ stackit load-balancer observability-credentials add --username xxx --display-name yyy
 
-  Add credentials to a load balancer with username "xxx" and display name "yyy", providing the password as flag
+  Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the password as flag
   $ stackit load-balancer observability-credentials add --username xxx --password pwd --display-name yyy
 ```
 

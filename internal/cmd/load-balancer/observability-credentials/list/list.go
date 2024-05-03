@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
@@ -58,6 +59,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -66,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			credentialsPtr := resp.Credentials
 			if credentialsPtr == nil || (credentialsPtr != nil && len(*credentialsPtr) == 0) {
-				p.Info("No observability credentials found for Load Balancer\n")
+				p.Info("No observability credentials found for Load Balancer on project %q\n", projectLabel)
 				return nil
 			}
 

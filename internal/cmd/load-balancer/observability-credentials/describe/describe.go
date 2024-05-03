@@ -29,13 +29,13 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialsRefArg),
-		Short: "Shows details of observability credentials for load balancers",
-		Long:  "Shows details of observability credentials for load balancers.",
+		Short: "Shows details of observability credentials for Load Balancer",
+		Long:  "Shows details of observability credentials for Load Balancer.",
 		Args:  args.SingleArg(credentialsRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of credentials with reference "credentials-xxx"`,
-				"$ stackit load-balancer credentials describe credentials-xxx"),
+				`Get details of observability credentials with reference "credentials-xxx"`,
+				"$ stackit load-balancer observability-credentials describe credentials-xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -71,10 +71,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		CredentialsRef:  credentialsRef,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetCredentialsRequest {

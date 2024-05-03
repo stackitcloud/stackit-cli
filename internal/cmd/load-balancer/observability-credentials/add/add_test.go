@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
@@ -120,7 +121,8 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := NewCmd(nil)
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)

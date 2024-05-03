@@ -43,13 +43,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(credentialsRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the password of credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal`,
+				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal`,
 				"$ stackit load-balancer observability-credentials update credentials-xxx --password "),
 			examples.NewExample(
-				`Update the password of credentials of Load Balancer with credentials reference "credentials-xxx", by providing it in the flag`,
+				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing it in the flag`,
 				"$ stackit load-balancer observability-credentials update credentials-xxx --password new-pwd"),
 			examples.NewExample(
-				`Update the display name of credentials of Load Balancer with credentials reference "credentials-xxx".`,
+				`Update the display name of observability credentials of Load Balancer with credentials reference "credentials-xxx".`,
 				"$ stackit load-balancer observability-credentials update credentials-xxx --display-name yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -78,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for your Load Balancers on project %q?", credentialsLabel, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -105,7 +105,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update Load Balancer observability credentials: %w", err)
 			}
 
-			p.Info("Updated observability credentials %q for Load Balancer\n", credentialsLabel)
+			p.Info("Updated observability credentials %q for Load Balancer on project %q\n", credentialsLabel, projectLabel)
 			return nil
 		},
 	}
