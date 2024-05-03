@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -19,8 +20,26 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &loadbalancer.APIClient{}
+
+type loadBalancerClientMocked struct {
+	getCredentialsError    bool
+	getCredentialsResponse *loadbalancer.GetCredentialsResponse
+}
+
+func (c *loadBalancerClientMocked) UpdateCredentials(ctx context.Context, projectId, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest {
+	return testClient.UpdateCredentials(ctx, projectId, credentialsRef)
+}
+
+func (c *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
+	if c.getCredentialsError {
+		return nil, fmt.Errorf("get credentials failed")
+	}
+	return c.getCredentialsResponse, nil
+}
+
 var testProjectId = uuid.NewString()
-var testCredentialsRef = "credentials-test"
+
+const testCredentialsRef = "credentials-test"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -73,6 +92,19 @@ func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsReque
 		mod(&request)
 	}
 	return request
+}
+
+func fixtureGetCredentialsResponse(mods ...func(response *loadbalancer.GetCredentialsResponse)) *loadbalancer.GetCredentialsResponse {
+	response := &loadbalancer.GetCredentialsResponse{
+		Credential: &loadbalancer.CredentialsResponse{
+			DisplayName: utils.Ptr("name"),
+			Username:    utils.Ptr("username"),
+		},
+	}
+	for _, mod := range mods {
+		mod(response)
+	}
+	return response
 }
 
 func TestParseInput(t *testing.T) {
@@ -205,20 +237,68 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description     string
-		model           *inputModel
-		expectedRequest loadbalancer.ApiUpdateCredentialsRequest
+		description            string
+		model                  *inputModel
+		expectedRequest        loadbalancer.ApiUpdateCredentialsRequest
+		getCredentialsFails    bool
+		getCredentialsResponse *loadbalancer.GetCredentialsResponse
+		isValid                bool
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			description:            "base",
+			model:                  fixtureInputModel(),
+			expectedRequest:        fixtureRequest(),
+			getCredentialsResponse: fixtureGetCredentialsResponse(),
+			isValid:                true,
+		},
+		{
+			description: "no display name",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.DisplayName = nil
+				},
+			),
+			expectedRequest:        fixtureRequest(),
+			getCredentialsResponse: fixtureGetCredentialsResponse(),
+			isValid:                true,
+		},
+		{
+			description: "no username name",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.Username = nil
+				},
+			),
+			expectedRequest:        fixtureRequest(),
+			getCredentialsResponse: fixtureGetCredentialsResponse(),
+			isValid:                true,
+		},
+		{
+			description:         "get credentials fails",
+			model:               fixtureInputModel(),
+			getCredentialsFails: true,
+			isValid:             false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			client := &loadBalancerClientMocked{
+				getCredentialsError:    tt.getCredentialsFails,
+				getCredentialsResponse: tt.getCredentialsResponse,
+			}
+			request, err := buildRequest(testCtx, tt.model, client)
+
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error building request: %v", err)
+			}
+
+			if !tt.isValid {
+				t.Fatal("expected error but none thrown")
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

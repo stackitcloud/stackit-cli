@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Prompt for password if not passed in as a flag
-			if model.Password != nil && *model.Password == "" {
+			if model.Password == nil {
 				pwd, err := p.PromptForPassword("Enter new password: ")
 				if err != nil {
 					return fmt.Errorf("prompt for password: %w", err)
@@ -95,7 +95,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return err
+			}
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Load Balancer observability credentials: %w", err)
@@ -127,10 +131,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	username := flags.FlagToStringPointer(p, cmd, usernameFlag)
 	password := flags.FlagToStringPointer(p, cmd, passwordFlag)
 
-	if displayName == nil && username == nil && password == nil {
-		return nil, &errors.EmptyUpdateError{}
-	}
-
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
 		CredentialsRef:  credentialsRef,
@@ -140,13 +140,31 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiUpdateCredentialsRequest {
+type loadBalancerClient interface {
+	UpdateCredentials(ctx context.Context, instanceId, projectId string) loadbalancer.ApiUpdateCredentialsRequest
+	GetCredentialsExecute(ctx context.Context, instanceId, projectId string) (*loadbalancer.GetCredentialsResponse, error)
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient loadBalancerClient) (loadbalancer.ApiUpdateCredentialsRequest, error) {
 	req := apiClient.UpdateCredentials(ctx, model.ProjectId, model.CredentialsRef)
 
-	req = req.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
-		DisplayName: model.DisplayName,
-		Username:    model.Username,
+	currentCredentials, err := apiClient.GetCredentialsExecute(ctx, model.ProjectId, model.CredentialsRef)
+	if err != nil {
+		return req, fmt.Errorf("get Load Balancer observability credentials: %w", err)
+	}
+
+	payload := loadbalancer.UpdateCredentialsPayload{
+		DisplayName: currentCredentials.Credential.DisplayName,
+		Username:    currentCredentials.Credential.Username,
 		Password:    model.Password,
-	})
-	return req
+	}
+
+	if model.DisplayName != nil {
+		payload.DisplayName = model.DisplayName
+	}
+	if model.Username != nil {
+		payload.Username = model.Username
+	}
+	req = req.UpdateCredentialsPayload(payload)
+	return req, nil
 }

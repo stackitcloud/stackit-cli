@@ -19,7 +19,8 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &loadbalancer.APIClient{}
 var testProjectId = uuid.NewString()
-var testCredentialsRef = "credentials-xxx"
+
+const testCredentialsRef = "credentials-xxx"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
