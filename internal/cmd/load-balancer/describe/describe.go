@@ -131,10 +131,15 @@ func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
 		}
 	}
 
-	var networkId string
+	networkId := "-"
 	if loadBalancer.Networks != nil && len(*loadBalancer.Networks) > 0 {
 		networks := *loadBalancer.Networks
 		networkId = *networks[0].NetworkId
+	}
+
+	externalAdress := "-"
+	if loadBalancer.ExternalAddress != nil {
+		externalAdress = *loadBalancer.ExternalAddress
 	}
 
 	table := tables.NewTable()
@@ -144,7 +149,7 @@ func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
 	table.AddSeparator()
 	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
 	table.AddSeparator()
-	table.AddRow("ATTACHED PUBLIC IP", *loadBalancer.ExternalAddress)
+	table.AddRow("ATTACHED PUBLIC IP", externalAdress)
 	table.AddSeparator()
 	table.AddRow("ATTACHED NETWORK ID", networkId)
 	table.AddSeparator()
