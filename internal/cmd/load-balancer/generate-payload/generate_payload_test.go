@@ -193,7 +193,7 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func TestToModifyListeners(t *testing.T) {
+func TestModifyListeners(t *testing.T) {
 	tests := []struct {
 		description string
 		response    *loadbalancer.LoadBalancer
