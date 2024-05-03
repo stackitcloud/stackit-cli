@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -116,6 +117,14 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return
 		}
 
+		sessionExpiresAtUnixInt, err := strconv.Atoi(sessionExpiresAtUnix)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "parse session expiration value \"%s\": %s", sessionExpiresAtUnix, err)
+		} else {
+			sessionExpiresAt := time.Unix(int64(sessionExpiresAtUnixInt), 0)
+			p.Debug(print.DebugLevel, "session expires at %s", sessionExpiresAt)
+		}
+
 		err = SetAuthFlow(AUTH_FLOW_USER_TOKEN)
 		if err != nil {
 			errServer = fmt.Errorf("set auth flow type: %w", err)
@@ -172,13 +181,14 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	})
 
+	p.Debug(print.DebugLevel, "opening browser for authentication")
+	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
+
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
 	if err != nil {
 		return fmt.Errorf("open browser to URL %s: %w", authorizationURL, err)
 	}
-	p.Debug(print.DebugLevel, "opening browser for authentication")
-	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
