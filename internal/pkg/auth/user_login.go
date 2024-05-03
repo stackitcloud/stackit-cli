@@ -82,6 +82,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	// Define a handler that will get the authorization code, call the token endpoint, and close the HTTP server
 	var errServer error
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		p.Debug(print.DebugLevel, "received request from authentication server")
 		// Close the server only if there was an error
 		// Otherwise, it will redirect to the succesfull login page
 		defer func() {
@@ -98,12 +99,16 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return
 		}
 
+		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
+
 		// Trade the authorization code and the code verifier for access and refresh tokens
 		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(authDomain, clientId, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
 		}
+
+		p.Debug(print.DebugLevel, "received response from the authentication server")
 
 		sessionExpiresAtUnix, err := getStartingSessionExpiresAtUnix()
 		if err != nil {
@@ -123,6 +128,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return
 		}
 
+		p.Debug(print.DebugLevel, "user %s logged in successfully", email)
+
 		authFields := map[authFieldKey]string{
 			SESSION_EXPIRES_AT_UNIX: sessionExpiresAtUnix,
 			ACCESS_TOKEN:            accessToken,
@@ -137,6 +144,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		// Redirect the user to the successful login page
 		loginSuccessURL := redirectURL + loginSuccessPath
+
+		p.Debug(print.DebugLevel, "redirecting browser to login successful page")
 		http.Redirect(w, r, loginSuccessURL, http.StatusSeeOther)
 	})
 
@@ -168,9 +177,12 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	if err != nil {
 		return fmt.Errorf("open browser to URL %s: %w", authorizationURL, err)
 	}
+	p.Debug(print.DebugLevel, "opening browser for authentication")
+	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
+	p.Debug(print.DebugLevel, "listening for response from authentication server on %s", redirectURL)
 	err = server.Serve(listener)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server for PKCE flow closed unexpectedly: %w", err)
