@@ -16,16 +16,16 @@ stackit redis credentials create [flags]
   Create credentials for a Redis instance
   $ stackit redis credentials create --instance-id xxx
 
-  Create credentials for a Redis instance and hide the password in the output
-  $ stackit redis credentials create --instance-id xxx --hide-password
+  Create credentials for a Redis instance and show the password in the output
+  $ stackit redis credentials create --instance-id xxx --show-password
 ```
 
 ### Options
 
 ```
   -h, --help                 Help for "stackit redis credentials create"
-      --hide-password        Hide password in output
       --instance-id string   Instance ID
+      --show-password        Show password in output
 ```
 
 ### Options inherited from parent commands
