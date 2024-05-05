@@ -100,8 +100,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 
 func outputResult(p *print.Printer, outputFormat string, config *argus.Job) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal scrape configuration: %w", err)
+		}
+		p.Outputln(string(details))
 
+		return nil
+	default:
 		saml2Enabled := "Enabled"
 		if config.Params != nil {
 			saml2 := (*config.Params)["saml2"]
@@ -162,14 +169,6 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(config, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal scrape configuration: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

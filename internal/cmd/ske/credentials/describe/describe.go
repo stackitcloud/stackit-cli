@@ -114,7 +114,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, credentials *ske.Credentials) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("SERVER", *credentials.Server)
 		table.AddSeparator()
@@ -123,14 +131,6 @@ func outputResult(p *print.Printer, outputFormat string, credentials *ske.Creden
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

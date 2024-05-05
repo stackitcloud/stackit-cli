@@ -114,7 +114,15 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 	backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(backup, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal backup for PostgreSQL Flex instance: %w", err)
+		}
+		cmd.Println(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *backup.Id)
 		table.AddSeparator()
@@ -128,14 +136,6 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(backup, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal backup for PostgreSQL Flex instance: %w", err)
-		}
-		cmd.Println(string(details))
 
 		return nil
 	}

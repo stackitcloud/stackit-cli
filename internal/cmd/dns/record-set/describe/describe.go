@@ -114,7 +114,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(recordSet, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record set: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		recordsData := make([]string, 0, len(*recordSet.Records))
 		for _, r := range *recordSet.Records {
 			recordsData = append(recordsData, *r.Content)
@@ -137,14 +145,6 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(recordSet, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

@@ -112,7 +112,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 
 func outputResult(p *print.Printer, outputFormat string, credentials *redis.CredentialsResponse) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Redis credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
@@ -129,14 +137,6 @@ func outputResult(p *print.Printer, outputFormat string, credentials *redis.Cred
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Redis credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

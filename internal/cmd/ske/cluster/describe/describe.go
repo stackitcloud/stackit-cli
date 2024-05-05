@@ -97,8 +97,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(cluster, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal SKE cluster: %w", err)
+		}
+		p.Outputln(string(details))
 
+		return nil
+	default:
 		acl := []string{}
 		if cluster.Extensions != nil && cluster.Extensions.Acl != nil {
 			acl = *cluster.Extensions.Acl.AllowedCidrs
@@ -116,14 +123,6 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(cluster, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

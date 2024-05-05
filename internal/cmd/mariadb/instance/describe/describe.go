@@ -100,7 +100,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 
 func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MariaDB instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.InstanceId)
 		table.AddSeparator()
@@ -124,14 +132,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Insta
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MariaDB instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

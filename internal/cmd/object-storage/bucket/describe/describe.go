@@ -97,7 +97,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 
 func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(bucket, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage bucket: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("Name", *bucket.Name)
 		table.AddSeparator()
@@ -111,14 +119,6 @@ func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.B
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(bucket, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Object Storage bucket: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

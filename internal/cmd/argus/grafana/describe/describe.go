@@ -125,7 +125,15 @@ func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *
 
 func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argus.GrafanaConfigs, instance *argus.GetInstanceResponse) error {
 	switch inputModel.OutputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(grafanaConfigs, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Grafana configs: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		initialAdminPassword := *instance.Instance.GrafanaAdminPassword
 		if !inputModel.ShowPassword {
 			initialAdminPassword = "<hidden>"
@@ -145,14 +153,6 @@ func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argu
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(grafanaConfigs, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Grafana configs: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

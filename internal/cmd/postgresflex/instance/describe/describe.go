@@ -102,7 +102,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 
 func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 
@@ -141,14 +149,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

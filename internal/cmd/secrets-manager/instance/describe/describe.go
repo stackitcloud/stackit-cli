@@ -111,8 +111,20 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 
 func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		output := struct {
+			*secretsmanager.Instance
+			*secretsmanager.AclList
+		}{instance, aclList}
 
+		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
 		table.AddSeparator()
@@ -140,19 +152,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		output := struct {
-			*secretsmanager.Instance
-			*secretsmanager.AclList
-		}{instance, aclList}
-
-		details, err := json.MarshalIndent(output, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}
