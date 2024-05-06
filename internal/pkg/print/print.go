@@ -163,13 +163,15 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = strings.NewReader(content)
-	lessCmd.Stdout = p.Cmd.OutOrStdout()
+	pagerCmd := exec.Command("less", "-F", "-S", "-w")
 
-	err := lessCmd.Run()
+	pagerCmd.Stdin = strings.NewReader(content)
+	pagerCmd.Stdout = p.Cmd.OutOrStdout()
+
+	err := pagerCmd.Run()
 	if err != nil {
-		return fmt.Errorf("run less command: %w", err)
+		p.Debug(ErrorLevel, "run pager command: %v", err)
+		p.Outputln(content)
 	}
 	return nil
 }
