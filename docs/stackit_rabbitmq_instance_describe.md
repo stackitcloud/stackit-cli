@@ -16,8 +16,8 @@ stackit rabbitmq instance describe INSTANCE_ID [flags]
   Get details of a RabbitMQ instance with ID "xxx"
   $ stackit rabbitmq instance describe xxx
 
-  Get details of a RabbitMQ instance with ID "xxx" in a table format
-  $ stackit rabbitmq instance describe xxx --output-format pretty
+  Get details of a RabbitMQ instance with ID "xxx" in JSON format
+  $ stackit rabbitmq instance describe xxx --output-format json
 ```
 
 ### Options

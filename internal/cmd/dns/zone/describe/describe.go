@@ -38,8 +38,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a DNS zone with ID "xxx"`,
 				"$ stackit dns zone describe xxx"),
 			examples.NewExample(
-				`Get details of a DNS zone with ID "xxx" in a table format`,
-				"$ stackit dns zone describe xxx --output-format pretty"),
+				`Get details of a DNS zone with ID "xxx" in JSON format`,
+				"$ stackit dns zone describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -99,7 +99,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(zone, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS zone: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *zone.Id)
 		table.AddSeparator()
@@ -134,14 +142,6 @@ func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(zone, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

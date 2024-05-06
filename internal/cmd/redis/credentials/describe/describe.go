@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of credentials with ID "xxx" from instance with ID "yyy"`,
 				"$ stackit redis credentials describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format`,
-				"$ stackit redis credentials describe xxx --instance-id yyy --output-format pretty"),
+				`Get details of credentials with ID "xxx" from instance with ID "yyy" in JSON format`,
+				"$ stackit redis credentials describe xxx --instance-id yyy --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -112,7 +112,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 
 func outputResult(p *print.Printer, outputFormat string, credentials *redis.CredentialsResponse) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Redis credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
@@ -129,14 +137,6 @@ func outputResult(p *print.Printer, outputFormat string, credentials *redis.Cred
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Redis credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

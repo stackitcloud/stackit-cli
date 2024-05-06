@@ -16,8 +16,8 @@ stackit opensearch instance describe INSTANCE_ID [flags]
   Get details of an OpenSearch instance with ID "xxx"
   $ stackit opensearch instance describe xxx
 
-  Get details of an OpenSearch instance with ID "xxx" in a table format
-  $ stackit opensearch instance describe xxx --output-format pretty
+  Get details of an OpenSearch instance with ID "xxx" in JSON format
+  $ stackit opensearch instance describe xxx --output-format json
 ```
 
 ### Options

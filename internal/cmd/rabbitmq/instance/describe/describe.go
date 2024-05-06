@@ -40,8 +40,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a RabbitMQ instance with ID "xxx"`,
 				"$ stackit rabbitmq instance describe xxx"),
 			examples.NewExample(
-				`Get details of a RabbitMQ instance with ID "xxx" in a table format`,
-				"$ stackit rabbitmq instance describe xxx --output-format pretty"),
+				`Get details of a RabbitMQ instance with ID "xxx" in JSON format`,
+				"$ stackit rabbitmq instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -100,7 +100,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 
 func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal RabbitMQ instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.InstanceId)
 		table.AddSeparator()
@@ -124,14 +132,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Inst
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

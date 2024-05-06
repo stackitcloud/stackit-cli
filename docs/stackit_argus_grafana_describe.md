@@ -18,11 +18,11 @@ stackit argus grafana describe INSTANCE_ID [flags]
   Get details of the Grafana configuration of an Argus instance with ID "xxx"
   $ stackit argus credentials describe xxx
 
-  Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format
-  $ stackit argus credentials describe xxx --output-format pretty
-
   Get details of the Grafana configuration of an Argus instance with ID "xxx" and show the initial admin password
-  $ stackit argus credentials describe xxx --output-format pretty --show-password
+  $ stackit argus credentials describe xxx --show-password
+
+  Get details of the Grafana configuration of an Argus instance with ID "xxx" in JSON format
+  $ stackit argus credentials describe xxx --output-format json
 ```
 
 ### Options

@@ -16,8 +16,8 @@ stackit dns record-set describe RECORD_SET_ID [flags]
   Get details of DNS record set with ID "xxx" in zone with ID "yyy"
   $ stackit dns record-set describe xxx --zone-id yyy
 
-  Get details of DNS record set with ID "xxx" in zone with ID "yyy" in a table format
-  $ stackit dns record-set describe xxx --zone-id yyy --output-format pretty
+  Get details of DNS record set with ID "xxx" in zone with ID "yyy" in JSON format
+  $ stackit dns record-set describe xxx --zone-id yyy --output-format json
 ```
 
 ### Options

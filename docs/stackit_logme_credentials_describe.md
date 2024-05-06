@@ -16,8 +16,8 @@ stackit logme credentials describe CREDENTIALS_ID [flags]
   Get details of credentials with ID "xxx" from instance with ID "yyy"
   $ stackit logme credentials describe xxx --instance-id yyy
 
-  Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format
-  $ stackit logme credentials describe xxx --instance-id yyy --output-format pretty
+  Get details of credentials with ID "xxx" from instance with ID "yyy" in JSON format
+  $ stackit logme credentials describe xxx --instance-id yyy --output-format json
 ```
 
 ### Options

@@ -16,8 +16,8 @@ stackit mariadb instance describe INSTANCE_ID [flags]
   Get details of a MariaDB instance with ID "xxx"
   $ stackit mariadb instance describe xxx
 
-  Get details of a MariaDB instance with ID "xxx" in a table format
-  $ stackit mariadb instance describe xxx --output-format pretty
+  Get details of a MariaDB instance with ID "xxx" in JSON format
+  $ stackit mariadb instance describe xxx --output-format json
 ```
 
 ### Options
