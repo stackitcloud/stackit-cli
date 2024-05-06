@@ -9,6 +9,7 @@ require (
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.5.8
 	github.com/lmittmann/tint v1.0.4
+	github.com/mattn/go-colorable v0.1.13
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -28,10 +29,7 @@ require (
 	golang.org/x/text v0.15.0
 )
 
-require (
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
-)
+require github.com/mattn/go-isatty v0.0.17 // indirect
 
 require (
 	github.com/alessio/shellescape v1.4.2 // indirect
