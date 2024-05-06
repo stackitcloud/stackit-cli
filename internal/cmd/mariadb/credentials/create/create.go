@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Bool(showPasswordFlag, false, "Show password in output")
+	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
