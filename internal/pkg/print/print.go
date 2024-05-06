@@ -169,7 +169,8 @@ func (p *Printer) PagerDisplay(content string) error {
 
 	err := lessCmd.Run()
 	if err != nil {
-		return fmt.Errorf("run less command: %w", err)
+		p.Debug(ErrorLevel, "run less command: %v", err)
+		p.Outputln(content)
 	}
 	return nil
 }
