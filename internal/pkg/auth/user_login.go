@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -170,7 +170,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			Email: email,
 		}
 
-		htmlTemplate, err := template.ParseFS(htmlContent, filepath.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
+		// ParseFS expects paths using forward slashes, even on Windows
+		// See: https://github.com/golang/go/issues/44305#issuecomment-780111748
+		htmlTemplate, err := template.ParseFS(htmlContent, path.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
