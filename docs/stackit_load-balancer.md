@@ -36,5 +36,6 @@ stackit load-balancer [flags]
 * [stackit load-balancer list](./stackit_load-balancer_list.md)	 - Lists all Load Balancers
 * [stackit load-balancer observability-credentials](./stackit_load-balancer_observability-credentials.md)	 - Provides functionality for Load Balancer observability credentials
 * [stackit load-balancer quota](./stackit_load-balancer_quota.md)	 - Shows the configured Load Balancer quota
+* [stackit load-balancer target-pool](./stackit_load-balancer_target-pool.md)	 - Provides functionality for target pools
 * [stackit load-balancer update](./stackit_load-balancer_update.md)	 - Updates a Load Balancer
 
