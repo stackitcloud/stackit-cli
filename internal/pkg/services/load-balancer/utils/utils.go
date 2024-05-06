@@ -87,3 +87,22 @@ func ToPayloadTargetPool(targetPool *loadbalancer.TargetPool) *loadbalancer.Upda
 		Targets:            targetPool.Targets,
 	}
 }
+
+func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId, loadBalancerName, targetPoolName, targetIp string) (string, error) {
+	targetPool, err := GetLoadBalancerTargetPool(ctx, apiClient, projectId, loadBalancerName, targetPoolName)
+	if err != nil {
+		return "", fmt.Errorf("get target pool: %w", err)
+	}
+	if targetPool.Targets == nil {
+		return "", fmt.Errorf("no targets found")
+	}
+	for _, target := range *targetPool.Targets {
+		if target.Ip != nil && *target.Ip == targetIp {
+			if target.DisplayName == nil {
+				return "", fmt.Errorf("nil target display name")
+			}
+			return *target.DisplayName, nil
+		}
+	}
+	return "", fmt.Errorf("target not found")
+}

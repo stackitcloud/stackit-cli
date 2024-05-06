@@ -56,8 +56,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			targetLabel, err := utils.GetTargetName(ctx, apiClient, model.ProjectId, model.LoadBalancerName, model.TargetPoolName, model.Ip)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get target name: %v", err)
+				targetLabel = model.Ip
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to remove target with IP %q from target pool %q of load balancer %q?", model.Ip, model.TargetPoolName, model.LoadBalancerName)
+				prompt := fmt.Sprintf("Are you sure you want to remove target %q from target pool %q of load balancer %q?", targetLabel, model.TargetPoolName, model.LoadBalancerName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

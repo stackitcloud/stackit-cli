@@ -565,3 +565,109 @@ func TestToPayloadTargetPool(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTargetName(t *testing.T) {
+	tests := []struct {
+		description          string
+		targetPoolName       string
+		targetIp             string
+		getLoadBalancerFails bool
+		getLoadBalancerResp  *loadbalancer.LoadBalancer
+		isValid              bool
+		expectedOutput       string
+	}{
+		{
+			description:         "base",
+			targetPoolName:      "target-pool-1",
+			targetIp:            "1.2.3.4",
+			getLoadBalancerResp: fixtureLoadBalancer(),
+			isValid:             true,
+			expectedOutput:      "target-1",
+		},
+		{
+			description:         "target not found",
+			targetPoolName:      "target-pool-1",
+			targetIp:            "9.9.9.9",
+			getLoadBalancerResp: fixtureLoadBalancer(),
+			isValid:             false,
+		},
+		{
+			description:    "no targets",
+			targetPoolName: "target-pool-1",
+			targetIp:       "1.2.3.4",
+			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+				lb.TargetPools = &[]loadbalancer.TargetPool{
+					{
+						Name:    utils.Ptr("target-pool-1"),
+						Targets: &[]loadbalancer.Target{},
+					},
+				}
+			}),
+			isValid: false,
+		},
+		{
+			description:    "nil targets",
+			targetPoolName: "target-pool-1",
+			targetIp:       "1.2.3.4",
+			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+				lb.TargetPools = &[]loadbalancer.TargetPool{
+					{
+						Name:    utils.Ptr("target-pool-1"),
+						Targets: nil,
+					},
+				}
+			}),
+			isValid: false,
+		},
+		{
+			description:    "nil target name",
+			targetPoolName: "target-pool-1",
+			targetIp:       "1.2.3.4",
+			getLoadBalancerResp: fixtureLoadBalancer(
+				func(lb *loadbalancer.LoadBalancer) {
+					lb.TargetPools = &[]loadbalancer.TargetPool{
+						{
+							Name: utils.Ptr("target-pool-1"),
+							Targets: &[]loadbalancer.Target{
+								{
+									DisplayName: nil,
+									Ip:          utils.Ptr("1.2.3.4"),
+								},
+							},
+						},
+					}
+				}),
+			isValid: false,
+		},
+		{
+			description:          "get target pool fails",
+			targetPoolName:       "target-pool-1",
+			targetIp:             "1.2.3.4",
+			getLoadBalancerFails: true,
+			isValid:              false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &loadBalancerClientMocked{
+				getLoadBalancerResp: tt.getLoadBalancerResp,
+			}
+
+			output, err := GetTargetName(context.Background(), client, testProjectId, testLoadBalancerName, tt.targetPoolName, tt.targetIp)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
