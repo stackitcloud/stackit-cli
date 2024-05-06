@@ -84,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(showPasswordFlag, false, `Show the initial admin password in the "pretty" output format`)
+	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

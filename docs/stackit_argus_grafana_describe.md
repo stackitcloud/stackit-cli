@@ -29,7 +29,7 @@ stackit argus grafana describe INSTANCE_ID [flags]
 
 ```
   -h, --help            Help for "stackit argus grafana describe"
-      --show-password   Show the initial admin password in the "pretty" output format
+  -s, --show-password   Show password in output
 ```
 
 ### Options inherited from parent commands

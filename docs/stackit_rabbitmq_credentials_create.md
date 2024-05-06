@@ -25,7 +25,7 @@ stackit rabbitmq credentials create [flags]
 ```
   -h, --help                 Help for "stackit rabbitmq credentials create"
       --instance-id string   Instance ID
-      --show-password        Show password in output
+  -s, --show-password        Show password in output
 ```
 
 ### Options inherited from parent commands
