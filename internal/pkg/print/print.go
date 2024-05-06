@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -37,7 +39,10 @@ type Printer struct {
 
 // Creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: false, Level: slog.LevelDebug}))
+	w := os.Stderr
+	logger := slog.New(
+		tint.NewHandler(colorable.NewColorable(w), &tint.Options{AddSource: false, Level: slog.LevelDebug}),
+	)
 	slog.SetDefault(logger)
 
 	return &Printer{}
