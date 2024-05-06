@@ -39,7 +39,7 @@ const (
 
 // Backend config keys
 const (
-	configFolder        = ".stackit"
+	configFolder        = "stackit"
 	configFileName      = "cli-config"
 	configFileExtension = "json"
 	ProjectNameKey      = "project_name"
@@ -73,9 +73,9 @@ var ConfigKeys = []string{
 var folderPath string
 
 func InitConfig() {
-	home, err := os.UserHomeDir()
+	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
-	configFolderPath := filepath.Join(home, configFolder)
+	configFolderPath := filepath.Join(configDir, configFolder)
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
 	// Write config dir path to global variable

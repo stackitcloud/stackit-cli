@@ -101,7 +101,13 @@ You can configure the CLI using the command:
 stackit config
 ```
 
-The configurations are stored in `~/stackit/cli-config.json` and are valid for all commands. For example, you can set a default `project-id` by running:
+The configuration is saved in a file. The file's location varies depending on the operating system:
+
+- Unix - `$XDG_CONFIG_HOME/stackit/cli-config.json`
+- MacOS - `$HOME/Library/Application Support/stackit/cli-config.json`
+- Windows - `%AppData%\stackit\cli-config.json`
+
+The configuration options apply to all commands and can be set using the `stackit config set` command. For example, you can set a default `project-id` by running:
 
 ```bash
 stackit config set --project-id xxxx-xxxx-xxxxx
