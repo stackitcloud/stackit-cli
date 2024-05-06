@@ -7,9 +7,9 @@ Provides functionality for CLI configuration options
 Provides functionality for CLI configuration options
 The configuration is stored in a file in the user's config directory, which is OS dependent.
 Windows: %APPDATA%\stackit
-Linux: $XDG_CONFIG_HOME/stackit or $HOME/.config/stackit
+Linux: $XDG_CONFIG_HOME/stackit
 macOS: $HOME/Library/Application Support/stackit
-The configuration file is named `cli-config.json` and is created automatically when setting a configuration option.
+The configuration file is named `cli-config.json` and is created automatically in your first CLI run.
 
 ```
 stackit config [flags]
