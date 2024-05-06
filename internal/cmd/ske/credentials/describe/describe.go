@@ -44,8 +44,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of the credentials associated to the SKE cluster with name "my-cluster"`,
 				"$ stackit ske credentials describe my-cluster"),
 			examples.NewExample(
-				`Get details of the credentials associated to the SKE cluster with name "my-cluster" in a table format`,
-				"$ stackit ske credentials describe my-cluster --output-format pretty"),
+				`Get details of the credentials associated to the SKE cluster with name "my-cluster" in JSON format`,
+				"$ stackit ske credentials describe my-cluster --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

@@ -37,8 +37,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of an Object Storage bucket with name "my-bucket"`,
 				"$ stackit object-storage bucket describe my-bucket"),
 			examples.NewExample(
-				`Get details of an Object Storage bucket with name "my-bucket" in a table format`,
-				"$ stackit object-storage bucket describe my-bucket --output-format pretty"),
+				`Get details of an Object Storage bucket with name "my-bucket" in JSON format`,
+				"$ stackit object-storage bucket describe my-bucket --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

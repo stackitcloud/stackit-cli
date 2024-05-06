@@ -40,8 +40,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a MongoDB Flex instance with ID "xxx"`,
 				"$ stackit mongodbflex instance describe xxx"),
 			examples.NewExample(
-				`Get details of a MongoDB Flex instance with ID "xxx" in a table format`,
-				"$ stackit mongodbflex instance describe xxx --output-format pretty"),
+				`Get details of a MongoDB Flex instance with ID "xxx" in JSON format`,
+				"$ stackit mongodbflex instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

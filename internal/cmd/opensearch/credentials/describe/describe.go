@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of credentials with ID "xxx" from instance with ID "yyy"`,
 				"$ stackit opensearch credentials describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format`,
-				"$ stackit opensearch credentials describe xxx --instance-id yyy --output-format pretty"),
+				`Get details of credentials with ID "xxx" from instance with ID "yyy" in JSON format`,
+				"$ stackit opensearch credentials describe xxx --instance-id yyy --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

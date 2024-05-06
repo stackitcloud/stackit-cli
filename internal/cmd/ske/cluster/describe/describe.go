@@ -37,8 +37,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of an SKE cluster with name "my-cluster"`,
 				"$ stackit ske cluster describe my-cluster"),
 			examples.NewExample(
-				`Get details of an SKE cluster with name "my-cluster" in a table format`,
-				"$ stackit ske cluster describe my-cluster --output-format pretty"),
+				`Get details of an SKE cluster with name "my-cluster" in JSON format`,
+				"$ stackit ske cluster describe my-cluster --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

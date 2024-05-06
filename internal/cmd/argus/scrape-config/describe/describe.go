@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a scrape configuration with name "my-config" from Argus instance "xxx"`,
 				"$ stackit argus scrape-config describe my-config --instance-id xxx"),
 			examples.NewExample(
-				`Get details of a scrape configuration with name "my-config" from Argus instance "xxx" in a table format`,
-				"$ stackit argus scrape-config describe my-config --output-format pretty"),
+				`Get details of a scrape configuration with name "my-config" from Argus instance "xxx" in JSON format`,
+				"$ stackit argus scrape-config describe my-config --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

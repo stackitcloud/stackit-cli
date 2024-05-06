@@ -38,8 +38,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a DNS zone with ID "xxx"`,
 				"$ stackit dns zone describe xxx"),
 			examples.NewExample(
-				`Get details of a DNS zone with ID "xxx" in a table format`,
-				"$ stackit dns zone describe xxx --output-format pretty"),
+				`Get details of a DNS zone with ID "xxx" in JSON format`,
+				"$ stackit dns zone describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
