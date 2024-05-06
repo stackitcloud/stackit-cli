@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"runtime"
 
 	"log/slog"
 	"os"
@@ -163,13 +164,17 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = strings.NewReader(content)
-	lessCmd.Stdout = p.Cmd.OutOrStdout()
+	pagerCmd := exec.Command("less", "-F", "-S", "-w")
+	if runtime.GOOS == "windows" {
+		pagerCmd = exec.Command("more")
+	}
 
-	err := lessCmd.Run()
+	pagerCmd.Stdin = strings.NewReader(content)
+	pagerCmd.Stdout = p.Cmd.OutOrStdout()
+
+	err := pagerCmd.Run()
 	if err != nil {
-		p.Debug(ErrorLevel, "run less command: %v", err)
+		p.Debug(ErrorLevel, "run pager command: %v", err)
 		p.Outputln(content)
 	}
 	return nil
