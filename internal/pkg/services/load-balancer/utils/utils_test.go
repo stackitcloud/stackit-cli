@@ -87,6 +87,29 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 	return &lb
 }
 
+func fixtureTargets(mod ...func(*[]loadbalancer.Target)) *[]loadbalancer.Target {
+	targets := &[]loadbalancer.Target{
+		{
+			DisplayName: utils.Ptr("target-1"),
+			Ip:          utils.Ptr("1.2.3.4"),
+		},
+		{
+			DisplayName: utils.Ptr("target-2"),
+			Ip:          utils.Ptr("2.2.2.2"),
+		},
+		{
+			DisplayName: utils.Ptr("target-3"),
+			Ip:          utils.Ptr("6.6.6.6"),
+		},
+	}
+
+	for _, m := range mod {
+		m(targets)
+	}
+
+	return targets
+}
+
 func TestGetCredentialsDisplayName(t *testing.T) {
 	tests := []struct {
 		description         string
@@ -326,6 +349,145 @@ func TestAddTargetToTargetPool(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := AddTargetToTargetPool(tt.targetPool, tt.target)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			diff := cmp.Diff(tt.targetPool, tt.expectedTargetPool)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestRemoveTargetFromTargetPool(t *testing.T) {
+	tests := []struct {
+		description        string
+		targetPool         *loadbalancer.TargetPool
+		targetIp           string
+		isValid            bool
+		expectedTargetPool *loadbalancer.TargetPool
+	}{
+		{
+			description: "remove first target",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: fixtureTargets(),
+			},
+			targetIp: "1.2.3.4",
+			isValid:  true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-2"),
+						Ip:          utils.Ptr("2.2.2.2"),
+					},
+					{
+						DisplayName: utils.Ptr("target-3"),
+						Ip:          utils.Ptr("6.6.6.6"),
+					},
+				},
+			},
+		},
+		{
+			description: "remove last target",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: fixtureTargets(),
+			},
+			targetIp: "6.6.6.6",
+			isValid:  true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("1.2.3.4"),
+					},
+					{
+						DisplayName: utils.Ptr("target-2"),
+						Ip:          utils.Ptr("2.2.2.2"),
+					},
+				},
+			},
+		},
+		{
+			description: "remove middle target",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: fixtureTargets(),
+			},
+			targetIp: "2.2.2.2",
+			isValid:  true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("1.2.3.4"),
+					},
+					{
+						DisplayName: utils.Ptr("target-3"),
+						Ip:          utils.Ptr("6.6.6.6"),
+					},
+				},
+			},
+		},
+		{
+			description: "remove only target",
+			targetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("1.2.3.4"),
+					},
+				},
+			},
+			targetIp: "1.2.3.4",
+			isValid:  true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{},
+			},
+		},
+		{
+			description: "no target pool targets",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{},
+			},
+			targetIp: "2.2.2.2",
+			isValid:  false,
+		},
+		{
+			description: "nil target pool targets",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: nil,
+			},
+			targetIp: "2.2.2.2",
+			isValid:  false,
+		},
+		{
+			description:        "nil target pool",
+			targetPool:         nil,
+			targetIp:           "2.2.2.2",
+			expectedTargetPool: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := RemoveTargetFromTargetPool(tt.targetPool, tt.targetIp)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

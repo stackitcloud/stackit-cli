@@ -58,6 +58,23 @@ func AddTargetToTargetPool(targetPool *loadbalancer.TargetPool, target *loadbala
 	return nil
 }
 
+func RemoveTargetFromTargetPool(targetPool *loadbalancer.TargetPool, ip string) error {
+	if targetPool == nil {
+		return fmt.Errorf("target pool is nil")
+	}
+	if targetPool.Targets == nil {
+		return fmt.Errorf("no targets found")
+	}
+	targets := *targetPool.Targets
+	for i, target := range targets {
+		if target.Ip != nil && *target.Ip == ip {
+			*targetPool.Targets = append(targets[:i], targets[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("target not found")
+}
+
 func ToPayloadTargetPool(targetPool *loadbalancer.TargetPool) *loadbalancer.UpdateTargetPoolPayload {
 	if targetPool == nil {
 		return nil

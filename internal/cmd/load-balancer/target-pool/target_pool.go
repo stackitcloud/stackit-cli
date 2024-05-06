@@ -2,6 +2,7 @@ package targetpool
 
 import (
 	addtarget "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/target-pool/add-target"
+	removetarget "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/target-pool/remove-target"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -23,4 +24,5 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(addtarget.NewCmd(p))
+	cmd.AddCommand(removetarget.NewCmd(p))
 }
