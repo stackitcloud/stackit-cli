@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/unset"
@@ -15,9 +17,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "Provides functionality for CLI configuration options",
-		Long:  "Provides functionality for CLI configuration options.",
-		Args:  args.NoArgs,
-		Run:   utils.CmdHelp,
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s", "Provides functionality for CLI configuration options",
+			"The configuration is stored in a file in the user's config directory, which is OS dependent.",
+			"Windows: %APPDATA%\\stackit",
+			"Linux: $XDG_CONFIG_HOME/stackit",
+			"macOS: $HOME/Library/Application Support/stackit",
+			"The configuration file is named `cli-config.json` and is created automatically in your first CLI run.",
+		),
+		Args: args.NoArgs,
+		Run:  utils.CmdHelp,
 	}
 	addSubcommands(cmd, p)
 	return cmd
