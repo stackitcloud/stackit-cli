@@ -30,4 +30,5 @@ stackit load-balancer target-pool [flags]
 
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
 * [stackit load-balancer target-pool add-target](./stackit_load-balancer_target-pool_add-target.md)	 - Adds a target to a target pool
+* [stackit load-balancer target-pool remove-target](./stackit_load-balancer_target-pool_remove-target.md)	 - Removes a target from a target pool
 
