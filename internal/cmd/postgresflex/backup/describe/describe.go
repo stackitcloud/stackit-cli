@@ -117,7 +117,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup for PostgreSQL Flex instance: %w", err)
+			return fmt.Errorf("marshal backup for PostgreSQL Flex backup: %w", err)
 		}
 		cmd.Println(string(details))
 

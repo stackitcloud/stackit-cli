@@ -120,7 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
 		}
 		p.Outputln(string(details))
 
