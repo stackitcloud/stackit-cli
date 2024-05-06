@@ -68,7 +68,9 @@ func RemoveTargetFromTargetPool(targetPool *loadbalancer.TargetPool, ip string) 
 	targets := *targetPool.Targets
 	for i, target := range targets {
 		if target.Ip != nil && *target.Ip == ip {
-			*targetPool.Targets = append(targets[:i], targets[i+1:]...)
+			newTargets := targets[:i]
+			newTargets = append(newTargets, targets[i+1:]...)
+			*targetPool.Targets = newTargets
 			return nil
 		}
 	}
