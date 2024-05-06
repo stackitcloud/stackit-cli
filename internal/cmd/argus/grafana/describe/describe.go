@@ -21,13 +21,13 @@ import (
 
 const (
 	instanceIdArg    = "INSTANCE_ID"
-	hidePasswordFlag = "hide-password"
+	showPasswordFlag = "show-password"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId   string
-	HidePassword bool
+	ShowPassword bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Shows details of the Grafana configuration of an Argus instance.",
 			`The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.`,
-			`The initial password is shown by default, if you want to hide it use the "--hide-password" flag.`,
+			`The initial password is hidden by default, if you want to show it use the "--show-password" flag.`,
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
@@ -48,8 +48,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of the Grafana configuration of an Argus instance with ID "xxx" in a table format`,
 				"$ stackit argus credentials describe xxx --output-format pretty"),
 			examples.NewExample(
-				`Get details of the Grafana configuration of an Argus instance with ID "xxx" and hide the initial admin password`,
-				"$ stackit argus credentials describe xxx --output-format pretty --hide-password"),
+				`Get details of the Grafana configuration of an Argus instance with ID "xxx" and show the initial admin password`,
+				"$ stackit argus credentials describe xxx --output-format pretty --show-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -84,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(hidePasswordFlag, false, `Show the initial admin password in the "pretty" output format`)
+	cmd.Flags().Bool(showPasswordFlag, false, `Show the initial admin password in the "pretty" output format`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -98,7 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-		HidePassword:    flags.FlagToBoolValue(p, cmd, hidePasswordFlag),
+		ShowPassword:    flags.FlagToBoolValue(p, cmd, showPasswordFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -127,7 +127,7 @@ func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *argu
 	switch inputModel.OutputFormat {
 	case print.PrettyOutputFormat:
 		initialAdminPassword := *instance.Instance.GrafanaAdminPassword
-		if inputModel.HidePassword {
+		if !inputModel.ShowPassword {
 			initialAdminPassword = "<hidden>"
 		}
 

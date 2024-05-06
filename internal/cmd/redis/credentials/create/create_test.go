@@ -74,6 +74,16 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "show password",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[showPasswordFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ShowPassword = true
+			}),
+		},
+		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
