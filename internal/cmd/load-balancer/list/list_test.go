@@ -119,8 +119,6 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("configure global flags: %v", err)
 			}
 
-			configureFlags(cmd)
-
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
 				if err != nil {
