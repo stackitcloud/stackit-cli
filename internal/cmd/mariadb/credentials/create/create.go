@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	mariadbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
@@ -124,6 +125,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *mariadb.CredentialsResponse) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
+		if !model.ShowPassword {
+			resp.Raw.Credentials.Password = utils.Ptr("hidden")
+		}
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB credentials: %w", err)

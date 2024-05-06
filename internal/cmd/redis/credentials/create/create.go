@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/redis"
@@ -124,6 +125,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *redis.CredentialsResponse) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
+		if !model.ShowPassword {
+			resp.Raw.Credentials.Password = utils.Ptr("hidden")
+		}
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Redis credentials: %w", err)
