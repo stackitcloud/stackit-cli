@@ -16,8 +16,8 @@ stackit secrets-manager user describe USER_ID [flags]
   Get details of a Secrets Manager user with ID "xxx" of instance with ID "yyy"
   $ stackit secrets-manager user describe xxx --instance-id yyy
 
-  Get details of a Secrets Manager user with ID "xxx" of instance with ID "yyy" in table format
-  $ stackit secrets-manager user describe xxx --instance-id yyy --output-format pretty
+  Get details of a Secrets Manager user with ID "xxx" of instance with ID "yyy" in JSON format
+  $ stackit secrets-manager user describe xxx --instance-id yyy --output-format json
 ```
 
 ### Options

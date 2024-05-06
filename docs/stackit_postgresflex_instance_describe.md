@@ -16,8 +16,8 @@ stackit postgresflex instance describe INSTANCE_ID [flags]
   Get details of a PostgreSQL Flex instance with ID "xxx"
   $ stackit postgresflex instance describe xxx
 
-  Get details of a PostgreSQL Flex instance with ID "xxx" in a table format
-  $ stackit postgresflex instance describe xxx --output-format pretty
+  Get details of a PostgreSQL Flex instance with ID "xxx" in JSON format
+  $ stackit postgresflex instance describe xxx --output-format json
 ```
 
 ### Options

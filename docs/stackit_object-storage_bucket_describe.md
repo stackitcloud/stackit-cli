@@ -16,8 +16,8 @@ stackit object-storage bucket describe BUCKET_NAME [flags]
   Get details of an Object Storage bucket with name "my-bucket"
   $ stackit object-storage bucket describe my-bucket
 
-  Get details of an Object Storage bucket with name "my-bucket" in a table format
-  $ stackit object-storage bucket describe my-bucket --output-format pretty
+  Get details of an Object Storage bucket with name "my-bucket" in JSON format
+  $ stackit object-storage bucket describe my-bucket --output-format json
 ```
 
 ### Options

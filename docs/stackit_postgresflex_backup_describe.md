@@ -16,8 +16,8 @@ stackit postgresflex backup describe BACKUP_ID [flags]
   Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy"
   $ stackit postgresflex backup describe xxx --instance-id yyy
 
-  Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy" in a table format
-  $ stackit postgresflex backup describe xxx --instance-id yyy --output-format pretty
+  Get details of a backup with ID "xxx" for a PostgreSQL Flex instance with ID "yyy" in JSON format
+  $ stackit postgresflex backup describe xxx --instance-id yyy --output-format json
 ```
 
 ### Options

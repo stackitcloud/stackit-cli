@@ -16,8 +16,8 @@ stackit argus scrape-config describe JOB_NAME [flags]
   Get details of a scrape configuration with name "my-config" from Argus instance "xxx"
   $ stackit argus scrape-config describe my-config --instance-id xxx
 
-  Get details of a scrape configuration with name "my-config" from Argus instance "xxx" in a table format
-  $ stackit argus scrape-config describe my-config --output-format pretty
+  Get details of a scrape configuration with name "my-config" from Argus instance "xxx" in JSON format
+  $ stackit argus scrape-config describe my-config --output-format json
 ```
 
 ### Options

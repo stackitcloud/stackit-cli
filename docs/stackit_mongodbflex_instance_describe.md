@@ -16,8 +16,8 @@ stackit mongodbflex instance describe INSTANCE_ID [flags]
   Get details of a MongoDB Flex instance with ID "xxx"
   $ stackit mongodbflex instance describe xxx
 
-  Get details of a MongoDB Flex instance with ID "xxx" in a table format
-  $ stackit mongodbflex instance describe xxx --output-format pretty
+  Get details of a MongoDB Flex instance with ID "xxx" in JSON format
+  $ stackit mongodbflex instance describe xxx --output-format json
 ```
 
 ### Options
