@@ -27,12 +27,15 @@ func GetLoadBalancerTargetPool(ctx context.Context, apiClient LoadBalancerClient
 		return nil, fmt.Errorf("get load balancer: %w", err)
 	}
 
+	if resp == nil {
+		return nil, fmt.Errorf("no load balancer found")
+	}
 	if resp.TargetPools == nil {
 		return nil, fmt.Errorf("no target pools found")
 	}
 
 	for _, targetPool := range *resp.TargetPools {
-		if *targetPool.Name == targetPoolName {
+		if targetPool.Name != nil && *targetPool.Name == targetPoolName {
 			return &targetPool, nil
 		}
 	}

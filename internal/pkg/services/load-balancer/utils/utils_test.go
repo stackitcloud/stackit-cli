@@ -48,6 +48,45 @@ func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _ s
 	return loadbalancer.ApiUpdateTargetPoolRequest{}
 }
 
+func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
+	lb := loadbalancer.LoadBalancer{
+		Name: utils.Ptr(testLoadBalancerName),
+		TargetPools: &[]loadbalancer.TargetPool{
+			{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("1.2.3.4"),
+					},
+					{
+						DisplayName: utils.Ptr("target-2"),
+						Ip:          utils.Ptr("4.3.2.1"),
+					},
+				},
+			},
+			{
+				Name: utils.Ptr("target-pool-2"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("6.7.8.9"),
+					},
+					{
+						DisplayName: utils.Ptr("target-2"),
+						Ip:          utils.Ptr("9.8.7.6"),
+					},
+				},
+			},
+		},
+	}
+
+	for _, mod := range mods {
+		mod(&lb)
+	}
+	return &lb
+}
+
 func TestGetCredentialsDisplayName(t *testing.T) {
 	tests := []struct {
 		description         string
@@ -98,45 +137,6 @@ func TestGetCredentialsDisplayName(t *testing.T) {
 	}
 }
 
-func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
-	lb := loadbalancer.LoadBalancer{
-		Name: utils.Ptr(testLoadBalancerName),
-		TargetPools: &[]loadbalancer.TargetPool{
-			{
-				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
-					{
-						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4"),
-					},
-					{
-						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("4.3.2.1"),
-					},
-				},
-			},
-			{
-				Name: utils.Ptr("target-pool-2"),
-				Targets: &[]loadbalancer.Target{
-					{
-						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("6.7.8.9"),
-					},
-					{
-						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("9.8.7.6"),
-					},
-				},
-			},
-		},
-	}
-
-	for _, mod := range mods {
-		mod(&lb)
-	}
-	return &lb
-}
-
 func TestGetLoadBalancerTargetPool(t *testing.T) {
 	tests := []struct {
 		description          string
@@ -173,6 +173,13 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 		},
 		{
 			description: "no target pools",
+			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+				lb.TargetPools = &[]loadbalancer.TargetPool{}
+			}),
+			isValid: false,
+		},
+		{
+			description: "nil target pools",
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
 				lb.TargetPools = nil
 			}),
@@ -250,6 +257,48 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			},
 		},
 		{
+			description: "no target pool targets",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{},
+			},
+			target: &loadbalancer.Target{
+				DisplayName: utils.Ptr("target-3"),
+				Ip:          utils.Ptr("2.2.2.2"),
+			},
+			isValid: true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-3"),
+						Ip:          utils.Ptr("2.2.2.2"),
+					},
+				},
+			},
+		},
+		{
+			description: "nil target pool targets",
+			targetPool: &loadbalancer.TargetPool{
+				Name:    utils.Ptr("target-pool-1"),
+				Targets: nil,
+			},
+			target: &loadbalancer.Target{
+				DisplayName: utils.Ptr("target-3"),
+				Ip:          utils.Ptr("2.2.2.2"),
+			},
+			isValid: true,
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-3"),
+						Ip:          utils.Ptr("2.2.2.2"),
+					},
+				},
+			},
+		},
+		{
 			description: "nil target pool",
 			targetPool:  nil,
 			target: &loadbalancer.Target{
@@ -257,6 +306,20 @@ func TestAddTargetToTargetPool(t *testing.T) {
 				Ip:          utils.Ptr("2.2.2.2"),
 			},
 			expectedTargetPool: nil,
+		},
+		{
+			description: "nil new target",
+			targetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+				Targets: &[]loadbalancer.Target{
+					{
+						DisplayName: utils.Ptr("target-1"),
+						Ip:          utils.Ptr("1.2.3.4"),
+					},
+				},
+			},
+			target:  nil,
+			isValid: false,
 		},
 	}
 

@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(loadBalancerNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Add a target to target pool "my-target-pool"  of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool add-target my-load-balancer --target-pool-name my-target-pool --target-name my-new-target --ip 1.2.3.4/32"),
+				`Add a target to target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
+				"$ stackit load-balancer target-pool add-target my-load-balancer --target-pool-name my-target-pool --target-name my-new-target --ip 1.2.3.4"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(targetPoolNameFlag, "", "Target pool name")
 	cmd.Flags().String(targetNameFlag, "", "Target name")
-	cmd.Flags().String(ipFlag, "", "Target IP. Must by unique within a target pool")
+	cmd.Flags().String(ipFlag, "", "Target IP. Must by unique within a target pool. Must be a valid IPv4 or IPv6")
 
 	err := flags.MarkFlagsRequired(cmd, targetPoolNameFlag, targetNameFlag, ipFlag)
 	cobra.CheckErr(err)
