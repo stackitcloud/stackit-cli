@@ -107,11 +107,11 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 					{
 						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("4.3.2.1/32"),
+						Ip:          utils.Ptr("4.3.2.1"),
 					},
 				},
 			},
@@ -120,11 +120,11 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("6.7.8.9/32"),
+						Ip:          utils.Ptr("6.7.8.9"),
 					},
 					{
 						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("9.8.7.6/32"),
+						Ip:          utils.Ptr("9.8.7.6"),
 					},
 				},
 			},
@@ -156,11 +156,11 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 					{
 						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("4.3.2.1/32"),
+						Ip:          utils.Ptr("4.3.2.1"),
 					},
 				},
 			},
@@ -226,13 +226,13 @@ func TestAddTargetToTargetPool(t *testing.T) {
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 				},
 			},
 			target: &loadbalancer.Target{
 				DisplayName: utils.Ptr("target-2"),
-				Ip:          utils.Ptr("6.6.6.6/32"),
+				Ip:          utils.Ptr("6.6.6.6"),
 			},
 			isValid: true,
 			expectedTargetPool: &loadbalancer.TargetPool{
@@ -240,11 +240,11 @@ func TestAddTargetToTargetPool(t *testing.T) {
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 					{
 						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("6.6.6.6/32"),
+						Ip:          utils.Ptr("6.6.6.6"),
 					},
 				},
 			},
@@ -254,7 +254,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			targetPool:  nil,
 			target: &loadbalancer.Target{
 				DisplayName: utils.Ptr("target-3"),
-				Ip:          utils.Ptr("2.2.2.2/32"),
+				Ip:          utils.Ptr("2.2.2.2"),
 			},
 			expectedTargetPool: nil,
 		},
@@ -301,7 +301,7 @@ func TestToPayloadTargetPool(t *testing.T) {
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 				},
 			},
@@ -317,7 +317,7 @@ func TestToPayloadTargetPool(t *testing.T) {
 				Targets: &[]loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("1.2.3.4/32"),
+						Ip:          utils.Ptr("1.2.3.4"),
 					},
 				},
 			},
