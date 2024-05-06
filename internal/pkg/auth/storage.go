@@ -152,11 +152,11 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 		return "", err
 	}
 
-	homeDir, err := os.UserHomeDir()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
-		return "", fmt.Errorf("get home dir: %w", err)
+		return "", fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(homeDir, textFileFolderName)
+	textFileDir := filepath.Join(configDir, textFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -183,11 +183,11 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 // If it doesn't, creates it with the content "{}" encoded.
 // If it does, does nothing (and returns nil).
 func createEncodedTextFile() error {
-	homeDir, err := os.UserHomeDir()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
-		return fmt.Errorf("get home dir: %w", err)
+		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(homeDir, textFileFolderName)
+	textFileDir := filepath.Join(configDir, textFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	err = os.MkdirAll(textFileDir, os.ModePerm)
