@@ -112,6 +112,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalancer.LoadBalancer) error {
+	targetPool := utils.FindLoadBalancerTargetPoolByName(*loadBalancer.TargetPools, model.TargetPoolName)
+	if targetPool == nil {
+		return fmt.Errorf("target pool not found")
+	}
+
+	listener := utils.FindLoadBalancerListenerByTargetPool(*loadBalancer.Listeners, *targetPool.Name)
+
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(loadBalancer, "", "  ")
@@ -122,13 +129,11 @@ func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalance
 
 		return nil
 	default:
-		return outputResultAsTable(p, model.TargetPoolName, loadBalancer)
+		return outputResultAsTable(p, *targetPool, listener)
 	}
 }
 
-func outputResultAsTable(p *print.Printer, targetPoolName string, loadBalancer *loadbalancer.LoadBalancer) error {
-	targetPool := utils.FindLoadBalancerTargetPoolByName(loadBalancer.TargetPools, targetPoolName)
-
+func outputResultAsTable(p *print.Printer, targetPool loadbalancer.TargetPool, listener *loadbalancer.Listener) error {
 	sessionPersistence := "None"
 	if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
 		sessionPersistence = "Use Source IP"
@@ -137,7 +142,6 @@ func outputResultAsTable(p *print.Printer, targetPoolName string, loadBalancer *
 	healthCheckInterval := "-"
 	healthCheckUnhealthyThreshold := "-"
 	healthCheckHealthyThreshold := "-"
-	healthCheckTimeout := "-"
 	if targetPool.ActiveHealthCheck != nil {
 		if targetPool.ActiveHealthCheck.Interval != nil {
 			healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
@@ -148,37 +152,40 @@ func outputResultAsTable(p *print.Printer, targetPoolName string, loadBalancer *
 		if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
 			healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
 		}
-		if targetPool.ActiveHealthCheck.Timeout != nil {
-			healthCheckTimeout = *targetPool.ActiveHealthCheck.Timeout
-		}
 	}
 
 	targets := "-"
 	if targetPool.Targets != nil {
 		var targetsSlice []string
 		for _, target := range *targetPool.Targets {
-			targetStr := fmt.Sprintf("%s: %s", *target.DisplayName, *target.Ip)
+			targetStr := fmt.Sprintf("%s (%s)", *target.DisplayName, *target.Ip)
 			targetsSlice = append(targetsSlice, targetStr)
 		}
 		targets = strings.Join(targetsSlice, "\n")
 	}
 
+	listenerStr := "-"
+	if listener != nil {
+		listenerStr = fmt.Sprintf("%s (Port:%d, Protocol: %s)", *listener.Name, *listener.Port, *listener.Protocol)
+	}
+
 	table := tables.NewTable()
 	table.AddRow("NAME", *targetPool.Name)
+	table.AddSeparator()
+	table.AddRow("TARGET PORT", *targetPool.TargetPort)
+	table.AddSeparator()
+	table.AddRow("ATTACHED LISTENER", listenerStr)
+	table.AddSeparator()
+	table.AddRow("TARGETS", targets)
 	table.AddSeparator()
 	table.AddRow("SESSION PERSISTENCE", sessionPersistence)
 	table.AddSeparator()
 	table.AddRow("HEALTH CHECK INTERVAL", healthCheckInterval)
 	table.AddSeparator()
-	table.AddRow("HEALTH CHECK TIMEOUT", healthCheckTimeout)
+	table.AddRow("HEALTH CHECK DOWN AFTER", healthCheckUnhealthyThreshold)
 	table.AddSeparator()
-	table.AddRow("HEALTH CHECK UNHEALTHY THRESHOLD", healthCheckUnhealthyThreshold)
+	table.AddRow("HEALTH CHECK UP AFTER", healthCheckHealthyThreshold)
 	table.AddSeparator()
-	table.AddRow("HEALTH CHECK HEALTHY THRESHOLD", healthCheckHealthyThreshold)
-	table.AddSeparator()
-	table.AddRow("TARGET PORT", *targetPool.TargetPort)
-	table.AddSeparator()
-	table.AddRow("TARGETS", targets)
 
 	err := p.PagerDisplay(table.Render())
 	if err != nil {

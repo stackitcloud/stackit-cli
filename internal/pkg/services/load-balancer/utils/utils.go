@@ -34,20 +34,32 @@ func GetLoadBalancerTargetPool(ctx context.Context, apiClient LoadBalancerClient
 		return nil, fmt.Errorf("no target pools found")
 	}
 
-	targetPool := FindLoadBalancerTargetPoolByName(resp.TargetPools, targetPoolName)
+	targetPool := FindLoadBalancerTargetPoolByName(*resp.TargetPools, targetPoolName)
 	if targetPool == nil {
 		return nil, fmt.Errorf("target pool not found")
 	}
 	return targetPool, nil
 }
 
-func FindLoadBalancerTargetPoolByName(targetPools *[]loadbalancer.TargetPool, targetPoolName string) *loadbalancer.TargetPool {
+func FindLoadBalancerTargetPoolByName(targetPools []loadbalancer.TargetPool, targetPoolName string) *loadbalancer.TargetPool {
 	if targetPools == nil {
 		return nil
 	}
-	for _, targetPool := range *targetPools {
+	for _, targetPool := range targetPools {
 		if targetPool.Name != nil && *targetPool.Name == targetPoolName {
 			return &targetPool
+		}
+	}
+	return nil
+}
+
+func FindLoadBalancerListenerByTargetPool(listeners []loadbalancer.Listener, targetPoolName string) *loadbalancer.Listener {
+	if listeners == nil {
+		return nil
+	}
+	for _, listener := range listeners {
+		if listener.TargetPool != nil && *listener.TargetPool == targetPoolName {
+			return &listener
 		}
 	}
 	return nil
