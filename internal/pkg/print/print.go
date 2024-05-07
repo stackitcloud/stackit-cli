@@ -153,6 +153,7 @@ func (p *Printer) PromptForEnter(prompt string) error {
 	if answer == 10 {
 		return nil
 	}
+	p.Debug(ErrorLevel, "got byte %d", answer)
 	return errAborted
 }
 
