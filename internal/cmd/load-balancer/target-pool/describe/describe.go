@@ -81,7 +81,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	loadBalancerName := inputArgs[0]
+	targetPoolName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		TargetPoolName:  loadBalancerName,
+		TargetPoolName:  targetPoolName,
 		LBName:          cmd.Flag(lbNameFlag).Value.String(),
 	}
 
@@ -122,12 +122,12 @@ func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalance
 
 		return nil
 	default:
-		return outputResultAsTable(p, model, loadBalancer)
+		return outputResultAsTable(p, model.TargetPoolName, loadBalancer)
 	}
 }
 
-func outputResultAsTable(p *print.Printer, model *inputModel, loadBalancer *loadbalancer.LoadBalancer) error {
-	targetPool := utils.FindLoadBalancerTargetPoolByName(loadBalancer.TargetPools, model.TargetPoolName)
+func outputResultAsTable(p *print.Printer, targetPoolName string, loadBalancer *loadbalancer.LoadBalancer) error {
+	targetPool := utils.FindLoadBalancerTargetPoolByName(loadBalancer.TargetPools, targetPoolName)
 
 	sessionPersistence := "None"
 	if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
