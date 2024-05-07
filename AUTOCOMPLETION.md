@@ -42,7 +42,7 @@ stackit completion zsh > "${fpath[1]}/_stackit"
 stackit completion zsh > $(brew --prefix)/share/zsh/site-functions/_stackit
 ```
 
-Additionaly, you might also need to run:
+Additionally, you might also need to run:
 
 ```shell
 source $(brew --prefix)/share/zsh/site-functions/_stackit >> ~/.zshrc
