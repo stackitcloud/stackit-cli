@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
-	cmd.Flags().String(targetNameFlag, "", "Target name")
+	cmd.Flags().StringP(targetNameFlag, "n", "", "Target name")
 	cmd.Flags().String(ipFlag, "", "Target IP. Must by unique within a target pool. Must be a valid IPv4 or IPv6")
 
 	err := flags.MarkFlagsRequired(cmd, lbNameFlag, targetNameFlag, ipFlag)

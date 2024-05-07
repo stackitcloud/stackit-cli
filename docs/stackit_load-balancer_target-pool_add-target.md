@@ -23,7 +23,7 @@ stackit load-balancer target-pool add-target TARGET_POOL_NAME [flags]
   -h, --help                 Help for "stackit load-balancer target-pool add-target"
       --ip string            Target IP. Must by unique within a target pool. Must be a valid IPv4 or IPv6
       --lb-name string       Load balancer name
-      --target-name string   Target name
+  -n, --target-name string   Target name
 ```
 
 ### Options inherited from parent commands

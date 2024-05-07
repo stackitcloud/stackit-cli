@@ -14,7 +14,7 @@ stackit load-balancer target-pool remove-target TARGET_POOL_NAME [flags]
 
 ```
   Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"
-  $ stackit load-balancer target-pool remove-target my-target-pool lb-name my-load-balancer --ip 1.2.3.4
+  $ stackit load-balancer target-pool remove-target my-target-pool --lb-name my-load-balancer --ip 1.2.3.4
 ```
 
 ### Options

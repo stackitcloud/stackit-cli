@@ -41,7 +41,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool remove-target my-target-pool lb-name my-load-balancer --ip 1.2.3.4"),
+				"$ stackit load-balancer target-pool remove-target my-target-pool --lb-name my-load-balancer --ip 1.2.3.4"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
