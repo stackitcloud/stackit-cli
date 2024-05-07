@@ -241,6 +241,128 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 	}
 }
 
+func TestFindLoadBalancerTargetPoolByName(t *testing.T) {
+	tests := []struct {
+		description        string
+		targetPools        []loadbalancer.TargetPool
+		targetPoolName     string
+		expectedTargetPool *loadbalancer.TargetPool
+	}{
+		{
+			description: "base",
+			targetPools: []loadbalancer.TargetPool{
+				{
+					Name: utils.Ptr("target-pool-1"),
+				},
+				{
+					Name: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName: "target-pool-1",
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+			},
+		},
+		{
+			description: "target pool not found",
+			targetPools: []loadbalancer.TargetPool{
+				{
+					Name: utils.Ptr("target-pool-1"),
+				},
+				{
+					Name: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName:     "target-pool-3",
+			expectedTargetPool: nil,
+		},
+		{
+			description:        "nil target pools",
+			targetPools:        nil,
+			targetPoolName:     "target-pool-1",
+			expectedTargetPool: nil,
+		},
+		{
+			description:        "no target pools",
+			targetPools:        []loadbalancer.TargetPool{},
+			targetPoolName:     "target-pool-1",
+			expectedTargetPool: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := FindLoadBalancerTargetPoolByName(tt.targetPools, tt.targetPoolName)
+
+			diff := cmp.Diff(output, tt.expectedTargetPool)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestFindLoadBalancerListenerByTargetPool(t *testing.T) {
+	tests := []struct {
+		description    string
+		listeners      []loadbalancer.Listener
+		targetPoolName string
+		expected       *loadbalancer.Listener
+	}{
+		{
+			description: "base",
+			listeners: []loadbalancer.Listener{
+				{
+					TargetPool: utils.Ptr("target-pool-1"),
+				},
+				{
+					TargetPool: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName: "target-pool-1",
+			expected: &loadbalancer.Listener{
+				TargetPool: utils.Ptr("target-pool-1"),
+			},
+		},
+		{
+			description: "listener not found",
+			listeners: []loadbalancer.Listener{
+				{
+					TargetPool: utils.Ptr("target-pool-1"),
+				},
+				{
+					TargetPool: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName: "target-pool-3",
+			expected:       nil,
+		},
+		{
+			description:    "nil listeners",
+			listeners:      nil,
+			targetPoolName: "target-pool-1",
+			expected:       nil,
+		},
+		{
+			description:    "no listeners",
+			listeners:      []loadbalancer.Listener{},
+			targetPoolName: "target-pool-1",
+			expected:       nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := FindLoadBalancerListenerByTargetPool(tt.listeners, tt.targetPoolName)
+
+			diff := cmp.Diff(output, tt.expected)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
 func TestAddTargetToTargetPool(t *testing.T) {
 	tests := []struct {
 		description        string
