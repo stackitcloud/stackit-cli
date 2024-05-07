@@ -18,30 +18,30 @@ import (
 )
 
 const (
-	loadBalancerNameArg = "LOAD_BALANCER_NAME"
+	targetPoolNameArg = "TARGET_POOL_NAME"
 
-	targetPoolNameFlag = "target-pool-name"
-	ipFlag             = "ip"
+	lbNameFlag = "lb-name"
+	ipFlag     = "ip"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	LoadBalancerName string
-	TargetPoolName   string
-	Ip               string
+	TargetPoolName string
+	LBName         string
+	IP             string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("remove-target %s", loadBalancerNameArg),
+		Use:   fmt.Sprintf("remove-target %s", targetPoolNameArg),
 		Short: "Removes a target from a target pool",
 		Long:  "Removes a target from a target pool.",
-		Args:  args.SingleArg(loadBalancerNameArg, nil),
+		Args:  args.SingleArg(targetPoolNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool remove-target my-load-balancer --target-pool-name my-target-pool --ip 1.2.3.4"),
+				"$ stackit load-balancer target-pool remove-target my-target-pool lb-name my-load-balancer --ip 1.2.3.4"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -56,14 +56,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			targetLabel, err := utils.GetTargetName(ctx, apiClient, model.ProjectId, model.LoadBalancerName, model.TargetPoolName, model.Ip)
+			targetLabel, err := utils.GetTargetName(ctx, apiClient, model.ProjectId, model.LBName, model.TargetPoolName, model.IP)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get target name: %v", err)
-				targetLabel = model.Ip
+				targetLabel = model.IP
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to remove target %q from target pool %q of load balancer %q?", targetLabel, model.TargetPoolName, model.LoadBalancerName)
+				prompt := fmt.Sprintf("Are you sure you want to remove target %q from target pool %q of load balancer %q?", targetLabel, model.TargetPoolName, model.LBName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -80,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("remove target from target pool: %w", err)
 			}
 
-			p.Info("Removed target from target pool of load balancer %q\n", model.LoadBalancerName)
+			p.Info("Removed target from target pool of load balancer %q\n", model.LBName)
 			return nil
 		},
 	}
@@ -89,15 +89,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(targetPoolNameFlag, "", "Target pool name")
+	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
 	cmd.Flags().String(ipFlag, "", "Target IP of the target to remove. Must be a valid IPv4 or IPv6")
 
-	err := flags.MarkFlagsRequired(cmd, targetPoolNameFlag, ipFlag)
+	err := flags.MarkFlagsRequired(cmd, lbNameFlag, ipFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	lbName := inputArgs[0]
+	targetPoolName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -105,10 +105,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel:  globalFlags,
-		LoadBalancerName: lbName,
-		TargetPoolName:   cmd.Flag(targetPoolNameFlag).Value.String(),
-		Ip:               cmd.Flag(ipFlag).Value.String(),
+		GlobalFlagModel: globalFlags,
+		TargetPoolName:  targetPoolName,
+		LBName:          cmd.Flag(lbNameFlag).Value.String(),
+		IP:              cmd.Flag(ipFlag).Value.String(),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -124,14 +124,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient utils.LoadBalancerClient) (loadbalancer.ApiUpdateTargetPoolRequest, error) {
-	req := apiClient.UpdateTargetPool(ctx, model.ProjectId, model.LoadBalancerName, model.TargetPoolName)
+	req := apiClient.UpdateTargetPool(ctx, model.ProjectId, model.LBName, model.TargetPoolName)
 
-	targetPool, err := utils.GetLoadBalancerTargetPool(ctx, apiClient, model.ProjectId, model.LoadBalancerName, model.TargetPoolName)
+	targetPool, err := utils.GetLoadBalancerTargetPool(ctx, apiClient, model.ProjectId, model.LBName, model.TargetPoolName)
 	if err != nil {
 		return req, fmt.Errorf("get load balancer target pool: %w", err)
 	}
 
-	err = utils.RemoveTargetFromTargetPool(targetPool, model.Ip)
+	err = utils.RemoveTargetFromTargetPool(targetPool, model.IP)
 	if err != nil {
 		return req, fmt.Errorf("remove target to target pool: %w", err)
 	}

@@ -26,10 +26,10 @@ var (
 )
 
 const (
-	testLoadBalancerName = "my-load-balancer"
-	testTargetPoolName   = "target-pool-1"
-	testTargetName       = "my-target"
-	testIp               = "1.2.3.4"
+	testLBName         = "my-load-balancer"
+	testTargetPoolName = "target-pool-1"
+	testTargetName     = "my-target"
+	testIP             = "1.2.3.4"
 )
 
 type loadBalancerClientMocked struct {
@@ -59,7 +59,7 @@ func (m *loadBalancerClientMocked) UpdateTargetPool(ctx context.Context, project
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testLoadBalancerName,
+		testTargetPoolName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -69,9 +69,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		targetPoolNameFlag: testTargetPoolName,
-		ipFlag:             testIp,
+		projectIdFlag: testProjectId,
+		lbNameFlag:    testLBName,
+		ipFlag:        testIP,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -85,9 +85,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		LoadBalancerName: testLoadBalancerName,
-		TargetPoolName:   testTargetPoolName,
-		Ip:               testIp,
+		LBName:         testLBName,
+		TargetPoolName: testTargetPoolName,
+		IP:             testIP,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -110,7 +110,7 @@ func fixtureTargets() *[]loadbalancer.Target {
 
 func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
 	lb := loadbalancer.LoadBalancer{
-		Name: utils.Ptr(testLoadBalancerName),
+		Name: utils.Ptr(testLBName),
 		TargetPools: &[]loadbalancer.TargetPool{
 			{
 				Name:    utils.Ptr(testTargetPoolName),
@@ -165,7 +165,7 @@ func fixturePayload(mods ...func(payload *loadbalancer.UpdateTargetPoolPayload))
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateTargetPoolRequest)) loadbalancer.ApiUpdateTargetPoolRequest {
-	request := testClient.UpdateTargetPool(testCtx, testProjectId, testLoadBalancerName, testTargetPoolName)
+	request := testClient.UpdateTargetPool(testCtx, testProjectId, testLBName, testTargetPoolName)
 	request = request.UpdateTargetPoolPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -219,16 +219,16 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "load balancer name empty",
+			description: "target pool name missing",
 			argValues:   []string{""},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
 		{
-			description: "target pool name missing",
+			description: "load balancer name missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, targetPoolNameFlag)
+				delete(flagValues, lbNameFlag)
 			}),
 			isValid: false,
 		},
@@ -330,7 +330,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "target not found",
 			model: fixtureInputModel(
 				func(model *inputModel) {
-					model.Ip = "9.9.9.9"
+					model.IP = "9.9.9.9"
 				}),
 			getLoadBalancerResp: fixtureLoadBalancer(),
 			isValid:             false,
