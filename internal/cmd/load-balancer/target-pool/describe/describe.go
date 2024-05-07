@@ -66,7 +66,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			targetPool := utils.FindLoadBalancerTargetPoolByName(*resp.TargetPools, model.TargetPoolName)
+			if targetPool == nil {
+				return fmt.Errorf("target pool not found")
+			}
+
+			listener := utils.FindLoadBalancerListenerByTargetPool(*resp.Listeners, *targetPool.Name)
+
+			return outputResult(p, model.OutputFormat, *targetPool, listener)
 		},
 	}
 	configureFlags(cmd)
@@ -111,17 +118,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalancer.LoadBalancer) error {
-	targetPool := utils.FindLoadBalancerTargetPoolByName(*loadBalancer.TargetPools, model.TargetPoolName)
-	if targetPool == nil {
-		return fmt.Errorf("target pool not found")
-	}
-
-	listener := utils.FindLoadBalancerListenerByTargetPool(*loadBalancer.Listeners, *targetPool.Name)
-
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, targetPool loadbalancer.TargetPool, listener *loadbalancer.Listener) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(loadBalancer, "", "  ")
+		output := struct {
+			*loadbalancer.TargetPool
+			Listener *loadbalancer.Listener `json:"attached_listener"`
+		}{
+			&targetPool,
+			listener,
+		}
+		details, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal load balancer: %w", err)
 		}
@@ -129,7 +136,7 @@ func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalance
 
 		return nil
 	default:
-		return outputResultAsTable(p, *targetPool, listener)
+		return outputResultAsTable(p, targetPool, listener)
 	}
 }
 
