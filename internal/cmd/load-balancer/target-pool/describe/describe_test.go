@@ -40,8 +40,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
-		loadBalancerNameFlag: testLoadBalancerName,
+		projectIdFlag: testProjectId,
+		lbNameFlag:    testLoadBalancerName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -55,8 +55,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		LoadBalancerName: testLoadBalancerName,
-		TargetPoolName:   testTargetPoolName,
+		LBName:         testLoadBalancerName,
+		TargetPoolName: testTargetPoolName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -127,7 +127,7 @@ func TestParseInput(t *testing.T) {
 			description: "load balancer name missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, loadBalancerNameFlag)
+				delete(flagValues, lbNameFlag)
 			}),
 			isValid: false,
 		},

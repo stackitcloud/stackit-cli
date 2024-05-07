@@ -24,13 +24,13 @@ import (
 const (
 	targetPoolNameArg = "TARGET_POOL_NAME"
 
-	loadBalancerNameFlag = "load-balancer"
+	lbNameFlag = "lb-name"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	TargetPoolName   string
-	LoadBalancerName string
+	TargetPoolName string
+	LBName         string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -42,10 +42,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a target pool with name "pool" in load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool describe pool --load-balancer my-load-balancer"),
+				"$ stackit load-balancer target-pool describe pool --lb-name my-load-balancer"),
 			examples.NewExample(
 				`Get details of a target pool with name "pool" in load balancer with name "my-load-balancer in JSON output"`,
-				"$ stackit load-balancer target-pool describe pool --load-balancer my-load-balancer --output-format json"),
+				"$ stackit load-balancer target-pool describe pool --lb-name my-load-balancer --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -74,9 +74,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(loadBalancerNameFlag, "", "Name of the load balancer")
+	cmd.Flags().String(lbNameFlag, "", "Name of the load balancer")
 
-	err := flags.MarkFlagsRequired(cmd, loadBalancerNameFlag)
+	err := flags.MarkFlagsRequired(cmd, lbNameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -89,9 +89,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel:  globalFlags,
-		TargetPoolName:   loadBalancerName,
-		LoadBalancerName: cmd.Flag(loadBalancerNameFlag).Value.String(),
+		GlobalFlagModel: globalFlags,
+		TargetPoolName:  loadBalancerName,
+		LBName:          cmd.Flag(lbNameFlag).Value.String(),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -107,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetLoadBalancerRequest {
-	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.LoadBalancerName)
+	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.LBName)
 	return req
 }
 
