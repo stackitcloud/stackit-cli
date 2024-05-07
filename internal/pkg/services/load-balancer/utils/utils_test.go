@@ -241,6 +241,67 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 	}
 }
 
+func TestFindLoadBalancerTargetPoolByName(t *testing.T) {
+	tests := []struct {
+		description         string
+		targetPools         *[]loadbalancer.TargetPool
+		targetPoolName      string
+		expectedTargetPool  *loadbalancer.TargetPool
+	}{
+		{
+			description: "base",
+			targetPools: &[]loadbalancer.TargetPool{
+				{
+					Name: utils.Ptr("target-pool-1"),
+				},
+				{
+					Name: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName: "target-pool-1",
+			expectedTargetPool: &loadbalancer.TargetPool{
+				Name: utils.Ptr("target-pool-1"),
+			},
+		},
+		{
+			description: "target pool not found",
+			targetPools: &[]loadbalancer.TargetPool{
+				{
+					Name: utils.Ptr("target-pool-1"),
+				},
+				{
+					Name: utils.Ptr("target-pool-2"),
+				},
+			},
+			targetPoolName:      "target-pool-3",
+			expectedTargetPool:  nil,
+		},
+		{
+			description:         "nil target pools",
+			targetPools:         nil,
+			targetPoolName:      "target-pool-1",
+			expectedTargetPool:  nil,
+		},
+		{
+			description:         "no target pools",
+			targetPools:         &[]loadbalancer.TargetPool{},
+			targetPoolName:      "target-pool-1",
+			expectedTargetPool:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := FindLoadBalancerTargetPoolByName(tt.targetPools, tt.targetPoolName)
+
+			diff := cmp.Diff(output, tt.expectedTargetPool)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
 func TestAddTargetToTargetPool(t *testing.T) {
 	tests := []struct {
 		description        string

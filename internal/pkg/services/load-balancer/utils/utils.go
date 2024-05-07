@@ -34,13 +34,23 @@ func GetLoadBalancerTargetPool(ctx context.Context, apiClient LoadBalancerClient
 		return nil, fmt.Errorf("no target pools found")
 	}
 
-	for _, targetPool := range *resp.TargetPools {
+	targetPool := FindLoadBalancerTargetPoolByName(resp.TargetPools, targetPoolName)
+	if targetPool == nil {
+		return nil, fmt.Errorf("target pool not found")
+	}
+	return targetPool, nil
+}
+
+func FindLoadBalancerTargetPoolByName(targetPools *[]loadbalancer.TargetPool, targetPoolName string) *loadbalancer.TargetPool {
+	if targetPools == nil {
+		return nil
+	}
+	for _, targetPool := range *targetPools {
 		if targetPool.Name != nil && *targetPool.Name == targetPoolName {
-			return &targetPool, nil
+			return &targetPool
 		}
 	}
-
-	return nil, fmt.Errorf("target pool not found")
+	return nil
 }
 
 func AddTargetToTargetPool(targetPool *loadbalancer.TargetPool, target *loadbalancer.Target) error {
