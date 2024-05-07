@@ -33,7 +33,7 @@ Examples:
 - `stackit mongodbflex instance create --name my-instance --cpu 1 --ram 4 --acl 0.0.0.0/0 --assume-yes`
 - `stackit dns zone delete my-zone`
 
-Some commands are implemented at the root, group or sub-group level:
+Some commands are implemented at the root, group or subgroup level:
 
 - `stackit config` to define variables to be used in future commands.
 - `stackit ske enable` to enable the SKE engine on your project.
@@ -71,9 +71,9 @@ Below you can find a list of the STACKIT services already available in the CLI (
 
 ## Authentication
 
-Most of the commands will require you to be authenticated. Currently it's possible to authenticate with your personal user or with a service account.
+Most of the commands will require you to be authenticated. Currently, it's possible to authenticate with your personal user or with a service account.
 
-After successful authentication, the CLI stores credentials in your OS keychain. You won't need to login again for the duration of your session, which is 2h by default but configurable by providing the `--session-time-limit` flag on the `config set` command (see [Configuration](#configuration)).
+After successful authentication, the CLI stores credentials in your OS keychain. You won't need to log in again for the duration of your session, which is 2h by default but configurable by providing the `--session-time-limit` flag on the `config set` command (see [Configuration](#configuration)).
 
 ### Login with a personal user account
 
@@ -91,7 +91,7 @@ To authenticate using a service account, run:
 stackit auth activate-service-account
 ```
 
-For more details on how to setup authentication using a service account, check our [authentication guide](./AUTHENTICATION.md).
+For more details on how to set up authentication using a service account, check our [authentication guide](./AUTHENTICATION.md).
 
 ## Configuration
 
@@ -119,9 +119,9 @@ To remove it, you can run:
 stackit config unset --project-id
 ```
 
-Run the `config set` command with the flag `--help` to get a list of all of the available configuration options.
+Run the `config set` command with the flag `--help` to get a list of all the available configuration options.
 
-You can lookup your current configuration by checking the configuration file or by running:
+You can look up your current configuration by checking the configuration file or by running:
 
 ```bash
 stackit config list
@@ -131,11 +131,11 @@ You can also edit the configuration file manually.
 
 ## Autocompletion
 
-If you wish to setup command autocompletion in your shell for the STACKIT CLI, please refer to our [autocompletion guide](./AUTOCOMPLETION.md).
+If you wish to set up command autocompletion in your shell for the STACKIT CLI, please refer to our [autocompletion guide](./AUTOCOMPLETION.md).
 
 ## Reporting issues
 
-If you encounter any issues or have suggestions for improvements, please reach out to the Developer Tools team or open a ticket through the [STACKIT Help Center](https://support.stackit.cloud/).
+If you encounter any issues or have suggestions for improvements, please open an issue in the [repository](https://github.com/stackitcloud/stackit-cli/issues).
 
 ## Contribute
 
@@ -144,3 +144,13 @@ Your contribution is welcome! For more details on how to contribute, refer to ou
 ## License
 
 Apache 2.0
+
+
+## Useful Links
+- [STACKIT Portal](https://portal.stackit.cloud/)
+
+- [STACKIT](https://www.stackit.de/en/)
+
+- [STACKIT Knowledge Base](https://docs.stackit.cloud/stackit/en/knowledge-base-85301704.html)
+
+- [STACKIT Terraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs)
