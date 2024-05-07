@@ -1,4 +1,4 @@
-package addtarget
+package removetarget
 
 import (
 	"context"
@@ -20,9 +20,8 @@ import (
 const (
 	targetPoolNameArg = "TARGET_POOL_NAME"
 
-	lbNameFlag     = "lb-name"
-	targetNameFlag = "target-name"
-	ipFlag         = "ip"
+	lbNameFlag = "lb-name"
+	ipFlag     = "ip"
 )
 
 type inputModel struct {
@@ -30,20 +29,19 @@ type inputModel struct {
 
 	TargetPoolName string
 	LBName         string
-	TargetName     string
 	IP             string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("add-target %s", targetPoolNameArg),
-		Short: "Adds a target to a target pool",
-		Long:  "Adds a target to a target pool.",
+		Use:   fmt.Sprintf("remove-target %s", targetPoolNameArg),
+		Short: "Removes a target from a target pool",
+		Long:  "Removes a target from a target pool.",
 		Args:  args.SingleArg(targetPoolNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Add a target to target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool add-target my-target-pool --lb-name my-load-balancer --target-name my-new-target --ip 1.2.3.4"),
+				`Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
+				"$ stackit load-balancer target-pool remove-target my-target-pool lb-name my-load-balancer --ip 1.2.3.4"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -58,8 +56,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			targetLabel, err := utils.GetTargetName(ctx, apiClient, model.ProjectId, model.LBName, model.TargetPoolName, model.IP)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get target name: %v", err)
+				targetLabel = model.IP
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to add a target with IP %q to target pool %q of load balancer %q?", model.IP, model.TargetPoolName, model.LBName)
+				prompt := fmt.Sprintf("Are you sure you want to remove target %q from target pool %q of load balancer %q?", targetLabel, model.TargetPoolName, model.LBName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -73,10 +77,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("add target to target pool: %w", err)
+				return fmt.Errorf("remove target from target pool: %w", err)
 			}
 
-			p.Info("Added target to target pool of load balancer %q\n", model.LBName)
+			p.Info("Removed target from target pool of load balancer %q\n", model.LBName)
 			return nil
 		},
 	}
@@ -86,10 +90,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
-	cmd.Flags().String(targetNameFlag, "", "Target name")
-	cmd.Flags().String(ipFlag, "", "Target IP. Must by unique within a target pool. Must be a valid IPv4 or IPv6")
+	cmd.Flags().String(ipFlag, "", "Target IP of the target to remove. Must be a valid IPv4 or IPv6")
 
-	err := flags.MarkFlagsRequired(cmd, lbNameFlag, targetNameFlag, ipFlag)
+	err := flags.MarkFlagsRequired(cmd, lbNameFlag, ipFlag)
 	cobra.CheckErr(err)
 }
 
@@ -105,7 +108,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		TargetPoolName:  targetPoolName,
 		LBName:          cmd.Flag(lbNameFlag).Value.String(),
-		TargetName:      cmd.Flag(targetNameFlag).Value.String(),
 		IP:              cmd.Flag(ipFlag).Value.String(),
 	}
 
@@ -129,13 +131,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient utils.LoadBa
 		return req, fmt.Errorf("get load balancer target pool: %w", err)
 	}
 
-	newTarget := &loadbalancer.Target{
-		DisplayName: &model.TargetName,
-		Ip:          &model.IP,
-	}
-	err = utils.AddTargetToTargetPool(targetPool, newTarget)
+	err = utils.RemoveTargetFromTargetPool(targetPool, model.IP)
 	if err != nil {
-		return req, fmt.Errorf("add target to target pool: %w", err)
+		return req, fmt.Errorf("remove target to target pool: %w", err)
 	}
 
 	payload := utils.ToPayloadTargetPool(targetPool)

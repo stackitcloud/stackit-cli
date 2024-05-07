@@ -1,4 +1,4 @@
-package addtarget
+package removetarget
 
 import (
 	"context"
@@ -69,10 +69,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		lbNameFlag:     testLBName,
-		targetNameFlag: testTargetName,
-		ipFlag:         testIP,
+		projectIdFlag: testProjectId,
+		lbNameFlag:    testLBName,
+		ipFlag:        testIP,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -86,9 +85,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		TargetPoolName: testTargetPoolName,
 		LBName:         testLBName,
-		TargetName:     testTargetName,
+		TargetPoolName: testTargetPoolName,
 		IP:             testIP,
 	}
 	for _, mod := range mods {
@@ -235,14 +233,6 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "target name missing",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, targetNameFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "ip missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
@@ -323,14 +313,7 @@ func TestBuildRequest(t *testing.T) {
 			isValid:             true,
 			expectedRequest: fixtureRequest(func(request *loadbalancer.ApiUpdateTargetPoolRequest) {
 				payload := fixturePayload(func(payload *loadbalancer.UpdateTargetPoolPayload) {
-					payload.Targets = &[]loadbalancer.Target{
-						(*fixtureTargets())[0],
-						(*fixtureTargets())[1],
-						{
-							DisplayName: utils.Ptr(testTargetName),
-							Ip:          utils.Ptr(testIP),
-						},
-					}
+					payload.Targets = utils.Ptr((*payload.Targets)[1:])
 				})
 				*request = request.UpdateTargetPoolPayload(*payload)
 			}),
@@ -341,18 +324,16 @@ func TestBuildRequest(t *testing.T) {
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
 				(*lb.TargetPools)[0].Targets = &[]loadbalancer.Target{}
 			}),
-			isValid: true,
-			expectedRequest: fixtureRequest(func(request *loadbalancer.ApiUpdateTargetPoolRequest) {
-				payload := fixturePayload(func(payload *loadbalancer.UpdateTargetPoolPayload) {
-					payload.Targets = &[]loadbalancer.Target{
-						{
-							DisplayName: utils.Ptr(testTargetName),
-							Ip:          utils.Ptr(testIP),
-						},
-					}
-				})
-				*request = request.UpdateTargetPoolPayload(*payload)
-			}),
+			isValid: false,
+		},
+		{
+			description: "target not found",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.IP = "9.9.9.9"
+				}),
+			getLoadBalancerResp: fixtureLoadBalancer(),
+			isValid:             false,
 		},
 		{
 			description: "nil targets",
@@ -360,18 +341,7 @@ func TestBuildRequest(t *testing.T) {
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
 				(*lb.TargetPools)[0].Targets = nil
 			}),
-			isValid: true,
-			expectedRequest: fixtureRequest(func(request *loadbalancer.ApiUpdateTargetPoolRequest) {
-				payload := fixturePayload(func(payload *loadbalancer.UpdateTargetPoolPayload) {
-					payload.Targets = &[]loadbalancer.Target{
-						{
-							DisplayName: utils.Ptr(testTargetName),
-							Ip:          utils.Ptr(testIP),
-						},
-					}
-				})
-				*request = request.UpdateTargetPoolPayload(*payload)
-			}),
+			isValid: false,
 		},
 		{
 			description:          "get load balancer fails",

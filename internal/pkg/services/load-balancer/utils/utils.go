@@ -58,6 +58,25 @@ func AddTargetToTargetPool(targetPool *loadbalancer.TargetPool, target *loadbala
 	return nil
 }
 
+func RemoveTargetFromTargetPool(targetPool *loadbalancer.TargetPool, ip string) error {
+	if targetPool == nil {
+		return fmt.Errorf("target pool is nil")
+	}
+	if targetPool.Targets == nil {
+		return fmt.Errorf("no targets found")
+	}
+	targets := *targetPool.Targets
+	for i, target := range targets {
+		if target.Ip != nil && *target.Ip == ip {
+			newTargets := targets[:i]
+			newTargets = append(newTargets, targets[i+1:]...)
+			*targetPool.Targets = newTargets
+			return nil
+		}
+	}
+	return fmt.Errorf("target not found")
+}
+
 func ToPayloadTargetPool(targetPool *loadbalancer.TargetPool) *loadbalancer.UpdateTargetPoolPayload {
 	if targetPool == nil {
 		return nil
@@ -69,4 +88,23 @@ func ToPayloadTargetPool(targetPool *loadbalancer.TargetPool) *loadbalancer.Upda
 		TargetPort:         targetPool.TargetPort,
 		Targets:            targetPool.Targets,
 	}
+}
+
+func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId, loadBalancerName, targetPoolName, targetIp string) (string, error) {
+	targetPool, err := GetLoadBalancerTargetPool(ctx, apiClient, projectId, loadBalancerName, targetPoolName)
+	if err != nil {
+		return "", fmt.Errorf("get target pool: %w", err)
+	}
+	if targetPool.Targets == nil {
+		return "", fmt.Errorf("no targets found")
+	}
+	for _, target := range *targetPool.Targets {
+		if target.Ip != nil && *target.Ip == targetIp {
+			if target.DisplayName == nil {
+				return "", fmt.Errorf("nil target display name")
+			}
+			return *target.DisplayName, nil
+		}
+	}
+	return "", fmt.Errorf("target not found")
 }
