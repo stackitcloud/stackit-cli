@@ -26,8 +26,6 @@ var (
 const (
 	testLoadBalancerName = "my-load-balancer"
 	testTargetPoolName   = "target-pool-1"
-	testTargetName       = "my-target"
-	testIp               = "1.2.3.4"
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
