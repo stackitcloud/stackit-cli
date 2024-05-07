@@ -7,22 +7,22 @@ Removes a target from a target pool
 Removes a target from a target pool.
 
 ```
-stackit load-balancer target-pool remove-target LOAD_BALANCER_NAME [flags]
+stackit load-balancer target-pool remove-target TARGET_POOL_NAME [flags]
 ```
 
 ### Examples
 
 ```
   Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"
-  $ stackit load-balancer target-pool remove-target my-load-balancer --target-pool-name my-target-pool --ip 1.2.3.4
+  $ stackit load-balancer target-pool remove-target my-target-pool lb-name my-load-balancer --ip 1.2.3.4
 ```
 
 ### Options
 
 ```
-  -h, --help                      Help for "stackit load-balancer target-pool remove-target"
-      --ip string                 Target IP of the target to remove. Must be a valid IPv4 or IPv6
-      --target-pool-name string   Target pool name
+  -h, --help             Help for "stackit load-balancer target-pool remove-target"
+      --ip string        Target IP of the target to remove. Must be a valid IPv4 or IPv6
+      --lb-name string   Load balancer name
 ```
 
 ### Options inherited from parent commands
