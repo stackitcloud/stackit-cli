@@ -14,17 +14,17 @@ stackit load-balancer target-pool describe TARGET_POOL_NAME [flags]
 
 ```
   Get details of a target pool with name "pool" in load balancer with name "my-load-balancer"
-  $ stackit load-balancer target-pool describe pool --load-balancer my-load-balancer
+  $ stackit load-balancer target-pool describe pool --lb-name my-load-balancer
 
   Get details of a target pool with name "pool" in load balancer with name "my-load-balancer in JSON output"
-  $ stackit load-balancer target-pool describe pool --load-balancer my-load-balancer --output-format json
+  $ stackit load-balancer target-pool describe pool --lb-name my-load-balancer --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help                   Help for "stackit load-balancer target-pool describe"
-      --load-balancer string   Name of the load balancer
+  -h, --help             Help for "stackit load-balancer target-pool describe"
+      --lb-name string   Name of the load balancer
 ```
 
 ### Options inherited from parent commands
