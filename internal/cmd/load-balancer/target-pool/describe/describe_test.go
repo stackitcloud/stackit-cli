@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
 	"github.com/google/go-cmp/cmp"
@@ -65,56 +64,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		mod(model)
 	}
 	return model
-}
-
-func fixtureTargets() *[]loadbalancer.Target {
-	return &[]loadbalancer.Target{
-		{
-			DisplayName: utils.Ptr("target-1"),
-			Ip:          utils.Ptr("1.2.3.4"),
-		},
-		{
-			DisplayName: utils.Ptr("target-2"),
-			Ip:          utils.Ptr("4.3.2.1"),
-		},
-	}
-}
-
-func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
-	lb := loadbalancer.LoadBalancer{
-		Name: utils.Ptr(testLoadBalancerName),
-		TargetPools: &[]loadbalancer.TargetPool{
-			{
-				Name:    utils.Ptr(testTargetPoolName),
-				Targets: fixtureTargets(),
-				ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-					UnhealthyThreshold: utils.Ptr(int64(3)),
-				},
-				SessionPersistence: &loadbalancer.SessionPersistence{
-					UseSourceIpAddress: utils.Ptr(true),
-				},
-				TargetPort: utils.Ptr(int64(80)),
-			},
-			{
-				Name: utils.Ptr("target-pool-2"),
-				Targets: &[]loadbalancer.Target{
-					{
-						DisplayName: utils.Ptr("target-1"),
-						Ip:          utils.Ptr("6.7.8.9"),
-					},
-					{
-						DisplayName: utils.Ptr("target-2"),
-						Ip:          utils.Ptr("9.8.7.6"),
-					},
-				},
-			},
-		},
-	}
-
-	for _, mod := range mods {
-		mod(&lb)
-	}
-	return &lb
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetLoadBalancerRequest)) loadbalancer.ApiGetLoadBalancerRequest {

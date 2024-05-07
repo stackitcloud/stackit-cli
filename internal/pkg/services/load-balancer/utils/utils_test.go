@@ -243,10 +243,10 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 
 func TestFindLoadBalancerTargetPoolByName(t *testing.T) {
 	tests := []struct {
-		description         string
-		targetPools         *[]loadbalancer.TargetPool
-		targetPoolName      string
-		expectedTargetPool  *loadbalancer.TargetPool
+		description        string
+		targetPools        *[]loadbalancer.TargetPool
+		targetPoolName     string
+		expectedTargetPool *loadbalancer.TargetPool
 	}{
 		{
 			description: "base",
@@ -273,20 +273,20 @@ func TestFindLoadBalancerTargetPoolByName(t *testing.T) {
 					Name: utils.Ptr("target-pool-2"),
 				},
 			},
-			targetPoolName:      "target-pool-3",
-			expectedTargetPool:  nil,
+			targetPoolName:     "target-pool-3",
+			expectedTargetPool: nil,
 		},
 		{
-			description:         "nil target pools",
-			targetPools:         nil,
-			targetPoolName:      "target-pool-1",
-			expectedTargetPool:  nil,
+			description:        "nil target pools",
+			targetPools:        nil,
+			targetPoolName:     "target-pool-1",
+			expectedTargetPool: nil,
 		},
 		{
-			description:         "no target pools",
-			targetPools:         &[]loadbalancer.TargetPool{},
-			targetPoolName:      "target-pool-1",
-			expectedTargetPool:  nil,
+			description:        "no target pools",
+			targetPools:        &[]loadbalancer.TargetPool{},
+			targetPoolName:     "target-pool-1",
+			expectedTargetPool: nil,
 		},
 	}
 

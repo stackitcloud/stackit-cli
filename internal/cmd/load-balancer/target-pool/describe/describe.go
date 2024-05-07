@@ -127,7 +127,6 @@ func outputResult(p *print.Printer, model *inputModel, loadBalancer *loadbalance
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, loadBalancer *loadbalancer.LoadBalancer) error {
-
 	targetPool := utils.FindLoadBalancerTargetPoolByName(loadBalancer.TargetPools, model.TargetPoolName)
 
 	sessionPersistence := "None"
@@ -187,13 +186,4 @@ func outputResultAsTable(p *print.Printer, model *inputModel, loadBalancer *load
 	}
 
 	return nil
-}
-
-func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
-	table := tables.NewTable()
-	table.SetHeader("TARGET POOL NAME", "PORT", "TARGETS")
-	for _, targetPool := range targetPools {
-		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
-	}
-	return table.Render()
 }
