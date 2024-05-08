@@ -138,8 +138,7 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 
 // Prompts the user for confirmation by pressing Enter.
 //
-// Returns nil only if the user (explicitly) press directly enter.
-// Returns ErrAborted if the user press anything else before pressing enter.
+// Returns nil if the user presses Enter.
 func (p *Printer) PromptForEnter(prompt string) error {
 	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	p.Cmd.PrintErr(prompt)
