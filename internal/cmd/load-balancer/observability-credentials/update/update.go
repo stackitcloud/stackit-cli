@@ -116,7 +116,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials name")
 	cmd.Flags().String(usernameFlag, "", "Username")
-	cmd.Flags().String(passwordFlag, "", "Password")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
