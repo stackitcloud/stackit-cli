@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
@@ -22,11 +23,15 @@ import (
 const (
 	instanceIdFlag = "instance-id"
 	limitFlag      = "limit"
+	usedFlag       = "used"
+	unusedFlag     = "unused"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Limit *int64
+	Limit  *int64
+	Used   bool
+	Unused bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -65,6 +70,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			var usedCredentials map[string]loadbalancer.CredentialsResponse
+			if model.Used {
+				usedCredentials, err = utils.GetUsedObsCredentials(ctx, apiClient, model.ProjectId)
+				if err != nil {
+					return fmt.Errorf("get used observability credentials: %w", err)
+				}
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -92,6 +105,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+	cmd.Flags().Bool(usedFlag, false, "List only used credentials")
+	cmd.Flags().Bool(unusedFlag, false, "List only unused credentials")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -111,6 +126,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
+		Used:            flags.FlagToBoolValue(p, cmd, usedFlag),
+		Unused:          flags.FlagToBoolValue(p, cmd, unusedFlag),
 	}
 
 	if p.IsVerbosityDebug() {

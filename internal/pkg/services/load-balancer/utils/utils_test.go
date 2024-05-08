@@ -44,6 +44,14 @@ func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, 
 	return m.getLoadBalancerResp, nil
 }
 
+func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
+	return nil, nil
+}
+
+func (m *loadBalancerClientMocked) ListCredentialsExecute(_ context.Context, _ string) (*loadbalancer.ListCredentialsResponse, error) {
+	return nil, nil
+}
+
 func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
 	return loadbalancer.ApiUpdateTargetPoolRequest{}
 }
