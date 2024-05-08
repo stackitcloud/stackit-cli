@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	targetPoolNameArg = "TARGET_POOL_NAME"
+	ipArg = "TARGET_IP"
 
-	lbNameFlag = "lb-name"
-	ipFlag     = "ip"
+	lbNameFlag         = "lb-name"
+	targetPoolNameFlag = "target-pool-name"
 )
 
 type inputModel struct {
@@ -34,14 +34,14 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("remove-target %s", targetPoolNameArg),
+		Use:   fmt.Sprintf("remove-target %s", ipArg),
 		Short: "Removes a target from a target pool",
 		Long:  "Removes a target from a target pool.",
-		Args:  args.SingleArg(targetPoolNameArg, nil),
+		Args:  args.SingleArg(ipArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Remove target with IP 1.2.3.4 from target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool remove-target my-target-pool --lb-name my-load-balancer --ip 1.2.3.4"),
+				"$ stackit load-balancer target-pool remove-target 1.2.3.4 --target-pool-name my-target-pool --lb-name my-load-balancer"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -90,14 +90,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
-	cmd.Flags().String(ipFlag, "", "Target IP of the target to remove. Must be a valid IPv4 or IPv6")
+	cmd.Flags().String(targetPoolNameFlag, "", "Target IP of the target to remove. Must be a valid IPv4 or IPv6")
 
-	err := flags.MarkFlagsRequired(cmd, lbNameFlag, ipFlag)
+	err := flags.MarkFlagsRequired(cmd, lbNameFlag, targetPoolNameFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	targetPoolName := inputArgs[0]
+	ip := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -106,9 +106,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		TargetPoolName:  targetPoolName,
+		TargetPoolName:  cmd.Flag(targetPoolNameFlag).Value.String(),
 		LBName:          cmd.Flag(lbNameFlag).Value.String(),
-		IP:              cmd.Flag(ipFlag).Value.String(),
+		IP:              ip,
 	}
 
 	if p.IsVerbosityDebug() {

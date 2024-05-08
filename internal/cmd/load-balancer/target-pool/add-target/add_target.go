@@ -18,11 +18,11 @@ import (
 )
 
 const (
-	targetPoolNameArg = "TARGET_POOL_NAME"
+	ipArg = "TARGET_IP"
 
-	lbNameFlag     = "lb-name"
-	targetNameFlag = "target-name"
-	ipFlag         = "ip"
+	lbNameFlag         = "lb-name"
+	targetNameFlag     = "target-name"
+	targetPoolNameFlag = "target-pool-name"
 )
 
 type inputModel struct {
@@ -36,14 +36,16 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("add-target %s", targetPoolNameArg),
+		Use:   fmt.Sprintf("add-target %s", ipArg),
 		Short: "Adds a target to a target pool",
-		Long:  "Adds a target to a target pool.",
-		Args:  args.SingleArg(targetPoolNameArg, nil),
+		Long: fmt.Sprintf("%s\n%s",
+			"Adds a target to a target pool.",
+			"The target IP must by unique within a target pool and must be a valid IPv4 or IPv6."),
+		Args: args.SingleArg(ipArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Add a target to target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
-				"$ stackit load-balancer target-pool add-target my-target-pool --lb-name my-load-balancer --target-name my-new-target --ip 1.2.3.4"),
+				`Add a target with IP 1.2.3.4 and name "my-new-target" to target pool "my-target-pool" of load balancer with name "my-load-balancer"`,
+				"$ stackit load-balancer target-pool add-target 1.2.3.4 --target-name my-new-target --target-pool-name my-target-pool --lb-name my-load-balancer"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -85,16 +87,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
 	cmd.Flags().StringP(targetNameFlag, "n", "", "Target name")
-	cmd.Flags().String(ipFlag, "", "Target IP. Must by unique within a target pool. Must be a valid IPv4 or IPv6")
+	cmd.Flags().String(targetPoolNameFlag, "", "Target pool name")
+	cmd.Flags().String(lbNameFlag, "", "Load balancer name")
 
-	err := flags.MarkFlagsRequired(cmd, lbNameFlag, targetNameFlag, ipFlag)
+	err := flags.MarkFlagsRequired(cmd, lbNameFlag, targetNameFlag, targetPoolNameFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	targetPoolName := inputArgs[0]
+	ip := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -103,10 +105,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		TargetPoolName:  targetPoolName,
+		TargetPoolName:  cmd.Flag(targetPoolNameFlag).Value.String(),
 		LBName:          cmd.Flag(lbNameFlag).Value.String(),
 		TargetName:      cmd.Flag(targetNameFlag).Value.String(),
-		IP:              cmd.Flag(ipFlag).Value.String(),
+		IP:              ip,
 	}
 
 	if p.IsVerbosityDebug() {
