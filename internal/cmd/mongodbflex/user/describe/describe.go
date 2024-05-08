@@ -46,8 +46,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit mongodbflex user list xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy" in table format`,
-				"$ stackit mongodbflex user list xxx --instance-id yyy --output-format pretty"),
+				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
+				"$ stackit mongodbflex user list xxx --instance-id yyy --output-format json"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -118,7 +118,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 
 func outputResult(p *print.Printer, outputFormat string, user mongodbflex.InstanceResponseUser) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *user.Id)
 		table.AddSeparator()
@@ -136,14 +144,6 @@ func outputResult(p *print.Printer, outputFormat string, user mongodbflex.Instan
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

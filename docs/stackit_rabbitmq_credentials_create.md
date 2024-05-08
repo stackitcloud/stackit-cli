@@ -16,16 +16,16 @@ stackit rabbitmq credentials create [flags]
   Create credentials for a RabbitMQ instance
   $ stackit rabbitmq credentials create --instance-id xxx
 
-  Create credentials for a RabbitMQ instance and hide the password in the output
-  $ stackit rabbitmq credentials create --instance-id xxx --hide-password
+  Create credentials for a RabbitMQ instance and show the password in the output
+  $ stackit rabbitmq credentials create --instance-id xxx --show-password
 ```
 
 ### Options
 
 ```
   -h, --help                 Help for "stackit rabbitmq credentials create"
-      --hide-password        Hide password in output
       --instance-id string   Instance ID
+  -s, --show-password        Show password in output
 ```
 
 ### Options inherited from parent commands

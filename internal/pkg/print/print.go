@@ -11,6 +11,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -39,7 +41,10 @@ type Printer struct {
 
 // Creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: false, Level: slog.LevelDebug}))
+	w := os.Stderr
+	logger := slog.New(
+		tint.NewHandler(colorable.NewColorable(w), &tint.Options{AddSource: false, Level: slog.LevelDebug}),
+	)
 	slog.SetDefault(logger)
 
 	return &Printer{}
@@ -173,13 +178,15 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = strings.NewReader(content)
-	lessCmd.Stdout = p.Cmd.OutOrStdout()
+	pagerCmd := exec.Command("less", "-F", "-S", "-w")
 
-	err := lessCmd.Run()
+	pagerCmd.Stdin = strings.NewReader(content)
+	pagerCmd.Stdout = p.Cmd.OutOrStdout()
+
+	err := pagerCmd.Run()
 	if err != nil {
-		return fmt.Errorf("run less command: %w", err)
+		p.Debug(ErrorLevel, "run pager command: %v", err)
+		p.Outputln(content)
 	}
 	return nil
 }

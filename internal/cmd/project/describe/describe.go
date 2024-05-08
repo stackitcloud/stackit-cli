@@ -119,7 +119,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 
 func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.ProjectResponseWithParents) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(project, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal project details: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *project.ProjectId)
 		table.AddSeparator()
@@ -134,14 +142,6 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(project, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal project details: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

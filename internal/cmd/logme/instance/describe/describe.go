@@ -40,8 +40,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a LogMe instance with ID "xxx"`,
 				"$ stackit logme instance describe xxx"),
 			examples.NewExample(
-				`Get details of a LogMe instance with ID "xxx" in a table format`,
-				"$ stackit logme instance describe xxx --output-format pretty"),
+				`Get details of a LogMe instance with ID "xxx" in JSON format`,
+				"$ stackit logme instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -100,7 +100,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 
 func outputResult(p *print.Printer, outputFormat string, instance *logme.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal LogMe instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.InstanceId)
 		table.AddSeparator()
@@ -124,14 +132,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *logme.Instanc
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal LogMe instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

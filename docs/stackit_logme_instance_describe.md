@@ -16,8 +16,8 @@ stackit logme instance describe INSTANCE_ID [flags]
   Get details of a LogMe instance with ID "xxx"
   $ stackit logme instance describe xxx
 
-  Get details of a LogMe instance with ID "xxx" in a table format
-  $ stackit logme instance describe xxx --output-format pretty
+  Get details of a LogMe instance with ID "xxx" in JSON format
+  $ stackit logme instance describe xxx --output-format json
 ```
 
 ### Options

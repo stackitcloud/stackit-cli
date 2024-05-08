@@ -16,8 +16,8 @@ stackit dns zone describe ZONE_ID [flags]
   Get details of a DNS zone with ID "xxx"
   $ stackit dns zone describe xxx
 
-  Get details of a DNS zone with ID "xxx" in a table format
-  $ stackit dns zone describe xxx --output-format pretty
+  Get details of a DNS zone with ID "xxx" in JSON format
+  $ stackit dns zone describe xxx --output-format json
 ```
 
 ### Options

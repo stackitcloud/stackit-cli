@@ -51,6 +51,9 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			argsString := print.BuildDebugStrFromSlice(os.Args)
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
+			configFilePath := viper.ConfigFileUsed()
+			p.Debug(print.DebugLevel, "using config file: %s", configFilePath)
+
 			configKeys := viper.AllSettings()
 			configKeysStr := print.BuildDebugStrFromMap(configKeys)
 			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
