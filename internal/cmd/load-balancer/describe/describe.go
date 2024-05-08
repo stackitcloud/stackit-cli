@@ -38,7 +38,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit load-balancer describe my-load-balancer"),
 			examples.NewExample(
 				`Get details of a load-balancer with name "my-load-balancer" in a JSON format`,
-				"$ stackit load-balancer describe my-load-balancer --output-format JSON"),
+				"$ stackit load-balancer describe my-load-balancer --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
