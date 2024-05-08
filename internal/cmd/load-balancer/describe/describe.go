@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -153,11 +154,22 @@ func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
 		externalAdress = *loadBalancer.ExternalAddress
 	}
 
+	errorDescriptions := []string{}
+	if loadBalancer.Errors != nil && len((*loadBalancer.Errors)) > 0 {
+		for _, err := range *loadBalancer.Errors {
+			errorDescriptions = append(errorDescriptions, *err.Description)
+		}
+	}
+
 	table := tables.NewTable()
 	table.AddRow("NAME", *loadBalancer.Name)
 	table.AddSeparator()
 	table.AddRow("STATE", *loadBalancer.Status)
 	table.AddSeparator()
+	if len(errorDescriptions) > 0 {
+		table.AddRow("ERROR DESCRIPTIONS", strings.Join(errorDescriptions, "\n"))
+		table.AddSeparator()
+	}
 	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
 	table.AddSeparator()
 	table.AddRow("ATTACHED PUBLIC IP", externalAdress)
