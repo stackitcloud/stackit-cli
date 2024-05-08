@@ -16,8 +16,8 @@ stackit secrets-manager instance describe INSTANCE_ID [flags]
   Get details of a Secrets Manager instance with ID "xxx"
   $ stackit secrets-manager instance describe xxx
 
-  Get details of a Secrets Manager instance with ID "xxx" in a table format
-  $ stackit secrets-manager instance describe xxx --output-format pretty
+  Get details of a Secrets Manager instance with ID "xxx" in JSON format
+  $ stackit secrets-manager instance describe xxx --output-format json
 ```
 
 ### Options

@@ -18,8 +18,8 @@ stackit postgresflex user describe USER_ID [flags]
   Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"
   $ stackit postgresflex user list xxx --instance-id yyy
 
-  Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in table format
-  $ stackit postgresflex user list xxx --instance-id yyy --output-format pretty
+  Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in JSON format
+  $ stackit postgresflex user list xxx --instance-id yyy --output-format json
 ```
 
 ### Options

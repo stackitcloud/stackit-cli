@@ -7,7 +7,9 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/jedib0t/go-pretty/v6 v6.5.8
+	github.com/jedib0t/go-pretty/v6 v6.5.9
+	github.com/lmittmann/tint v1.0.4
+	github.com/mattn/go-colorable v0.1.13
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -20,13 +22,15 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.14.0
 	github.com/zalando/go-keyring v0.2.4
 	golang.org/x/mod v0.17.0
-	golang.org/x/oauth2 v0.19.0
-	golang.org/x/term v0.19.0
-	golang.org/x/text v0.14.0
+	golang.org/x/oauth2 v0.20.0
+	golang.org/x/term v0.17.0
+	golang.org/x/text v0.15.0
 )
+
+require github.com/mattn/go-isatty v0.0.17 // indirect
 
 require (
 	github.com/alessio/shellescape v1.4.2 // indirect

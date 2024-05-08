@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/redis"
@@ -20,13 +21,13 @@ import (
 
 const (
 	instanceIdFlag   = "instance-id"
-	hidePasswordFlag = "hide-password"
+	showPasswordFlag = "show-password"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId   string
-	HidePassword bool
+	ShowPassword bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -40,8 +41,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create credentials for a Redis instance`,
 				"$ stackit redis credentials create --instance-id xxx"),
 			examples.NewExample(
-				`Create credentials for a Redis instance and hide the password in the output`,
-				"$ stackit redis credentials create --instance-id xxx --hide-password"),
+				`Create credentials for a Redis instance and show the password in the output`,
+				"$ stackit redis credentials create --instance-id xxx --show-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -86,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Bool(hidePasswordFlag, false, "Hide password in output")
+	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -101,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		HidePassword:    flags.FlagToBoolValue(p, cmd, hidePasswordFlag),
+		ShowPassword:    flags.FlagToBoolValue(p, cmd, showPasswordFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -124,6 +125,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *redis.CredentialsResponse) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
+		if !model.ShowPassword {
+			resp.Raw.Credentials.Password = utils.Ptr("hidden")
+		}
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Redis credentials: %w", err)
@@ -138,7 +142,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		if username != "" {
 			p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
 		}
-		if model.HidePassword {
+		if !model.ShowPassword {
 			p.Outputf("Password: <hidden>\n")
 		} else {
 			p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)

@@ -29,6 +29,12 @@ func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	}
 
+	if p.IsVerbosityDebug() {
+		cfgOptions = append(cfgOptions,
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
+		)
+	}
+
 	apiClient, err = logme.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)

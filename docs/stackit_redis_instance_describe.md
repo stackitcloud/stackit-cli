@@ -16,8 +16,8 @@ stackit redis instance describe INSTANCE_ID [flags]
   Get details of a Redis instance with ID "xxx"
   $ stackit redis instance describe xxx
 
-  Get details of a Redis instance with ID "xxx" in a table format
-  $ stackit redis instance describe xxx --output-format pretty
+  Get details of a Redis instance with ID "xxx" in JSON format
+  $ stackit redis instance describe xxx --output-format json
 ```
 
 ### Options

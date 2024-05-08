@@ -336,5 +336,13 @@
         </a>
       </div>
     </div>
+    <script>
+      if (window.location.hash) {
+          history.replaceState(null, "", window.location.pathname);
+      }
+      setTimeout(function () {
+          window.location = 'https://www.stackit.de'
+      }, 60000);
+  </script>
   </body>
 </html>
