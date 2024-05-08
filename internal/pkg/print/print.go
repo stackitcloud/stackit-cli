@@ -141,19 +141,13 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 // Returns nil only if the user (explicitly) press directly enter.
 // Returns ErrAborted if the user press anything else before pressing enter.
 func (p *Printer) PromptForEnter(prompt string) error {
-	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
-
+	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	p.Cmd.PrintErr(prompt)
-	answer, err := reader.ReadByte()
+	_, err := reader.ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("read user response: %w", err)
 	}
-
-	// ASCII code for Enter (newline) is 10.
-	if answer == 10 {
-		return nil
-	}
-	return errAborted
+	return nil
 }
 
 // Shows the content in the command's stdout using the "less" command
