@@ -16,8 +16,8 @@ stackit load-balancer describe LOAD_BALANCER_NAME [flags]
   Get details of a load balancer with name "my-load-balancer"
   $ stackit load-balancer describe my-load-balancer
 
-  Get details of a load-balancer with name "my-load-balancer" in a table format
-  $ stackit load-balancer describe my-load-balancer --output-format pretty
+  Get details of a load-balancer with name "my-load-balancer" in a JSON format
+  $ stackit load-balancer describe my-load-balancer --output-format json
 ```
 
 ### Options
