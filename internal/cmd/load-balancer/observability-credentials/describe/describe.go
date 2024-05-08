@@ -95,7 +95,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 
 func outputResult(p *print.Printer, outputFormat string, credentials *loadbalancer.GetCredentialsResponse) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("REFERENCE", *credentials.Credential.CredentialsRef)
 		table.AddSeparator()
@@ -107,14 +115,6 @@ func outputResult(p *print.Printer, outputFormat string, credentials *loadbalanc
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}
