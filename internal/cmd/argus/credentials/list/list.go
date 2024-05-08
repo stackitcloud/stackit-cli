@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v3"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -131,6 +132,14 @@ func outputResult(p *print.Printer, outputFormat string, credentials []argus.Ser
 		}
 		p.Outputln(string(details))
 
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(credentials)
+		if err != nil {
+			return fmt.Errorf("marshal Argus credentials list : %w", err)
+		}
+
+		p.Outputln(string(details))
 		return nil
 	default:
 		table := tables.NewTable()

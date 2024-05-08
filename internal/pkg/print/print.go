@@ -28,6 +28,7 @@ const (
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
 	NoneOutputFormat   = "none"
+	YAMLOutputFormat   = "yaml"
 )
 
 var errAborted = errors.New("operation aborted")
