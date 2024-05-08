@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit load-balancer update xxx --payload "{...}"`),
 			examples.NewExample(
 				`Generate a payload with the current values of an existing load balancer xxx, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload --instance-name xxx > ./payload.json`,
+				`$ stackit load-balancer generate-payload --lb-name xxx > ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit load-balancer update xxx --payload @./payload.json`),
 		),
