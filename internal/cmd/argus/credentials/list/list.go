@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,7 +16,6 @@ import (
 	argusUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/argus/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/argus"
-	"gopkg.in/yaml.v3"
 
 	"github.com/spf13/cobra"
 )
