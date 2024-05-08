@@ -101,7 +101,7 @@ brews:
       email: noreply@stackit.de
     homepage: "https://github.com/stackitcloud/stackit-cli"
     description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a BETA state. More services and functionality will be supported soon."
-    folder: Formula
+    directory: Formula
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
@@ -125,3 +125,22 @@ snapcrafts:
     grade: devel
     # Whether to publish the Snap to the store
     publish: true
+
+winget:
+  - name: stackit
+    publisher: stackitcloud
+    short_description: A command-line interface to manage STACKIT resources.
+    license: Apache-2.0
+    publisher_support_url: "https://github.com/derailed/k9s/issues"
+    package_identifier: stackitcloud.stackit
+    homepage: "https://github.com/stackitcloud/stackit-cli"
+    repository:
+      owner: stackitcloud
+      name: winget-pkgs
+      pull_request:
+        enabled: true
+        draft: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
