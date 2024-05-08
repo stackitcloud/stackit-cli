@@ -37,8 +37,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a load balancer with name "my-load-balancer"`,
 				"$ stackit load-balancer describe my-load-balancer"),
 			examples.NewExample(
-				`Get details of a load-balancer with name "my-load-balancer" in a table format`,
-				"$ stackit load-balancer describe my-load-balancer --output-format pretty"),
+				`Get details of a load-balancer with name "my-load-balancer" in a JSON format`,
+				"$ stackit load-balancer describe my-load-balancer --output-format JSON"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -97,9 +97,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 
 func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalancer.LoadBalancer) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
-		return outputResultAsTable(p, loadBalancer)
-	default:
+	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(loadBalancer, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal load balancer: %w", err)
@@ -107,6 +105,8 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 		p.Outputln(string(details))
 
 		return nil
+	default:
+		return outputResultAsTable(p, loadBalancer)
 	}
 }
 
