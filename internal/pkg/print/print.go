@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"syscall"
 
 	"log/slog"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"golang.org/x/term"
 )
 
 type Level string
@@ -147,6 +149,19 @@ func (p *Printer) PromptForEnter(prompt string) error {
 		return fmt.Errorf("read user response: %w", err)
 	}
 	return nil
+}
+
+// Prompts the user for a password.
+//
+// Returns the password that was given, otherwise returns error
+func (p *Printer) PromptForPassword(prompt string) (string, error) {
+	p.Cmd.PrintErr(prompt)
+	defer p.Outputln("")
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", fmt.Errorf("read password: %w", err)
+	}
+	return string(bytePassword), nil
 }
 
 // Shows the content in the command's stdout using the "less" command
