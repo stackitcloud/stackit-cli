@@ -66,21 +66,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			// Prompt for password if not passed in as a flag
+			if model.Password == nil {
+				pwd, err := p.PromptForPassword("Enter user password: ")
+				if err != nil {
+					return fmt.Errorf("prompt for password: %w", err)
+				}
+				model.Password = utils.Ptr(pwd)
+			}
+
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
-			}
-
-			// Prompt for password if not passed in as a flag
-			if model.Password == nil {
-				pwd, err := p.PromptForPassword("Enter password: ")
-				if err != nil {
-					return fmt.Errorf("prompt for password: %w", err)
-				}
-				model.Password = utils.Ptr(pwd)
 			}
 
 			// Call API
