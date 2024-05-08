@@ -46,11 +46,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal`,
 				"$ stackit load-balancer observability-credentials update credentials-xxx"),
 			examples.NewExample(
-				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing it in the flag`,
-				"$ stackit load-balancer observability-credentials update credentials-xxx --password new-pwd"),
-			examples.NewExample(
-				`Update the display name of observability credentials of Load Balancer with credentials reference "credentials-xxx".`,
-				"$ stackit load-balancer observability-credentials update credentials-xxx --display-name yyy"),
+				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing the path to a file with the new password as flag`,
+				"$ stackit load-balancer observability-credentials update credentials-xxx --password @./new-password.txt"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
