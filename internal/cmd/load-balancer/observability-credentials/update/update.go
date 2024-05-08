@@ -77,14 +77,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				credentialsLabel = model.CredentialsRef
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
-				err = p.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Prompt for password if not passed in as a flag
 			if model.Password == nil {
 				pwd, err := p.PromptForPassword("Enter new password: ")
@@ -92,6 +84,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					return fmt.Errorf("prompt for password: %w", err)
 				}
 				model.Password = utils.Ptr(pwd)
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Call API
