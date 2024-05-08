@@ -43,8 +43,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(credentialsRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal`,
-				"$ stackit load-balancer observability-credentials update credentials-xxx"),
+				`Update the password and username of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal`,
+				"$ stackit load-balancer observability-credentials update credentials-xxx --username new-username"),
 			examples.NewExample(
 				`Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing the path to a file with the new password as flag`,
 				"$ stackit load-balancer observability-credentials update credentials-xxx --password @./new-password.txt"),
