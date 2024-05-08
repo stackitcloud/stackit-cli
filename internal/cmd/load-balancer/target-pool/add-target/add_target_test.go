@@ -29,7 +29,7 @@ const (
 	testLBName         = "my-load-balancer"
 	testTargetPoolName = "target-pool-1"
 	testTargetName     = "my-target"
-	testIP             = "1.2.3.4"
+	testIP             = "1.1.1.1"
 )
 
 type loadBalancerClientMocked struct {
@@ -59,7 +59,7 @@ func (m *loadBalancerClientMocked) UpdateTargetPool(ctx context.Context, project
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testTargetPoolName,
+		testIP,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -69,10 +69,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		lbNameFlag:     testLBName,
-		targetNameFlag: testTargetName,
-		ipFlag:         testIP,
+		projectIdFlag:      testProjectId,
+		lbNameFlag:         testLBName,
+		targetNameFlag:     testTargetName,
+		targetPoolNameFlag: testTargetPoolName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -221,7 +221,7 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "target pool name missing",
+			description: "ip missing",
 			argValues:   []string{""},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
@@ -243,10 +243,10 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "ip missing",
+			description: "target pool name missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, ipFlag)
+				delete(flagValues, targetPoolNameFlag)
 			}),
 			isValid: false,
 		},

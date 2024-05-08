@@ -23,9 +23,9 @@ stackit load-balancer observability-credentials add [flags]
 ### Options
 
 ```
-      --display-name string   Credentials name
+      --display-name string   Credentials display name
   -h, --help                  Help for "stackit load-balancer observability-credentials add"
-      --password string       Password
+      --password string       Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).
       --username string       Username
 ```
 

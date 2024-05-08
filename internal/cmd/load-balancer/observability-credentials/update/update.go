@@ -77,14 +77,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				credentialsLabel = model.CredentialsRef
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
-				err = p.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Prompt for password if not passed in as a flag
 			if model.Password == nil {
 				pwd, err := p.PromptForPassword("Enter new password: ")
@@ -92,6 +84,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					return fmt.Errorf("prompt for password: %w", err)
 				}
 				model.Password = utils.Ptr(pwd)
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Call API
@@ -116,7 +116,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials name")
 	cmd.Flags().String(usernameFlag, "", "Username")
-	cmd.Flags().String(passwordFlag, "", "Password")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

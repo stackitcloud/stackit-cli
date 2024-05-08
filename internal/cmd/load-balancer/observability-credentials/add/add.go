@@ -98,9 +98,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(displayNameFlag, "", "Credentials name")
+	cmd.Flags().String(displayNameFlag, "", "Credentials display name")
 	cmd.Flags().String(usernameFlag, "", "Username")
-	cmd.Flags().String(passwordFlag, "", "Password")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
 
 	err := flags.MarkFlagsRequired(cmd, displayNameFlag, usernameFlag)
 	cobra.CheckErr(err)
