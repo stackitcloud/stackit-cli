@@ -30,6 +30,12 @@ func ConfigureClient(p *print.Printer) (*loadbalancer.APIClient, error) {
 		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
 	}
 
+	if p.IsVerbosityDebug() {
+		cfgOptions = append(cfgOptions,
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
+		)
+	}
+
 	apiClient, err = loadbalancer.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)
