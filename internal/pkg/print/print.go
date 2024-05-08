@@ -167,7 +167,7 @@ func (p *Printer) PagerDisplay(content string) error {
 
 	pager := os.Getenv("PAGER")
 	if pager != "nil" && pager != "" {
-		pagerCmd = exec.Command(pager)
+		pagerCmd = exec.Command(pager) // #nosec
 	}
 
 	pagerCmd.Stdin = strings.NewReader(content)
