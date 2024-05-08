@@ -165,12 +165,16 @@ func (p *Printer) PagerDisplay(content string) error {
 	}
 	pagerCmd := exec.Command("less", "-F", "-S", "-w")
 
+	pager := os.Getenv("PAGER")
+	if pager != "nil" && pager != "" {
+		pagerCmd = exec.Command(pager)
+	}
+
 	pagerCmd.Stdin = strings.NewReader(content)
 	pagerCmd.Stdout = p.Cmd.OutOrStdout()
 
 	err := pagerCmd.Run()
 	if err != nil {
-		p.Debug(ErrorLevel, "run pager command: %v", err)
 		p.Outputln(content)
 	}
 	return nil
