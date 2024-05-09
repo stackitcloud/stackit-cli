@@ -108,6 +108,34 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "used",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[usedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Used = true
+			}),
+		},
+		{
+			description: "unused",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[unusedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Unused = true
+			}),
+		},
+		{
+			description: "used and unused",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[usedFlag] = "true"
+				flagValues[unusedFlag] = "true"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -130,6 +158,14 @@ func TestParseInput(t *testing.T) {
 			}
 
 			err = cmd.ValidateRequiredFlags()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating flags: %v", err)
+			}
+
+			err = cmd.ValidateFlagGroups()
 			if err != nil {
 				if !tt.isValid {
 					return

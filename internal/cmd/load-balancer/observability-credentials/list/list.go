@@ -73,18 +73,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			var usedCredentials []loadbalancer.CredentialsResponse
-			if model.Used {
-				usedCredentials, err = utils.GetUsedObsCredentials(ctx, apiClient, model.ProjectId)
-				if err != nil {
-					return fmt.Errorf("get used observability credentials: %w", err)
-				}
-				if len(usedCredentials) == 0 {
-					p.Info("No used observability credentials found for Load Balancer on project %q\n", projectLabel)
-					return nil
-				}
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -99,11 +87,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			credentials := *credentialsPtr
 
+			credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Used, model.Unused)
+			if err != nil {
+				return fmt.Errorf("filter credentials: %w", err)
+			}
+
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(p, model, credentials, usedCredentials)
+			return outputResult(p, model.OutputFormat, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -114,6 +107,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Bool(usedFlag, false, "List only used credentials")
 	cmd.Flags().Bool(unusedFlag, false, "List only unused credentials")
+
+	cmd.MarkFlagsMutuallyExclusive(usedFlag, unusedFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -154,13 +149,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, allCredentials, usedCredentials []loadbalancer.CredentialsResponse) error {
-	credentials := allCredentials
-	if model.Used {
-		credentials = usedCredentials
-	}
-
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, credentials []loadbalancer.CredentialsResponse) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {

@@ -14,7 +14,6 @@ type LoadBalancerClient interface {
 	GetLoadBalancerExecute(ctx context.Context, projectId, name string) (*loadbalancer.LoadBalancer, error)
 	UpdateTargetPool(ctx context.Context, projectId, loadBalancerName, targetPoolName string) loadbalancer.ApiUpdateTargetPoolRequest
 	ListLoadBalancersExecute(ctx context.Context, projectId string) (*loadbalancer.ListLoadBalancersResponse, error)
-	ListCredentialsExecute(ctx context.Context, projectId string) (*loadbalancer.ListCredentialsResponse, error)
 }
 
 func GetCredentialsDisplayName(ctx context.Context, apiClient LoadBalancerClient, projectId, credentialsRef string) (string, error) {
@@ -137,7 +136,7 @@ func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId,
 
 // GetUsedObsCredentials returns a list of credentials that are used by load balancers for observability metrics or logs.
 // It goes through all load balancers and checks what observability credentials are being used, then returns a list of those credentials.
-func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, projectId string) ([]loadbalancer.CredentialsResponse, error) {
+func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId string) ([]loadbalancer.CredentialsResponse, error) {
 	var usedCredentialsSlice []loadbalancer.CredentialsResponse
 
 	loadBalancers, err := apiClient.ListLoadBalancersExecute(ctx, projectId)
@@ -162,16 +161,8 @@ func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, pr
 		}
 	}
 
-	credentials, err := apiClient.ListCredentialsExecute(ctx, projectId)
-	if err != nil {
-		return nil, fmt.Errorf("get credentials: %w", err)
-	}
-	if credentials == nil || credentials.Credentials == nil {
-		return usedCredentialsSlice, nil
-	}
-
 	usedCredentialsMap := make(map[string]loadbalancer.CredentialsResponse)
-	for _, credential := range *credentials.Credentials {
+	for _, credential := range allCredentials {
 		if credential.CredentialsRef == nil {
 			continue
 		}
@@ -191,4 +182,51 @@ func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, pr
 	})
 
 	return usedCredentialsSlice, nil
+}
+
+// GetUnusedObsCredentials returns a list of credentials that are not used by any load balancer for observability metrics or logs.
+// It compares the list of all credentials with the list of used credentials and returns a list of credentials that are not used.
+func GetUnusedObsCredentials(usedCredentials, allCredentials []loadbalancer.CredentialsResponse) []loadbalancer.CredentialsResponse {
+	var unusedCredentials []loadbalancer.CredentialsResponse
+	usedCredentialsRefs := make(map[string]bool)
+	for _, credential := range usedCredentials {
+		if credential.CredentialsRef != nil {
+			usedCredentialsRefs[*credential.CredentialsRef] = true
+		}
+	}
+
+	for _, credential := range allCredentials {
+		if credential.CredentialsRef == nil {
+			continue
+		}
+		if !usedCredentialsRefs[*credential.CredentialsRef] {
+			unusedCredentials = append(unusedCredentials, credential)
+		}
+	}
+
+	return unusedCredentials
+}
+
+// FilterCredentials filters a list of credentials based on the used and unused flags.
+// If used is true, it returns only the credentials that are used by load balancers for observability metrics or logs.
+// If unused is true, it returns only the credentials that are not used by any load balancer for observability metrics or logs.
+// If both used and unused are true, it returns an error.
+// If both used and unused are false, it returns the original list of credentials.
+func FilterCredentials(ctx context.Context, client LoadBalancerClient, credentials []loadbalancer.CredentialsResponse, projectId string, used, unused bool) ([]loadbalancer.CredentialsResponse, error) {
+	if !used && !unused {
+		return credentials, nil
+	}
+	if used && unused {
+		return nil, fmt.Errorf("used and unused flags are mutually exclusive")
+	}
+	filteredCredentials, err := GetUsedObsCredentials(ctx, client, credentials, projectId)
+	if err != nil {
+		return nil, fmt.Errorf("get used observability credentials: %w", err)
+	}
+
+	if unused {
+		filteredCredentials = GetUnusedObsCredentials(filteredCredentials, credentials)
+	}
+
+	return filteredCredentials, nil
 }
