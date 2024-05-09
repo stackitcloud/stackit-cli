@@ -37,7 +37,7 @@ func GetProfile() (string, error) {
 }
 
 // validateProfile validates the profile name.
-// It can only use letters, numbers, or "-".
+// It can only use letters, numbers, or "-" and cannot be empty.
 // If the profile is invalid, it returns an error.
 func validateProfile(profile string) error {
 	match, err := regexp.MatchString("^[a-zA-Z0-9-]+$", profile)

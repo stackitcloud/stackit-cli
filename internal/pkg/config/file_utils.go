@@ -24,8 +24,11 @@ func createFolderIfNotExists(folderPath string) error {
 // If the file exists but cannot be read, it returns an error.
 func readFileIfExists(filePath string) (contents string, exists bool, err error) {
 	_, err = os.Stat(filePath)
-	if os.IsNotExist(err) {
-		return "", false, nil
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", false, nil
+		}
+		return "", true, err
 	}
 
 	content, err := os.ReadFile(filePath)
