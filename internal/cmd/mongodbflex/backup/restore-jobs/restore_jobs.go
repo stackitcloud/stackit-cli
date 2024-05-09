@@ -39,13 +39,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all restore jobs of instance with ID "xxx"`,
-				"$ stackit mongodbflex backup list --instance-id xxx"),
+				"$ stackit mongodbflex backup restore-jobs --instance-id xxx"),
 			examples.NewExample(
 				`List all restore jobs of instance with ID "xxx" in JSON format`,
-				"$ stackit mongodbflex backup list --instance-id xxx --output-format json"),
+				"$ stackit mongodbflex backup restore-jobs --instance-id xxx --output-format json"),
 			examples.NewExample(
 				`List up to 10 restore jobs of instance with ID "xxx"`,
-				"$ stackit mongodbflex backup list --instance-id xxx --limit 10"),
+				"$ stackit mongodbflex backup restore-jobs --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
