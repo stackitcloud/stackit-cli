@@ -1114,12 +1114,14 @@ func TestFilterCredentials(t *testing.T) {
 		},
 		{
 			description:         "no credentials",
+			filterOp:            OP_FILTER_NOP,
 			allCredentials:      []loadbalancer.CredentialsResponse{},
 			expectedCredentials: []loadbalancer.CredentialsResponse{},
 			isValid:             true,
 		},
 		{
 			description:            "list load balancers fails",
+			filterOp:               OP_FILTER_USED,
 			listLoadBalancersFails: true,
 			isValid:                false,
 		},
