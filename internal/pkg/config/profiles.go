@@ -40,16 +40,12 @@ func GetProfile() (string, error) {
 // It can only use letters, numbers, or "-".
 // If the profile is invalid, it returns an error.
 func validateProfile(profile string) error {
-	if profile == "" {
-		// Not actually needed as the regext would catch this, but will provide a better error message
-		return fmt.Errorf("profile name cannot be empty")
-	}
 	match, err := regexp.MatchString("^[a-zA-Z0-9-]+$", profile)
 	if err != nil {
 		return fmt.Errorf("match string regex: %v", err)
 	}
 	if !match {
-		return fmt.Errorf("profile name can only contain letters, numbers, and \"-\"")
+		return fmt.Errorf("profile name can only contain letters, numbers, and \"-\" and cannot be empty")
 	}
 	return nil
 }
