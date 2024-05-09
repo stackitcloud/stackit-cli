@@ -34,16 +34,20 @@ const (
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 
+	ProjectNameKey = "project_name"
+
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
 )
 
-// Backend config keys
 const (
-	configFolder        = "stackit"
+	configFolder = "stackit"
+
 	configFileName      = "cli-config"
 	configFileExtension = "json"
-	ProjectNameKey      = "project_name"
+
+	profileFileName      = "cli-profile"
+	profileFileExtension = "txt"
 )
 
 var ConfigKeys = []string{
@@ -72,16 +76,13 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 }
 
-var folderPath string
+var configFolderPath string
 
 func InitConfig() {
 	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
-	configFolderPath := filepath.Join(configDir, configFolder)
+	configFolderPath = filepath.Join(configDir, configFolder)
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
-
-	// Write config dir path to global variable
-	folderPath = configFolderPath
 
 	// This hack is required to allow creating the config file with `viper.WriteConfig`
 	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
@@ -107,22 +108,9 @@ func InitConfig() {
 	viper.SetEnvPrefix("stackit")
 }
 
-func createFolderIfNotExists() error {
-	_, err := os.Stat(folderPath)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(folderPath, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	return nil
-}
-
 // Write saves the config file (wrapping `viper.WriteConfig`) and ensures that its directory exists
 func Write() error {
-	if err := createFolderIfNotExists(); err != nil {
+	if err := createFolderIfNotExists(configFolderPath); err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}
 	return viper.WriteConfig()
