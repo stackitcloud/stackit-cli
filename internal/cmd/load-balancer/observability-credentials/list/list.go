@@ -37,8 +37,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all observability credentials for Load Balancer",
-		Long:  "Lists all observability credentials for Load Balancer.",
+		Short: "Lists observability credentials for Load Balancer",
+		Long:  "Lists observability credentials for Load Balancer.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
