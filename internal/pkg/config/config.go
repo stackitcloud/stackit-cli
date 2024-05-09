@@ -81,7 +81,15 @@ var configFolderPath string
 func InitConfig() {
 	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
+
+	configProfile, err := GetProfile()
+	cobra.CheckErr(err)
+
 	configFolderPath = filepath.Join(configDir, configFolder)
+	if configProfile != "" {
+		configFolderPath = filepath.Join(configFolderPath, configProfile)
+	}
+
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
 	// This hack is required to allow creating the config file with `viper.WriteConfig`

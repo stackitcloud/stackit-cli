@@ -31,7 +31,7 @@ func GetProfile() (string, error) {
 
 	err := validateProfile(profile)
 	if err != nil {
-		return "", fmt.Errorf("validate profile from env var: %w", err)
+		return "", fmt.Errorf("validate profile: %w", err)
 	}
 	return profile, nil
 }
