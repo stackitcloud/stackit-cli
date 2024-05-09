@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
@@ -66,7 +67,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe backup for MongoDB Flex instance: %w", err)
 			}
 
-			return outputResult(p, cmd, model.OutputFormat, *resp.Item)
+			restoreJobState, err := utils.GetRestoreStatus(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId)
+			if err != nil {
+				return fmt.Errorf("get restore status for MongoDB Flex instance backup: %w", err)
+			}
+
+			return outputResult(p, cmd, model.OutputFormat, restoreJobState, *resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -111,7 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, backup mongodbflex.Backup) error {
+func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreStatus string, backup mongodbflex.Backup) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
@@ -130,6 +136,8 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		table.AddRow("EXPIRES AT", *backup.EndTime)
 		table.AddSeparator()
 		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
+		table.AddSeparator()
+		table.AddRow("RESTORE STATUS", restoreStatus)
 
 		err := table.Display(p)
 		if err != nil {

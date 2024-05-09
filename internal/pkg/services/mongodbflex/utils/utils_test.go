@@ -16,6 +16,7 @@ var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testUserId     = uuid.NewString()
+	testBackupId   = uuid.NewString()
 )
 
 const (
@@ -24,12 +25,14 @@ const (
 )
 
 type mongoDBFlexClientMocked struct {
-	listVersionsFails bool
-	listVersionsResp  *mongodbflex.ListVersionsResponse
-	getInstanceFails  bool
-	getInstanceResp   *mongodbflex.GetInstanceResponse
-	getUserFails      bool
-	getUserResp       *mongodbflex.GetUserResponse
+	listVersionsFails    bool
+	listVersionsResp     *mongodbflex.ListVersionsResponse
+	getInstanceFails     bool
+	getInstanceResp      *mongodbflex.GetInstanceResponse
+	getUserFails         bool
+	getUserResp          *mongodbflex.GetUserResponse
+	listRestoreJobsFails bool
+	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
 }
 
 func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*mongodbflex.ListVersionsResponse, error) {
@@ -37,6 +40,13 @@ func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ strin
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
+}
+
+func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*mongodbflex.ListRestoreJobsResponse, error) {
+	if m.listRestoreJobsFails {
+		return nil, fmt.Errorf("could not list versions")
+	}
+	return m.listRestoreJobsResp, nil
 }
 
 func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
@@ -364,7 +374,7 @@ func TestLoadFlavorId(t *testing.T) {
 	}
 }
 
-func TestGetLatestPostgreSQLVersion(t *testing.T) {
+func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 	tests := []struct {
 		description       string
 		listVersionsFails bool
@@ -502,6 +512,105 @@ func TestGetUserName(t *testing.T) {
 			}
 
 			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetGetRestoreStatus(t *testing.T) {
+	tests := []struct {
+		description          string
+		listRestoreJobsFails bool
+		listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
+		isValid              bool
+		expectedOutput       string
+	}{
+		{
+			description: "base",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Status:   utils.Ptr("state"),
+					},
+					{
+						BackupID: utils.Ptr("bar"),
+						Status:   utils.Ptr("state 2"),
+					},
+				},
+			},
+			isValid:        true,
+			expectedOutput: "state",
+		},
+		{
+			description: "get latest restore",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Status:   utils.Ptr("in progress"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Status:   utils.Ptr("finished"),
+					},
+				},
+			},
+			isValid:        true,
+			expectedOutput: "in progress",
+		},
+		{
+			description: "no restore job for that backup",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr("bar"),
+						Status:   utils.Ptr("in progress"),
+					},
+					{
+						BackupID: utils.Ptr("bar"),
+						Status:   utils.Ptr("finished"),
+					},
+				},
+			},
+			isValid:        true,
+			expectedOutput: "-",
+		},
+		{
+			description: "no restore jobs",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: nil,
+			},
+			isValid:        true,
+			expectedOutput: "-",
+		},
+		{
+			description:          "get restore jobs fails",
+			listRestoreJobsFails: true,
+			isValid:              false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &mongoDBFlexClientMocked{
+				listRestoreJobsFails: tt.listRestoreJobsFails,
+				listRestoreJobsResp:  tt.listRestoreJobsResp,
+			}
+
+			output, err := GetRestoreStatus(context.Background(), client, testProjectId, testInstanceId, testBackupId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

@@ -85,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				backups = backups[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, backups)
+			return outputResult(ctx, p, model, apiClient, backups)
 		},
 	}
 
@@ -138,8 +138,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.Backup) error {
-	switch outputFormat {
+func outputResult(ctx context.Context, p *print.Printer, model *inputModel, apiClient *mongodbflex.APIClient, backups []mongodbflex.Backup) error {
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backups, "", "  ")
 		if err != nil {
@@ -150,10 +150,14 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
+		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE", "RESTORE STATUS")
 		for i := range backups {
 			backup := backups[i]
-			table.AddRow(*backup.Id, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)))
+			restoreStatus, err := mongodbflexUtils.GetRestoreStatus(ctx, apiClient, model.ProjectId, *model.InstanceId, *backup.Id)
+			if err != nil {
+				return fmt.Errorf("get restore status for backup with id %s: %w", *backup.Id, err)
+			}
+			table.AddRow(*backup.Id, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)), restoreStatus)
 		}
 		err := table.Display(p)
 		if err != nil {

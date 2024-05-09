@@ -118,6 +118,7 @@ type MongoDBFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
 	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
+	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
 }
 
 func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId string) (string, error) {
@@ -156,4 +157,24 @@ func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, in
 		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
 	}
 	return *resp.Item.Username, nil
+}
+
+func GetRestoreStatus(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, backupId string) (string, error) {
+	state := "-"
+	restoreJobs, err := apiClient.ListRestoreJobsExecute(ctx, projectId, instanceId)
+	if err != nil {
+		return "", fmt.Errorf("list restore jobs: %w", err)
+	}
+
+	if restoreJobs.Items == nil {
+		return state, nil
+	}
+
+	for _, restoreJob := range *restoreJobs.Items {
+		if *restoreJob.BackupID == backupId {
+			state = *restoreJob.Status
+			break
+		}
+	}
+	return state, nil
 }

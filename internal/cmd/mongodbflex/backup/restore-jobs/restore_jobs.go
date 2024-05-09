@@ -149,7 +149,7 @@ func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbfl
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "BACKUP ID", "BACKUP INSTANCE ID", "DATE", "STATE")
+		table.SetHeader("ID", "BACKUP ID", "BACKUP INSTANCE ID", "DATE", "STATUS")
 		for i := range restoreJobs {
 			restoreJob := restoreJobs[i]
 
