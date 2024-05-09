@@ -29,9 +29,9 @@ func TestValidateProfile(t *testing.T) {
 			isValid:     true,
 		},
 		{
-			description: "valid empty",
+			description: "invalid empty",
 			profile:     "",
-			isValid:     true,
+			isValid:     false,
 		},
 		{
 			description: "invalid with special characters",
