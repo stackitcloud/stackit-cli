@@ -1057,8 +1057,7 @@ func TestGetUnusedObsCredentials(t *testing.T) {
 func TestFilterCredentials(t *testing.T) {
 	tests := []struct {
 		description            string
-		used                   bool
-		unused                 bool
+		filterOp               int
 		allCredentials         []loadbalancer.CredentialsResponse
 		listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
 		listLoadBalancersFails bool
@@ -1067,13 +1066,14 @@ func TestFilterCredentials(t *testing.T) {
 	}{
 		{
 			description:         "unfiltered credentials",
+			filterOp:            OP_FILTER_NOP,
 			allCredentials:      fixtureCredentials(),
 			expectedCredentials: fixtureCredentials(),
 			isValid:             true,
 		},
 		{
 			description:    "used credentials",
-			used:           true,
+			filterOp:       OP_FILTER_USED,
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
 				LoadBalancers: &[]loadbalancer.LoadBalancer{
@@ -1096,7 +1096,7 @@ func TestFilterCredentials(t *testing.T) {
 		},
 		{
 			description:    "unused credentials",
-			unused:         true,
+			filterOp:       OP_FILTER_UNUSED,
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
 				LoadBalancers: &[]loadbalancer.LoadBalancer{
@@ -1113,12 +1113,6 @@ func TestFilterCredentials(t *testing.T) {
 			isValid: true,
 		},
 		{
-			description: "used and unused credentials",
-			used:        true,
-			unused:      true,
-			isValid:     false,
-		},
-		{
 			description:         "no credentials",
 			allCredentials:      []loadbalancer.CredentialsResponse{},
 			expectedCredentials: []loadbalancer.CredentialsResponse{},
@@ -1129,6 +1123,12 @@ func TestFilterCredentials(t *testing.T) {
 			listLoadBalancersFails: true,
 			isValid:                false,
 		},
+		{
+			description:    "invalid filter operation",
+			filterOp:       999,
+			allCredentials: fixtureCredentials(),
+			isValid:        false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1137,7 +1137,7 @@ func TestFilterCredentials(t *testing.T) {
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 				listLoadBalancersFails: tt.listLoadBalancersFails,
 			}
-			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, tt.used, tt.unused)
+			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, tt.filterOp)
 			if err != nil {
 				if !tt.isValid {
 					return

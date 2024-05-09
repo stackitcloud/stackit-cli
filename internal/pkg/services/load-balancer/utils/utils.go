@@ -9,6 +9,12 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
+const (
+	OP_FILTER_NOP = iota
+	OP_FILTER_USED
+	OP_FILTER_UNUSED
+)
+
 type LoadBalancerClient interface {
 	GetCredentialsExecute(ctx context.Context, projectId, credentialsRef string) (*loadbalancer.GetCredentialsResponse, error)
 	GetLoadBalancerExecute(ctx context.Context, projectId, name string) (*loadbalancer.LoadBalancer, error)
@@ -212,19 +218,22 @@ func GetUnusedObsCredentials(usedCredentials, allCredentials []loadbalancer.Cred
 // If unused is true, it returns only the credentials that are not used by any load balancer for observability metrics or logs.
 // If both used and unused are true, it returns an error.
 // If both used and unused are false, it returns the original list of credentials.
-func FilterCredentials(ctx context.Context, client LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId string, used, unused bool) ([]loadbalancer.CredentialsResponse, error) {
-	if !used && !unused {
+func FilterCredentials(ctx context.Context, client LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId string, filterOp int) ([]loadbalancer.CredentialsResponse, error) {
+	// check that filter OP is valid
+	if filterOp != OP_FILTER_USED && filterOp != OP_FILTER_UNUSED && filterOp != OP_FILTER_NOP {
+		return nil, fmt.Errorf("invalid filter operation")
+	}
+
+	if filterOp == OP_FILTER_NOP {
 		return allCredentials, nil
 	}
-	if used && unused {
-		return nil, fmt.Errorf("used and unused flags are mutually exclusive")
-	}
+
 	usedCredentials, err := GetUsedObsCredentials(ctx, client, allCredentials, projectId)
 	if err != nil {
 		return nil, fmt.Errorf("get used observability credentials: %w", err)
 	}
 
-	if unused {
+	if filterOp == OP_FILTER_UNUSED {
 		return GetUnusedObsCredentials(usedCredentials, allCredentials), nil
 	}
 	return usedCredentials, nil

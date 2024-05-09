@@ -90,7 +90,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			credentials := *credentialsPtr
 
-			credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Used, model.Unused)
+			filterOp, err := getFilterOp(model.Used, model.Unused)
+			if err != nil {
+				return err
+			}
+
+			credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
 			if err != nil {
 				return fmt.Errorf("filter credentials: %w", err)
 			}
@@ -176,4 +181,21 @@ func outputResult(p *print.Printer, outputFormat string, credentials []loadbalan
 
 		return nil
 	}
+}
+
+func getFilterOp(used, unused bool) (int, error) {
+	// should not happen, cobra handles this
+	if used && unused {
+		return 0, fmt.Errorf("used and unused flags are mutually exclusive")
+	}
+
+	if !used && !unused {
+		return utils.OP_FILTER_NOP, nil
+	}
+
+	if used {
+		return utils.OP_FILTER_USED, nil
+	}
+
+	return utils.OP_FILTER_UNUSED, nil
 }
