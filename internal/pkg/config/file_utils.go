@@ -19,18 +19,19 @@ func createFolderIfNotExists(folderPath string) error {
 	return nil
 }
 
-// readFileIfExists reads the contents of a file and returns it as a string.
-// If the file does not exist, it returns an empty string.
-func readFileIfExists(filePath string) (string, error) {
-	_, err := os.Stat(filePath)
+// readFileIfExists reads the contents of a file and returns it as a string, along with a boolean indicating if the file exists.
+// If the file does not exist, it returns an empty string and no error.
+// If the file exists but cannot be read, it returns an error.
+func readFileIfExists(filePath string) (contents string, exists bool, err error) {
+	_, err = os.Stat(filePath)
 	if os.IsNotExist(err) {
-		return "", nil
+		return "", false, nil
 	}
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", fmt.Errorf("read file: %v", err)
+		return "", true, fmt.Errorf("read file: %v", err)
 	}
 
-	return string(content), nil
+	return string(content), true, nil
 }
