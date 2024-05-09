@@ -868,6 +868,30 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
 				LoadBalancers: &[]loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
+				},
+			},
+			isValid: true,
+			expectedOutput: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-1"),
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+				{
+					DisplayName:    utils.Ptr("credentials-2"),
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					Username:       utils.Ptr("user-2"),
+				},
+			},
+		},
+		{
+			description: "repeated credentials in different load balancers",
+			listCredentialsResp: &loadbalancer.ListCredentialsResponse{
+				Credentials: fixtureCredentials(),
+			},
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
 					*fixtureLoadBalancer(),
 				},
 			},
@@ -884,6 +908,23 @@ func TestGetUsedObsCredentials(t *testing.T) {
 					Username:       utils.Ptr("user-2"),
 				},
 			},
+		},
+		{
+			description: "no repeated credentials in different load balancers",
+			listCredentialsResp: &loadbalancer.ListCredentialsResponse{
+				Credentials: fixtureCredentials(),
+			},
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+					*fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+						lb.Options.Observability.Logs.CredentialsRef = utils.Ptr("credentials-ref-3")
+						lb.Options.Observability.Metrics.CredentialsRef = utils.Ptr("credentials-ref-3")
+					}),
+				},
+			},
+			isValid:        true,
+			expectedOutput: *fixtureCredentials(),
 		},
 		{
 			description:           "no load balancers, no credentials",
@@ -907,7 +948,6 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
 				LoadBalancers: &[]loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
-					*fixtureLoadBalancer(),
 				},
 			},
 			isValid:        true,
@@ -917,7 +957,6 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description: "list credentials fails",
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
 				LoadBalancers: &[]loadbalancer.LoadBalancer{
-					*fixtureLoadBalancer(),
 					*fixtureLoadBalancer(),
 				},
 			},
