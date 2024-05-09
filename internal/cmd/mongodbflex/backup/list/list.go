@@ -153,16 +153,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
 		for i := range backups {
 			backup := backups[i]
-
-			// TO-DO: check if the Portal shows the expire date. If yes, check how to compute
-			// it from the schedule endpoint. Ask the team
-			// backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
-			// if err != nil {
-			// 	return fmt.Errorf("parse backup start time: %w", err)
-			// }
-			// backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
-
-			table.AddRow(*backup.Id, *backup.StartTime, bytesize.New(float64(*backup.Size)))
+			table.AddRow(*backup.Id, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)))
 		}
 		err := table.Display(p)
 		if err != nil {

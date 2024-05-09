@@ -112,16 +112,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, backup mongodbflex.Backup) error {
-	// TO-DO: check if the Portal shows the expire date. If yes, check how to compute
-	// it from the schedule endpoint. Ask the team
-
-	// backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
-	// if err != nil {
-	// 	return fmt.Errorf("parse backup start time: %w", err)
-	// }
-
-	// backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
-
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
@@ -137,8 +127,8 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		table.AddSeparator()
 		table.AddRow("CREATED AT", *backup.StartTime)
 		table.AddSeparator()
-		// table.AddRow("EXPIRES AT", backupExpireDate)
-		// table.AddSeparator()
+		table.AddRow("EXPIRES AT", *backup.EndTime)
+		table.AddSeparator()
 		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
 
 		err := table.Display(p)
