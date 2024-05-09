@@ -16,6 +16,9 @@ stackit load-balancer observability-credentials list [flags]
   List all observability credentials for Load Balancer
   $ stackit load-balancer observability-credentials list
 
+  List all used observability credentials for Load Balancer
+  $ stackit load-balancer observability-credentials list --used
+
   List all observability credentials for Load Balancer in JSON format
   $ stackit load-balancer observability-credentials list --output-format json
 
@@ -28,6 +31,8 @@ stackit load-balancer observability-credentials list [flags]
 ```
   -h, --help        Help for "stackit load-balancer observability-credentials list"
       --limit int   Maximum number of entries to list
+      --unused      List only unused credentials
+      --used        List only used credentials
 ```
 
 ### Options inherited from parent commands

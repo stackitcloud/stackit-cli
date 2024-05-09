@@ -45,6 +45,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List all observability credentials for Load Balancer`,
 				"$ stackit load-balancer observability-credentials list"),
 			examples.NewExample(
+				`List all used observability credentials for Load Balancer`,
+				"$ stackit load-balancer observability-credentials list --used"),
+			examples.NewExample(
 				`List all observability credentials for Load Balancer in JSON format`,
 				"$ stackit load-balancer observability-credentials list --output-format json"),
 			examples.NewExample(
@@ -89,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
 			credentialsPtr := resp.Credentials
-			if credentialsPtr == nil || (credentialsPtr != nil && len(*credentialsPtr) == 0) {
+			if credentialsPtr == nil || len(*credentialsPtr) == 0 {
 				p.Info("No observability credentials found for Load Balancer on project %q\n", projectLabel)
 				return nil
 			}
@@ -151,15 +154,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, credentials, usedCredentials []loadbalancer.CredentialsResponse) error {
-	creds := credentials
+func outputResult(p *print.Printer, model *inputModel, allCredentials, usedCredentials []loadbalancer.CredentialsResponse) error {
+	credentials := allCredentials
 	if model.Used {
-		creds = usedCredentials
+		credentials = usedCredentials
 	}
 
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(creds, "", "  ")
+		details, err := json.MarshalIndent(credentials, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Load Balancer observability credentials list: %w", err)
 		}
@@ -169,8 +172,8 @@ func outputResult(p *print.Printer, model *inputModel, credentials, usedCredenti
 	default:
 		table := tables.NewTable()
 		table.SetHeader("REFERENCE", "DISPLAY NAME", "USERNAME")
-		for i := range creds {
-			c := creds[i]
+		for i := range credentials {
+			c := credentials[i]
 			table.AddRow(*c.CredentialsRef, *c.DisplayName, *c.Username)
 		}
 		err := table.Display(p)
