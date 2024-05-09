@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -108,6 +109,34 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "used",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[usedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Used = true
+			}),
+		},
+		{
+			description: "unused",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[unusedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Unused = true
+			}),
+		},
+		{
+			description: "used and unused",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[usedFlag] = "true"
+				flagValues[unusedFlag] = "true"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -130,6 +159,14 @@ func TestParseInput(t *testing.T) {
 			}
 
 			err = cmd.ValidateRequiredFlags()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating flags: %v", err)
+			}
+
+			err = cmd.ValidateFlagGroups()
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -179,6 +216,55 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestGetFilterOp(t *testing.T) {
+	tests := []struct {
+		description      string
+		used             bool
+		unused           bool
+		expectedFilterOp int
+		isValid          bool
+	}{
+		{
+			description:      "used",
+			used:             true,
+			expectedFilterOp: lbUtils.OP_FILTER_USED,
+			isValid:          true,
+		},
+		{
+			description:      "unused",
+			unused:           true,
+			expectedFilterOp: lbUtils.OP_FILTER_UNUSED,
+			isValid:          true,
+		},
+		{
+			description: "used and unused",
+			used:        true,
+			unused:      true,
+			isValid:     false,
+		},
+		{
+			description:      "neither used nor unused",
+			expectedFilterOp: lbUtils.OP_FILTER_NOP,
+			isValid:          true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			filterOp, err := getFilterOp(tt.used, tt.unused)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error getting filter op: %v", err)
+			}
+			if filterOp != tt.expectedFilterOp {
+				t.Fatalf("Data does not match: %d", filterOp)
 			}
 		})
 	}
