@@ -23,7 +23,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("cleanup"),
+		Use:   "cleanup",
 		Short: "Deletes observability credentials unused by any Load Balancer",
 		Long:  "Deletes observability credentials unused by any Load Balancer.",
 		Args:  args.NoArgs,
@@ -56,11 +56,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
-			credentialsPtr := resp.Credentials
 
 			var credentials []loadbalancer.CredentialsResponse
-			if credentialsPtr != nil && len(*credentialsPtr) > 0 {
-				credentials, err = utils.FilterCredentials(ctx, apiClient, *credentialsPtr, model.ProjectId, utils.OP_FILTER_UNUSED)
+			if resp.Credentials != nil && len(*resp.Credentials) > 0 {
+				credentials, err = utils.FilterCredentials(ctx, apiClient, *resp.Credentials, model.ProjectId, utils.OP_FILTER_UNUSED)
 				if err != nil {
 					return fmt.Errorf("filter Load Balancer observability credentials: %w", err)
 				}
