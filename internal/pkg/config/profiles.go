@@ -18,8 +18,8 @@ import (
 func GetProfile() (string, error) {
 	profile, profileSet := os.LookupEnv("STACKIT_CLI_PROFILE")
 	if !profileSet {
-		confiprofileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
-		contents, exists, err := readFileIfExists(confiprofileFilePath)
+		profileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
+		contents, exists, err := readFileIfExists(profileFilePath)
 		if err != nil {
 			return "", fmt.Errorf("read profile from file: %v", err)
 		}
