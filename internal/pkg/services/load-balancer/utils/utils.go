@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"sort"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
@@ -135,29 +136,29 @@ func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId,
 }
 
 // GetUsedObsCredentials returns a list of credentials that are used by load balancers for observability metrics or logs.
-// It goes through all load balancers and checks what credentials are being used, then returns a list of those credentials.
-func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, projectId string) (map[string]loadbalancer.CredentialsResponse, error) {
+// It goes through all load balancers and checks what observability credentials are being used, then returns a list of those credentials.
+func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, projectId string) ([]loadbalancer.CredentialsResponse, error) {
+	var usedCredentialsSlice []loadbalancer.CredentialsResponse
+
 	loadBalancers, err := apiClient.ListLoadBalancersExecute(ctx, projectId)
 	if err != nil {
 		return nil, fmt.Errorf("list load balancers: %w", err)
 	}
-
 	if loadBalancers == nil || loadBalancers.LoadBalancers == nil {
-		return nil, fmt.Errorf("no load balancers found")
+		return usedCredentialsSlice, nil
 	}
 
-	var usedCredentials []string
-
+	var usedCredentialsRefs []string
 	for _, loadBalancer := range *loadBalancers.LoadBalancers {
 		if loadBalancer.Options == nil || loadBalancer.Options.Observability == nil {
 			continue
 		}
 
-		if loadBalancer.Options != nil && loadBalancer.Options.Observability != nil && loadBalancer.Options.Observability.Logs != nil && loadBalancer.Options.Observability.Metrics != nil {
-			usedCredentials = append(usedCredentials, *loadBalancer.Options.Observability.Logs.CredentialsRef)
+		if loadBalancer.Options != nil && loadBalancer.Options.Observability != nil && loadBalancer.Options.Observability.Logs != nil && loadBalancer.Options.Observability.Logs.CredentialsRef != nil {
+			usedCredentialsRefs = append(usedCredentialsRefs, *loadBalancer.Options.Observability.Logs.CredentialsRef)
 		}
-		if loadBalancer.Options != nil && loadBalancer.Options.Observability != nil && loadBalancer.Options.Observability.Metrics != nil && loadBalancer.Options.Observability.Logs == nil {
-			usedCredentials = append(usedCredentials, *loadBalancer.Options.Observability.Metrics.CredentialsRef)
+		if loadBalancer.Options != nil && loadBalancer.Options.Observability != nil && loadBalancer.Options.Observability.Metrics != nil && loadBalancer.Options.Observability.Metrics.CredentialsRef != nil {
+			usedCredentialsRefs = append(usedCredentialsRefs, *loadBalancer.Options.Observability.Metrics.CredentialsRef)
 		}
 	}
 
@@ -165,21 +166,29 @@ func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, pr
 	if err != nil {
 		return nil, fmt.Errorf("get credentials: %w", err)
 	}
-
 	if credentials == nil || credentials.Credentials == nil {
-		return nil, fmt.Errorf("no credentials found")
+		return usedCredentialsSlice, nil
 	}
-	var usedObsCredentials map[string]loadbalancer.CredentialsResponse
 
+	usedCredentialsMap := make(map[string]loadbalancer.CredentialsResponse)
 	for _, credential := range *credentials.Credentials {
 		if credential.CredentialsRef == nil {
 			continue
 		}
 		ref := *credential.CredentialsRef
-		if slices.Contains(usedCredentials, ref) {
-			usedObsCredentials[ref] = credential
+		if slices.Contains(usedCredentialsRefs, ref) {
+			usedCredentialsMap[ref] = credential
 		}
 	}
 
-	return usedObsCredentials, nil
+	for _, credential := range usedCredentialsMap {
+		usedCredentialsSlice = append(usedCredentialsSlice, credential)
+	}
+
+	// sort credentials by reference to make output deterministic
+	sort.Slice(usedCredentialsSlice, func(i, j int) bool {
+		return *usedCredentialsSlice[i].CredentialsRef < *usedCredentialsSlice[j].CredentialsRef
+	})
+
+	return usedCredentialsSlice, nil
 }

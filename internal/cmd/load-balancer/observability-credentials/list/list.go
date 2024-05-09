@@ -70,11 +70,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			var usedCredentials map[string]loadbalancer.CredentialsResponse
+			var usedCredentials []loadbalancer.CredentialsResponse
 			if model.Used {
 				usedCredentials, err = utils.GetUsedObsCredentials(ctx, apiClient, model.ProjectId)
 				if err != nil {
 					return fmt.Errorf("get used observability credentials: %w", err)
+				}
+				if len(usedCredentials) == 0 {
+					p.Info("No used observability credentials found for Load Balancer on project %q\n", projectLabel)
+					return nil
 				}
 			}
 
@@ -96,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(p, model.OutputFormat, credentials)
+			return outputResult(p, model, credentials, usedCredentials)
 		},
 	}
 	configureFlags(cmd)
@@ -147,10 +151,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []loadbalancer.CredentialsResponse) error {
-	switch outputFormat {
+func outputResult(p *print.Printer, model *inputModel, credentials, usedCredentials []loadbalancer.CredentialsResponse) error {
+	creds := credentials
+	if model.Used {
+		creds = usedCredentials
+	}
+
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(credentials, "", "  ")
+		details, err := json.MarshalIndent(creds, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Load Balancer observability credentials list: %w", err)
 		}
@@ -160,8 +169,8 @@ func outputResult(p *print.Printer, outputFormat string, credentials []loadbalan
 	default:
 		table := tables.NewTable()
 		table.SetHeader("REFERENCE", "DISPLAY NAME", "USERNAME")
-		for i := range credentials {
-			c := credentials[i]
+		for i := range creds {
+			c := creds[i]
 			table.AddRow(*c.CredentialsRef, *c.DisplayName, *c.Username)
 		}
 		err := table.Display(p)
