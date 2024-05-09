@@ -33,9 +33,9 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "Lists all restore jobs which are available for a MongoDB Flex instance",
-		Long:  "Lists all restore jobs which are available for a MongoDB Flex instance.",
+		Use:   "restore-jobs",
+		Short: "Lists all restore jobs which have been run for a MongoDB Flex instance",
+		Long:  "Lists all restore jobs which have been run for a MongoDB Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
 				`List all restore jobs of instance with ID "xxx"`,
