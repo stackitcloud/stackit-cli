@@ -61,10 +61,6 @@ func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _
 	return nil, nil
 }
 
-func (m *loadBalancerClientMocked) ListCredentialsExecute(_ context.Context, _ string) (*loadbalancer.ListCredentialsResponse, error) {
-	return nil, nil
-}
-
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
 		testIP,
