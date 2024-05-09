@@ -30,7 +30,7 @@ func readFileIfExists(filePath string) (contents string, exists bool, err error)
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", true, fmt.Errorf("read file: %v", err)
+		return "", true, fmt.Errorf("read file: %w", err)
 	}
 
 	return string(content), true, nil

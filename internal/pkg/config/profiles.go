@@ -21,7 +21,7 @@ func GetProfile() (string, error) {
 		profileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 		contents, exists, err := readFileIfExists(profileFilePath)
 		if err != nil {
-			return "", fmt.Errorf("read profile from file: %v", err)
+			return "", fmt.Errorf("read profile from file: %w", err)
 		}
 		if !exists {
 			return "", nil
@@ -31,7 +31,7 @@ func GetProfile() (string, error) {
 
 	err := validateProfile(profile)
 	if err != nil {
-		return "", fmt.Errorf("validate profile from env var: %v", err)
+		return "", fmt.Errorf("validate profile from env var: %w", err)
 	}
 	return profile, nil
 }
@@ -42,7 +42,7 @@ func GetProfile() (string, error) {
 func validateProfile(profile string) error {
 	match, err := regexp.MatchString("^[a-zA-Z0-9-]+$", profile)
 	if err != nil {
-		return fmt.Errorf("match string regex: %v", err)
+		return fmt.Errorf("match string regex: %w", err)
 	}
 	if !match {
 		return fmt.Errorf("profile name can only contain letters, numbers, and \"-\" and cannot be empty")
