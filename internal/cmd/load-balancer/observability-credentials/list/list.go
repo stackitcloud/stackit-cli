@@ -42,11 +42,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all observability credentials for Load Balancer`,
+				`List all Load Balancer observability credentials`,
 				"$ stackit load-balancer observability-credentials list"),
 			examples.NewExample(
-				`List all used observability credentials for Load Balancer`,
+				`List all observability credentials being used by Load Balancer`,
 				"$ stackit load-balancer observability-credentials list --used"),
+			examples.NewExample(
+				`List all observability credentials not being used by Load Balancer`,
+				"$ stackit load-balancer observability-credentials list --unused"),
 			examples.NewExample(
 				`List all observability credentials for Load Balancer in JSON format`,
 				"$ stackit load-balancer observability-credentials list --output-format json"),
@@ -105,8 +108,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Bool(usedFlag, false, "List only used credentials")
-	cmd.Flags().Bool(unusedFlag, false, "List only unused credentials")
+	cmd.Flags().Bool(usedFlag, false, "List only credentials being used by a Load Balancer")
+	cmd.Flags().Bool(unusedFlag, false, "List only credentials not being used by a Load Balancer")
 
 	cmd.MarkFlagsMutuallyExclusive(usedFlag, unusedFlag)
 }

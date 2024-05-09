@@ -212,21 +212,20 @@ func GetUnusedObsCredentials(usedCredentials, allCredentials []loadbalancer.Cred
 // If unused is true, it returns only the credentials that are not used by any load balancer for observability metrics or logs.
 // If both used and unused are true, it returns an error.
 // If both used and unused are false, it returns the original list of credentials.
-func FilterCredentials(ctx context.Context, client LoadBalancerClient, credentials []loadbalancer.CredentialsResponse, projectId string, used, unused bool) ([]loadbalancer.CredentialsResponse, error) {
+func FilterCredentials(ctx context.Context, client LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId string, used, unused bool) ([]loadbalancer.CredentialsResponse, error) {
 	if !used && !unused {
-		return credentials, nil
+		return allCredentials, nil
 	}
 	if used && unused {
 		return nil, fmt.Errorf("used and unused flags are mutually exclusive")
 	}
-	filteredCredentials, err := GetUsedObsCredentials(ctx, client, credentials, projectId)
+	usedCredentials, err := GetUsedObsCredentials(ctx, client, allCredentials, projectId)
 	if err != nil {
 		return nil, fmt.Errorf("get used observability credentials: %w", err)
 	}
 
 	if unused {
-		filteredCredentials = GetUnusedObsCredentials(filteredCredentials, credentials)
+		return GetUnusedObsCredentials(usedCredentials, allCredentials), nil
 	}
-
-	return filteredCredentials, nil
+	return usedCredentials, nil
 }
