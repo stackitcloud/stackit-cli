@@ -131,7 +131,7 @@ winget:
     publisher: stackitcloud
     short_description: A command-line interface to manage STACKIT resources.
     license: Apache-2.0
-    publisher_support_url: "https://github.com/derailed/k9s/issues"
+    publisher_support_url: "https://github.com/stackitcloud/stackit-cli/issues"
     package_identifier: stackitcloud.stackit
     homepage: "https://github.com/stackitcloud/stackit-cli"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
