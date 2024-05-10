@@ -171,7 +171,12 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	pagerCmd := exec.Command("less", "-F", "-S", "-w")
+
+	// less arguments
+	// -F: exits if the entire file fits on the first screen
+	// -S: disables line wrapping
+	// -R: interprets ANSI color and style sequences
+	pagerCmd := exec.Command("less", "-F", "-S", "-R")
 
 	pagerCmd.Stdin = strings.NewReader(content)
 	pagerCmd.Stdout = p.Cmd.OutOrStdout()
