@@ -47,7 +47,7 @@ func TestValidateProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := validateProfile(tt.profile)
+			err := ValidateProfile(tt.profile)
 			if tt.isValid && err != nil {
 				t.Errorf("expected profile to be valid but got error: %v", err)
 			}

@@ -77,17 +77,20 @@ var ConfigKeys = []string{
 }
 
 var configFolderPath string
+var profileFilePath string
 
 func InitConfig() {
 	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
 
+	configFolderPath = filepath.Join(configDir, configFolder)                                                      // Default config folder
+	profileFilePath = filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension)) // Profile file path is in the default config folder
+
 	configProfile, err := GetProfile()
 	cobra.CheckErr(err)
 
-	configFolderPath = filepath.Join(configDir, configFolder)
 	if configProfile != "" {
-		configFolderPath = filepath.Join(configFolderPath, configProfile)
+		configFolderPath = filepath.Join(configFolderPath, configProfile) // If a profile is set, use the profile config folder
 	}
 
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
