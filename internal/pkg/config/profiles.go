@@ -71,7 +71,7 @@ func ValidateProfile(profile string) error {
 		return fmt.Errorf("match string regex: %w", err)
 	}
 	if !match {
-		return &errors.InvalidProfileError{
+		return &errors.InvalidProfileNameError{
 			Profile: profile,
 		}
 	}

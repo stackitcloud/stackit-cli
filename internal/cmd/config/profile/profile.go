@@ -15,10 +15,10 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "profile",
-		Short: "Manage the CLI configurations profiles",
+		Short: "Manage the CLI configuration profiles",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
-			"Manage the CLI configurations profiles.",
-			`The profile to be used can be managed via the STACKIT_CLI_PROFILE environment variable or using the "stackit config profile set PROFILE" and "stackit config profile unset" commands.`,
+			"Manage the CLI configuration profiles.",
+			`The profile to be used can be managed via the "STACKIT_CLI_PROFILE" environment variable or using the "stackit config profile set PROFILE" and "stackit config profile unset" commands.`,
 			"The environment variable takes precedence over what is set via the commands.",
 			"When no profile is set, the default profile is used.",
 		),
