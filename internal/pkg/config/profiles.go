@@ -20,7 +20,6 @@ import (
 func GetProfile() (string, error) {
 	profile, profileSet := os.LookupEnv("STACKIT_CLI_PROFILE")
 	if !profileSet {
-		profileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 		contents, exists, err := readFileIfExists(profileFilePath)
 		if err != nil {
 			return "", fmt.Errorf("read profile from file: %w", err)
@@ -56,7 +55,6 @@ func SetProfile(profile string) error {
 // UnsetProfile removes the profile file.
 // If the profile file does not exist, it does nothing.
 func UnsetProfile() error {
-	profileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 	err := os.Remove(profileFilePath)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("remove profile file: %w", err)
