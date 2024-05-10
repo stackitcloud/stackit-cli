@@ -529,13 +529,11 @@ func TestGetUserName(t *testing.T) {
 	}
 }
 
-func TestGetGetRestoreStatus(t *testing.T) {
+func TestGetRestoreStatus(t *testing.T) {
 	tests := []struct {
-		description          string
-		listRestoreJobsFails bool
-		listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
-		isValid              bool
-		expectedOutput       string
+		description         string
+		listRestoreJobsResp *mongodbflex.ListRestoreJobsResponse
+		expectedOutput      string
 	}{
 		{
 			description: "base",
@@ -551,7 +549,6 @@ func TestGetGetRestoreStatus(t *testing.T) {
 					},
 				},
 			},
-			isValid:        true,
 			expectedOutput: "state",
 		},
 		{
@@ -568,7 +565,6 @@ func TestGetGetRestoreStatus(t *testing.T) {
 					},
 				},
 			},
-			isValid:        true,
 			expectedOutput: "in progress",
 		},
 		{
@@ -585,7 +581,6 @@ func TestGetGetRestoreStatus(t *testing.T) {
 					},
 				},
 			},
-			isValid:        true,
 			expectedOutput: "-",
 		},
 		{
@@ -593,34 +588,14 @@ func TestGetGetRestoreStatus(t *testing.T) {
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
 				Items: nil,
 			},
-			isValid:        true,
 			expectedOutput: "-",
-		},
-		{
-			description:          "get restore jobs fails",
-			listRestoreJobsFails: true,
-			isValid:              false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
-				listRestoreJobsFails: tt.listRestoreJobsFails,
-				listRestoreJobsResp:  tt.listRestoreJobsResp,
-			}
+			output := GetRestoreStatus(testBackupId, tt.listRestoreJobsResp)
 
-			output, err := GetRestoreStatus(context.Background(), client, testProjectId, testInstanceId, testBackupId)
-
-			if tt.isValid && err != nil {
-				t.Errorf("failed on valid input")
-			}
-			if !tt.isValid && err == nil {
-				t.Errorf("did not fail on invalid input")
-			}
-			if !tt.isValid {
-				return
-			}
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

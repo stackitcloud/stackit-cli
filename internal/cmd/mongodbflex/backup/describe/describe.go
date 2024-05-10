@@ -59,6 +59,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			instanceLabel, err := utils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -67,11 +73,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe backup for MongoDB Flex instance: %w", err)
 			}
 
-			restoreJobState, err := utils.GetRestoreStatus(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId)
+			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, model.InstanceId).Execute()
 			if err != nil {
-				return fmt.Errorf("get restore status for MongoDB Flex instance backup: %w", err)
+				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
 
+			restoreJobState := utils.GetRestoreStatus(model.BackupId, restoreJobs)
 			return outputResult(p, cmd, model.OutputFormat, restoreJobState, *resp.Item)
 		},
 	}

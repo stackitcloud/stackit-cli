@@ -159,15 +159,10 @@ func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, in
 	return *resp.Item.Username, nil
 }
 
-func GetRestoreStatus(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, backupId string) (string, error) {
+func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsResponse) string {
 	state := "-"
-	restoreJobs, err := apiClient.ListRestoreJobsExecute(ctx, projectId, instanceId)
-	if err != nil {
-		return "", fmt.Errorf("list restore jobs: %w", err)
-	}
-
 	if restoreJobs.Items == nil {
-		return state, nil
+		return state
 	}
 
 	for _, restoreJob := range *restoreJobs.Items {
@@ -176,5 +171,5 @@ func GetRestoreStatus(ctx context.Context, apiClient MongoDBFlexClient, projectI
 			break
 		}
 	}
-	return state, nil
+	return state
 }
