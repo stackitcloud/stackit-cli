@@ -16,16 +16,16 @@ stackit opensearch credentials create [flags]
   Create credentials for an OpenSearch instance
   $ stackit opensearch credentials create --instance-id xxx
 
-  Create credentials for an OpenSearch instance and hide the password in the output
-  $ stackit opensearch credentials create --instance-id xxx --hide-password
+  Create credentials for an OpenSearch instance and show the password in the output
+  $ stackit opensearch credentials create --instance-id xxx --show-password
 ```
 
 ### Options
 
 ```
   -h, --help                 Help for "stackit opensearch credentials create"
-      --hide-password        Hide password in output
       --instance-id string   Instance ID
+  -s, --show-password        Show password in output
 ```
 
 ### Options inherited from parent commands

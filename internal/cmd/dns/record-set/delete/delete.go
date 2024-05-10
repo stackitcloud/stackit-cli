@@ -124,11 +124,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
 		RecordSetId:     recordSetId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiDeleteRecordSetRequest {

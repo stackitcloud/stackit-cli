@@ -110,11 +110,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Limit:           limit,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiListCredentialsRequest {

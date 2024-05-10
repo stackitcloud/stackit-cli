@@ -54,6 +54,7 @@ release:
   prerelease: auto
 
 changelog:
+  use: github
   sort: asc
   filters:
     exclude:

@@ -38,16 +38,16 @@ The CLI commands are located under `internal/cmd`, where each folder includes th
 
 ### Implementing a new command
 
-Let's suppose you want to want to implement a new command `bar`, that would be the direct child of an existing command `stackit foo` (meaning it would be invoked as `stackit foo bar`):
+Let's suppose you want to implement a new command `bar`, that would be the direct child of an existing command `stackit foo` (meaning it would be invoked as `stackit foo bar`):
 
 1. You would start by creating a new folder `bar/` inside `internal/cmd/foo/`
 2. Following with the creation of a file `bar.go` inside your new folder `internal/cmd/foo/bar/`
    1. The Go package should be similar to the command usage, in this case `package bar` would be an adequate name
-   2. Please refer to the [Command file structure](./CONTRIBUTION.md/#command-file-structure) section for details on the strcutre of the file itself
+   2. Please refer to the [Command file structure](./CONTRIBUTION.md/#command-file-structure) section for details on the structure of the file itself
 3. To register the command `bar` as a child of the existing command `foo`, add `cmd.AddCommand(bar.NewCmd(p))` to the `addSubcommands` method of the constructor of the `foo` command
    1. In this case, `p` is the `printer` that is passed from the root command to all subcommands of the tree (refer to the [Outputs, prints and debug logs](./CONTRIBUTION.md/#outputs-prints-and-debug-logs) section for more details regarding the `printer`)
 
-Please remeber to run `make generate-docs` after your changes to keep the commands' documentation updated.
+Please remember to run `make generate-docs` after your changes to keep the commands' documentation updated.
 
 #### Command file structure
 
@@ -138,11 +138,23 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
       MyArg            myArg,
 		MyFlag:          flags.FlagToStringPointer(cmd, myFlag),
 	}, nil
+
+	// Write the input model to the debug logs
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 // Build request to the API
@@ -200,7 +212,7 @@ If you want to add a command that uses a STACKIT service `foo` that was not yet 
 
 1.  Add a `FooCustomEndpointKey` key in `internal/pkg/config/config.go` (and add it to `ConfigKeys` and set the to default to `""` using `viper.SetDefault`)
 2.  Update the `stackit config unset` and `stackit config unset` commands by adding flags to set and unset a custom endpoint for the `foo` service API, respectively, and update their unit tests
-3.  Setup the SDK client configuration, using the authentication method configured in the CLI
+3.  Set up the SDK client configuration, using the authentication method configured in the CLI
 
     1.  This is done in `internal/pkg/services/foo/client/client.go`
     2.  Below is an example of a typical `client.go` file structure:
@@ -279,6 +291,6 @@ If you would like to report a bug, please open a [GitHub issue](https://github.c
 To ensure we can provide the best support to your issue, follow these guidelines:
 
 1. Go through the existing issues to check if your issue has already been reported.
-2. Make sure you are using the latest version of the provider, we will not provide bug fixes for older versions. Also, latest versions may have the fix for your bug.
-3. Please provide as much information as you can about your environment, e.g. your version of Go, your version of the provider, which operating system you are using and the corresponding version.
+2. Make sure you are using the latest version of the STACKIT CLI, we will not provide bug fixes for older versions. Also, latest versions may have the fix for your bug.
+3. Please provide as much information as you can about your environment, e.g. your version of Go, your version of the CLI, which operating system you are using and the corresponding version.
 4. Include in your issue the steps to reproduce it, along with code snippets and/or information about your specific use case. This will make the support process much easier and efficient.

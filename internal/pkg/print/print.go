@@ -4,15 +4,19 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"syscall"
 
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"golang.org/x/term"
 )
 
 type Level string
@@ -37,7 +41,10 @@ type Printer struct {
 
 // Creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{AddSource: false, Level: slog.LevelDebug}))
+	w := os.Stderr
+	logger := slog.New(
+		tint.NewHandler(colorable.NewColorable(w), &tint.Options{AddSource: false, Level: slog.LevelDebug}),
+	)
 	slog.SetDefault(logger)
 
 	return &Printer{}
@@ -66,7 +73,7 @@ func (p *Printer) Outputln(msg string) {
 // Print a Debug level log through the "slog" package.
 // If the verbosity level is not Debug, it does nothing
 func (p *Printer) Debug(level Level, msg string, args ...any) {
-	if p.Verbosity != DebugLevel {
+	if !p.IsVerbosityDebug() {
 		return
 	}
 	msg = fmt.Sprintf(msg, args...)
@@ -85,7 +92,7 @@ func (p *Printer) Debug(level Level, msg string, args ...any) {
 // Print an Info level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug or Info, it does nothing.
 func (p *Printer) Info(msg string, args ...any) {
-	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel {
+	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() {
 		return
 	}
 	p.Cmd.PrintErrf(msg, args...)
@@ -94,7 +101,7 @@ func (p *Printer) Info(msg string, args ...any) {
 // Print a Warn level output to the defined Err output (falling back to Stderr if not set).
 // If the verbosity level is not Debug, Info, or Warn, it does nothing.
 func (p *Printer) Warn(msg string, args ...any) {
-	if p.Verbosity != DebugLevel && p.Verbosity != InfoLevel && p.Verbosity != WarningLevel {
+	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() && !p.IsVerbosityWarning() {
 		return
 	}
 	warning := fmt.Sprintf(msg, args...)
@@ -133,22 +140,28 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 
 // Prompts the user for confirmation by pressing Enter.
 //
-// Returns nil only if the user (explicitly) press directly enter.
-// Returns ErrAborted if the user press anything else before pressing enter.
+// Returns nil if the user presses Enter.
 func (p *Printer) PromptForEnter(prompt string) error {
-	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
-
+	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	p.Cmd.PrintErr(prompt)
-	answer, err := reader.ReadByte()
+	_, err := reader.ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("read user response: %w", err)
 	}
+	return nil
+}
 
-	// ASCII code for Enter (newline) is 10.
-	if answer == 10 {
-		return nil
+// Prompts the user for a password.
+//
+// Returns the password that was given, otherwise returns error
+func (p *Printer) PromptForPassword(prompt string) (string, error) {
+	p.Cmd.PrintErr(prompt)
+	defer p.Outputln("")
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", fmt.Errorf("read password: %w", err)
 	}
-	return errAborted
+	return string(bytePassword), nil
 }
 
 // Shows the content in the command's stdout using the "less" command
@@ -158,13 +171,35 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	lessCmd := exec.Command("less", "-F", "-S", "-w")
-	lessCmd.Stdin = strings.NewReader(content)
-	lessCmd.Stdout = p.Cmd.OutOrStdout()
+	pagerCmd := exec.Command("less", "-F", "-S", "-w")
 
-	err := lessCmd.Run()
+	pagerCmd.Stdin = strings.NewReader(content)
+	pagerCmd.Stdout = p.Cmd.OutOrStdout()
+
+	err := pagerCmd.Run()
 	if err != nil {
-		return fmt.Errorf("run less command: %w", err)
+		p.Debug(ErrorLevel, "run pager command: %v", err)
+		p.Outputln(content)
 	}
 	return nil
+}
+
+// Returns True if the verbosity level is set to Debug, False otherwise.
+func (p *Printer) IsVerbosityDebug() bool {
+	return p.Verbosity == DebugLevel
+}
+
+// Returns True if the verbosity level is set to Info, False otherwise.
+func (p *Printer) IsVerbosityInfo() bool {
+	return p.Verbosity == InfoLevel
+}
+
+// Returns True if the verbosity level is set to Warning, False otherwise.
+func (p *Printer) IsVerbosityWarning() bool {
+	return p.Verbosity == WarningLevel
+}
+
+// Returns True if the verbosity level is set to Error, False otherwise.
+func (p *Printer) IsVerbosityError() bool {
+	return p.Verbosity == ErrorLevel
 }

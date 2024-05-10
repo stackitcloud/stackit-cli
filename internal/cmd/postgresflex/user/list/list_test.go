@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -155,7 +156,8 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(nil, cmd)
+			p := print.NewPrinter()
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

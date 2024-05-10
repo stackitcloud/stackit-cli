@@ -29,6 +29,12 @@ func ConfigureClient(p *print.Printer) (*mongodbflex.APIClient, error) {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	}
 
+	if p.IsVerbosityDebug() {
+		cfgOptions = append(cfgOptions,
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
+		)
+	}
+
 	apiClient, err = mongodbflex.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)

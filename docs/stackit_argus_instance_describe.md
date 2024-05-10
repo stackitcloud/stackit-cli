@@ -16,8 +16,8 @@ stackit argus instance describe INSTANCE_ID [flags]
   Get details of an Argus instance with ID "xxx"
   $ stackit argus instance describe xxx
 
-  Get details of an Argus instance with ID "xxx" in a table format
-  $ stackit argus instance describe xxx --output-format pretty
+  Get details of an Argus instance with ID "xxx" in JSON format
+  $ stackit argus instance describe xxx --output-format json
 ```
 
 ### Options

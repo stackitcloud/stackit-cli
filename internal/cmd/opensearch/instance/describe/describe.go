@@ -40,8 +40,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of an OpenSearch instance with ID "xxx"`,
 				"$ stackit opensearch instance describe xxx"),
 			examples.NewExample(
-				`Get details of an OpenSearch instance with ID "xxx" in a table format`,
-				"$ stackit opensearch instance describe xxx --output-format pretty"),
+				`Get details of an OpenSearch instance with ID "xxx" in JSON format`,
+				"$ stackit opensearch instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -76,10 +76,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiGetInstanceRequest {
@@ -89,7 +100,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 
 func outputResult(p *print.Printer, outputFormat string, instance *opensearch.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal OpenSearch instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.InstanceId)
 		table.AddSeparator()
@@ -113,14 +132,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *opensearch.In
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal OpenSearch instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

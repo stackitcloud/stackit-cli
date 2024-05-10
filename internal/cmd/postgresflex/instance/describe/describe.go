@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a PostgreSQL Flex instance with ID "xxx"`,
 				"$ stackit postgresflex instance describe xxx"),
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex instance with ID "xxx" in a table format`,
-				"$ stackit postgresflex instance describe xxx --output-format pretty"),
+				`Get details of a PostgreSQL Flex instance with ID "xxx" in JSON format`,
+				"$ stackit postgresflex instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -78,10 +78,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetInstanceRequest {
@@ -91,7 +102,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 
 func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(instance, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 
@@ -124,18 +143,12 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
 		table.AddSeparator()
+		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		table.AddSeparator()
 		err = table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

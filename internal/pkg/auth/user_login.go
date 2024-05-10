@@ -11,8 +11,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -82,6 +83,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	// Define a handler that will get the authorization code, call the token endpoint, and close the HTTP server
 	var errServer error
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		p.Debug(print.DebugLevel, "received request from authentication server")
 		// Close the server only if there was an error
 		// Otherwise, it will redirect to the succesfull login page
 		defer func() {
@@ -98,6 +100,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return
 		}
 
+		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
+
 		// Trade the authorization code and the code verifier for access and refresh tokens
 		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(authDomain, clientId, codeVerifier, code, redirectURL)
 		if err != nil {
@@ -105,10 +109,20 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return
 		}
 
+		p.Debug(print.DebugLevel, "received response from the authentication server")
+
 		sessionExpiresAtUnix, err := getStartingSessionExpiresAtUnix()
 		if err != nil {
 			errServer = fmt.Errorf("compute session expiration timestamp: %w", err)
 			return
+		}
+
+		sessionExpiresAtUnixInt, err := strconv.Atoi(sessionExpiresAtUnix)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "parse session expiration value \"%s\": %s", sessionExpiresAtUnix, err)
+		} else {
+			sessionExpiresAt := time.Unix(int64(sessionExpiresAtUnixInt), 0)
+			p.Debug(print.DebugLevel, "session expires at %s", sessionExpiresAt)
 		}
 
 		err = SetAuthFlow(AUTH_FLOW_USER_TOKEN)
@@ -122,6 +136,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			errServer = fmt.Errorf("get email from access token: %w", err)
 			return
 		}
+
+		p.Debug(print.DebugLevel, "user %s logged in successfully", email)
 
 		authFields := map[authFieldKey]string{
 			SESSION_EXPIRES_AT_UNIX: sessionExpiresAtUnix,
@@ -137,6 +153,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		// Redirect the user to the successful login page
 		loginSuccessURL := redirectURL + loginSuccessPath
+
+		p.Debug(print.DebugLevel, "redirecting browser to login successful page")
 		http.Redirect(w, r, loginSuccessURL, http.StatusSeeOther)
 	})
 
@@ -152,7 +170,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			Email: email,
 		}
 
-		htmlTemplate, err := template.ParseFS(htmlContent, filepath.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
+		// ParseFS expects paths using forward slashes, even on Windows
+		// See: https://github.com/golang/go/issues/44305#issuecomment-780111748
+		htmlTemplate, err := template.ParseFS(htmlContent, path.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
@@ -163,6 +183,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	})
 
+	p.Debug(print.DebugLevel, "opening browser for authentication")
+	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
+
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
 	if err != nil {
@@ -171,6 +194,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
+	p.Debug(print.DebugLevel, "listening for response from authentication server on %s", redirectURL)
 	err = server.Serve(listener)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server for PKCE flow closed unexpectedly: %w", err)

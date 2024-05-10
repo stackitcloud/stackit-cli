@@ -45,8 +45,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit postgresflex user list xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in table format`,
-				"$ stackit postgresflex user list xxx --instance-id yyy --output-format pretty"),
+				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
+				"$ stackit postgresflex user list xxx --instance-id yyy --output-format json"),
 		),
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -92,11 +92,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		UserId:          userId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetUserRequest {
@@ -106,7 +117,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 
 func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserResponse) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *user.Id)
 		table.AddSeparator()
@@ -122,14 +141,6 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

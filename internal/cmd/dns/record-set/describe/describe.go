@@ -43,8 +43,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of DNS record set with ID "xxx" in zone with ID "yyy"`,
 				"$ stackit dns record-set describe xxx --zone-id yyy"),
 			examples.NewExample(
-				`Get details of DNS record set with ID "xxx" in zone with ID "yyy" in a table format`,
-				"$ stackit dns record-set describe xxx --zone-id yyy --output-format pretty"),
+				`Get details of DNS record set with ID "xxx" in zone with ID "yyy" in JSON format`,
+				"$ stackit dns record-set describe xxx --zone-id yyy --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -89,11 +89,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
 		RecordSetId:     recordSetId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiGetRecordSetRequest {
@@ -103,7 +114,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(recordSet, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS record set: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		recordsData := make([]string, 0, len(*recordSet.Records))
 		for _, r := range *recordSet.Records {
 			recordsData = append(recordsData, *r.Content)
@@ -126,14 +145,6 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(recordSet, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

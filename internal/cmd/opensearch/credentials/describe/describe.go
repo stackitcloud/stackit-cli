@@ -42,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of credentials with ID "xxx" from instance with ID "yyy"`,
 				"$ stackit opensearch credentials describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of credentials with ID "xxx" from instance with ID "yyy" in a table format`,
-				"$ stackit opensearch credentials describe xxx --instance-id yyy --output-format pretty"),
+				`Get details of credentials with ID "xxx" from instance with ID "yyy" in JSON format`,
+				"$ stackit opensearch credentials describe xxx --instance-id yyy --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -87,11 +87,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	return &inputModel{
+	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		CredentialsId:   credentialsId,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiGetCredentialsRequest {
@@ -101,7 +112,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 
 func outputResult(p *print.Printer, outputFormat string, credentials *opensearch.CredentialsResponse) error {
 	switch outputFormat {
-	case print.PrettyOutputFormat:
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
 		table := tables.NewTable()
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
@@ -118,14 +137,6 @@ func outputResult(p *print.Printer, outputFormat string, credentials *opensearch
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
 		return nil
 	}

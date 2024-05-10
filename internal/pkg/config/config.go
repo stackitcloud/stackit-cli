@@ -20,6 +20,7 @@ const (
 	ArgusCustomEndpointKey          = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey  = "authorization_custom_endpoint"
 	DNSCustomEndpointKey            = "dns_custom_endpoint"
+	LoadBalancerCustomEndpointKey   = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey          = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
 	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
@@ -39,7 +40,7 @@ const (
 
 // Backend config keys
 const (
-	configFolder        = ".stackit"
+	configFolder        = "stackit"
 	configFileName      = "cli-config"
 	configFileExtension = "json"
 	ProjectNameKey      = "project_name"
@@ -53,6 +54,7 @@ var ConfigKeys = []string{
 	VerbosityKey,
 
 	DNSCustomEndpointKey,
+	LoadBalancerCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
 	ObjectStorageCustomEndpointKey,
@@ -73,9 +75,9 @@ var ConfigKeys = []string{
 var folderPath string
 
 func InitConfig() {
-	home, err := os.UserHomeDir()
+	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
-	configFolderPath := filepath.Join(home, configFolder)
+	configFolderPath := filepath.Join(configDir, configFolder)
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
 	// Write config dir path to global variable

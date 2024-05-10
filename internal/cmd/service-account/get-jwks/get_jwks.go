@@ -35,7 +35,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(cmd, args)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -65,12 +65,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func parseInput(_ *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, _ *cobra.Command, inputArgs []string) (*inputModel, error) {
 	email := inputArgs[0]
 
-	return &inputModel{
+	model := inputModel{
 		Email: email,
-	}, nil
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiGetJWKSRequest {
