@@ -83,21 +83,29 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
 			credentialsPtr := resp.Credentials
-			if credentialsPtr == nil || len(*credentialsPtr) == 0 {
-				p.Info("No observability credentials found for Load Balancer on project %q\n", projectLabel)
+
+			var credentials []loadbalancer.CredentialsResponse
+			if credentialsPtr != nil && len(*credentialsPtr) > 0 {
+				credentials = *credentialsPtr
+				filterOp, err := getFilterOp(model.Used, model.Unused)
+				if err != nil {
+					return err
+				}
+				credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
+				if err != nil {
+					return fmt.Errorf("filter credentials: %w", err)
+				}
+			}
+
+			if len(credentials) == 0 {
+				opLabel := "No "
+				if model.Used {
+					opLabel += "used"
+				} else if model.Unused {
+					opLabel += "unused"
+				}
+				p.Info("%s observability credentials found for Load Balancer on project %q\n", opLabel, projectLabel)
 				return nil
-			}
-
-			credentials := *credentialsPtr
-
-			filterOp, err := getFilterOp(model.Used, model.Unused)
-			if err != nil {
-				return err
-			}
-
-			credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
-			if err != nil {
-				return fmt.Errorf("filter credentials: %w", err)
 			}
 
 			// Truncate output
