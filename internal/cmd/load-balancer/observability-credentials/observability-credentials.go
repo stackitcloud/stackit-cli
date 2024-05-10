@@ -2,6 +2,7 @@ package credentials
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/observability-credentials/add"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/observability-credentials/cleanup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/observability-credentials/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/observability-credentials/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer/observability-credentials/list"
@@ -32,4 +33,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(delete.NewCmd(p))
 	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(list.NewCmd(p))
+	cmd.AddCommand(cleanup.NewCmd(p))
 }

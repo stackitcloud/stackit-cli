@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
@@ -22,28 +23,38 @@ import (
 const (
 	instanceIdFlag = "instance-id"
 	limitFlag      = "limit"
+	usedFlag       = "used"
+	unusedFlag     = "unused"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Limit *int64
+	Limit  *int64
+	Used   bool
+	Unused bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all observability credentials for Load Balancer",
-		Long:  "Lists all observability credentials for Load Balancer.",
+		Short: "Lists observability credentials for Load Balancer",
+		Long:  "Lists observability credentials for Load Balancer.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all observability credentials for Load Balancer`,
+				`List all Load Balancer observability credentials`,
 				"$ stackit load-balancer observability-credentials list"),
 			examples.NewExample(
-				`List all observability credentials for Load Balancer in JSON format`,
+				`List all observability credentials being used by Load Balancer`,
+				"$ stackit load-balancer observability-credentials list --used"),
+			examples.NewExample(
+				`List all observability credentials not being used by Load Balancer`,
+				"$ stackit load-balancer observability-credentials list --unused"),
+			examples.NewExample(
+				`List all Load Balancer observability credentials in JSON format`,
 				"$ stackit load-balancer observability-credentials list --output-format json"),
 			examples.NewExample(
-				`List up to 10 observability credentials for Load Balancer`,
+				`List up to 10 Load Balancer observability credentials`,
 				"$ stackit load-balancer observability-credentials list --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -72,12 +83,22 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
 			credentialsPtr := resp.Credentials
-			if credentialsPtr == nil || (credentialsPtr != nil && len(*credentialsPtr) == 0) {
+			if credentialsPtr == nil || len(*credentialsPtr) == 0 {
 				p.Info("No observability credentials found for Load Balancer on project %q\n", projectLabel)
 				return nil
 			}
 
 			credentials := *credentialsPtr
+
+			filterOp, err := getFilterOp(model.Used, model.Unused)
+			if err != nil {
+				return err
+			}
+
+			credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
+			if err != nil {
+				return fmt.Errorf("filter credentials: %w", err)
+			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
@@ -92,6 +113,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+	cmd.Flags().Bool(usedFlag, false, "List only credentials being used by a Load Balancer")
+	cmd.Flags().Bool(unusedFlag, false, "List only credentials not being used by a Load Balancer")
+
+	cmd.MarkFlagsMutuallyExclusive(usedFlag, unusedFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -111,6 +136,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
+		Used:            flags.FlagToBoolValue(p, cmd, usedFlag),
+		Unused:          flags.FlagToBoolValue(p, cmd, unusedFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -154,4 +181,21 @@ func outputResult(p *print.Printer, outputFormat string, credentials []loadbalan
 
 		return nil
 	}
+}
+
+func getFilterOp(used, unused bool) (int, error) {
+	// should not happen, cobra handles this
+	if used && unused {
+		return 0, fmt.Errorf("used and unused flags are mutually exclusive")
+	}
+
+	if !used && !unused {
+		return utils.OP_FILTER_NOP, nil
+	}
+
+	if used {
+		return utils.OP_FILTER_USED, nil
+	}
+
+	return utils.OP_FILTER_UNUSED, nil
 }

@@ -30,8 +30,9 @@ stackit load-balancer observability-credentials [flags]
 
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
 * [stackit load-balancer observability-credentials add](./stackit_load-balancer_observability-credentials_add.md)	 - Adds observability credentials to Load Balancer
+* [stackit load-balancer observability-credentials cleanup](./stackit_load-balancer_observability-credentials_cleanup.md)	 - Deletes observability credentials unused by any Load Balancer
 * [stackit load-balancer observability-credentials delete](./stackit_load-balancer_observability-credentials_delete.md)	 - Deletes observability credentials for Load Balancer
 * [stackit load-balancer observability-credentials describe](./stackit_load-balancer_observability-credentials_describe.md)	 - Shows details of observability credentials for Load Balancer
-* [stackit load-balancer observability-credentials list](./stackit_load-balancer_observability-credentials_list.md)	 - Lists all observability credentials for Load Balancer
+* [stackit load-balancer observability-credentials list](./stackit_load-balancer_observability-credentials_list.md)	 - Lists observability credentials for Load Balancer
 * [stackit load-balancer observability-credentials update](./stackit_load-balancer_observability-credentials_update.md)	 - Updates observability credentials for Load Balancer
 
