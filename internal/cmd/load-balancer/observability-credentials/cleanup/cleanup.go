@@ -74,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				prompt := "Will delete the following unused observability credentials: \n"
 				for _, credential := range credentials {
 					if credential.DisplayName == nil || credential.Username == nil {
-						return fmt.Errorf("delete Load Balancer observability credentials: missing display name or username")
+						return fmt.Errorf("list unused Load Balancer observability credentials: credentials %q missing display name or username", *credential.CredentialsRef)
 					}
 					name := *credential.DisplayName
 					username := *credential.Username
@@ -100,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			p.Info("Deleted unused observability credentials on project %q\n", projectLabel)
+			p.Info("Deleted unused Load Balancer observability credentials on project %q\n", projectLabel)
 			return nil
 		},
 	}
