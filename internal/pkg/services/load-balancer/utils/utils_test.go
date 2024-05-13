@@ -15,6 +15,7 @@ import (
 
 var (
 	testProjectId = uuid.NewString()
+	testCtx       = context.Background()
 )
 
 const (
@@ -24,10 +25,12 @@ const (
 )
 
 type loadBalancerClientMocked struct {
-	getCredentialsFails  bool
-	getCredentialsResp   *loadbalancer.GetCredentialsResponse
-	getLoadBalancerFails bool
-	getLoadBalancerResp  *loadbalancer.LoadBalancer
+	getCredentialsFails    bool
+	getCredentialsResp     *loadbalancer.GetCredentialsResponse
+	getLoadBalancerFails   bool
+	getLoadBalancerResp    *loadbalancer.LoadBalancer
+	listLoadBalancersFails bool
+	listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
 }
 
 func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
@@ -42,6 +45,13 @@ func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, 
 		return nil, fmt.Errorf("could not get load balancer")
 	}
 	return m.getLoadBalancerResp, nil
+}
+
+func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
+	if m.listLoadBalancersFails {
+		return nil, fmt.Errorf("could not list load balancers")
+	}
+	return m.listLoadBalancersResp, nil
 }
 
 func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
@@ -79,12 +89,50 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 				},
 			},
 		},
+		Options: &loadbalancer.LoadBalancerOptions{
+			Observability: &loadbalancer.LoadbalancerOptionObservability{
+				Logs: &loadbalancer.LoadbalancerOptionLogs{
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					PushUrl:        utils.Ptr("https://logs.stackit.cloud"),
+				},
+				Metrics: &loadbalancer.LoadbalancerOptionMetrics{
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					PushUrl:        utils.Ptr("https://metrics.stackit.cloud"),
+				},
+			},
+		},
 	}
 
 	for _, mod := range mods {
 		mod(&lb)
 	}
 	return &lb
+}
+
+func fixtureCredentials(mod ...func([]loadbalancer.CredentialsResponse)) []loadbalancer.CredentialsResponse {
+	credentials := []loadbalancer.CredentialsResponse{
+		{
+			CredentialsRef: utils.Ptr("credentials-ref-1"),
+			DisplayName:    utils.Ptr("credentials-1"),
+			Username:       utils.Ptr("user-1"),
+		},
+		{
+			CredentialsRef: utils.Ptr("credentials-ref-2"),
+			DisplayName:    utils.Ptr("credentials-2"),
+			Username:       utils.Ptr("user-2"),
+		},
+		{
+			CredentialsRef: utils.Ptr("credentials-ref-3"),
+			DisplayName:    utils.Ptr("credentials-3"),
+			Username:       utils.Ptr("user-3"),
+		},
+	}
+
+	for _, m := range mod {
+		m(credentials)
+	}
+
+	return credentials
 }
 
 func fixtureTargets(mod ...func(*[]loadbalancer.Target)) *[]loadbalancer.Target {
@@ -789,6 +837,319 @@ func TestGetTargetName(t *testing.T) {
 			}
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetUsedObsCredentials(t *testing.T) {
+	tests := []struct {
+		description            string
+		allCredentials         []loadbalancer.CredentialsResponse
+		listLoadBalancersFails bool
+		listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
+		isValid                bool
+		expectedOutput         []loadbalancer.CredentialsResponse
+	}{
+		{
+			description:    "base",
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+				},
+			},
+			isValid: true,
+			expectedOutput: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-1"),
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+				{
+					DisplayName:    utils.Ptr("credentials-2"),
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					Username:       utils.Ptr("user-2"),
+				},
+			},
+		},
+		{
+			description:    "repeated credentials in different load balancers",
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+					*fixtureLoadBalancer(),
+				},
+			},
+			isValid: true,
+			expectedOutput: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-1"),
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+				{
+					DisplayName:    utils.Ptr("credentials-2"),
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					Username:       utils.Ptr("user-2"),
+				},
+			},
+		},
+		{
+			description:    "no repeated credentials in different load balancers",
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+					*fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+						lb.Options.Observability.Logs.CredentialsRef = utils.Ptr("credentials-ref-3")
+						lb.Options.Observability.Metrics.CredentialsRef = utils.Ptr("credentials-ref-3")
+					}),
+				},
+			},
+			isValid:        true,
+			expectedOutput: fixtureCredentials(),
+		},
+		{
+			description:           "no load balancers, no credentials",
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{},
+			isValid:               true,
+			expectedOutput:        nil,
+		},
+		{
+			description:           "no load balancers",
+			allCredentials:        fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{},
+			isValid:               true,
+			expectedOutput:        nil,
+		},
+		{
+			description:    "no credentials",
+			allCredentials: []loadbalancer.CredentialsResponse{},
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+				},
+			},
+			isValid:        true,
+			expectedOutput: nil,
+		},
+		{
+			description:            "list load balancers fails",
+			listLoadBalancersFails: true,
+			isValid:                false,
+		},
+		{
+			description:    "no observability options",
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
+						lb.Options = nil
+					}),
+				},
+			},
+			isValid:        true,
+			expectedOutput: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &loadBalancerClientMocked{
+				listLoadBalancersFails: tt.listLoadBalancersFails,
+				listLoadBalancersResp:  tt.listLoadBalancersResp,
+			}
+
+			output, err := GetUsedObsCredentials(testCtx, client, tt.allCredentials, testProjectId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			diff := cmp.Diff(output, tt.expectedOutput)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestGetUnusedObsCredentials(t *testing.T) {
+	tests := []struct {
+		description     string
+		allCredentials  []loadbalancer.CredentialsResponse
+		usedCredentials []loadbalancer.CredentialsResponse
+		isValid         bool
+		expectedOutput  []loadbalancer.CredentialsResponse
+	}{
+		{
+			description:    "base",
+			allCredentials: fixtureCredentials(),
+			usedCredentials: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-1"),
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+			},
+			isValid: true,
+			expectedOutput: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-2"),
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					Username:       utils.Ptr("user-2"),
+				},
+				{
+					DisplayName:    utils.Ptr("credentials-3"),
+					CredentialsRef: utils.Ptr("credentials-ref-3"),
+					Username:       utils.Ptr("user-3"),
+				},
+			},
+		},
+		{
+			description:     "no used credentials",
+			allCredentials:  fixtureCredentials(),
+			usedCredentials: nil,
+			isValid:         true,
+			expectedOutput:  fixtureCredentials(),
+		},
+		{
+			description:    "no credentials",
+			allCredentials: []loadbalancer.CredentialsResponse{},
+			usedCredentials: []loadbalancer.CredentialsResponse{
+				{
+					DisplayName:    utils.Ptr("credentials-1"),
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+			},
+			isValid:        true,
+			expectedOutput: nil,
+		},
+		{
+			description:     "no used credentials, no credentials",
+			allCredentials:  []loadbalancer.CredentialsResponse{},
+			usedCredentials: nil,
+			isValid:         true,
+			expectedOutput:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := GetUnusedObsCredentials(tt.usedCredentials, tt.allCredentials)
+
+			diff := cmp.Diff(output, tt.expectedOutput)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestFilterCredentials(t *testing.T) {
+	tests := []struct {
+		description            string
+		filterOp               int
+		allCredentials         []loadbalancer.CredentialsResponse
+		listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
+		listLoadBalancersFails bool
+		expectedCredentials    []loadbalancer.CredentialsResponse
+		isValid                bool
+	}{
+		{
+			description:         "unfiltered credentials",
+			filterOp:            OP_FILTER_NOP,
+			allCredentials:      fixtureCredentials(),
+			expectedCredentials: fixtureCredentials(),
+			isValid:             true,
+		},
+		{
+			description:    "used credentials",
+			filterOp:       OP_FILTER_USED,
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+				},
+			},
+			expectedCredentials: []loadbalancer.CredentialsResponse{
+				{
+					CredentialsRef: utils.Ptr("credentials-ref-1"),
+					DisplayName:    utils.Ptr("credentials-1"),
+					Username:       utils.Ptr("user-1"),
+				},
+				{
+					CredentialsRef: utils.Ptr("credentials-ref-2"),
+					DisplayName:    utils.Ptr("credentials-2"),
+					Username:       utils.Ptr("user-2"),
+				},
+			},
+			isValid: true,
+		},
+		{
+			description:    "unused credentials",
+			filterOp:       OP_FILTER_UNUSED,
+			allCredentials: fixtureCredentials(),
+			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
+				LoadBalancers: &[]loadbalancer.LoadBalancer{
+					*fixtureLoadBalancer(),
+				},
+			},
+			expectedCredentials: []loadbalancer.CredentialsResponse{
+				{
+					CredentialsRef: utils.Ptr("credentials-ref-3"),
+					DisplayName:    utils.Ptr("credentials-3"),
+					Username:       utils.Ptr("user-3"),
+				},
+			},
+			isValid: true,
+		},
+		{
+			description:         "no credentials",
+			filterOp:            OP_FILTER_NOP,
+			allCredentials:      []loadbalancer.CredentialsResponse{},
+			expectedCredentials: []loadbalancer.CredentialsResponse{},
+			isValid:             true,
+		},
+		{
+			description:            "list load balancers fails",
+			filterOp:               OP_FILTER_USED,
+			listLoadBalancersFails: true,
+			isValid:                false,
+		},
+		{
+			description:    "invalid filter operation",
+			filterOp:       999,
+			allCredentials: fixtureCredentials(),
+			isValid:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &loadBalancerClientMocked{
+				listLoadBalancersResp:  tt.listLoadBalancersResp,
+				listLoadBalancersFails: tt.listLoadBalancersFails,
+			}
+			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, tt.filterOp)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error filtering credentials: %v", err)
+			}
+
+			diff := cmp.Diff(filteredCredentials, tt.expectedCredentials)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}

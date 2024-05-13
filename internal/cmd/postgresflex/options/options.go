@@ -222,6 +222,7 @@ func renderFlavors(flavors []postgresflex.Flavor) string {
 	}
 
 	table := tables.NewTable()
+	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
 	for i := range flavors {
 		f := flavors[i]
@@ -236,6 +237,7 @@ func renderVersions(versions []string) string {
 	}
 
 	table := tables.NewTable()
+	table.SetTitle("Versions")
 	table.SetHeader("VERSION")
 	for i := range versions {
 		v := versions[i]
@@ -251,7 +253,8 @@ func renderStorages(resp *postgresflex.ListStoragesResponse) string {
 	storageClasses := *resp.StorageClasses
 
 	table := tables.NewTable()
-	table.SetHeader("MIN STORAGE", "MAX STORAGE", "STORAGE CLASS")
+	table.SetTitle("Storages")
+	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
 	for i := range storageClasses {
 		sc := storageClasses[i]
 		table.AddRow(*resp.StorageRange.Min, *resp.StorageRange.Max, sc)
