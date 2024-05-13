@@ -57,6 +57,7 @@ func SetProfile(p *print.Printer, profile string) error {
 		return fmt.Errorf("create config folder: %w", err)
 	}
 	p.Debug(print.DebugLevel, "created folder for the new profile: %s", configFolderPath)
+	p.Debug(print.DebugLevel, "profile %q is now active", profile)
 
 	return nil
 }

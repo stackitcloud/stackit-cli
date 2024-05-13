@@ -53,7 +53,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
 			configFilePath := viper.ConfigFileUsed()
-			p.Debug(print.DebugLevel, "will persist and read config from: %s", configFilePath)
+			p.Debug(print.DebugLevel, "configuration is persisted and read from: %s", configFilePath)
 
 			activeProfile, err := config.GetProfile()
 			if err != nil {
@@ -62,11 +62,11 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			if activeProfile == "" {
 				activeProfile = "(no active profile, the default profile configuration will be used)"
 			}
-			p.Debug(print.DebugLevel, "active config profile: %s", activeProfile)
+			p.Debug(print.DebugLevel, "active configuration profile: %s", activeProfile)
 
 			configKeys := viper.AllSettings()
 			configKeysStr := print.BuildDebugStrFromMap(configKeys)
-			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
+			p.Debug(print.DebugLevel, "configuration keys: %s", configKeysStr)
 
 			return nil
 		},
