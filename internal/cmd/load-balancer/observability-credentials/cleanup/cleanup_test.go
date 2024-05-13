@@ -1,4 +1,4 @@
-package list
+package cleanup
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
+
+const testCredentialsRef = "credentials-1"
 
 var projectIdFlag = globalflags.ProjectIdFlag
 
@@ -26,7 +26,6 @@ var testProjectId = uuid.NewString()
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		limitFlag:     "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,7 +39,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -48,7 +46,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
+func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDeleteCredentialsRequest)) loadbalancer.ApiDeleteCredentialsRequest {
+	request := testClient.DeleteCredentials(testCtx, testProjectId, testCredentialsRef)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureListCredentialsRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
 	request := testClient.ListCredentials(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
@@ -59,6 +65,7 @@ func fixtureRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -71,6 +78,12 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
@@ -95,48 +108,6 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
-		{
-			description: "limit invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
-			}),
-			isValid: false,
-		},
-		{
-			description: "used",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[usedFlag] = "true"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Used = true
-			}),
-		},
-		{
-			description: "unused",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[unusedFlag] = "true"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Unused = true
-			}),
-		},
-		{
-			description: "used and unused",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[usedFlag] = "true"
-				flagValues[unusedFlag] = "true"
-			}),
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
@@ -158,15 +129,15 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateRequiredFlags()
+			err = cmd.ValidateArgs(tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error validating flags: %v", err)
+				t.Fatalf("error validating args: %v", err)
 			}
 
-			err = cmd.ValidateFlagGroups()
+			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -179,7 +150,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error parsing flags: %v", err)
+				t.Fatalf("error parsing input: %v", err)
 			}
 
 			if !tt.isValid {
@@ -193,22 +164,22 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildDeleteCredentialRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest loadbalancer.ApiListCredentialsRequest
+		expectedRequest loadbalancer.ApiDeleteCredentialsRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureDeleteCredentialRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildDeleteCredentialRequest(testCtx, tt.model, testClient, testCredentialsRef)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -221,50 +192,29 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func TestGetFilterOp(t *testing.T) {
+func TestListCredentialsRequest(t *testing.T) {
 	tests := []struct {
-		description      string
-		used             bool
-		unused           bool
-		expectedFilterOp int
-		isValid          bool
+		description     string
+		model           *inputModel
+		expectedRequest loadbalancer.ApiListCredentialsRequest
 	}{
 		{
-			description:      "used",
-			used:             true,
-			expectedFilterOp: lbUtils.OP_FILTER_USED,
-			isValid:          true,
-		},
-		{
-			description:      "unused",
-			unused:           true,
-			expectedFilterOp: lbUtils.OP_FILTER_UNUSED,
-			isValid:          true,
-		},
-		{
-			description: "used and unused",
-			used:        true,
-			unused:      true,
-			isValid:     false,
-		},
-		{
-			description:      "neither used nor unused",
-			expectedFilterOp: lbUtils.OP_FILTER_NOP,
-			isValid:          true,
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureListCredentialsRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			filterOp, err := getFilterOp(tt.used, tt.unused)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error getting filter op: %v", err)
-			}
-			if filterOp != tt.expectedFilterOp {
-				t.Fatalf("Data does not match: %d", filterOp)
+			request := buildListCredentialsRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}

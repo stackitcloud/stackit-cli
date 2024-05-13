@@ -74,7 +74,7 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		if activeProfile != "" {
-			configData["active_profile"] = activeProfile
+			configData["profile"] = activeProfile
 		}
 		details, err := json.MarshalIndent(configData, "", "  ")
 		if err != nil {
@@ -83,9 +83,6 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 		p.Outputln(string(details))
 		return nil
 	default:
-		if activeProfile != "" {
-			p.Outputf("\n ACTIVE PROFILE: %s\n", activeProfile)
-		}
 
 		// Sort the config options by key
 		configKeys := make([]string, 0, len(configData))
@@ -95,6 +92,9 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 		sort.Strings(configKeys)
 
 		table := tables.NewTable()
+		if activeProfile != "" {
+			table.SetTitle(fmt.Sprintf("Profile: %q", activeProfile))
+		}
 		table.SetHeader("NAME", "VALUE")
 		for _, key := range configKeys {
 			value := configData[key]

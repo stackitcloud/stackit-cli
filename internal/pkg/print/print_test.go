@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestOutputf(t *testing.T) {
@@ -66,7 +65,7 @@ func TestOutputf(t *testing.T) {
 			viper.Reset()
 
 			if tt.outputFormatNone {
-				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+				viper.Set(outputFormatKey, NoneOutputFormat)
 			}
 
 			if len(tt.args) == 0 {
@@ -137,7 +136,7 @@ func TestOutputln(t *testing.T) {
 			viper.Reset()
 
 			if tt.outputFormatNone {
-				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+				viper.Set(outputFormatKey, NoneOutputFormat)
 			}
 
 			p.Outputln(tt.message)
@@ -201,7 +200,7 @@ func TestPagerDisplay(t *testing.T) {
 			viper.Reset()
 
 			if tt.outputFormatNone {
-				viper.Set(config.OutputFormatKey, NoneOutputFormat)
+				viper.Set(outputFormatKey, NoneOutputFormat)
 			}
 
 			err := p.PagerDisplay(tt.content)

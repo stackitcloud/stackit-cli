@@ -76,6 +76,7 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 }
 
+var defaultConfigFolderPath string
 var configFolderPath string
 var profileFilePath string
 
@@ -83,12 +84,13 @@ func InitConfig() {
 	configDir, err := os.UserConfigDir()
 	cobra.CheckErr(err)
 
-	configFolderPath = filepath.Join(configDir, configFolder)                                                      // Default config folder
-	profileFilePath = filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension)) // Profile file path is in the default config folder
+	defaultConfigFolderPath = filepath.Join(configDir, configFolder)
+	profileFilePath = filepath.Join(defaultConfigFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension)) // Profile file path is in the default config folder
 
 	configProfile, err := GetProfile()
 	cobra.CheckErr(err)
 
+	configFolderPath = defaultConfigFolderPath
 	if configProfile != "" {
 		configFolderPath = filepath.Join(configFolderPath, configProfile) // If a profile is set, use the profile config folder
 	}
