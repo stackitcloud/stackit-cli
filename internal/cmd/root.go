@@ -53,7 +53,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
 			configFilePath := viper.ConfigFileUsed()
-			p.Debug(print.DebugLevel, "using config file: %s", configFilePath)
+			p.Debug(print.DebugLevel, "will persist and read config from: %s", configFilePath)
 
 			activeProfile, err := config.GetProfile()
 			if err != nil {

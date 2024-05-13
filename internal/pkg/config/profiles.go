@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 // GetProfile returns the current profile to be used by the CLI.
@@ -38,27 +39,36 @@ func GetProfile() (string, error) {
 }
 
 // SetProfile sets the profile to be used by the CLI.
-func SetProfile(profile string) error {
+func SetProfile(p *print.Printer, profile string) error {
 	err := ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
 	}
 
-	profileFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 	err = os.WriteFile(profileFilePath, []byte(profile), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("write profile to file: %w", err)
 	}
+	p.Debug(print.DebugLevel, "persisted new active profile in: %s", profileFilePath)
+
+	configFolderPath = filepath.Join(defaultConfigFolderPath, profile)
+	err = createFolderIfNotExists(configFolderPath)
+	if err != nil {
+		return fmt.Errorf("create config folder: %w", err)
+	}
+	p.Debug(print.DebugLevel, "created folder for the new profile: %s", configFolderPath)
+
 	return nil
 }
 
 // UnsetProfile removes the profile file.
 // If the profile file does not exist, it does nothing.
-func UnsetProfile() error {
+func UnsetProfile(p *print.Printer) error {
 	err := os.Remove(profileFilePath)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("remove profile file: %w", err)
 	}
+	p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
 	return nil
 }
 

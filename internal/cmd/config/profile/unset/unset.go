@@ -26,7 +26,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config profile unset"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := config.UnsetProfile()
+			err := config.UnsetProfile(p)
 			if err != nil {
 				return fmt.Errorf("unset profile: %w", err)
 			}
