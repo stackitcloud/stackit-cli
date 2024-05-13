@@ -21,7 +21,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &mongodbflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testSchedule = "0 0 * * *"
+var testSchedule = "0 0/6 * * *"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -52,7 +52,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayload)) mongodbflex.UpdateBackupSchedulePayload {
 	payload := mongodbflex.UpdateBackupSchedulePayload{
-		BackupSchedule: utils.Ptr(testSchedule),
+		BackupSchedule:                 utils.Ptr(testSchedule),
+		SnapshotRetentionDays:          utils.Ptr(int64(3)),
+		DailySnapshotRetentionDays:     utils.Ptr(int64(0)),
+		WeeklySnapshotRetentionWeeks:   utils.Ptr(int64(3)),
+		MonthlySnapshotRetentionMonths: utils.Ptr(int64(1)),
+		PointInTimeWindowHours:         utils.Ptr(int64(30)),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -60,13 +65,38 @@ func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayloa
 	return payload
 }
 
-func fixtureRequest(mods ...func(request *mongodbflex.ApiUpdateBackupScheduleRequest)) mongodbflex.ApiUpdateBackupScheduleRequest {
+func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpdateBackupScheduleRequest)) mongodbflex.ApiUpdateBackupScheduleRequest {
 	request := testClient.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
+}
+
+func fixtureGetInstanceRequest(mods ...func(request *mongodbflex.ApiGetInstanceRequest)) mongodbflex.ApiGetInstanceRequest {
+	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureInstance(mods ...func(instance *mongodbflex.Instance)) *mongodbflex.Instance {
+	instance := mongodbflex.Instance{
+		BackupSchedule: &testSchedule,
+		Options: &map[string]string{
+			"dailySnapshotRetentionDays":     "0",
+			"weeklySnapshotRetentionWeeks":   "3",
+			"monthlySnapshotRetentionMonths": "1",
+			"pointInTimeWindowHours":         "30",
+			"snapshotRetentionDays":          "3",
+		},
+	}
+	for _, mod := range mods {
+		mod(&instance)
+	}
+	return &instance
 }
 
 func TestParseInput(t *testing.T) {
@@ -184,33 +214,103 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildGetInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest mongodbflex.ApiUpdateBackupScheduleRequest
+		expectedRequest mongodbflex.ApiGetInstanceRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureGetInstanceRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildGetInstanceRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		instance        *mongodbflex.Instance
+		expectedRequest mongodbflex.ApiUpdateBackupScheduleRequest
+	}{
+		{
+			description:     "update backup schedule, read retention policy from instance",
+			model:           fixtureInputModel(),
+			instance:        fixtureInstance(),
+			expectedRequest: fixtureUpdateBackupScheduleRequest(),
 		},
 		{
-			description: "required fields only",
+			description: "update retention policy, read backup schedule from instance",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+				},
+				InstanceId:                utils.Ptr(testInstanceId),
+				DailySnaphotRetentionDays: utils.Ptr(int64(2)),
+			},
+			instance: fixtureInstance(),
+			expectedRequest: fixtureUpdateBackupScheduleRequest().UpdateBackupSchedulePayload(
+				fixturePayload(func(payload *mongodbflex.UpdateBackupSchedulePayload) {
+					payload.DailySnapshotRetentionDays = utils.Ptr(int64(2))
+				}),
+			),
+		},
+		{
+			description: "update backup schedule and retention policy",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+				},
+				InstanceId:                     utils.Ptr(testInstanceId),
+				BackupSchedule:                 utils.Ptr("0 0/6 5 2 1"),
+				DailySnaphotRetentionDays:      utils.Ptr(int64(2)),
+				WeeklySnapshotRetentionWeeks:   utils.Ptr(int64(2)),
+				MonthlySnapshotRetentionMonths: utils.Ptr(int64(2)),
+				SnapshotRetentionDays:          utils.Ptr(int64(2)),
+			},
+			instance: fixtureInstance(),
+			expectedRequest: fixtureUpdateBackupScheduleRequest().UpdateBackupSchedulePayload(
+				fixturePayload(func(payload *mongodbflex.UpdateBackupSchedulePayload) {
+					payload.BackupSchedule = utils.Ptr("0 0/6 5 2 1")
+					payload.DailySnapshotRetentionDays = utils.Ptr(int64(2))
+					payload.WeeklySnapshotRetentionWeeks = utils.Ptr(int64(2))
+					payload.MonthlySnapshotRetentionMonths = utils.Ptr(int64(2))
+					payload.SnapshotRetentionDays = utils.Ptr(int64(2))
+				}),
+			),
+		},
+		{
+			description: "no fields set, empty instance (use defaults)",
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 				},
 				InstanceId: utils.Ptr(testInstanceId),
 			},
-			expectedRequest: testClient.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId).
-				UpdateBackupSchedulePayload(mongodbflex.UpdateBackupSchedulePayload{}),
+			instance:        &mongodbflex.Instance{},
+			expectedRequest: fixtureUpdateBackupScheduleRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildUpdateBackupScheduleRequest(testCtx, tt.model, tt.instance, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
