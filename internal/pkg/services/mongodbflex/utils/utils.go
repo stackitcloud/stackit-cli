@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -164,6 +165,14 @@ func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsR
 	if restoreJobs.Items == nil {
 		return state
 	}
+
+	restoreJobsSlice := *restoreJobs.Items
+
+	// sort array by descending date
+	slices.SortFunc(restoreJobsSlice, func(i, j mongodbflex.RestoreInstanceStatus) int {
+		// swap elements to sort by descending order
+		return cmp.Compare(*j.Date, *i.Date)
+	})
 
 	for _, restoreJob := range *restoreJobs.Items {
 		if *restoreJob.BackupID == backupId {

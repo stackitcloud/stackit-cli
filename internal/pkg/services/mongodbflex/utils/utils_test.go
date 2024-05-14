@@ -541,10 +541,12 @@ func TestGetRestoreStatus(t *testing.T) {
 				Items: &[]mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
 						Status:   utils.Ptr("state"),
 					},
 					{
 						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
 						Status:   utils.Ptr("state 2"),
 					},
 				},
@@ -552,16 +554,36 @@ func TestGetRestoreStatus(t *testing.T) {
 			expectedOutput: "state",
 		},
 		{
-			description: "get latest restore",
+			description: "get latest restore, ordered array",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
 				Items: &[]mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
 						Status:   utils.Ptr("in progress"),
 					},
 					{
 						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
 						Status:   utils.Ptr("finished"),
+					},
+				},
+			},
+			expectedOutput: "in progress",
+		},
+		{
+			description: "get latest restore, unordered array",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
+						Status:   utils.Ptr("finished"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
+						Status:   utils.Ptr("in progress"),
 					},
 				},
 			},
@@ -573,10 +595,12 @@ func TestGetRestoreStatus(t *testing.T) {
 				Items: &[]mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
 						Status:   utils.Ptr("in progress"),
 					},
 					{
 						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
 						Status:   utils.Ptr("finished"),
 					},
 				},
