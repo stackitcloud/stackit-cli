@@ -3,6 +3,7 @@ package backup
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/restore"
 	restorejobs "github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/restore-jobs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/schedule"
 	updateschedule "github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/update-schedule"
@@ -31,4 +32,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(restorejobs.NewCmd(p))
 	cmd.AddCommand(updateschedule.NewCmd(p))
 	cmd.AddCommand(schedule.NewCmd(p))
+	cmd.AddCommand(restore.NewCmd(p))
 }
