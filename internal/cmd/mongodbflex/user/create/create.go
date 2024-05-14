@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -151,6 +152,14 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(user)
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
 		}

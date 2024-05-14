@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -134,6 +135,14 @@ func outputResult(p *print.Printer, outputFormat string, instances []postgresfle
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(instances)
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
 		}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -114,6 +115,14 @@ func outputResult(p *print.Printer, outputFormat string, credentials *opensearch
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(credentials)
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
 		}

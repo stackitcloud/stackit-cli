@@ -136,10 +136,10 @@ func outputResult(p *print.Printer, outputFormat string, credentials []argus.Ser
 	case print.YAMLOutputFormat:
 		details, err := yaml.Marshal(credentials)
 		if err != nil {
-			return fmt.Errorf("marshal Argus credentials list : %w", err)
+			return fmt.Errorf("marshal Argus credentials list: %w", err)
 		}
-
 		p.Outputln(string(details))
+
 		return nil
 	default:
 		table := tables.NewTable()

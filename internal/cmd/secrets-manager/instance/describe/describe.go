@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -110,14 +112,22 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
+	output := struct {
+		*secretsmanager.Instance
+		*secretsmanager.AclList
+	}{instance, aclList}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		output := struct {
-			*secretsmanager.Instance
-			*secretsmanager.AclList
-		}{instance, aclList}
-
 		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(output)
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
 		}

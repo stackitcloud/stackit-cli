@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -141,6 +143,14 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 			return fmt.Errorf("marshal SKE options: %w", err)
 		}
 		p.Outputln(string(details))
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(options)
+		if err != nil {
+			return fmt.Errorf("marshal SKE options: %w", err)
+		}
+		p.Outputln(string(details))
+
 		return nil
 	default:
 		return outputResultAsTable(p, model, options)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -140,6 +141,14 @@ func outputResult(p *print.Printer, outputFormat string, credentials []objectsto
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(credentials)
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials list: %w", err)
 		}
