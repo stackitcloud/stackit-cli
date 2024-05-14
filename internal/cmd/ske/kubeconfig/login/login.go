@@ -36,7 +36,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "login plugin for kubectl",
-		Long:  "login plugin for kubectl to create a short-lived kubeconfig to authenticate against a STACKIT Kubernetes Engine (SKE) cluster. To obtain a kubeconfig for use with the login command, use the 'kubeconfig create' command.",
+		Long:  "login plugin for kubectl to create a short-lived kubeconfig to authenticate against a STACKIT Kubernetes Engine (SKE) cluster. To obtain a kubeconfig for use with the login command, use the 'kubeconfig create --login' command.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
