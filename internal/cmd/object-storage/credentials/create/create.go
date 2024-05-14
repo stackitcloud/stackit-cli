@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ghodss/yaml"
+	"github.com/goccy/go-yaml"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 
 	"github.com/spf13/cobra"

@@ -3,7 +3,7 @@ module github.com/stackitcloud/stackit-cli
 go 1.22
 
 require (
-	github.com/ghodss/yaml v1.0.0
+	github.com/goccy/go-yaml v1.11.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
@@ -31,8 +31,9 @@ require (
 )
 
 require (
+	github.com/fatih/color v1.14.1 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
 
 require (
