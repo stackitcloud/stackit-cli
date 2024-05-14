@@ -590,6 +590,24 @@ func TestGetRestoreStatus(t *testing.T) {
 			expectedOutput: "in progress",
 		},
 		{
+			description: "get latest restore, another date format",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2009-11-10 23:00:00 +0000 UTC m=+0.000000001"),
+						Status:   utils.Ptr("finished"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2009-11-11 23:00:00 +0000 UTC m=+0.000000001"),
+						Status:   utils.Ptr("in progress"),
+					},
+				},
+			},
+			expectedOutput: "in progress",
+		},
+		{
 			description: "no restore job for that backup",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
 				Items: &[]mongodbflex.RestoreInstanceStatus{
