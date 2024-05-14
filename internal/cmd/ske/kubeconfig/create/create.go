@@ -22,6 +22,7 @@ import (
 const (
 	clusterNameArg = "CLUSTER_NAME"
 
+	loginFlag      = "login"
 	expirationFlag = "expiration"
 	filepathFlag   = "filepath"
 )
@@ -31,6 +32,7 @@ type inputModel struct {
 	ClusterName    string
 	Filepath       *string
 	ExpirationTime *string
+	Login          bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -48,6 +50,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a kubeconfig for the SKE cluster with name "my-cluster"`,
 				"$ stackit ske kubeconfig create my-cluster"),
+			examples.NewExample(
+				`Create a login kubeconfig for the SKE cluster with name "my-cluster".`,
+				"This kubeconfig does not contain any credentials and instead obtains valid credentials via the STACKIT CLI",
+				"$ stackit ske kubeconfig create my-cluster --login"),
 			examples.NewExample(
 				`Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days`,
 				"$ stackit ske kubeconfig create my-cluster --expiration 30d"),
@@ -80,20 +86,41 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return fmt.Errorf("build kubeconfig create request: %w", err)
-			}
-			resp, err := req.Execute()
-			if err != nil {
-				return fmt.Errorf("create kubeconfig for SKE cluster: %w", err)
+			var (
+				kubeconfig     string
+				respKubeconfig *ske.Kubeconfig
+				respLogin      *ske.V1LoginKubeconfig
+			)
+
+			if !model.Login {
+				req, err := buildRequestCreate(ctx, model, apiClient)
+				if err != nil {
+					return fmt.Errorf("build kubeconfig create request: %w", err)
+				}
+				respKubeconfig, err = req.Execute()
+				if err != nil {
+					return fmt.Errorf("create kubeconfig for SKE cluster: %w", err)
+				}
+				if respKubeconfig.Kubeconfig == nil {
+					return fmt.Errorf("no kubeconfig returned from the API")
+				}
+				kubeconfig = *respKubeconfig.Kubeconfig
+			} else {
+				req, err := buildRequestLogin(ctx, model, apiClient)
+				if err != nil {
+					return fmt.Errorf("build login kubeconfig create request: %w", err)
+				}
+				respLogin, err = req.Execute()
+				if err != nil {
+					return fmt.Errorf("create login kubeconfig for SKE cluster: %w", err)
+				}
+				if respLogin.Kubeconfig == nil {
+					return fmt.Errorf("no login kubeconfig returned from the API")
+				}
+				kubeconfig = *respLogin.Kubeconfig
 			}
 
 			// Create the config file
-			if resp.Kubeconfig == nil {
-				return fmt.Errorf("no kubeconfig returned from the API")
-			}
-
 			var kubeconfigPath string
 			if model.Filepath == nil {
 				kubeconfigPath, err = skeUtils.GetDefaultKubeconfigPath()
@@ -104,12 +131,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				kubeconfigPath = *model.Filepath
 			}
 
-			err = skeUtils.WriteConfigFile(kubeconfigPath, *resp.Kubeconfig)
-			if err != nil {
-				return fmt.Errorf("write kubeconfig file: %w", err)
+			if model.OutputFormat != print.JSONOutputFormat {
+				err = skeUtils.WriteConfigFile(kubeconfigPath, kubeconfig)
+				if err != nil {
+					return fmt.Errorf("write kubeconfig file: %w", err)
+				}
 			}
 
-			return outputResult(p, model, kubeconfigPath, resp)
+			return outputResult(p, model, kubeconfigPath, respKubeconfig, respLogin)
 		},
 	}
 	configureFlags(cmd)
@@ -117,8 +146,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the `expiration` flag.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
 	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
+
+	cmd.MarkFlagsMutuallyExclusive(loginFlag, expirationFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -147,6 +179,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		ClusterName:     clusterName,
 		Filepath:        flags.FlagToStringPointer(p, cmd, filepathFlag),
 		ExpirationTime:  expTime,
+		Login:           flags.FlagToBoolValue(p, cmd, loginFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -161,7 +194,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiCreateKubeconfigRequest, error) {
+func buildRequestCreate(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiCreateKubeconfigRequest, error) {
 	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
 
 	payload := ske.CreateKubeconfigPayload{}
@@ -173,10 +206,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req.CreateKubeconfigPayload(payload), nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, resp *ske.Kubeconfig) error {
+func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiGetLoginKubeconfigRequest, error) {
+	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.ClusterName), nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.V1LoginKubeconfig) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
+		var err error
+		var details []byte
+		if respKubeconfig != nil {
+			details, err = json.MarshalIndent(respKubeconfig, "", "  ")
+		} else if respLogin != nil {
+			details, err = json.MarshalIndent(respLogin, "", "  ")
+		}
 		if err != nil {
 			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
 		}
@@ -192,7 +235,11 @@ func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, re
 
 		return nil
 	default:
-		p.Outputf("Created kubeconfig file for cluster %s in %q, with expiration date %v (UTC)\n", model.ClusterName, kubeconfigPath, *resp.ExpirationTimestamp)
+		var expiration string
+		if respKubeconfig != nil {
+			expiration = fmt.Sprintf(", with expiration date %v (UTC)", *respKubeconfig.ExpirationTimestamp)
+		}
+		p.Outputf("Created kubeconfig file for cluster %s in %q%s\n", model.ClusterName, kubeconfigPath, expiration)
 
 		return nil
 	}
