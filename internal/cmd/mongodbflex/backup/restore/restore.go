@@ -40,20 +40,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Short: "Restores a MongoDB Flex instance from a backup",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Restores a MongoDB Flex instance from a backup of an instance or clones a MongoDB Flex instance from a point-in-time snapshot.",
-			"The backup is specified by a backup id and the point-in-time snapshot is specified by a timestamp.",
-			"The instance to apply the backup to can be specified, otherwise it will be the same as the backup.",
+			"The backup is specified by a backup ID and the point-in-time snapshot is specified by a timestamp.",
+			"You can specify the instance to which the backup will be applied. If not specified, the backup will be applied to the same instance from which it was taken.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Restores a MongoDB Flex instance with id "yyy" using backup with id "zzz"`,
+				`Restores a MongoDB Flex instance with ID "yyy" using backup with ID "zzz"`,
 				`$ stackit mongodbflex backup restore --instance-id yyy --backup-id zzz`),
 			examples.NewExample(
-				`Clone a MongoDB Flex instance with id "yyy" via point-in-time restore to timestamp "zzz"`,
-				`$ stackit mongodbflex backup restore --instance-id yyy --timestamp zzz`),
+				`Clone a MongoDB Flex instance with ID "yyy" via point-in-time restore to timestamp "2024-05-14T14:31:48Z"`,
+				`$ stackit mongodbflex backup restore --instance-id yyy --timestamp 2024-05-14T14:31:48Z`),
 			examples.NewExample(
-				`Restores a MongoDB Flex instance with id "yyy" using backup from instance with id "zzz" with backup id "aaa"`,
-				`$ stackit mongodbflex backup restore --instance-id zzz --backup-instance-id yyy --backup-id aaa`),
+				`Restores a MongoDB Flex instance with ID "yyy", using backup from instance with ID "zzz" with backup ID "xxx"`,
+				`$ stackit mongodbflex backup restore --instance-id zzz --backup-instance-id yyy --backup-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -138,10 +138,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance id")
-	cmd.Flags().Var(flags.UUIDFlag(), backupInstanceIdFlag, "Instance id of the target instance to restore the backup to")
-	cmd.Flags().String(backupIdFlag, "", "Backup id")
-	cmd.Flags().String(timestampFlag, "", "Timestamp of the snapshot to clone the instance from")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+	cmd.Flags().Var(flags.UUIDFlag(), backupInstanceIdFlag, "Instance ID of the target instance to restore the backup to")
+	cmd.Flags().String(backupIdFlag, "", "Backup ID")
+	cmd.Flags().String(timestampFlag, "", "Timestamp of the snapshot to use as a source for cloning the instance in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
