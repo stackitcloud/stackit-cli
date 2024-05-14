@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"sort"
 
 	"github.com/ghodss/yaml"
