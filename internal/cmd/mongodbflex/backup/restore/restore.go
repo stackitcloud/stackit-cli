@@ -12,9 +12,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/wait"
 )
 
 const (
@@ -47,11 +49,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Restores a MongoDB Flex instance with id "yyy" using backup with id "zzz"`,
 				`$ stackit mongodbflex backup restore --instance-id yyy --backup-id zzz`),
 			examples.NewExample(
-				`Restores a MongoDB Flex instance with id "yyy" using backup with timestamp "zzz"`,
+				`Clone a MongoDB Flex instance with id "yyy" via point-in-time restore to timestamp "zzz"`,
 				`$ stackit mongodbflex backup restore --instance-id yyy --timestamp zzz`),
 			examples.NewExample(
 				`Restores a MongoDB Flex instance with id "yyy" using backup from instance with id "zzz" with backup id "aaa"`,
-				`$ stackit mongodbflex backup restore --instance-id yyy --backup-instance-id zzz --backup-id aaa`),
+				`$ stackit mongodbflex backup restore --instance-id zzz --backup-instance-id yyy --backup-id aaa`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -96,16 +98,37 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					return fmt.Errorf("restore MongoDB Flex instance: %w", err)
 				}
 
+				if !model.Async {
+					s := spinner.New(p)
+					s.Start("Restoring instance")
+					_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId).WaitWithContext(ctx)
+					if err != nil {
+						return fmt.Errorf("wait for MongoDB Flex instance restoration: %w", err)
+					}
+					s.Stop()
+				}
+
 				p.Outputf("Restored instance %q with backup %q\n", model.InstanceId, model.BackupId)
 				return nil
 			}
 
-			// Else, if timestamp is provided, clone the instance from the backup with the timestep
+			// Else, if timestamp is provided, clone the instance from a point-in-time snapshot
 			req := buildCloneRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("clone MongoDB Flex instance: %w", err)
 			}
+
+			if !model.Async {
+				s := spinner.New(p)
+				s.Start("Cloning instance")
+				_, err = wait.CloneInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for MongoDB Flex instance cloning: %w", err)
+				}
+				s.Stop()
+			}
+
 			p.Outputf("Cloned instance %q from backup with timestamp %q\n", model.InstanceId, model.Timestamp)
 			return nil
 		},
