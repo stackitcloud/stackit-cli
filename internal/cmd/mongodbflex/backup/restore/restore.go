@@ -39,9 +39,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Use:   "restore",
 		Short: "Restores a MongoDB Flex instance from a backup",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Restores a MongoDB Flex instance from a backup of an instance.",
-			"The backup can be specified by either a backup id or a timestamp.",
-			"The target instance can be specified, otherwise the target instance will be the same as the backup.",
+			"Restores a MongoDB Flex instance from a backup of an instance or clones a MongoDB Flex instance from a point-in-time snapshot.",
+			"The backup is specified by a backup id and the point-in-time snapshot is specified by a timestamp.",
+			"The instance to apply the backup to can be specified, otherwise it will be the same as the backup.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
@@ -139,9 +139,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance id")
-	cmd.Flags().Var(flags.UUIDFlag(), backupInstanceIdFlag, "Backup instance id")
+	cmd.Flags().Var(flags.UUIDFlag(), backupInstanceIdFlag, "Instance id of the target instance to restore the backup to")
 	cmd.Flags().String(backupIdFlag, "", "Backup id")
-	cmd.Flags().String(timestampFlag, "", "Timestamp of the backup")
+	cmd.Flags().String(timestampFlag, "", "Timestamp of the snapshot to clone the instance from")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
