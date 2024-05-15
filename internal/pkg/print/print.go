@@ -173,6 +173,7 @@ func (p *Printer) PagerDisplay(content string) error {
 	pagerCmd.Stdin = strings.NewReader(content)
 	pagerCmd.Stdout = p.Cmd.OutOrStdout()
 
+	p.Debug(DebugLevel, "using pager: %s", pagerCmd.Args[0])
 	err := pagerCmd.Run()
 	if err != nil {
 		p.Debug(ErrorLevel, "run pager command: %v", err)
