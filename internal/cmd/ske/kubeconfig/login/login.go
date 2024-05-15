@@ -192,6 +192,11 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, clusterConfig *
 }
 
 func output(cmd *cobra.Command, cacheKey string, kubeconfig *rest.Config) error {
+	if kubeconfig == nil {
+		_ = cache.DeleteObject(cacheKey)
+		return errors.New("kubeconfig is nil")
+	}
+
 	outputExecCredential, err := parseKubeConfigToExecCredential(kubeconfig)
 	if err != nil {
 		_ = cache.DeleteObject(cacheKey)
