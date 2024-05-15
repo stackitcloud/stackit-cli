@@ -131,10 +131,6 @@ You can also edit the configuration file manually.
 
 ## Customization
 
-### Using **less** as a pager
-
-## Customization
-
 ### Pager
 
 To specify a custom pager, use the `PAGER` environment variable.
@@ -147,9 +143,7 @@ When using `less` as a pager, STACKIT CLI will automatically pass following opti
 - -w, --hilite-unread - Temporarily highlights the first "new" line after a forward movement of a full page.
 - -R, --RAW-CONTROL-CHARS - ANSI color and style sequences will be interpreted.
 
-
->[IMPORTANT]
-> These options will not be added if a custom pager is defined.
+> These options will not be added automatically if a custom pager is defined.
 
 
 ## Autocompletion
