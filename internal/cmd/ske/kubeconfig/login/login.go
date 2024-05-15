@@ -38,15 +38,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login plugin for kubernetes clients",
-		Long: fmt.Sprintf("%s\n%s",
+		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Login plugin for kubernetes clients, that creates short-lived credentials to authenticate against a STACKIT Kubernetes Engine (SKE) cluster.",
-			"To obtain a kubeconfig for use with the login command, run 'kubeconfig create --login'.",
+			"First you need to obtain a kubeconfig for use with the login command (first example).",
+			"Secondly you use the kubeconfig with your chosen Kubernetes client (second example), the client will automatically retrieve the credentials via the STACKIT CLI.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Get a login kubeconfig for the SKE cluster with name "my-cluster". `+
-					"This kubeconfig does not contain any credentials and instead obtains valid credentials via the STACKIT CLI.",
+					"This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.",
 				"$ stackit ske kubeconfig create my-cluster --login"),
 			examples.NewExample(
 				"Use the previously saved kubeconfig to authenticate to the SKE cluster, in this case with kubectl.",
