@@ -129,6 +129,26 @@ stackit config list
 
 You can also edit the configuration file manually.
 
+## Customization
+
+### Using **less** as a pager
+
+STACKIT CLI uses the `less` as default pager. 
+When using `less` as a pager, STACKIT CLI will automatically pass following options
+- -F, --quit-if-one-screen - Less will automatically exit if the entire file can be displayed on the first screen.
+- -S, --chop-long-lines - Lines longer than the screen width will be chopped rather than being folded.
+- -w, --hilite-unread - Temporarily highlights the first "new" line after a forward movement of a full page.
+
+
+>[IMPORTANT]
+> These options will not be added if:
+> - The pager is not named `less`.
+
+### Using a different pager
+
+STACKIT CLI uses the pager that is specified in the `PAGER` environment variable. If the variable is not set, STACKIT CLI uses the `less` as default pager.
+
+
 ## Autocompletion
 
 If you wish to set up command autocompletion in your shell for the STACKIT CLI, please refer to our [autocompletion guide](./AUTOCOMPLETION.md).
