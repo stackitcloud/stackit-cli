@@ -51,8 +51,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a kubeconfig for the SKE cluster with name "my-cluster"`,
 				"$ stackit ske kubeconfig create my-cluster"),
 			examples.NewExample(
-				`Create a login kubeconfig for the SKE cluster with name "my-cluster".`,
-				"This kubeconfig does not contain any credentials and instead obtains valid credentials via the STACKIT CLI",
+				`Get a login kubeconfig for the SKE cluster with name "my-cluster". `+
+					"This kubeconfig does not contain any credentials and instead obtains valid credentials via the STACKIT CLI.",
 				"$ stackit ske kubeconfig create my-cluster --login"),
 			examples.NewExample(
 				`Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days`,

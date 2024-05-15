@@ -35,13 +35,21 @@ const (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "login plugin for kubectl",
-		Long:  "login plugin for kubectl to create a short-lived kubeconfig to authenticate against a STACKIT Kubernetes Engine (SKE) cluster. To obtain a kubeconfig for use with the login command, use the 'kubeconfig create --login' command.",
-		Args:  args.NoArgs,
+		Short: "Login plugin for kubernetes clients",
+		Long: fmt.Sprintf("%s\n%s",
+			"Login plugin for kubernetes clients, that creates short-lived credentials to authenticate against a STACKIT Kubernetes Engine (SKE) cluster.",
+			"To obtain a kubeconfig for use with the login command, run 'kubeconfig create --login'.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				"login to a SKE cluster specified in the kubeconfig",
-				"$ kubectl get pod"),
+				`Get a login kubeconfig for the SKE cluster with name "my-cluster". `+
+					"This kubeconfig does not contain any credentials and instead obtains valid credentials via the STACKIT CLI.",
+				"$ stackit ske kubeconfig create my-cluster --login"),
+			examples.NewExample(
+				"Use the previously saved kubeconfig to authenticate to the SKE cluster, in this case with kubectl.",
+				"$ kubectl cluster-info",
+				"$ kubectl get pods"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
