@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -119,16 +120,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, targetPool loadbalancer.TargetPool, listener *loadbalancer.Listener) error {
+	output := struct {
+		*loadbalancer.TargetPool
+		Listener *loadbalancer.Listener `json:"attached_listener"`
+	}{
+		&targetPool,
+		listener,
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		output := struct {
-			*loadbalancer.TargetPool
-			Listener *loadbalancer.Listener `json:"attached_listener"`
-		}{
-			&targetPool,
-			listener,
-		}
 		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal load balancer: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(output)
 		if err != nil {
 			return fmt.Errorf("marshal load balancer: %w", err)
 		}
