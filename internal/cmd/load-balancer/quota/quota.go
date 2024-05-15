@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -94,6 +95,14 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 		}
 
 		p.Outputf("Maximum number of load balancers allowed: %s\n", maxLoadBalancers)
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(quota)
+		if err != nil {
+			return fmt.Errorf("marshal quota: %w", err)
+		}
+		p.Outputln(string(details))
 
 		return nil
 	default:
