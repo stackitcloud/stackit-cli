@@ -1,0 +1,43 @@
+## stackit mongodbflex backup schedule
+
+Shows details of the backup schedule and retention policy of a MongoDB Flex instance
+
+### Synopsis
+
+Shows details of the backup schedule and retention policy of a MongoDB Flex instance.
+
+```
+stackit mongodbflex backup schedule [flags]
+```
+
+### Examples
+
+```
+  Get details of the backup schedule of a MongoDB Flex instance with ID "xxx"
+  $ stackit mongodbflex backup schedule --instance-id xxx
+
+  Get details of the backup schedule of a MongoDB Flex instance with ID "xxx" in JSON format
+  $ stackit mongodbflex backup schedule --instance-id xxx --output-format json
+```
+
+### Options
+
+```
+  -h, --help                 Help for "stackit mongodbflex backup schedule"
+      --instance-id string   Instance ID
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes             If set, skips all confirmation prompts
+      --async                  If set, runs the command asynchronously
+  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
+  -p, --project-id string      Project ID
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+```
+
+### SEE ALSO
+
+* [stackit mongodbflex backup](./stackit_mongodbflex_backup.md)	 - Provides functionality for MongoDB Flex instance backups
+

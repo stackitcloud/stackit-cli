@@ -14,13 +14,13 @@ stackit mongodbflex backup restore-jobs [flags]
 
 ```
   List all restore jobs of instance with ID "xxx"
-  $ stackit mongodbflex backup list --instance-id xxx
+  $ stackit mongodbflex backup restore-jobs --instance-id xxx
 
   List all restore jobs of instance with ID "xxx" in JSON format
-  $ stackit mongodbflex backup list --instance-id xxx --output-format json
+  $ stackit mongodbflex backup restore-jobs --instance-id xxx --output-format json
 
   List up to 10 restore jobs of instance with ID "xxx"
-  $ stackit mongodbflex backup list --instance-id xxx --limit 10
+  $ stackit mongodbflex backup restore-jobs --instance-id xxx --limit 10
 ```
 
 ### Options
