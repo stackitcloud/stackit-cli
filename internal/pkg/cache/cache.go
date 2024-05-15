@@ -4,24 +4,31 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
-
-	"github.com/adrg/xdg"
 )
 
 var (
-	cacheFolderPath = xdg.CacheHome + "/stackit"
+	cacheFolderPath string
 
 	identifierRegex             = regexp.MustCompile("^[a-zA-Z0-9-]+$")
 	ErrorInvalidCacheIdentifier = fmt.Errorf("invalid cache identifier")
 )
+
+func init() {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		panic(fmt.Errorf("get user cache dir: %w", err))
+	}
+	cacheFolderPath = filepath.Join(cacheDir, "stackit")
+}
 
 func GetObject(identifier string) ([]byte, error) {
 	if !identifierRegex.MatchString(identifier) {
 		return nil, ErrorInvalidCacheIdentifier
 	}
 
-	return os.ReadFile(cacheFolderPath + "/" + identifier)
+	return os.ReadFile(filepath.Join(cacheFolderPath, identifier))
 }
 
 func PutObject(identifier string, data []byte) error {
@@ -34,7 +41,7 @@ func PutObject(identifier string, data []byte) error {
 		return err
 	}
 
-	return os.WriteFile(cacheFolderPath+"/"+identifier, data, 0o600)
+	return os.WriteFile(filepath.Join(cacheFolderPath, identifier), data, 0o600)
 }
 
 func DeleteObject(identifier string) error {
@@ -42,7 +49,7 @@ func DeleteObject(identifier string) error {
 		return ErrorInvalidCacheIdentifier
 	}
 
-	if err := os.Remove(cacheFolderPath + "/" + identifier); !errors.Is(err, os.ErrNotExist) {
+	if err := os.Remove(filepath.Join(cacheFolderPath, identifier)); !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	return nil

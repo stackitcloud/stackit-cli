@@ -3,9 +3,9 @@ package cache
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/adrg/xdg"
 	"github.com/google/uuid"
 )
 
@@ -46,7 +46,7 @@ func TestGetObject(t *testing.T) {
 				if err != nil {
 					t.Fatalf("create cache folder: %s", err.Error())
 				}
-				path := cacheFolderPath + "/" + id
+				path := filepath.Join(cacheFolderPath, id)
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed", path)
 				}
@@ -114,9 +114,10 @@ func TestPutObject(t *testing.T) {
 			if tt.customPath != "" {
 				cacheFolderPath = tt.customPath
 			} else {
-				cacheFolderPath = xdg.CacheHome
+				cacheDir, _ := os.UserCacheDir()
+				cacheFolderPath = filepath.Join(cacheDir, "stackit")
 			}
-			path := cacheFolderPath + "/" + id
+			path := filepath.Join(cacheFolderPath, id)
 
 			// setup
 			if tt.existingFile {
@@ -170,7 +171,7 @@ func TestDeleteObject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			id := tt.identifier + "-" + uuid.NewString()
-			path := cacheFolderPath + "/" + id
+			path := filepath.Join(cacheFolderPath, id)
 
 			// setup
 			if tt.existingFile {
