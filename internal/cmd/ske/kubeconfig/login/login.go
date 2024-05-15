@@ -6,7 +6,9 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -53,6 +55,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
+			env := os.Getenv("KUBERNETES_EXEC_INFO")
+			if env == "" {
+				return fmt.Errorf("%s\n%s\n%s", "KUBERNETES_EXEC_INFO env var is unset or empty.",
+					"The command probably was not called from a Kubernetes client application!",
+					"See `stackit ske login --help` for detailed usage instructions.")
+			}
 
 			clusterConfig, err := parseClusterConfig()
 			if err != nil {
