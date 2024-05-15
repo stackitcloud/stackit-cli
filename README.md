@@ -133,20 +133,23 @@ You can also edit the configuration file manually.
 
 ### Using **less** as a pager
 
-STACKIT CLI uses the `less` as default pager. 
+## Customization
+
+### Pager
+
+To specify a custom pager, use the `PAGER` environment variable.
+
+If the variable is not set, STACKIT CLI uses the `less` as default pager.
+
 When using `less` as a pager, STACKIT CLI will automatically pass following options
 - -F, --quit-if-one-screen - Less will automatically exit if the entire file can be displayed on the first screen.
 - -S, --chop-long-lines - Lines longer than the screen width will be chopped rather than being folded.
 - -w, --hilite-unread - Temporarily highlights the first "new" line after a forward movement of a full page.
+- -R, --RAW-CONTROL-CHARS - ANSI color and style sequences will be interpreted.
 
 
 >[IMPORTANT]
-> These options will not be added if:
-> - The pager is not named `less`.
-
-### Using a different pager
-
-STACKIT CLI uses the pager that is specified in the `PAGER` environment variable. If the variable is not set, STACKIT CLI uses the `less` as default pager.
+> These options will not be added if a custom pager is defined.
 
 
 ## Autocompletion
