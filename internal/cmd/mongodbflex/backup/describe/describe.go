@@ -130,7 +130,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreSta
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup for MongoDB Flex backup: %w", err)
+			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
 		}
 		cmd.Println(string(details))
 
