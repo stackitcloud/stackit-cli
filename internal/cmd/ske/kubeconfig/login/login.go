@@ -54,9 +54,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput()
+			clusterConfig, err := parseClusterConfig()
 			if err != nil {
-				return fmt.Errorf("parseInput: %w", err)
+				return fmt.Errorf("parseClusterConfig: %w", err)
 			}
 
 			// Configure API client
@@ -65,36 +65,36 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			cachedKubeconfig := getCachedKubeConfig(model.CacheKey)
+			cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
 
 			if cachedKubeconfig == nil {
-				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, clusterConfig, false, nil)
 			}
 
 			certPem, _ := pem.Decode(cachedKubeconfig.CertData)
 			if certPem == nil {
-				_ = cache.DeleteObject(model.CacheKey)
-				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				_ = cache.DeleteObject(clusterConfig.cacheKey)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, clusterConfig, false, nil)
 			}
 
 			certificate, err := x509.ParseCertificate(certPem.Bytes)
 			if err != nil {
-				_ = cache.DeleteObject(model.CacheKey)
-				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				_ = cache.DeleteObject(clusterConfig.cacheKey)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, clusterConfig, false, nil)
 			}
 
 			// cert is expired, request new
 			if time.Now().After(certificate.NotAfter.UTC()) {
-				_ = cache.DeleteObject(model.CacheKey)
-				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, false, nil)
+				_ = cache.DeleteObject(clusterConfig.cacheKey)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, clusterConfig, false, nil)
 			}
 			// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
 			if time.Now().Add(refreshBeforeDuration).After(certificate.NotAfter.UTC()) {
-				return GetAndOutputKubeconfig(ctx, cmd, apiClient, model, true, cachedKubeconfig)
+				return GetAndOutputKubeconfig(ctx, cmd, apiClient, clusterConfig, true, cachedKubeconfig)
 			}
 
 			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
-			if err := output(cmd, model.CacheKey, cachedKubeconfig); err != nil {
+			if err := output(cmd, clusterConfig.cacheKey, cachedKubeconfig); err != nil {
 				return err
 			}
 			return nil
@@ -103,18 +103,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-type inputModel struct {
-	ProjectId   string
-	ClusterName string
-	CacheKey    string
-}
-
-type SKEClusterConfig struct {
+type clusterConfig struct {
 	STACKITProjectID string `json:"stackitProjectId"`
 	ClusterName      string `json:"clusterName"`
+
+	cacheKey string
 }
 
-func parseInput() (*inputModel, error) {
+func parseClusterConfig() (*clusterConfig, error) {
 	obj, _, err := exec.LoadExecCredentialFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("LoadExecCredentialFromEnv: %w", err)
@@ -136,17 +132,15 @@ func parseInput() (*inputModel, error) {
 	if execCredential == nil || execCredential.Spec.Cluster == nil {
 		return nil, fmt.Errorf("ExecCredential contains not all needed fields")
 	}
-	config := &SKEClusterConfig{}
+	config := &clusterConfig{}
 	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, config)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal: %w", err)
 	}
 
-	return &inputModel{
-		ClusterName: config.ClusterName,
-		ProjectId:   config.STACKITProjectID,
-		CacheKey:    fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server))),
-	}, nil
+	config.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server)))
+
+	return config, nil
 }
 
 func getCachedKubeConfig(key string) *rest.Config {
@@ -163,12 +157,12 @@ func getCachedKubeConfig(key string) *rest.Config {
 	return restConfig
 }
 
-func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *ske.APIClient, model *inputModel, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
-	req := buildRequest(ctx, apiClient, model)
+func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *ske.APIClient, clusterConfig *clusterConfig, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
+	req := buildRequest(ctx, apiClient, clusterConfig)
 	kubeconfigResponse, err := req.Execute()
 	if err != nil {
 		if fallbackToCache {
-			return output(cmd, model.CacheKey, cachedKubeconfig)
+			return output(cmd, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("request kubeconfig: %w", err)
 	}
@@ -176,22 +170,22 @@ func GetAndOutputKubeconfig(ctx context.Context, cmd *cobra.Command, apiClient *
 	kubeconfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(*kubeconfigResponse.Kubeconfig))
 	if err != nil {
 		if fallbackToCache {
-			return output(cmd, model.CacheKey, cachedKubeconfig)
+			return output(cmd, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("parse kubeconfig: %w", err)
 	}
-	if err = cache.PutObject(model.CacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
+	if err = cache.PutObject(clusterConfig.cacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
 		if fallbackToCache {
-			return output(cmd, model.CacheKey, cachedKubeconfig)
+			return output(cmd, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("cache kubeconfig: %w", err)
 	}
 
-	return output(cmd, model.CacheKey, kubeconfig)
+	return output(cmd, clusterConfig.cacheKey, kubeconfig)
 }
 
-func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiCreateKubeconfigRequest {
-	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
+func buildRequest(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) ske.ApiCreateKubeconfigRequest {
+	req := apiClient.CreateKubeconfig(ctx, clusterConfig.STACKITProjectID, clusterConfig.ClusterName)
 	expirationSeconds := strconv.Itoa(expirationSeconds)
 
 	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
