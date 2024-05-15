@@ -227,7 +227,13 @@ func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, re
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(resp)
+		var err error
+		var details []byte
+		if respKubeconfig != nil {
+			details, err = yaml.Marshal(respKubeconfig)
+		} else if respLogin != nil {
+			details, err = yaml.Marshal(respLogin)
+		}
 		if err != nil {
 			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
 		}
