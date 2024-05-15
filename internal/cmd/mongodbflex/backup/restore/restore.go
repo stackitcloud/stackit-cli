@@ -46,13 +46,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Restores a MongoDB Flex instance with ID "yyy" using backup with ID "zzz"`,
+				`Restore a MongoDB Flex instance with ID "yyy" using backup with ID "zzz"`,
 				`$ stackit mongodbflex backup restore --instance-id yyy --backup-id zzz`),
 			examples.NewExample(
 				`Clone a MongoDB Flex instance with ID "yyy" via point-in-time restore to timestamp "2024-05-14T14:31:48Z"`,
 				`$ stackit mongodbflex backup restore --instance-id yyy --timestamp 2024-05-14T14:31:48Z`),
 			examples.NewExample(
-				`Restores a MongoDB Flex instance with ID "yyy", using backup from instance with ID "zzz" with backup ID "xxx"`,
+				`Restore a MongoDB Flex instance with ID "yyy", using backup from instance with ID "zzz" with backup ID "xxx"`,
 				`$ stackit mongodbflex backup restore --instance-id zzz --backup-instance-id yyy --backup-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -145,15 +145,21 @@ func configureFlags(cmd *cobra.Command) {
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
-
-	cmd.MarkFlagsOneRequired(backupIdFlag, timestampFlag)
-	cmd.MarkFlagsMutuallyExclusive(backupIdFlag, timestampFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
+	}
+
+	backupId := flags.FlagToStringValue(p, cmd, backupIdFlag)
+	timestamp := flags.FlagToStringValue(p, cmd, timestampFlag)
+
+	if backupId != "" && timestamp != "" || backupId == "" && timestamp == "" {
+		return nil, &cliErr.RequiredMutuallyExclusiveFlagsError{
+			Flags: []string{backupIdFlag, timestampFlag},
+		}
 	}
 
 	model := inputModel{
