@@ -140,9 +140,7 @@ When using `less` as a pager, STACKIT CLI will automatically pass following opti
 - -w, --hilite-unread - Temporarily highlights the first "new" line after a forward movement of a full page.
 
 
->[IMPORTANT]
-> These options will not be added if:
-> - The pager is not named `less`.
+> These options will not be added automatically if a custom pager is defined.
 
 ### Using a different pager
 
