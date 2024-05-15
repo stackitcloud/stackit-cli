@@ -138,7 +138,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreSta
 	case print.YAMLOutputFormat:
 		details, err := yaml.Marshal(backup)
 		if err != nil {
-			return fmt.Errorf("marshal backup for MongoDB Flex backup: %w", err)
+			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
 		}
 		p.Outputln(string(details))
 
