@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/inhies/go-bytesize"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -147,6 +148,14 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backups, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex backups list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(backups)
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex backups list: %w", err)
 		}

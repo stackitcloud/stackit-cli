@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -129,9 +130,17 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreSta
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup for MongoDB Flex backup: %w", err)
+			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
 		}
 		cmd.Println(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(backup)
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
+		}
+		p.Outputln(string(details))
 
 		return nil
 	default:

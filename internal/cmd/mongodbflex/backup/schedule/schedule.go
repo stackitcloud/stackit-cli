@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -103,24 +104,33 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
+	output := struct {
+		BackupSchedule                 string `json:"backup_schedule"`
+		DailySnaphotRetentionDays      string `json:"daily_snapshot_retention_days"`
+		MonthlySnapshotRetentionMonths string `json:"monthly_snapshot_retention_months"`
+		PointInTimeWindowHours         string `json:"point_in_time_window_hours"`
+		SnapshotRetentionDays          string `json:"snapshot_retention_days"`
+		WeeklySnapshotRetentionWeeks   string `json:"weekly_snapshot_retention_weeks"`
+	}{
+		BackupSchedule:                 *instance.BackupSchedule,
+		DailySnaphotRetentionDays:      (*instance.Options)["dailySnapshotRetentionDays"],
+		MonthlySnapshotRetentionMonths: (*instance.Options)["monthlySnapshotRetentionDays"],
+		PointInTimeWindowHours:         (*instance.Options)["pointInTimeWindowHours"],
+		SnapshotRetentionDays:          (*instance.Options)["snapshotRetentionDays"],
+		WeeklySnapshotRetentionWeeks:   (*instance.Options)["weeklySnapshotRetentionWeeks"],
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		output := struct {
-			BackupSchedule                 string `json:"backup_schedule"`
-			DailySnaphotRetentionDays      string `json:"daily_snapshot_retention_days"`
-			MonthlySnapshotRetentionMonths string `json:"monthly_snapshot_retention_months"`
-			PointInTimeWindowHours         string `json:"point_in_time_window_hours"`
-			SnapshotRetentionDays          string `json:"snapshot_retention_days"`
-			WeeklySnapshotRetentionWeeks   string `json:"weekly_snapshot_retention_weeks"`
-		}{
-			BackupSchedule:                 *instance.BackupSchedule,
-			DailySnaphotRetentionDays:      (*instance.Options)["dailySnapshotRetentionDays"],
-			MonthlySnapshotRetentionMonths: (*instance.Options)["monthlySnapshotRetentionDays"],
-			PointInTimeWindowHours:         (*instance.Options)["pointInTimeWindowHours"],
-			SnapshotRetentionDays:          (*instance.Options)["snapshotRetentionDays"],
-			WeeklySnapshotRetentionWeeks:   (*instance.Options)["weeklySnapshotRetentionWeeks"],
-		}
 		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex backup schedule: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(output)
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex backup schedule: %w", err)
 		}
