@@ -16,13 +16,13 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.9.1
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.12.0
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.14.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.15.0
 	github.com/zalando/go-keyring v0.2.4
 	golang.org/x/mod v0.17.0
 	golang.org/x/oauth2 v0.20.0
