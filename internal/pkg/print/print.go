@@ -175,6 +175,7 @@ func (p *Printer) PagerDisplay(content string) error {
 
 	err := pagerCmd.Run()
 	if err != nil {
+		p.Debug(ErrorLevel, "run pager command: %v", err)
 		p.Outputln(content)
 	}
 	return nil
