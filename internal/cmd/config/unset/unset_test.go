@@ -20,6 +20,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
+		loadBalancerCustomEndpointFlag:    true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
 		objectStorageCustomEndpointFlag:   true,
@@ -48,6 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
+		LoadBalancerCustomEndpoint:    true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
 		ObjectStorageCustomEndpoint:   true,
@@ -92,6 +94,7 @@ func TestParseInput(t *testing.T) {
 				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
+				model.LoadBalancerCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
 				model.ObjectStorageCustomEndpoint = false

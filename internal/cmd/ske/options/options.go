@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -142,6 +143,14 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 		}
 		p.Outputln(string(details))
 		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(options)
+		if err != nil {
+			return fmt.Errorf("marshal SKE options: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
 	default:
 		return outputResultAsTable(p, model, options)
 	}
@@ -181,7 +190,8 @@ func renderAvailabilityZones(resp *ske.ProviderOptions) string {
 	zones := *resp.AvailabilityZones
 
 	table := tables.NewTable()
-	table.SetHeader("AVAILABILITY ZONES")
+	table.SetTitle("Availability Zones")
+	table.SetHeader("ZONE")
 	for i := range zones {
 		z := zones[i]
 		table.AddRow(*z.Name)
@@ -193,7 +203,8 @@ func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
 	versions := *resp.KubernetesVersions
 
 	table := tables.NewTable()
-	table.SetHeader("KUBERNETES VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
+	table.SetTitle("Kubernetes Versions")
+	table.SetHeader("VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
 	for i := range versions {
 		v := versions[i]
 		featureGate, err := json.Marshal(*v.FeatureGates)
@@ -213,7 +224,8 @@ func renderMachineImages(resp *ske.ProviderOptions) string {
 	images := *resp.MachineImages
 
 	table := tables.NewTable()
-	table.SetHeader("MACHINE IMAGE NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
+	table.SetTitle("Machine Images")
+	table.SetHeader("NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
 	for i := range images {
 		image := images[i]
 		versions := *image.Versions
@@ -241,7 +253,8 @@ func renderMachineTypes(resp *ske.ProviderOptions) string {
 	types := *resp.MachineTypes
 
 	table := tables.NewTable()
-	table.SetHeader("MACHINE TYPE", "CPU", "MEMORY")
+	table.SetTitle("Machine Types")
+	table.SetHeader("TYPE", "CPU", "MEMORY")
 	for i := range types {
 		t := types[i]
 		table.AddRow(*t.Name, *t.Cpu, *t.Memory)
@@ -253,7 +266,8 @@ func renderVolumeTypes(resp *ske.ProviderOptions) string {
 	types := *resp.VolumeTypes
 
 	table := tables.NewTable()
-	table.SetHeader("VOLUME TYPE")
+	table.SetTitle("Volume Types")
+	table.SetHeader("TYPE")
 	for i := range types {
 		z := types[i]
 		table.AddRow(*z.Name)

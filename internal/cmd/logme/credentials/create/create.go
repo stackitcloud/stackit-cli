@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	logmeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/logme"
 )
 
@@ -123,12 +123,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 }
 
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *logme.CredentialsResponse) error {
+	if !model.ShowPassword {
+		resp.Raw.Credentials.Password = utils.Ptr("hidden")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		if !model.ShowPassword {
-			resp.Raw.Credentials.Password = utils.Ptr("hidden")
-		}
 		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal LogMe credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(resp)
 		if err != nil {
 			return fmt.Errorf("marshal LogMe credentials: %w", err)
 		}

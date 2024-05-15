@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -108,6 +109,14 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		p.Outputln(string(details))
 
 		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(instance)
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
 	default:
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
@@ -140,6 +149,8 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		table.AddRow("CPU", *instance.Flavor.Cpu)
 		table.AddSeparator()
 		table.AddRow("RAM", *instance.Flavor.Memory)
+		table.AddSeparator()
+		table.AddRow("BACKUP SCHEDULE", *instance.BackupSchedule)
 		table.AddSeparator()
 		err = table.Display(p)
 		if err != nil {

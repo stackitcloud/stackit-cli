@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -226,6 +227,14 @@ func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error
 	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(zones, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal DNS zone list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(zones)
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}

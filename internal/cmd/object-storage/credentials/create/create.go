@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 
 	"github.com/spf13/cobra"
@@ -140,6 +141,14 @@ func outputResult(p *print.Printer, model *inputModel, credentialsGroupLabel str
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Object Storage credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(resp)
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials: %w", err)
 		}

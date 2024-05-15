@@ -1,6 +1,7 @@
 package mongodbflex
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/user"
@@ -27,4 +28,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(instance.NewCmd(p))
 	cmd.AddCommand(user.NewCmd(p))
 	cmd.AddCommand(options.NewCmd(p))
+	cmd.AddCommand(backup.NewCmd(p))
 }

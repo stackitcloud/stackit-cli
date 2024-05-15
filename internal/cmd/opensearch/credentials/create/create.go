@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -123,12 +124,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 }
 
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *opensearch.CredentialsResponse) error {
+	if !model.ShowPassword {
+		resp.Raw.Credentials.Password = utils.Ptr("hidden")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		if !model.ShowPassword {
-			resp.Raw.Credentials.Password = utils.Ptr("hidden")
-		}
 		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(resp)
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch credentials: %w", err)
 		}

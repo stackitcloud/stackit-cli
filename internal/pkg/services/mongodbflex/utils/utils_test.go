@@ -16,6 +16,7 @@ var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testUserId     = uuid.NewString()
+	testBackupId   = uuid.NewString()
 )
 
 const (
@@ -24,12 +25,14 @@ const (
 )
 
 type mongoDBFlexClientMocked struct {
-	listVersionsFails bool
-	listVersionsResp  *mongodbflex.ListVersionsResponse
-	getInstanceFails  bool
-	getInstanceResp   *mongodbflex.GetInstanceResponse
-	getUserFails      bool
-	getUserResp       *mongodbflex.GetUserResponse
+	listVersionsFails    bool
+	listVersionsResp     *mongodbflex.ListVersionsResponse
+	getInstanceFails     bool
+	getInstanceResp      *mongodbflex.GetInstanceResponse
+	getUserFails         bool
+	getUserResp          *mongodbflex.GetUserResponse
+	listRestoreJobsFails bool
+	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
 }
 
 func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*mongodbflex.ListVersionsResponse, error) {
@@ -37,6 +40,13 @@ func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ strin
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
+}
+
+func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*mongodbflex.ListRestoreJobsResponse, error) {
+	if m.listRestoreJobsFails {
+		return nil, fmt.Errorf("could not list versions")
+	}
+	return m.listRestoreJobsResp, nil
 }
 
 func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
@@ -364,7 +374,7 @@ func TestLoadFlavorId(t *testing.T) {
 	}
 }
 
-func TestGetLatestPostgreSQLVersion(t *testing.T) {
+func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 	tests := []struct {
 		description       string
 		listVersionsFails bool
@@ -512,6 +522,122 @@ func TestGetUserName(t *testing.T) {
 			if !tt.isValid {
 				return
 			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetRestoreStatus(t *testing.T) {
+	tests := []struct {
+		description         string
+		listRestoreJobsResp *mongodbflex.ListRestoreJobsResponse
+		expectedOutput      string
+	}{
+		{
+			description: "base",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
+						Status:   utils.Ptr("state"),
+					},
+					{
+						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
+						Status:   utils.Ptr("state 2"),
+					},
+				},
+			},
+			expectedOutput: "state",
+		},
+		{
+			description: "get latest restore, ordered array",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
+						Status:   utils.Ptr("in progress"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
+						Status:   utils.Ptr("finished"),
+					},
+				},
+			},
+			expectedOutput: "in progress",
+		},
+		{
+			description: "get latest restore, unordered array",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
+						Status:   utils.Ptr("finished"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
+						Status:   utils.Ptr("in progress"),
+					},
+				},
+			},
+			expectedOutput: "in progress",
+		},
+		{
+			description: "get latest restore, another date format",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2009-11-10 23:00:00 +0000 UTC m=+0.000000001"),
+						Status:   utils.Ptr("finished"),
+					},
+					{
+						BackupID: utils.Ptr(testBackupId),
+						Date:     utils.Ptr("2009-11-11 23:00:00 +0000 UTC m=+0.000000001"),
+						Status:   utils.Ptr("in progress"),
+					},
+				},
+			},
+			expectedOutput: "in progress",
+		},
+		{
+			description: "no restore job for that backup",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: &[]mongodbflex.RestoreInstanceStatus{
+					{
+						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
+						Status:   utils.Ptr("in progress"),
+					},
+					{
+						BackupID: utils.Ptr("bar"),
+						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
+						Status:   utils.Ptr("finished"),
+					},
+				},
+			},
+			expectedOutput: "-",
+		},
+		{
+			description: "no restore jobs",
+			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
+				Items: nil,
+			},
+			expectedOutput: "-",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output := GetRestoreStatus(testBackupId, tt.listRestoreJobsResp)
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

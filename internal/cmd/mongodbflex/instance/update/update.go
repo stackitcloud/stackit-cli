@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -310,6 +311,14 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal update MongoDBFlex instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(resp)
 		if err != nil {
 			return fmt.Errorf("marshal update MongoDBFlex instance: %w", err)
 		}

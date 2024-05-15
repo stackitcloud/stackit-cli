@@ -31,6 +31,7 @@ stackit config unset [flags]
       --authorization-custom-endpoint      Authorization API base URL. If unset, uses the default base URL
       --dns-custom-endpoint                DNS API base URL. If unset, uses the default base URL
   -h, --help                               Help for "stackit config unset"
+      --load-balancer-custom-endpoint      Load Balancer API base URL. If unset, uses the default base URL
       --logme-custom-endpoint              LogMe API base URL. If unset, uses the default base URL
       --mariadb-custom-endpoint            MariaDB API base URL. If unset, uses the default base URL
       --mongodbflex-custom-endpoint        MongoDB Flex API base URL. If unset, uses the default base URL

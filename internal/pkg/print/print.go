@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"syscall"
 
 	"log/slog"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"golang.org/x/term"
 )
 
 type Level string
@@ -28,6 +30,7 @@ const (
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
 	NoneOutputFormat   = "none"
+	YAMLOutputFormat   = "yaml"
 )
 
 var errAborted = errors.New("operation aborted")
@@ -138,22 +141,28 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 
 // Prompts the user for confirmation by pressing Enter.
 //
-// Returns nil only if the user (explicitly) press directly enter.
-// Returns ErrAborted if the user press anything else before pressing enter.
+// Returns nil if the user presses Enter.
 func (p *Printer) PromptForEnter(prompt string) error {
-	reader := bufio.NewReaderSize(p.Cmd.InOrStdin(), 1)
-
+	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	p.Cmd.PrintErr(prompt)
-	answer, err := reader.ReadByte()
+	_, err := reader.ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("read user response: %w", err)
 	}
+	return nil
+}
 
-	// ASCII code for Enter (newline) is 10.
-	if answer == 10 {
-		return nil
+// Prompts the user for a password.
+//
+// Returns the password that was given, otherwise returns error
+func (p *Printer) PromptForPassword(prompt string) (string, error) {
+	p.Cmd.PrintErr(prompt)
+	defer p.Outputln("")
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", fmt.Errorf("read password: %w", err)
 	}
-	return errAborted
+	return string(bytePassword), nil
 }
 
 // Shows the content in the command's stdout using the "less" command
@@ -163,7 +172,13 @@ func (p *Printer) PagerDisplay(content string) error {
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}
-	pagerCmd := exec.Command("less", "-F", "-S", "-w")
+
+	// less arguments
+	// -F: exits if the entire file fits on the first screen
+	// -S: disables line wrapping
+	// -w: highlight the first line after moving one full page down
+	// -R: interprets ANSI color and style sequences
+	pagerCmd := exec.Command("less", "-F", "-S", "-w", "-R")
 
 	pager, pagerExists := os.LookupEnv("PAGER")
 	if pagerExists && pager != "nil" && pager != "" {

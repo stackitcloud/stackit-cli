@@ -33,6 +33,7 @@ stackit config set [flags]
       --authorization-custom-endpoint string      Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                DNS API base URL, used in calls to this API
   -h, --help                                      Help for "stackit config set"
+      --load-balancer-custom-endpoint string      Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string              LogMe API base URL, used in calls to this API
       --mariadb-custom-endpoint string            MariaDB API base URL, used in calls to this API
       --mongodbflex-custom-endpoint string        MongoDB Flex API base URL, used in calls to this API
@@ -53,7 +54,7 @@ stackit config set [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
   -p, --project-id string      Project ID
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
