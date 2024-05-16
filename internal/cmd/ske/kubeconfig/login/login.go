@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if env == "" {
 				return fmt.Errorf("%s\n%s\n%s", "KUBERNETES_EXEC_INFO env var is unset or empty.",
 					"The command probably was not called from a Kubernetes client application!",
-					"See `stackit ske login --help` for detailed usage instructions.")
+					"See `stackit ske kubeconfig login --help` for detailed usage instructions.")
 			}
 
 			clusterConfig, err := parseClusterConfig()
@@ -223,7 +223,7 @@ func output(p *print.Printer, cacheKey string, kubeconfig *rest.Config) error {
 		return fmt.Errorf("marshal ExecCredential: %w", err)
 	}
 
-	p.Outputf(string(output), nil)
+	p.Outputf(string(output))
 	return nil
 }
 
