@@ -180,9 +180,15 @@ func (p *Printer) PagerDisplay(content string) error {
 	// -R: interprets ANSI color and style sequences
 	pagerCmd := exec.Command("less", "-F", "-S", "-w", "-R")
 
+	pager, pagerExists := os.LookupEnv("PAGER")
+	if pagerExists && pager != "nil" && pager != "" {
+		pagerCmd = exec.Command(pager) // #nosec G204
+	}
+
 	pagerCmd.Stdin = strings.NewReader(content)
 	pagerCmd.Stdout = p.Cmd.OutOrStdout()
 
+	p.Debug(DebugLevel, "using pager: %s", pagerCmd.Args[0])
 	err := pagerCmd.Run()
 	if err != nil {
 		p.Debug(ErrorLevel, "run pager command: %v", err)
