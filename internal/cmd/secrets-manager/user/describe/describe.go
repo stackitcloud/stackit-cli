@@ -124,7 +124,7 @@ func outputResult(p *print.Printer, outputFormat string, user secretsmanager.Use
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(user)
+		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user: %w", err)
 		}

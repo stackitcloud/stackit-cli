@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offeri
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(plans)
+		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ plans: %w", err)
 		}

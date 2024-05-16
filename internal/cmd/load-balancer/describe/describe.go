@@ -108,7 +108,7 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(loadBalancer)
+		details, err := yaml.MarshalWithOptions(loadBalancer, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal load balancer: %w", err)
 		}

@@ -98,7 +98,7 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(quota)
+		details, err := yaml.MarshalWithOptions(quota, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal quota: %w", err)
 		}

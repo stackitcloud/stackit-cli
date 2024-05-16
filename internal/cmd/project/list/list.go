@@ -230,7 +230,7 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(projects)
+		details, err := yaml.MarshalWithOptions(projects, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
 		}

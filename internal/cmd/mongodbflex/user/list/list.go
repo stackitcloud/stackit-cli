@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat string, users []mongodbflex.Lis
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(users)
+		details, err := yaml.MarshalWithOptions(users, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex user list: %w", err)
 		}

@@ -105,7 +105,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials *loadbalanc
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(credentials)
+		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
 		}

@@ -144,7 +144,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(backups)
+		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex backup list: %w", err)
 		}

@@ -154,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, tokensMetadata []servic
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(tokensMetadata)
+		details, err := yaml.MarshalWithOptions(tokensMetadata, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal tokens metadata: %w", err)
 		}

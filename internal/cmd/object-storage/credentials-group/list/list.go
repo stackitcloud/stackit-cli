@@ -132,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(credentialsGroups)
+		details, err := yaml.MarshalWithOptions(credentialsGroups, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage credentials group list: %w", err)
 		}

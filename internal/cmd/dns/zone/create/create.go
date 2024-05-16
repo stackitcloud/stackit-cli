@@ -206,7 +206,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(resp)
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone: %w", err)
 		}

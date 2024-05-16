@@ -110,7 +110,7 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(config)
+		details, err := yaml.MarshalWithOptions(config, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal scrape configuration: %w", err)
 		}

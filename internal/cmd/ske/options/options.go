@@ -144,7 +144,7 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 		p.Outputln(string(details))
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(options)
+		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal SKE options: %w", err)
 		}

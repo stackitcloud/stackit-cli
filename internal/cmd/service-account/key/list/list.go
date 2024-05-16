@@ -150,7 +150,7 @@ func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.S
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(keys)
+		details, err := yaml.MarshalWithOptions(keys, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal keys metadata: %w", err)
 		}

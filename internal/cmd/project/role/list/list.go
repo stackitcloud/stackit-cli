@@ -142,7 +142,7 @@ func outputRolesResult(p *print.Printer, outputFormat string, roles []authorizat
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(roles)
+		details, err := yaml.MarshalWithOptions(roles, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal roles: %w", err)
 		}

@@ -122,7 +122,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.C
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(credentials)
+		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
 		}

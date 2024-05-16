@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, instances []mongodbflex
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(instances)
+		details, err := yaml.MarshalWithOptions(instances, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex instance list: %w", err)
 		}
