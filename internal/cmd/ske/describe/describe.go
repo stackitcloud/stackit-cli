@@ -96,7 +96,7 @@ func outputResult(p *print.Printer, outputFormat string, project *ske.ProjectRes
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(project)
+		details, err := yaml.MarshalWithOptions(project, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal SKE project details: %w", err)
 		}

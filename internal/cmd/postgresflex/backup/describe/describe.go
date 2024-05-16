@@ -124,7 +124,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(backup)
+		details, err := yaml.MarshalWithOptions(backup, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal backup for PostgreSQL Flex backup: %w", err)
 		}

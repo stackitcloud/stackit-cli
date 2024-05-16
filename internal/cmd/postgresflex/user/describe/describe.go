@@ -127,7 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(user)
+		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
 		}

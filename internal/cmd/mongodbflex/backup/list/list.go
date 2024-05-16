@@ -155,7 +155,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(backups)
+		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex backups list: %w", err)
 		}

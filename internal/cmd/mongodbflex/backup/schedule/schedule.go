@@ -130,7 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(output)
+		details, err := yaml.MarshalWithOptions(output, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex backup schedule: %w", err)
 		}

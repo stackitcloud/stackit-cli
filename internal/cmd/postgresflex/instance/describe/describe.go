@@ -112,7 +112,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(instance)
+		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
 		}

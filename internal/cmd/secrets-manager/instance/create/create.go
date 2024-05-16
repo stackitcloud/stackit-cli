@@ -168,7 +168,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(resp)
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
 		}

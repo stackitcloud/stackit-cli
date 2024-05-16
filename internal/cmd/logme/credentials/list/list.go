@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []logme.Cre
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(credentials)
+		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal LogMe credentials list: %w", err)
 		}

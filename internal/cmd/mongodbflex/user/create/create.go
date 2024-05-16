@@ -159,7 +159,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(user)
+		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
 		}

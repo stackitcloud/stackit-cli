@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, plans []mariadb.Offerin
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(plans)
+		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB plans: %w", err)
 		}

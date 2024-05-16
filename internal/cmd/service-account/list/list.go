@@ -132,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(serviceAccounts)
+		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)
 		}
