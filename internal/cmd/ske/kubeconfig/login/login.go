@@ -57,6 +57,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
+			if err := cache.Init(); err != nil {
+				return fmt.Errorf("cache init failed: %w", err)
+			}
+
 			env := os.Getenv("KUBERNETES_EXEC_INFO")
 			if env == "" {
 				return fmt.Errorf("%s\n%s\n%s", "KUBERNETES_EXEC_INFO env var is unset or empty.",

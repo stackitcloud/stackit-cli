@@ -10,6 +10,10 @@ import (
 )
 
 func TestGetObject(t *testing.T) {
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
 	tests := []struct {
 		description string
 		identifier  string
@@ -71,7 +75,10 @@ func TestGetObject(t *testing.T) {
 	}
 }
 func TestPutObject(t *testing.T) {
-	// Also test createFolderIfNotExists here
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
 	tests := []struct {
 		description  string
 		identifier   string
@@ -142,6 +149,10 @@ func TestPutObject(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
 	tests := []struct {
 		description  string
 		identifier   string

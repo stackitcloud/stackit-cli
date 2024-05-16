@@ -15,15 +15,19 @@ var (
 	ErrorInvalidCacheIdentifier = fmt.Errorf("invalid cache identifier")
 )
 
-func init() {
+func Init() error {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		panic(fmt.Errorf("get user cache dir: %w", err))
+		return fmt.Errorf("get user cache dir: %w", err)
 	}
 	cacheFolderPath = filepath.Join(cacheDir, "stackit")
+	return nil
 }
 
 func GetObject(identifier string) ([]byte, error) {
+	if err := validateCacheFolderPath(); err != nil {
+		return nil, err
+	}
 	if !identifierRegex.MatchString(identifier) {
 		return nil, ErrorInvalidCacheIdentifier
 	}
@@ -32,6 +36,9 @@ func GetObject(identifier string) ([]byte, error) {
 }
 
 func PutObject(identifier string, data []byte) error {
+	if err := validateCacheFolderPath(); err != nil {
+		return err
+	}
 	if !identifierRegex.MatchString(identifier) {
 		return ErrorInvalidCacheIdentifier
 	}
@@ -45,6 +52,9 @@ func PutObject(identifier string, data []byte) error {
 }
 
 func DeleteObject(identifier string) error {
+	if err := validateCacheFolderPath(); err != nil {
+		return err
+	}
 	if !identifierRegex.MatchString(identifier) {
 		return ErrorInvalidCacheIdentifier
 	}
@@ -64,6 +74,13 @@ func createFolderIfNotExists(folderPath string) error {
 		}
 	} else if err != nil {
 		return err
+	}
+	return nil
+}
+
+func validateCacheFolderPath() error {
+	if cacheFolderPath == "" {
+		return errors.New("cacheFolderPath not set. Forgot to call Init()?")
 	}
 	return nil
 }
