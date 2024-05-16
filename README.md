@@ -145,6 +145,14 @@ When using `less` as a pager, STACKIT CLI will automatically pass following opti
 - -R, --RAW-CONTROL-CHARS - ANSI color and style sequences will be interpreted.
 
 > These options will not be added automatically if a custom pager is defined.
+> 
+> In that case, users can define the parameters by using the specific environment variable required by the PAGER (if supported by pager).
+> 
+> For example, if user sets the PAGER environment variable to less and would like to pass some arguments, LESS environment variable must be used as following.
+> 
+> export PAGER="less"
+> 
+> export LESS="-R"
 
 
 ## Autocompletion
