@@ -4,6 +4,7 @@ dist/
 
 # IDE
 .vscode
+.idea
 
 # OS generated files
 .DS_Store

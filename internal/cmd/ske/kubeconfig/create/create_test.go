@@ -92,7 +92,17 @@ func TestParseInput(t *testing.T) {
 				model.ExpirationTime = utils.Ptr("2592000")
 			}),
 		},
-
+		{
+			description: "login",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["login"] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Login = true
+			}),
+		},
 		{
 			description: "custom filepath",
 			argValues:   fixtureArgValues(),
@@ -202,7 +212,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildRequestCreate(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -225,7 +235,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, _ := buildRequest(testCtx, tt.model, testClient)
+			request, _ := buildRequestCreate(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
