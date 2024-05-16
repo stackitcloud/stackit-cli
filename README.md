@@ -149,7 +149,8 @@ When using `less` as a pager, STACKIT CLI will automatically pass following opti
 > In that case, users can define the parameters by using the specific environment variable required by the `PAGER` (if supported).
 
 > 
-> For example, if user sets the PAGER environment variable to less and would like to pass some arguments, LESS environment variable must be used as following.
+> For example, if user sets the `PAGER` environment variable to `less` and would like to pass some arguments, `LESS` environment variable must be used as following:
+
 > 
 > export PAGER="less"
 > 
