@@ -2,8 +2,6 @@ module github.com/stackitcloud/stackit-cli
 
 go 1.22.0
 
-toolchain go1.22.3
-
 require (
 	github.com/goccy/go-yaml v1.11.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
