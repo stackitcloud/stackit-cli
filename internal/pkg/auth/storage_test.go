@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestSetGetAuthField(t *testing.T) {
@@ -336,6 +338,16 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 }
 
 func deleteAuthFieldInKeyring(key authFieldKey) error {
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	if activeProfile != "" {
+		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		return keyring.Delete(activeProfileKeyring, string(key))
+	}
+
 	return keyring.Delete(keyringService, string(key))
 }
 
@@ -349,7 +361,18 @@ func deleteAuthFieldInEncodedTextFile(key authFieldKey) error {
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
