@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+
 	"github.com/zalando/go-keyring"
 )
 
@@ -69,6 +71,15 @@ func SetAuthField(key authFieldKey, value string) error {
 }
 
 func setAuthFieldInKeyring(key authFieldKey, value string) error {
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	if activeProfile != "" {
+		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		return keyring.Set(activeProfileKeyring, string(key), value)
+	}
 	return keyring.Set(keyringService, string(key), value)
 }
 
@@ -82,7 +93,18 @@ func setAuthFieldInEncodedTextFile(key authFieldKey, value string) error {
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -143,6 +165,15 @@ func GetAuthField(key authFieldKey) (string, error) {
 }
 
 func getAuthFieldFromKeyring(key authFieldKey) (string, error) {
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return "", fmt.Errorf("get profile: %w", err)
+	}
+
+	if activeProfile != "" {
+		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		return keyring.Get(activeProfileKeyring, string(key))
+	}
 	return keyring.Get(keyringService, string(key))
 }
 
@@ -156,7 +187,18 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return "", fmt.Errorf("get profile: %w", err)
+	}
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -187,7 +229,18 @@ func createEncodedTextFile() error {
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	err = os.MkdirAll(textFileDir, os.ModePerm)
