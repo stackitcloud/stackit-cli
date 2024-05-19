@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -47,6 +48,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			err = config.SetProfile(p, model.Profile)
 			if err != nil {
 				return fmt.Errorf("set profile: %w", err)
+			}
+
+			_, err = auth.GetAuthFlow()
+			if err != nil {
+				p.Warn("Failed to find a valid authentication flow for the active profile. Please run 'stackit auth -h' for more information on the login process.\n")
 			}
 
 			p.Info("Successfully set active profile to %q\n", model.Profile)
