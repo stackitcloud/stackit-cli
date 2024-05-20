@@ -260,3 +260,16 @@ func createEncodedTextFile() error {
 
 	return nil
 }
+
+func GetPrettyAuthFlow(flow AuthFlow) string {
+	switch flow {
+	case AUTH_FLOW_USER_TOKEN:
+		return "User Token"
+	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN:
+		return "Service Account Token"
+	case AUTH_FLOW_SERVICE_ACCOUNT_KEY:
+		return "Service Account Key"
+	default:
+		return "Unknown"
+	}
+}
