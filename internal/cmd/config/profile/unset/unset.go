@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -29,6 +30,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			err := config.UnsetProfile(p)
 			if err != nil {
 				return fmt.Errorf("unset profile: %w", err)
+			}
+
+			flow, err := auth.GetAuthFlow()
+			if err != nil {
+				p.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
+				p.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
+			} else {
+				p.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 			}
 
 			p.Info("Profile unset successfully. The default profile will be used.\n")
