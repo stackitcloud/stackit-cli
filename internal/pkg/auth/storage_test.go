@@ -344,7 +344,7 @@ func deleteAuthFieldInKeyring(key authFieldKey) error {
 	}
 
 	if activeProfile != "" {
-		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Delete(activeProfileKeyring, string(key))
 	}
 

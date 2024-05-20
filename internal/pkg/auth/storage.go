@@ -77,7 +77,7 @@ func setAuthFieldInKeyring(key authFieldKey, value string) error {
 	}
 
 	if activeProfile != "" {
-		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Set(activeProfileKeyring, string(key), value)
 	}
 	return keyring.Set(keyringService, string(key), value)
@@ -171,7 +171,7 @@ func getAuthFieldFromKeyring(key authFieldKey) (string, error) {
 	}
 
 	if activeProfile != "" {
-		activeProfileKeyring := fmt.Sprintf("%s%s%s", keyringService, "/", activeProfile)
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Get(activeProfileKeyring, string(key))
 	}
 	return keyring.Get(keyringService, string(key))
