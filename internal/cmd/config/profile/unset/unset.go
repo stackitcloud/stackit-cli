@@ -35,9 +35,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			flow, err := auth.GetAuthFlow()
 			if err != nil {
 				p.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
-				p.Warn("Failed to find a valid authentication flow for the active profile. Please login using the 'stackit auth login' command.\n")
+				p.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
 			} else {
-				p.Debug(print.InfoLevel, "found valid authentication flow for active profile: %s", auth.GetPrettyAuthFlow(flow))
+				p.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 			}
 
 			p.Info("Profile unset successfully. The default profile will be used.\n")
