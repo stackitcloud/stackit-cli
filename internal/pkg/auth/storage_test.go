@@ -115,6 +115,11 @@ func TestSetGetAuthField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				t.Errorf("get profile: %v", err)
+			}
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
@@ -142,12 +147,12 @@ func TestSetGetAuthField(t *testing.T) {
 				}
 
 				if !tt.keyringFails {
-					err = deleteAuthFieldInKeyring(key)
+					err = deleteAuthFieldInKeyring(activeProfile, key)
 					if err != nil {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from keyring: %v. Please remove it manually", key, err)
 					}
 				} else {
-					err = deleteAuthFieldInEncodedTextFile(key)
+					err = deleteAuthFieldInEncodedTextFile(activeProfile, key)
 					if err != nil {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 					}
@@ -174,9 +179,11 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 		description      string
 		valueAssignments []valueAssignment
 		expectedValues   map[authFieldKey]string
+		activeProfile    string
 	}{
 		{
-			description: "simple assignments",
+			description:   "simple assignments with default profile",
+			activeProfile: "",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -193,7 +200,48 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			},
 		},
 		{
-			description: "overlapping assignments",
+			description:   "overlapping assignments with default profile",
+			activeProfile: "",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+				{
+					key:   testField1,
+					value: testValue3,
+				},
+			},
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue3,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:   "simple assignments with testProfile",
+			activeProfile: "testProfile",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+			},
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue1,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:   "overlapping assignments with testProfile",
+			activeProfile: "testProfile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -220,7 +268,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			keyring.MockInit()
 
 			for _, assignment := range tt.valueAssignments {
-				err := setAuthFieldInKeyring(assignment.key, assignment.value)
+				err := setAuthFieldInKeyring(tt.activeProfile, assignment.key, assignment.value)
 				if err != nil {
 					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", assignment.key, assignment.value, err)
 				}
@@ -231,7 +279,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			}
 
 			for key, valueExpected := range tt.expectedValues {
-				value, err := getAuthFieldFromKeyring(key)
+				value, err := getAuthFieldFromKeyring(tt.activeProfile, key)
 				if err != nil {
 					t.Errorf("Failed to get value of \"%s\": %v", key, err)
 					continue
@@ -239,7 +287,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 					t.Errorf("Value of field \"%s\" is wrong: expected \"%s\", got \"%s\"", key, valueExpected, value)
 				}
 
-				err = deleteAuthFieldInKeyring(key)
+				err = deleteAuthFieldInKeyring(tt.activeProfile, key)
 				if err != nil {
 					t.Errorf("Post-test cleanup failed: remove field \"%s\" from keyring: %v. Please remove it manually", key, err)
 				}
@@ -263,11 +311,13 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	tests := []struct {
 		description      string
+		activeProfile    string
 		valueAssignments []valueAssignment
 		expectedValues   map[authFieldKey]string
 	}{
 		{
-			description: "simple assignments",
+			description:   "simple assignments with default profile",
+			activeProfile: "",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -284,7 +334,48 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			},
 		},
 		{
-			description: "overlapping assignments",
+			description:   "overlapping assignments with default profile",
+			activeProfile: "",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+				{
+					key:   testField1,
+					value: testValue3,
+				},
+			},
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue3,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:   "simple assignments with testProfile",
+			activeProfile: "testProfile",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+			},
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue1,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:   "overlapping assignments with testProfile",
+			activeProfile: "testProfile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -309,7 +400,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			for _, assignment := range tt.valueAssignments {
-				err := setAuthFieldInEncodedTextFile(assignment.key, assignment.value)
+				err := setAuthFieldInEncodedTextFile(tt.activeProfile, assignment.key, assignment.value)
 				if err != nil {
 					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", assignment.key, assignment.value, err)
 				}
@@ -320,7 +411,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			}
 
 			for key, valueExpected := range tt.expectedValues {
-				value, err := getAuthFieldFromEncodedTextFile(key)
+				value, err := getAuthFieldFromEncodedTextFile(tt.activeProfile, key)
 				if err != nil {
 					t.Errorf("Failed to get value of \"%s\": %v", key, err)
 					continue
@@ -328,7 +419,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 					t.Errorf("Value of field \"%s\" is wrong: expected \"%s\", got \"%s\"", key, valueExpected, value)
 				}
 
-				err = deleteAuthFieldInEncodedTextFile(key)
+				err = deleteAuthFieldInEncodedTextFile(tt.activeProfile, key)
 				if err != nil {
 					t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 				}
@@ -337,12 +428,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 	}
 }
 
-func deleteAuthFieldInKeyring(key authFieldKey) error {
-	activeProfile, err := config.GetProfile()
-	if err != nil {
-		return fmt.Errorf("get profile: %w", err)
-	}
-
+func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
 	if activeProfile != "" {
 		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Delete(activeProfileKeyring, string(key))
@@ -351,8 +437,8 @@ func deleteAuthFieldInKeyring(key authFieldKey) error {
 	return keyring.Delete(keyringService, string(key))
 }
 
-func deleteAuthFieldInEncodedTextFile(key authFieldKey) error {
-	err := createEncodedTextFile()
+func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -360,11 +446,6 @@ func deleteAuthFieldInEncodedTextFile(key authFieldKey) error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
-	}
-
-	activeProfile, err := config.GetProfile()
-	if err != nil {
-		return fmt.Errorf("get profile: %w", err)
 	}
 
 	profileTextFileFolderName := textFileFolderName
