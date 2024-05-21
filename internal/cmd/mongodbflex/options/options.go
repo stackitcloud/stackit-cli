@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -190,6 +191,14 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
 		}
 		p.Outputln(string(details))
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true))
+		if err != nil {
+			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
+		}
+		p.Outputln(string(details))
+
 		return nil
 	default:
 		return outputResultAsTable(p, model, options)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -119,6 +120,14 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -102,6 +103,14 @@ func outputResult(p *print.Printer, outputFormat string, config *argus.Job) erro
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal scrape configuration: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(config, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal scrape configuration: %w", err)
 		}

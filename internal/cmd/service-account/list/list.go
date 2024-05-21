@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -126,6 +127,12 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal service accounts list: %w", err)
+		}
+		p.Outputln(string(details))
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)
 		}

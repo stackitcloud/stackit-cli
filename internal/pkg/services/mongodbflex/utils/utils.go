@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -118,6 +119,7 @@ type MongoDBFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
 	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
+	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
 }
 
 func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId string) (string, error) {
@@ -156,4 +158,27 @@ func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, in
 		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
 	}
 	return *resp.Item.Username, nil
+}
+
+func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsResponse) string {
+	state := "-"
+	if restoreJobs.Items == nil {
+		return state
+	}
+
+	restoreJobsSlice := *restoreJobs.Items
+
+	// sort array by descending date
+	slices.SortFunc(restoreJobsSlice, func(i, j mongodbflex.RestoreInstanceStatus) int {
+		// swap elements to sort by descending order
+		return cmp.Compare(*j.Date, *i.Date)
+	})
+
+	for _, restoreJob := range *restoreJobs.Items {
+		if *restoreJob.BackupID == backupId {
+			state = *restoreJob.Status
+			break
+		}
+	}
+	return state
 }

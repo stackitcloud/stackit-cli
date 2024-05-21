@@ -22,6 +22,8 @@ or you can also set it through the environment variable [STACKIT_PROJECT_ID]`
 	
 Get details on the available flags by re-running your command with the --help flag.`
 
+	REQUIRED_MUTUALLY_EXCLUSIVE_FLAGS = `the following flags are mutually exclusive and at least one of them is required: %s`
+
 	FAILED_AUTH = `you are not authenticated.
 
 You can authenticate as a user by running:
@@ -239,6 +241,14 @@ type FlagValidationError struct {
 
 func (e *FlagValidationError) Error() string {
 	return fmt.Sprintf(FLAG_VALIDATION, e.Flag, e.Details)
+}
+
+type RequiredMutuallyExclusiveFlagsError struct {
+	Flags []string
+}
+
+func (e *RequiredMutuallyExclusiveFlagsError) Error() string {
+	return fmt.Sprintf(REQUIRED_MUTUALLY_EXCLUSIVE_FLAGS, strings.Join(e.Flags, ", "))
 }
 
 type ArgValidationError struct {
