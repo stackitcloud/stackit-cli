@@ -12,7 +12,6 @@ import (
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 func TestSetGetAuthField(t *testing.T) {
@@ -33,11 +32,9 @@ func TestSetGetAuthField(t *testing.T) {
 		keyringFails     bool
 		valueAssignments []valueAssignment
 		expectedValues   map[authFieldKey]string
-		activeProfile    string
 	}{
 		{
-			description:   "simple assignments with default profile",
-			activeProfile: "",
+			description: "simple assignments",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -54,9 +51,8 @@ func TestSetGetAuthField(t *testing.T) {
 			},
 		},
 		{
-			description:   "simple assignments w/ keyring failing with default profile",
-			activeProfile: "",
-			keyringFails:  true,
+			description:  "simple assignments w/ keyring failing",
+			keyringFails: true,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -73,8 +69,7 @@ func TestSetGetAuthField(t *testing.T) {
 			},
 		},
 		{
-			description:   "overlapping assignments with default profile",
-			activeProfile: "",
+			description: "overlapping assignments",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -95,91 +90,8 @@ func TestSetGetAuthField(t *testing.T) {
 			},
 		},
 		{
-			description:   "overlapping assignments w/ keyring failing with default profile",
-			activeProfile: "",
-			keyringFails:  true,
-			valueAssignments: []valueAssignment{
-				{
-					key:   testField1,
-					value: testValue1,
-				},
-				{
-					key:   testField2,
-					value: testValue2,
-				},
-				{
-					key:   testField1,
-					value: testValue3,
-				},
-			},
-			expectedValues: map[authFieldKey]string{
-				testField1: testValue3,
-				testField2: testValue2,
-			},
-		},
-		{
-			description:   "simple assignments with testProfile",
-			activeProfile: "testProfile",
-			valueAssignments: []valueAssignment{
-				{
-					key:   testField1,
-					value: testValue1,
-				},
-				{
-					key:   testField2,
-					value: testValue2,
-				},
-			},
-			expectedValues: map[authFieldKey]string{
-				testField1: testValue1,
-				testField2: testValue2,
-			},
-		},
-		{
-			description:   "simple assignments w/ keyring failing with testProfile",
-			activeProfile: "testProfile",
-			keyringFails:  true,
-			valueAssignments: []valueAssignment{
-				{
-					key:   testField1,
-					value: testValue1,
-				},
-				{
-					key:   testField2,
-					value: testValue2,
-				},
-			},
-			expectedValues: map[authFieldKey]string{
-				testField1: testValue1,
-				testField2: testValue2,
-			},
-		},
-		{
-			description:   "overlapping assignments with testProfile",
-			activeProfile: "testProfile",
-			valueAssignments: []valueAssignment{
-				{
-					key:   testField1,
-					value: testValue1,
-				},
-				{
-					key:   testField2,
-					value: testValue2,
-				},
-				{
-					key:   testField1,
-					value: testValue3,
-				},
-			},
-			expectedValues: map[authFieldKey]string{
-				testField1: testValue3,
-				testField2: testValue2,
-			},
-		},
-		{
-			description:   "overlapping assignments w/ keyring failing with testProfile",
-			activeProfile: "testProfile",
-			keyringFails:  true,
+			description:  "overlapping assignments w/ keyring failing",
+			keyringFails: true,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -203,23 +115,15 @@ func TestSetGetAuthField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				t.Errorf("get profile: %v", err)
+			}
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
 				keyring.MockInitWithError(fmt.Errorf("keyring unavailable for testing"))
-			}
-
-			p := print.NewPrinter()
-			if tt.activeProfile != "" {
-				err := config.SetProfile(p, tt.activeProfile)
-				if err != nil {
-					t.Errorf("set profile: %v", err)
-				}
-			} else {
-				err := config.UnsetProfile(p)
-				if err != nil {
-					t.Errorf("unset profile: %v", err)
-				}
 			}
 
 			for _, assignment := range tt.valueAssignments {
@@ -243,12 +147,12 @@ func TestSetGetAuthField(t *testing.T) {
 				}
 
 				if !tt.keyringFails {
-					err = deleteAuthFieldInKeyring(tt.activeProfile, key)
+					err = deleteAuthFieldInKeyring(activeProfile, key)
 					if err != nil {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from keyring: %v. Please remove it manually", key, err)
 					}
 				} else {
-					err = deleteAuthFieldInEncodedTextFile(tt.activeProfile, key)
+					err = deleteAuthFieldInEncodedTextFile(activeProfile, key)
 					if err != nil {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 					}
@@ -362,19 +266,6 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
-
-			p := print.NewPrinter()
-			if tt.activeProfile != "" {
-				err := config.SetProfile(p, tt.activeProfile)
-				if err != nil {
-					t.Errorf("set profile: %v", err)
-				}
-			} else {
-				err := config.UnsetProfile(p)
-				if err != nil {
-					t.Errorf("unset profile: %v", err)
-				}
-			}
 
 			for _, assignment := range tt.valueAssignments {
 				err := setAuthFieldInKeyring(tt.activeProfile, assignment.key, assignment.value)
@@ -508,19 +399,6 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			if tt.activeProfile != "" {
-				err := config.SetProfile(p, tt.activeProfile)
-				if err != nil {
-					t.Errorf("set profile: %v", err)
-				}
-			} else {
-				err := config.UnsetProfile(p)
-				if err != nil {
-					t.Errorf("unset profile: %v", err)
-				}
-			}
-
 			for _, assignment := range tt.valueAssignments {
 				err := setAuthFieldInEncodedTextFile(tt.activeProfile, assignment.key, assignment.value)
 				if err != nil {
