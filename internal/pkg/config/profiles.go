@@ -52,7 +52,7 @@ func SetProfile(p *print.Printer, profile string) error {
 	p.Debug(print.DebugLevel, "persisted new active profile in: %s", profileFilePath)
 
 	configFolderPath = filepath.Join(defaultConfigFolderPath, profile)
-	err = createFolderIfNotExists(configFolderPath)
+	err = os.MkdirAll(configFolderPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("create config folder: %w", err)
 	}

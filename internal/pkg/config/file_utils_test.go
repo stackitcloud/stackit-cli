@@ -1,50 +1,8 @@
 package config
 
 import (
-	"os"
 	"testing"
 )
-
-func TestCreateFolderIfNotExists(t *testing.T) {
-	tests := []struct {
-		description  string
-		folderPath   string
-		needsCleanUp bool
-	}{
-		{
-			description: "folder exists",
-			folderPath:  "test-data/folder-exists",
-		},
-		{
-			description:  "folder does not exist",
-			folderPath:   "test-data/folder-does-not-exist",
-			needsCleanUp: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			err := createFolderIfNotExists(tt.folderPath)
-			if err != nil {
-				t.Errorf("create folder: %v", err)
-			}
-
-			// Check if the folder was created
-			_, err = os.Stat(tt.folderPath)
-			if os.IsNotExist(err) {
-				t.Errorf("expected folder to exist but it does not")
-			}
-
-			// Clean up
-			if tt.needsCleanUp {
-				err = os.RemoveAll(tt.folderPath)
-				if err != nil {
-					t.Errorf("remove folder: %v", err)
-				}
-			}
-		})
-	}
-}
 
 func TestReadFileIfExists(t *testing.T) {
 	tests := []struct {
