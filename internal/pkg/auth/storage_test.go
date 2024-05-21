@@ -115,6 +115,11 @@ func TestSetGetAuthField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				t.Errorf("get profile: %v", err)
+			}
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
@@ -147,7 +152,7 @@ func TestSetGetAuthField(t *testing.T) {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from keyring: %v. Please remove it manually", key, err)
 					}
 				} else {
-					err = deleteAuthFieldInEncodedTextFile(key)
+					err = deleteAuthFieldInEncodedTextFile(activeProfile, key)
 					if err != nil {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 					}
@@ -219,8 +224,13 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
 
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				t.Errorf("get profile: %v", err)
+			}
+
 			for _, assignment := range tt.valueAssignments {
-				err := setAuthFieldInKeyring(assignment.key, assignment.value)
+				err := setAuthFieldInKeyring(activeProfile, assignment.key, assignment.value)
 				if err != nil {
 					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", assignment.key, assignment.value, err)
 				}
@@ -231,7 +241,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			}
 
 			for key, valueExpected := range tt.expectedValues {
-				value, err := getAuthFieldFromKeyring(key)
+				value, err := getAuthFieldFromKeyring(activeProfile, key)
 				if err != nil {
 					t.Errorf("Failed to get value of \"%s\": %v", key, err)
 					continue
@@ -308,8 +318,13 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				t.Errorf("get profile: %v", err)
+			}
+
 			for _, assignment := range tt.valueAssignments {
-				err := setAuthFieldInEncodedTextFile(assignment.key, assignment.value)
+				err := setAuthFieldInEncodedTextFile(activeProfile, assignment.key, assignment.value)
 				if err != nil {
 					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", assignment.key, assignment.value, err)
 				}
@@ -320,7 +335,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			}
 
 			for key, valueExpected := range tt.expectedValues {
-				value, err := getAuthFieldFromEncodedTextFile(key)
+				value, err := getAuthFieldFromEncodedTextFile(activeProfile, key)
 				if err != nil {
 					t.Errorf("Failed to get value of \"%s\": %v", key, err)
 					continue
@@ -328,7 +343,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 					t.Errorf("Value of field \"%s\" is wrong: expected \"%s\", got \"%s\"", key, valueExpected, value)
 				}
 
-				err = deleteAuthFieldInEncodedTextFile(key)
+				err = deleteAuthFieldInEncodedTextFile(activeProfile, key)
 				if err != nil {
 					t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 				}
@@ -351,8 +366,8 @@ func deleteAuthFieldInKeyring(key authFieldKey) error {
 	return keyring.Delete(keyringService, string(key))
 }
 
-func deleteAuthFieldInEncodedTextFile(key authFieldKey) error {
-	err := createEncodedTextFile()
+func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -360,11 +375,6 @@ func deleteAuthFieldInEncodedTextFile(key authFieldKey) error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
-	}
-
-	activeProfile, err := config.GetProfile()
-	if err != nil {
-		return fmt.Errorf("get profile: %w", err)
 	}
 
 	profileTextFileFolderName := textFileFolderName
