@@ -5,20 +5,6 @@ import (
 	"os"
 )
 
-// createFolderIfNotExists creates a folder if it does not exist.
-func createFolderIfNotExists(folderPath string) error {
-	_, err := os.Stat(folderPath)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(folderPath, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	return nil
-}
-
 // readFileIfExists reads the contents of a file and returns it as a string, along with a boolean indicating if the file exists.
 // If the file does not exist, it returns an empty string and no error.
 // If the file exists but cannot be read, it returns an error.

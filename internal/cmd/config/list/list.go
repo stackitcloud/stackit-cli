@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -81,6 +82,14 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 			return fmt.Errorf("marshal config list: %w", err)
 		}
 		p.Outputln(string(details))
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(configData, yaml.IndentSequence(true))
+		if err != nil {
+			return fmt.Errorf("marshal config list: %w", err)
+		}
+		p.Outputln(string(details))
+
 		return nil
 	default:
 

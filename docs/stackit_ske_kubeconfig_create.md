@@ -21,6 +21,9 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   Create a kubeconfig for the SKE cluster with name "my-cluster"
   $ stackit ske kubeconfig create my-cluster
 
+  Get a login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
+  $ stackit ske kubeconfig create my-cluster --login
+
   Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days
   $ stackit ske kubeconfig create my-cluster --expiration 30d
 
@@ -37,6 +40,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
       --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
+  -l, --login               Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
 ```
 
 ### Options inherited from parent commands
@@ -44,7 +48,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
   -p, --project-id string      Project ID
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```

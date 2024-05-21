@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -222,6 +223,14 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal projects list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(projects, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal projects list: %w", err)
 		}

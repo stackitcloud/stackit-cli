@@ -27,7 +27,7 @@ const (
 	VerbosityDefault = InfoVerbosity
 )
 
-var outputFormatFlagOptions = []string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat}
+var outputFormatFlagOptions = []string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat, print.YAMLOutputFormat}
 var verbosityFlagOptions = []string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity}
 
 type GlobalFlagModel struct {

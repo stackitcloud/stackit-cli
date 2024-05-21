@@ -173,6 +173,13 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, res
 		}
 		p.Outputln(string(details))
 		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.Marshal(resources)
+		if err != nil {
+			return fmt.Errorf("marshal resource list: %w", err)
+		}
+		p.Outputln(string(details))
+		return nil	
 	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE")
