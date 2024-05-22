@@ -43,7 +43,7 @@ func PutObject(identifier string, data []byte) error {
 		return ErrorInvalidCacheIdentifier
 	}
 
-	err := os.MkdirAll(cacheFolderPath, os.ModePerm)
+	err := createFolderIfNotExists(cacheFolderPath)
 	if err != nil {
 		return err
 	}
@@ -60,6 +60,19 @@ func DeleteObject(identifier string) error {
 	}
 
 	if err := os.Remove(filepath.Join(cacheFolderPath, identifier)); !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
+func createFolderIfNotExists(folderPath string) error {
+	_, err := os.Stat(folderPath)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(folderPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
 		return err
 	}
 	return nil

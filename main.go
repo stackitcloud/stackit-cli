@@ -5,7 +5,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
-// These values are overwritten by GoReleaser at build time
+// These values are dynamically overridden by GoReleaser
 var (
 	version = "DEV"
 	date    = "UNKNOWN"
