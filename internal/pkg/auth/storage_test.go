@@ -450,7 +450,7 @@ func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) er
 
 	profileTextFileFolderName := textFileFolderName
 	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
 	}
 
 	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
