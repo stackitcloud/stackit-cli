@@ -21,7 +21,7 @@ import (
 const (
 	instanceIdFlag                     = "instance-id"
 	scheduleFlag                       = "schedule"
-	snapshotRetentionDaysFlag          = "save-for-days"
+	snapshotRetentionDaysFlag          = "store-for-days"
 	dailySnapshotRetentionDaysFlag     = "store-daily-backup-days"
 	weeklySnapshotRetentionWeeksFlag   = "store-weekly-backup-weeks"
 	monthlySnapshotRetentionMonthsFlag = "store-monthly-backups-months"
@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit mongodbflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'"),
 			examples.NewExample(
 				`Update the retention days for backups of a MongoDB Flex instance with ID "xxx" to 5 days`,
-				"$ stackit mongodbflex backup update-schedule --instance-id xxx --save-for-days 5"),
+				"$ stackit mongodbflex backup update-schedule --instance-id xxx --store-for-days 5"),
 		),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
