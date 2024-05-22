@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -483,7 +484,7 @@ func TestSingleArgExpectedError(t *testing.T) {
 				Cmd:      operation,
 			}
 
-			appendedErr := AppendUsageTip(fmt.Errorf(tt.expectedMsg), operation)
+			appendedErr := AppendUsageTip(errors.New(tt.expectedMsg), operation)
 
 			if err.Error() != appendedErr.Error() {
 				t.Fatalf("expected error to be %s, got %s", tt.expectedMsg, err.Error())
@@ -528,7 +529,7 @@ func TestSingleOptionalArgExpectedError(t *testing.T) {
 				Cmd:      operation,
 			}
 
-			appendedErr := AppendUsageTip(fmt.Errorf(tt.expectedMsg), operation)
+			appendedErr := AppendUsageTip(errors.New(tt.expectedMsg), operation)
 
 			if err.Error() != appendedErr.Error() {
 				t.Fatalf("expected error to be %s, got %s", tt.expectedMsg, err.Error())
@@ -566,7 +567,7 @@ func TestInputUnknownError(t *testing.T) {
 				Cmd:           tt.command,
 			}
 
-			appendedErr := AppendUsageTip(fmt.Errorf(tt.expectedMsg), tt.command)
+			appendedErr := AppendUsageTip(errors.New(tt.expectedMsg), tt.command)
 
 			if err.Error() != appendedErr.Error() {
 				t.Fatalf("expected error to be %s, got %s", appendedErr.Error(), err.Error())
@@ -593,7 +594,7 @@ func TestSubcommandMissingError(t *testing.T) {
 				Cmd: cmd,
 			}
 
-			appendedErr := AppendUsageTip(fmt.Errorf(tt.expectedMsg), cmd)
+			appendedErr := AppendUsageTip(errors.New(tt.expectedMsg), cmd)
 
 			if err.Error() != appendedErr.Error() {
 				t.Fatalf("expected error to be %s, got %s", tt.expectedMsg, err.Error())

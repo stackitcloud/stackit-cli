@@ -2,15 +2,11 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/spf13/cobra"
 	pkgErrors "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
-
-var p = print.NewPrinter()
 
 var cmd *cobra.Command
 var service *cobra.Command
@@ -33,10 +29,6 @@ func setupCmd() {
 	cmd.AddCommand(service)
 	service.AddCommand(resource)
 	resource.AddCommand(operation)
-}
-
-func subCommandMissingErrorString(err *pkgErrors.SubcommandMissingError) string {
-	return err.Error()
 }
 
 func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
@@ -74,11 +66,10 @@ func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
 				return
 			}
 
-			appendedErr := pkgErrors.AppendUsageTip(fmt.Errorf(tt.expectedMsg), cmd)
+			appendedErr := pkgErrors.AppendUsageTip(errors.New(tt.expectedMsg), cmd)
 			if actualError.Error() != appendedErr.Error() {
 				t.Fatalf("expected error to be %s, got %s", appendedErr.Error(), actualError.Error())
 			}
-
 		})
 	}
 }
