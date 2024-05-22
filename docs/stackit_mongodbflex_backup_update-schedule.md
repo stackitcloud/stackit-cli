@@ -20,7 +20,7 @@ stackit mongodbflex backup update-schedule [flags]
   $ stackit mongodbflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'
 
   Update the retention days for backups of a MongoDB Flex instance with ID "xxx" to 5 days
-  $ stackit mongodbflex backup update-schedule --instance-id xxx --save-for-days 5
+  $ stackit mongodbflex backup update-schedule --instance-id xxx --store-for-days 5
 ```
 
 ### Options
@@ -28,9 +28,9 @@ stackit mongodbflex backup update-schedule [flags]
 ```
   -h, --help                               Help for "stackit mongodbflex backup update-schedule"
       --instance-id string                 Instance ID
-      --save-for-days int                  Number of days to retain backups. Should be less than or equal to the value of the daily backup.
       --schedule string                    Backup schedule, in the cron scheduling system format e.g. '0 0 * * *'
       --store-daily-backup-days int        Number of days to retain daily backups. Should be less than or equal to the number of days of the selected weekly or monthly value.
+      --store-for-days int                 Number of days to retain backups. Should be less than or equal to the value of the daily backup.
       --store-monthly-backups-months int   Number of months to retain monthly backups
       --store-weekly-backup-weeks int      Number of weeks to retain weekly backups. Should be less than or equal to the number of weeks of the selected monthly value.
 ```
