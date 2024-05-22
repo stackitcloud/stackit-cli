@@ -19,8 +19,8 @@ stackit mongodbflex backup update-schedule [flags]
   Update the backup schedule of a MongoDB Flex instance with ID "xxx"
   $ stackit mongodbflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'
 
-  Update the retention days for snapshots of a MongoDB Flex instance with ID "xxx" to 5 days
-  $ stackit mongodbflex backup update-schedule --instance-id xxx --save-snapshot-days 5
+  Update the retention days for backups of a MongoDB Flex instance with ID "xxx" to 5 days
+  $ stackit mongodbflex backup update-schedule --instance-id xxx --save-for-days 5
 ```
 
 ### Options
@@ -28,11 +28,11 @@ stackit mongodbflex backup update-schedule [flags]
 ```
   -h, --help                               Help for "stackit mongodbflex backup update-schedule"
       --instance-id string                 Instance ID
-      --save-daily-snapshot-days int       Number of days to retain daily snapshots. Should be less than or equal to the number of days of the selected weekly or monthly value.
-      --save-monthly-snapshot-months int   Number of months to retain monthly snapshots
-      --save-snapshot-days int             Number of days to retain snapshots. Should be less than or equal to the value of the daily backup.
-      --save-weekly-snapshot-weeks int     Number of weeks to retain weekly snapshots. Should be less than or equal to the number of weeks of the selected monthly value.
+      --save-for-days int                  Number of days to retain backups. Should be less than or equal to the value of the daily backup.
       --schedule string                    Backup schedule, in the cron scheduling system format e.g. '0 0 * * *'
+      --store-daily-backup-days int        Number of days to retain daily backups. Should be less than or equal to the number of days of the selected weekly or monthly value.
+      --store-monthly-backups-months int   Number of months to retain monthly backups
+      --store-weekly-backup-weeks int      Number of weeks to retain weekly backups. Should be less than or equal to the number of weeks of the selected monthly value.
 ```
 
 ### Options inherited from parent commands

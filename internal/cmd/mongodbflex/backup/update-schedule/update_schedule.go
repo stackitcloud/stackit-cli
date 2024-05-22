@@ -24,7 +24,7 @@ const (
 	snapshotRetentionDaysFlag          = "save-for-days"
 	dailySnapshotRetentionDaysFlag     = "store-daily-backup-days"
 	weeklySnapshotRetentionWeeksFlag   = "store-weekly-backup-weeks"
-	monthlySnapshotRetentionMonthsFlag = "save-monthly-backups-months"
+	monthlySnapshotRetentionMonthsFlag = "store-monthly-backups-months"
 
 	// Default values for the backup schedule options
 	defaultBackupSchedule                       = "0 0/6 * * *"
@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Update the backup schedule of a MongoDB Flex instance with ID "xxx"`,
 				"$ stackit mongodbflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'"),
 			examples.NewExample(
-				`Update the retention days for backup of a MongoDB Flex instance with ID "xxx" to 5 days`,
+				`Update the retention days for backups of a MongoDB Flex instance with ID "xxx" to 5 days`,
 				"$ stackit mongodbflex backup update-schedule --instance-id xxx --save-for-days 5"),
 		),
 
