@@ -51,13 +51,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			configData := viper.AllSettings()
 
 			model := parseInput(p, cmd)
-
-			activeProfile, err := config.GetProfile()
-			if err != nil {
-				return fmt.Errorf("get profile: %w", err)
-			}
-
-			return outputResult(p, model.OutputFormat, configData, activeProfile)
+			return outputResult(p, model.OutputFormat, configData)
 		},
 	}
 	return cmd
@@ -71,12 +65,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	}
 }
 
-func outputResult(p *print.Printer, outputFormat string, configData map[string]any, activeProfile string) error {
+func outputResult(p *print.Printer, outputFormat string, configData map[string]any) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		if activeProfile != "" {
-			configData["profile"] = activeProfile
-		}
 		details, err := json.MarshalIndent(configData, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
@@ -92,7 +83,6 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 
 		return nil
 	default:
-
 		// Sort the config options by key
 		configKeys := make([]string, 0, len(configData))
 		for k := range configData {
@@ -101,9 +91,6 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 		sort.Strings(configKeys)
 
 		table := tables.NewTable()
-		if activeProfile != "" {
-			table.SetTitle(fmt.Sprintf("Profile: %q", activeProfile))
-		}
 		table.SetHeader("NAME", "VALUE")
 		for _, key := range configKeys {
 			value := configData[key]
