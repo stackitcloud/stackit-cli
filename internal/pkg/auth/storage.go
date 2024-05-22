@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+
 	"github.com/zalando/go-keyring"
 )
 
@@ -58,9 +60,14 @@ func SetAuthFieldMap(keyMap map[authFieldKey]string) error {
 }
 
 func SetAuthField(key authFieldKey, value string) error {
-	err := setAuthFieldInKeyring(key, value)
+	activeProfile, err := config.GetProfile()
 	if err != nil {
-		errFallback := setAuthFieldInEncodedTextFile(key, value)
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	err = setAuthFieldInKeyring(activeProfile, key, value)
+	if err != nil {
+		errFallback := setAuthFieldInEncodedTextFile(activeProfile, key, value)
 		if errFallback != nil {
 			return fmt.Errorf("write to keyring failed (%w), try writing to encoded text file: %w", err, errFallback)
 		}
@@ -68,12 +75,16 @@ func SetAuthField(key authFieldKey, value string) error {
 	return nil
 }
 
-func setAuthFieldInKeyring(key authFieldKey, value string) error {
+func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string) error {
+	if activeProfile != "" {
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
+		return keyring.Set(activeProfileKeyring, string(key), value)
+	}
 	return keyring.Set(keyringService, string(key), value)
 }
 
-func setAuthFieldInEncodedTextFile(key authFieldKey, value string) error {
-	err := createEncodedTextFile()
+func setAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey, value string) error {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -82,7 +93,13 @@ func setAuthFieldInEncodedTextFile(key authFieldKey, value string) error {
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -131,10 +148,15 @@ func GetAuthFlow() (AuthFlow, error) {
 }
 
 func GetAuthField(key authFieldKey) (string, error) {
-	value, err := getAuthFieldFromKeyring(key)
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return "", fmt.Errorf("get profile: %w", err)
+	}
+
+	value, err := getAuthFieldFromKeyring(activeProfile, key)
 	if err != nil {
 		var errFallback error
-		value, errFallback = getAuthFieldFromEncodedTextFile(key)
+		value, errFallback = getAuthFieldFromEncodedTextFile(activeProfile, key)
 		if errFallback != nil {
 			return "", fmt.Errorf("read from keyring: %w, read from encoded file as fallback: %w", err, errFallback)
 		}
@@ -142,12 +164,16 @@ func GetAuthField(key authFieldKey) (string, error) {
 	return value, nil
 }
 
-func getAuthFieldFromKeyring(key authFieldKey) (string, error) {
+func getAuthFieldFromKeyring(activeProfile string, key authFieldKey) (string, error) {
+	if activeProfile != "" {
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
+		return keyring.Get(activeProfileKeyring, string(key))
+	}
 	return keyring.Get(keyringService, string(key))
 }
 
-func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
-	err := createEncodedTextFile()
+func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (string, error) {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return "", err
 	}
@@ -156,7 +182,13 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -182,12 +214,18 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 // Checks if the encoded text file exist.
 // If it doesn't, creates it with the content "{}" encoded.
 // If it does, does nothing (and returns nil).
-func createEncodedTextFile() error {
+func createEncodedTextFile(activeProfile string) error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("get config dir: %w", err)
 	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+
+	profileTextFileFolderName := textFileFolderName
+	if activeProfile != "" {
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
+	}
+
+	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	err = os.MkdirAll(textFileDir, os.ModePerm)

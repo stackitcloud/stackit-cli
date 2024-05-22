@@ -115,6 +115,10 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SUBCOMMAND_MISSING = `missing subcommand`
 
+	INVALID_PROFILE_NAME = `the profile name %q is invalid.
+	
+The profile name can only contain letters, numbers, and "-" and cannot be empty.`
+
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
 )
@@ -313,4 +317,12 @@ func (e *SubcommandMissingError) Error() string {
 func AppendUsageTip(err error, cmd *cobra.Command) error {
 	tip := fmt.Sprintf(USAGE_TIP, cmd.CommandPath())
 	return fmt.Errorf("%w.\n\n%s", err, tip)
+}
+
+type InvalidProfileNameError struct {
+	Profile string
+}
+
+func (e *InvalidProfileNameError) Error() string {
+	return fmt.Sprintf(INVALID_PROFILE_NAME, e.Profile)
 }
