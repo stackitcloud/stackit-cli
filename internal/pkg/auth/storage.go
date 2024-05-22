@@ -96,7 +96,7 @@ func setAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey, value
 
 	profileTextFileFolderName := textFileFolderName
 	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
 	}
 
 	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
@@ -185,7 +185,7 @@ func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (st
 
 	profileTextFileFolderName := textFileFolderName
 	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
 	}
 
 	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
@@ -222,7 +222,7 @@ func createEncodedTextFile(activeProfile string) error {
 
 	profileTextFileFolderName := textFileFolderName
 	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(activeProfile, textFileFolderName)
+		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
 	}
 
 	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
