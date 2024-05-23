@@ -71,7 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if model.JobName == nil {
 				createPayload := argusUtils.DefaultCreateScrapeConfigPayload
-				return outputCreateResult(p, model, &createPayload)
+				return outputCreateResult(p, model.FilePath, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)
@@ -85,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("map update scrape config payloads: %w", err)
 			}
 
-			return outputUpdateResult(p, model, payload)
+			return outputUpdateResult(p, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -121,14 +121,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 	return req
 }
 
-func outputCreateResult(p *print.Printer, model *inputModel, payload *argus.CreateScrapeConfigPayload) error {
+func outputCreateResult(p *print.Printer, filePath *string, payload *argus.CreateScrapeConfigPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if model.FilePath != nil {
-		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
+	if filePath != nil {
+		err = fileutils.FileOutput(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}
@@ -139,14 +139,14 @@ func outputCreateResult(p *print.Printer, model *inputModel, payload *argus.Crea
 	return nil
 }
 
-func outputUpdateResult(p *print.Printer, model *inputModel, payload *argus.UpdateScrapeConfigPayload) error {
+func outputUpdateResult(p *print.Printer, filePath *string, payload *argus.UpdateScrapeConfigPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if model.FilePath != nil {
-		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
+	if filePath != nil {
+		err = fileutils.FileOutput(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}

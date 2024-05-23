@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			return outputResult(p, model, payload)
+			return outputResult(p, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -130,14 +130,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, payload *ske.CreateOrUpdateClusterPayload) error {
+func outputResult(p *print.Printer, filePath *string, payload *ske.CreateOrUpdateClusterPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if model.FilePath != nil {
-		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
+	if filePath != nil {
+		err = fileutils.FileOutput(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}
