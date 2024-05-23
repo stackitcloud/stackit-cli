@@ -61,7 +61,7 @@ func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
 
 			if tt.isNotUnknownFlagError {
 				if actualError.Error() != tt.expectedMsg {
-					t.Fatalf("expected error to be %s, got %s", tt.expectedMsg, actualError.Error())
+					t.Fatalf("expected error message to be %s, got %s", tt.expectedMsg, actualError.Error())
 				}
 				return
 			}
