@@ -58,6 +58,14 @@ func TestWrite(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected error to be nil, got %v", err)
 			}
+
+			// Delete the folder
+			if tt.folderName != "" {
+				err = os.Remove(folderPath)
+				if err != nil {
+					t.Fatalf("expected error to be nil, got %v", err)
+				}
+			}
 		})
 	}
 }
