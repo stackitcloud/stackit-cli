@@ -174,7 +174,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(loadBalancerNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
-	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload in the given file. If unset, writes the payload to the standard output")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given file. If unset, writes the payload to the standard output")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
