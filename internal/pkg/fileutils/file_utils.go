@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func FileOutput(outputFileName, content string) error {
+func WriteToFile(outputFileName, content string) error {
 	fo, err := os.Create(outputFileName)
 	if err != nil {
 		return fmt.Errorf("create output file: %w", err)

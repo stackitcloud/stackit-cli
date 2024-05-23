@@ -7,7 +7,7 @@ import (
 
 const outputFilePath = "./testPayload.json"
 
-func TestFileOutput(t *testing.T) {
+func TestWriteToFile(t *testing.T) {
 	tests := []struct {
 		description string
 		content     string
@@ -21,7 +21,7 @@ func TestFileOutput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := FileOutput(tt.outputFile, tt.content)
+			err := WriteToFile(tt.outputFile, tt.content)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}

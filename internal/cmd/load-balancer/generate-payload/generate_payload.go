@@ -219,7 +219,7 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *loadbalance
 	}
 
 	if filePath != nil {
-		err = fileutils.FileOutput(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write create load balancer payload to the file: %w", err)
 		}
@@ -237,7 +237,7 @@ func outputUpdateResult(p *print.Printer, filePath *string, payload *loadbalance
 	}
 
 	if filePath != nil {
-		err = fileutils.FileOutput(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write update load balancer payload to the file: %w", err)
 		}

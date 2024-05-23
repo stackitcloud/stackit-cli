@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, filePath *string, payload *ske.CreateOrUpdat
 	}
 
 	if filePath != nil {
-		err = fileutils.FileOutput(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}

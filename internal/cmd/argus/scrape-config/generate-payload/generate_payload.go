@@ -131,7 +131,7 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *argus.Creat
 	}
 
 	if filePath != nil {
-		err = fileutils.FileOutput(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}
@@ -149,7 +149,7 @@ func outputUpdateResult(p *print.Printer, filePath *string, payload *argus.Updat
 	}
 
 	if filePath != nil {
-		err = fileutils.FileOutput(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}
