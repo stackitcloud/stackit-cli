@@ -13,8 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
-const outputFilePath = "./testPayload.json"
-
 func TestOutputf(t *testing.T) {
 	tests := []struct {
 		description      string
