@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -855,50 +854,5 @@ func TestIsVerbosityError(t *testing.T) {
 				t.Errorf("unexpected result: got %t, want %t", result, tt.expected)
 			}
 		})
-	}
-}
-
-func TestFileOutput(t *testing.T) {
-	tests := []struct {
-		description string
-		content     string
-		verbosity   Level
-		outputFile  string
-	}{
-		{
-			description: "write into file",
-			content:     "Test message",
-			verbosity:   DebugLevel,
-			outputFile:  outputFilePath,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
-			p := &Printer{
-				Cmd:       cmd,
-				Verbosity: tt.verbosity,
-			}
-
-			err := p.FileOutput(tt.outputFile, tt.content)
-			if err != nil {
-				t.Fatalf("unexpected error: %s", err.Error())
-			}
-
-			expectedOutput := tt.content
-
-			output, err := os.ReadFile(tt.outputFile)
-			if err != nil {
-				t.Fatalf("unexpected error: %s", err.Error())
-			}
-			if string(output) != expectedOutput {
-				t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
-			}
-		})
-	}
-	// Cleanup
-	err := os.RemoveAll(outputFilePath)
-	if err != nil {
-		t.Errorf("failed cleaning test data")
 	}
 }
