@@ -35,5 +35,5 @@ stackit auth login [flags]
 
 ### SEE ALSO
 
-* [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
+* [stackit auth](./stackit_auth.md)	 - Provides functionality for authentication
 

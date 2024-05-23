@@ -44,5 +44,5 @@ stackit project update [flags]
 
 ### SEE ALSO
 
-* [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
+* [stackit project](./stackit_project.md)	 - Provides functionality for projects
 

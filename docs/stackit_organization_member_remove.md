@@ -43,5 +43,5 @@ stackit organization member remove SUBJECT [flags]
 
 ### SEE ALSO
 
-* [stackit organization member](./stackit_organization_member.md)	 - Provides functionality regarding organization members
+* [stackit organization member](./stackit_organization_member.md)	 - Provides functionality for organization members
 

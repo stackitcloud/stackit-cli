@@ -36,5 +36,5 @@ stackit service-account key describe KEY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit service-account key](./stackit_service-account_key.md)	 - Provides functionality regarding service account keys
+* [stackit service-account key](./stackit_service-account_key.md)	 - Provides functionality for service account keys
 

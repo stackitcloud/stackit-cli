@@ -13,8 +13,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
-		Short: "Provides authentication functionality",
-		Long:  "Provides authentication functionality.",
+		Short: "Provides functionality for authentication",
+		Long:  "Provides functionality for authentication.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

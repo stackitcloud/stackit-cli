@@ -1,10 +1,10 @@
 ## stackit auth
 
-Provides authentication functionality
+Provides functionality for authentication
 
 ### Synopsis
 
-Provides authentication functionality.
+Provides functionality for authentication.
 
 ```
 stackit auth [flags]
