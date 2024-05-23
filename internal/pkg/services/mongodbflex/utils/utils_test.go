@@ -644,3 +644,55 @@ func TestGetRestoreStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestGetInstanceType(t *testing.T) {
+	tests := []struct {
+		description    string
+		numReplicas    int64
+		expectedOutput string
+		isValid        bool
+	}{
+		{
+			description:    "single",
+			numReplicas:    1,
+			expectedOutput: "Single",
+			isValid:        true,
+		},
+		{
+			description:    "replica set",
+			numReplicas:    3,
+			expectedOutput: "Replica",
+			isValid:        true,
+		},
+		{
+			description:    "sharded cluster",
+			numReplicas:    9,
+			expectedOutput: "Sharded",
+			isValid:        true,
+		},
+		{
+			description: "invalid",
+			numReplicas: 0,
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output, err := GetInstanceType(tt.numReplicas)
+			if !tt.isValid {
+				if err == nil {
+					t.Fatalf("did not fail on invalid input")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("failed on valid input: %v", err)
+			}
+
+			if output != tt.expectedOutput {
+				t.Fatalf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
