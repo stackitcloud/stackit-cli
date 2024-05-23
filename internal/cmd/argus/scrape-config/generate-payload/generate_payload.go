@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -127,7 +128,7 @@ func outputCreateResult(p *print.Printer, model *inputModel, payload *argus.Crea
 	}
 
 	if model.FilePath != nil {
-		err = p.FileOutput(*model.FilePath, string(payloadBytes))
+		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}
@@ -145,7 +146,7 @@ func outputUpdateResult(p *print.Printer, model *inputModel, payload *argus.Upda
 	}
 
 	if model.FilePath != nil {
-		err = p.FileOutput(*model.FilePath, string(payloadBytes))
+		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write payload to the file: %w", err)
 		}

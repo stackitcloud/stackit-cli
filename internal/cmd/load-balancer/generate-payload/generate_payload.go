@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -215,7 +216,7 @@ func outputCreateResult(p *print.Printer, model *inputModel, payload *loadbalanc
 	}
 
 	if model.FilePath != nil {
-		err = p.FileOutput(*model.FilePath, string(payloadBytes))
+		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write create load balancer payload to the file: %w", err)
 		}
@@ -233,7 +234,7 @@ func outputUpdateResult(p *print.Printer, model *inputModel, payload *loadbalanc
 	}
 
 	if model.FilePath != nil {
-		err = p.FileOutput(*model.FilePath, string(payloadBytes))
+		err = fileutils.FileOutput(*model.FilePath, string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write update load balancer payload to the file: %w", err)
 		}
