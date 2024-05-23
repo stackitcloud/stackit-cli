@@ -128,6 +128,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit load-balancer generate-payload --lb-name xxx --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit load-balancer update xxx --payload @./payload.json`),
+			examples.NewExample(
+				`Generate a payload with values of an existing load balancer, and preview it in the terminal`,
+				`$ stackit load-balancer generate-payload --lb-name xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

@@ -55,6 +55,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit argus scrape-config update my-config --payload @./payload.json`),
+			examples.NewExample(
+				`Generate an Update payload with the values of an existing configuration named "my-config" for Argus instance xxx, and preview it in the terminal`,
+				`$ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

@@ -50,6 +50,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit ske cluster generate-payload --cluster-name my-cluster --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit ske cluster update my-cluster --payload @./payload.json`),
+			examples.NewExample(
+				`Generate a payload with values of a cluster, and preview it in the terminal`,
+				`$ stackit ske cluster generate-payload --cluster-name my-cluster`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
