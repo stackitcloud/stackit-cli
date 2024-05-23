@@ -23,12 +23,15 @@ stackit load-balancer generate-payload [flags]
   $ stackit load-balancer generate-payload --lb-name xxx --file-path ./payload.json
   <Modify payload in file>
   $ stackit load-balancer update xxx --payload @./payload.json
+
+  Generate a payload with values of an existing load balancer, and preview it in the terminal
+  $ stackit load-balancer generate-payload --lb-name xxx
 ```
 
 ### Options
 
 ```
-  -f, --file-path string   If set, writes the payload in the given file. If unset, writes the payload to the standard output
+  -f, --file-path string   If set, writes the payload to the given file. If unset, writes the payload to the standard output
   -h, --help               Help for "stackit load-balancer generate-payload"
   -n, --lb-name string     If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values
 ```
