@@ -1,10 +1,10 @@
 ## stackit dns record-set list
 
-List DNS record sets
+Lists DNS record sets
 
 ### Synopsis
 
-List DNS record sets. Successfully deleted record sets are not listed by default.
+Lists DNS record sets. Successfully deleted record sets are not listed by default.
 
 ```
 stackit dns record-set list [flags]

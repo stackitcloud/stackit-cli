@@ -12,8 +12,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "role",
-		Short: "Provides functionality regarding organization roles",
-		Long:  "Provides functionality regarding organization roles.",
+		Short: "Manages organization roles",
+		Long:  "Manages organization roles.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

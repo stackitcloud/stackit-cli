@@ -35,5 +35,5 @@ stackit object-storage enable [flags]
 
 ### SEE ALSO
 
-* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
+* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality for Object Storage
 

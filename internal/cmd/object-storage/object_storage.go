@@ -16,8 +16,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "object-storage",
-		Short: "Provides functionality regarding Object Storage",
-		Long:  "Provides functionality regarding Object Storage.",
+		Short: "Provides functionality for Object Storage",
+		Long:  "Provides functionality for Object Storage.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

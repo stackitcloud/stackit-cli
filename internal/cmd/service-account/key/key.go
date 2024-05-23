@@ -16,8 +16,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "key",
-		Short: "Provides functionality regarding service account keys",
-		Long:  "Provides functionality regarding service account keys.",
+		Short: "Provides functionality for service account keys",
+		Long:  "Provides functionality for service account keys.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

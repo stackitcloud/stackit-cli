@@ -1,10 +1,10 @@
 ## stackit project member
 
-Provides functionality regarding project members
+Manages project members
 
 ### Synopsis
 
-Provides functionality regarding project members.
+Manages project members.
 
 ```
 stackit project member [flags]
@@ -28,7 +28,7 @@ stackit project member [flags]
 
 ### SEE ALSO
 
-* [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
+* [stackit project](./stackit_project.md)	 - Manages projects
 * [stackit project member add](./stackit_project_member_add.md)	 - Adds a member to a project
 * [stackit project member list](./stackit_project_member_list.md)	 - Lists members of a project
 * [stackit project member remove](./stackit_project_member_remove.md)	 - Removes a member from a project

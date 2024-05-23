@@ -42,5 +42,5 @@ stackit project role list [flags]
 
 ### SEE ALSO
 
-* [stackit project role](./stackit_project_role.md)	 - Provides functionality regarding project roles
+* [stackit project role](./stackit_project_role.md)	 - Manages project roles
 
