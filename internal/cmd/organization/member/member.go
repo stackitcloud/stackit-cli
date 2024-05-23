@@ -14,8 +14,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "member",
-		Short: "Provides functionality for organization members",
-		Long:  "Provides functionality for organization members.",
+		Short: "Manages organization members",
+		Long:  "Manages organization members.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

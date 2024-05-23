@@ -48,5 +48,5 @@ stackit auth activate-service-account [flags]
 
 ### SEE ALSO
 
-* [stackit auth](./stackit_auth.md)	 - Provides functionality for authentication
+* [stackit auth](./stackit_auth.md)	 - Authenticates in the STACKIT CLI
 

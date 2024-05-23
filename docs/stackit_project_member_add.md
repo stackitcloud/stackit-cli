@@ -40,5 +40,5 @@ stackit project member add SUBJECT [flags]
 
 ### SEE ALSO
 
-* [stackit project member](./stackit_project_member.md)	 - Provides functionality for project members
+* [stackit project member](./stackit_project_member.md)	 - Manages project members
 

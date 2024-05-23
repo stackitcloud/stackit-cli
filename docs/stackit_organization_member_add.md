@@ -41,5 +41,5 @@ stackit organization member add SUBJECT [flags]
 
 ### SEE ALSO
 
-* [stackit organization member](./stackit_organization_member.md)	 - Provides functionality for organization members
+* [stackit organization member](./stackit_organization_member.md)	 - Manages organization members
 

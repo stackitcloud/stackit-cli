@@ -20,7 +20,7 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project",
-		Short: "Provides functionality for projects",
+		Short: "Manages projects",
 		Long: fmt.Sprintf("%s\n%s",
 			"Provides functionality for projects.",
 			"A project is a container for resources which is the service that you can purchase from STACKIT.",

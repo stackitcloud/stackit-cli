@@ -1,10 +1,10 @@
 ## stackit organization
 
-Provides functionality for organizations
+Manages organizations
 
 ### Synopsis
 
-Provides functionality for organizations.
+Manages organizations.
 An active STACKIT organization is the root element of the resource hierarchy and a prerequisite to use any STACKIT Cloud Resource / Service.
 
 ```
@@ -30,6 +30,6 @@ stackit organization [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit organization member](./stackit_organization_member.md)	 - Provides functionality for organization members
-* [stackit organization role](./stackit_organization_role.md)	 - Provides functionality for organization roles
+* [stackit organization member](./stackit_organization_member.md)	 - Manages organization members
+* [stackit organization role](./stackit_organization_role.md)	 - Manages organization roles
 

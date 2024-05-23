@@ -42,5 +42,5 @@ stackit project describe [flags]
 
 ### SEE ALSO
 
-* [stackit project](./stackit_project.md)	 - Provides functionality for projects
+* [stackit project](./stackit_project.md)	 - Manages projects
 
