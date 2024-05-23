@@ -13,7 +13,7 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
-		Short: "Authenticates in the STACKIT CLI",
+		Short: "Authenticates the STACKIT CLI",
 		Long:  "Authenticates in the STACKIT CLI.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
