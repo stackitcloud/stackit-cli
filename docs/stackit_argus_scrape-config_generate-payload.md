@@ -20,12 +20,12 @@ stackit argus scrape-config generate-payload [flags]
 
 ```
   Generate a Create payload with default values, and adapt it with custom values for the different configuration options
-  $ stackit argus scrape-config generate-payload > ./payload.json
+  $ stackit argus scrape-config generate-payload --file-path ./payload.json
   <Modify payload in file, if needed>
   $ stackit argus scrape-config create my-config --payload @./payload.json
 
   Generate an Update payload with the values of an existing configuration named "my-config" for Argus instance xxx, and adapt it with custom values for the different configuration options
-  $ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx > ./payload.json
+  $ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx --file-path ./payload.json
   <Modify payload in file>
   $ stackit argus scrape-config update my-config --payload @./payload.json
 ```
@@ -33,6 +33,7 @@ stackit argus scrape-config generate-payload [flags]
 ### Options
 
 ```
+  -f, --file-path string     If set, writes the payload in the given file. If unset, writes the payload to the standard output
   -h, --help                 Help for "stackit argus scrape-config generate-payload"
       --instance-id string   Instance ID
   -n, --job-name string      If set, generates an update payload with the current state of the given scrape config. If unset, generates a create payload with default values
