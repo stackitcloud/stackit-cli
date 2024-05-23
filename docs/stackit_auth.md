@@ -1,6 +1,6 @@
 ## stackit auth
 
-Authenticates in the STACKIT CLI
+Authenticates the STACKIT CLI
 
 ### Synopsis
 

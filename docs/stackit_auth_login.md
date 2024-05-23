@@ -35,5 +35,5 @@ stackit auth login [flags]
 
 ### SEE ALSO
 
-* [stackit auth](./stackit_auth.md)	 - Authenticates in the STACKIT CLI
+* [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 
