@@ -23,10 +23,16 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &loadbalancer.APIClient{}
 var testProjectId = uuid.NewString()
 
+const (
+	testLoadBalancerName = "example-name"
+	testFilePath         = "example-file"
+)
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:        testProjectId,
-		loadBalancerNameFlag: "example-name",
+		loadBalancerNameFlag: testLoadBalancerName,
+		filePathFlag:         testFilePath,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,7 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		LoadBalancerName: utils.Ptr("example-name"),
+		LoadBalancerName: utils.Ptr(testLoadBalancerName),
+		FilePath:         utils.Ptr(testFilePath),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetLoadBalancerRequest)) loadbalancer.ApiGetLoadBalancerRequest {
-	request := testClient.GetLoadBalancer(testCtx, testProjectId, "example-name")
+	request := testClient.GetLoadBalancer(testCtx, testProjectId, testLoadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -85,6 +92,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.LoadBalancerName = nil
+			}),
+		},
+		{
+			description: "file path missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, filePathFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.FilePath = nil
 			}),
 		},
 		{

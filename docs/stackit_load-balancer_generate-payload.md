@@ -15,21 +15,25 @@ stackit load-balancer generate-payload [flags]
 
 ```
   Generate a payload, and adapt it with custom values for the different configuration options
-  $ stackit load-balancer generate-payload > ./payload.json
+  $ stackit load-balancer generate-payload --file-path ./payload.json
   <Modify payload in file, if needed>
   $ stackit load-balancer create --payload @./payload.json
 
   Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options
-  $ stackit load-balancer generate-payload --lb-name xxx > ./payload.json
+  $ stackit load-balancer generate-payload --lb-name xxx --file-path ./payload.json
   <Modify payload in file>
   $ stackit load-balancer update xxx --payload @./payload.json
+
+  Generate a payload with values of an existing load balancer, and preview it in the terminal
+  $ stackit load-balancer generate-payload --lb-name xxx
 ```
 
 ### Options
 
 ```
-  -h, --help             Help for "stackit load-balancer generate-payload"
-  -n, --lb-name string   If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values
+  -f, --file-path string   If set, writes the payload to the given file. If unset, writes the payload to the standard output
+  -h, --help               Help for "stackit load-balancer generate-payload"
+  -n, --lb-name string     If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values
 ```
 
 ### Options inherited from parent commands

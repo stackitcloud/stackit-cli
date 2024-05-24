@@ -1,10 +1,10 @@
 ## stackit service-account token
 
-Provides functionality regarding service account tokens
+Provides functionality for service account tokens
 
 ### Synopsis
 
-Provides functionality regarding service account tokens.
+Provides functionality for service account tokens.
 
 ```
 stackit service-account token [flags]

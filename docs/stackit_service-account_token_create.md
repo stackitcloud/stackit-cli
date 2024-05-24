@@ -42,5 +42,5 @@ stackit service-account token create [flags]
 
 ### SEE ALSO
 
-* [stackit service-account token](./stackit_service-account_token.md)	 - Provides functionality regarding service account tokens
+* [stackit service-account token](./stackit_service-account_token.md)	 - Provides functionality for service account tokens
 

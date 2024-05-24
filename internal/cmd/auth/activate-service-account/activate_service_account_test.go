@@ -3,8 +3,10 @@ package activateserviceaccount
 import (
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/zalando/go-keyring"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -116,6 +118,65 @@ func TestParseInput(t *testing.T) {
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestStoreFlags(t *testing.T) {
+	tests := []struct {
+		description string
+		model       *inputModel
+		isValid     bool
+	}{
+		{
+			description: "base",
+			model:       fixtureInputModel(),
+			isValid:     true,
+		},
+		{
+			description: "no values",
+			model: &inputModel{
+				ServiceAccountToken:   "",
+				ServiceAccountKeyPath: "",
+				PrivateKeyPath:        "",
+				TokenCustomEndpoint:   "",
+				JwksCustomEndpoint:    "",
+			},
+			isValid: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			// Initialize an empty keyring
+			keyring.MockInit()
+
+			err := storeFlags(tt.model)
+			if !tt.isValid {
+				if err == nil {
+					t.Fatalf("did not fail on invalid input")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("store flags: %v", err)
+			}
+
+			value, err := auth.GetAuthField(auth.TOKEN_CUSTOM_ENDPOINT)
+			if err != nil {
+				t.Errorf("Failed to get value of auth field: %v", err)
+			}
+			if value != tt.model.TokenCustomEndpoint {
+				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.TOKEN_CUSTOM_ENDPOINT, tt.model.TokenCustomEndpoint, value)
+			}
+
+			value, err = auth.GetAuthField(auth.JWKS_CUSTOM_ENDPOINT)
+			if err != nil {
+				t.Errorf("Failed to get value of auth field: %v", err)
+			}
+			if value != tt.model.JwksCustomEndpoint {
+				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.JWKS_CUSTOM_ENDPOINT, tt.model.TokenCustomEndpoint, value)
 			}
 		})
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,11 +21,13 @@ import (
 
 const (
 	loadBalancerNameFlag = "lb-name"
+	filePathFlag         = "file-path"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LoadBalancerName *string
+	FilePath         *string
 }
 
 var (
@@ -118,14 +121,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Generate a payload, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload > ./payload.json`,
+				`$ stackit load-balancer generate-payload --file-path ./payload.json`,
 				`<Modify payload in file, if needed>`,
 				`$ stackit load-balancer create --payload @./payload.json`),
 			examples.NewExample(
 				`Generate a payload with values of an existing load balancer, and adapt it with custom values for the different configuration options`,
-				`$ stackit load-balancer generate-payload --lb-name xxx > ./payload.json`,
+				`$ stackit load-balancer generate-payload --lb-name xxx --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit load-balancer update xxx --payload @./payload.json`),
+			examples.NewExample(
+				`Generate a payload with values of an existing load balancer, and preview it in the terminal`,
+				`$ stackit load-balancer generate-payload --lb-name xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -142,7 +148,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if model.LoadBalancerName == nil {
 				createPayload := DefaultCreateLoadBalancerPayload
-				return outputCreateResult(p, &createPayload)
+				return outputCreateResult(p, model.FilePath, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)
@@ -162,7 +168,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				TargetPools:     resp.TargetPools,
 				Version:         resp.Version,
 			}
-			return outputUpdateResult(p, updatePayload)
+			return outputUpdateResult(p, model.FilePath, updatePayload)
 		},
 	}
 	configureFlags(cmd)
@@ -171,6 +177,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(loadBalancerNameFlag, "n", "", "If set, generates the payload with the current values of the given load balancer. If unset, generates the payload with empty values")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given file. If unset, writes the payload to the standard output")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -185,6 +192,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel:  globalFlags,
 		LoadBalancerName: loadBalancerName,
+		FilePath:         flags.FlagToStringPointer(p, cmd, filePathFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -204,22 +212,38 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputCreateResult(p *print.Printer, payload *loadbalancer.CreateLoadBalancerPayload) error {
+func outputCreateResult(p *print.Printer, filePath *string, payload *loadbalancer.CreateLoadBalancerPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal create load balancer payload: %w", err)
 	}
-	p.Outputln(string(payloadBytes))
+
+	if filePath != nil {
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("write create load balancer payload to the file: %w", err)
+		}
+	} else {
+		p.Outputln(string(payloadBytes))
+	}
 
 	return nil
 }
 
-func outputUpdateResult(p *print.Printer, payload *loadbalancer.UpdateLoadBalancerPayload) error {
+func outputUpdateResult(p *print.Printer, filePath *string, payload *loadbalancer.UpdateLoadBalancerPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal update load balancer payload: %w", err)
 	}
-	p.Outputln(string(payloadBytes))
+
+	if filePath != nil {
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("write update load balancer payload to the file: %w", err)
+		}
+	} else {
+		p.Outputln(string(payloadBytes))
+	}
 
 	return nil
 }
