@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
@@ -21,7 +22,7 @@ import (
 func GetProfile() (string, error) {
 	profile, profileSet := os.LookupEnv("STACKIT_CLI_PROFILE")
 	if !profileSet {
-		contents, exists, err := readFileIfExists(profileFilePath)
+		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
 			return "", fmt.Errorf("read profile from file: %w", err)
 		}

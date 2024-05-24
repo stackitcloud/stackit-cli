@@ -33,10 +33,10 @@ func TestWrite(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			configPath := filepath.Join(os.TempDir(), tt.folderName, "config.json")
 			viper.SetConfigFile(configPath)
-			folderPath = filepath.Dir(configPath)
+			configFolderPath = filepath.Dir(configPath)
 
 			if tt.folderExists {
-				err := os.MkdirAll(folderPath, os.ModePerm)
+				err := os.MkdirAll(configFolderPath, os.ModePerm)
 				if err != nil {
 					t.Fatalf("expected error to be nil, got %v", err)
 				}
@@ -61,7 +61,7 @@ func TestWrite(t *testing.T) {
 
 			// Delete the folder
 			if tt.folderName != "" {
-				err = os.Remove(folderPath)
+				err = os.Remove(configFolderPath)
 				if err != nil {
 					t.Fatalf("expected error to be nil, got %v", err)
 				}
