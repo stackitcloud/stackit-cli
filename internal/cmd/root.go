@@ -102,8 +102,10 @@ func beautifyUsageTemplate(cmd *cobra.Command) {
 		`Examples:`, `{{WhiteBold "EXAMPLES"}}`,
 		`Aliases:`, `{{WhiteBold "ALIASES"}}`,
 		`Available Commands:`, `{{WhiteBold "AVAILABLE COMMANDS"}}`,
+		`Additional Commands:`, `{{WhiteBold "ADDITIONAL COMMANDS"}}`,
 		`Global Flags:`, `{{WhiteBold "GLOBAL FLAGS"}}`,
 		`Flags:`, `{{WhiteBold "FLAGS"}}`,
+		`Additional help topics:`, `{{WhiteBold "ADDITIONAL HELP TOPICS"}}`,
 	).Replace(usageTemplate)
 	cmd.SetUsageTemplate(usageTemplate)
 }
