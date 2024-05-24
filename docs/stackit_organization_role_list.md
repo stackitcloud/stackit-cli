@@ -43,5 +43,5 @@ stackit organization role list [flags]
 
 ### SEE ALSO
 
-* [stackit organization role](./stackit_organization_role.md)	 - Provides functionality regarding organization roles
+* [stackit organization role](./stackit_organization_role.md)	 - Manages organization roles
 

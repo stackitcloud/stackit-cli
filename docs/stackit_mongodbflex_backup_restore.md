@@ -4,8 +4,8 @@ Restores a MongoDB Flex instance from a backup
 
 ### Synopsis
 
-Restores a MongoDB Flex instance from a backup of an instance or clones a MongoDB Flex instance from a point-in-time snapshot.
-The backup is specified by a backup ID and the point-in-time snapshot is specified by a timestamp.
+Restores a MongoDB Flex instance from a backup of an instance or clones a MongoDB Flex instance from a point-in-time backup.
+The backup can be specified by a backup ID or a timestamp.
 You can specify the instance to which the backup will be applied. If not specified, the backup will be applied to the same instance from which it was taken.
 
 ```
@@ -32,7 +32,7 @@ stackit mongodbflex backup restore [flags]
       --backup-instance-id string   Instance ID of the target instance to restore the backup to
   -h, --help                        Help for "stackit mongodbflex backup restore"
       --instance-id string          Instance ID
-      --timestamp string            Timestamp of the snapshot to use as a source for cloning the instance in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z
+      --timestamp string            Timestamp to restore the instance to, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z
 ```
 
 ### Options inherited from parent commands

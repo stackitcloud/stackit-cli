@@ -14,8 +14,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token",
-		Short: "Provides functionality regarding service account tokens",
-		Long:  "Provides functionality regarding service account tokens.",
+		Short: "Provides functionality for service account tokens",
+		Long:  "Provides functionality for service account tokens.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

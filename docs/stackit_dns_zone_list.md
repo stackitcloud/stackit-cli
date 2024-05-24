@@ -1,10 +1,10 @@
 ## stackit dns zone list
 
-List DNS zones
+Lists DNS zones
 
 ### Synopsis
 
-List DNS zones. Successfully deleted zones are not listed by default.
+Lists DNS zones. Successfully deleted zones are not listed by default.
 
 ```
 stackit dns zone list [flags]

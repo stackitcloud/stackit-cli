@@ -1,10 +1,10 @@
 ## stackit object-storage
 
-Provides functionality regarding Object Storage
+Provides functionality for Object Storage
 
 ### Synopsis
 
-Provides functionality regarding Object Storage.
+Provides functionality for Object Storage.
 
 ```
 stackit object-storage [flags]
