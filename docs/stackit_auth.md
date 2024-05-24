@@ -1,10 +1,10 @@
 ## stackit auth
 
-Provides authentication functionality
+Authenticates the STACKIT CLI
 
 ### Synopsis
 
-Provides authentication functionality.
+Authenticates in the STACKIT CLI.
 
 ```
 stackit auth [flags]

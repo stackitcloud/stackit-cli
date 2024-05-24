@@ -32,6 +32,6 @@ stackit dns record-set [flags]
 * [stackit dns record-set create](./stackit_dns_record-set_create.md)	 - Creates a DNS record set
 * [stackit dns record-set delete](./stackit_dns_record-set_delete.md)	 - Deletes a DNS record set
 * [stackit dns record-set describe](./stackit_dns_record-set_describe.md)	 - Shows details  of a DNS record set
-* [stackit dns record-set list](./stackit_dns_record-set_list.md)	 - List DNS record sets
+* [stackit dns record-set list](./stackit_dns_record-set_list.md)	 - Lists DNS record sets
 * [stackit dns record-set update](./stackit_dns_record-set_update.md)	 - Updates a DNS record set
 

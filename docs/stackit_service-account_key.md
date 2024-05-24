@@ -1,10 +1,10 @@
 ## stackit service-account key
 
-Provides functionality regarding service account keys
+Provides functionality for service account keys
 
 ### Synopsis
 
-Provides functionality regarding service account keys.
+Provides functionality for service account keys.
 
 ```
 stackit service-account key [flags]

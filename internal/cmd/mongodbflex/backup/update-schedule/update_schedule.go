@@ -21,10 +21,10 @@ import (
 const (
 	instanceIdFlag                     = "instance-id"
 	scheduleFlag                       = "schedule"
-	snapshotRetentionDaysFlag          = "save-snapshot-days"
-	dailySnapshotRetentionDaysFlag     = "save-daily-snapshot-days"
-	weeklySnapshotRetentionWeeksFlag   = "save-weekly-snapshot-weeks"
-	monthlySnapshotRetentionMonthsFlag = "save-monthly-snapshot-months"
+	snapshotRetentionDaysFlag          = "store-for-days"
+	dailySnapshotRetentionDaysFlag     = "store-daily-backup-days"
+	weeklySnapshotRetentionWeeksFlag   = "store-weekly-backup-weeks"
+	monthlySnapshotRetentionMonthsFlag = "store-monthly-backups-months"
 
 	// Default values for the backup schedule options
 	defaultBackupSchedule                       = "0 0/6 * * *"
@@ -62,8 +62,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Update the backup schedule of a MongoDB Flex instance with ID "xxx"`,
 				"$ stackit mongodbflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'"),
 			examples.NewExample(
-				`Update the retention days for snapshots of a MongoDB Flex instance with ID "xxx" to 5 days`,
-				"$ stackit mongodbflex backup update-schedule --instance-id xxx --save-snapshot-days 5"),
+				`Update the retention days for backups of a MongoDB Flex instance with ID "xxx" to 5 days`,
+				"$ stackit mongodbflex backup update-schedule --instance-id xxx --store-for-days 5"),
 		),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -121,10 +121,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().String(scheduleFlag, "", "Backup schedule, in the cron scheduling system format e.g. '0 0 * * *'")
-	cmd.Flags().Int64(snapshotRetentionDaysFlag, 0, "Number of days to retain snapshots. Should be less than or equal to the value of the daily backup.")
-	cmd.Flags().Int64(dailySnapshotRetentionDaysFlag, 0, "Number of days to retain daily snapshots. Should be less than or equal to the number of days of the selected weekly or monthly value.")
-	cmd.Flags().Int64(weeklySnapshotRetentionWeeksFlag, 0, "Number of weeks to retain weekly snapshots. Should be less than or equal to the number of weeks of the selected monthly value.")
-	cmd.Flags().Int64(monthlySnapshotRetentionMonthsFlag, 0, "Number of months to retain monthly snapshots")
+	cmd.Flags().Int64(snapshotRetentionDaysFlag, 0, "Number of days to retain backups. Should be less than or equal to the value of the daily backup.")
+	cmd.Flags().Int64(dailySnapshotRetentionDaysFlag, 0, "Number of days to retain daily backups. Should be less than or equal to the number of days of the selected weekly or monthly value.")
+	cmd.Flags().Int64(weeklySnapshotRetentionWeeksFlag, 0, "Number of weeks to retain weekly backups. Should be less than or equal to the number of weeks of the selected monthly value.")
+	cmd.Flags().Int64(monthlySnapshotRetentionMonthsFlag, 0, "Number of months to retain monthly backups")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)

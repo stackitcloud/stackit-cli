@@ -38,5 +38,5 @@ stackit project delete [flags]
 
 ### SEE ALSO
 
-* [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
+* [stackit project](./stackit_project.md)	 - Manages projects
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,12 +21,14 @@ import (
 const (
 	jobNameFlag    = "job-name"
 	instanceIdFlag = "instance-id"
+	filePathFlag   = "file-path"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	JobName    *string
 	InstanceId string
+	FilePath   *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -44,14 +47,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Generate a Create payload with default values, and adapt it with custom values for the different configuration options`,
-				`$ stackit argus scrape-config generate-payload > ./payload.json`,
+				`$ stackit argus scrape-config generate-payload --file-path ./payload.json`,
 				`<Modify payload in file, if needed>`,
 				`$ stackit argus scrape-config create my-config --payload @./payload.json`),
 			examples.NewExample(
 				`Generate an Update payload with the values of an existing configuration named "my-config" for Argus instance xxx, and adapt it with custom values for the different configuration options`,
-				`$ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx > ./payload.json`,
+				`$ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit argus scrape-config update my-config --payload @./payload.json`),
+			examples.NewExample(
+				`Generate an Update payload with the values of an existing configuration named "my-config" for Argus instance xxx, and preview it in the terminal`,
+				`$ stackit argus scrape-config generate-payload --job-name my-config --instance-id xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -68,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if model.JobName == nil {
 				createPayload := argusUtils.DefaultCreateScrapeConfigPayload
-				return outputCreateResult(p, &createPayload)
+				return outputCreateResult(p, model.FilePath, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)
@@ -82,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("map update scrape config payloads: %w", err)
 			}
 
-			return outputUpdateResult(p, payload)
+			return outputUpdateResult(p, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -92,6 +98,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().StringP(jobNameFlag, "n", "", "If set, generates an update payload with the current state of the given scrape config. If unset, generates a create payload with default values")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given file. If unset, writes the payload to the standard output")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -108,6 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		JobName:         jobName,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		FilePath:        flags.FlagToStringPointer(p, cmd, filePathFlag),
 	}, nil
 }
 
@@ -116,22 +124,38 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APICl
 	return req
 }
 
-func outputCreateResult(p *print.Printer, payload *argus.CreateScrapeConfigPayload) error {
+func outputCreateResult(p *print.Printer, filePath *string, payload *argus.CreateScrapeConfigPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
-	p.Outputln(string(payloadBytes))
+
+	if filePath != nil {
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("write payload to the file: %w", err)
+		}
+	} else {
+		p.Outputln(string(payloadBytes))
+	}
 
 	return nil
 }
 
-func outputUpdateResult(p *print.Printer, payload *argus.UpdateScrapeConfigPayload) error {
+func outputUpdateResult(p *print.Printer, filePath *string, payload *argus.UpdateScrapeConfigPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
-	p.Outputln(string(payloadBytes))
+
+	if filePath != nil {
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("write payload to the file: %w", err)
+		}
+	} else {
+		p.Outputln(string(payloadBytes))
+	}
 
 	return nil
 }

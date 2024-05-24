@@ -51,8 +51,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List DNS record sets",
-		Long:  `List DNS record sets. Successfully deleted record sets are not listed by default.`,
+		Short: "Lists DNS record sets",
+		Long:  `Lists DNS record sets. Successfully deleted record sets are not listed by default.`,
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

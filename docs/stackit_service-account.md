@@ -32,7 +32,7 @@ stackit service-account [flags]
 * [stackit service-account create](./stackit_service-account_create.md)	 - Creates a service account
 * [stackit service-account delete](./stackit_service-account_delete.md)	 - Deletes a service account
 * [stackit service-account get-jwks](./stackit_service-account_get-jwks.md)	 - Shows the JWKS for a service account
-* [stackit service-account key](./stackit_service-account_key.md)	 - Provides functionality regarding service account keys
+* [stackit service-account key](./stackit_service-account_key.md)	 - Provides functionality for service account keys
 * [stackit service-account list](./stackit_service-account_list.md)	 - Lists all service accounts
-* [stackit service-account token](./stackit_service-account_token.md)	 - Provides functionality regarding service account tokens
+* [stackit service-account token](./stackit_service-account_token.md)	 - Provides functionality for service account tokens
 

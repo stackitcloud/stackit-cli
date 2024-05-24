@@ -27,7 +27,7 @@ stackit [flags]
 ### SEE ALSO
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
-* [stackit auth](./stackit_auth.md)	 - Provides authentication functionality
+* [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
@@ -35,11 +35,11 @@ stackit [flags]
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
-* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
+* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality for Object Storage
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
-* [stackit organization](./stackit_organization.md)	 - Provides functionality regarding organizations
+* [stackit organization](./stackit_organization.md)	 - Manages organizations
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
-* [stackit project](./stackit_project.md)	 - Provides functionality regarding projects
+* [stackit project](./stackit_project.md)	 - Manages projects
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
 * [stackit redis](./stackit_redis.md)	 - Provides functionality for Redis
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager

@@ -610,3 +610,30 @@ func TestWriteConfigFile(t *testing.T) {
 		t.Errorf("failed cleaning test data")
 	}
 }
+
+func TestGetDefaultKubeconfigPath(t *testing.T) {
+	tests := []struct {
+		description string
+	}{
+		{
+			description: "base",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			output, err := GetDefaultKubeconfigPath()
+
+			if err != nil {
+				t.Errorf("failed on valid input")
+			}
+			userHome, err := os.UserHomeDir()
+			if err != nil {
+				t.Errorf("could not get user home directory")
+			}
+			if output != filepath.Join(userHome, ".kube", "config") {
+				t.Errorf("expected output to be %s, got %s", filepath.Join(userHome, ".kube", "config"), output)
+			}
+		})
+	}
+}

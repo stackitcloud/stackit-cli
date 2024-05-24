@@ -28,7 +28,7 @@ stackit object-storage bucket [flags]
 
 ### SEE ALSO
 
-* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality regarding Object Storage
+* [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality for Object Storage
 * [stackit object-storage bucket create](./stackit_object-storage_bucket_create.md)	 - Creates an Object Storage bucket
 * [stackit object-storage bucket delete](./stackit_object-storage_bucket_delete.md)	 - Deletes an Object Storage bucket
 * [stackit object-storage bucket describe](./stackit_object-storage_bucket_describe.md)	 - Shows details of an Object Storage bucket

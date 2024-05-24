@@ -15,20 +15,24 @@ stackit ske cluster generate-payload [flags]
 
 ```
   Generate a payload with default values, and adapt it with custom values for the different configuration options
-  $ stackit ske cluster generate-payload > ./payload.json
+  $ stackit ske cluster generate-payload --file-path ./payload.json
   <Modify payload in file, if needed>
   $ stackit ske cluster create my-cluster --payload @./payload.json
 
   Generate a payload with values of a cluster, and adapt it with custom values for the different configuration options
-  $ stackit ske cluster generate-payload --cluster-name my-cluster > ./payload.json
+  $ stackit ske cluster generate-payload --cluster-name my-cluster --file-path ./payload.json
   <Modify payload in file>
   $ stackit ske cluster update my-cluster --payload @./payload.json
+
+  Generate a payload with values of a cluster, and preview it in the terminal
+  $ stackit ske cluster generate-payload --cluster-name my-cluster
 ```
 
 ### Options
 
 ```
   -n, --cluster-name string   If set, generates the payload with the current state of the given cluster. If unset, generates the payload with default values
+  -f, --file-path string      If set, writes the payload to the given file. If unset, writes the payload to the standard output
   -h, --help                  Help for "stackit ske cluster generate-payload"
 ```
 
