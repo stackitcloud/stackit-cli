@@ -31,6 +31,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -88,7 +89,23 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		c.Flags().BoolP("help", "h", false, fmt.Sprintf("Help for %q", c.CommandPath()))
 	})
 
+	beautifyUsageTemplate(cmd)
+
 	return cmd
+}
+
+func beautifyUsageTemplate(cmd *cobra.Command) {
+	cobra.AddTemplateFunc("WhiteBold", color.New(color.FgHiWhite, color.Bold).SprintFunc())
+	usageTemplate := cmd.UsageTemplate()
+	usageTemplate = strings.NewReplacer(
+		`Usage:`, `{{WhiteBold "USAGE"}}`,
+		`Examples:`, `{{WhiteBold "EXAMPLES"}}`,
+		`Aliases:`, `{{WhiteBold "ALIASES"}}`,
+		`Available Commands:`, `{{WhiteBold "AVAILABLE COMMANDS"}}`,
+		`Global Flags:`, `{{WhiteBold "GLOBAL FLAGS"}}`,
+		`Flags:`, `{{WhiteBold "FLAGS"}}`,
+	).Replace(usageTemplate)
+	cmd.SetUsageTemplate(usageTemplate)
 }
 
 func configureFlags(cmd *cobra.Command) error {
