@@ -22,13 +22,17 @@ var testClient = &argus.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
-const testJobName = "test-job-name"
+const (
+	testJobName  = "test-job-name"
+	testFilePath = "example-file"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
 		jobNameFlag:    testJobName,
+		filePathFlag:   testFilePath,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,6 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		JobName:    utils.Ptr(testJobName),
+		FilePath:   utils.Ptr(testFilePath),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,6 +84,16 @@ func TestParseInput(t *testing.T) {
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
 			},
+		},
+		{
+			description: "file path missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, filePathFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.FilePath = nil
+			}),
 		},
 		{
 			description: "job name missing",
