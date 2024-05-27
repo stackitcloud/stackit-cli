@@ -24,6 +24,7 @@ const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 func GetProfile() (string, error) {
 	profile, profileSet := GetProfileFromEnv()
 	if !profileSet {
+		fmt.Println("Profile not set")
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
 			return "", fmt.Errorf("read profile from file: %w", err)
@@ -32,6 +33,15 @@ func GetProfile() (string, error) {
 			return "", nil
 		}
 		profile = contents
+	} else {
+		// Make sure the profile exists
+		profileExists, err := ProfileExists(profile)
+		if err != nil {
+			return "", fmt.Errorf("check if profile exists: %w", err)
+		}
+		if !profileExists {
+			return "", &errors.SetInexistentProfile{Profile: profile}
+		}
 	}
 
 	err := ValidateProfile(profile)
@@ -139,6 +149,15 @@ func SetProfile(p *print.Printer, profile string) error {
 		return fmt.Errorf("validate profile: %w", err)
 	}
 
+	profileExists, err := ProfileExists(profile)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+
+	if !profileExists {
+		return fmt.Errorf("profile %q does not exist", profile)
+	}
+
 	err = os.WriteFile(profileFilePath, []byte(profile), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("write profile to file: %w", err)
@@ -176,4 +195,15 @@ func ValidateProfile(profile string) error {
 		}
 	}
 	return nil
+}
+
+func ProfileExists(profile string) (bool, error) {
+	_, err := os.Stat(filepath.Join(defaultConfigFolderPath, profileRootFolder, profile))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("get profile folder: %w", err)
+	}
+	return true, nil
 }

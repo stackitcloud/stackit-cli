@@ -38,6 +38,10 @@ Please double check if they are correctly configured.
 For more details run:
   $ stackit auth activate-service-account -h`
 
+	SET_INEXISTENT_PROFILE = `the configuration profile %q does not exist.
+Please create it by running:
+  $ stackit config profile create %q`
+
 	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
@@ -145,6 +149,14 @@ type ActivateServiceAccountError struct{}
 
 func (e *ActivateServiceAccountError) Error() string {
 	return FAILED_SERVICE_ACCOUNT_ACTIVATION
+}
+
+type SetInexistentProfile struct {
+	Profile string
+}
+
+func (e *SetInexistentProfile) Error() string {
+	return fmt.Sprintf(SET_INEXISTENT_PROFILE, e.Profile, e.Profile)
 }
 
 type ArgusInputPlanError struct {
