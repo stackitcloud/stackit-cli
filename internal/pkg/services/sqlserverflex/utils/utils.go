@@ -10,6 +10,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
+const (
+	ServiceCmd = "beta sqlserverflex"
+)
+
 type SQLServerFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*sqlserverflex.GetInstanceResponse, error)
@@ -27,7 +31,7 @@ func ValidateFlavorId(flavorId string, flavors *[]sqlserverflex.InstanceFlavorEn
 	}
 
 	return &errors.DatabaseInvalidFlavorError{
-		Service: "sqlserverflex",
+		Service: ServiceCmd,
 		Details: fmt.Sprintf("You provided flavor ID '%s', which is invalid.", flavorId),
 	}
 }
@@ -53,7 +57,7 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *sqlserv
 		}
 	}
 	return &errors.DatabaseInvalidStorageError{
-		Service:  "sqlserverflex",
+		Service:  ServiceCmd,
 		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", *storageClass),
 		FlavorId: flavorId,
 	}
@@ -75,7 +79,7 @@ func LoadFlavorId(cpu, ram int64, flavors *[]sqlserverflex.InstanceFlavorEntry) 
 		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, *f.Cpu, *f.Cpu)
 	}
 	return nil, &errors.DatabaseInvalidFlavorError{
-		Service: "sqlserverflex",
+		Service: ServiceCmd,
 		Details: "You provided an invalid combination for CPU and RAM.",
 	}
 }

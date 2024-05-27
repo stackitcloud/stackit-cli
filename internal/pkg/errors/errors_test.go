@@ -31,6 +31,28 @@ func setupCmd() {
 	resource.AddCommand(operation)
 }
 
+func setupBetaCmd() {
+	cmd = &cobra.Command{
+		Use: "stackit",
+	}
+	beta := &cobra.Command{
+		Use: "beta",
+	}
+	service = &cobra.Command{
+		Use: "service",
+	}
+	resource = &cobra.Command{
+		Use: "resource",
+	}
+	operation = &cobra.Command{
+		Use: "operation",
+	}
+	cmd.AddCommand(beta)
+	beta.AddCommand(service)
+	service.AddCommand(resource)
+	resource.AddCommand(operation)
+}
+
 func TestSimpleErrors(t *testing.T) {
 	tests := []struct {
 		description string
@@ -220,24 +242,35 @@ func TestDatabaseInputFlavorError(t *testing.T) {
 	tests := []struct {
 		description string
 		args        []string
-		operation   string
+		service     string
 		expectedMsg string
+		isBetaCmd   bool
 	}{
 		{
-			description: "base",
+			description: "no service",
 			args:        []string{"arg1", "arg2"},
-			operation:   "operation",
 			expectedMsg: fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, "stackit service resource operation arg1 arg2", "service"),
+		},
+		{
+			description: "with service",
+			args:        []string{"arg1", "arg2"},
+			service:     "beta service",
+			expectedMsg: fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, "stackit beta service resource operation arg1 arg2", "beta service"),
+			isBetaCmd:   true,
 		},
 	}
 
-	setupCmd()
 	for _, tt := range tests {
+		if tt.isBetaCmd {
+			setupBetaCmd()
+		} else {
+			setupCmd()
+		}
 		t.Run(tt.description, func(t *testing.T) {
 			err := &DatabaseInputFlavorError{
-				Cmd:       operation,
-				Args:      tt.args,
-				Operation: tt.operation,
+				Cmd:     operation,
+				Args:    tt.args,
+				Service: tt.service,
 			}
 
 			if err.Error() != tt.expectedMsg {

@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete an SQLServer Flex instance with ID "xxx"`,
-				"$ stackit sqlserverflex instance delete xxx"),
+				"$ stackit beta sqlserverflex instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

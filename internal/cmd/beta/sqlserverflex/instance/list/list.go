@@ -38,13 +38,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all SQLServer Flex instances`,
-				"$ stackit sqlserverflex instance list"),
+				"$ stackit beta sqlserverflex instance list"),
 			examples.NewExample(
 				`List all SQLServer Flex instances in JSON format`,
-				"$ stackit sqlserverflex instance list --output-format json"),
+				"$ stackit beta sqlserverflex instance list --output-format json"),
 			examples.NewExample(
 				`List up to 10 SQLServer Flex instances`,
-				"$ stackit sqlserverflex instance list --limit 10"),
+				"$ stackit beta sqlserverflex instance list --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

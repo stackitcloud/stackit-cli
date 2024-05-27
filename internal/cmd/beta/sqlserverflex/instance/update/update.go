@@ -56,10 +56,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the name of an SQLServer Flex instance with ID "xxx"`,
-				"$ stackit sqlserverflex instance update xxx --name my-new-name"),
+				"$ stackit beta sqlserverflex instance update xxx --name my-new-name"),
 			examples.NewExample(
 				`Update the backup schedule of an SQLServer Flex instance with ID "xxx"`,
-				`$ stackit sqlserverflex instance update xxx --backup-schedule "30 0 * * *"`),
+				`$ stackit beta sqlserverflex instance update xxx --backup-schedule "30 0 * * *"`),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -152,8 +152,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Cmd:  cmd,
-			Args: inputArgs,
+			Cmd:     cmd,
+			Service: sqlserverflexUtils.ServiceCmd,
+			Args:    inputArgs,
 		}
 	}
 

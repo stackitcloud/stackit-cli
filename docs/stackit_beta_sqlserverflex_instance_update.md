@@ -14,10 +14,10 @@ stackit beta sqlserverflex instance update INSTANCE_ID [flags]
 
 ```
   Update the name of an SQLServer Flex instance with ID "xxx"
-  $ stackit sqlserverflex instance update xxx --name my-new-name
+  $ stackit beta sqlserverflex instance update xxx --name my-new-name
 
   Update the backup schedule of an SQLServer Flex instance with ID "xxx"
-  $ stackit sqlserverflex instance update xxx --backup-schedule "30 0 * * *"
+  $ stackit beta sqlserverflex instance update xxx --backup-schedule "30 0 * * *"
 ```
 
 ### Options
