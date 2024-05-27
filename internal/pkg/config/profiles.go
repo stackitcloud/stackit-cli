@@ -22,7 +22,7 @@ const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 //
 // If the profile is not valid, it returns an error.
 func GetProfile() (string, error) {
-	profile, profileSet := os.LookupEnv(ProfileEnvVar)
+	profile, profileSet := GetProfileFromEnv()
 	if !profileSet {
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
@@ -49,9 +49,8 @@ func GetProfileFromEnv() (string, bool) {
 }
 
 // CreateProfile creates a new profile.
-// It creates a new folder for the profile and copies the config file from the current profile to the new profile.
-// If the fromDefault flag is set, it creates an empty profile.
-// If the setProfile flag is set, it sets the new profile as the active profile.
+// If emptyProfile is true, it creates an empty profile. Otherwise, copies the config from the current profile to the new profile.
+// If setProfile is true, it sets the new profile as the active profile.
 // If the profile already exists, it returns an error.
 func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bool) error {
 	err := ValidateProfile(profile)

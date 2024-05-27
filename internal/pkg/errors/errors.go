@@ -111,10 +111,6 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SINGLE_OPTIONAL_ARG_EXPECTED = `expected no more than 1 argument %q, %d were provided`
 
-	PROFILE_NAME_NOT_PROVIDED = `profile name is required for this operation and was not provided as an argument nor set in the environment variable.
-	
-Please run this command again with an argument or set the environment variable [STACKIT_CLI_PROFILE]`
-
 	SUBCOMMAND_UNKNOWN = `unknown subcommand %q`
 
 	SUBCOMMAND_MISSING = `missing subcommand`
@@ -289,12 +285,6 @@ type SingleOptionalArgExpectedError struct {
 func (e *SingleOptionalArgExpectedError) Error() string {
 	err := fmt.Errorf(SINGLE_OPTIONAL_ARG_EXPECTED, e.Expected, e.Count)
 	return AppendUsageTip(err, e.Cmd).Error()
-}
-
-type ProfileNameNotProvided struct{}
-
-func (e *ProfileNameNotProvided) Error() string {
-	return PROFILE_NAME_NOT_PROVIDED
 }
 
 // Used when an unexpected non-flag input (either arg or subcommand) is found

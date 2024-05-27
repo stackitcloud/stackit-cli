@@ -17,7 +17,7 @@ stackit config profile create PROFILE [flags]
 ### Examples
 
 ```
-  Create a new configuration profile "my-profile" as the active profile
+  Create a new configuration profile "my-profile" with the current configuration, setting it as the active profile
   $ stackit config profile create my-profile
 
   Create a new configuration profile "my-profile" with a default initial configuration and don't set it as the active profile

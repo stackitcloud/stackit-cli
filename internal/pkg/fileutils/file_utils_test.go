@@ -88,31 +88,33 @@ func TestReadFileIfExists(t *testing.T) {
 func TestCopyFile(t *testing.T) {
 	tests := []struct {
 		description string
-		exists      bool
+		srcExists   bool
+		destExists  bool
 		content     string
 		isValid     bool
 	}{
 		{
 			description: "copy file",
-			exists:      true,
+			srcExists:   true,
 			content:     "my-content",
 			isValid:     true,
 		},
 		{
 			description: "copy empty file",
-			exists:      true,
+			srcExists:   true,
 			content:     "",
 			isValid:     true,
 		},
 		{
 			description: "copy non-existent file",
-			exists:      false,
+			srcExists:   false,
 			content:     "",
 			isValid:     false,
 		},
 		{
 			description: "copy file to existing file",
-			exists:      true,
+			srcExists:   true,
+			destExists:  true,
 			content:     "my-content",
 			isValid:     true,
 		},
@@ -128,8 +130,15 @@ func TestCopyFile(t *testing.T) {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}
 
-			if tt.exists {
+			if tt.srcExists {
 				err := WriteToFile(src, tt.content)
+				if err != nil {
+					t.Fatalf("unexpected error: %s", err.Error())
+				}
+			}
+
+			if tt.destExists {
+				err := WriteToFile(dst, "existing-content")
 				if err != nil {
 					t.Fatalf("unexpected error: %s", err.Error())
 				}

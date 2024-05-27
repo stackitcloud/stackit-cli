@@ -6,7 +6,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -40,10 +39,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			"If you do not want to set the profile as active, use the --no-set flag.",
 			"If you want to create the new profile with the initial default configurations, use the --empty flag.",
 		),
-		Args: args.SingleOptionalArg(profileArg, nil),
+		Args: args.SingleArg(profileArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new configuration profile "my-profile" as the active profile`,
+				`Create a new configuration profile "my-profile" with the current configuration, setting it as the active profile`,
 				"$ stackit config profile create my-profile"),
 			examples.NewExample(
 				`Create a new configuration profile "my-profile" with a default initial configuration and don't set it as the active profile`,
@@ -88,21 +87,9 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	var err error
-	var profile string
+	profile := inputArgs[0]
 
-	// Read profile name
-	if len(inputArgs) > 0 {
-		profile = inputArgs[0]
-	} else {
-		var profileSet bool
-		profile, profileSet = config.GetProfileFromEnv()
-		if !profileSet {
-			return nil, &errors.ProfileNameNotProvided{}
-		}
-	}
-
-	err = config.ValidateProfile(profile)
+	err := config.ValidateProfile(profile)
 	if err != nil {
 		return nil, err
 	}
