@@ -14,13 +14,13 @@ stackit beta sqlserverflex instance list [flags]
 
 ```
   List all SQLServer Flex instances
-  $ stackit sqlserverflex instance list
+  $ stackit beta sqlserverflex instance list
 
   List all SQLServer Flex instances in JSON format
-  $ stackit sqlserverflex instance list --output-format json
+  $ stackit beta sqlserverflex instance list --output-format json
 
   List up to 10 SQLServer Flex instances
-  $ stackit sqlserverflex instance list --limit 10
+  $ stackit beta sqlserverflex instance list --limit 10
 ```
 
 ### Options

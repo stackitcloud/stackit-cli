@@ -14,10 +14,10 @@ stackit beta sqlserverflex instance describe INSTANCE_ID [flags]
 
 ```
   Get details of an SQLServer Flex instance with ID "xxx"
-  $ stackit sqlserverflex instance describe xxx
+  $ stackit beta sqlserverflex instance describe xxx
 
   Get details of an SQLServer Flex instance with ID "xxx" in JSON format
-  $ stackit sqlserverflex instance describe xxx --output-format json
+  $ stackit beta sqlserverflex instance describe xxx --output-format json
 ```
 
 ### Options

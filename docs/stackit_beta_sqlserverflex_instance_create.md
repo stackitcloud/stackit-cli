@@ -14,13 +14,13 @@ stackit beta sqlserverflex instance create [flags]
 
 ```
   Create an SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values
-  $ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4
+  $ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4
 
   Create an SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values
-  $ stackit sqlserverflex instance create --name my-instance --flavor-id xxx
+  $ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx
 
   Create an SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values
-  $ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24
+  $ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24
 ```
 
 ### Options

@@ -63,13 +63,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values`,
-				`$ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4`),
+				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4`),
 			examples.NewExample(
 				`Create an SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values`,
-				`$ stackit sqlserverflex instance create --name my-instance --flavor-id xxx`),
+				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx`),
 			examples.NewExample(
 				`Create an SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
-				`$ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24`),
+				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -157,12 +157,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Cmd: cmd,
+			Cmd:     cmd,
+			Service: sqlserverflexUtils.ServiceCmd,
 		}
 	}
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
-			Cmd: cmd,
+			Cmd:     cmd,
+			Service: sqlserverflexUtils.ServiceCmd,
 		}
 	}
 

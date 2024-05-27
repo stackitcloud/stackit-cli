@@ -194,10 +194,9 @@ func (e *DSAInvalidPlanError) Error() string {
 }
 
 type DatabaseInputFlavorError struct {
-	Service   string
-	Operation string
-	Cmd       *cobra.Command
-	Args      []string
+	Service string
+	Cmd     *cobra.Command
+	Args    []string
 }
 
 func (e *DatabaseInputFlavorError) Error() string {
@@ -205,10 +204,13 @@ func (e *DatabaseInputFlavorError) Error() string {
 	if len(e.Args) > 0 {
 		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
 	}
-	// Assumes a structure of the form "stackit <service> <resource> <operation>"
-	service := e.Cmd.Parent().Parent().Use
 
-	return fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, fullCommandPath, service)
+	if e.Service == "" {
+		// Assumes a structure of the form "stackit <service> <resource> <operation>"
+		e.Service = e.Cmd.Parent().Parent().Use
+	}
+
+	return fmt.Sprintf(DATABASE_INVALID_INPUT_FLAVOR, fullCommandPath, e.Service)
 }
 
 type DatabaseInvalidFlavorError struct {
