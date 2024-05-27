@@ -29,9 +29,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Profile:    testProfile,
-		UseDefault: false,
-		NoSet:      false,
+		Profile:          testProfile,
+		FromEmptyProfile: false,
+		NoSet:            false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -98,11 +98,11 @@ func TestParseInput(t *testing.T) {
 			description: "use default given",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				useDefaultFlag: "true",
+				fromEmptyProfile: "true",
 			},
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.UseDefault = true
+				model.FromEmptyProfile = true
 			}),
 		},
 		{

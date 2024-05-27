@@ -17,15 +17,15 @@ import (
 const (
 	profileArg = "PROFILE"
 
-	noSetFlag      = "no-set"
-	useDefaultFlag = "default"
+	noSetFlag        = "no-set"
+	fromEmptyProfile = "empty"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NoSet      bool
-	UseDefault bool
-	Profile    string
+	NoSet            bool
+	FromEmptyProfile bool
+	Profile          string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			`The profile name can be provided via the STACKIT_CLI_PROFILE environment variable or as an argument in this command.`,
 			"The environment variable takes precedence over the argument.",
 			"If you do not want to set the profile as active, use the --no-set flag.",
-			"If you want to create the profile from the default profile instead of the current one, use the --default flag.",
+			"If you want to create the new profile with the initial default configurations, use the --empty flag.",
 		),
 		Args: args.SingleOptionalArg(profileArg, nil),
 		Example: examples.Build(
@@ -45,8 +45,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a new configuration profile "my-profile" as the active profile`,
 				"$ stackit config profile create my-profile"),
 			examples.NewExample(
-				`Create a new configuration profile "my-profile" based on the default profile and don't set it as the active profile`,
-				"$ stackit config profile create my-profile --default --no-set"),
+				`Create a new configuration profile "my-profile" with a default initial configuration and don't set it as the active profile`,
+				"$ stackit config profile create my-profile --empty --no-set"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model, err := parseInput(p, cmd, args)
@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			err = config.CreateProfile(p, model.Profile, !model.NoSet, model.UseDefault)
+			err = config.CreateProfile(p, model.Profile, !model.NoSet, model.FromEmptyProfile)
 			if err != nil {
 				return fmt.Errorf("create profile: %w", err)
 			}
@@ -83,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(noSetFlag, false, "Do not set the profile as the active profile")
-	cmd.Flags().Bool(useDefaultFlag, false, "Create the profile from the default profile instead of the current one")
+	cmd.Flags().Bool(fromEmptyProfile, false, "Create the profile with the initial default configurations")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -111,10 +111,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Profile:         profile,
-		UseDefault:      flags.FlagToBoolValue(p, cmd, useDefaultFlag),
-		NoSet:           flags.FlagToBoolValue(p, cmd, noSetFlag),
+		GlobalFlagModel:  globalFlags,
+		Profile:          profile,
+		FromEmptyProfile: flags.FlagToBoolValue(p, cmd, fromEmptyProfile),
+		NoSet:            flags.FlagToBoolValue(p, cmd, noSetFlag),
 	}
 
 	if p.IsVerbosityDebug() {

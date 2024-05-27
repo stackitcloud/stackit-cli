@@ -62,7 +62,7 @@ func GetProfileFromEnv() (string, error) {
 // If the fromDefault flag is set, it creates an empty profile.
 // If the setProfile flag is set, it sets the new profile as the active profile.
 // If the profile already exists, it returns an error.
-func CreateProfile(p *print.Printer, profile string, setProfile, fromDefault bool) error {
+func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bool) error {
 	err := ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
@@ -94,7 +94,7 @@ func CreateProfile(p *print.Printer, profile string, setProfile, fromDefault boo
 
 	p.Debug(print.DebugLevel, "current active profile: %q", currentProfile)
 
-	if !fromDefault && currentProfile != "default" {
+	if !emptyProfile {
 		p.Debug(print.DebugLevel, "duplicating profile configuration from %q to new profile %q", currentProfile, profile)
 		err = DuplicateProfileConfiguration(p, currentProfile, profile)
 		if err != nil {
@@ -122,7 +122,14 @@ func CreateProfile(p *print.Printer, profile string, setProfile, fromDefault boo
 // If the current profile does not exist, it returns an error.
 // If the new profile already exists, it will be overwritten.
 func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile string) error {
-	currentConfigFilePath := filepath.Join(defaultConfigFolderPath, profileRootFolder, currentProfile, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	var currentConfigFilePath string
+	// If the current profile is empty, its the default profile
+	if currentProfile == "" {
+		currentConfigFilePath = filepath.Join(defaultConfigFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	} else {
+		currentConfigFilePath = filepath.Join(defaultConfigFolderPath, profileRootFolder, currentProfile, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	}
+
 	newConfigFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 
 	err := fileutils.CopyFile(currentConfigFilePath, newConfigFilePath)
