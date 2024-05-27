@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-type mongoDBFlexOptionsClient interface {
+type SQLServerFlexOptionsClient interface {
 	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
 	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
