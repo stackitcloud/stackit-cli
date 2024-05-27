@@ -135,7 +135,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddSeparator()
 		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
 		table.AddSeparator()
 		table.AddRow("CPU", *instance.Flavor.Cpu)
