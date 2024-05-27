@@ -1,11 +1,10 @@
 ## stackit sqlserverflex instance create
 
-Creates credentials for an Argus instance.
+Creates an SQLServer Flex instance
 
 ### Synopsis
 
-Creates credentials (username and password) for an Argus instance.
-The credentials will be generated and included in the response. You won't be able to retrieve the password later.
+Creates an SQLServer Flex instance.
 
 ```
 stackit sqlserverflex instance create [flags]
@@ -14,15 +13,31 @@ stackit sqlserverflex instance create [flags]
 ### Examples
 
 ```
-  Create credentials for Argus instance with ID "xxx"
-  $ stackit argus credentials create --instance-id xxx
+  Create an SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values
+  $ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4
+
+  Create an SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values
+  $ stackit sqlserverflex instance create --name my-instance --flavor-id xxx
+
+  Create an SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values
+  $ stackit sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit sqlserverflex instance create"
-      --instance-id string   Instance ID
+      --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
+      --backup-schedule string   Backup schedule
+      --cpu int                  Number of CPUs
+      --edition string           Edition of the SQLServer instance
+      --flavor-id string         ID of the flavor
+  -h, --help                     Help for "stackit sqlserverflex instance create"
+  -n, --name string              Instance name
+      --ram int                  Amount of RAM (in GB)
+      --retention-days int       The days for how long the backup files should be stored before being cleaned up
+      --storage-class string     Storage class
+      --storage-size int         Storage size (in GB)
+      --version string           SQLServer version
 ```
 
 ### Options inherited from parent commands
