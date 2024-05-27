@@ -1,4 +1,4 @@
-## stackit sqlserverflex instance describe
+## stackit beta sqlserverflex instance describe
 
 Shows details  of an SQLServer Flex instance
 
@@ -7,7 +7,7 @@ Shows details  of an SQLServer Flex instance
 Shows details  of an SQLServer Flex instance.
 
 ```
-stackit sqlserverflex instance describe INSTANCE_ID [flags]
+stackit beta sqlserverflex instance describe INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -23,7 +23,7 @@ stackit sqlserverflex instance describe INSTANCE_ID [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit sqlserverflex instance describe"
+  -h, --help   Help for "stackit beta sqlserverflex instance describe"
 ```
 
 ### Options inherited from parent commands
@@ -38,5 +38,5 @@ stackit sqlserverflex instance describe INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
 

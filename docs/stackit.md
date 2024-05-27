@@ -28,6 +28,7 @@ stackit [flags]
 
 * [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
+* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
@@ -45,5 +46,4 @@ stackit [flags]
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
-* [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

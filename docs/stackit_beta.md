@@ -1,19 +1,30 @@
-## stackit sqlserverflex
+## stackit beta
 
-Provides functionality for SQLServer Flex
+Contains beta STACKIT CLI commands
 
 ### Synopsis
 
-Provides functionality for SQLServer Flex.
+Contains beta STACKIT CLI commands.
+The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
 
 ```
-stackit sqlserverflex [flags]
+stackit beta [flags]
+```
+
+### Examples
+
+```
+  See the currently available beta commands
+  $ stackit beta --help
+
+  Execute a beta command
+  $ stackit beta MY_COMMAND
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit sqlserverflex"
+  -h, --help   Help for "stackit beta"
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +40,5 @@ stackit sqlserverflex [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 
