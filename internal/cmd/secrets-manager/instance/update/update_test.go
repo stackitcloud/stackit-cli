@@ -70,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
 	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-		Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+		Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
 			{Cidr: utils.Ptr(testACL1)},
 		})})
 
@@ -275,7 +275,7 @@ func TestBuildRequest(t *testing.T) {
 				*model.Acls = append(*model.Acls, testACL2)
 			}),
 			expectedRequest: fixtureRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-				Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+				Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
 					{Cidr: utils.Ptr(testACL1)},
 					{Cidr: utils.Ptr(testACL2)},
 				})}),
