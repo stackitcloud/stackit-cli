@@ -135,13 +135,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-type SQLServerFlexOptionsClient interface {
+type sqlServerFlexOptionsClient interface {
 	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
 	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
 }
 
-func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
+func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlServerFlexOptionsClient) error {
 	var flavors *sqlserverflex.ListFlavorsResponse
 	var versions *sqlserverflex.ListVersionsResponse
 	var storages *sqlserverflex.ListStoragesResponse

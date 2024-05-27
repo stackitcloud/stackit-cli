@@ -17,7 +17,7 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 
-type mongoDBFlexClientMocked struct {
+type sqlServerFlexClientMocked struct {
 	listFlavorsFails  bool
 	listVersionsFails bool
 	listStoragesFails bool
@@ -27,7 +27,7 @@ type mongoDBFlexClientMocked struct {
 	listStoragesCalled bool
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	c.listFlavorsCalled = true
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
@@ -37,7 +37,7 @@ func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string
 	}), nil
 }
 
-func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
 	c.listVersionsCalled = true
 	if c.listVersionsFails {
 		return nil, fmt.Errorf("list versions failed")
@@ -47,7 +47,7 @@ func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ strin
 	}), nil
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	c.listStoragesCalled = true
 	if c.listStoragesFails {
 		return nil, fmt.Errorf("list storages failed")
@@ -293,7 +293,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			p := &print.Printer{}
 			cmd := NewCmd(p)
 			p.Cmd = cmd
-			client := &mongoDBFlexClientMocked{
+			client := &sqlServerFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listVersionsFails: tt.listVersionsFails,
 				listStoragesFails: tt.listStoragesFails,
