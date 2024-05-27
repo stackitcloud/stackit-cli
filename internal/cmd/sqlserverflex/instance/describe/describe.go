@@ -12,15 +12,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
-	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 const (
@@ -35,16 +32,16 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details of a PostgreSQL Flex instance",
-		Long:  "Shows details of a PostgreSQL Flex instance.",
+		Short: "Shows details  of an SQLServer Flex instance",
+		Long:  "Shows details  of an SQLServer Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex instance with ID "xxx"`,
-				"$ stackit postgresflex instance describe xxx"),
+				`Get details of an SQLServer Flex instance with ID "xxx"`,
+				"$ stackit sqlserverflex instance describe xxx"),
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex instance with ID "xxx" in JSON format`,
-				"$ stackit postgresflex instance describe xxx --output-format json"),
+				`Get details of an SQLServer Flex instance with ID "xxx" in JSON format`,
+				"$ stackit sqlserverflex instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -62,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read PostgreSQL Flex instance: %w", err)
+				return fmt.Errorf("read SQLServer Flex instance: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, resp.Item)
@@ -96,17 +93,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetInstanceRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex.Instance) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex instance: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -114,7 +111,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex instance: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -123,38 +120,29 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 		aclsArray := *instance.Acl.Items
 		acls := strings.Join(aclsArray, ",")
 
-		instanceType, err := postgresflexUtils.GetInstanceType(*instance.Replicas)
-		if err != nil {
-			// Should never happen
-			instanceType = ""
-		}
-
 		table := tables.NewTable()
 		table.AddRow("ID", *instance.Id)
 		table.AddSeparator()
 		table.AddRow("NAME", *instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATUS", cases.Title(language.English).String(*instance.Status))
+		table.AddRow("STATUS", *instance.Status)
 		table.AddSeparator()
 		table.AddRow("STORAGE SIZE (GB)", *instance.Storage.Size)
 		table.AddSeparator()
 		table.AddRow("VERSION", *instance.Version)
 		table.AddSeparator()
+		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
 		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
-		table.AddSeparator()
-		table.AddRow("TYPE", instanceType)
-		table.AddSeparator()
-		table.AddRow("REPLICAS", *instance.Replicas)
 		table.AddSeparator()
 		table.AddRow("CPU", *instance.Flavor.Cpu)
 		table.AddSeparator()
 		table.AddRow("RAM (GB)", *instance.Flavor.Memory)
 		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
-		table.AddSeparator()
-		err = table.Display(p)
+
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
