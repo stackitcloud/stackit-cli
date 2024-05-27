@@ -57,6 +57,11 @@ func TestSimpleErrors(t *testing.T) {
 			err:         &ActivateServiceAccountError{},
 			expectedMsg: FAILED_SERVICE_ACCOUNT_ACTIVATION,
 		},
+		{
+			description: "Test ProfileNameNotProvided",
+			err:         &ProfileNameNotProvided{},
+			expectedMsg: PROFILE_NAME_NOT_PROVIDED,
+		},
 	}
 
 	for _, tt := range tests {
