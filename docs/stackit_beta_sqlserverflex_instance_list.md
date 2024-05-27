@@ -1,4 +1,4 @@
-## stackit sqlserverflex instance list
+## stackit beta sqlserverflex instance list
 
 Lists all SQLServer Flex instances
 
@@ -7,7 +7,7 @@ Lists all SQLServer Flex instances
 Lists all SQLServer Flex instances.
 
 ```
-stackit sqlserverflex instance list [flags]
+stackit beta sqlserverflex instance list [flags]
 ```
 
 ### Examples
@@ -26,7 +26,7 @@ stackit sqlserverflex instance list [flags]
 ### Options
 
 ```
-  -h, --help        Help for "stackit sqlserverflex instance list"
+  -h, --help        Help for "stackit beta sqlserverflex instance list"
       --limit int   Maximum number of entries to list
 ```
 
@@ -42,5 +42,5 @@ stackit sqlserverflex instance list [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
 

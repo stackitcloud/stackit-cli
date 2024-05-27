@@ -1,4 +1,4 @@
-## stackit sqlserverflex instance delete
+## stackit beta sqlserverflex instance delete
 
 Deletes an SQLServer Flex instance
 
@@ -7,7 +7,7 @@ Deletes an SQLServer Flex instance
 Deletes an SQLServer Flex instance.
 
 ```
-stackit sqlserverflex instance delete INSTANCE_ID [flags]
+stackit beta sqlserverflex instance delete INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ stackit sqlserverflex instance delete INSTANCE_ID [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit sqlserverflex instance delete"
+  -h, --help   Help for "stackit beta sqlserverflex instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +35,5 @@ stackit sqlserverflex instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
 

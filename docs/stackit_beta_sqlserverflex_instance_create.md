@@ -1,4 +1,4 @@
-## stackit sqlserverflex instance create
+## stackit beta sqlserverflex instance create
 
 Creates an SQLServer Flex instance
 
@@ -7,7 +7,7 @@ Creates an SQLServer Flex instance
 Creates an SQLServer Flex instance.
 
 ```
-stackit sqlserverflex instance create [flags]
+stackit beta sqlserverflex instance create [flags]
 ```
 
 ### Examples
@@ -31,7 +31,7 @@ stackit sqlserverflex instance create [flags]
       --cpu int                  Number of CPUs
       --edition string           Edition of the SQLServer instance
       --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit sqlserverflex instance create"
+  -h, --help                     Help for "stackit beta sqlserverflex instance create"
   -n, --name string              Instance name
       --ram int                  Amount of RAM (in GB)
       --retention-days int       The days for how long the backup files should be stored before being cleaned up
@@ -52,5 +52,5 @@ stackit sqlserverflex instance create [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
 

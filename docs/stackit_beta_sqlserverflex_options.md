@@ -1,4 +1,4 @@
-## stackit sqlserverflex options
+## stackit beta sqlserverflex options
 
 Lists SQL Server Flex options
 
@@ -8,7 +8,7 @@ Lists SQL Server Flex options (flavors, versions and storages for a given flavor
 Pass one or more flags to filter what categories are shown.
 
 ```
-stackit sqlserverflex options [flags]
+stackit beta sqlserverflex options [flags]
 ```
 
 ### Examples
@@ -29,7 +29,7 @@ stackit sqlserverflex options [flags]
 ```
       --flavor-id string   The flavor ID to show storages for. Only relevant when "--storages" is passed
       --flavors            Lists supported flavors
-  -h, --help               Help for "stackit sqlserverflex options"
+  -h, --help               Help for "stackit beta sqlserverflex options"
       --storages           Lists supported storages for a given flavor
       --versions           Lists supported versions
 ```
@@ -46,5 +46,5 @@ stackit sqlserverflex options [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

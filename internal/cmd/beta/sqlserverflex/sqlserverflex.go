@@ -1,8 +1,8 @@
 package sqlserverflex
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/options"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
