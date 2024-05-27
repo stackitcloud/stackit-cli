@@ -124,10 +124,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
 	req := apiClient.UpdateACLs(ctx, model.ProjectId, model.InstanceId)
 
-	cidrs := []secretsmanager.AclUpdate{}
+	cidrs := []secretsmanager.UpdateACLPayload{}
 
 	for _, acl := range *model.Acls {
-		cidrs = append(cidrs, secretsmanager.AclUpdate{Cidr: utils.Ptr(acl)})
+		cidrs = append(cidrs, secretsmanager.UpdateACLPayload{Cidr: utils.Ptr(acl)})
 	}
 
 	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})

@@ -110,10 +110,10 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.AclList) error {
+func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.ListACLsResponse) error {
 	output := struct {
 		*secretsmanager.Instance
-		*secretsmanager.AclList
+		*secretsmanager.ListACLsResponse
 	}{instance, aclList}
 
 	switch outputFormat {
