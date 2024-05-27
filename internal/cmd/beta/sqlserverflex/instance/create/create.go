@@ -195,13 +195,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-type SQLServerFlexClient interface {
+type sqlServerFlexClient interface {
 	CreateInstance(ctx context.Context, projectId string) sqlserverflex.ApiCreateInstanceRequest
 	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient SQLServerFlexClient) (sqlserverflex.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFlexClient) (sqlserverflex.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var flavorId *string

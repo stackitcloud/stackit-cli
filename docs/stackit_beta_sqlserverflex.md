@@ -30,4 +30,5 @@ stackit beta sqlserverflex [flags]
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex options](./stackit_beta_sqlserverflex_options.md)	 - Lists SQL Server Flex options
 
