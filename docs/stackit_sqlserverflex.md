@@ -30,4 +30,5 @@ stackit sqlserverflex [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit sqlserverflex options](./stackit_sqlserverflex_options.md)	 - Lists SQL Server Flex options
 
