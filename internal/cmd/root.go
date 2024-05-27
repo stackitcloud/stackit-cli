@@ -62,7 +62,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
-				p.Outputf("STACKIT CLI (BETA)\n")
+				p.Outputf("STACKIT CLI (beta)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {

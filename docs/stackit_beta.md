@@ -1,11 +1,11 @@
 ## stackit beta
 
-Contains Beta STACKIT CLI commands
+Contains beta STACKIT CLI commands
 
 ### Synopsis
 
-Contains Beta STACKIT CLI commands.
-The commands under this group are still in a Beta state, and functionality may be incomplete or have breaking changes.
+Contains beta STACKIT CLI commands.
+The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
 
 ```
 stackit beta [flags]
@@ -14,10 +14,10 @@ stackit beta [flags]
 ### Examples
 
 ```
-  See the currently available Beta commands
+  See the currently available beta commands
   $ stackit beta --help
 
-  Execute a Beta command
+  Execute a beta command
   $ stackit beta MY_COMMAND
 ```
 

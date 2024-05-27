@@ -15,18 +15,18 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "beta",
-		Short: "Contains Beta STACKIT CLI commands",
+		Short: "Contains beta STACKIT CLI commands",
 		Long: fmt.Sprintf("%s\n%s",
-			"Contains Beta STACKIT CLI commands.",
-			"The commands under this group are still in a Beta state, and functionality may be incomplete or have breaking changes."),
+			"Contains beta STACKIT CLI commands.",
+			"The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes."),
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 		Example: examples.Build(
 			examples.NewExample(
-				"See the currently available Beta commands",
+				"See the currently available beta commands",
 				"$ stackit beta --help"),
 			examples.NewExample(
-				"Execute a Beta command",
+				"Execute a beta command",
 				"$ stackit beta MY_COMMAND"),
 		),
 	}
