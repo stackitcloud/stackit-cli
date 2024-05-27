@@ -6,7 +6,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -33,7 +32,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			"The environment variable takes precedence over what is set via the commands.",
 			"When no profile is set, the default profile is used.",
 		),
-		Args: args.SingleOptionalArg(profileArg, nil),
+		Args: args.SingleArg(profileArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Set the configuration profile "my-profile" as the active profile`,
@@ -75,21 +74,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	var err error
-	var profile string
+	profile := inputArgs[0]
 
-	// Read profile name
-	if len(inputArgs) > 0 {
-		profile = inputArgs[0]
-	} else {
-		var profileSet bool
-		profile, profileSet = config.GetProfileFromEnv()
-		if !profileSet {
-			return nil, &errors.ProfileNameNotProvided{}
-		}
-	}
-
-	err = config.ValidateProfile(profile)
+	err := config.ValidateProfile(profile)
 	if err != nil {
 		return nil, err
 	}
