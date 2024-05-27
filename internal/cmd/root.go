@@ -25,6 +25,7 @@ import (
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -140,6 +141,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(secretsmanager.NewCmd(p))
 	cmd.AddCommand(serviceaccount.NewCmd(p))
 	cmd.AddCommand(ske.NewCmd(p))
+	cmd.AddCommand(sqlserverflex.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.

@@ -45,4 +45,5 @@ stackit [flags]
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
+* [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

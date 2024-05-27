@@ -156,6 +156,8 @@ github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0 h1:JB1O0E9
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0/go.mod h1:Ni9RBJvcaXRIrDIuQBpJcuQvCQSj27crQSyc+WM4p0c=
 github.com/stackitcloud/stackit-sdk-go/services/ske v0.15.0 h1:7iTzdiglvJmKMaHlr4JUPvNOmA730rAniry74cnZ8zI=
 github.com/stackitcloud/stackit-sdk-go/services/ske v0.15.0/go.mod h1:0fFs4R7kg+gU7FNAIzzFvlCZJz6gyZ8CFhbK3eSrAwQ=
+github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.2.0 h1:aIXxXx6u4+6C02MPb+hdItigeKeen7m+hEEG+Ej9sNs=
+github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.2.0/go.mod h1:fQJOQMfasStZ8J9iGX0vTjyJoQtLqMXJ5Npb03QJk84=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=

@@ -31,6 +31,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		secretsManagerCustomEndpointFlag:  true,
 		serviceAccountCustomEndpointFlag:  true,
 		skeCustomEndpointFlag:             true,
+		sqlServerFlexCustomEndpointFlag:   true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -60,6 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		SecretsManagerCustomEndpoint:  true,
 		ServiceAccountCustomEndpoint:  true,
 		SKECustomEndpoint:             true,
+		SQLServerFlexCustomEndpoint:   true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -105,6 +107,7 @@ func TestParseInput(t *testing.T) {
 				model.SecretsManagerCustomEndpoint = false
 				model.ServiceAccountCustomEndpoint = false
 				model.SKECustomEndpoint = false
+				model.SQLServerFlexCustomEndpoint = false
 			}),
 		},
 		{
