@@ -22,25 +22,25 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
 
-type mongoDBFlexClientMocked struct {
+type sqlServerFlexClientMocked struct {
 	listFlavorsFails  bool
 	listFlavorsResp   *sqlserverflex.ListFlavorsResponse
 	listStoragesFails bool
 	listStoragesResp  *sqlserverflex.ListStoragesResponse
 }
 
-func (c *mongoDBFlexClientMocked) CreateInstance(ctx context.Context, projectId string) sqlserverflex.ApiCreateInstanceRequest {
+func (c *sqlServerFlexClientMocked) CreateInstance(ctx context.Context, projectId string) sqlserverflex.ApiCreateInstanceRequest {
 	return testClient.CreateInstance(ctx, projectId)
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -468,7 +468,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			client := &sqlServerFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listFlavorsResp:   tt.listFlavorsResp,
 				listStoragesFails: tt.listStoragesFails,

@@ -22,7 +22,7 @@ const (
 	testUserName     = "user"
 )
 
-type mongoDBFlexClientMocked struct {
+type sqlServerFlexClientMocked struct {
 	listVersionsFails    bool
 	listVersionsResp     *sqlserverflex.ListVersionsResponse
 	getInstanceFails     bool
@@ -33,28 +33,28 @@ type mongoDBFlexClientMocked struct {
 	listRestoreJobsResp  *sqlserverflex.ListRestoreJobsResponse
 }
 
-func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
+func (m *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
 	if m.listVersionsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListRestoreJobsResponse, error) {
+func (m *sqlServerFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListRestoreJobsResponse, error) {
 	if m.listRestoreJobsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listRestoreJobsResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
+func (m *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
 	return m.getInstanceResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetUserResponse, error) {
+func (m *sqlServerFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetUserResponse, error) {
 	if m.getUserFails {
 		return nil, fmt.Errorf("could not get user")
 	}
@@ -399,7 +399,7 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			client := &sqlServerFlexClientMocked{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}

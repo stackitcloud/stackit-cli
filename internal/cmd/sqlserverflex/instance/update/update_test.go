@@ -22,7 +22,7 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
 
-type mongoDBFlexClientMocked struct {
+type sqlServerFlexClientMocked struct {
 	listFlavorsFails  bool
 	listFlavorsResp   *sqlserverflex.ListFlavorsResponse
 	listStoragesFails bool
@@ -31,25 +31,25 @@ type mongoDBFlexClientMocked struct {
 	getInstanceResp   *sqlserverflex.GetInstanceResponse
 }
 
-func (c *mongoDBFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) sqlserverflex.ApiPartialUpdateInstanceRequest {
+func (c *sqlServerFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) sqlserverflex.ApiPartialUpdateInstanceRequest {
 	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
 }
 
-func (c *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
+func (c *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -457,7 +457,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			client := &sqlServerFlexClientMocked{
 				getInstanceFails:  tt.getInstanceFails,
 				getInstanceResp:   tt.getInstanceResp,
 				listFlavorsFails:  tt.listFlavorsFails,

@@ -1,7 +1,7 @@
 package instance
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus/credentials/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
