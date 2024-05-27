@@ -29,5 +29,7 @@ stackit sqlserverflex instance [flags]
 ### SEE ALSO
 
 * [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit sqlserverflex instance create](./stackit_sqlserverflex_instance_create.md)	 - Creates credentials for an Argus instance.
 * [stackit sqlserverflex instance list](./stackit_sqlserverflex_instance_list.md)	 - Lists all SQLServer Flex instances
+* [stackit sqlserverflex instance update](./stackit_sqlserverflex_instance_update.md)	 - Updates an SQLServer Flex instance
 
