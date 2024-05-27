@@ -8,6 +8,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
@@ -25,7 +26,6 @@ import (
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -124,6 +124,7 @@ func configureFlags(cmd *cobra.Command) error {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
+	cmd.AddCommand(beta.NewCmd(p))
 	cmd.AddCommand(config.NewCmd(p))
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
@@ -141,7 +142,6 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(secretsmanager.NewCmd(p))
 	cmd.AddCommand(serviceaccount.NewCmd(p))
 	cmd.AddCommand(ske.NewCmd(p))
-	cmd.AddCommand(sqlserverflex.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.

@@ -1,4 +1,4 @@
-## stackit sqlserverflex instance update
+## stackit beta sqlserverflex instance update
 
 Updates an SQLServer Flex instance
 
@@ -7,7 +7,7 @@ Updates an SQLServer Flex instance
 Updates an SQLServer Flex instance.
 
 ```
-stackit sqlserverflex instance update INSTANCE_ID [flags]
+stackit beta sqlserverflex instance update INSTANCE_ID [flags]
 ```
 
 ### Examples
@@ -27,7 +27,7 @@ stackit sqlserverflex instance update INSTANCE_ID [flags]
       --backup-schedule string   Backup schedule
       --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit sqlserverflex instance update"
+  -h, --help                     Help for "stackit beta sqlserverflex instance update"
   -n, --name string              Instance name
       --ram int                  Amount of RAM (in GB)
       --version string           Version
@@ -45,5 +45,5 @@ stackit sqlserverflex instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit sqlserverflex instance](./stackit_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
+* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
 

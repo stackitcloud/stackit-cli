@@ -1,11 +1,11 @@
 package instance
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
