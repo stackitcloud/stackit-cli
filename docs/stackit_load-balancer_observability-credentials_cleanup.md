@@ -35,4 +35,5 @@ stackit load-balancer observability-credentials cleanup [flags]
 
 ### SEE ALSO
 
-- [stackit load-balancer observability-credentials](./stackit_load-balancer_observability-credentials.md) - Provides functionality for Load Balancer observability credentials
+* [stackit load-balancer observability-credentials](./stackit_load-balancer_observability-credentials.md)	 - Provides functionality for Load Balancer observability credentials
+

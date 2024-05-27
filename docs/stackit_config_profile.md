@@ -24,7 +24,7 @@ stackit config profile [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none"]
+  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
   -p, --project-id string      Project ID
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
@@ -32,6 +32,7 @@ stackit config profile [flags]
 ### SEE ALSO
 
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
+* [stackit config profile create](./stackit_config_profile_create.md)	 - Creates a CLI configuration profile
 * [stackit config profile set](./stackit_config_profile_set.md)	 - Set a CLI configuration profile
 * [stackit config profile unset](./stackit_config_profile_unset.md)	 - Unset the current active CLI configuration profile
 
