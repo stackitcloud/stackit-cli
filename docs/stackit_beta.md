@@ -5,6 +5,7 @@ Contains Beta STACKIT CLI commands
 ### Synopsis
 
 Contains Beta STACKIT CLI commands.
+The commands under this group are still in a Beta state, and functionality may be incomplete or have breaking changes.
 
 ```
 stackit beta [flags]
