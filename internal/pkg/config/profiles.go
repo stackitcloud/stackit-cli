@@ -44,17 +44,8 @@ func GetProfile() (string, error) {
 // GetProfileFromEnv returns the profile from the environment variable.
 // If the environment variable is not set, it returns an empty string.
 // If the profile is not valid, it returns an error.
-func GetProfileFromEnv() (string, error) {
-	profile, profileSet := os.LookupEnv(ProfileEnvVar)
-	if !profileSet {
-		return "", nil
-	}
-
-	err := ValidateProfile(profile)
-	if err != nil {
-		return "", fmt.Errorf("validate profile: %w", err)
-	}
-	return profile, nil
+func GetProfileFromEnv() (string, bool) {
+	return os.LookupEnv(ProfileEnvVar)
 }
 
 // CreateProfile creates a new profile.

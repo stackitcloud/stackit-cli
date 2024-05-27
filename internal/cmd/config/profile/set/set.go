@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -33,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			"A new profile is created automatically if it does not exist.",
 			"When no profile is set, the default profile is used.",
 		),
-		Args: args.SingleArg(profileArg, nil),
+		Args: args.SingleOptionalArg(profileArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Set the configuration profile "my-profile" as the active profile`,
@@ -67,9 +68,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	profile := inputArgs[0]
+	var err error
+	var profile string
 
-	err := config.ValidateProfile(profile)
+	// Read profile name
+	if len(inputArgs) > 0 {
+		profile = inputArgs[0]
+	} else {
+		var profileSet bool
+		profile, profileSet = config.GetProfileFromEnv()
+		if !profileSet {
+			return nil, &errors.ProfileNameNotProvided{}
+		}
+	}
+
+	err = config.ValidateProfile(profile)
 	if err != nil {
 		return nil, err
 	}

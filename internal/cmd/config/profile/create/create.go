@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -94,12 +95,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if len(inputArgs) > 0 {
 		profile = inputArgs[0]
 	} else {
-		profile, err = config.GetProfileFromEnv()
-		if err != nil {
-			return nil, fmt.Errorf("get profile from environment: %w", err)
-		}
-		if profile == "" {
-			return nil, fmt.Errorf("no profile set")
+		var profileSet bool
+		profile, profileSet = config.GetProfileFromEnv()
+		if !profileSet {
+			return nil, &errors.ProfileNameNotProvided{}
 		}
 	}
 

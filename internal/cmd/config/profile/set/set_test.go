@@ -1,10 +1,13 @@
 package set
 
 import (
+	"os"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -40,6 +43,7 @@ func TestParseInput(t *testing.T) {
 		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
+		profileEnvVar *string
 		expectedModel *inputModel
 	}{
 		{
@@ -75,6 +79,19 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{"invalid-profile-&"},
 			isValid:     false,
 		},
+		{
+			description:   "profile from env",
+			argValues:     []string{},
+			profileEnvVar: utils.Ptr(testProfile),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
+		},
+		{
+			description:   "profile from env, but empty",
+			argValues:     []string{},
+			profileEnvVar: utils.Ptr(""),
+			isValid:       false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -93,6 +110,20 @@ func TestParseInput(t *testing.T) {
 						return
 					}
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
+				}
+			}
+
+			// Set the profile env var or unset existing
+			oldProfileEnv := os.Getenv(config.ProfileEnvVar)
+			if tt.profileEnvVar != nil {
+				err = os.Setenv(config.ProfileEnvVar, *tt.profileEnvVar)
+				if err != nil {
+					t.Fatalf("setting profile env var: %v", err)
+				}
+			} else {
+				err = os.Unsetenv(config.ProfileEnvVar)
+				if err != nil {
+					t.Fatalf("unsetting profile env var: %v", err)
 				}
 			}
 
@@ -126,6 +157,12 @@ func TestParseInput(t *testing.T) {
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+
+			// Reset the env state
+			err = os.Setenv(config.ProfileEnvVar, oldProfileEnv)
+			if err != nil {
+				t.Fatalf("setting back profile env var: %v", err)
 			}
 		})
 	}
