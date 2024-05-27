@@ -22,8 +22,8 @@ const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 //
 // If the profile is not valid, it returns an error.
 func GetProfile() (string, error) {
-	profile, profileSet := GetProfileFromEnv()
-	if !profileSet {
+	profile, profileSetInEnv := GetProfileFromEnv()
+	if !profileSetInEnv {
 		fmt.Println("Profile not set")
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
@@ -33,18 +33,18 @@ func GetProfile() (string, error) {
 			return "", nil
 		}
 		profile = contents
-	} else {
-		// Make sure the profile exists
-		profileExists, err := ProfileExists(profile)
-		if err != nil {
-			return "", fmt.Errorf("check if profile exists: %w", err)
-		}
-		if !profileExists {
-			return "", &errors.SetInexistentProfile{Profile: profile}
-		}
 	}
 
-	err := ValidateProfile(profile)
+	// Make sure the profile exists
+	profileExists, err := ProfileExists(profile)
+	if err != nil {
+		return "", fmt.Errorf("check if profile exists: %w", err)
+	}
+	if !profileExists {
+		return "", &errors.SetInexistentProfile{Profile: profile}
+	}
+
+	err = ValidateProfile(profile)
 	if err != nil {
 		return "", fmt.Errorf("validate profile: %w", err)
 	}
