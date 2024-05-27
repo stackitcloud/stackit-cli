@@ -24,7 +24,6 @@ const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 func GetProfile() (string, error) {
 	profile, profileSetInEnv := GetProfileFromEnv()
 	if !profileSetInEnv {
-		fmt.Println("Profile not set")
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
 			return "", fmt.Errorf("read profile from file: %w", err)
