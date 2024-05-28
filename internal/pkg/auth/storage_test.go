@@ -12,6 +12,7 @@ import (
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 func TestSetGetAuthField(t *testing.T) {
@@ -183,7 +184,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 	}{
 		{
 			description:   "simple assignments with default profile",
-			activeProfile: "",
+			activeProfile: config.DefaultProfileName,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -201,7 +202,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 		},
 		{
 			description:   "overlapping assignments with default profile",
-			activeProfile: "",
+			activeProfile: config.DefaultProfileName,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -267,6 +268,12 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
 
+			// Make sure profile name is valid
+			err := config.ValidateProfile(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
+			}
+
 			for _, assignment := range tt.valueAssignments {
 				err := setAuthFieldInKeyring(tt.activeProfile, assignment.key, assignment.value)
 				if err != nil {
@@ -317,7 +324,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 	}{
 		{
 			description:   "simple assignments with default profile",
-			activeProfile: "",
+			activeProfile: config.DefaultProfileName,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -335,7 +342,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 		},
 		{
 			description:   "overlapping assignments with default profile",
-			activeProfile: "",
+			activeProfile: config.DefaultProfileName,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -399,6 +406,26 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			// Make sure profile name is valid
+			err := config.ValidateProfile(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
+			}
+
+			// Create profile if it does not exist
+			// Will be deleted at the end of the test
+			profileExists, err := config.ProfileExists(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Failed to check if profile exists: %v", err)
+			}
+			if !profileExists {
+				p := print.NewPrinter()
+				err := config.CreateProfile(p, tt.activeProfile, true, true)
+				if err != nil {
+					t.Fatalf("Failed to create profile: %v", err)
+				}
+			}
+
 			for _, assignment := range tt.valueAssignments {
 				err := setAuthFieldInEncodedTextFile(tt.activeProfile, assignment.key, assignment.value)
 				if err != nil {
@@ -423,6 +450,11 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 				if err != nil {
 					t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 				}
+			}
+
+			err = deleteAuthFieldProfile(tt.activeProfile, profileExists)
+			if err != nil {
+				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
 		})
 	}
@@ -470,6 +502,18 @@ func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) er
 	err = os.WriteFile(textFilePath, contentEncoded, 0o600)
 	if err != nil {
 		return fmt.Errorf("write file: %w", err)
+	}
+	return nil
+}
+
+func deleteAuthFieldProfile(activeProfile string, profileExisted bool) error {
+	textFileDir := config.GetProfileFolderPath(activeProfile)
+	if !profileExisted {
+		// Remove the entire directory if the profile does not exist
+		err := os.RemoveAll(textFileDir)
+		if err != nil {
+			return fmt.Errorf("remove directory: %w", err)
+		}
 	}
 	return nil
 }

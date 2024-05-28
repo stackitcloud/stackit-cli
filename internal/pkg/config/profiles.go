@@ -181,6 +181,10 @@ func SetProfile(p *print.Printer, profile string) error {
 		return &errors.SetInexistentProfile{Profile: profile}
 	}
 
+	if profileFilePath == "" {
+		profileFilePath = getInitialProfileFilePath()
+	}
+
 	err = os.WriteFile(profileFilePath, []byte(profile), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("write profile to file: %w", err)

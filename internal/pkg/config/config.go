@@ -84,7 +84,7 @@ var profileFilePath string
 
 func InitConfig() {
 	defaultConfigFolderPath = getInitialConfigDir()
-	profileFilePath = filepath.Join(defaultConfigFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension)) // Profile file path is in the default config folder
+	profileFilePath = getInitialProfileFilePath() // Profile file path is in the default config folder
 
 	configProfile, err := GetProfile()
 	cobra.CheckErr(err)
@@ -155,4 +155,12 @@ func getInitialConfigDir() string {
 	cobra.CheckErr(err)
 
 	return filepath.Join(configDir, configFolder)
+}
+
+func getInitialProfileFilePath() string {
+	configFolderPath := defaultConfigFolderPath
+	if configFolderPath == "" {
+		configFolderPath = getInitialConfigDir()
+	}
+	return filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 }

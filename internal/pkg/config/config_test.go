@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -89,6 +90,35 @@ func TestGetInitialConfigDir(t *testing.T) {
 			}
 
 			expected := filepath.Join(userConfig, "stackit")
+			if actual != expected {
+				t.Fatalf("expected %s, got %s", expected, actual)
+			}
+		})
+	}
+}
+
+func TestGetInitialProfileFilePath(t *testing.T) {
+	tests := []struct {
+		description      string
+		configFolderPath string
+	}{
+		{
+			description:      "base",
+			configFolderPath: getInitialConfigDir(),
+		},
+		{
+			description:      "empty config folder path",
+			configFolderPath: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			configFolderPath = getInitialConfigDir()
+
+			actual := getInitialProfileFilePath()
+
+			expected := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 			if actual != expected {
 				t.Fatalf("expected %s, got %s", expected, actual)
 			}
