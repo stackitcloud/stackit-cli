@@ -218,6 +218,10 @@ func ProfileExists(profile string) (bool, error) {
 }
 
 func GetProfileFolderPath(profile string) string {
+	if defaultConfigFolderPath == "" {
+		defaultConfigFolderPath = getInitialConfigDir()
+	}
+
 	if profile == DefaultProfileName {
 		return defaultConfigFolderPath
 	}

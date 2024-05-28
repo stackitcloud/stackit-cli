@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestValidateProfile(t *testing.T) {
 	tests := []struct {
@@ -53,6 +56,51 @@ func TestValidateProfile(t *testing.T) {
 			}
 			if !tt.isValid && err == nil {
 				t.Errorf("expected profile to be invalid but got no error")
+			}
+		})
+	}
+}
+
+func TestGetProfileFolderPath(t *testing.T) {
+	tests := []struct {
+		description               string
+		defaultConfigFolderNotSet bool
+		profile                   string
+		expected                  string
+	}{
+		{
+			description: "default profile",
+			profile:     DefaultProfileName,
+			expected:    getInitialConfigDir(),
+		},
+		{
+			description:               "default profile, default config folder not set",
+			defaultConfigFolderNotSet: true,
+			profile:                   DefaultProfileName,
+			expected:                  getInitialConfigDir(),
+		},
+		{
+			description: "custom profile",
+			profile:     "my-profile",
+			expected:    filepath.Join(getInitialConfigDir(), profileRootFolder, "my-profile"),
+		},
+		{
+			description:               "custom profile, default config folder not set",
+			defaultConfigFolderNotSet: true,
+			profile:                   "my-profile",
+			expected:                  filepath.Join(getInitialConfigDir(), profileRootFolder, "my-profile"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			defaultConfigFolderPath = getInitialConfigDir()
+			if tt.defaultConfigFolderNotSet {
+				defaultConfigFolderPath = ""
+			}
+			actual := GetProfileFolderPath(tt.profile)
+			if actual != tt.expected {
+				t.Errorf("expected profile folder path to be %q but got %q", tt.expected, actual)
 			}
 		})
 	}

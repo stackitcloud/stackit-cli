@@ -443,17 +443,7 @@ func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) er
 		return err
 	}
 
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("get config dir: %w", err)
-	}
-
-	profileTextFileFolderName := textFileFolderName
-	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
-	}
-
-	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)

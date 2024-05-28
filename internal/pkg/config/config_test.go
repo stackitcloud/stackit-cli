@@ -69,3 +69,29 @@ func TestWrite(t *testing.T) {
 		})
 	}
 }
+
+func TestGetInitialConfigDir(t *testing.T) {
+	tests := []struct {
+		description string
+	}{
+		{
+			description: "base",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			actual := getInitialConfigDir()
+
+			userConfig, err := os.UserConfigDir()
+			if err != nil {
+				t.Fatalf("expected error to be nil, got %v", err)
+			}
+
+			expected := filepath.Join(userConfig, "stackit")
+			if actual != expected {
+				t.Fatalf("expected %s, got %s", expected, actual)
+			}
+		})
+	}
+}
