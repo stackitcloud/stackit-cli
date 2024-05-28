@@ -89,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			var (
 				kubeconfig     string
 				respKubeconfig *ske.Kubeconfig
-				respLogin      *ske.V1LoginKubeconfig
+				respLogin      *ske.LoginKubeconfig
 			)
 
 			if !model.Login {
@@ -210,7 +210,7 @@ func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.AP
 	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.ClusterName), nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.V1LoginKubeconfig) error {
+func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		var err error
