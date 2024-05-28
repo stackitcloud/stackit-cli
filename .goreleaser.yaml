@@ -100,7 +100,7 @@ brews:
       name: CLI Release Bot
       email: noreply@stackit.de
     homepage: "https://github.com/stackitcloud/stackit-cli"
-    description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a beta state. More services and functionality will be supported soon."
+    description: "A command-line interface to manage STACKIT resources."
     directory: Formula
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
@@ -117,12 +117,12 @@ snapcrafts:
     # centre graphical frontends
     title: STACKIT CLI
     summary: A command-line interface to manage STACKIT resources.
-    description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a beta state. More services and functionality will be supported soon."
+    description: "A command-line interface to manage STACKIT resources."
     license: Apache-2.0
     confinement: classic
     # Grade "devel" will only release to `edge` and `beta` channels
     # Grade "stable" will also release to the `candidate` and `stable` channels
-    grade: devel
+    grade: '{{ if eq .Env.IS_PRERELEASE "true" }}devel{{ else }}stable{{ end }}'
     # Whether to publish the Snap to the store
     publish: true
 
