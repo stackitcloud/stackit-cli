@@ -39,6 +39,11 @@ func GetProfile() (string, error) {
 	return profile, nil
 }
 
+// GetConfiguredProfile returns the profile that is configured by the user, which may not exist.
+// The profile is determined by the value of the STACKIT_CLI_PROFILE environment variable, or, if not set,
+// by the contents of the profile file in the CLI config folder.
+//
+// If the profile is not valid, it returns an error.
 func GetConfiguredProfile() (string, error) {
 	profile, profileSetInEnv := GetProfileFromEnv()
 	if !profileSetInEnv {

@@ -67,6 +67,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			}
 
 			if activeProfile != profileSet {
+				p.Debug(print.DebugLevel, "the active profile %q does not exist, following folder is missing: %q", profileSet, config.GetProfileFolderPath(profileSet))
 				p.Warn("active profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
 			}
 			p.Debug(print.DebugLevel, "active configuration profile: %s", activeProfile)
