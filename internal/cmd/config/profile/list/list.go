@@ -6,6 +6,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -67,16 +68,36 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	}
 }
 
-func outputResult(p *print.Printer, outputFormat string, profiles []string, activeProfile string) error {
-	configData := make(map[string]string)
-	for _, profile := range profiles {
-		configData["profile_name"] = profile
-		if profile == activeProfile {
-			configData["active"] = "true"
-		} else {
-			configData["active"] = "false"
+type profileInfo struct {
+	Name   string
+	Active bool
+	Email  string
+}
+
+func getProfileEmail(profile string) string {
+	// Get the email from the profile
+	email, err := auth.GetAuthFieldWithProfile(profile, auth.USER_EMAIL)
+	if err != nil {
+		return ""
+	}
+	if email == "" {
+		email, err = auth.GetAuthFieldWithProfile(profile, auth.SERVICE_ACCOUNT_EMAIL)
+		if err != nil {
+			return ""
 		}
-		configData["email"] = ""
+	}
+	return email
+
+}
+
+func outputResult(p *print.Printer, outputFormat string, profiles []string, activeProfile string) error {
+	configData := make(map[string]profileInfo)
+	for _, profile := range profiles {
+		configData[profile] = profileInfo{
+			Name:   profile,
+			Active: profile == activeProfile,
+			Email:  getProfileEmail(profile),
+		}
 	}
 
 	switch outputFormat {

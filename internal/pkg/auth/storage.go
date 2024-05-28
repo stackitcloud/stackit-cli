@@ -141,11 +141,14 @@ func GetAuthField(key authFieldKey) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get profile: %w", err)
 	}
+	return GetAuthFieldWithProfile(activeProfile, key)
+}
 
-	value, err := getAuthFieldFromKeyring(activeProfile, key)
+func GetAuthFieldWithProfile(profile string, key authFieldKey) (string, error) {
+	value, err := getAuthFieldFromKeyring(profile, key)
 	if err != nil {
 		var errFallback error
-		value, errFallback = getAuthFieldFromEncodedTextFile(activeProfile, key)
+		value, errFallback = getAuthFieldFromEncodedTextFile(profile, key)
 		if errFallback != nil {
 			return "", fmt.Errorf("read from keyring: %w, read from encoded file as fallback: %w", err, errFallback)
 		}
