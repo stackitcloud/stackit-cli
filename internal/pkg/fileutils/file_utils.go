@@ -30,7 +30,7 @@ func WriteToFile(outputFileName, content string) (err error) {
 }
 
 // ReadFileIfExists reads the contents of a file and returns it as a string, along with a boolean indicating if the file exists.
-// If the file does not exist, it returns an empty string and no error.
+// If the file does not exist, it returns an empty string, false and no error.
 // If the file exists but cannot be read, it returns an error.
 func ReadFileIfExists(filePath string) (contents string, exists bool, err error) {
 	_, err = os.Stat(filePath)
