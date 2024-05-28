@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -26,11 +27,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("set %s", profileArg),
 		Short: "Set a CLI configuration profile",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s",
 			"Set a CLI configuration profile as the active profile.",
 			`The profile to be used can be managed via the STACKIT_CLI_PROFILE environment variable or using the "stackit config profile set PROFILE" and "stackit config profile unset" commands.`,
 			"The environment variable takes precedence over what is set via the commands.",
-			"A new profile is created automatically if it does not exist.",
 			"When no profile is set, the default profile is used.",
 		),
 		Args: args.SingleArg(profileArg, nil),
@@ -43,6 +43,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
+			}
+
+			profileExists, err := config.ProfileExists(model.Profile)
+			if err != nil {
+				return fmt.Errorf("check if profile exists: %w", err)
+			}
+			if !profileExists {
+				return &errors.SetInexistentProfile{Profile: model.Profile}
 			}
 
 			err = config.SetProfile(p, model.Profile)

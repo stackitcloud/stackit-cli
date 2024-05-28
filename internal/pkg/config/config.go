@@ -46,6 +46,7 @@ const (
 	configFileName      = "cli-config"
 	configFileExtension = "json"
 
+	profileRootFolder    = "profiles"
 	profileFileName      = "cli-profile"
 	profileFileExtension = "txt"
 )
@@ -92,7 +93,7 @@ func InitConfig() {
 
 	configFolderPath = defaultConfigFolderPath
 	if configProfile != "" {
-		configFolderPath = filepath.Join(configFolderPath, configProfile) // If a profile is set, use the profile config folder
+		configFolderPath = filepath.Join(configFolderPath, profileRootFolder, configProfile) // If a profile is set, use the profile config folder
 	}
 
 	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))

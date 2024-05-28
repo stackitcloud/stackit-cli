@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// WriteToFile writes the given content to a file.
+// If the file already exists, it will be overwritten.
 func WriteToFile(outputFileName, content string) (err error) {
 	fo, err := os.Create(outputFileName)
 	if err != nil {
@@ -45,4 +47,20 @@ func ReadFileIfExists(filePath string) (contents string, exists bool, err error)
 	}
 
 	return string(content), true, nil
+}
+
+// CopyFile copies the contents of a file to another file.
+// If the destination file already exists, it will be overwritten.
+func CopyFile(src, dst string) (err error) {
+	contents, err := os.ReadFile(src)
+	if err != nil {
+		return fmt.Errorf("read source file: %w", err)
+	}
+
+	err = WriteToFile(dst, string(contents))
+	if err != nil {
+		return fmt.Errorf("write destination file: %w", err)
+	}
+
+	return nil
 }
