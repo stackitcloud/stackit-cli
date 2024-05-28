@@ -252,3 +252,47 @@ func GetProfileFolderPath(profile string) string {
 	}
 	return filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
 }
+
+// ListProfiles returns a list of all profiles.
+func ListProfiles() ([]string, error) {
+	profiles := []string{}
+
+	profileFolders, err := os.ReadDir(filepath.Join(defaultConfigFolderPath, profileRootFolder))
+	if err != nil {
+		return nil, fmt.Errorf("read profile folders: %w", err)
+	}
+
+	for _, profileFolder := range profileFolders {
+		if profileFolder.IsDir() {
+			profiles = append(profiles, profileFolder.Name())
+		}
+	}
+
+	return profiles, nil
+}
+
+// DeleteProfile deletes a profile.
+func DeleteProfile(p *print.Printer, profile string) error {
+	err := ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	profileExists, err := ProfileExists(profile)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+
+	if !profileExists {
+		return fmt.Errorf("profile %q does not exist", profile)
+	}
+
+	err = os.RemoveAll(filepath.Join(defaultConfigFolderPath, profileRootFolder, profile))
+	if err != nil {
+		return fmt.Errorf("remove profile folder: %w", err)
+	}
+
+	p.Debug(print.DebugLevel, "removed profile %q", profile)
+
+	return nil
+}
