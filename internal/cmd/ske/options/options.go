@@ -135,6 +135,27 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
+	// filter output based on the flags
+	if !model.AvailabilityZones {
+		options.AvailabilityZones = nil
+	}
+
+	if !model.KubernetesVersions {
+		options.KubernetesVersions = nil
+	}
+
+	if !model.MachineImages {
+		options.MachineImages = nil
+	}
+
+	if !model.MachineTypes {
+		options.MachineTypes = nil
+	}
+
+	if !model.VolumeTypes {
+		options.VolumeTypes = nil
+	}
+
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
@@ -152,33 +173,25 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 
 		return nil
 	default:
-		return outputResultAsTable(p, model, options)
+		return outputResultAsTable(p, options)
 	}
 }
 
-func outputResultAsTable(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
+func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 	content := ""
-	if model.AvailabilityZones {
-		content += renderAvailabilityZones(options)
-	}
-	if model.KubernetesVersions {
-		kubernetesVersionsRendered, err := renderKubernetesVersions(options)
-		if err != nil {
-			return fmt.Errorf("render Kubernetes versions: %w", err)
-		}
-		content += kubernetesVersionsRendered
-	}
-	if model.MachineImages {
-		content += renderMachineImages(options)
-	}
-	if model.MachineTypes {
-		content += renderMachineTypes(options)
-	}
-	if model.VolumeTypes {
-		content += renderVolumeTypes(options)
-	}
+	content += renderAvailabilityZones(options)
 
-	err := p.PagerDisplay(content)
+	kubernetesVersionsRendered, err := renderKubernetesVersions(options)
+	if err != nil {
+		return fmt.Errorf("render Kubernetes versions: %w", err)
+	}
+	content += kubernetesVersionsRendered
+
+	content += renderMachineImages(options)
+	content += renderMachineTypes(options)
+	content += renderVolumeTypes(options)
+
+	err = p.PagerDisplay(content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -187,6 +200,10 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *ske.Provi
 }
 
 func renderAvailabilityZones(resp *ske.ProviderOptions) string {
+	if resp.AvailabilityZones == nil {
+		return ""
+	}
+
 	zones := *resp.AvailabilityZones
 
 	table := tables.NewTable()
@@ -200,6 +217,10 @@ func renderAvailabilityZones(resp *ske.ProviderOptions) string {
 }
 
 func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
+	if resp.KubernetesVersions == nil {
+		return "", nil
+	}
+
 	versions := *resp.KubernetesVersions
 
 	table := tables.NewTable()
@@ -221,6 +242,10 @@ func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
 }
 
 func renderMachineImages(resp *ske.ProviderOptions) string {
+	if resp.MachineImages == nil {
+		return ""
+	}
+
 	images := *resp.MachineImages
 
 	table := tables.NewTable()
@@ -250,6 +275,10 @@ func renderMachineImages(resp *ske.ProviderOptions) string {
 }
 
 func renderMachineTypes(resp *ske.ProviderOptions) string {
+	if resp.MachineTypes == nil {
+		return ""
+	}
+
 	types := *resp.MachineTypes
 
 	table := tables.NewTable()
@@ -263,6 +292,10 @@ func renderMachineTypes(resp *ske.ProviderOptions) string {
 }
 
 func renderVolumeTypes(resp *ske.ProviderOptions) string {
+	if resp.VolumeTypes == nil {
+		return ""
+	}
+
 	types := *resp.VolumeTypes
 
 	table := tables.NewTable()
