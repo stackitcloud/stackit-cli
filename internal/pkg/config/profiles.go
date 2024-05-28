@@ -146,7 +146,16 @@ func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile 
 
 	newConfigFilePath := getConfigFilePath(configFolderPath)
 
-	err := fileutils.CopyFile(currentConfigFilePath, newConfigFilePath)
+	// If the source profile configuration does not exist, do nothing
+	_, err := os.Stat(currentConfigFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("get current profile configuration: %w", err)
+	}
+
+	err = fileutils.CopyFile(currentConfigFilePath, newConfigFilePath)
 	if err != nil {
 		return fmt.Errorf("copy config file: %w", err)
 	}
