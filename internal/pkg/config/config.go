@@ -41,7 +41,8 @@ const (
 )
 
 const (
-	configFolder = "stackit"
+	configFolder       = "stackit"
+	defaultProfileName = "default"
 
 	configFileName      = "cli-config"
 	configFileExtension = "json"
@@ -92,7 +93,7 @@ func InitConfig() {
 	cobra.CheckErr(err)
 
 	configFolderPath = defaultConfigFolderPath
-	if configProfile != "" {
+	if configProfile != defaultProfileName {
 		configFolderPath = filepath.Join(configFolderPath, profileRootFolder, configProfile) // If a profile is set, use the profile config folder
 	}
 

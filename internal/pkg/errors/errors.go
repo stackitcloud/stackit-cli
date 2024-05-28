@@ -38,7 +38,10 @@ Please double check if they are correctly configured.
 For more details run:
   $ stackit auth activate-service-account -h`
 
-	SET_INEXISTENT_PROFILE = `the configuration profile %[1]q does not exist.
+	SET_INEXISTENT_PROFILE = `the active configuration profile %[1]q does not exist.
+
+To unset it, run:
+  $ stackit config profile unset
 
 To create it, run:
   $ stackit config profile create %[1]q`
@@ -122,7 +125,7 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	INVALID_PROFILE_NAME = `the profile name %q is invalid.
 	
-The profile name can only contain letters, numbers, and "-" and cannot be empty.`
+The profile name can only contain letters, numbers, and "-" and cannot be empty or "default".`
 
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
