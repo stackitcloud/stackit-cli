@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
 )
@@ -100,6 +101,13 @@ func outputResult(p *print.Printer, outputFormat string, profiles []string, acti
 		}
 	}
 
+	// append default profile
+	configData["default"] = profileInfo{
+		Name:   "default",
+		Active: activeProfile == config.DefaultProfileName,
+		Email:  getProfileEmail(config.DefaultProfileName),
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(configData, "", "  ")
@@ -116,53 +124,24 @@ func outputResult(p *print.Printer, outputFormat string, profiles []string, acti
 		p.Outputln(string(details))
 		return nil
 	default:
-		// // Sort the config options by key
-		// configKeys := make([]string, 0, len(configData))
-		// for k := range configData {
-		// 	configKeys = append(configKeys, k)
-		// }
-		// sort.Strings(configKeys)
-
-		// table := tables.NewTable()
-		// if activeProfile != "" {
-		// 	table.SetTitle(fmt.Sprintf("Profile: %q", activeProfile))
-		// }
-		// table.SetHeader("NAME", "VALUE")
-		// for _, key := range configKeys {
-		// 	value := configData[key]
-
-		// 	// Convert value to string
-		// 	// (Assuming value is either string or bool)
-		// 	valueString, ok := value.(string)
-		// 	if !ok {
-		// 		valueBool, ok := value.(bool)
-		// 		if !ok {
-		// 			continue
-		// 		}
-		// 		valueString = strconv.FormatBool(valueBool)
-		// 	}
-
-		// 	// Don't show unset values
-		// 	if valueString == "" {
-		// 		continue
-		// 	}
-
-		// 	// Don't show unsupported (deprecated or user-inputted) configuration options
-		// 	// that might be present in the config file
-		// 	if !slices.Contains(config.ConfigKeys, key) {
-		// 		continue
-		// 	}
-
-		// 	// Replace "_" with "-" to match the flags
-		// 	key = strings.ReplaceAll(key, "_", "-")
-
-		// 	table.AddRow(key, valueString)
-		// 	table.AddSeparator()
-		// }
-		// err := table.Display(p)
-		// if err != nil {
-		// 	return fmt.Errorf("render table: %w", err)
-		// }
+		table := tables.NewTable()
+		table.SetHeader("NAME", "ACTIVE", "EMAIL")
+		for _, profile := range configData {
+			email := profile.Email
+			active := ""
+			if profile.Email == "" {
+				email = "Not authenticated"
+			}
+			if profile.Active {
+				active = "*"
+			}
+			table.AddRow(profile.Name, active, email)
+			table.AddSeparator()
+		}
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 		return nil
 	}
 }
