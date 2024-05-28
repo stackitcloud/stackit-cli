@@ -56,20 +56,22 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			configFilePath := viper.ConfigFileUsed()
 			p.Debug(print.DebugLevel, "configuration is persisted and read from: %s", configFilePath)
 
-			activeProfile, err := config.GetProfile()
+			profileSet, activeProfile, configMethod, err := config.GetConfiguredProfile()
 			if err != nil {
-				return fmt.Errorf("get profile: %w", err)
+				return fmt.Errorf("get configured profile: %w", err)
 			}
 
-			profileSet, err := config.GetConfiguredProfile()
-			if err != nil {
-				return fmt.Errorf("get profile raw: %w", err)
-			}
+			p.Debug(print.DebugLevel, "read configuration profile %q via %s", profileSet, configMethod)
 
 			if activeProfile != profileSet {
-				p.Debug(print.DebugLevel, "the active profile %q does not exist, following folder is missing: %q", profileSet, config.GetProfileFolderPath(profileSet))
-				p.Warn("active profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
+				if configMethod == "" {
+					p.Debug(print.DebugLevel, "no profile is configured in env var or profile file")
+				} else {
+					p.Debug(print.DebugLevel, "the configured profile %q does not exist and the %q profile configuration will be used: folder %q is missing", profileSet, activeProfile, config.GetProfileFolderPath(profileSet))
+				}
+				p.Warn("configured profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
 			}
+
 			p.Debug(print.DebugLevel, "active configuration profile: %s", activeProfile)
 
 			configKeys := viper.AllSettings()

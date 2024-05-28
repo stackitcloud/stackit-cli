@@ -14,54 +14,58 @@ import (
 const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 
 // GetProfile returns the current profile to be used by the CLI.
-//
 // The profile is determined by the value of the STACKIT_CLI_PROFILE environment variable, or, if not set,
 // by the contents of the profile file in the CLI config folder.
-//
 // If the profile is not set (env var or profile file) or is set but does not exist, it falls back to the default profile.
-//
 // If the profile is not valid, it returns an error.
 func GetProfile() (string, error) {
-	profile, err := GetConfiguredProfile()
+	_, profile, _, err := GetConfiguredProfile()
 	if err != nil {
 		return "", err
-	}
-
-	// Make sure the profile exists
-	profileExists, err := ProfileExists(profile)
-	if err != nil {
-		return "", fmt.Errorf("check if profile exists: %w", err)
-	}
-	if !profileExists {
-		return DefaultProfileName, nil
 	}
 
 	return profile, nil
 }
 
-// GetConfiguredProfile returns the profile that is configured by the user, which may not exist.
+// GetConfiguredProfile returns the profile configured by the user, the profile to be used by the CLI and the method used to configure the profile.
 // The profile is determined by the value of the STACKIT_CLI_PROFILE environment variable, or, if not set,
 // by the contents of the profile file in the CLI config folder.
-//
+// If the configured profile is not set (env var or profile file) or is set but does not exist, it falls back to the default profile.
+// The configuration method can be environment variable, profile file or empty if profile is not configured.
 // If the profile is not valid, it returns an error.
-func GetConfiguredProfile() (string, error) {
+func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMethod string, err error) {
+	var configMethod string
 	profile, profileSetInEnv := GetProfileFromEnv()
 	if !profileSetInEnv {
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
-			return "", fmt.Errorf("read profile from file: %w", err)
+			return "", "", "", fmt.Errorf("read profile from file: %w", err)
 		}
 		if !exists {
-			return DefaultProfileName, nil
+			// No profile set in env or file
+			return "", DefaultProfileName, "", nil
 		}
 		profile = contents
+		configMethod = "profile file"
+	} else {
+		configMethod = "environment variable"
 	}
 
-	err := ValidateProfile(profile)
+	// Make sure the profile exists
+	profileExists, err := ProfileExists(profile)
 	if err != nil {
-		return "", fmt.Errorf("validate profile: %w", err)
+		return "", "", "", fmt.Errorf("check if profile exists: %w", err)
 	}
-	return profile, nil
+	if !profileExists {
+		// Profile is configured but does not exist
+		return profile, DefaultProfileName, configMethod, nil
+	}
+
+	err = ValidateProfile(profile)
+	if err != nil {
+		return "", "", "", fmt.Errorf("validate profile: %w", err)
+	}
+	return profile, DefaultProfileName, configMethod, nil
 }
 
 // GetProfileFromEnv returns the profile from the environment variable.
@@ -138,7 +142,7 @@ func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bo
 
 // DuplicateProfileConfiguration duplicates the current profile configuration to a new profile.
 // It copies the config file from the current profile to the new profile.
-// If the current profile does not exist, it returns an error.
+// If the current profile does not exist, it does nothing.
 // If the new profile already exists, it will be overwritten.
 func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile string) error {
 	currentProfileFolder := GetProfileFolderPath(currentProfile)
@@ -150,6 +154,7 @@ func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile 
 	_, err := os.Stat(currentConfigFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
+			p.Debug(print.DebugLevel, "current profile %q has no configuration, nothing to duplicate", currentProfile)
 			return nil
 		}
 		return fmt.Errorf("get current profile configuration: %w", err)
@@ -235,6 +240,8 @@ func ProfileExists(profile string) (bool, error) {
 	return true, nil
 }
 
+// GetProfileFolderPath returns the path to the folder where the profile configuration is stored.
+// If the profile is the default profile, it returns the default config folder path.
 func GetProfileFolderPath(profile string) string {
 	if defaultConfigFolderPath == "" {
 		defaultConfigFolderPath = getInitialConfigDir()
