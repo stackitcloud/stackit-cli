@@ -33,6 +33,7 @@ const (
 	SecretsManagerCustomEndpointKey = "secrets_manager_custom_endpoint"
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
+	SQLServerFlexCustomEndpointKey  = "sqlserverflex_custom_endpoint"
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
@@ -70,6 +71,7 @@ var ConfigKeys = []string{
 	SecretsManagerCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
+	SQLServerFlexCustomEndpointKey,
 }
 
 var folderPath string
@@ -146,4 +148,5 @@ func setConfigDefaults() {
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
+	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 }

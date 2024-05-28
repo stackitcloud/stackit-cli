@@ -8,6 +8,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
@@ -31,6 +32,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -60,7 +62,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
-				p.Outputf("STACKIT CLI (BETA)\n")
+				p.Outputf("STACKIT CLI (beta)\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {
@@ -88,7 +90,25 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		c.Flags().BoolP("help", "h", false, fmt.Sprintf("Help for %q", c.CommandPath()))
 	})
 
+	beautifyUsageTemplate(cmd)
+
 	return cmd
+}
+
+func beautifyUsageTemplate(cmd *cobra.Command) {
+	cobra.AddTemplateFunc("WhiteBold", color.New(color.FgHiWhite, color.Bold).SprintFunc())
+	usageTemplate := cmd.UsageTemplate()
+	usageTemplate = strings.NewReplacer(
+		`Usage:`, `{{WhiteBold "USAGE"}}`,
+		`Examples:`, `{{WhiteBold "EXAMPLES"}}`,
+		`Aliases:`, `{{WhiteBold "ALIASES"}}`,
+		`Available Commands:`, `{{WhiteBold "AVAILABLE COMMANDS"}}`,
+		`Additional Commands:`, `{{WhiteBold "ADDITIONAL COMMANDS"}}`,
+		`Global Flags:`, `{{WhiteBold "GLOBAL FLAGS"}}`,
+		`Flags:`, `{{WhiteBold "FLAGS"}}`,
+		`Additional help topics:`, `{{WhiteBold "ADDITIONAL HELP TOPICS"}}`,
+	).Replace(usageTemplate)
+	cmd.SetUsageTemplate(usageTemplate)
 }
 
 func configureFlags(cmd *cobra.Command) error {
@@ -104,6 +124,7 @@ func configureFlags(cmd *cobra.Command) error {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
+	cmd.AddCommand(beta.NewCmd(p))
 	cmd.AddCommand(config.NewCmd(p))
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))

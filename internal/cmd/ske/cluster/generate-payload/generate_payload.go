@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,11 +21,13 @@ import (
 
 const (
 	clusterNameFlag = "cluster-name"
+	filePathFlag    = "file-path"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ClusterName *string
+	FilePath    *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -39,14 +42,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
-				`$ stackit ske cluster generate-payload > ./payload.json`,
+				`$ stackit ske cluster generate-payload --file-path ./payload.json`,
 				`<Modify payload in file, if needed>`,
 				`$ stackit ske cluster create my-cluster --payload @./payload.json`),
 			examples.NewExample(
 				`Generate a payload with values of a cluster, and adapt it with custom values for the different configuration options`,
-				`$ stackit ske cluster generate-payload --cluster-name my-cluster > ./payload.json`,
+				`$ stackit ske cluster generate-payload --cluster-name my-cluster --file-path ./payload.json`,
 				`<Modify payload in file>`,
 				`$ stackit ske cluster update my-cluster --payload @./payload.json`),
+			examples.NewExample(
+				`Generate a payload with values of a cluster, and preview it in the terminal`,
+				`$ stackit ske cluster generate-payload --cluster-name my-cluster`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -83,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			return outputResult(p, payload)
+			return outputResult(p, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)
@@ -92,6 +98,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(clusterNameFlag, "n", "", "If set, generates the payload with the current state of the given cluster. If unset, generates the payload with default values")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given file. If unset, writes the payload to the standard output")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -106,6 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
+		FilePath:        flags.FlagToStringPointer(p, cmd, filePathFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -125,12 +133,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, payload *ske.CreateOrUpdateClusterPayload) error {
+func outputResult(p *print.Printer, filePath *string, payload *ske.CreateOrUpdateClusterPayload) error {
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
-	p.Outputln(string(payloadBytes))
+
+	if filePath != nil {
+		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("write payload to the file: %w", err)
+		}
+	} else {
+		p.Outputln(string(payloadBytes))
+	}
 
 	return nil
 }

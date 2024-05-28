@@ -3,6 +3,7 @@ module github.com/stackitcloud/stackit-cli
 go 1.22
 
 require (
+	github.com/fatih/color v1.14.1
 	github.com/goccy/go-yaml v1.11.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
@@ -23,7 +24,8 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.16.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.2.0
 	github.com/zalando/go-keyring v0.2.4
 	golang.org/x/mod v0.17.0
 	golang.org/x/oauth2 v0.20.0
@@ -40,7 +42,6 @@ require (
 )
 
 require (
-	github.com/fatih/color v1.14.1 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )

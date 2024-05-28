@@ -22,10 +22,16 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
 
+const (
+	testClusterName = "example-name"
+	testFilePath    = "example-file"
+)
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:   testProjectId,
-		clusterNameFlag: "example-name",
+		clusterNameFlag: testClusterName,
+		filePathFlag:    testFilePath,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,7 +45,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ClusterName: utils.Ptr("example-name"),
+		ClusterName: utils.Ptr(testClusterName),
+		FilePath:    utils.Ptr(testFilePath),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -48,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiGetClusterRequest)) ske.ApiGetClusterRequest {
-	request := testClient.GetCluster(testCtx, testProjectId, "example-name")
+	request := testClient.GetCluster(testCtx, testProjectId, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -84,6 +91,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ClusterName = nil
+			}),
+		},
+		{
+			description: "file path missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, filePathFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.FilePath = nil
 			}),
 		},
 		{
