@@ -34,15 +34,15 @@ const (
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 
-	ProjectNameKey = "project_name"
+	ProjectNameKey     = "project_name"
+	DefaultProfileName = "default"
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
 )
 
 const (
-	configFolder       = "stackit"
-	defaultProfileName = "default"
+	configFolder = "stackit"
 
 	configFileName      = "cli-config"
 	configFileExtension = "json"
@@ -92,12 +92,9 @@ func InitConfig() {
 	configProfile, err := GetProfile()
 	cobra.CheckErr(err)
 
-	configFolderPath = defaultConfigFolderPath
-	if configProfile != defaultProfileName {
-		configFolderPath = filepath.Join(configFolderPath, profileRootFolder, configProfile) // If a profile is set, use the profile config folder
-	}
+	configFolderPath = GetProfileFolderPath(configProfile)
 
-	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	configFilePath := getConfigFilePath(configFolderPath)
 
 	// This hack is required to allow creating the config file with `viper.WriteConfig`
 	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
@@ -150,4 +147,8 @@ func setConfigDefaults() {
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
+}
+
+func getConfigFilePath(configFolder string) string {
+	return filepath.Join(configFolder, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
 }

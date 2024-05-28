@@ -22,16 +22,9 @@ const ProfileEnvVar = "STACKIT_CLI_PROFILE"
 //
 // If the profile is not valid, it returns an error.
 func GetProfile() (string, error) {
-	profile, profileSetInEnv := GetProfileFromEnv()
-	if !profileSetInEnv {
-		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
-		if err != nil {
-			return "", fmt.Errorf("read profile from file: %w", err)
-		}
-		if !exists {
-			return defaultProfileName, nil
-		}
-		profile = contents
+	profile, err := GetConfiguredProfile()
+	if err != nil {
+		return "", err
 	}
 
 	// Make sure the profile exists
@@ -40,10 +33,26 @@ func GetProfile() (string, error) {
 		return "", fmt.Errorf("check if profile exists: %w", err)
 	}
 	if !profileExists {
-		return defaultProfileName, nil
+		return DefaultProfileName, nil
 	}
 
-	err = ValidateProfile(profile)
+	return profile, nil
+}
+
+func GetConfiguredProfile() (string, error) {
+	profile, profileSetInEnv := GetProfileFromEnv()
+	if !profileSetInEnv {
+		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
+		if err != nil {
+			return "", fmt.Errorf("read profile from file: %w", err)
+		}
+		if !exists {
+			return DefaultProfileName, nil
+		}
+		profile = contents
+	}
+
+	err := ValidateProfile(profile)
 	if err != nil {
 		return "", fmt.Errorf("validate profile: %w", err)
 	}
@@ -68,13 +77,13 @@ func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bo
 	}
 
 	// Cannot create a profile with the default name
-	if profile == defaultProfileName {
+	if profile == DefaultProfileName {
 		return &errors.InvalidProfileNameError{
 			Profile: profile,
 		}
 	}
 
-	configFolderPath = filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
+	configFolderPath = GetProfileFolderPath(profile)
 
 	// Error if the profile already exists
 	_, err = os.Stat(configFolderPath)
@@ -127,15 +136,10 @@ func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bo
 // If the current profile does not exist, it returns an error.
 // If the new profile already exists, it will be overwritten.
 func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile string) error {
-	var currentConfigFilePath string
+	currentProfileFolder := GetProfileFolderPath(currentProfile)
+	currentConfigFilePath := getConfigFilePath(currentProfileFolder)
 
-	if currentProfile == defaultProfileName {
-		currentConfigFilePath = filepath.Join(defaultConfigFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
-	} else {
-		currentConfigFilePath = filepath.Join(defaultConfigFolderPath, profileRootFolder, currentProfile, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
-	}
-
-	newConfigFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	newConfigFilePath := getConfigFilePath(configFolderPath)
 
 	err := fileutils.CopyFile(currentConfigFilePath, newConfigFilePath)
 	if err != nil {
@@ -169,7 +173,7 @@ func SetProfile(p *print.Printer, profile string) error {
 	}
 	p.Debug(print.DebugLevel, "persisted new active profile in: %s", profileFilePath)
 
-	configFolderPath = filepath.Join(defaultConfigFolderPath, profile)
+	configFolderPath = GetProfileFolderPath(profile)
 	p.Debug(print.DebugLevel, "profile %q is now active", profile)
 
 	return nil
@@ -203,7 +207,7 @@ func ValidateProfile(profile string) error {
 }
 
 func ProfileExists(profile string) (bool, error) {
-	_, err := os.Stat(filepath.Join(defaultConfigFolderPath, profileRootFolder, profile))
+	_, err := os.Stat(GetProfileFolderPath(profile))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
@@ -211,4 +215,11 @@ func ProfileExists(profile string) (bool, error) {
 		return false, fmt.Errorf("get profile folder: %w", err)
 	}
 	return true, nil
+}
+
+func GetProfileFolderPath(profile string) string {
+	if profile == DefaultProfileName {
+		return defaultConfigFolderPath
+	}
+	return filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
 }

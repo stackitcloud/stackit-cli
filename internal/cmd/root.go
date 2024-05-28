@@ -61,12 +61,13 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get profile: %w", err)
 			}
 
-			profileExists, err := config.ProfileExists(activeProfile)
+			profileSet, err := config.GetConfiguredProfile()
 			if err != nil {
-				return fmt.Errorf("check if profile exists: %w", err)
+				return fmt.Errorf("get profile raw: %w", err)
 			}
-			if !profileExists {
-				p.Warn("active profile does not exist, the default profile configuration will be used\n")
+
+			if activeProfile != profileSet {
+				p.Warn("active profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
 			}
 			p.Debug(print.DebugLevel, "active configuration profile: %s", activeProfile)
 
