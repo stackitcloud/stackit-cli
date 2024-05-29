@@ -734,9 +734,6 @@ func TestGetProfileEmail(t *testing.T) {
 				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
 			}
 
-			oldUserEmail, _ := getAuthFieldWithProfile(tt.activeProfile, USER_EMAIL)
-			oldServiceAccEmail, _ := getAuthFieldWithProfile(tt.activeProfile, SERVICE_ACCOUNT_EMAIL)
-
 			err = setAuthFieldInKeyring(tt.activeProfile, USER_EMAIL, tt.userEmail)
 			if err != nil {
 				t.Errorf("Failed to set user email: %v", err)
@@ -765,20 +762,6 @@ func TestGetProfileEmail(t *testing.T) {
 			err = deleteAuthFieldInKeyring(tt.activeProfile, SERVICE_ACCOUNT_EMAIL)
 			if err != nil {
 				t.Fatalf("Failed to remove service account email: %v", err)
-			}
-
-			if oldUserEmail != "" {
-				err := setAuthFieldInKeyring(tt.activeProfile, USER_EMAIL, oldUserEmail)
-				if err != nil {
-					t.Fatalf("Failed to set back user email: %v", err)
-				}
-			}
-
-			if oldServiceAccEmail != "" {
-				err := setAuthFieldInKeyring(tt.activeProfile, SERVICE_ACCOUNT_EMAIL, oldServiceAccEmail)
-				if err != nil {
-					t.Fatalf("Failed to set back service account email: %v", err)
-				}
 			}
 
 			err = deleteAuthFieldProfile(tt.activeProfile)
