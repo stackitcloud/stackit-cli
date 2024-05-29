@@ -88,18 +88,7 @@ func setAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey, value
 	if err != nil {
 		return err
 	}
-
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("get config dir: %w", err)
-	}
-
-	profileTextFileFolderName := textFileFolderName
-	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
-	}
-
-	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -178,17 +167,7 @@ func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (st
 		return "", err
 	}
 
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", fmt.Errorf("get config dir: %w", err)
-	}
-
-	profileTextFileFolderName := textFileFolderName
-	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
-	}
-
-	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -215,20 +194,10 @@ func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (st
 // If it doesn't, creates it with the content "{}" encoded.
 // If it does, does nothing (and returns nil).
 func createEncodedTextFile(activeProfile string) error {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("get config dir: %w", err)
-	}
-
-	profileTextFileFolderName := textFileFolderName
-	if activeProfile != "" {
-		profileTextFileFolderName = filepath.Join(textFileFolderName, activeProfile)
-	}
-
-	textFileDir := filepath.Join(configDir, profileTextFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
-	err = os.MkdirAll(textFileDir, os.ModePerm)
+	err := os.MkdirAll(textFileDir, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("create file dir: %w", err)
 	}
