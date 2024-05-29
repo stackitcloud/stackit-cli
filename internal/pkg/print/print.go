@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
@@ -33,7 +34,13 @@ const (
 	YAMLOutputFormat   = "yaml"
 )
 
-var errAborted = errors.New("operation aborted")
+var (
+	errAborted = errors.New("operation aborted")
+
+	WhiteBold  = color.New(color.FgHiWhite, color.Bold).SprintFunc()
+	RedBold    = color.New(color.FgHiRed, color.Bold).SprintFunc()
+	YellowBold = color.New(color.FgHiYellow, color.Bold).SprintFunc()
+)
 
 type Printer struct {
 	Cmd       *cobra.Command
@@ -106,13 +113,13 @@ func (p *Printer) Warn(msg string, args ...any) {
 		return
 	}
 	warning := fmt.Sprintf(msg, args...)
-	p.Cmd.PrintErrf("Warning: %s", warning)
+	p.Cmd.PrintErrf("%s %s", YellowBold("Warning:"), warning)
 }
 
 // Print an Error level output to the defined Err output (falling back to Stderr if not set).
 func (p *Printer) Error(msg string, args ...any) {
 	err := fmt.Sprintf(msg, args...)
-	p.Cmd.PrintErrln(p.Cmd.ErrPrefix(), err)
+	p.Cmd.PrintErrln(RedBold(p.Cmd.ErrPrefix()), err)
 }
 
 // Prompts the user for confirmation.
