@@ -215,9 +215,10 @@ func UnsetProfile(p *print.Printer) error {
 
 // ValidateProfile validates the profile name.
 // It can only use lowercase letters, numbers, or "-" and cannot be empty.
+// It can't start with a "-".
 // If the profile is invalid, it returns an error.
 func ValidateProfile(profile string) error {
-	match, err := regexp.MatchString("^[a-z0-9-]+$", profile)
+	match, err := regexp.MatchString("^[a-z0-9][a-z0-9-]+$", profile)
 	if err != nil {
 		return fmt.Errorf("match string regex: %w", err)
 	}

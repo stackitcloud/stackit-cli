@@ -27,6 +27,11 @@ func TestValidateProfile(t *testing.T) {
 			isValid:     true,
 		},
 		{
+			description: "valid with letters, numbers, and ending with hyphen",
+			profile:     "my-profile123-",
+			isValid:     true,
+		},
+		{
 			description: "invalid empty",
 			profile:     "",
 			isValid:     false,
@@ -39,6 +44,11 @@ func TestValidateProfile(t *testing.T) {
 		{
 			description: "invalid with spaces",
 			profile:     "my profile",
+			isValid:     false,
+		},
+		{
+			description: "invalid starting with -",
+			profile:     "-my-profile",
 			isValid:     false,
 		},
 		{
