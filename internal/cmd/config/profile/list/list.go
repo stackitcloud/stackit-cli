@@ -23,17 +23,9 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists the current CLI configuration profiles",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s",
-			"Lists the current CLI configuration profiles",
-			"- Environment variable",
-			`  The environment variable is the name of the setting, with underscores ("_") instead of dashes ("-") and the "STACKIT" prefix.`,
-			"  Example: you can set the project ID by setting the environment variable STACKIT_PROJECT_ID.",
-			"- Configuration set in CLI",
-			`  These are set using the "stackit config set" command`,
-			`  Example: you can set the project ID by running "stackit config set --project-id xxx"`,
-		),
-		Args: args.NoArgs,
+		Short: "Lists all CLI configuration profiles",
+		Long:  "Lists all CLI configuration profiles.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List the configuration profiles`,
@@ -55,7 +47,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get profile: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, profiles, activeProfile)
+			outputProfiles := buildOutput(profiles, activeProfile)
+
+			return outputResult(p, model.OutputFormat, outputProfiles)
 		},
 	}
 	return cmd
@@ -75,49 +69,38 @@ type profileInfo struct {
 	Email  string
 }
 
-func getProfileEmail(profile string) string {
-	// Get the email from the profile
-	email, err := auth.GetAuthFieldWithProfile(profile, auth.USER_EMAIL)
-	if err != nil {
-		return ""
-	}
-	if email == "" {
-		email, err = auth.GetAuthFieldWithProfile(profile, auth.SERVICE_ACCOUNT_EMAIL)
-		if err != nil {
-			return ""
-		}
-	}
-	return email
+func buildOutput(profiles []string, activeProfile string) []profileInfo {
+	var configData []profileInfo
 
-}
+	// Add default profile first
+	configData = append(configData, profileInfo{
+		Name:   config.DefaultProfileName,
+		Active: activeProfile == config.DefaultProfileName,
+		Email:  auth.GetProfileEmail(config.DefaultProfileName),
+	})
 
-func outputResult(p *print.Printer, outputFormat string, profiles []string, activeProfile string) error {
-	configData := make(map[string]profileInfo)
 	for _, profile := range profiles {
-		configData[profile] = profileInfo{
+		configData = append(configData, profileInfo{
 			Name:   profile,
 			Active: profile == activeProfile,
-			Email:  getProfileEmail(profile),
-		}
+			Email:  auth.GetProfileEmail(profile),
+		})
 	}
 
-	// append default profile
-	configData["default"] = profileInfo{
-		Name:   "default",
-		Active: activeProfile == config.DefaultProfileName,
-		Email:  getProfileEmail(config.DefaultProfileName),
-	}
+	return configData
+}
 
+func outputResult(p *print.Printer, outputFormat string, profiles []profileInfo) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(configData, "", "  ")
+		details, err := json.MarshalIndent(profiles, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(configData, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(profiles, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
 		}
@@ -126,7 +109,8 @@ func outputResult(p *print.Printer, outputFormat string, profiles []string, acti
 	default:
 		table := tables.NewTable()
 		table.SetHeader("NAME", "ACTIVE", "EMAIL")
-		for _, profile := range configData {
+		for _, profile := range profiles {
+			// Prettify the output
 			email := profile.Email
 			active := ""
 			if profile.Email == "" {

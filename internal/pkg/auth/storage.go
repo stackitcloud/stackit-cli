@@ -141,10 +141,10 @@ func GetAuthField(key authFieldKey) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get profile: %w", err)
 	}
-	return GetAuthFieldWithProfile(activeProfile, key)
+	return getAuthFieldWithProfile(activeProfile, key)
 }
 
-func GetAuthFieldWithProfile(profile string, key authFieldKey) (string, error) {
+func getAuthFieldWithProfile(profile string, key authFieldKey) (string, error) {
 	value, err := getAuthFieldFromKeyring(profile, key)
 	if err != nil {
 		var errFallback error
@@ -216,4 +216,18 @@ func createEncodedTextFile(activeProfile string) error {
 	}
 
 	return nil
+}
+
+func GetProfileEmail(profile string) string {
+	email, err := getAuthFieldWithProfile(profile, USER_EMAIL)
+	if err != nil {
+		return ""
+	}
+	if email == "" {
+		email, err = getAuthFieldWithProfile(profile, SERVICE_ACCOUNT_EMAIL)
+		if err != nil {
+			return ""
+		}
+	}
+	return email
 }

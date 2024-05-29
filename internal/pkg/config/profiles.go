@@ -278,18 +278,30 @@ func DeleteProfile(p *print.Printer, profile string) error {
 		return fmt.Errorf("validate profile: %w", err)
 	}
 
+	activeProfile, err := GetProfile()
+	if err != nil {
+		return fmt.Errorf("get active profile: %w", err)
+	}
+
 	profileExists, err := ProfileExists(profile)
 	if err != nil {
 		return fmt.Errorf("check if profile exists: %w", err)
 	}
 
 	if !profileExists {
-		return fmt.Errorf("profile %q does not exist", profile)
+		return &errors.DeleteInexistentProfile{Profile: profile}
 	}
 
 	err = os.RemoveAll(filepath.Join(defaultConfigFolderPath, profileRootFolder, profile))
 	if err != nil {
 		return fmt.Errorf("remove profile folder: %w", err)
+	}
+
+	if activeProfile == profile {
+		err = UnsetProfile(p)
+		if err != nil {
+			return fmt.Errorf("unset profile: %w", err)
+		}
 	}
 
 	p.Debug(print.DebugLevel, "removed profile %q", profile)

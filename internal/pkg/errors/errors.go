@@ -43,6 +43,11 @@ For more details run:
 To create it, run:
   $ stackit config profile create %[1]q`
 
+	DELETE_INEXISTENT_PROFILE = `the configuration profile %q does not exist.
+
+To list all profiles, run:
+  $ stackit config profile list`
+
 	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
@@ -158,6 +163,14 @@ type SetInexistentProfile struct {
 
 func (e *SetInexistentProfile) Error() string {
 	return fmt.Sprintf(SET_INEXISTENT_PROFILE, e.Profile)
+}
+
+type DeleteInexistentProfile struct {
+	Profile string
+}
+
+func (e *DeleteInexistentProfile) Error() string {
+	return fmt.Sprintf(DELETE_INEXISTENT_PROFILE, e.Profile)
 }
 
 type ArgusInputPlanError struct {

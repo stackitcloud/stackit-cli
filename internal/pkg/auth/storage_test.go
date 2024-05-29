@@ -12,7 +12,6 @@ import (
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 func TestSetGetAuthField(t *testing.T) {
@@ -412,18 +411,10 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
 			}
 
-			// Create profile if it does not exist
-			// Will be deleted at the end of the test
+			// Check if the profile existed before the test, and if it didn't, delete it after the test
 			profileExists, err := config.ProfileExists(tt.activeProfile)
 			if err != nil {
 				t.Fatalf("Failed to check if profile exists: %v", err)
-			}
-			if !profileExists {
-				p := print.NewPrinter()
-				err := config.CreateProfile(p, tt.activeProfile, true, true)
-				if err != nil {
-					t.Fatalf("Failed to create profile: %v", err)
-				}
 			}
 
 			for _, assignment := range tt.valueAssignments {
@@ -455,6 +446,111 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			err = deleteAuthFieldProfile(tt.activeProfile, profileExists)
 			if err != nil {
 				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
+			}
+		})
+	}
+}
+
+func TestGetProfileEmail(t *testing.T) {
+	tests := []struct {
+		description     string
+		profile         string
+		userEmail       string
+		serviceAccEmail string
+	}{
+		{
+			description: "default profile, user email",
+			profile:     config.DefaultProfileName,
+			userEmail:   "test@test.com",
+		},
+		{
+			description:     "default profile, service acc email",
+			profile:         config.DefaultProfileName,
+			serviceAccEmail: "test@test.com",
+		},
+		{
+			description: "custom profile, user email",
+			profile:     "testProfile",
+			userEmail:   "test@test.com",
+		},
+		{
+			description:     "custom profile, service acc email",
+			profile:         "testProfile",
+			serviceAccEmail: "test@test.com",
+		},
+		{
+			description: "none of the emails",
+			profile:     "testProfile",
+		},
+		{
+			description:     "both emails",
+			profile:         "testProfile",
+			userEmail:       "test@test.com",
+			serviceAccEmail: "test2@test.com",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			profileExists, err := config.ProfileExists(tt.profile)
+			if err != nil {
+				t.Fatalf("Failed to check if profile exists: %v", err)
+			}
+			oldUserEmail, _ := getAuthFieldWithProfile(tt.profile, USER_EMAIL)
+			oldServiceAccEmail, _ := getAuthFieldWithProfile(tt.profile, SERVICE_ACCOUNT_EMAIL)
+
+			err = setAuthFieldInKeyring(tt.profile, USER_EMAIL, tt.userEmail)
+			if err != nil {
+				t.Errorf("Failed to set user email: %v", err)
+			}
+
+			err = setAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL, tt.serviceAccEmail)
+			if err != nil {
+				t.Errorf("Failed to set service account email: %v", err)
+			}
+
+			email := GetProfileEmail(tt.profile)
+			if tt.userEmail != "" {
+				if email != tt.userEmail {
+					t.Errorf("User email is wrong: expected \"%s\", got \"%s\"", tt.userEmail, email)
+				}
+			} else if tt.serviceAccEmail != "" {
+				if email != tt.serviceAccEmail {
+					t.Errorf("Service account email is wrong: expected \"%s\", got \"%s\"", tt.serviceAccEmail, email)
+				}
+			} else {
+				if email != "" {
+					t.Errorf("Email is wrong: expected \"\", got \"%s\"", email)
+				}
+			}
+
+			err = deleteAuthFieldInKeyring(tt.profile, USER_EMAIL)
+			if err != nil {
+				t.Fatalf("Failed to remove user email: %v", err)
+			}
+
+			err = deleteAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL)
+			if err != nil {
+				t.Fatalf("Failed to remove service account email: %v", err)
+			}
+
+			if oldUserEmail != "" {
+				err := setAuthFieldInKeyring(tt.profile, USER_EMAIL, oldUserEmail)
+				if err != nil {
+					t.Fatalf("Failed to set back user email: %v", err)
+				}
+			}
+
+			if oldServiceAccEmail != "" {
+				err := setAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL, oldServiceAccEmail)
+				if err != nil {
+					t.Fatalf("Failed to set back service account email: %v", err)
+				}
+			}
+
+			err = deleteAuthFieldProfile(tt.profile, profileExists)
+			if err != nil {
+				t.Fatalf("Failed to remove profile: %v", err)
 			}
 		})
 	}
