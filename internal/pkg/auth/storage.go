@@ -65,9 +65,13 @@ func SetAuthField(key authFieldKey, value string) error {
 		return fmt.Errorf("get profile: %w", err)
 	}
 
-	err = setAuthFieldInKeyring(activeProfile, key, value)
+	return setAuthFieldWithProfile(activeProfile, key, value)
+}
+
+func setAuthFieldWithProfile(profile string, key authFieldKey, value string) error {
+	err := setAuthFieldInKeyring(profile, key, value)
 	if err != nil {
-		errFallback := setAuthFieldInEncodedTextFile(activeProfile, key, value)
+		errFallback := setAuthFieldInEncodedTextFile(profile, key, value)
 		if errFallback != nil {
 			return fmt.Errorf("write to keyring failed (%w), try writing to encoded text file: %w", err, errFallback)
 		}
@@ -76,7 +80,7 @@ func SetAuthField(key authFieldKey, value string) error {
 }
 
 func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string) error {
-	if activeProfile != "" {
+	if activeProfile != config.DefaultProfileName {
 		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Set(activeProfileKeyring, string(key), value)
 	}
@@ -157,7 +161,7 @@ func getAuthFieldWithProfile(profile string, key authFieldKey) (string, error) {
 }
 
 func getAuthFieldFromKeyring(activeProfile string, key authFieldKey) (string, error) {
-	if activeProfile != "" {
+	if activeProfile != config.DefaultProfileName {
 		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Get(activeProfileKeyring, string(key))
 	}

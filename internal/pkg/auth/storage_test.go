@@ -31,6 +31,7 @@ func TestSetGetAuthField(t *testing.T) {
 		description      string
 		keyringFails     bool
 		valueAssignments []valueAssignment
+		profile          string
 		expectedValues   map[authFieldKey]string
 	}{
 		{
@@ -157,6 +158,171 @@ func TestSetGetAuthField(t *testing.T) {
 						t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestSetGetAuthFieldWithProfile(t *testing.T) {
+	var testField1 authFieldKey = "test-field-1"
+	var testField2 authFieldKey = "test-field-2"
+
+	testValue1 := fmt.Sprintf("value-1-%s", time.Now().Format(time.RFC3339))
+	testValue2 := fmt.Sprintf("value-2-%s", time.Now().Format(time.RFC3339))
+	testValue3 := fmt.Sprintf("value-3-%s", time.Now().Format(time.RFC3339))
+
+	type valueAssignment struct {
+		key   authFieldKey
+		value string
+	}
+
+	tests := []struct {
+		description      string
+		keyringFails     bool
+		valueAssignments []valueAssignment
+		activeProfile    string
+		expectedValues   map[authFieldKey]string
+	}{
+		{
+			description: "simple assignments",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+			},
+			activeProfile: "test-profile",
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue1,
+				testField2: testValue2,
+			},
+		},
+		{
+			description: "simple assignments w/ keyring failing",
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+			},
+			activeProfile: "test-profile",
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue1,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:  "overlapping assignments",
+			keyringFails: true,
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+				{
+					key:   testField1,
+					value: testValue3,
+				},
+			},
+			activeProfile: "test-profile",
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue3,
+				testField2: testValue2,
+			},
+		},
+		{
+			description:  "overlapping assignments w/ keyring failing",
+			keyringFails: true,
+			valueAssignments: []valueAssignment{
+				{
+					key:   testField1,
+					value: testValue1,
+				},
+				{
+					key:   testField2,
+					value: testValue2,
+				},
+				{
+					key:   testField1,
+					value: testValue3,
+				},
+			},
+			activeProfile: "test-profile",
+			expectedValues: map[authFieldKey]string{
+				testField1: testValue3,
+				testField2: testValue2,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			// Make sure profile name is valid
+			err := config.ValidateProfile(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
+			}
+
+			// Check if the profile existed before the test, and if it didn't, delete it after the test
+			profileExists, err := config.ProfileExists(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Failed to check if profile exists: %v", err)
+			}
+
+			if !tt.keyringFails {
+				keyring.MockInit()
+			} else {
+				keyring.MockInitWithError(fmt.Errorf("keyring unavailable for testing"))
+			}
+
+			for _, assignment := range tt.valueAssignments {
+				err := setAuthFieldWithProfile(tt.activeProfile, assignment.key, assignment.value)
+				if err != nil {
+					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", assignment.key, assignment.value, err)
+				}
+				// Check that this value will be checked
+				if _, ok := tt.expectedValues[assignment.key]; !ok {
+					t.Fatalf("Value \"%s\" set but not checked. Please add it to 'expectedValues'", assignment.key)
+				}
+			}
+
+			for key, valueExpected := range tt.expectedValues {
+				value, err := getAuthFieldWithProfile(tt.activeProfile, key)
+				if err != nil {
+					t.Errorf("Failed to get value of \"%s\": %v", key, err)
+					continue
+				} else if value != valueExpected {
+					t.Errorf("Value of field \"%s\" is wrong: expected \"%s\", got \"%s\"", key, valueExpected, value)
+				}
+
+				if !tt.keyringFails {
+					err = deleteAuthFieldInKeyring(tt.activeProfile, key)
+					if err != nil {
+						t.Errorf("Post-test cleanup failed: remove field \"%s\" from keyring: %v. Please remove it manually", key, err)
+					}
+				} else {
+					err = deleteAuthFieldInEncodedTextFile(tt.activeProfile, key)
+					if err != nil {
+						t.Errorf("Post-test cleanup failed: remove field \"%s\" from text file: %v. Please remove it manually", key, err)
+					}
+				}
+			}
+
+			err = deleteAuthFieldProfile(tt.activeProfile, profileExists)
+			if err != nil {
+				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
 		})
 	}
@@ -557,7 +723,7 @@ func TestGetProfileEmail(t *testing.T) {
 }
 
 func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
-	if activeProfile != "" {
+	if activeProfile != config.DefaultProfileName {
 		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
 		return keyring.Delete(activeProfileKeyring, string(key))
 	}

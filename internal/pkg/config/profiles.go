@@ -209,7 +209,9 @@ func UnsetProfile(p *print.Printer) error {
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("remove profile file: %w", err)
 	}
-	p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
+	if p != nil {
+		p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
+	}
 	return nil
 }
 
@@ -307,7 +309,9 @@ func DeleteProfile(p *print.Printer, profile string) error {
 		}
 	}
 
-	p.Debug(print.DebugLevel, "removed profile %q", profile)
+	if p != nil {
+		p.Debug(print.DebugLevel, "deleted profile %q", profile)
+	}
 
 	return nil
 }
