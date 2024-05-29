@@ -43,7 +43,7 @@ func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMeth
 		}
 		if !exists {
 			// No profile set in env or file
-			return "", DefaultProfileName, "", nil
+			return DefaultProfileName, DefaultProfileName, "", nil
 		}
 		profile = contents
 		configMethod = "profile file"
@@ -65,7 +65,7 @@ func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMeth
 	if err != nil {
 		return "", "", "", fmt.Errorf("validate profile: %w", err)
 	}
-	return profile, DefaultProfileName, configMethod, nil
+	return profile, profile, configMethod, nil
 }
 
 // GetProfileFromEnv returns the profile from the environment variable.
