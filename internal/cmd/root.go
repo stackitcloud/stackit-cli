@@ -32,7 +32,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -96,7 +95,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 }
 
 func beautifyUsageTemplate(cmd *cobra.Command) {
-	cobra.AddTemplateFunc("WhiteBold", color.New(color.FgHiWhite, color.Bold).SprintFunc())
+	cobra.AddTemplateFunc("WhiteBold", print.WhiteBold)
 	usageTemplate := cmd.UsageTemplate()
 	usageTemplate = strings.NewReplacer(
 		`Usage:`, `{{WhiteBold "USAGE"}}`,
