@@ -1,27 +1,29 @@
-## stackit config profile set
+## stackit config profile list
 
-Delete a CLI configuration profile
+Lists all CLI configuration profiles
 
 ### Synopsis
 
-Delete a CLI configuration profile.
-If the deleted profile is the active profile, the default profile will be set to active.
+Lists all CLI configuration profiles.
 
 ```
-stackit config profile set PROFILE [flags]
+stackit config profile list [flags]
 ```
 
 ### Examples
 
 ```
-  Delete the configuration profile "my-profile"
-  $ stackit config profile delete my-profile
+  List the configuration profiles
+  $ stackit config profile list
+
+  List the configuration profiles in a json format
+  $ stackit config profile list --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit config profile set"
+  -h, --help   Help for "stackit config profile list"
 ```
 
 ### Options inherited from parent commands
