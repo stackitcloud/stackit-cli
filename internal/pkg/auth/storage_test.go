@@ -222,8 +222,8 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			},
 		},
 		{
-			description:   "simple assignments with testProfile",
-			activeProfile: "testProfile",
+			description:   "simple assignments with test-profile",
+			activeProfile: "test-profile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -240,8 +240,8 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 			},
 		},
 		{
-			description:   "overlapping assignments with testProfile",
-			activeProfile: "testProfile",
+			description:   "overlapping assignments with test-profile",
+			activeProfile: "test-profile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -362,8 +362,8 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			},
 		},
 		{
-			description:   "simple assignments with testProfile",
-			activeProfile: "testProfile",
+			description:   "simple assignments with test-profile",
+			activeProfile: "test-profile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -380,8 +380,8 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 			},
 		},
 		{
-			description:   "overlapping assignments with testProfile",
-			activeProfile: "testProfile",
+			description:   "overlapping assignments with test-profile",
+			activeProfile: "test-profile",
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -470,21 +470,21 @@ func TestGetProfileEmail(t *testing.T) {
 		},
 		{
 			description: "custom profile, user email",
-			profile:     "testProfile",
+			profile:     "test-profile",
 			userEmail:   "test@test.com",
 		},
 		{
 			description:     "custom profile, service acc email",
-			profile:         "testProfile",
+			profile:         "test-profile",
 			serviceAccEmail: "test@test.com",
 		},
 		{
 			description: "none of the emails",
-			profile:     "testProfile",
+			profile:     "test-profile",
 		},
 		{
 			description:     "both emails",
-			profile:         "testProfile",
+			profile:         "test-profile",
 			userEmail:       "test@test.com",
 			serviceAccEmail: "test2@test.com",
 		},
