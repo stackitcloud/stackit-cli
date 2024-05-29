@@ -31,7 +31,6 @@ func TestSetGetAuthField(t *testing.T) {
 		description      string
 		keyringFails     bool
 		valueAssignments []valueAssignment
-		profile          string
 		expectedValues   map[authFieldKey]string
 	}{
 		{
@@ -202,7 +201,8 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 			},
 		},
 		{
-			description: "simple assignments w/ keyring failing",
+			description:  "simple assignments w/ keyring failing",
+			keyringFails: true,
 			valueAssignments: []valueAssignment{
 				{
 					key:   testField1,
@@ -269,16 +269,13 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			// Apppend random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
+
 			// Make sure profile name is valid
 			err := config.ValidateProfile(tt.activeProfile)
 			if err != nil {
 				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
-			}
-
-			// Check if the profile existed before the test, and if it didn't, delete it after the test
-			profileExists, err := config.ProfileExists(tt.activeProfile)
-			if err != nil {
-				t.Fatalf("Failed to check if profile exists: %v", err)
 			}
 
 			if !tt.keyringFails {
@@ -320,7 +317,7 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 				}
 			}
 
-			err = deleteAuthFieldProfile(tt.activeProfile, profileExists)
+			err = deleteAuthFieldProfile(tt.activeProfile)
 			if err != nil {
 				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
@@ -432,6 +429,9 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
+
+			// Apppend random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
 
 			// Make sure profile name is valid
 			err := config.ValidateProfile(tt.activeProfile)
@@ -571,16 +571,13 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			// Append random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
+
 			// Make sure profile name is valid
 			err := config.ValidateProfile(tt.activeProfile)
 			if err != nil {
 				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
-			}
-
-			// Check if the profile existed before the test, and if it didn't, delete it after the test
-			profileExists, err := config.ProfileExists(tt.activeProfile)
-			if err != nil {
-				t.Fatalf("Failed to check if profile exists: %v", err)
 			}
 
 			for _, assignment := range tt.valueAssignments {
@@ -609,7 +606,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 				}
 			}
 
-			err = deleteAuthFieldProfile(tt.activeProfile, profileExists)
+			err = deleteAuthFieldProfile(tt.activeProfile)
 			if err != nil {
 				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
@@ -620,101 +617,171 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 func TestGetProfileEmail(t *testing.T) {
 	tests := []struct {
 		description     string
-		profile         string
+		activeProfile   string
 		userEmail       string
+		authFlow        AuthFlow
 		serviceAccEmail string
+		expectedEmail   string
 	}{
 		{
-			description: "default profile, user email",
-			profile:     config.DefaultProfileName,
-			userEmail:   "test@test.com",
+			description:   "default profile, user token",
+			activeProfile: config.DefaultProfileName,
+			userEmail:     "test@test.com",
+			authFlow:      AUTH_FLOW_USER_TOKEN,
+			expectedEmail: "test@test.com",
 		},
 		{
-			description:     "default profile, service acc email",
-			profile:         config.DefaultProfileName,
+			description:     "default profile, service acc token",
+			activeProfile:   config.DefaultProfileName,
 			serviceAccEmail: "test@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_TOKEN,
+			expectedEmail:   "test@test.com",
 		},
 		{
-			description: "custom profile, user email",
-			profile:     "test-profile",
-			userEmail:   "test@test.com",
-		},
-		{
-			description:     "custom profile, service acc email",
-			profile:         "test-profile",
+			description:     "default profile, service acc key",
+			activeProfile:   config.DefaultProfileName,
 			serviceAccEmail: "test@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_KEY,
+			expectedEmail:   "test@test.com",
 		},
 		{
-			description: "none of the emails",
-			profile:     "test-profile",
+			description:   "custom profile, user token",
+			activeProfile: "test-profile",
+			userEmail:     "test@test.com",
+			authFlow:      AUTH_FLOW_USER_TOKEN,
+			expectedEmail: "test@test.com",
 		},
 		{
-			description:     "both emails",
-			profile:         "test-profile",
+			description:     "custom profile, service acc token",
+			activeProfile:   "test-profile",
+			serviceAccEmail: "test@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_TOKEN,
+			expectedEmail:   "test@test.com",
+		},
+		{
+			description:     "custom profile, service acc key",
+			activeProfile:   "test-profile",
+			serviceAccEmail: "test@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_KEY,
+			expectedEmail:   "test@test.com",
+		},
+		{
+			description:   "no email, user token",
+			activeProfile: "test-profile",
+			authFlow:      AUTH_FLOW_USER_TOKEN,
+			expectedEmail: "",
+		},
+		{
+			description:   "no email, service acc token",
+			activeProfile: "test-profile",
+			authFlow:      AUTH_FLOW_SERVICE_ACCOUNT_TOKEN,
+			expectedEmail: "",
+		},
+		{
+			description:   "no email, service acc key",
+			activeProfile: "test-profile",
+			authFlow:      AUTH_FLOW_SERVICE_ACCOUNT_KEY,
+			expectedEmail: "",
+		},
+		{
+			description:   "user not authenticated",
+			activeProfile: "test-profile",
+			expectedEmail: "",
+		},
+		{
+			description:     "both emails, user not authenticated",
+			activeProfile:   "test-profile",
 			userEmail:       "test@test.com",
 			serviceAccEmail: "test2@test.com",
+			expectedEmail:   "",
+		},
+		{
+			description:     "both emails, user token",
+			activeProfile:   "test-profile",
+			userEmail:       "test@test.com",
+			serviceAccEmail: "test2@test.com",
+			authFlow:        AUTH_FLOW_USER_TOKEN,
+			expectedEmail:   "test@test.com",
+		},
+		{
+			description:     "both emails, service account token",
+			activeProfile:   "test-profile",
+			userEmail:       "test@test.com",
+			serviceAccEmail: "test2@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_TOKEN,
+			expectedEmail:   "test2@test.com",
+		},
+		{
+			description:     "both emails, service account key",
+			activeProfile:   "test-profile",
+			userEmail:       "test@test.com",
+			serviceAccEmail: "test2@test.com",
+			authFlow:        AUTH_FLOW_SERVICE_ACCOUNT_KEY,
+			expectedEmail:   "test2@test.com",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			profileExists, err := config.ProfileExists(tt.profile)
-			if err != nil {
-				t.Fatalf("Failed to check if profile exists: %v", err)
-			}
-			oldUserEmail, _ := getAuthFieldWithProfile(tt.profile, USER_EMAIL)
-			oldServiceAccEmail, _ := getAuthFieldWithProfile(tt.profile, SERVICE_ACCOUNT_EMAIL)
+			keyring.MockInit()
 
-			err = setAuthFieldInKeyring(tt.profile, USER_EMAIL, tt.userEmail)
+			// Append random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
+
+			// Make sure profile name is valid
+			err := config.ValidateProfile(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
+			}
+
+			oldUserEmail, _ := getAuthFieldWithProfile(tt.activeProfile, USER_EMAIL)
+			oldServiceAccEmail, _ := getAuthFieldWithProfile(tt.activeProfile, SERVICE_ACCOUNT_EMAIL)
+
+			err = setAuthFieldInKeyring(tt.activeProfile, USER_EMAIL, tt.userEmail)
 			if err != nil {
 				t.Errorf("Failed to set user email: %v", err)
 			}
 
-			err = setAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL, tt.serviceAccEmail)
+			err = setAuthFieldInKeyring(tt.activeProfile, SERVICE_ACCOUNT_EMAIL, tt.serviceAccEmail)
 			if err != nil {
 				t.Errorf("Failed to set service account email: %v", err)
 			}
 
-			email := GetProfileEmail(tt.profile)
-			if tt.userEmail != "" {
-				if email != tt.userEmail {
-					t.Errorf("User email is wrong: expected \"%s\", got \"%s\"", tt.userEmail, email)
-				}
-			} else if tt.serviceAccEmail != "" {
-				if email != tt.serviceAccEmail {
-					t.Errorf("Service account email is wrong: expected \"%s\", got \"%s\"", tt.serviceAccEmail, email)
-				}
-			} else {
-				if email != "" {
-					t.Errorf("Email is wrong: expected \"\", got \"%s\"", email)
-				}
+			err = setAuthFieldWithProfile(tt.activeProfile, authFlowType, string(tt.authFlow))
+			if err != nil {
+				t.Errorf("Failed to set auth flow: %v", err)
 			}
 
-			err = deleteAuthFieldInKeyring(tt.profile, USER_EMAIL)
+			email := GetProfileEmail(tt.activeProfile)
+			if email != tt.expectedEmail {
+				t.Errorf("Expected email \"%s\", got \"%s\"", tt.expectedEmail, email)
+			}
+
+			err = deleteAuthFieldInKeyring(tt.activeProfile, USER_EMAIL)
 			if err != nil {
 				t.Fatalf("Failed to remove user email: %v", err)
 			}
 
-			err = deleteAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL)
+			err = deleteAuthFieldInKeyring(tt.activeProfile, SERVICE_ACCOUNT_EMAIL)
 			if err != nil {
 				t.Fatalf("Failed to remove service account email: %v", err)
 			}
 
 			if oldUserEmail != "" {
-				err := setAuthFieldInKeyring(tt.profile, USER_EMAIL, oldUserEmail)
+				err := setAuthFieldInKeyring(tt.activeProfile, USER_EMAIL, oldUserEmail)
 				if err != nil {
 					t.Fatalf("Failed to set back user email: %v", err)
 				}
 			}
 
 			if oldServiceAccEmail != "" {
-				err := setAuthFieldInKeyring(tt.profile, SERVICE_ACCOUNT_EMAIL, oldServiceAccEmail)
+				err := setAuthFieldInKeyring(tt.activeProfile, SERVICE_ACCOUNT_EMAIL, oldServiceAccEmail)
 				if err != nil {
 					t.Fatalf("Failed to set back service account email: %v", err)
 				}
 			}
 
-			err = deleteAuthFieldProfile(tt.profile, profileExists)
+			err = deleteAuthFieldProfile(tt.activeProfile)
 			if err != nil {
 				t.Fatalf("Failed to remove profile: %v", err)
 			}
@@ -768,14 +835,23 @@ func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) er
 	return nil
 }
 
-func deleteAuthFieldProfile(activeProfile string, profileExisted bool) error {
+func deleteAuthFieldProfile(activeProfile string) error {
+	if activeProfile == config.DefaultProfileName {
+		// Do not delete the default profile
+		return nil
+	}
 	textFileDir := config.GetProfileFolderPath(activeProfile)
-	if !profileExisted {
-		// Remove the entire directory if the profile does not exist
-		err := os.RemoveAll(textFileDir)
-		if err != nil {
-			return fmt.Errorf("remove directory: %w", err)
-		}
+	// Remove the entire directory if the profile does not exist
+	err := os.RemoveAll(textFileDir)
+	if err != nil {
+		return fmt.Errorf("remove directory: %w", err)
 	}
 	return nil
+}
+
+func makeProfileNameUnique(profile string) string {
+	if profile == config.DefaultProfileName {
+		return profile
+	}
+	return fmt.Sprintf("%s-%s", profile, time.Now().Format("20060102150405"))
 }

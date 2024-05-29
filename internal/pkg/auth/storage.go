@@ -140,6 +140,11 @@ func GetAuthFlow() (AuthFlow, error) {
 	return AuthFlow(value), err
 }
 
+func getAuthFlowWithProfile(profile string) (AuthFlow, error) {
+	value, err := getAuthFieldWithProfile(profile, authFlowType)
+	return AuthFlow(value), err
+}
+
 func GetAuthField(key authFieldKey) (string, error) {
 	activeProfile, err := config.GetProfile()
 	if err != nil {
@@ -222,15 +227,26 @@ func createEncodedTextFile(activeProfile string) error {
 	return nil
 }
 
+// GetProfileEmail returns the email of the user associated with the given profile.
+// If the profile is not authenticated, it returns an empty string.
 func GetProfileEmail(profile string) string {
-	email, err := getAuthFieldWithProfile(profile, USER_EMAIL)
+	authFlow, err := getAuthFlowWithProfile(profile)
 	if err != nil {
 		return ""
 	}
-	if email == "" {
+
+	var email string
+
+	switch authFlow {
+	case AUTH_FLOW_USER_TOKEN:
+		email, err = getAuthFieldWithProfile(profile, USER_EMAIL)
+		if err != nil {
+			email = ""
+		}
+	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN, AUTH_FLOW_SERVICE_ACCOUNT_KEY:
 		email, err = getAuthFieldWithProfile(profile, SERVICE_ACCOUNT_EMAIL)
 		if err != nil {
-			return ""
+			email = ""
 		}
 	}
 	return email
