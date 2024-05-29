@@ -1,11 +1,13 @@
 ## stackit config profile set
 
-Delete a CLI configuration profile
+Set a CLI configuration profile
 
 ### Synopsis
 
-Delete a CLI configuration profile.
-If the deleted profile is the active profile, the default profile will be set to active.
+Set a CLI configuration profile as the active profile.
+The profile to be used can be managed via the STACKIT_CLI_PROFILE environment variable or using the "stackit config profile set PROFILE" and "stackit config profile unset" commands.
+The environment variable takes precedence over what is set via the commands.
+When no profile is set, the default profile is used.
 
 ```
 stackit config profile set PROFILE [flags]
@@ -14,8 +16,8 @@ stackit config profile set PROFILE [flags]
 ### Examples
 
 ```
-  Delete the configuration profile "my-profile"
-  $ stackit config profile delete my-profile
+  Set the configuration profile "my-profile" as the active profile
+  $ stackit config profile set my-profile
 ```
 
 ### Options

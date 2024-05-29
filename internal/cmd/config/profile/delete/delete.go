@@ -24,7 +24,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("set %s", profileArg),
+		Use:   fmt.Sprintf("delete %s", profileArg),
 		Short: "Delete a CLI configuration profile",
 		Long: fmt.Sprintf("%s\n%s",
 			"Delete a CLI configuration profile.",
