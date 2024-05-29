@@ -214,10 +214,10 @@ func UnsetProfile(p *print.Printer) error {
 }
 
 // ValidateProfile validates the profile name.
-// It can only use letters, numbers, or "-" and cannot be empty.
+// It can only use lowercase letters, numbers, or "-" and cannot be empty.
 // If the profile is invalid, it returns an error.
 func ValidateProfile(profile string) error {
-	match, err := regexp.MatchString("^[a-zA-Z0-9-]+$", profile)
+	match, err := regexp.MatchString("^[a-z0-9-]+$", profile)
 	if err != nil {
 		return fmt.Errorf("match string regex: %w", err)
 	}
@@ -272,6 +272,8 @@ func ListProfiles() ([]string, error) {
 }
 
 // DeleteProfile deletes a profile.
+// If the profile does not exist, it returns an error.
+// If the profile is the active profile, it sets the active profile to the default profile.
 func DeleteProfile(p *print.Printer, profile string) error {
 	err := ValidateProfile(profile)
 	if err != nil {

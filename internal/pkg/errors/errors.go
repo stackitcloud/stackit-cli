@@ -127,7 +127,7 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	INVALID_PROFILE_NAME = `the profile name %q is invalid.
 	
-The profile name can only contain letters, numbers, and "-" and cannot be empty or "default".`
+The profile name can only contain lowercase letters, numbers, and "-" and cannot be empty or "default".`
 
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
