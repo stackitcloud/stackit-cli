@@ -67,8 +67,10 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 				if configMethod == "" {
 					p.Debug(print.DebugLevel, "no profile is configured in env var or profile file")
 				} else {
-					p.Debug(print.DebugLevel, "the configured profile %q does not exist and the %q profile configuration will be used: folder %q is missing", profileSet, activeProfile, config.GetProfileFolderPath(profileSet))
+					p.Debug(print.DebugLevel, "the configured profile %q does not exist: folder %q is missing", profileSet, config.GetProfileFolderPath(profileSet))
 				}
+				p.Debug(print.DebugLevel, "the %q profile will be used", activeProfile)
+
 				p.Warn("configured profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
 			}
 
