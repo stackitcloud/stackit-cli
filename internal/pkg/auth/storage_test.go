@@ -547,6 +547,7 @@ func TestDeleteAuthFieldKeyring(t *testing.T) {
 func TestDeleteProfileFromKeyring(t *testing.T) {
 	tests := []struct {
 		description   string
+		keyringFails  bool
 		keys          []authFieldKey
 		activeProfile string
 		isValid       bool
@@ -586,11 +587,20 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 			activeProfile: "INVALID",
 			isValid:       false,
 		},
+		{
+			description:  "keyring fails",
+			keyringFails: true,
+			isValid:      false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			keyring.MockInit()
+			if !tt.keyringFails {
+				keyring.MockInit()
+			} else {
+				keyring.MockInitWithError(fmt.Errorf("keyring unavailable for testing"))
+			}
 
 			// Append random string to auth field key and value to avoid conflicts
 			testValue1 := fmt.Sprintf("value-1-keyring-%s", time.Now().Format(time.RFC3339))
