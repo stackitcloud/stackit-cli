@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -45,20 +46,18 @@ const (
 )
 
 // Returns all auth field keys managed by the auth storage
-func getAllAuthFieldKeys() []authFieldKey {
-	return []authFieldKey{
-		SESSION_EXPIRES_AT_UNIX,
-		ACCESS_TOKEN,
-		REFRESH_TOKEN,
-		SERVICE_ACCOUNT_TOKEN,
-		SERVICE_ACCOUNT_EMAIL,
-		USER_EMAIL,
-		SERVICE_ACCOUNT_KEY,
-		PRIVATE_KEY,
-		TOKEN_CUSTOM_ENDPOINT,
-		JWKS_CUSTOM_ENDPOINT,
-		authFlowType,
-	}
+var authFieldKeys = []authFieldKey{
+	SESSION_EXPIRES_AT_UNIX,
+	ACCESS_TOKEN,
+	REFRESH_TOKEN,
+	SERVICE_ACCOUNT_TOKEN,
+	SERVICE_ACCOUNT_EMAIL,
+	USER_EMAIL,
+	SERVICE_ACCOUNT_KEY,
+	PRIVATE_KEY,
+	TOKEN_CUSTOM_ENDPOINT,
+	JWKS_CUSTOM_ENDPOINT,
+	authFlowType,
 }
 
 func SetAuthFlow(value AuthFlow) error {
@@ -273,18 +272,18 @@ func GetProfileEmail(profile string) string {
 }
 
 func DeleteProfileFromKeyring(profile string) error {
-	allKeys := getAllAuthFieldKeys()
-
 	err := config.ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
 	}
 
-	for _, key := range allKeys {
+	for _, key := range authFieldKeys {
 		err := deleteAuthFieldInKeyring(profile, key)
 		if err != nil {
-			// If the key doesn't exist, continue
-			continue
+			// if the key is not found, we can ignore the error
+			if !errors.Is(err, keyring.ErrNotFound) {
+				return fmt.Errorf("delete auth field \"%s\" from keyring: %w", key, err)
+			}
 		}
 	}
 

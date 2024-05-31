@@ -553,7 +553,7 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 	}{
 		{
 			description:   "base, default profile",
-			keys:          getAllAuthFieldKeys(),
+			keys:          authFieldKeys,
 			activeProfile: config.DefaultProfileName,
 			isValid:       true,
 		},
@@ -568,7 +568,7 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 		},
 		{
 			description:   "base, custom profile",
-			keys:          getAllAuthFieldKeys(),
+			keys:          authFieldKeys,
 			activeProfile: "test-profile",
 			isValid:       true,
 		},
