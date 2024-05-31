@@ -275,12 +275,17 @@ func ListProfiles() ([]string, error) {
 }
 
 // DeleteProfile deletes a profile.
-// If the profile does not exist, it returns an error.
+// If the profile does not exist or is the default profile, it returns an error.
 // If the profile is the active profile, it sets the active profile to the default profile.
 func DeleteProfile(p *print.Printer, profile string) error {
 	err := ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	// Default profile cannot be deleted
+	if profile == DefaultProfileName {
+		return &errors.DeleteDefaultProfile{DefaultProfile: DefaultProfileName}
 	}
 
 	activeProfile, err := GetProfile()

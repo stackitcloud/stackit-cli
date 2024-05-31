@@ -48,6 +48,8 @@ To create it, run:
 To list all profiles, run:
   $ stackit config profile list`
 
+	DELETE_DEFAULT_PROFILE = `the default configuration profile %q cannot be deleted.`
+
 	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
@@ -171,6 +173,14 @@ type DeleteInexistentProfile struct {
 
 func (e *DeleteInexistentProfile) Error() string {
 	return fmt.Sprintf(DELETE_INEXISTENT_PROFILE, e.Profile)
+}
+
+type DeleteDefaultProfile struct {
+	DefaultProfile string
+}
+
+func (e *DeleteDefaultProfile) Error() string {
+	return fmt.Sprintf(DELETE_DEFAULT_PROFILE, e.DefaultProfile)
 }
 
 type ArgusInputPlanError struct {

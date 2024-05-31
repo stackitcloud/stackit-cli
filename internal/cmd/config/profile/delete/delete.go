@@ -51,6 +51,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return &errors.DeleteInexistentProfile{Profile: model.Profile}
 			}
 
+			if model.Profile == config.DefaultProfileName {
+				return &errors.DeleteDefaultProfile{DefaultProfile: config.DefaultProfileName}
+			}
+
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete profile %q? (This cannot be undone)", model.Profile)
 				err = p.PromptForConfirmation(prompt)
