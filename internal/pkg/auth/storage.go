@@ -44,6 +44,23 @@ const (
 	AUTH_FLOW_SERVICE_ACCOUNT_KEY   AuthFlow     = "sa_key"
 )
 
+// Returns all auth field keys managed by the auth storage
+func getAllAuthFieldKeys() []authFieldKey {
+	return []authFieldKey{
+		SESSION_EXPIRES_AT_UNIX,
+		ACCESS_TOKEN,
+		REFRESH_TOKEN,
+		SERVICE_ACCOUNT_TOKEN,
+		SERVICE_ACCOUNT_EMAIL,
+		USER_EMAIL,
+		SERVICE_ACCOUNT_KEY,
+		PRIVATE_KEY,
+		TOKEN_CUSTOM_ENDPOINT,
+		JWKS_CUSTOM_ENDPOINT,
+		authFlowType,
+	}
+}
+
 func SetAuthFlow(value AuthFlow) error {
 	return SetAuthField(authFlowType, string(value))
 }
@@ -85,6 +102,15 @@ func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string)
 		return keyring.Set(activeProfileKeyring, string(key), value)
 	}
 	return keyring.Set(keyringService, string(key), value)
+}
+
+func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
+	keyringServiceLocal := keyringService
+	if activeProfile != config.DefaultProfileName {
+		keyringServiceLocal = filepath.Join(keyringService, activeProfile)
+	}
+
+	return keyring.Delete(keyringServiceLocal, string(key))
 }
 
 func setAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey, value string) error {
@@ -244,4 +270,23 @@ func GetProfileEmail(profile string) string {
 		}
 	}
 	return email
+}
+
+func DeleteProfileFromKeyring(profile string) error {
+	allKeys := getAllAuthFieldKeys()
+
+	err := config.ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	for _, key := range allKeys {
+		err := deleteAuthFieldInKeyring(profile, key)
+		if err != nil {
+			// If the key doesn't exist, continue
+			continue
+		}
+	}
+
+	return nil
 }

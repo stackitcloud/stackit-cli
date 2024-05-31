@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -61,6 +62,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			err = config.DeleteProfile(p, model.Profile)
 			if err != nil {
 				return fmt.Errorf("delete profile: %w", err)
+			}
+
+			err = auth.DeleteProfileFromKeyring(model.Profile)
+			if err != nil {
+				return fmt.Errorf("delete profile from keyring: %w", err)
 			}
 
 			p.Info("Successfully deleted profile %q\n", model.Profile)

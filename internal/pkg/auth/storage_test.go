@@ -468,6 +468,166 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 	}
 }
 
+func TestDeleteAuthFieldKeyring(t *testing.T) {
+	tests := []struct {
+		description   string
+		activeProfile string
+		noKey         bool
+		isValid       bool
+	}{
+		{
+			description:   "base, default profile",
+			activeProfile: config.DefaultProfileName,
+			isValid:       true,
+		},
+		{
+			description:   "key doesnt exist, default profile",
+			activeProfile: config.DefaultProfileName,
+			noKey:         true,
+			isValid:       false,
+		},
+		{
+			description:   "base, custom profile",
+			activeProfile: "test-profile",
+			isValid:       true,
+		},
+		{
+			description:   "key doesnt exist, custom profile",
+			activeProfile: "test-profile",
+			noKey:         true,
+			isValid:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			keyring.MockInit()
+
+			// Append random string to auth field key and value to avoid conflicts
+			testField1 := authFieldKey(fmt.Sprintf("test-field-1-%s", time.Now().Format(time.RFC3339)))
+			testValue1 := fmt.Sprintf("value-1-keyring-%s", time.Now().Format(time.RFC3339))
+
+			// Append random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
+
+			// Make sure profile name is valid
+			err := config.ValidateProfile(tt.activeProfile)
+			if err != nil {
+				t.Fatalf("Profile name \"%s\" is invalid: %v", tt.activeProfile, err)
+			}
+
+			if !tt.noKey {
+				err := setAuthFieldInKeyring(tt.activeProfile, testField1, testValue1)
+				if err != nil {
+					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", testField1, testValue1, err)
+				}
+			}
+
+			err = deleteAuthFieldInKeyring(tt.activeProfile, testField1)
+			if err != nil {
+				if tt.isValid {
+					t.Fatalf("Failed to delete field \"%s\" from keyring: %v", testField1, err)
+				}
+				return
+			}
+
+			if !tt.isValid {
+				t.Fatalf("Expected error when deleting field \"%s\" from keyring, got none", testField1)
+			}
+
+			// Check if key still exists
+			_, err = getAuthFieldFromKeyring(tt.activeProfile, testField1)
+			if err == nil {
+				t.Fatalf("Key \"%s\" still exists in keyring after deletion", testField1)
+			}
+		})
+	}
+}
+
+func TestDeleteProfileFromKeyring(t *testing.T) {
+	tests := []struct {
+		description   string
+		keys          []authFieldKey
+		activeProfile string
+		isValid       bool
+	}{
+		{
+			description:   "base, default profile",
+			keys:          getAllAuthFieldKeys(),
+			activeProfile: config.DefaultProfileName,
+			isValid:       true,
+		},
+		{
+			description: "missing keys, default profile",
+			keys: []authFieldKey{
+				ACCESS_TOKEN,
+				SERVICE_ACCOUNT_EMAIL,
+			},
+			activeProfile: config.DefaultProfileName,
+			isValid:       true,
+		},
+		{
+			description:   "base, custom profile",
+			keys:          getAllAuthFieldKeys(),
+			activeProfile: "test-profile",
+			isValid:       true,
+		},
+		{
+			description: "missing keys, custom profile",
+			keys: []authFieldKey{
+				ACCESS_TOKEN,
+				SERVICE_ACCOUNT_EMAIL,
+			},
+			activeProfile: config.DefaultProfileName,
+			isValid:       true,
+		},
+		{
+			description:   "invalid profile",
+			activeProfile: "INVALID",
+			isValid:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			keyring.MockInit()
+
+			// Append random string to auth field key and value to avoid conflicts
+			testValue1 := fmt.Sprintf("value-1-keyring-%s", time.Now().Format(time.RFC3339))
+
+			// Append random string to profile name to avoid conflicts
+			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
+
+			for _, key := range tt.keys {
+				err := setAuthFieldInKeyring(tt.activeProfile, key, testValue1)
+				if err != nil {
+					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", key, testValue1, err)
+				}
+			}
+
+			err := DeleteProfileFromKeyring(tt.activeProfile)
+			if err != nil {
+				if tt.isValid {
+					t.Fatalf("Failed to delete profile \"%s\" from keyring: %v", tt.activeProfile, err)
+				}
+				return
+			}
+
+			if !tt.isValid {
+				t.Fatalf("Expected error when deleting profile \"%s\" from keyring, got none", tt.activeProfile)
+			}
+
+			for _, key := range tt.keys {
+				// Check if key still exists
+				_, err = getAuthFieldFromKeyring(tt.activeProfile, key)
+				if err == nil {
+					t.Fatalf("Key \"%s\" still exists in keyring after profile deletion", key)
+				}
+			}
+		})
+	}
+}
+
 func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 	var testField1 authFieldKey = "test-field-1"
 	var testField2 authFieldKey = "test-field-2"
@@ -770,15 +930,6 @@ func TestGetProfileEmail(t *testing.T) {
 			}
 		})
 	}
-}
-
-func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
-	if activeProfile != config.DefaultProfileName {
-		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
-		return keyring.Delete(activeProfileKeyring, string(key))
-	}
-
-	return keyring.Delete(keyringService, string(key))
 }
 
 func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
