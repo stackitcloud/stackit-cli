@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"os"
 	"path/filepath"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	pkgErrors "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/zalando/go-keyring"
 )
@@ -275,6 +277,10 @@ func DeleteProfileFromKeyring(profile string) error {
 	err := config.ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	if profile == config.DefaultProfileName {
+		return &pkgErrors.DeleteDefaultProfile{DefaultProfile: config.DefaultProfileName}
 	}
 
 	for _, key := range authFieldKeys {

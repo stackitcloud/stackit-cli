@@ -552,34 +552,20 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 		activeProfile string
 		isValid       bool
 	}{
+
 		{
-			description:   "base, default profile",
-			keys:          authFieldKeys,
-			activeProfile: config.DefaultProfileName,
-			isValid:       true,
-		},
-		{
-			description: "missing keys, default profile",
-			keys: []authFieldKey{
-				ACCESS_TOKEN,
-				SERVICE_ACCOUNT_EMAIL,
-			},
-			activeProfile: config.DefaultProfileName,
-			isValid:       true,
-		},
-		{
-			description:   "base, custom profile",
+			description:   "base",
 			keys:          authFieldKeys,
 			activeProfile: "test-profile",
 			isValid:       true,
 		},
 		{
-			description: "missing keys, custom profile",
+			description: "missing keys",
 			keys: []authFieldKey{
 				ACCESS_TOKEN,
 				SERVICE_ACCOUNT_EMAIL,
 			},
-			activeProfile: config.DefaultProfileName,
+			activeProfile: "test-profile",
 			isValid:       true,
 		},
 		{
@@ -591,6 +577,11 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 			description:  "keyring fails",
 			keyringFails: true,
 			isValid:      false,
+		},
+		{
+			description:   "default profile",
+			activeProfile: config.DefaultProfileName,
+			isValid:       false,
 		},
 	}
 
