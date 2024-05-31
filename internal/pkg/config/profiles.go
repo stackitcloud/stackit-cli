@@ -209,15 +209,18 @@ func UnsetProfile(p *print.Printer) error {
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("remove profile file: %w", err)
 	}
-	p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
+	if p != nil {
+		p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
+	}
 	return nil
 }
 
 // ValidateProfile validates the profile name.
-// It can only use letters, numbers, or "-" and cannot be empty.
+// It can only use lowercase letters, numbers, or "-" and cannot be empty.
+// It can't start with a "-".
 // If the profile is invalid, it returns an error.
 func ValidateProfile(profile string) error {
-	match, err := regexp.MatchString("^[a-zA-Z0-9-]+$", profile)
+	match, err := regexp.MatchString("^[a-z0-9][a-z0-9-]+$", profile)
 	if err != nil {
 		return fmt.Errorf("match string regex: %w", err)
 	}
@@ -251,4 +254,64 @@ func GetProfileFolderPath(profile string) string {
 		return defaultConfigFolderPath
 	}
 	return filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
+}
+
+// ListProfiles returns a list of all profiles.
+func ListProfiles() ([]string, error) {
+	profiles := []string{}
+
+	profileFolders, err := os.ReadDir(filepath.Join(defaultConfigFolderPath, profileRootFolder))
+	if err != nil {
+		return nil, fmt.Errorf("read profile folders: %w", err)
+	}
+
+	for _, profileFolder := range profileFolders {
+		if profileFolder.IsDir() {
+			profiles = append(profiles, profileFolder.Name())
+		}
+	}
+
+	return profiles, nil
+}
+
+// DeleteProfile deletes a profile.
+// If the profile does not exist, it returns an error.
+// If the profile is the active profile, it sets the active profile to the default profile.
+func DeleteProfile(p *print.Printer, profile string) error {
+	err := ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	activeProfile, err := GetProfile()
+	if err != nil {
+		return fmt.Errorf("get active profile: %w", err)
+	}
+
+	profileExists, err := ProfileExists(profile)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+
+	if !profileExists {
+		return &errors.DeleteInexistentProfile{Profile: profile}
+	}
+
+	err = os.RemoveAll(filepath.Join(defaultConfigFolderPath, profileRootFolder, profile))
+	if err != nil {
+		return fmt.Errorf("remove profile folder: %w", err)
+	}
+
+	if activeProfile == profile {
+		err = UnsetProfile(p)
+		if err != nil {
+			return fmt.Errorf("unset profile: %w", err)
+		}
+	}
+
+	if p != nil {
+		p.Debug(print.DebugLevel, "deleted profile %q", profile)
+	}
+
+	return nil
 }
