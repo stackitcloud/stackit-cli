@@ -38,10 +38,7 @@ Please double check if they are correctly configured.
 For more details run:
   $ stackit auth activate-service-account -h`
 
-	SET_INEXISTENT_PROFILE = `the active configuration profile %[1]q does not exist.
-
-To unset it, run:
-  $ stackit config profile unset
+	SET_INEXISTENT_PROFILE = `the configuration profile %[1]q you are trying to set doesn't exist.
 
 To create it, run:
   $ stackit config profile create %[1]q`
