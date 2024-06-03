@@ -3,9 +3,14 @@ package auth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+
 	"os"
 	"path/filepath"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	pkgErrors "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/zalando/go-keyring"
 )
@@ -42,6 +47,21 @@ const (
 	AUTH_FLOW_SERVICE_ACCOUNT_KEY   AuthFlow     = "sa_key"
 )
 
+// Returns all auth field keys managed by the auth storage
+var authFieldKeys = []authFieldKey{
+	SESSION_EXPIRES_AT_UNIX,
+	ACCESS_TOKEN,
+	REFRESH_TOKEN,
+	SERVICE_ACCOUNT_TOKEN,
+	SERVICE_ACCOUNT_EMAIL,
+	USER_EMAIL,
+	SERVICE_ACCOUNT_KEY,
+	PRIVATE_KEY,
+	TOKEN_CUSTOM_ENDPOINT,
+	JWKS_CUSTOM_ENDPOINT,
+	authFlowType,
+}
+
 func SetAuthFlow(value AuthFlow) error {
 	return SetAuthField(authFlowType, string(value))
 }
@@ -58,9 +78,18 @@ func SetAuthFieldMap(keyMap map[authFieldKey]string) error {
 }
 
 func SetAuthField(key authFieldKey, value string) error {
-	err := setAuthFieldInKeyring(key, value)
+	activeProfile, err := config.GetProfile()
 	if err != nil {
-		errFallback := setAuthFieldInEncodedTextFile(key, value)
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	return setAuthFieldWithProfile(activeProfile, key, value)
+}
+
+func setAuthFieldWithProfile(profile string, key authFieldKey, value string) error {
+	err := setAuthFieldInKeyring(profile, key, value)
+	if err != nil {
+		errFallback := setAuthFieldInEncodedTextFile(profile, key, value)
 		if errFallback != nil {
 			return fmt.Errorf("write to keyring failed (%w), try writing to encoded text file: %w", err, errFallback)
 		}
@@ -68,21 +97,29 @@ func SetAuthField(key authFieldKey, value string) error {
 	return nil
 }
 
-func setAuthFieldInKeyring(key authFieldKey, value string) error {
+func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string) error {
+	if activeProfile != config.DefaultProfileName {
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
+		return keyring.Set(activeProfileKeyring, string(key), value)
+	}
 	return keyring.Set(keyringService, string(key), value)
 }
 
-func setAuthFieldInEncodedTextFile(key authFieldKey, value string) error {
-	err := createEncodedTextFile()
+func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
+	keyringServiceLocal := keyringService
+	if activeProfile != config.DefaultProfileName {
+		keyringServiceLocal = filepath.Join(keyringService, activeProfile)
+	}
+
+	return keyring.Delete(keyringServiceLocal, string(key))
+}
+
+func setAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey, value string) error {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return err
 	}
-
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("get config dir: %w", err)
-	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -131,10 +168,18 @@ func GetAuthFlow() (AuthFlow, error) {
 }
 
 func GetAuthField(key authFieldKey) (string, error) {
-	value, err := getAuthFieldFromKeyring(key)
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return "", fmt.Errorf("get profile: %w", err)
+	}
+	return getAuthFieldWithProfile(activeProfile, key)
+}
+
+func getAuthFieldWithProfile(profile string, key authFieldKey) (string, error) {
+	value, err := getAuthFieldFromKeyring(profile, key)
 	if err != nil {
 		var errFallback error
-		value, errFallback = getAuthFieldFromEncodedTextFile(key)
+		value, errFallback = getAuthFieldFromEncodedTextFile(profile, key)
 		if errFallback != nil {
 			return "", fmt.Errorf("read from keyring: %w, read from encoded file as fallback: %w", err, errFallback)
 		}
@@ -142,21 +187,21 @@ func GetAuthField(key authFieldKey) (string, error) {
 	return value, nil
 }
 
-func getAuthFieldFromKeyring(key authFieldKey) (string, error) {
+func getAuthFieldFromKeyring(activeProfile string, key authFieldKey) (string, error) {
+	if activeProfile != config.DefaultProfileName {
+		activeProfileKeyring := filepath.Join(keyringService, activeProfile)
+		return keyring.Get(activeProfileKeyring, string(key))
+	}
 	return keyring.Get(keyringService, string(key))
 }
 
-func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
-	err := createEncodedTextFile()
+func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (string, error) {
+	err := createEncodedTextFile(activeProfile)
 	if err != nil {
 		return "", err
 	}
 
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", fmt.Errorf("get config dir: %w", err)
-	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
@@ -182,15 +227,11 @@ func getAuthFieldFromEncodedTextFile(key authFieldKey) (string, error) {
 // Checks if the encoded text file exist.
 // If it doesn't, creates it with the content "{}" encoded.
 // If it does, does nothing (and returns nil).
-func createEncodedTextFile() error {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("get config dir: %w", err)
-	}
-	textFileDir := filepath.Join(configDir, textFileFolderName)
+func createEncodedTextFile(activeProfile string) error {
+	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
-	err = os.MkdirAll(textFileDir, os.ModePerm)
+	err := os.MkdirAll(textFileDir, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("create file dir: %w", err)
 	}
@@ -203,6 +244,53 @@ func createEncodedTextFile() error {
 	err = os.WriteFile(textFilePath, []byte(contentEncoded), 0o600)
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
+	}
+
+	return nil
+}
+
+// GetProfileEmail returns the email of the user or service account associated with the given profile.
+// If the profile is not authenticated or the email can't be obtained, it returns an empty string.
+func GetProfileEmail(profile string) string {
+	value, err := getAuthFieldWithProfile(profile, authFlowType)
+	if err != nil {
+		return ""
+	}
+
+	var email string
+	switch AuthFlow(value) {
+	case AUTH_FLOW_USER_TOKEN:
+		email, err = getAuthFieldWithProfile(profile, USER_EMAIL)
+		if err != nil {
+			email = ""
+		}
+	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN, AUTH_FLOW_SERVICE_ACCOUNT_KEY:
+		email, err = getAuthFieldWithProfile(profile, SERVICE_ACCOUNT_EMAIL)
+		if err != nil {
+			email = ""
+		}
+	}
+	return email
+}
+
+func DeleteProfileFromKeyring(profile string) error {
+	err := config.ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	if profile == config.DefaultProfileName {
+		return &pkgErrors.DeleteDefaultProfile{DefaultProfile: config.DefaultProfileName}
+	}
+
+	for _, key := range authFieldKeys {
+		err := deleteAuthFieldInKeyring(profile, key)
+		if err != nil {
+			// if the key is not found, we can ignore the error
+			if !errors.Is(err, keyring.ErrNotFound) {
+				return fmt.Errorf("delete auth field \"%s\" from keyring: %w", key, err)
+			}
+		}
 	}
 
 	return nil

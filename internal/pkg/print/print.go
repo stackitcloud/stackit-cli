@@ -16,7 +16,7 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+
 	"golang.org/x/term"
 )
 
@@ -27,6 +27,10 @@ const (
 	InfoLevel    Level = "info"
 	WarningLevel Level = "warning"
 	ErrorLevel   Level = "error"
+
+	// Needed to avoid import cycle
+	// Originally defined in "internal/pkg/config/config.go"
+	outputFormatKey = "output-format"
 
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"
@@ -61,7 +65,7 @@ func NewPrinter() *Printer {
 // Print an output using Printf to the defined output (falling back to Stderr if not set).
 // If output format is set to none, it does nothing
 func (p *Printer) Outputf(msg string, args ...any) {
-	outputFormat := viper.GetString(config.OutputFormatKey)
+	outputFormat := viper.GetString(outputFormatKey)
 	if outputFormat == NoneOutputFormat {
 		return
 	}
@@ -71,7 +75,7 @@ func (p *Printer) Outputf(msg string, args ...any) {
 // Print an output using Println to the defined output (falling back to Stderr if not set).
 // If output format is set to none, it does nothing
 func (p *Printer) Outputln(msg string) {
-	outputFormat := viper.GetString(config.OutputFormatKey)
+	outputFormat := viper.GetString(outputFormatKey)
 	if outputFormat == NoneOutputFormat {
 		return
 	}
@@ -175,7 +179,7 @@ func (p *Printer) PromptForPassword(prompt string) (string, error) {
 // Shows the content in the command's stdout using the "less" command
 // If output format is set to none, it does nothing
 func (p *Printer) PagerDisplay(content string) error {
-	outputFormat := viper.GetString(config.OutputFormatKey)
+	outputFormat := viper.GetString(outputFormatKey)
 	if outputFormat == NoneOutputFormat {
 		return nil
 	}

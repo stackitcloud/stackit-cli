@@ -123,6 +123,32 @@ func TestArgusInputPlanError(t *testing.T) {
 	}
 }
 
+func TestSetInexistentProfile(t *testing.T) {
+	tests := []struct {
+		description string
+		profile     string
+		expectedMsg string
+	}{
+		{
+			description: "base",
+			profile:     "profile",
+			expectedMsg: fmt.Sprintf(SET_INEXISTENT_PROFILE, "profile", "profile"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := &SetInexistentProfile{
+				Profile: tt.profile,
+			}
+
+			if err.Error() != tt.expectedMsg {
+				t.Fatalf("expected error to be %s, got %s", tt.expectedMsg, err.Error())
+			}
+		})
+	}
+}
+
 func TestArgusInvalidPlanError(t *testing.T) {
 	tests := []struct {
 		description string

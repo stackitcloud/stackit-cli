@@ -35,16 +35,22 @@ const (
 	SKECustomEndpointKey            = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey  = "sqlserverflex_custom_endpoint"
 
+	ProjectNameKey     = "project_name"
+	DefaultProfileName = "default"
+
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
 )
 
-// Backend config keys
 const (
-	configFolder        = "stackit"
+	configFolder = "stackit"
+
 	configFileName      = "cli-config"
 	configFileExtension = "json"
-	ProjectNameKey      = "project_name"
+
+	profileRootFolder    = "profiles"
+	profileFileName      = "cli-profile"
+	profileFileExtension = "txt"
 )
 
 var ConfigKeys = []string{
@@ -74,16 +80,20 @@ var ConfigKeys = []string{
 	SQLServerFlexCustomEndpointKey,
 }
 
-var folderPath string
+var defaultConfigFolderPath string
+var configFolderPath string
+var profileFilePath string
 
 func InitConfig() {
-	configDir, err := os.UserConfigDir()
-	cobra.CheckErr(err)
-	configFolderPath := filepath.Join(configDir, configFolder)
-	configFilePath := filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+	defaultConfigFolderPath = getInitialConfigDir()
+	profileFilePath = getInitialProfileFilePath() // Profile file path is in the default config folder
 
-	// Write config dir path to global variable
-	folderPath = configFolderPath
+	configProfile, err := GetProfile()
+	cobra.CheckErr(err)
+
+	configFolderPath = GetProfileFolderPath(configProfile)
+
+	configFilePath := getConfigFilePath(configFolderPath)
 
 	// This hack is required to allow creating the config file with `viper.WriteConfig`
 	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
@@ -109,22 +119,10 @@ func InitConfig() {
 	viper.SetEnvPrefix("stackit")
 }
 
-func createFolderIfNotExists() error {
-	_, err := os.Stat(folderPath)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(folderPath, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	return nil
-}
-
 // Write saves the config file (wrapping `viper.WriteConfig`) and ensures that its directory exists
 func Write() error {
-	if err := createFolderIfNotExists(); err != nil {
+	err := os.MkdirAll(configFolderPath, os.ModePerm)
+	if err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}
 	return viper.WriteConfig()
@@ -149,4 +147,23 @@ func setConfigDefaults() {
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
+}
+
+func getConfigFilePath(configFolder string) string {
+	return filepath.Join(configFolder, fmt.Sprintf("%s.%s", configFileName, configFileExtension))
+}
+
+func getInitialConfigDir() string {
+	configDir, err := os.UserConfigDir()
+	cobra.CheckErr(err)
+
+	return filepath.Join(configDir, configFolder)
+}
+
+func getInitialProfileFilePath() string {
+	configFolderPath := defaultConfigFolderPath
+	if configFolderPath == "" {
+		configFolderPath = getInitialConfigDir()
+	}
+	return filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 }

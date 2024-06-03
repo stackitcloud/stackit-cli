@@ -38,6 +38,18 @@ Please double check if they are correctly configured.
 For more details run:
   $ stackit auth activate-service-account -h`
 
+	SET_INEXISTENT_PROFILE = `the configuration profile %[1]q you are trying to set doesn't exist.
+
+To create it, run:
+  $ stackit config profile create %[1]q`
+
+	DELETE_INEXISTENT_PROFILE = `the configuration profile %q does not exist.
+
+To list all profiles, run:
+  $ stackit config profile list`
+
+	DELETE_DEFAULT_PROFILE = `the default configuration profile %q cannot be deleted.`
+
 	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
@@ -115,6 +127,10 @@ For more details on the available storages for the configured flavor (%[3]s), ru
 
 	SUBCOMMAND_MISSING = `missing subcommand`
 
+	INVALID_PROFILE_NAME = `the profile name %q is invalid.
+	
+The profile name can only contain lowercase letters, numbers, and "-" and cannot be empty or "default". It can't start with a "-".`
+
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
 )
@@ -141,6 +157,30 @@ type ActivateServiceAccountError struct{}
 
 func (e *ActivateServiceAccountError) Error() string {
 	return FAILED_SERVICE_ACCOUNT_ACTIVATION
+}
+
+type SetInexistentProfile struct {
+	Profile string
+}
+
+func (e *SetInexistentProfile) Error() string {
+	return fmt.Sprintf(SET_INEXISTENT_PROFILE, e.Profile)
+}
+
+type DeleteInexistentProfile struct {
+	Profile string
+}
+
+func (e *DeleteInexistentProfile) Error() string {
+	return fmt.Sprintf(DELETE_INEXISTENT_PROFILE, e.Profile)
+}
+
+type DeleteDefaultProfile struct {
+	DefaultProfile string
+}
+
+func (e *DeleteDefaultProfile) Error() string {
+	return fmt.Sprintf(DELETE_DEFAULT_PROFILE, e.DefaultProfile)
 }
 
 type ArgusInputPlanError struct {
@@ -315,4 +355,12 @@ func (e *SubcommandMissingError) Error() string {
 func AppendUsageTip(err error, cmd *cobra.Command) error {
 	tip := fmt.Sprintf(USAGE_TIP, cmd.CommandPath())
 	return fmt.Errorf("%w.\n\n%s", err, tip)
+}
+
+type InvalidProfileNameError struct {
+	Profile string
+}
+
+func (e *InvalidProfileNameError) Error() string {
+	return fmt.Sprintf(INVALID_PROFILE_NAME, e.Profile)
 }

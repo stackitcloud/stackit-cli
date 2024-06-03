@@ -9,7 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/config"
+	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
 	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
@@ -27,6 +27,7 @@ import (
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -45,7 +46,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		SilenceErrors:     true, // Error is beautified in a custom way before being printed
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			p.Cmd = cmd
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
 
@@ -53,11 +54,33 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
 			configFilePath := viper.ConfigFileUsed()
-			p.Debug(print.DebugLevel, "using config file: %s", configFilePath)
+			p.Debug(print.DebugLevel, "configuration is persisted and read from: %s", configFilePath)
+
+			profileSet, activeProfile, configMethod, err := config.GetConfiguredProfile()
+			if err != nil {
+				return fmt.Errorf("get configured profile: %w", err)
+			}
+
+			p.Debug(print.DebugLevel, "read configuration profile %q via %s", profileSet, configMethod)
+
+			if activeProfile != profileSet {
+				if configMethod == "" {
+					p.Debug(print.DebugLevel, "no profile is configured in env var or profile file")
+				} else {
+					p.Debug(print.DebugLevel, "the configured profile %q does not exist: folder %q is missing", profileSet, config.GetProfileFolderPath(profileSet))
+				}
+				p.Debug(print.DebugLevel, "the %q profile will be used", activeProfile)
+
+				p.Warn("configured profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
+			}
+
+			p.Debug(print.DebugLevel, "active configuration profile: %s", activeProfile)
 
 			configKeys := viper.AllSettings()
 			configKeysStr := print.BuildDebugStrFromMap(configKeys)
-			p.Debug(print.DebugLevel, "config keys: %s", configKeysStr)
+			p.Debug(print.DebugLevel, "configuration keys: %s", configKeysStr)
+
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
@@ -123,8 +146,8 @@ func configureFlags(cmd *cobra.Command) error {
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
+	cmd.AddCommand(configCmd.NewCmd(p))
 	cmd.AddCommand(beta.NewCmd(p))
-	cmd.AddCommand(config.NewCmd(p))
 	cmd.AddCommand(curl.NewCmd(p))
 	cmd.AddCommand(dns.NewCmd(p))
 	cmd.AddCommand(loadbalancer.NewCmd(p))
