@@ -33,6 +33,7 @@ const (
 	SecretsManagerCustomEndpointKey = "secrets_manager_custom_endpoint"
 	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
 	SKECustomEndpointKey            = "ske_custom_endpoint"
+	SQLServerFlexCustomEndpointKey  = "sqlserverflex_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -76,6 +77,7 @@ var ConfigKeys = []string{
 	SecretsManagerCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	SKECustomEndpointKey,
+	SQLServerFlexCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -144,6 +146,7 @@ func setConfigDefaults() {
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
+	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {

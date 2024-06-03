@@ -139,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("BACKUP SCHEDULE", *instance.BackupSchedule)
+		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
 		table.AddSeparator()
 		table.AddRow("DAILY SNAPSHOT RETENTION (DAYS)", (*instance.Options)["dailySnapshotRetentionDays"])
 		table.AddSeparator()

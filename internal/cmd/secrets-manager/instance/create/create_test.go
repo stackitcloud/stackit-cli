@@ -63,7 +63,7 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceReques
 func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
 	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-		Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+		Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
 			{Cidr: utils.Ptr("198.51.100.14/24")},
 		})})
 
@@ -281,7 +281,7 @@ func TestBuildCreateACLRequests(t *testing.T) {
 				*model.Acls = append(*model.Acls, "1.2.3.4/32")
 			}),
 			expectedRequest: fixtureUpdateACLsRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-				Cidrs: utils.Ptr([]secretsmanager.AclUpdate{
+				Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
 					{Cidr: utils.Ptr("198.51.100.14/24")},
 					{Cidr: utils.Ptr("1.2.3.4/32")},
 				})}),

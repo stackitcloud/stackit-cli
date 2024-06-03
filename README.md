@@ -49,26 +49,26 @@ Help is available for any command by specifying the special flag `--help` (or si
 
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
-| Service                            | CLI Commands              | Status                  |
-| ---------------------------------- | ------------------------- | ----------------------- |
-| Argus                              | `argus`                   | :white_check_mark:      |
-| Infrastructure as a Service (IaaS) |                           | Will be integrated soon |
-| Authorization                      | `project`, `organization` | :white_check_mark:      |
-| DNS                                | `dns`                     | :white_check_mark:      |
-| Kubernetes Engine (SKE)            | `ske`                     | :white_check_mark:      |
-| Load Balancer                      | `load-balancer`           | :white_check_mark:      |
-| LogMe                              | `logme`                   | :white_check_mark:      |
-| MariaDB                            | `mariadb`                 | :white_check_mark:      |
-| MongoDB Flex                       | `mongodbflex`             | :white_check_mark:      |
-| Object Storage                     | `object-storage`          | :white_check_mark:      |
-| OpenSearch                         | `opensearch`              | :white_check_mark:      |
-| PostgreSQL Flex                    | `postgresflex`            | :white_check_mark:      |
-| RabbitMQ                           | `rabbitmq`                | :white_check_mark:      |
-| Redis                              | `redis`                   | :white_check_mark:      |
-| Resource Manager                   | `project`                 | :white_check_mark:      |
-| Secrets Manager                    | `secrets-manager`         | :white_check_mark:      |
-| Service Account                    | `service-account`         | :white_check_mark:      |
-| SQLServer Flex                     |                           | Will be integrated soon |
+| Service                            | CLI Commands              | Status                    |
+| ---------------------------------- | ------------------------- | ------------------------- |
+| Argus                              | `argus`                   | :white_check_mark:        |
+| Infrastructure as a Service (IaaS) |                           | Will be integrated soon   |
+| Authorization                      | `project`, `organization` | :white_check_mark:        |
+| DNS                                | `dns`                     | :white_check_mark:        |
+| Kubernetes Engine (SKE)            | `ske`                     | :white_check_mark:        |
+| Load Balancer                      | `load-balancer`           | :white_check_mark:        |
+| LogMe                              | `logme`                   | :white_check_mark:        |
+| MariaDB                            | `mariadb`                 | :white_check_mark:        |
+| MongoDB Flex                       | `mongodbflex`             | :white_check_mark:        |
+| Object Storage                     | `object-storage`          | :white_check_mark:        |
+| OpenSearch                         | `opensearch`              | :white_check_mark:        |
+| PostgreSQL Flex                    | `postgresflex`            | :white_check_mark:        |
+| RabbitMQ                           | `rabbitmq`                | :white_check_mark:        |
+| Redis                              | `redis`                   | :white_check_mark:        |
+| Resource Manager                   | `project`                 | :white_check_mark:        |
+| Secrets Manager                    | `secrets-manager`         | :white_check_mark:        |
+| Service Account                    | `service-account`         | :white_check_mark:        |
+| SQLServer Flex                     | `beta sqlserverflex`      | :white_check_mark: (beta) |
 
 ## Authentication
 
@@ -139,23 +139,21 @@ To specify a custom pager, use the `PAGER` environment variable.
 If the variable is not set, STACKIT CLI uses the `less` as default pager.
 
 When using `less` as a pager, STACKIT CLI will automatically pass following options
+
 - -F, --quit-if-one-screen - Less will automatically exit if the entire file can be displayed on the first screen.
 - -S, --chop-long-lines - Lines longer than the screen width will be chopped rather than being folded.
 - -w, --hilite-unread - Temporarily highlights the first "new" line after a forward movement of a full page.
 - -R, --RAW-CONTROL-CHARS - ANSI color and style sequences will be interpreted.
 
 > These options will not be added automatically if a custom pager is defined.
-> 
+>
 > In that case, users can define the parameters by using the specific environment variable required by the `PAGER` (if supported).
 
-> 
 > For example, if user sets the `PAGER` environment variable to `less` and would like to pass some arguments, `LESS` environment variable must be used as following:
 
-> 
 > export PAGER="less"
-> 
+>
 > export LESS="-R"
-
 
 ## Autocompletion
 

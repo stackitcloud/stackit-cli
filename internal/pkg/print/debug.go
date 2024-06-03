@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/core/config"
 )
 
-var defaultHTTPHeaders = []string{"Accept", "Content-Type", "Content-Length", "User-Agent", "Date", "Referrer-Policy"}
+var defaultHTTPHeaders = []string{"Accept", "Content-Type", "Content-Length", "User-Agent", "Date", "Referrer-Policy", "Traceparent"}
 
 // BuildDebugStrFromInputModel converts an input model to a user-friendly string representation.
 // This function converts the input model to a map, removes empty values, and generates a string representation of the map.
