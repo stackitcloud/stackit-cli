@@ -256,9 +256,19 @@ func GetProfileFolderPath(profile string) string {
 	return filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
 }
 
-// ListProfiles returns a list of all profiles.
+// ListProfiles returns a list of all non-default profiles.
+// If there are no profiles, it returns an empty list.
 func ListProfiles() ([]string, error) {
 	profiles := []string{}
+
+	// Check if the profile root folder exists
+	_, err := os.Stat(filepath.Join(defaultConfigFolderPath, profileRootFolder))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return profiles, nil
+		}
+		return nil, fmt.Errorf("get profile root folder: %w", err)
+	}
 
 	profileFolders, err := os.ReadDir(filepath.Join(defaultConfigFolderPath, profileRootFolder))
 	if err != nil {
