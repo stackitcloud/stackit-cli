@@ -143,7 +143,6 @@ winget:
       name: winget-pkgs
       pull_request:
         enabled: true
-        draft: true
         base:
           owner: microsoft
           name: winget-pkgs
