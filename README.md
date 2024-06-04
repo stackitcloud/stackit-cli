@@ -1,9 +1,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/stackitcloud/stackit-cli)](https://goreportcard.com/report/github.com/stackitcloud/stackit-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stackitcloud/stackit-cli) [![GitHub License](https://img.shields.io/github/license/stackitcloud/stackit-cli)](https://www.apache.org/licenses/LICENSE-2.0)
 
 <br>
-
-![STACKIT logo](.github/images/stackit-logo.png)
-
+<p align="center">
+  <img src=".github/images/stackit-logo.png" alt="STACKIT logo" width="50%"/>
+</p>
 <br>
 
 # STACKIT CLI (BETA)
