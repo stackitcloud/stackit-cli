@@ -1,12 +1,13 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/stackitcloud/stackit-cli)](https://goreportcard.com/report/github.com/stackitcloud/stackit-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stackitcloud/stackit-cli) [![GitHub License](https://img.shields.io/github/license/stackitcloud/stackit-cli)](https://www.apache.org/licenses/LICENSE-2.0)
-
+<div align="center">
 <br>
-<p align="center">
-  <img src=".github/images/stackit-logo.png" alt="STACKIT logo" width="50%"/>
-</p>
+<img src=".github/images/stackit-logo.png" alt="STACKIT logo" width="50%"/>
 <br>
+<br>
+</div>
 
 # STACKIT CLI (BETA)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/stackitcloud/stackit-cli)](https://goreportcard.com/report/github.com/stackitcloud/stackit-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stackitcloud/stackit-cli) [![GitHub License](https://img.shields.io/github/license/stackitcloud/stackit-cli)](https://www.apache.org/licenses/LICENSE-2.0)
 
 Welcome to the [STACKIT](https://www.stackit.de/en) CLI, a command-line interface for the STACKIT services.
 
