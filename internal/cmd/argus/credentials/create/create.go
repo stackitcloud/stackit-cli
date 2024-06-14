@@ -2,8 +2,10 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -77,15 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create credentials for Argus instance: %w", err)
 			}
 
-			p.Outputf("Created credentials for instance %q.\n\n", instanceLabel)
-			// The username field cannot be set by the user so we only display it if it's not returned empty
-			username := *resp.Credentials.Username
-			if username != "" {
-				p.Outputf("Username: %s\n", username)
-			}
-
-			p.Outputf("Password: %s\n", *resp.Credentials.Password)
-			return nil
+			return outputResult(p, model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -114,4 +108,35 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *argus.APIClient) argus.ApiCreateCredentialsRequest {
 	req := apiClient.CreateCredentials(ctx, model.InstanceId, model.ProjectId)
 	return req
+}
+
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *argus.CreateCredentialsResponse) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal Argus credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
+		if err != nil {
+			return fmt.Errorf("marshal Argus credentials: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Created credentials for instance %q.\n\n", instanceLabel)
+		// The username field cannot be set by the user so we only display it if it's not returned empty
+		username := *resp.Credentials.Username
+		if username != "" {
+			p.Outputf("Username: %s\n", username)
+		}
+
+		p.Outputf("Password: %s\n", *resp.Credentials.Password)
+		return nil
+	}
 }
