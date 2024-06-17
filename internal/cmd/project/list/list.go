@@ -182,13 +182,13 @@ type resourceManagerClient interface {
 	ListProjects(ctx context.Context) resourcemanager.ApiListProjectsRequest
 }
 
-func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceManagerClient) ([]resourcemanager.ProjectResponse, error) {
+func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceManagerClient) ([]resourcemanager.Project, error) {
 	if model.Limit != nil && *model.Limit < model.PageSize {
 		model.PageSize = *model.Limit
 	}
 
 	offset := 0
-	projects := []resourcemanager.ProjectResponse{}
+	projects := []resourcemanager.Project{}
 	for {
 		// Call API
 		req, err := buildRequest(ctx, model, apiClient, offset)
@@ -219,7 +219,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 	return projects, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.ProjectResponse) error {
+func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.Project) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(projects, "", "  ")

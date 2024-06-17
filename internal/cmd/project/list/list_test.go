@@ -451,8 +451,8 @@ func TestFetchProjects(t *testing.T) {
 					numItemsToReturn = tt.totalItems - offset // Last page
 				}
 
-				projects := make([]resourcemanager.ProjectResponse, numItemsToReturn)
-				mockedResp := resourcemanager.AllProjectsResponse{
+				projects := make([]resourcemanager.Project, numItemsToReturn)
+				mockedResp := resourcemanager.ListProjectsResponse{
 					Items: &projects,
 				}
 
