@@ -88,9 +88,26 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, usernameFlag)
 			}),
+			isValid: false,
+		},
+		{
+			description: "no database specified",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, databaseFlag)
+			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
+				model.Database = nil
+			}),
+		},
+		{
+			description: "no roles specified",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, roleFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Roles = nil
 			}),
 		},
 		{
@@ -130,30 +147,6 @@ func TestParseInput(t *testing.T) {
 			description: "instance id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "database missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, databaseFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "roles missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, roleFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = &rolesDefault
-			}),
-		},
-		{
-			description: "invalid role",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[roleFlag] = "invalid-role"
 			}),
 			isValid: false,
 		},

@@ -25,10 +25,6 @@ const (
 	roleFlag       = "role"
 )
 
-var (
-	rolesDefault = []string{"read"}
-)
-
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 

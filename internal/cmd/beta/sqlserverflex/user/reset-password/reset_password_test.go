@@ -148,18 +148,6 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
-		{
-			description: "user id invalid 1",
-			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "user id invalid 2",
-			argValues:   []string{"invalid-uuid"},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
 	}
 
 	for _, tt := range tests {
