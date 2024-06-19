@@ -35,14 +35,14 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
-		Short: "Resets the password of a SQLServer Flex user",
+		Short: "Resets the password of an SQLServer Flex user",
 		Long: fmt.Sprintf("%s\ns%s",
-			"Resets the password of a SQLServer Flex user.",
+			"Resets the password of an SQLServer Flex user.",
 			"The new password is visible after and cannot be retrieved later.",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Reset the password of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
+				`Reset the password of an SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit sqlserverflex user reset-password xxx --instance-id yyy"),
 		),
 		Args: args.SingleArg(userIdArg, nil),

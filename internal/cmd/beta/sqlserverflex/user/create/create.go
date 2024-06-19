@@ -41,9 +41,9 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a SQLServer Flex user",
+		Short: "Creates an SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
-			"Creates a SQLServer Flex user login for an instance.",
+			"Creates an SQLServer Flex user login for an instance.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
 			"  $ stackit sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
@@ -51,7 +51,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
+				`Create an SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
 				"$ stackit sqlserverflex user create --instance-id xxx --username johndoe --role my-role --database my-database"),
 		),
 		Args: args.NoArgs,
