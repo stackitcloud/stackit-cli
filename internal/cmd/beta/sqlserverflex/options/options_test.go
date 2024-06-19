@@ -217,17 +217,41 @@ func TestParseInput(t *testing.T) {
 			description: "user roles without instance id",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, instanceIdFlag)
+				delete(flagValues, dbCollationsFlag)
+				delete(flagValues, dbCompatibilitiesFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "instance id without user roles",
+			description: "db collations without instance id",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+				delete(flagValues, userRolesFlag)
+				delete(flagValues, dbCompatibilitiesFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "db compatibilities without instance id",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+				delete(flagValues, userRolesFlag)
+				delete(flagValues, dbCollationsFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id without user roles, db collations and db compatibilities",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, userRolesFlag)
+				delete(flagValues, dbCollationsFlag)
+				delete(flagValues, dbCompatibilitiesFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
 				model.UserRoles = false
+				model.DBCollations = false
+				model.DBCompatibilities = false
 			}),
 		},
 	}
