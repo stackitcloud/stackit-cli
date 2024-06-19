@@ -58,7 +58,7 @@ func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectReques
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
-		Members: &[]resourcemanager.ProjectMember{
+		Members: &[]resourcemanager.Member{
 			{
 				Role:    utils.Ptr(ownerRole),
 				Subject: utils.Ptr(testEmail),

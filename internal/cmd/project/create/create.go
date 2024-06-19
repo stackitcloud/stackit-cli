@@ -178,7 +178,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 		ContainerParentId: model.ParentId,
 		Name:              model.Name,
 		Labels:            model.Labels,
-		Members: &[]resourcemanager.ProjectMember{
+		Members: &[]resourcemanager.Member{
 			{
 				Role:    utils.Ptr(ownerRole),
 				Subject: utils.Ptr(email),
@@ -189,7 +189,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *resourcemanager.ProjectResponse) error {
+func outputResult(p *print.Printer, model *inputModel, resp *resourcemanager.Project) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")

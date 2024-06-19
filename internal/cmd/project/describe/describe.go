@@ -118,7 +118,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.ProjectResponseWithParents) error {
+func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.GetProjectResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(project, "", "  ")
