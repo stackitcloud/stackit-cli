@@ -82,13 +82,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List SQL Server Flex flavors options`,
-				"$ stackit sqlserverflex options --flavors"),
+				"$ stackit beta sqlserverflex options --flavors"),
 			examples.NewExample(
 				`List SQL Server Flex available versions`,
-				"$ stackit sqlserverflex options --versions"),
+				"$ stackit beta sqlserverflex options --versions"),
 			examples.NewExample(
 				`List SQL Server Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit sqlserverflex options --flavors"`,
-				"$ stackit sqlserverflex options --storages --flavor-id <FLAVOR_ID>"),
+				"$ stackit beta sqlserverflex options --storages --flavor-id <FLAVOR_ID>"),
+			examples.NewExample(
+				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit sqlserverflex instance list"`,
+				"$ stackit beta sqlserverflex options --user-roles --db-compatibilities --instance-id <INSTANCE_ID>"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -310,11 +313,12 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	if model.UserRoles {
 		content += renderUserRoles(options.UserRoles)
 	}
-	if model.DBCollations {
-		content += renderDBCollations(options.DBCollations)
-	}
 	if model.DBCompatibilities {
 		content += renderDBCompatibilities(options.DBCompatibilities)
+	}
+	// Rendered at last because table is very long
+	if model.DBCollations {
+		content += renderDBCollations(options.DBCollations)
 	}
 
 	err := p.PagerDisplay(content)
