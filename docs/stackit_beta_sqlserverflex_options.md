@@ -27,11 +27,15 @@ stackit beta sqlserverflex options [flags]
 ### Options
 
 ```
-      --flavor-id string   The flavor ID to show storages for. Only relevant when "--storages" is passed
-      --flavors            Lists supported flavors
-  -h, --help               Help for "stackit beta sqlserverflex options"
-      --storages           Lists supported storages for a given flavor
-      --versions           Lists supported versions
+      --db-collations        Lists supported database collations for a given instance
+      --db-compatibilities   Lists supported database compatibilities for a given instance
+      --flavor-id string     The flavor ID to show storages for. Only relevant when "--storages" is passed
+      --flavors              Lists supported flavors
+  -h, --help                 Help for "stackit beta sqlserverflex options"
+      --instance-id string   The instance ID to show user roles, database collations and database compatibilities for. Only relevant when "--user-roles", "--db-collations" or "--db-compatibilities" is passed
+      --storages             Lists supported storages for a given flavor
+      --user-roles           Lists supported user roles for a given instance
+      --versions             Lists supported versions
 ```
 
 ### Options inherited from parent commands

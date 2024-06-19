@@ -19,30 +19,58 @@ import (
 )
 
 const (
-	flavorsFlag  = "flavors"
-	versionsFlag = "versions"
-	storagesFlag = "storages"
-	flavorIdFlag = "flavor-id"
+	flavorsFlag           = "flavors"
+	versionsFlag          = "versions"
+	storagesFlag          = "storages"
+	userRolesFlag         = "user-roles"
+	dbCollationsFlag      = "db-collations"
+	dbCompatibilitiesFlag = "db-compatibilities"
+
+	flavorIdFlag   = "flavor-id"
+	instanceIdFlag = "instance-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	Flavors  bool
-	Versions bool
-	Storages bool
-	FlavorId *string
+	Flavors           bool
+	Versions          bool
+	Storages          bool
+	UserRoles         bool
+	DBCollations      bool
+	DBCompatibilities bool
+
+	FlavorId   *string
+	InstanceId *string
 }
 
 type options struct {
-	Flavors  *[]sqlserverflex.InstanceFlavorEntry `json:"flavors,omitempty"`
-	Versions *[]string                            `json:"versions,omitempty"`
-	Storages *flavorStorages                      `json:"flavorStorages,omitempty"`
+	Flavors           *[]sqlserverflex.InstanceFlavorEntry `json:"flavors,omitempty"`
+	Versions          *[]string                            `json:"versions,omitempty"`
+	Storages          *flavorStorages                      `json:"flavorStorages,omitempty"`
+	UserRoles         *instanceUserRoles                   `json:"userRoles,omitempty"`
+	DBCollations      *instanceDBCollations                `json:"dbCollations,omitempty"`
+	DBCompatibilities *instanceDBCompatibilities           `json:"dbCompatibilities,omitempty"`
 }
 
 type flavorStorages struct {
 	FlavorId string                              `json:"flavorId"`
 	Storages *sqlserverflex.ListStoragesResponse `json:"storages"`
+}
+
+type instanceUserRoles struct {
+	InstanceId string   `json:"instanceId"`
+	UserRoles  []string `json:"userRoles"`
+}
+
+type instanceDBCollations struct {
+	InstanceId   string                                 `json:"instanceId"`
+	DBCollations []sqlserverflex.MssqlDatabaseCollation `json:"dbCollations"`
+}
+
+type instanceDBCompatibilities struct {
+	InstanceId        string                                     `json:"instanceId"`
+	DBCompatibilities []sqlserverflex.MssqlDatabaseCompatibility `json:"dbCompatibilities"`
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -92,17 +120,27 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flavorsFlag, false, "Lists supported flavors")
 	cmd.Flags().Bool(versionsFlag, false, "Lists supported versions")
 	cmd.Flags().Bool(storagesFlag, false, "Lists supported storages for a given flavor")
+	cmd.Flags().Bool(userRolesFlag, false, "Lists supported user roles for a given instance")
+	cmd.Flags().Bool(dbCollationsFlag, false, "Lists supported database collations for a given instance")
+	cmd.Flags().Bool(dbCompatibilitiesFlag, false, "Lists supported database compatibilities for a given instance")
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
+	cmd.Flags().String(instanceIdFlag, "", `The instance ID to show user roles, database collations and database compatibilities for. Only relevant when "--user-roles", "--db-collations" or "--db-compatibilities" is passed`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
+
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
 	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)
 	storages := flags.FlagToBoolValue(p, cmd, storagesFlag)
-	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	userRoles := flags.FlagToBoolValue(p, cmd, userRolesFlag)
+	dbCollations := flags.FlagToBoolValue(p, cmd, dbCollationsFlag)
+	dbCompatibilities := flags.FlagToBoolValue(p, cmd, dbCompatibilitiesFlag)
 
-	if !flavors && !versions && !storages {
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	instanceId := flags.FlagToStringPointer(p, cmd, instanceIdFlag)
+
+	if !flavors && !versions && !storages && !userRoles && !dbCollations && !dbCompatibilities {
 		return nil, fmt.Errorf("%s\n\n%s",
 			"please specify at least one category for which to list the available options.",
 			"Get details on the available flags by re-running your command with the --help flag.")
@@ -115,12 +153,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 			"  $ stackit sqlserverflex options --flavors")
 	}
 
+	if (userRoles || dbCollations || dbCompatibilities) && instanceId == nil {
+		return nil, fmt.Errorf("%s\n\n%s\n%s",
+			`please specify an instance ID to show user roles, database collations or database compatibilities for by setting the flag "--instance-id <INSTANCE_ID>".`,
+			"You can get the available instances and their IDs by running:",
+			"  $ stackit sqlserverflex instance list")
+	}
+
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Flavors:         flavors,
-		Versions:        versions,
-		Storages:        storages,
-		FlavorId:        flags.FlagToStringPointer(p, cmd, flavorIdFlag),
+		GlobalFlagModel:   globalFlags,
+		Flavors:           flavors,
+		Versions:          versions,
+		Storages:          storages,
+		UserRoles:         userRoles,
+		DBCollations:      dbCollations,
+		DBCompatibilities: dbCompatibilities,
+		FlavorId:          flavorId,
+		InstanceId:        instanceId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -139,12 +188,18 @@ type sqlServerFlexOptionsClient interface {
 	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
 	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
 	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
+	ListRolesExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListRolesResponse, error)
+	ListCollationsExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListCollationsResponse, error)
+	ListCompatibilityExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListCompatibilityResponse, error)
 }
 
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlServerFlexOptionsClient) error {
 	var flavors *sqlserverflex.ListFlavorsResponse
 	var versions *sqlserverflex.ListVersionsResponse
 	var storages *sqlserverflex.ListStoragesResponse
+	var userRoles *sqlserverflex.ListRolesResponse
+	var dbCollations *sqlserverflex.ListCollationsResponse
+	var dbCompatibilities *sqlserverflex.ListCompatibilityResponse
 	var err error
 
 	if model.Flavors {
@@ -165,11 +220,29 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 			return fmt.Errorf("get SQL Server Flex storages: %w", err)
 		}
 	}
+	if model.UserRoles {
+		userRoles, err = apiClient.ListRolesExecute(ctx, model.ProjectId, *model.InstanceId)
+		if err != nil {
+			return fmt.Errorf("get SQL Server Flex user roles: %w", err)
+		}
+	}
+	if model.DBCollations {
+		dbCollations, err = apiClient.ListCollationsExecute(ctx, model.ProjectId, *model.InstanceId)
+		if err != nil {
+			return fmt.Errorf("get SQL Server Flex DB collations: %w", err)
+		}
+	}
+	if model.DBCompatibilities {
+		dbCompatibilities, err = apiClient.ListCompatibilityExecute(ctx, model.ProjectId, *model.InstanceId)
+		if err != nil {
+			return fmt.Errorf("get SQL Server Flex DB compatibilities: %w", err)
+		}
+	}
 
-	return outputResult(p, model, flavors, versions, storages)
+	return outputResult(p, model, flavors, versions, storages, userRoles, dbCollations, dbCompatibilities)
 }
 
-func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.ListFlavorsResponse, versions *sqlserverflex.ListVersionsResponse, storages *sqlserverflex.ListStoragesResponse) error {
+func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.ListFlavorsResponse, versions *sqlserverflex.ListVersionsResponse, storages *sqlserverflex.ListStoragesResponse, userRoles *sqlserverflex.ListRolesResponse, dbCollations *sqlserverflex.ListCollationsResponse, dbCompatibilities *sqlserverflex.ListCompatibilityResponse) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -181,6 +254,24 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 		options.Storages = &flavorStorages{
 			FlavorId: *model.FlavorId,
 			Storages: storages,
+		}
+	}
+	if userRoles != nil && model.InstanceId != nil {
+		options.UserRoles = &instanceUserRoles{
+			InstanceId: *model.InstanceId,
+			UserRoles:  *userRoles.Roles,
+		}
+	}
+	if dbCollations != nil && model.InstanceId != nil {
+		options.DBCollations = &instanceDBCollations{
+			InstanceId:   *model.InstanceId,
+			DBCollations: *dbCollations.Collations,
+		}
+	}
+	if dbCompatibilities != nil && model.InstanceId != nil {
+		options.DBCompatibilities = &instanceDBCompatibilities{
+			InstanceId:        *model.InstanceId,
+			DBCompatibilities: *dbCompatibilities.Compatibilities,
 		}
 	}
 
@@ -215,6 +306,15 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	}
 	if model.Storages {
 		content += renderStorages(options.Storages.Storages)
+	}
+	if model.UserRoles {
+		content += renderUserRoles(options.UserRoles)
+	}
+	if model.DBCollations {
+		content += renderDBCollations(options.DBCollations)
+	}
+	if model.DBCompatibilities {
+		content += renderDBCompatibilities(options.DBCompatibilities)
 	}
 
 	err := p.PagerDisplay(content)
@@ -269,5 +369,47 @@ func renderStorages(resp *sqlserverflex.ListStoragesResponse) string {
 		table.AddRow(*resp.StorageRange.Min, *resp.StorageRange.Max, sc)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
+	return table.Render()
+}
+
+func renderUserRoles(roles *instanceUserRoles) string {
+	if len(roles.UserRoles) == 0 {
+		return ""
+	}
+
+	table := tables.NewTable()
+	table.SetTitle("User Roles")
+	table.SetHeader("ROLE")
+	for i := range roles.UserRoles {
+		table.AddRow(roles.UserRoles[i])
+	}
+	return table.Render()
+}
+
+func renderDBCollations(dbCollations *instanceDBCollations) string {
+	if len(dbCollations.DBCollations) == 0 {
+		return ""
+	}
+
+	table := tables.NewTable()
+	table.SetTitle("DB Collations")
+	table.SetHeader("NAME", "DESCRIPTION")
+	for i := range dbCollations.DBCollations {
+		table.AddRow(*dbCollations.DBCollations[i].CollationName, *dbCollations.DBCollations[i].Description)
+	}
+	return table.Render()
+}
+
+func renderDBCompatibilities(dbCompatibilities *instanceDBCompatibilities) string {
+	if len(dbCompatibilities.DBCompatibilities) == 0 {
+		return ""
+	}
+
+	table := tables.NewTable()
+	table.SetTitle("DB Compatibilities")
+	table.SetHeader("COMPATIBILITY LEVEL", "DESCRIPTION")
+	for i := range dbCompatibilities.DBCompatibilities {
+		table.AddRow(*dbCompatibilities.DBCompatibilities[i].CompatibilityLevel, *dbCompatibilities.DBCompatibilities[i].Description)
+	}
 	return table.Render()
 }
