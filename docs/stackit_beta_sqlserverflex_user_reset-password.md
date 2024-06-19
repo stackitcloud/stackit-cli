@@ -1,19 +1,28 @@
-## stackit beta sqlserverflex
+## stackit beta sqlserverflex user reset-password
 
-Provides functionality for SQLServer Flex
+Resets the password of an SQLServer Flex user
 
 ### Synopsis
 
-Provides functionality for SQLServer Flex.
+Resets the password of an SQLServer Flex user.
+sThe new password is visible after resetting and cannot be retrieved later.
 
 ```
-stackit beta sqlserverflex [flags]
+stackit beta sqlserverflex user reset-password USER_ID [flags]
+```
+
+### Examples
+
+```
+  Reset the password of an SQLServer Flex user with ID "xxx" of instance with ID "yyy"
+  $ stackit beta sqlserverflex user reset-password xxx --instance-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sqlserverflex"
+  -h, --help                 Help for "stackit beta sqlserverflex user reset-password"
+      --instance-id string   ID of the instance
 ```
 
 ### Options inherited from parent commands
@@ -28,8 +37,5 @@ stackit beta sqlserverflex [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta sqlserverflex instance](./stackit_beta_sqlserverflex_instance.md)	 - Provides functionality for SQLServer Flex instances
-* [stackit beta sqlserverflex options](./stackit_beta_sqlserverflex_options.md)	 - Lists SQL Server Flex options
 * [stackit beta sqlserverflex user](./stackit_beta_sqlserverflex_user.md)	 - Provides functionality for SQLServer Flex users
 

@@ -20,6 +20,13 @@ var instanceTypeToReplicas = map[string]int64{
 	"Sharded": 9,
 }
 
+type MongoDBFlexClient interface {
+	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
+	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
+}
+
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
 	i := 0
@@ -115,13 +122,6 @@ func LoadFlavorId(cpu, ram int64, flavors *[]mongodbflex.HandlersInfraFlavor) (*
 	}
 }
 
-type MongoDBFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
-	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
-}
-
 func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId string) (string, error) {
 	resp, err := apiClient.ListVersionsExecute(ctx, projectId)
 	if err != nil {
@@ -147,7 +147,7 @@ func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, p
 func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex instance: %w", err)
+		return "", fmt.Errorf("get MongoDB Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
 }
@@ -155,7 +155,7 @@ func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId
 func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId string) (string, error) {
 	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
+		return "", fmt.Errorf("get MongoDB Flex user: %w", err)
 	}
 	return *resp.Item.Username, nil
 }

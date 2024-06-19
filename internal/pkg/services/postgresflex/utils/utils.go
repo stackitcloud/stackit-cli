@@ -18,6 +18,12 @@ var instanceTypeToReplicas = map[string]int64{
 	"Replica": 3,
 }
 
+type PostgresFlexClient interface {
+	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
+}
+
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
 	i := 0
@@ -111,12 +117,6 @@ func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, erro
 		Service: "postgresflex",
 		Details: "You provided an invalid combination for CPU and RAM.",
 	}
-}
-
-type PostgresFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
 }
 
 func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId string) (string, error) {
