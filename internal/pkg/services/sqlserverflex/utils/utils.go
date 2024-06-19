@@ -96,7 +96,7 @@ func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, project
 func GetUserName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, userId string) (string, error) {
 	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
+		return "", fmt.Errorf("get SQLServer Flex user: %w", err)
 	}
 	return *resp.Item.Username, nil
 }

@@ -147,7 +147,7 @@ func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, p
 func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex instance: %w", err)
+		return "", fmt.Errorf("get MongoDB Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
 }
@@ -155,7 +155,7 @@ func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId
 func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId string) (string, error) {
 	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
 	if err != nil {
-		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
+		return "", fmt.Errorf("get MongoDB Flex user: %w", err)
 	}
 	return *resp.Item.Username, nil
 }
