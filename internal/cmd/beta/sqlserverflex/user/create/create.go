@@ -22,7 +22,7 @@ const (
 	instanceIdFlag = "instance-id"
 	usernameFlag   = "username"
 	databaseFlag   = "database"
-	roleFlag       = "role"
+	rolesFlag      = "roles"
 )
 
 type inputModel struct {
@@ -39,16 +39,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Use:   "create",
 		Short: "Creates an SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
-			"Creates an SQLServer Flex user login for an instance.",
+			"Creates an SQLServer Flex user for an instance.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
-			"  $ stackit sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
+			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 			"Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.",
 		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
-				"$ stackit sqlserverflex user create --instance-id xxx --username johndoe --role my-role --database my-database"),
+				"$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database"),
+			examples.NewExample(
+				`Create an SQLServer Flex user for instance with ID "xxx", specifying multiple roles`,
+				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2`),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -98,7 +101,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user")
 	cmd.Flags().String(databaseFlag, "", "Default database for the user")
-	cmd.Flags().StringSlice(roleFlag, []string{}, "Roles of the user")
+	cmd.Flags().StringSlice(rolesFlag, []string{}, "Roles of the user")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
 	cobra.CheckErr(err)
@@ -115,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Database:        flags.FlagToStringPointer(p, cmd, databaseFlag),
-		Roles:           flags.FlagToStringSlicePointer(p, cmd, roleFlag),
+		Roles:           flags.FlagToStringSlicePointer(p, cmd, rolesFlag),
 	}
 
 	if p.IsVerbosityDebug() {

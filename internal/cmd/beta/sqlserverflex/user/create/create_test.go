@@ -30,7 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		instanceIdFlag: testInstanceId,
 		usernameFlag:   "johndoe",
 		databaseFlag:   "default",
-		roleFlag:       "read",
+		rolesFlag:      "read",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -103,7 +103,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no roles specified",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, roleFlag)
+				delete(flagValues, rolesFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {

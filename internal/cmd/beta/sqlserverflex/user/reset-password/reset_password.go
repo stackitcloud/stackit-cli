@@ -38,12 +38,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Short: "Resets the password of an SQLServer Flex user",
 		Long: fmt.Sprintf("%s\ns%s",
 			"Resets the password of an SQLServer Flex user.",
-			"The new password is visible after and cannot be retrieved later.",
+			"The new password is visible after resetting and cannot be retrieved later.",
 		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Reset the password of an SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit sqlserverflex user reset-password xxx --instance-id yyy"),
+				"$ stackit beta sqlserverflex user reset-password xxx --instance-id yyy"),
 		),
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
