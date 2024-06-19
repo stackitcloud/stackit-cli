@@ -20,6 +20,13 @@ var instanceTypeToReplicas = map[string]int64{
 	"Sharded": 9,
 }
 
+type MongoDBFlexClient interface {
+	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
+	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
+}
+
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
 	i := 0
@@ -113,13 +120,6 @@ func LoadFlavorId(cpu, ram int64, flavors *[]mongodbflex.HandlersInfraFlavor) (*
 		Service: "mongodbflex",
 		Details: "You provided an invalid combination for CPU and RAM.",
 	}
-}
-
-type MongoDBFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*mongodbflex.GetUserResponse, error)
-	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId string) (*mongodbflex.ListRestoreJobsResponse, error)
 }
 
 func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId string) (string, error) {

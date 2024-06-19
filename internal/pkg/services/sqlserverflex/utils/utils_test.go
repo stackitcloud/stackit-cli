@@ -15,6 +15,7 @@ import (
 var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
+	testUserId     = uuid.NewString()
 )
 
 const (
@@ -405,6 +406,56 @@ func TestGetInstanceName(t *testing.T) {
 			}
 
 			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetUserName(t *testing.T) {
+	tests := []struct {
+		description    string
+		getUserFails   bool
+		getUserResp    *sqlserverflex.GetUserResponse
+		isValid        bool
+		expectedOutput string
+	}{
+		{
+			description: "base",
+			getUserResp: &sqlserverflex.GetUserResponse{
+				Item: &sqlserverflex.InstanceResponseUser{
+					Username: utils.Ptr(testUserName),
+				},
+			},
+			isValid:        true,
+			expectedOutput: testUserName,
+		},
+		{
+			description:  "get user fails",
+			getUserFails: true,
+			isValid:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &sqlServerFlexClientMocked{
+				getUserFails: tt.getUserFails,
+				getUserResp:  tt.getUserResp,
+			}
+
+			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

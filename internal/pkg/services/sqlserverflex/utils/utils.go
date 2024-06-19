@@ -17,6 +17,7 @@ const (
 type SQLServerFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
 	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*sqlserverflex.GetInstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*sqlserverflex.GetUserResponse, error)
 }
 
 func ValidateFlavorId(flavorId string, flavors *[]sqlserverflex.InstanceFlavorEntry) error {
@@ -90,4 +91,12 @@ func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, project
 		return "", fmt.Errorf("get SQLServer Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
+}
+
+func GetUserName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, userId string) (string, error) {
+	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
+	if err != nil {
+		return "", fmt.Errorf("get MongoDBFlex user: %w", err)
+	}
+	return *resp.Item.Username, nil
 }
