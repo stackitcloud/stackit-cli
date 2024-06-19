@@ -87,10 +87,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List SQL Server Flex available versions`,
 				"$ stackit beta sqlserverflex options --versions"),
 			examples.NewExample(
-				`List SQL Server Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit sqlserverflex options --flavors"`,
+				`List SQL Server Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit beta sqlserverflex options --flavors"`,
 				"$ stackit beta sqlserverflex options --storages --flavor-id <FLAVOR_ID>"),
 			examples.NewExample(
-				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit sqlserverflex instance list"`,
+				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit beta sqlserverflex instance list"`,
 				"$ stackit beta sqlserverflex options --user-roles --db-compatibilities --instance-id <INSTANCE_ID>"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
