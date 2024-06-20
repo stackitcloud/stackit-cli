@@ -27,7 +27,6 @@ stackit beta sqlserverflex user create [flags]
 ### Options
 
 ```
-      --database string      Default database for the user
   -h, --help                 Help for "stackit beta sqlserverflex user create"
       --instance-id string   ID of the instance
       --roles strings        Roles of the user
