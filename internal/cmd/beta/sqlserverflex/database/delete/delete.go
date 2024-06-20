@@ -1,11 +1,9 @@
-package create
+package delete
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,39 +12,36 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 const (
 	databaseNameArg = "DATABASE_NAME"
 
 	instanceIdFlag = "instance-id"
-	ownerFlag      = "owner"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	DatabaseName string
 	InstanceId   string
-	Owner        string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("create %s", databaseNameArg),
-		Short: "Creates an SQLServer Flex database",
+		Use:   fmt.Sprintf("delete %s", databaseNameArg),
+		Short: "Deletes an SQLServer Flex database",
 		Long: fmt.Sprintf("%s\n%s",
-			"Creates an SQLServer Flex database.",
+			"Deletes an SQLServer Flex database.",
 			`This operation cannot be triggered asynchronously (the "--async" flag will have no effect).`,
 		),
 		Args: args.SingleArg(databaseNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an SQLServer Flex database with name "my-database" on instance with ID "xxx"`,
-				"$ stackit beta sqlserverflex database create my-database --instance-id xxx --owner some-username"),
+				`Delete an SQLServer Flex database with name "my-database" of instance with ID "xxx"`,
+				"$ stackit beta sqlserverflex database delete my-database --instance-id xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -62,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create database %q? (This cannot be undone)", model.DatabaseName)
+				prompt := fmt.Sprintf("Are you sure you want to delete database %q? (This cannot be undone)", model.DatabaseName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -72,15 +67,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			s := spinner.New(p)
-			s.Start("Creating database")
-			resp, err := req.Execute()
+			s.Start("Deleting database")
+			err = req.Execute()
 			if err != nil {
 				s.StopWithError()
-				return fmt.Errorf("create SQLServer Flex database: %w", err)
+				return fmt.Errorf("delete SQLServer Flex database: %w", err)
 			}
 			s.Stop()
 
-			return outputResult(p, model, resp)
+			p.Info("Deleted database %q\n", model.DatabaseName)
+			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -89,8 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "SQLServer Flex instance ID")
-	cmd.Flags().String(ownerFlag, "", "Username of the owner user")
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, ownerFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -106,7 +101,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		DatabaseName:    databaseName,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Owner:           flags.FlagToStringValue(p, cmd, ownerFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -121,38 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateDatabaseRequest {
-	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId)
-	payload := sqlserverflex.CreateDatabasePayload{
-		Name: &model.DatabaseName,
-		Options: utils.Ptr(map[string]string{
-			"owner": model.Owner,
-		}),
-	}
-	req = req.CreateDatabasePayload(payload)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteDatabaseRequest {
+	req := apiClient.DeleteDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName)
 	return req
-}
-
-func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.CreateDatabaseResponse) error {
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		p.Outputf("Created database %q\n", model.DatabaseName)
-		return nil
-	}
 }

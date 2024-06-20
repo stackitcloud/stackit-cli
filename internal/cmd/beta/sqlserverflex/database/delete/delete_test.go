@@ -1,4 +1,4 @@
-package create
+package delete
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/google/go-cmp/cmp"
@@ -23,7 +22,6 @@ var testClient = &sqlserverflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testDatabaseName = "my-database"
-var testOwner = "owner"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -39,7 +37,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		ownerFlag:      testOwner,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -55,7 +52,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		DatabaseName: testDatabaseName,
 		InstanceId:   testInstanceId,
-		Owner:        testOwner,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -63,15 +59,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateDatabaseRequest)) sqlserverflex.ApiCreateDatabaseRequest {
-	request := testClient.CreateDatabase(testCtx, testProjectId, testInstanceId)
-	payload := sqlserverflex.CreateDatabasePayload{
-		Name: &testDatabaseName,
-		Options: utils.Ptr(map[string]string{
-			"owner": testOwner,
-		}),
-	}
-	request = request.CreateDatabasePayload(payload)
+func fixtureRequest(mods ...func(request *sqlserverflex.ApiDeleteDatabaseRequest)) sqlserverflex.ApiDeleteDatabaseRequest {
+	request := testClient.DeleteDatabase(testCtx, testProjectId, testInstanceId, testDatabaseName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,14 +149,6 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "owner missing",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, ownerFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "database name invalid 1",
 			argValues:   []string{""},
 			flagValues:  fixtureFlagValues(),
@@ -233,7 +214,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sqlserverflex.ApiCreateDatabaseRequest
+		expectedRequest sqlserverflex.ApiDeleteDatabaseRequest
 	}{
 		{
 			description:     "base",
