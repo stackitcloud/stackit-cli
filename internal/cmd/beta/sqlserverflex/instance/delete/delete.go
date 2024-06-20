@@ -31,12 +31,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes an SQLServer Flex instance",
-		Long:  "Deletes an SQLServer Flex instance.",
+		Short: "Deletes a SQLServer Flex instance",
+		Long:  "Deletes a SQLServer Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an SQLServer Flex instance with ID "xxx"`,
+				`Delete a SQLServer Flex instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

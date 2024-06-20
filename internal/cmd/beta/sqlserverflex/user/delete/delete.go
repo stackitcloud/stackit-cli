@@ -1,11 +1,9 @@
-package resetpassword
+package delete
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,16 +32,16 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("reset-password %s", userIdArg),
-		Short: "Resets the password of a SQLServer Flex user",
-		Long: fmt.Sprintf("%s\ns%s",
-			"Resets the password of a SQLServer Flex user.",
-			"The new password is visible after resetting and cannot be retrieved later.",
+		Use:   fmt.Sprintf("delete %s", userIdArg),
+		Short: "Deletes a SQLServer Flex user",
+		Long: fmt.Sprintf("%s\n%s",
+			"Deletes a SQLServer Flex user by ID. You can get the IDs of users for an instance by running:",
+			"  $ stackit beta sqlserverflex user list --instance-id <INSTANCE_ID>",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Reset the password of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit beta sqlserverflex user reset-password xxx --instance-id yyy"),
+				`Delete a SQLServer Flex user with ID "xxx" for instance with ID "yyy"`,
+				"$ stackit beta sqlserverflex user delete xxx --instance-id yyy"),
 		),
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -72,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -81,21 +79,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			user, err := req.Execute()
+			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("reset SQLServer Flex user password: %w", err)
+				return fmt.Errorf("delete SQLServer Flex user: %w", err)
 			}
 
-			return outputResult(p, model, userLabel, instanceLabel, user.Item)
+			p.Info("Deleted user %q of instance %q\n", userLabel, instanceLabel)
+			return nil
 		},
 	}
-
 	configureFlags(cmd)
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -127,36 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiResetUserRequest {
-	req := apiClient.ResetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteUserRequest {
+	req := apiClient.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
-}
-
-func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *sqlserverflex.User) error {
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex reset password: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex reset password: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", *user.Username)
-		p.Outputf("New password: %s\n", *user.Password)
-		if user.Uri != nil && *user.Uri != "" {
-			p.Outputf("New URI: %s\n", *user.Uri)
-		}
-		return nil
-	}
 }

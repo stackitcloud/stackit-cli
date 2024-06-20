@@ -32,15 +32,15 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of an SQLServer Flex instance",
-		Long:  "Shows details  of an SQLServer Flex instance.",
+		Short: "Shows details  of a SQLServer Flex instance",
+		Long:  "Shows details  of a SQLServer Flex instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an SQLServer Flex instance with ID "xxx"`,
+				`Get details of a SQLServer Flex instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex instance describe xxx"),
 			examples.NewExample(
-				`Get details of an SQLServer Flex instance with ID "xxx" in JSON format`,
+				`Get details of a SQLServer Flex instance with ID "xxx" in JSON format`,
 				"$ stackit beta sqlserverflex instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

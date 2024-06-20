@@ -21,7 +21,6 @@ import (
 const (
 	instanceIdFlag = "instance-id"
 	usernameFlag   = "username"
-	databaseFlag   = "database"
 	rolesFlag      = "roles"
 )
 
@@ -30,16 +29,15 @@ type inputModel struct {
 
 	InstanceId string
 	Username   *string
-	Database   *string
 	Roles      *[]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates an SQLServer Flex user",
+		Short: "Creates a SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
-			"Creates an SQLServer Flex user for an instance.",
+			"Creates a SQLServer Flex user for an instance.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
@@ -47,10 +45,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
+				`Create a SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
 				"$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database"),
 			examples.NewExample(
-				`Create an SQLServer Flex user for instance with ID "xxx", specifying multiple roles`,
+				`Create a SQLServer Flex user for instance with ID "xxx", specifying multiple roles`,
 				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2`),
 		),
 		Args: args.NoArgs,
@@ -100,7 +98,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user")
-	cmd.Flags().String(databaseFlag, "", "Default database for the user")
 	cmd.Flags().StringSlice(rolesFlag, []string{}, "Roles of the user")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
@@ -117,7 +114,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Database:        flags.FlagToStringPointer(p, cmd, databaseFlag),
 		Roles:           flags.FlagToStringSlicePointer(p, cmd, rolesFlag),
 	}
 
@@ -145,7 +141,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 
 	req = req.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: model.Username,
-		Database: model.Database,
 		Roles:    &roles,
 	})
 	return req
@@ -175,9 +170,6 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		p.Outputf("Password: %s\n", *user.Password)
 		if user.Roles != nil && len(*user.Roles) != 0 {
 			p.Outputf("Roles: %v\n", *user.Roles)
-		}
-		if user.Database != nil && *user.Database != "" {
-			p.Outputf("Database: %s\n", *user.Database)
 		}
 		if user.Host != nil && *user.Host != "" {
 			p.Outputf("Host: %s\n", *user.Host)

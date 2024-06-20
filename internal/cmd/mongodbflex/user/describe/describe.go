@@ -45,10 +45,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit mongodbflex user list xxx --instance-id yyy"),
+				"$ stackit mongodbflex user describe xxx --instance-id yyy"),
 			examples.NewExample(
 				`Get details of a MongoDB Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
-				"$ stackit mongodbflex user list xxx --instance-id yyy --output-format json"),
+				"$ stackit mongodbflex user describe xxx --instance-id yyy --output-format json"),
 		),
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {

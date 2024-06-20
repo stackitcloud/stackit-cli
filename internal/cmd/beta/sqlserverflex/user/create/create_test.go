@@ -29,7 +29,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
 		usernameFlag:   "johndoe",
-		databaseFlag:   "default",
 		rolesFlag:      "read",
 	}
 	for _, mod := range mods {
@@ -46,7 +45,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		Username:   utils.Ptr("johndoe"),
-		Database:   utils.Ptr("default"),
 		Roles:      utils.Ptr([]string{"read"}),
 	}
 	for _, mod := range mods {
@@ -59,7 +57,6 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) s
 	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
 	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: utils.Ptr("johndoe"),
-		Database: utils.Ptr("default"),
 		Roles:    utils.Ptr([]sqlserverflex.Role{"read"}),
 	})
 
@@ -89,16 +86,6 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, usernameFlag)
 			}),
 			isValid: false,
-		},
-		{
-			description: "no database specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, databaseFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Database = nil
-			}),
 		},
 		{
 			description: "no roles specified",
@@ -217,8 +204,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Username = nil
 			}),
 			expectedRequest: fixtureRequest().CreateUserPayload(sqlserverflex.CreateUserPayload{
-				Database: utils.Ptr("default"),
-				Roles:    utils.Ptr([]sqlserverflex.Role{"read"}),
+				Roles: utils.Ptr([]sqlserverflex.Role{"read"}),
 			}),
 		},
 	}

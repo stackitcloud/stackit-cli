@@ -1,4 +1,4 @@
-package resetpassword
+package delete
 
 import (
 	"context"
@@ -59,8 +59,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sqlserverflex.ApiResetUserRequest)) sqlserverflex.ApiResetUserRequest {
-	request := testClient.ResetUser(testCtx, testProjectId, testInstanceId, testUserId)
+func fixtureRequest(mods ...func(request *sqlserverflex.ApiDeleteUserRequest)) sqlserverflex.ApiDeleteUserRequest {
+	request := testClient.DeleteUser(testCtx, testProjectId, testInstanceId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -208,7 +208,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sqlserverflex.ApiResetUserRequest
+		expectedRequest sqlserverflex.ApiDeleteUserRequest
 	}{
 		{
 			description:     "base",

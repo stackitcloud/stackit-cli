@@ -51,14 +51,14 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an SQLServer Flex instance",
-		Long:  "Updates an SQLServer Flex instance.",
+		Short: "Updates a SQLServer Flex instance",
+		Long:  "Updates a SQLServer Flex instance.",
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the name of an SQLServer Flex instance with ID "xxx"`,
+				`Update the name of a SQLServer Flex instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex instance update xxx --name my-new-name"),
 			examples.NewExample(
-				`Update the backup schedule of an SQLServer Flex instance with ID "xxx"`,
+				`Update the backup schedule of a SQLServer Flex instance with ID "xxx"`,
 				`$ stackit beta sqlserverflex instance update xxx --backup-schedule "30 0 * * *"`),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),

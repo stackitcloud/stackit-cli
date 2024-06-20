@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -12,11 +13,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 const (
@@ -35,19 +36,19 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
-		Short: "Shows details of a PostgreSQL Flex user",
+		Short: "Shows details of a SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Shows details of a PostgreSQL Flex user.",
-			`The user password is hidden inside the "host" field and replaced with asterisks, as it is only visible upon creation. You can reset it by running:`,
-			"  $ stackit postgresflex user reset-password USER_ID --instance-id INSTANCE_ID",
+			"Shows details of a SQLServer Flex user.",
+			`The user password is only visible upon creation. You can reset it by running:`,
+			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit postgresflex user describe xxx --instance-id yyy"),
+				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
+				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of a PostgreSQL Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
-				"$ stackit postgresflex user describe xxx --instance-id yyy --output-format json"),
+				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
+				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy --output-format json"),
 		),
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get MongoDB Flex user: %w", err)
+				return fmt.Errorf("get SQLServer Flex user: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, *resp.Item)
@@ -111,17 +112,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetUserRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetUserRequest {
 	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserResponse) error {
+func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.InstanceResponseUser) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -129,7 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex user: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -139,12 +140,22 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 		table.AddRow("ID", *user.Id)
 		table.AddSeparator()
 		table.AddRow("USERNAME", *user.Username)
-		table.AddSeparator()
-		table.AddRow("ROLES", *user.Roles)
-		table.AddSeparator()
-		table.AddRow("HOST", *user.Host)
-		table.AddSeparator()
-		table.AddRow("PORT", *user.Port)
+		if user.Roles != nil && len(*user.Roles) != 0 {
+			table.AddSeparator()
+			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))
+		}
+		if user.Database != nil && *user.Database != "" {
+			table.AddSeparator()
+			table.AddRow("DATABASE", *user.Database)
+		}
+		if user.Host != nil && *user.Host != "" {
+			table.AddSeparator()
+			table.AddRow("HOST", *user.Host)
+		}
+		if user.Port != nil {
+			table.AddSeparator()
+			table.AddRow("PORT", *user.Port)
+		}
 
 		err := table.Display(p)
 		if err != nil {
