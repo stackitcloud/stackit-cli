@@ -39,7 +39,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Short: "Shows details of an SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Shows details of an SQLServer Flex user.",
-			`The user password is hidden inside the "host" field and replaced with asterisks, as it is only visible upon creation. You can reset it by running:`,
+			`The user password is only visible upon creation. You can reset it by running:`,
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
