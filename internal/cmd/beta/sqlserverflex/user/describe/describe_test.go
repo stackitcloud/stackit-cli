@@ -21,7 +21,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = uuid.NewString()
+var testUserId = "my-user-id"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
