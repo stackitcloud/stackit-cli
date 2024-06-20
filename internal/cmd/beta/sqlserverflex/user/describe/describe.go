@@ -142,7 +142,7 @@ func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.Inst
 		table.AddRow("USERNAME", *user.Username)
 		if user.Roles != nil && len(*user.Roles) != 0 {
 			table.AddSeparator()
-			table.AddRow("ROLES", strings.Join(*user.Roles, ", "))
+			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))
 		}
 		if user.Database != nil && *user.Database != "" {
 			table.AddSeparator()
