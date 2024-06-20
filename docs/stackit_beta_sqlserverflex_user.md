@@ -29,9 +29,9 @@ stackit beta sqlserverflex user [flags]
 ### SEE ALSO
 
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
-* [stackit beta sqlserverflex user create](./stackit_beta_sqlserverflex_user_create.md)	 - Creates an SQLServer Flex user
-* [stackit beta sqlserverflex user delete](./stackit_beta_sqlserverflex_user_delete.md)	 - Deletes an SQLServer Flex user
-* [stackit beta sqlserverflex user describe](./stackit_beta_sqlserverflex_user_describe.md)	 - Shows details of an SQLServer Flex user
+* [stackit beta sqlserverflex user create](./stackit_beta_sqlserverflex_user_create.md)	 - Creates a SQLServer Flex user
+* [stackit beta sqlserverflex user delete](./stackit_beta_sqlserverflex_user_delete.md)	 - Deletes a SQLServer Flex user
+* [stackit beta sqlserverflex user describe](./stackit_beta_sqlserverflex_user_describe.md)	 - Shows details of a SQLServer Flex user
 * [stackit beta sqlserverflex user list](./stackit_beta_sqlserverflex_user_list.md)	 - Lists all SQLServer Flex users of an instance
-* [stackit beta sqlserverflex user reset-password](./stackit_beta_sqlserverflex_user_reset-password.md)	 - Resets the password of an SQLServer Flex user
+* [stackit beta sqlserverflex user reset-password](./stackit_beta_sqlserverflex_user_reset-password.md)	 - Resets the password of a SQLServer Flex user
 

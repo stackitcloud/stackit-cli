@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex instance delete
 
-Deletes an SQLServer Flex instance
+Deletes a SQLServer Flex instance
 
 ### Synopsis
 
-Deletes an SQLServer Flex instance.
+Deletes a SQLServer Flex instance.
 
 ```
 stackit beta sqlserverflex instance delete INSTANCE_ID [flags]
@@ -13,7 +13,7 @@ stackit beta sqlserverflex instance delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete an SQLServer Flex instance with ID "xxx"
+  Delete a SQLServer Flex instance with ID "xxx"
   $ stackit beta sqlserverflex instance delete xxx
 ```
 

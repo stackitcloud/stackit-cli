@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex instance update
 
-Updates an SQLServer Flex instance
+Updates a SQLServer Flex instance
 
 ### Synopsis
 
-Updates an SQLServer Flex instance.
+Updates a SQLServer Flex instance.
 
 ```
 stackit beta sqlserverflex instance update INSTANCE_ID [flags]
@@ -13,10 +13,10 @@ stackit beta sqlserverflex instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update the name of an SQLServer Flex instance with ID "xxx"
+  Update the name of a SQLServer Flex instance with ID "xxx"
   $ stackit beta sqlserverflex instance update xxx --name my-new-name
 
-  Update the backup schedule of an SQLServer Flex instance with ID "xxx"
+  Update the backup schedule of a SQLServer Flex instance with ID "xxx"
   $ stackit beta sqlserverflex instance update xxx --backup-schedule "30 0 * * *"
 ```
 

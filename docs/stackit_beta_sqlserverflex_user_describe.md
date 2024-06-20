@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex user describe
 
-Shows details of an SQLServer Flex user
+Shows details of a SQLServer Flex user
 
 ### Synopsis
 
-Shows details of an SQLServer Flex user.
+Shows details of a SQLServer Flex user.
 The user password is only visible upon creation. You can reset it by running:
   $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID
 
@@ -15,10 +15,10 @@ stackit beta sqlserverflex user describe USER_ID [flags]
 ### Examples
 
 ```
-  Get details of an SQLServer Flex user with ID "xxx" of instance with ID "yyy"
+  Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"
   $ stackit beta sqlserverflex user describe xxx --instance-id yyy
 
-  Get details of an SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format
+  Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format
   $ stackit beta sqlserverflex user describe xxx --instance-id yyy --output-format json
 ```
 

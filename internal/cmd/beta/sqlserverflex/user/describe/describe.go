@@ -36,18 +36,18 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
-		Short: "Shows details of an SQLServer Flex user",
+		Short: "Shows details of a SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Shows details of an SQLServer Flex user.",
+			"Shows details of a SQLServer Flex user.",
 			`The user password is only visible upon creation. You can reset it by running:`,
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
+				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
 				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy"),
 			examples.NewExample(
-				`Get details of an SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
+				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
 				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy --output-format json"),
 		),
 		Args: args.SingleArg(userIdArg, nil),

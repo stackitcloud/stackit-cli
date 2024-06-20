@@ -57,18 +57,18 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates an SQLServer Flex instance",
-		Long:  "Creates an SQLServer Flex instance.",
+		Short: "Creates a SQLServer Flex instance",
+		Long:  "Creates a SQLServer Flex instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values`,
+				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values`,
 				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4`),
 			examples.NewExample(
-				`Create an SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values`,
+				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values`,
 				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx`),
 			examples.NewExample(
-				`Create an SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
+				`Create a SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
 				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20  --acl 1.2.3.0/24`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -92,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create an SQLServer Flex instance for project %q?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a SQLServer Flex instance for project %q?", projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

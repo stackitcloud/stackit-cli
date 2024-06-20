@@ -33,14 +33,14 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", userIdArg),
-		Short: "Deletes an SQLServer Flex user",
+		Short: "Deletes a SQLServer Flex user",
 		Long: fmt.Sprintf("%s\n%s",
-			"Deletes an SQLServer Flex user by ID. You can get the IDs of users for an instance by running:",
+			"Deletes a SQLServer Flex user by ID. You can get the IDs of users for an instance by running:",
 			"  $ stackit beta sqlserverflex user list --instance-id <INSTANCE_ID>",
 		),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an SQLServer Flex user with ID "xxx" for instance with ID "yyy"`,
+				`Delete a SQLServer Flex user with ID "xxx" for instance with ID "yyy"`,
 				"$ stackit beta sqlserverflex user delete xxx --instance-id yyy"),
 		),
 		Args: args.SingleArg(userIdArg, nil),

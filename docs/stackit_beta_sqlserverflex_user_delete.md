@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex user delete
 
-Deletes an SQLServer Flex user
+Deletes a SQLServer Flex user
 
 ### Synopsis
 
-Deletes an SQLServer Flex user by ID. You can get the IDs of users for an instance by running:
+Deletes a SQLServer Flex user by ID. You can get the IDs of users for an instance by running:
   $ stackit beta sqlserverflex user list --instance-id <INSTANCE_ID>
 
 ```
@@ -14,7 +14,7 @@ stackit beta sqlserverflex user delete USER_ID [flags]
 ### Examples
 
 ```
-  Delete an SQLServer Flex user with ID "xxx" for instance with ID "yyy"
+  Delete a SQLServer Flex user with ID "xxx" for instance with ID "yyy"
   $ stackit beta sqlserverflex user delete xxx --instance-id yyy
 ```
 
