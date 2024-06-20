@@ -153,14 +153,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, fmt.Errorf("%s\n\n%s\n%s",
 			`please specify a flavor ID to show storages for by setting the flag "--flavor-id <FLAVOR_ID>".`,
 			"You can get the available flavor IDs by running:",
-			"  $ stackit sqlserverflex options --flavors")
+			"  $ stackit beta sqlserverflex options --flavors")
 	}
 
 	if (userRoles || dbCollations || dbCompatibilities) && instanceId == nil {
 		return nil, fmt.Errorf("%s\n\n%s\n%s",
 			`please specify an instance ID to show user roles, database collations or database compatibilities for by setting the flag "--instance-id <INSTANCE_ID>".`,
 			"You can get the available instances and their IDs by running:",
-			"  $ stackit sqlserverflex instance list")
+			"  $ stackit beta sqlserverflex instance list")
 	}
 
 	model := inputModel{

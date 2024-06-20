@@ -36,6 +36,12 @@ func (s *Spinner) Stop() {
 	s.printer.Info("\r%s ✓ \n", s.message)
 }
 
+func (s *Spinner) StopWithError() {
+	s.done <- true
+	close(s.done)
+	s.printer.Info("\r%s ✗ \n", s.message)
+}
+
 func (s *Spinner) animate() {
 	i := 0
 	for {
