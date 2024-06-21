@@ -1,6 +1,7 @@
 package sqlserverflex
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/database"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/user"
@@ -24,6 +25,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+	cmd.AddCommand(database.NewCmd(p))
 	cmd.AddCommand(instance.NewCmd(p))
 	cmd.AddCommand(options.NewCmd(p))
 	cmd.AddCommand(user.NewCmd(p))
