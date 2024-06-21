@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex database create
 
-Creates an SQLServer Flex database
+Creates a SQLServer Flex database
 
 ### Synopsis
 
-Creates an SQLServer Flex database.
+Creates a SQLServer Flex database.
 This operation cannot be triggered asynchronously (the "--async" flag will have no effect).
 
 ```
@@ -14,7 +14,7 @@ stackit beta sqlserverflex database create DATABASE_NAME [flags]
 ### Examples
 
 ```
-  Create an SQLServer Flex database with name "my-database" on instance with ID "xxx"
+  Create a SQLServer Flex database with name "my-database" on instance with ID "xxx"
   $ stackit beta sqlserverflex database create my-database --instance-id xxx --owner some-username
 ```
 

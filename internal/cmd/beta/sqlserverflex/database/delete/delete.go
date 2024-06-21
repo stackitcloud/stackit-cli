@@ -32,15 +32,15 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", databaseNameArg),
-		Short: "Deletes an SQLServer Flex database",
+		Short: "Deletes a SQLServer Flex database",
 		Long: fmt.Sprintf("%s\n%s",
-			"Deletes an SQLServer Flex database.",
+			"Deletes a SQLServer Flex database.",
 			`This operation cannot be triggered asynchronously (the "--async" flag will have no effect).`,
 		),
 		Args: args.SingleArg(databaseNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an SQLServer Flex database with name "my-database" of instance with ID "xxx"`,
+				`Delete a SQLServer Flex database with name "my-database" of instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex database delete my-database --instance-id xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

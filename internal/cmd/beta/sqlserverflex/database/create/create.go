@@ -37,15 +37,15 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", databaseNameArg),
-		Short: "Creates an SQLServer Flex database",
+		Short: "Creates a SQLServer Flex database",
 		Long: fmt.Sprintf("%s\n%s",
-			"Creates an SQLServer Flex database.",
+			"Creates a SQLServer Flex database.",
 			`This operation cannot be triggered asynchronously (the "--async" flag will have no effect).`,
 		),
 		Args: args.SingleArg(databaseNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an SQLServer Flex database with name "my-database" on instance with ID "xxx"`,
+				`Create a SQLServer Flex database with name "my-database" on instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex database create my-database --instance-id xxx --owner some-username"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

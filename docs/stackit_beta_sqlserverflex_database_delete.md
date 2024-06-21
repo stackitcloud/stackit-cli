@@ -1,10 +1,10 @@
 ## stackit beta sqlserverflex database delete
 
-Deletes an SQLServer Flex database
+Deletes a SQLServer Flex database
 
 ### Synopsis
 
-Deletes an SQLServer Flex database.
+Deletes a SQLServer Flex database.
 This operation cannot be triggered asynchronously (the "--async" flag will have no effect).
 
 ```
@@ -14,7 +14,7 @@ stackit beta sqlserverflex database delete DATABASE_NAME [flags]
 ### Examples
 
 ```
-  Delete an SQLServer Flex database with name "my-database" of instance with ID "xxx"
+  Delete a SQLServer Flex database with name "my-database" of instance with ID "xxx"
   $ stackit beta sqlserverflex database delete my-database --instance-id xxx
 ```
 
