@@ -36,7 +36,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("reset-password %s", userIdArg),
 		Short: "Resets the password of a SQLServer Flex user",
-		Long: fmt.Sprintf("%s\ns%s",
+		Long: fmt.Sprintf("%s\n%s",
 			"Resets the password of a SQLServer Flex user.",
 			"The new password is visible after resetting and cannot be retrieved later.",
 		),
