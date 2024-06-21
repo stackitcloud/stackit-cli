@@ -21,7 +21,7 @@ stackit beta sqlserverflex user create [flags]
   $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database
 
   Create a SQLServer Flex user for instance with ID "xxx", specifying multiple roles
-  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2
+  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2"
 ```
 
 ### Options

@@ -5,7 +5,7 @@ Resets the password of a SQLServer Flex user
 ### Synopsis
 
 Resets the password of a SQLServer Flex user.
-sThe new password is visible after resetting and cannot be retrieved later.
+The new password is visible after resetting and cannot be retrieved later.
 
 ```
 stackit beta sqlserverflex user reset-password USER_ID [flags]

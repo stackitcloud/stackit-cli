@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database"),
 			examples.NewExample(
 				`Create a SQLServer Flex user for instance with ID "xxx", specifying multiple roles`,
-				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2`),
+				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2"`),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
