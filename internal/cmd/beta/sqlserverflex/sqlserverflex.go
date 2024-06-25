@@ -14,7 +14,7 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "sqlserverflex TEST 2",
+		Use:   "sqlserverflex TEST 3",
 		Short: "Provides functionality for SQLServer Flex",
 		Long:  "Provides functionality for SQLServer Flex.",
 		Args:  args.NoArgs,
