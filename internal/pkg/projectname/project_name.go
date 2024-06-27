@@ -82,10 +82,6 @@ func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
 
 func isProjectIdSetInEnvVar() bool {
 	// Reads the project Id from the environment variable PROJECT_ID
-	projectIdFromEnv := os.Getenv("STACKIT_PROJECT_ID")
-	projectIdSetInEnv := false
-	if projectIdFromEnv != "" {
-		projectIdSetInEnv = true
-	}
+	_, projectIdSetInEnv := os.LookupEnv("STACKIT_PROJECT_ID")
 	return projectIdSetInEnv
 }
