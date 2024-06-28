@@ -93,7 +93,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 			if !enabled {
-				return fmt.Errorf("SKE isn't enabled for this project, please run 'stackit ske enable'")
+				return &errors.ServiceEnablementError{
+					Service: "SKE",
+					Command: "stackit ske enable",
+				}
 			}
 
 			// Check if cluster exists

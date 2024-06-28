@@ -133,6 +133,8 @@ The profile name can only contain lowercase letters, numbers, and "-" and cannot
 
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
+
+	SERVICE_NOT_ENABLED = `%s isn't enabled for this project, please run '%s'`
 )
 
 type ProjectIdError struct{}
@@ -363,4 +365,13 @@ type InvalidProfileNameError struct {
 
 func (e *InvalidProfileNameError) Error() string {
 	return fmt.Sprintf(INVALID_PROFILE_NAME, e.Profile)
+}
+
+type ServiceEnablementError struct {
+	Service string
+	Command string
+}
+
+func (e *ServiceEnablementError) Error() string {
+	return fmt.Sprintf(SERVICE_NOT_ENABLED, e.Service, e.Command)
 }

@@ -60,6 +60,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
+			reqServiceState := apiClient.GetServiceStatus(ctx, model.ProjectId)
+			_, err = reqServiceState.Execute()
+			if err != nil {
+				return &errors.ServiceEnablementError{
+					Service: "SKE",
+					Command: "stackit ske enable",
+				}
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
