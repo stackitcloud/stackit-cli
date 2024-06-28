@@ -3,6 +3,7 @@ package projectname
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -41,7 +42,7 @@ func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (
 
 	// If project ID is set in config, we store the project name in config
 	// (So next time we can just pull it from there)
-	if !isProjectIdSetInFlags(p, cmd) {
+	if !(isProjectIdSetInFlags(p, cmd) || isProjectIdSetInEnvVar()) {
 		viper.Set(config.ProjectNameKey, projectName)
 		err = config.Write()
 		if err != nil {
@@ -57,13 +58,14 @@ func useProjectNameFromConfig(p *print.Printer, cmd *cobra.Command) bool {
 	// We use the project name from the config file, if:
 	// - Project id is not set to a different value than the one in the config file
 	// - Project name in the config file is not empty
-	projectIdSet := isProjectIdSetInFlags(p, cmd)
+	projectIdSetInFlags := isProjectIdSetInFlags(p, cmd)
+	projectIdSetInEnv := isProjectIdSetInEnvVar()
 	projectName := viper.GetString(config.ProjectNameKey)
 	projectNameSet := false
 	if projectName != "" {
 		projectNameSet = true
 	}
-	return !projectIdSet && projectNameSet
+	return !projectIdSetInFlags && !projectIdSetInEnv && projectNameSet
 }
 
 func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
@@ -76,4 +78,10 @@ func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
 		projectIdSetInFlag = true
 	}
 	return projectIdSetInFlag
+}
+
+func isProjectIdSetInEnvVar() bool {
+	// Reads the project Id from the environment variable PROJECT_ID
+	_, projectIdSetInEnv := os.LookupEnv("STACKIT_PROJECT_ID")
+	return projectIdSetInEnv
 }
