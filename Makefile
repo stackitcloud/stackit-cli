@@ -7,6 +7,9 @@ GOLANG_CI_ARGS ?= --allow-parallel-runners --timeout=5m --config=${GOLANG_CI_YAM
 build:
 	@go build -o ./bin/stackit   
 
+fmt:
+	@gofmt -s -w .
+
 # Setup and tool initialization tasks
 project-help:
 	@$(SCRIPTS_BASE)/project.sh help
