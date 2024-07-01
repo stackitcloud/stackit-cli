@@ -153,6 +153,8 @@ github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.9.0 h1:qCbvGq
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.9.0/go.mod h1:p16qz/pAW8b1gEhqMpIgJfutRPeDPqQLlbVGyCo3f8o=
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.8.0 h1:pJBG455kmtbQFpCxcBfBK8wOuEnmsMv3h90LFcdj3q0=
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.8.0/go.mod h1:LX0Mcyr7/QP77zf7e05fHCJO38RMuTxr7nEDUDZ3oPQ=
+github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.1.0 h1:fYCBNvh4tqE+DXYDfbJEjC3n/I78zTZajdcPTPB/yig=
+github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.1.0/go.mod h1:ZYI3wj/NnhhWi25ugbdcniwnY/7mF6zN582c5HPe00o=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0 h1:JB1O0E9+L50ZaO36uz7azurvUuB5JdX5s2ZXuIdb9t8=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.4.0/go.mod h1:Ni9RBJvcaXRIrDIuQBpJcuQvCQSj27crQSyc+WM4p0c=
 github.com/stackitcloud/stackit-sdk-go/services/ske v0.16.0 h1:trrJuRMzgXu6fiiMZiUx6+A1FNKEFhA1vGq5cr5Qn3U=
