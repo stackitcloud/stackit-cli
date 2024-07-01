@@ -74,6 +74,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Redis                              | `redis`                   | :white_check_mark:        |
 | Resource Manager                   | `project`                 | :white_check_mark:        |
 | Secrets Manager                    | `secrets-manager`         | :white_check_mark:        |
+| Server Backup Management           | `beta server backup`      | :white_check_mark:        |
 | Service Account                    | `service-account`         | :white_check_mark:        |
 | SQLServer Flex                     | `beta sqlserverflex`      | :white_check_mark: (beta) |
 
