@@ -1,8 +1,8 @@
-package server
+package template
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/backup"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/command"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/command/template/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/command/template/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -12,9 +12,9 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "server",
-		Short: "Provides functionality for Server",
-		Long:  "Provides functionality for Server.",
+		Use:   "template",
+		Short: "Provides functionality for Server Command Template",
+		Long:  "Provides functionality for Server Command Template.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
@@ -23,6 +23,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(backup.NewCmd(p))
-	cmd.AddCommand(command.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
+	cmd.AddCommand(list.NewCmd(p))
 }

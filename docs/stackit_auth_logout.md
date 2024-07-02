@@ -1,19 +1,26 @@
-## stackit beta server
+## stackit auth logout
 
-Provides functionality for Server
+Logs the user account out of the STACKIT CLI
 
 ### Synopsis
 
-Provides functionality for Server.
+Logs the user account out of the STACKIT CLI.
 
 ```
-stackit beta server [flags]
+stackit auth logout [flags]
+```
+
+### Examples
+
+```
+  Log out of the STACKIT CLI.
+  $ stackit auth logout
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta server"
+  -h, --help   Help for "stackit auth logout"
 ```
 
 ### Options inherited from parent commands
@@ -28,7 +35,5 @@ stackit beta server [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
-* [stackit beta server command](./stackit_beta_server_command.md)	 - Provides functionality for Server Command
+* [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 

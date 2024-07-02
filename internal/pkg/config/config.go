@@ -36,6 +36,7 @@ const (
 	ServiceAccountCustomEndpointKey    = "service_account_custom_endpoint"
 	ServiceEnablementCustomEndpointKey = "service_enablement_custom_endpoint"
 	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
+	RunCommandCustomEndpointKey        = "runcommand_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 
@@ -84,6 +85,7 @@ var ConfigKeys = []string{
 	ServiceAccountCustomEndpointKey,
 	ServiceEnablementCustomEndpointKey,
 	ServerBackupCustomEndpointKey,
+	RunCommandCustomEndpointKey,
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
 }
@@ -156,6 +158,7 @@ func setConfigDefaults() {
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(ServiceEnablementCustomEndpointKey, "")
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
+	viper.SetDefault(RunCommandCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 }
