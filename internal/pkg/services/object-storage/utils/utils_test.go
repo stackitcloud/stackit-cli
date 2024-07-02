@@ -35,7 +35,7 @@ type objectStorageClientMocked struct {
 	listAccessKeysReq          objectstorage.ApiListAccessKeysRequest
 }
 
-func (m *objectStorageClientMocked) GetServiceStatusExecute(ctx context.Context, projectId string) (*objectstorage.ProjectStatus, error) {
+func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _ string) (*objectstorage.ProjectStatus, error) {
 	if m.getServiceStatusFails {
 		return nil, fmt.Errorf("could not get service status")
 	}
