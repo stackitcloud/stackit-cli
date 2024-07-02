@@ -40,6 +40,7 @@ const (
 	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
+	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
@@ -69,6 +70,7 @@ type inputModel struct {
 	ResourceManagerCustomEndpoint   bool
 	SecretsManagerCustomEndpoint    bool
 	ServerBackupCustomEndpoint      bool
+	RunCommandCustomEndpoint        bool
 	ServiceAccountCustomEndpoint    bool
 	ServiceEnablementCustomEndpoint bool
 	SKECustomEndpoint               bool
@@ -167,6 +169,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.ServerBackupCustomEndpoint {
 				viper.Set(config.ServerBackupCustomEndpointKey, "")
 			}
+			if model.RunCommandCustomEndpoint {
+				viper.Set(config.RunCommandCustomEndpointKey, "")
+			}
 			if model.SKECustomEndpoint {
 				viper.Set(config.SKECustomEndpointKey, "")
 			}
@@ -214,6 +219,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "Service Account API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceEnablementCustomEndpointFlag, false, "Service Enablement API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serverBackupCustomEndpointFlag, false, "Server Backup base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(runCommandCustomEndpointFlag, false, "Server Command base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
@@ -246,6 +252,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServiceAccountCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
 		ServiceEnablementCustomEndpoint: flags.FlagToBoolValue(p, cmd, serviceEnablementCustomEndpointFlag),
 		ServerBackupCustomEndpoint:      flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),
+		RunCommandCustomEndpoint:        flags.FlagToBoolValue(p, cmd, runCommandCustomEndpointFlag),
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
