@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
@@ -57,6 +58,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
+				}
+			}
+
+			// Check if the project is enabled before trying to create
+			enabled, err := utils.ProjectEnabled(ctx, apiClient, model.ProjectId)
+			if err != nil {
+				return fmt.Errorf("check if Object Storage is enabled: %w", err)
+			}
+			if !enabled {
+				return &errors.ServiceDisabledError{
+					Service: "object-storage",
 				}
 			}
 

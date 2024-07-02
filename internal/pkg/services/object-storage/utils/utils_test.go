@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/core/config"
+	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
 )
 
@@ -27,9 +28,21 @@ const (
 )
 
 type objectStorageClientMocked struct {
+	serviceDisabled            bool
+	getServiceStatusFails      bool
 	listCredentialsGroupsFails bool
 	listCredentialsGroupsResp  *objectstorage.ListCredentialsGroupsResponse
 	listAccessKeysReq          objectstorage.ApiListAccessKeysRequest
+}
+
+func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _ string) (*objectstorage.ProjectStatus, error) {
+	if m.getServiceStatusFails {
+		return nil, fmt.Errorf("could not get service status")
+	}
+	if m.serviceDisabled {
+		return nil, &oapierror.GenericOpenAPIError{StatusCode: 404}
+	}
+	return &objectstorage.ProjectStatus{}, nil
 }
 
 func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Context, _ string) (*objectstorage.ListCredentialsGroupsResponse, error) {
@@ -41,6 +54,58 @@ func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Conte
 
 func (m *objectStorageClientMocked) ListAccessKeys(_ context.Context, _ string) objectstorage.ApiListAccessKeysRequest {
 	return m.listAccessKeysReq
+}
+
+func TestProjectEnabled(t *testing.T) {
+	tests := []struct {
+		description     string
+		serviceDisabled bool
+		getProjectFails bool
+		isValid         bool
+		expectedOutput  bool
+	}{
+		{
+			description:    "project enabled",
+			isValid:        true,
+			expectedOutput: true,
+		},
+		{
+			description:     "project disabled (404)",
+			serviceDisabled: true,
+			isValid:         true,
+			expectedOutput:  false,
+		},
+		{
+			description:     "get project fails",
+			getProjectFails: true,
+			isValid:         false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &objectStorageClientMocked{
+				serviceDisabled:       tt.serviceDisabled,
+				getServiceStatusFails: tt.getProjectFails,
+			}
+
+			output, err := ProjectEnabled(context.Background(), client, testProjectId)
+
+			if tt.isValid && err != nil {
+				fmt.Printf("failed on valid input: %v", err)
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %t, got %t", tt.expectedOutput, output)
+			}
+		})
+	}
 }
 
 func TestGetCredentialsGroupName(t *testing.T) {
