@@ -19,26 +19,18 @@ import (
 )
 
 const (
-	backupScheduleNameFlag    = "backup-schedule-name"
-	enabledFlag               = "enabled"
-	rruleFlag                 = "rrule"
-	backupNameFlag            = "backup-name"
-	backupVolumeIdsFlag       = "backup-volume-ids"
-	backupRetentionPeriodFlag = "backup-retention-period"
+	backupNameFlag            = "name"
+	backupRetentionPeriodFlag = "retention-period"
+	backupVolumeIdsFlag       = "volume-ids"
 	serverIdFlag              = "server-id"
 
-	defaultRrule           = "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"
 	defaultRetentionPeriod = 14
-	defaultEnabled         = true
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	ServerId              string
-	BackupScheduleName    string
-	Enabled               bool
-	Rrule                 string
 	BackupName            string
 	BackupRetentionPeriod int64
 	BackupVolumeIds       []string
@@ -47,16 +39,16 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a Server Backup Schedule",
-		Long:  "Creates a Server Backup Schedule.",
+		Short: "Creates a Server Backup.",
+		Long:  "Creates a Server Backup. Operation always is async.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Server Backup Schedule with name "myschedule" and backup name "mybackup"`,
-				`$ stackit beta server backup schedule create --server-id xxx --backup-name=mybackup --backup-schedule-name=myschedule`),
+				`Create a Server Backup with name "mybackup"`,
+				`$ stackit beta server backup create --server-id xxx --name=mybackup`),
 			examples.NewExample(
-				`Create a Server Backup Schedule with name "myschedule", backup name "mybackup" and retention period of 5 days`,
-				`$ stackit beta server backup schedule create --server-id xxx --backup-name=mybackup --backup-schedule-name=myschedule --backup-retention-period=5`),
+				`Create a Server Backup with name "mybackup" and retention period of 5 days`,
+				`$ stackit beta server backup create --server-id xxx --name=mybackup --retention-period=5`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -73,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Backup Schedule for server %s?", model.ServerId)
+				prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -87,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Server Backup Schedule: %w", err)
+				return fmt.Errorf("create Server Backup: %w", err)
 			}
 
 			return outputResult(p, model, resp)
@@ -99,14 +91,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
-	cmd.Flags().StringP(backupScheduleNameFlag, "n", "", "Backup schedule name")
 	cmd.Flags().StringP(backupNameFlag, "b", "", "Backup name")
 	cmd.Flags().Int64P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
-	cmd.Flags().BoolP(enabledFlag, "e", defaultEnabled, "Is the server backup schedule enabled")
-	cmd.Flags().StringP(rruleFlag, "r", defaultRrule, "Backup RRULE (recurrence rule)")
 	cmd.Flags().VarP(flags.UUIDSliceFlag(), backupVolumeIdsFlag, "i", "Backup volume IDs, as comma separated UUID values.")
 
-	err := flags.MarkFlagsRequired(cmd, serverIdFlag, backupScheduleNameFlag, backupNameFlag)
+	err := flags.MarkFlagsRequired(cmd, serverIdFlag, backupNameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -120,10 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel:       globalFlags,
 		ServerId:              flags.FlagToStringValue(p, cmd, serverIdFlag),
 		BackupRetentionPeriod: flags.FlagWithDefaultToInt64Value(p, cmd, backupRetentionPeriodFlag),
-		BackupScheduleName:    flags.FlagToStringValue(p, cmd, backupScheduleNameFlag),
 		BackupName:            flags.FlagToStringValue(p, cmd, backupNameFlag),
-		Rrule:                 flags.FlagWithDefaultToStringValue(p, cmd, rruleFlag),
-		Enabled:               flags.FlagToBoolValue(p, cmd, enabledFlag),
 		BackupVolumeIds:       flags.FlagToStringSliceValue(p, cmd, backupVolumeIdsFlag),
 	}
 
@@ -139,31 +125,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupScheduleRequest, error) {
-	req := apiClient.CreateBackupSchedule(ctx, model.ProjectId, model.ServerId)
-	backupProperties := serverbackup.BackupProperties{
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupRequest, error) {
+	req := apiClient.CreateBackup(ctx, model.ProjectId, model.ServerId)
+	payload := serverbackup.CreateBackupPayload{
 		Name:            &model.BackupName,
 		RetentionPeriod: &model.BackupRetentionPeriod,
 		VolumeIds:       &model.BackupVolumeIds,
 	}
 	if model.BackupVolumeIds == nil {
-		backupProperties.VolumeIds = nil
+		payload.VolumeIds = nil
 	}
-	req = req.CreateBackupSchedulePayload(serverbackup.CreateBackupSchedulePayload{
-		Enabled:          &model.Enabled,
-		Name:             &model.BackupScheduleName,
-		Rrule:            &model.Rrule,
-		BackupProperties: &backupProperties,
-	})
+	req = req.CreateBackupPayload(payload)
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.BackupSchedule) error {
+func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.BackupJob) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal server backup schedule: %w", err)
+			return fmt.Errorf("marshal server backup: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -171,13 +152,13 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.Backup
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal server backup schedule: %w", err)
+			return fmt.Errorf("marshal server backup: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
-		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %d\n", model.ServerId, *resp.Id)
+		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", model.ServerId, *resp.Id)
 		return nil
 	}
 }

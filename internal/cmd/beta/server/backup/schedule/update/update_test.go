@@ -23,6 +23,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &serverbackup.APIClient{}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
+var testVolumeId = uuid.NewString()
 var testBackupScheduleId = "5"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -44,7 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		rruleFlag:                 defaultRrule,
 		backupNameFlag:            "example-backup-name",
 		backupRetentionPeriodFlag: "14",
-		backupVolumeIdsFlag:       defaultVolumeIds,
+		backupVolumeIdsFlag:       testVolumeId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -65,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Rrule:                 utils.Ptr(defaultRrule),
 		BackupName:            utils.Ptr("example-backup-name"),
 		BackupRetentionPeriod: utils.Ptr(int64(14)),
-		BackupVolumeIds:       utils.Ptr(defaultVolumeIds),
+		BackupVolumeIds:       []string{testVolumeId},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -83,7 +84,7 @@ func fixtureBackupSchedule(mods ...func(schedule *serverbackup.BackupSchedule)) 
 		BackupProperties: &serverbackup.BackupProperties{
 			Name:            utils.Ptr("example-backup-name"),
 			RetentionPeriod: utils.Ptr(int64(14)),
-			VolumeIds:       nil,
+			VolumeIds:       utils.Ptr([]string{testVolumeId}),
 		},
 	}
 	for _, mod := range mods {
@@ -100,7 +101,7 @@ func fixturePayload(mods ...func(payload *serverbackup.UpdateBackupSchedulePaylo
 		BackupProperties: &serverbackup.BackupProperties{
 			Name:            utils.Ptr("example-backup-name"),
 			RetentionPeriod: utils.Ptr(int64(14)),
-			VolumeIds:       nil,
+			VolumeIds:       utils.Ptr([]string{testVolumeId}),
 		},
 	}
 	for _, mod := range mods {

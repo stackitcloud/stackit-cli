@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -33,7 +32,6 @@ const (
 	defaultRrule           = "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"
 	defaultRetentionPeriod = 14
 	defaultEnabled         = true
-	defaultVolumeIds       = ""
 )
 
 type inputModel struct {
@@ -46,7 +44,7 @@ type inputModel struct {
 	Rrule                 *string
 	BackupName            *string
 	BackupRetentionPeriod *int64
-	BackupVolumeIds       *string
+	BackupVolumeIds       []string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -116,7 +114,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
 	cmd.Flags().BoolP(enabledFlag, "e", defaultEnabled, "Is the server backup schedule enabled")
 	cmd.Flags().StringP(rruleFlag, "r", defaultRrule, "Backup RRULE (recurrence rule)")
-	cmd.Flags().StringP(backupVolumeIdsFlag, "i", defaultVolumeIds, "Backup volume ids, as comma separated UUID values.")
+	cmd.Flags().VarP(flags.UUIDSliceFlag(), backupVolumeIdsFlag, "i", "Backup volume IDs, as comma separated UUID values.")
 
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
@@ -139,7 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		BackupName:            flags.FlagToStringPointer(p, cmd, backupNameFlag),
 		Rrule:                 flags.FlagToStringPointer(p, cmd, rruleFlag),
 		Enabled:               flags.FlagToBoolPointer(p, cmd, enabledFlag),
-		BackupVolumeIds:       flags.FlagToStringPointer(p, cmd, backupVolumeIdsFlag),
+		BackupVolumeIds:       flags.FlagToStringSliceValue(p, cmd, backupVolumeIdsFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -164,12 +162,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 		old.BackupProperties.RetentionPeriod = model.BackupRetentionPeriod
 	}
 	if model.BackupVolumeIds != nil {
-		if *model.BackupVolumeIds == "" {
-			old.BackupProperties.VolumeIds = nil
-		} else {
-			ids := strings.Split(*model.BackupVolumeIds, ",")
-			old.BackupProperties.VolumeIds = &ids
-		}
+		old.BackupProperties.VolumeIds = &model.BackupVolumeIds
 	}
 	if model.Enabled != nil {
 		old.Enabled = model.Enabled
