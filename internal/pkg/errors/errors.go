@@ -134,7 +134,7 @@ The profile name can only contain lowercase letters, numbers, and "-" and cannot
 	USAGE_TIP = `For usage help, run:
   $ %s --help`
 
-	SERVICE_DISABLED_ERROR = `This service isn't enabled for the current project.
+	SERVICE_DISABLED = `This service isn't enabled for the current project.
 
 To enable it, run:
   $ stackit %s enable`
@@ -375,5 +375,5 @@ type ServiceDisabledError struct {
 }
 
 func (e *ServiceDisabledError) Error() string {
-	return fmt.Sprintf(SERVICE_DISABLED_ERROR, e.Service)
+	return fmt.Sprintf(SERVICE_DISABLED, e.Service)
 }
