@@ -3,13 +3,31 @@ package utils
 import (
 	"context"
 	"fmt"
+	"net/http"
 
+	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
 )
 
 type ObjectStorageClient interface {
+	GetServiceStatusExecute(ctx context.Context, projectId string) (*objectstorage.ProjectStatus, error)
 	ListCredentialsGroupsExecute(ctx context.Context, projectId string) (*objectstorage.ListCredentialsGroupsResponse, error)
 	ListAccessKeys(ctx context.Context, projectId string) objectstorage.ApiListAccessKeysRequest
+}
+
+func ProjectEnabled(ctx context.Context, apiClient ObjectStorageClient, projectId string) (bool, error) {
+	_, err := apiClient.GetServiceStatusExecute(ctx, projectId)
+	if err != nil {
+		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
+		if !ok {
+			return false, err
+		}
+		if oapiErr.StatusCode == http.StatusNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func GetCredentialsGroupName(ctx context.Context, apiClient ObjectStorageClient, projectId, credentialsGroupId string) (string, error) {

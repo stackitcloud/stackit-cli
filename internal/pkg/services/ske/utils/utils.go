@@ -3,12 +3,14 @@ package utils
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"golang.org/x/mod/semver"
 )
@@ -37,7 +39,14 @@ type SKEClient interface {
 func ProjectEnabled(ctx context.Context, apiClient SKEClient, projectId string) (bool, error) {
 	project, err := apiClient.GetServiceStatusExecute(ctx, projectId)
 	if err != nil {
-		return false, fmt.Errorf("get SKE status: %w", err)
+		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
+		if !ok {
+			return false, err
+		}
+		if oapiErr.StatusCode == http.StatusNotFound {
+			return false, nil
+		}
+		return false, err
 	}
 	return *project.State == ske.PROJECTSTATE_CREATED, nil
 }
