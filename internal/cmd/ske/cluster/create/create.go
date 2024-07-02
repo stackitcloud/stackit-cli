@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			// Check if SKE is enabled for this project
+			// Check if the project is enabled before trying to create
 			enabled, err := skeUtils.ProjectEnabled(ctx, apiClient, model.ProjectId)
 			if err != nil {
 				return err

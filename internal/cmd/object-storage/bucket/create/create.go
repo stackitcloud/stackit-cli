@@ -61,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			// // Check if the project is enabled before trying to create
+			// Check if the project is enabled before trying to create
 			enabled, err := utils.ProjectEnabled(ctx, apiClient, model.ProjectId)
 			if err != nil {
 				return fmt.Errorf("check if Object Storage is enabled: %w", err)
