@@ -41,6 +41,9 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
+	idpEndpoint := getIDPEndpoint()
+	idpClientID := getIDPClientID()
+
 	if isReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
 		if err != nil {
@@ -59,9 +62,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
-		ClientID: getIDPClientID(),
+		ClientID: idpClientID,
 		Endpoint: oauth2.Endpoint{
-			AuthURL: fmt.Sprintf("%s/authorize", getIDPEndpoint()),
+			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
 		Scopes:      []string{"openid"},
 		RedirectURL: redirectURL,
@@ -104,7 +107,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(getIDPEndpoint(), getIDPClientID(), codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, idpClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -185,7 +188,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
-	p.Debug(print.DebugLevel, "using authentication server on %s", getIDPEndpoint())
+	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
+	p.Debug(print.DebugLevel, "using client ID %s", idpClientID)
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
