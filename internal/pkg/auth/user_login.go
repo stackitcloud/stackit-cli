@@ -44,7 +44,10 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	idpEndpoint := getIDPEndpoint()
 	if idpEndpoint != defaultIDPEndpoint {
 		p.Warn("You are using a custom identity provider (%s) for authentication. Please make sure that you trust the entity.\n", idpEndpoint)
-		p.PromptForEnter("Press Enter to proceed with the login...")
+		err := p.PromptForEnter("Press Enter to proceed with the login...")
+		if err != nil {
+			return err
+		}
 	}
 	idpClientID := getIDPClientID()
 
