@@ -24,7 +24,7 @@ import (
 
 const (
 	defaultIDPEndpoint = "https://auth.01.idp.eu01.stackit.cloud/oauth"
-	defaultIDPClientID = "stackit-cli-client-id"
+	cliClientID        = "stackit-cli-client-id"
 
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
@@ -52,7 +52,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return err
 		}
 	}
-	idpClientID := getIDPClientID()
+	idpClientID := cliClientID
 
 	if isReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")

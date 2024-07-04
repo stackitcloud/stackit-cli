@@ -22,7 +22,6 @@ const (
 
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
-	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
 
 	argusCustomEndpointFlag           = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
@@ -52,7 +51,6 @@ type inputModel struct {
 
 	SessionTimeLimit               bool
 	IdentityProviderCustomEndpoint bool
-	IdentityProviderCustomClientId bool
 
 	ArgusCustomEndpoint           bool
 	AuthorizationCustomEndpoint   bool
@@ -112,9 +110,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			if model.IdentityProviderCustomEndpoint {
 				viper.Set(config.IdentityProviderCustomEndpointKey, "")
-			}
-			if model.IdentityProviderCustomClientId {
-				viper.Set(config.IdentityProviderCustomClientIdKey, "")
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -191,7 +186,6 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
-	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID. If unset, uses the default client ID")
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
@@ -222,7 +216,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
 		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
-		IdentityProviderCustomClientId: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
 
 		ArgusCustomEndpoint:           flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),

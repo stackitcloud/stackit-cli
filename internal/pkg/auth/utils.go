@@ -22,12 +22,3 @@ func getIDPEndpoint() (string, error) {
 
 	return idpEndpoint, nil
 }
-
-func getIDPClientID() string {
-	customIDPClientID := viper.GetString(config.IdentityProviderCustomClientIdKey)
-	if customIDPClientID != "" {
-		return customIDPClientID
-	}
-
-	return defaultIDPClientID
-}

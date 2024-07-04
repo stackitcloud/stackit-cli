@@ -172,7 +172,7 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	}
 	reqQuery := url.Values{}
 	reqQuery.Set("grant_type", "refresh_token")
-	reqQuery.Set("client_id", getIDPClientID())
+	reqQuery.Set("client_id", cliClientID)
 	reqQuery.Set("refresh_token", utf.refreshToken)
 	reqQuery.Set("token_format", "jwt")
 	req.URL.RawQuery = reqQuery.Encode()
