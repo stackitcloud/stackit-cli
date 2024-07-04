@@ -198,7 +198,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
 	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
-	p.Debug(print.DebugLevel, "using client ID %s", cliClientID)
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
