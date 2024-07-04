@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	authDomain              = "auth.01.idp.eu01.stackit.cloud/oauth"
-	clientId                = "stackit-cli-client-id"
+	defaultIDPEndpoint = "https://auth.01.idp.eu01.stackit.cloud/oauth"
+	defaultIDPClientID = "stackit-cli-client-id"
+
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
 	htmlTemplatesPath       = "templates"
@@ -58,9 +59,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
-		ClientID: clientId,
+		ClientID: getIDPClientID(),
 		Endpoint: oauth2.Endpoint{
-			AuthURL: fmt.Sprintf("https://%s/authorize", authDomain),
+			AuthURL: fmt.Sprintf("%s/authorize", getIDPEndpoint()),
 		},
 		Scopes:      []string{"openid"},
 		RedirectURL: redirectURL,
@@ -103,7 +104,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(authDomain, clientId, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(getIDPEndpoint(), getIDPClientID(), codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -184,7 +185,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
-	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
+	p.Debug(print.DebugLevel, "using authentication server on %s", getIDPEndpoint())
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
@@ -211,7 +212,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
 func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
 	// Set the authUrl and form-encoded data for the POST to the access token endpoint
-	authUrl := fmt.Sprintf("https://%s/token", authDomain)
+	authUrl := fmt.Sprintf("%s/token", authDomain)
 	data := fmt.Sprintf(
 		"grant_type=authorization_code&client_id=%s"+
 			"&code_verifier=%s"+

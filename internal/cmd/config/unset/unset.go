@@ -20,7 +20,9 @@ const (
 	projectIdFlag    = globalflags.ProjectIdFlag
 	verbosityFlag    = globalflags.VerbosityFlag
 
-	sessionTimeLimitFlag = "session-time-limit"
+	sessionTimeLimitFlag               = "session-time-limit"
+	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
+	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
 
 	argusCustomEndpointFlag           = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
@@ -43,11 +45,14 @@ const (
 )
 
 type inputModel struct {
-	Async            bool
-	OutputFormat     bool
-	ProjectId        bool
-	SessionTimeLimit bool
-	Verbosity        bool
+	Async        bool
+	OutputFormat bool
+	ProjectId    bool
+	Verbosity    bool
+
+	SessionTimeLimit               bool
+	IdentityProviderCustomEndpoint bool
+	IdentityProviderCustomClientId bool
 
 	ArgusCustomEndpoint           bool
 	AuthorizationCustomEndpoint   bool
@@ -98,11 +103,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
 			}
+			if model.Verbosity {
+				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
+			}
+
 			if model.SessionTimeLimit {
 				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
-			if model.Verbosity {
-				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
+			if model.IdentityProviderCustomEndpoint {
+				viper.Set(config.IdentityProviderCustomEndpointKey, "")
+			}
+			if model.IdentityProviderCustomClientId {
+				viper.Set(config.IdentityProviderCustomClientIdKey, "")
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -175,8 +187,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(asyncFlag, false, "Configuration option to run commands asynchronously")
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
-	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(verbosityFlag, false, "Verbosity of the CLI")
+
+	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
+	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID. If unset, uses the default client ID")
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
@@ -200,11 +215,14 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	model := inputModel{
-		Async:            flags.FlagToBoolValue(p, cmd, asyncFlag),
-		OutputFormat:     flags.FlagToBoolValue(p, cmd, outputFormatFlag),
-		ProjectId:        flags.FlagToBoolValue(p, cmd, projectIdFlag),
-		SessionTimeLimit: flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
-		Verbosity:        flags.FlagToBoolValue(p, cmd, verbosityFlag),
+		Async:        flags.FlagToBoolValue(p, cmd, asyncFlag),
+		OutputFormat: flags.FlagToBoolValue(p, cmd, outputFormatFlag),
+		ProjectId:    flags.FlagToBoolValue(p, cmd, projectIdFlag),
+		Verbosity:    flags.FlagToBoolValue(p, cmd, verbosityFlag),
+
+		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
+		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
+		IdentityProviderCustomClientId: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
 
 		ArgusCustomEndpoint:           flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),

@@ -28,11 +28,11 @@ func (rt *clientTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if reqURL == rt.requestURL {
 		return rt.roundTripRequest()
 	}
-	if reqURL == fmt.Sprintf("%s/token", authDomain) {
+	if fmt.Sprintf("https://%s", reqURL) == fmt.Sprintf("%s/token", defaultIDPEndpoint) {
 		return rt.roundTripRefreshTokens()
 	}
-	rt.t.Fatalf("unexpected request to \"%s\"", reqURL)
-	return nil, fmt.Errorf("unexpected request to \"%s\"", reqURL)
+	rt.t.Fatalf("unexpected request to %q", reqURL)
+	return nil, fmt.Errorf("unexpected request to %q", reqURL)
 }
 
 func (rt *clientTransport) roundTripRequest() (*http.Response, error) {
@@ -302,20 +302,16 @@ func TestRoundTrip(t *testing.T) {
 			}
 
 			if !tt.isValid && err == nil {
-				if err == nil {
-					t.Errorf("should have failed")
-				}
 				if requestSent {
-					t.Errorf("request was sent")
+					t.Logf("request was sent")
 				}
+				t.Errorf("should have failed")
 			}
 			if tt.isValid && err != nil {
-				if err != nil {
-					t.Errorf("shouldn't have failed: %v", err)
-				}
 				if !requestSent {
-					t.Errorf("request wasn't sent")
+					t.Logf("request wasn't sent")
 				}
+				t.Errorf("shouldn't have failed: %v", err)
 			}
 			if authorizeUserCalled && !tt.expectedReautorizeUserCalled {
 				t.Errorf("reauthorizeUser was called")

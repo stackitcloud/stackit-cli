@@ -11,11 +11,14 @@ import (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
 	flagValues := map[string]bool{
-		asyncFlag:            true,
-		outputFormatFlag:     true,
-		projectIdFlag:        true,
-		sessionTimeLimitFlag: true,
-		verbosityFlag:        true,
+		asyncFlag:        true,
+		outputFormatFlag: true,
+		projectIdFlag:    true,
+		verbosityFlag:    true,
+
+		sessionTimeLimitFlag:               true,
+		identityProviderCustomEndpointFlag: true,
+		identityProviderCustomClientIdFlag: true,
 
 		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
@@ -42,11 +45,14 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		Async:            true,
-		OutputFormat:     true,
-		ProjectId:        true,
-		SessionTimeLimit: true,
-		Verbosity:        true,
+		Async:        true,
+		OutputFormat: true,
+		ProjectId:    true,
+		Verbosity:    true,
+
+		SessionTimeLimit:               true,
+		IdentityProviderCustomEndpoint: true,
+		IdentityProviderCustomClientId: true,
 
 		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
@@ -92,8 +98,11 @@ func TestParseInput(t *testing.T) {
 				model.Async = false
 				model.OutputFormat = false
 				model.ProjectId = false
-				model.SessionTimeLimit = false
 				model.Verbosity = false
+
+				model.SessionTimeLimit = false
+				model.IdentityProviderCustomEndpoint = false
+				model.IdentityProviderCustomClientId = false
 
 				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
@@ -131,6 +140,26 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.OutputFormat = false
+			}),
+		},
+		{
+			description: "identity provider custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[identityProviderCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IdentityProviderCustomEndpoint = false
+			}),
+		},
+		{
+			description: "identity provider client id empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[identityProviderCustomClientIdFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IdentityProviderCustomClientId = false
 			}),
 		},
 		{

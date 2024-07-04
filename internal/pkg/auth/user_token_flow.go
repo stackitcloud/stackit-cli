@@ -159,7 +159,7 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	req, err := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("https://%s/token", authDomain),
+		fmt.Sprintf("%s/token", getIDPEndpoint()),
 		http.NoBody,
 	)
 	if err != nil {
@@ -167,7 +167,7 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	}
 	reqQuery := url.Values{}
 	reqQuery.Set("grant_type", "refresh_token")
-	reqQuery.Set("client_id", clientId)
+	reqQuery.Set("client_id", getIDPClientID())
 	reqQuery.Set("refresh_token", utf.refreshToken)
 	reqQuery.Set("token_format", "jwt")
 	req.URL.RawQuery = reqQuery.Encode()
