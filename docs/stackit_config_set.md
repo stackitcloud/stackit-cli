@@ -33,8 +33,8 @@ stackit config set [flags]
       --authorization-custom-endpoint string        Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                  DNS API base URL, used in calls to this API
   -h, --help                                        Help for "stackit config set"
-      --identity-provider-custom-client-id string   Identity Provider client ID, used for user authentication
-      --identity-provider-custom-endpoint string    Identity Provider base URL, used for user authentication. Needs to support the Authorization Code Flow with PKCE of the OpenID Connect (OIDC) protocol
+      --identity-provider-custom-client-id string   Identity Provider client ID. This is the client ID of the application registered in the Identity Provider, used for user authentication
+      --identity-provider-custom-endpoint string    Identity Provider base URL, used for user authentication
       --load-balancer-custom-endpoint string        Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string                LogMe API base URL, used in calls to this API
       --mariadb-custom-endpoint string              MariaDB API base URL, used in calls to this API

@@ -157,9 +157,14 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 }
 
 func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
+	idpEndpoint, err := getIDPEndpoint()
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("%s/token", getIDPEndpoint()),
+		fmt.Sprintf("%s/token", idpEndpoint),
 		http.NoBody,
 	)
 	if err != nil {

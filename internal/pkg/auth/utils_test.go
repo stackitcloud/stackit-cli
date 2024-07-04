@@ -11,16 +11,24 @@ func TestGetIDPEndpoint(t *testing.T) {
 	tests := []struct {
 		name              string
 		idpCustomEndpoint string
+		isValid           bool
 		expected          string
 	}{
 		{
 			name:              "custom endpoint specified",
-			idpCustomEndpoint: "https://custom.endpoint",
-			expected:          "https://custom.endpoint",
+			idpCustomEndpoint: "https://example.stackit.cloud",
+			isValid:           true,
+			expected:          "https://example.stackit.cloud",
+		},
+		{
+			name:              "custom endpoint outside STACKIT",
+			idpCustomEndpoint: "https://www.very-suspicious-website.com/",
+			isValid:           false,
 		},
 		{
 			name:              "custom endpoint not specified",
 			idpCustomEndpoint: "",
+			isValid:           true,
 			expected:          defaultIDPEndpoint,
 		},
 	}
@@ -32,7 +40,14 @@ func TestGetIDPEndpoint(t *testing.T) {
 				viper.Set(config.IdentityProviderCustomEndpointKey, tt.idpCustomEndpoint)
 			}
 
-			got := getIDPEndpoint()
+			got, err := getIDPEndpoint()
+
+			if tt.isValid && err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if !tt.isValid && err == nil {
+				t.Fatalf("expected error, got none")
+			}
 
 			if got != tt.expected {
 				t.Fatalf("expected idp endpoint %q, got %q", tt.expected, got)

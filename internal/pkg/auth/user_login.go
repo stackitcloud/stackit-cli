@@ -41,9 +41,12 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
-	idpEndpoint := getIDPEndpoint()
+	idpEndpoint, err := getIDPEndpoint()
+	if err != nil {
+		return err
+	}
 	if idpEndpoint != defaultIDPEndpoint {
-		p.Warn("You are using a custom identity provider (%s) for authentication. Please make sure that you trust the entity.\n", idpEndpoint)
+		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpEndpoint)
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return err
