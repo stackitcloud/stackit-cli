@@ -14,6 +14,15 @@ Welcome to the [STACKIT](https://www.stackit.de/en) CLI, a command-line interfac
 This CLI is in a BETA state. More services and functionality will be supported soon.
 Your feedback is appreciated!
 
+<a name="warning-new-stackit-idp"></a>
+
+> [!WARNING]
+> Starting on July 9 2024, the new [STACKIT Identity Provider (IDP)](https://docs.stackit.cloud/stackit/en/release-notes-23101442.html#ReleaseNotes-2024-06-21-identity-provider) will be available.
+>
+> On this date, we will release a new version of the STACKIT CLI that will use the new IDP for user authentication. This also means that the **user authentication on STACKIT CLI versions released before July 9 2024 is no longer guaranteed to work for all services**.
+>
+> Please make sure to **update your STACKIT CLI to the latest version after July 9 2024** to ensure that you can continue to use all STACKIT services.
+
 ## Installation
 
 Please refer to our [installation guide](./INSTALLATION.md) for instructions on how to install and get started using the STACKIT CLI.
