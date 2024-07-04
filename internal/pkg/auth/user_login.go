@@ -52,7 +52,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			return err
 		}
 	}
-	idpClientID := cliClientID
 
 	if isReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
@@ -72,7 +71,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
-		ClientID: idpClientID,
+		ClientID: cliClientID,
 		Endpoint: oauth2.Endpoint{
 			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
@@ -117,7 +116,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, idpClientID, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, cliClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -199,7 +198,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
 	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
-	p.Debug(print.DebugLevel, "using client ID %s", idpClientID)
+	p.Debug(print.DebugLevel, "using client ID %s", cliClientID)
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
