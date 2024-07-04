@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -47,4 +49,19 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	}
 	f := float64(*i)
 	return &f
+}
+
+func ValidateSTACKITURL(value string) error {
+	urlStruct, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("parse url: %w", err)
+	}
+	urlHost := urlStruct.Hostname()
+	if urlHost == "" {
+		return fmt.Errorf("bad url")
+	}
+	if !strings.HasSuffix(urlHost, "stackit.cloud") {
+		return fmt.Errorf(`only urls belonging to STACKIT are allowed, hostname must end in "stackit.cloud"`)
+	}
+	return nil
 }

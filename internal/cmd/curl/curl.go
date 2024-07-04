@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail`,
 			),
 		),
-		Args: args.SingleArg(urlArg, validateURL),
+		Args: args.SingleArg(urlArg, utils.ValidateSTACKITURL),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			model, err := parseInput(p, cmd, args)
 			if err != nil {
@@ -111,21 +111,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	}
 	configureFlags(cmd)
 	return cmd
-}
-
-func validateURL(value string) error {
-	urlStruct, err := url.Parse(value)
-	if err != nil {
-		return fmt.Errorf("parse URL: %w", err)
-	}
-	urlHost := urlStruct.Hostname()
-	if urlHost == "" {
-		return fmt.Errorf("bad url")
-	}
-	if !strings.HasSuffix(urlHost, "stackit.cloud") {
-		return fmt.Errorf("only urls belonging to STACKIT are permitted, hostname must end in stackit.cloud")
-	}
-	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {

@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	authDomain              = "auth.01.idp.eu01.stackit.cloud/oauth"
-	clientId                = "stackit-cli-client-id"
+	defaultIDPEndpoint = "https://auth.01.idp.eu01.stackit.cloud/oauth"
+	cliClientID        = "stackit-cli-client-id"
+
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
 	htmlTemplatesPath       = "templates"
@@ -40,6 +41,18 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
+	idpEndpoint, err := getIDPEndpoint()
+	if err != nil {
+		return err
+	}
+	if idpEndpoint != defaultIDPEndpoint {
+		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpEndpoint)
+		err := p.PromptForEnter("Press Enter to proceed with the login...")
+		if err != nil {
+			return err
+		}
+	}
+
 	if isReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
 		if err != nil {
@@ -58,9 +71,9 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
-		ClientID: clientId,
+		ClientID: cliClientID,
 		Endpoint: oauth2.Endpoint{
-			AuthURL: fmt.Sprintf("https://%s/authorize", authDomain),
+			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
 		Scopes:      []string{"openid"},
 		RedirectURL: redirectURL,
@@ -103,7 +116,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(authDomain, clientId, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, cliClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -184,7 +197,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
-	p.Debug(print.DebugLevel, "using authentication server on %s", authDomain)
+	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
@@ -211,7 +224,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
 func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
 	// Set the authUrl and form-encoded data for the POST to the access token endpoint
-	authUrl := fmt.Sprintf("https://%s/token", authDomain)
+	authUrl := fmt.Sprintf("%s/token", authDomain)
 	data := fmt.Sprintf(
 		"grant_type=authorization_code&client_id=%s"+
 			"&code_verifier=%s"+
