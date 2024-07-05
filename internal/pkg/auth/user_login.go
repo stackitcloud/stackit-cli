@@ -72,6 +72,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	for i := range configuredPortRange {
 		port = defaultPort + i
 		portString := fmt.Sprintf(":%s", strconv.Itoa(port))
+		p.Debug(print.DebugLevel, "trying to bind port %d for login redirect", port)
 		listener, listenerErr = net.Listen("tcp", portString)
 		if listenerErr == nil {
 			redirectURL = fmt.Sprintf("http://localhost:%d", port)
