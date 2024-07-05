@@ -5,6 +5,7 @@ Logs in to the STACKIT CLI
 ### Synopsis
 
 Logs in to the STACKIT CLI using a user account.
+The authentication is done via a web-based authorization flow, where the command will open a browser window in which you can login to your STACKIT account.
 
 ```
 stackit auth login [flags]

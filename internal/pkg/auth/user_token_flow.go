@@ -43,19 +43,18 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	accessTokenValid := false
-	if accessTokenExpired, err := tokenExpired(utf.accessToken); err != nil {
+	accessTokenExpired, err := tokenExpired(utf.accessToken)
+	if err != nil {
 		return nil, fmt.Errorf("check if access token has expired: %w", err)
 	} else if !accessTokenExpired {
 		accessTokenValid = true
-	} else if refreshTokenExpired, err := tokenExpired(utf.refreshToken); err != nil {
-		return nil, fmt.Errorf("check if refresh token has expired: %w", err)
-	} else if !refreshTokenExpired {
+	} else {
 		utf.printer.Debug(print.DebugLevel, "access token expired, refreshing...")
 		err = refreshTokens(utf)
 		if err == nil {
 			accessTokenValid = true
 		} else {
-			utf.printer.Debug(print.ErrorLevel, "refresh access token: %v", err)
+			utf.printer.Debug(print.ErrorLevel, "refresh access token: %w", err)
 		}
 	}
 
@@ -176,9 +175,6 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	reqQuery.Set("refresh_token", utf.refreshToken)
 	reqQuery.Set("token_format", "jwt")
 	req.URL.RawQuery = reqQuery.Encode()
-
-	// without this header, the API returns error "An Authentication object was not found in the SecurityContext"
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return req, nil
 }

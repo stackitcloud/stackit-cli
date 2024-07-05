@@ -15,8 +15,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Logs in to the STACKIT CLI",
-		Long:  "Logs in to the STACKIT CLI using a user account.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s",
+			"Logs in to the STACKIT CLI using a user account.",
+			"The authentication is done via a web-based authorization flow, where the command will open a browser window in which you can login to your STACKIT account."),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Login to the STACKIT CLI. This command will open a browser window where you can login to your STACKIT account`,
