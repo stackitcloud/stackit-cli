@@ -90,7 +90,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		Endpoint: oauth2.Endpoint{
 			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
-		Scopes:      []string{"openid offline_access"},
+		Scopes:      []string{"openid offline_access email"},
 		RedirectURL: redirectURL,
 	}
 
