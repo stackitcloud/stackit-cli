@@ -28,7 +28,11 @@ func (rt *clientTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if reqURL == rt.requestURL {
 		return rt.roundTripRequest()
 	}
-	if fmt.Sprintf("https://%s", reqURL) == fmt.Sprintf("%s/token", defaultIDPEndpoint) {
+	idpEndpoint, err := getIDPEndpoint()
+	if err != nil {
+		rt.t.Fatalf("get IDP endpoint for test: %v", err)
+	}
+	if fmt.Sprintf("https://%s", reqURL) == fmt.Sprintf("%s/token", idpEndpoint) {
 		return rt.roundTripRefreshTokens()
 	}
 	rt.t.Fatalf("unexpected request to %q", reqURL)
@@ -163,6 +167,7 @@ func TestRoundTrip(t *testing.T) {
 			desc:                         "tokens expired",
 			accessTokenExpiresAt:         time.Now().Add(-time.Hour),
 			refreshTokenExpiresAt:        time.Now().Add(-time.Hour),
+			refreshTokensFails:           true, // Fails because refresh token is expired
 			isValid:                      true,
 			expectedReautorizeUserCalled: true,
 			expectedTokensRefreshed:      true,
@@ -190,9 +195,10 @@ func TestRoundTrip(t *testing.T) {
 			accessTokenExpiresAt:         time.Now().Add(-time.Hour),
 			refreshTokenExpiresAt:        time.Now().Add(time.Hour),
 			refreshTokenInvalid:          true,
-			isValid:                      false,
-			expectedReautorizeUserCalled: false,
-			expectedTokensRefreshed:      false,
+			refreshTokensFails:           true, // Fails because refresh token is invalid
+			isValid:                      true,
+			expectedReautorizeUserCalled: true,
+			expectedTokensRefreshed:      true, // Refreshed during reauthorization
 		},
 		{
 			desc:                         "refresh token invalid but unused",
@@ -207,6 +213,7 @@ func TestRoundTrip(t *testing.T) {
 			desc:                         "authorize user fails",
 			accessTokenExpiresAt:         time.Now().Add(-time.Hour),
 			refreshTokenExpiresAt:        time.Now().Add(-time.Hour),
+			refreshTokensFails:           true, // Fails because refresh token is expired
 			authorizeUserFails:           true,
 			isValid:                      false,
 			expectedReautorizeUserCalled: true,

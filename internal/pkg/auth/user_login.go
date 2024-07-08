@@ -23,13 +23,18 @@ import (
 )
 
 const (
-	defaultIDPEndpoint = "https://auth.01.idp.eu01.stackit.cloud/oauth"
-	cliClientID        = "stackit-cli-client-id"
+	defaultIDPEndpoint = "https://accounts.stackit.cloud/oauth/v2"
+	cliClientID        = "stackit-cli-0000-0000-000000000001"
 
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
 	htmlTemplatesPath       = "templates"
 	loginSuccessfulHTMLFile = "login-successful.html"
+
+	// The IDP doesn't support wildcards for the port,
+	// so we configure a range of ports from 8000 to 8020
+	defaultPort         = 8000
+	configuredPortRange = 20
 )
 
 //go:embed templates/*
@@ -60,22 +65,32 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	}
 
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		return fmt.Errorf("bind port for login redirect: %w", err)
+	var redirectURL string
+	var listener net.Listener
+	var listenerErr error
+	var port int
+	for i := range configuredPortRange {
+		port = defaultPort + i
+		portString := fmt.Sprintf(":%s", strconv.Itoa(port))
+		p.Debug(print.DebugLevel, "trying to bind port %d for login redirect", port)
+		listener, listenerErr = net.Listen("tcp", portString)
+		if listenerErr == nil {
+			redirectURL = fmt.Sprintf("http://localhost:%d", port)
+			p.Debug(print.DebugLevel, "bound port %d for login redirect", port)
+			break
+		}
+		p.Debug(print.DebugLevel, "unable to bind port %d for login redirect: %s", port, listenerErr)
 	}
-	address, ok := listener.Addr().(*net.TCPAddr)
-	if !ok {
-		return fmt.Errorf("assert listener address type to TCP address")
+	if listenerErr != nil {
+		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", defaultPort, port, err)
 	}
-	redirectURL := fmt.Sprintf("http://localhost:%d", address.Port)
 
 	conf := &oauth2.Config{
 		ClientID: cliClientID,
 		Endpoint: oauth2.Endpoint{
 			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
-		Scopes:      []string{"openid"},
+		Scopes:      []string{"openid offline_access email"},
 		RedirectURL: redirectURL,
 	}
 
@@ -98,7 +113,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		p.Debug(print.DebugLevel, "received request from authentication server")
 		// Close the server only if there was an error
-		// Otherwise, it will redirect to the succesfull login page
+		// Otherwise, it will redirect to the successful login page
 		defer func() {
 			if errServer != nil {
 				fmt.Println(errServer)
