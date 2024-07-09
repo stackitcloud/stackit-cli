@@ -1,4 +1,4 @@
-package create
+package describe
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -20,21 +19,24 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &serverbackup.APIClient{}
-
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
-var testVolumeId = uuid.NewString()
+var testBackupId = uuid.NewString()
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testBackupId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:             testProjectId,
-		serverIdFlag:              testServerId,
-		backupScheduleNameFlag:    "example-backup-schedule-name",
-		enabledFlag:               "true",
-		rruleFlag:                 defaultRrule,
-		backupNameFlag:            "example-backup-name",
-		backupRetentionPeriodFlag: "14",
-		backupVolumeIdsFlag:       testVolumeId,
+		projectIdFlag: testProjectId,
+		serverIdFlag:  testServerId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -48,13 +50,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ServerId:              testServerId,
-		BackupScheduleName:    "example-backup-schedule-name",
-		Enabled:               defaultEnabled,
-		Rrule:                 defaultRrule,
-		BackupName:            "example-backup-name",
-		BackupRetentionPeriod: int64(14),
-		BackupVolumeIds:       []string{testVolumeId},
+		ServerId: testServerId,
+		BackupId: testBackupId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -62,61 +59,50 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *serverbackup.ApiCreateBackupScheduleRequest)) serverbackup.ApiCreateBackupScheduleRequest {
-	request := testClient.CreateBackupSchedule(testCtx, testProjectId, testServerId)
-	request = request.CreateBackupSchedulePayload(fixturePayload())
+func fixtureRequest(mods ...func(request *serverbackup.ApiGetBackupRequest)) serverbackup.ApiGetBackupRequest {
+	request := testClient.GetBackup(testCtx, testProjectId, testServerId, testBackupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
 }
 
-func fixturePayload(mods ...func(payload *serverbackup.CreateBackupSchedulePayload)) serverbackup.CreateBackupSchedulePayload {
-	payload := serverbackup.CreateBackupSchedulePayload{
-		Name:    utils.Ptr("example-backup-schedule-name"),
-		Enabled: utils.Ptr(defaultEnabled),
-		Rrule:   utils.Ptr("DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"),
-		BackupProperties: &serverbackup.BackupProperties{
-			Name:            utils.Ptr("example-backup-name"),
-			RetentionPeriod: utils.Ptr(int64(14)),
-			VolumeIds:       utils.Ptr([]string{testVolumeId}),
-		},
-	}
-	for _, mod := range mods {
-		mod(&payload)
-	}
-	return payload
-}
-
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
-		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "with defaults",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, backupRetentionPeriodFlag)
-			}),
-			isValid:       true,
-			expectedModel: fixtureInputModel(),
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
-			description: "no values",
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -124,6 +110,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -131,6 +118,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
@@ -157,6 +145,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -165,7 +161,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -188,8 +184,8 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest serverbackup.ApiCreateBackupScheduleRequest
 		isValid         bool
+		expectedRequest serverbackup.ApiGetBackupRequest
 	}{
 		{
 			description:     "base",
@@ -201,13 +197,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error building request: %v", err)
-			}
+			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

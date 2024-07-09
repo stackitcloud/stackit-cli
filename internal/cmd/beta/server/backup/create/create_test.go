@@ -23,18 +23,15 @@ var testClient = &serverbackup.APIClient{}
 
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
-var testVolumeId = uuid.NewString()
+var testBackupVolumeId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:             testProjectId,
 		serverIdFlag:              testServerId,
-		backupScheduleNameFlag:    "example-backup-schedule-name",
-		enabledFlag:               "true",
-		rruleFlag:                 defaultRrule,
 		backupNameFlag:            "example-backup-name",
 		backupRetentionPeriodFlag: "14",
-		backupVolumeIdsFlag:       testVolumeId,
+		backupVolumeIdsFlag:       testBackupVolumeId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -49,12 +46,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ServerId:              testServerId,
-		BackupScheduleName:    "example-backup-schedule-name",
-		Enabled:               defaultEnabled,
-		Rrule:                 defaultRrule,
 		BackupName:            "example-backup-name",
 		BackupRetentionPeriod: int64(14),
-		BackupVolumeIds:       []string{testVolumeId},
+		BackupVolumeIds:       []string{testBackupVolumeId},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -62,25 +56,20 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *serverbackup.ApiCreateBackupScheduleRequest)) serverbackup.ApiCreateBackupScheduleRequest {
-	request := testClient.CreateBackupSchedule(testCtx, testProjectId, testServerId)
-	request = request.CreateBackupSchedulePayload(fixturePayload())
+func fixtureRequest(mods ...func(request *serverbackup.ApiCreateBackupRequest)) serverbackup.ApiCreateBackupRequest {
+	request := testClient.CreateBackup(testCtx, testProjectId, testServerId)
+	request = request.CreateBackupPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
 }
 
-func fixturePayload(mods ...func(payload *serverbackup.CreateBackupSchedulePayload)) serverbackup.CreateBackupSchedulePayload {
-	payload := serverbackup.CreateBackupSchedulePayload{
-		Name:    utils.Ptr("example-backup-schedule-name"),
-		Enabled: utils.Ptr(defaultEnabled),
-		Rrule:   utils.Ptr("DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"),
-		BackupProperties: &serverbackup.BackupProperties{
-			Name:            utils.Ptr("example-backup-name"),
-			RetentionPeriod: utils.Ptr(int64(14)),
-			VolumeIds:       utils.Ptr([]string{testVolumeId}),
-		},
+func fixturePayload(mods ...func(payload *serverbackup.CreateBackupPayload)) serverbackup.CreateBackupPayload {
+	payload := serverbackup.CreateBackupPayload{
+		Name:            utils.Ptr("example-backup-name"),
+		RetentionPeriod: utils.Ptr(int64(14)),
+		VolumeIds:       utils.Ptr([]string{testBackupVolumeId}),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -188,7 +177,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest serverbackup.ApiCreateBackupScheduleRequest
+		expectedRequest serverbackup.ApiCreateBackupRequest
 		isValid         bool
 	}{
 		{

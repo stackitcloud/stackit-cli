@@ -26,7 +26,7 @@ stackit beta server backup schedule update SCHEDULE_ID [flags]
   -b, --backup-name string            Backup name
   -d, --backup-retention-period int   Backup retention period (in days) (default 14)
   -n, --backup-schedule-name string   Backup schedule name
-  -i, --backup-volume-ids string      Backup volume ids, as comma separated UUID values.
+  -i, --backup-volume-ids strings     Backup volume IDs, as comma separated UUID values. (default [])
   -e, --enabled                       Is the server backup schedule enabled (default true)
   -h, --help                          Help for "stackit beta server backup schedule update"
   -r, --rrule string                  Backup RRULE (recurrence rule) (default "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1")
