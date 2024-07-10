@@ -11,7 +11,8 @@ Alternatively, you can reset the password and access the new one by running:
   $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID
 Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.
 
-The allowed user roles for your instance can be obtained by running: $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID
+The allowed user roles for your instance can be obtained by running:
+  $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID
 
 ```
 stackit beta sqlserverflex user create [flags]
