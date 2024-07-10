@@ -5,10 +5,13 @@ Creates a SQLServer Flex user
 ### Synopsis
 
 Creates a SQLServer Flex user for an instance.
+
 The password is only visible upon creation and cannot be retrieved later.
 Alternatively, you can reset the password and access the new one by running:
   $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID
 Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.
+
+The allowed user roles for your instance can be obtained by running: $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID
 
 ```
 stackit beta sqlserverflex user create [flags]
@@ -18,10 +21,10 @@ stackit beta sqlserverflex user create [flags]
 
 ```
   Create a SQLServer Flex user for instance with ID "xxx" and specify the username, role and database
-  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database
+  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "##STACKIT_DatabaseManager##" --database my-database
 
   Create a SQLServer Flex user for instance with ID "xxx", specifying multiple roles
-  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2"
+  $ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "##STACKIT_LoginManager##,##STACKIT_DatabaseManager##"
 ```
 
 ### Options

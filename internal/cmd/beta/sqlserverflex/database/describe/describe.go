@@ -1,4 +1,4 @@
-package create
+package describe
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/spf13/cobra"
@@ -23,29 +23,27 @@ const (
 	databaseNameArg = "DATABASE_NAME"
 
 	instanceIdFlag = "instance-id"
-	ownerFlag      = "owner"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	DatabaseName string
 	InstanceId   string
-	Owner        string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("create %s", databaseNameArg),
-		Short: "Creates a SQLServer Flex database",
-		Long: fmt.Sprintf("%s\n%s",
-			"Creates a SQLServer Flex database.",
-			`This operation cannot be triggered asynchronously (the "--async" flag will have no effect).`,
-		),
-		Args: args.SingleArg(databaseNameArg, nil),
+		Use:   fmt.Sprintf("describe %s", databaseNameArg),
+		Short: "Shows details of an SQLServer Flex database",
+		Long:  "Shows details of an SQLServer Flex database.",
+		Args:  args.SingleArg(databaseNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a SQLServer Flex database with name "my-database" on instance with ID "xxx"`,
-				"$ stackit beta sqlserverflex database create my-database --instance-id xxx --owner some-username"),
+				`Get details of an SQLServer Flex database with name "my-database" of instance with ID "xxx"`,
+				"$ stackit beta sqlserverflex database describe my-database --instance-id xxx"),
+			examples.NewExample(
+				`Get details of an SQLServer Flex database with name "my-database" of instance with ID "xxx" in JSON format`,
+				"$ stackit beta sqlserverflex database describe my-database --instance-id xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -53,33 +51,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			// Configure API client
 			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create database %q? (This cannot be undone)", model.DatabaseName)
-				err = p.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			s := spinner.New(p)
-			s.Start("Creating database")
 			resp, err := req.Execute()
 			if err != nil {
-				s.StopWithError()
-				return fmt.Errorf("create SQLServer Flex database: %w", err)
+				return fmt.Errorf("read SQLServer Flex database: %w", err)
 			}
-			s.Stop()
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -88,8 +73,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "SQLServer Flex instance ID")
-	cmd.Flags().String(ownerFlag, "", "Username of the owner user")
-	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, ownerFlag)
+
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -105,7 +90,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		DatabaseName:    databaseName,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Owner:           flags.FlagToStringValue(p, cmd, ownerFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -120,22 +104,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateDatabaseRequest {
-	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId)
-	payload := sqlserverflex.CreateDatabasePayload{
-		Name: &model.DatabaseName,
-		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
-			Owner: &model.Owner,
-		},
-	}
-	req = req.CreateDatabasePayload(payload)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetDatabaseRequest {
+	req := apiClient.GetDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName)
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.CreateDatabaseResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex.GetDatabaseResponse) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
+		details, err := json.MarshalIndent(database, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
@@ -143,7 +120,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.Creat
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(database, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
@@ -151,7 +128,42 @@ func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.Creat
 
 		return nil
 	default:
-		p.Outputf("Created database %q\n", model.DatabaseName)
+		database := database.Database
+		table := tables.NewTable()
+		table.AddRow("ID", *database.Id)
+		table.AddSeparator()
+		table.AddRow("NAME", *database.Name)
+		table.AddSeparator()
+		if database.CreateDate != nil {
+			table.AddRow("CREATE DATE", *database.CreateDate)
+			table.AddSeparator()
+		}
+		if database.Collation != nil {
+			table.AddRow("COLLATION", *database.Collation)
+			table.AddSeparator()
+		}
+		if database.Options != nil {
+			if database.Options.CompatibilityLevel != nil {
+				table.AddRow("COMPATIBILITY LEVEL", *database.Options.CompatibilityLevel)
+				table.AddSeparator()
+			}
+			if database.Options.IsEncrypted != nil {
+				table.AddRow("IS ENCRYPTED", *database.Options.IsEncrypted)
+				table.AddSeparator()
+			}
+			if database.Options.Owner != nil {
+				table.AddRow("OWNER", *database.Options.Owner)
+				table.AddSeparator()
+			}
+			if database.Options.UserAccess != nil {
+				table.AddRow("USER ACCESS", *database.Options.UserAccess)
+			}
+		}
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
 		return nil
 	}
 }
