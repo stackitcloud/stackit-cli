@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No databases found for project %s\n", projectLabel)
+				p.Info("No databases found for instance %s on project %s\n", model.InstanceId, projectLabel)
 				return nil
 			}
 			databases := *resp.Databases
