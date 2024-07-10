@@ -1,4 +1,4 @@
-package create
+package list
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -28,8 +28,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		usernameFlag:   "johndoe",
-		rolesFlag:      "read",
+		limitFlag:      "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,8 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
-		Username:   utils.Ptr("johndoe"),
-		Roles:      utils.Ptr([]string{"read"}),
+		Limit:      utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -53,13 +51,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) sqlserverflex.ApiCreateUserRequest {
-	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
-	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
-		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]string{"read"}),
-	})
-
+func fixtureRequest(mods ...func(request *sqlserverflex.ApiListDatabasesRequest)) sqlserverflex.ApiListDatabasesRequest {
+	request := testClient.ListDatabases(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -73,29 +66,11 @@ func TestParseInput(t *testing.T) {
 		isValid       bool
 		expectedModel *inputModel
 	}{
-
 		{
 			description:   "base",
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
-		},
-		{
-			description: "no username specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, usernameFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "no roles specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, rolesFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = nil
-			}),
 		},
 		{
 			description: "no values",
@@ -134,6 +109,27 @@ func TestParseInput(t *testing.T) {
 			description: "instance id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},
@@ -191,21 +187,12 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sqlserverflex.ApiCreateUserRequest
+		expectedRequest sqlserverflex.ApiListDatabasesRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "no username specified",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-			}),
-			expectedRequest: fixtureRequest().CreateUserPayload(sqlserverflex.CreateUserPayload{
-				Roles: utils.Ptr([]string{"read"}),
-			}),
 		},
 	}
 

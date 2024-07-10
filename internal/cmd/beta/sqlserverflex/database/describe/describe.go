@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -15,49 +14,43 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 const (
-	userIdArg = "USER_ID"
+	databaseNameArg = "DATABASE_NAME"
 
 	instanceIdFlag = "instance-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-
-	InstanceId string
-	UserId     string
+	DatabaseName string
+	InstanceId   string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("describe %s", userIdArg),
-		Short: "Shows details of a SQLServer Flex user",
-		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Shows details of a SQLServer Flex user.",
-			`The user password is only visible upon creation. You can reset it by running:`,
-			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
-		),
+		Use:   fmt.Sprintf("describe %s", databaseNameArg),
+		Short: "Shows details of an SQLServer Flex database",
+		Long:  "Shows details of an SQLServer Flex database.",
+		Args:  args.SingleArg(databaseNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy"`,
-				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy"),
+				`Get details of an SQLServer Flex database with name "my-database" of instance with ID "xxx"`,
+				"$ stackit beta sqlserverflex database describe my-database --instance-id xxx"),
 			examples.NewExample(
-				`Get details of a SQLServer Flex user with ID "xxx" of instance with ID "yyy" in JSON format`,
-				"$ stackit beta sqlserverflex user describe xxx --instance-id yyy --output-format json"),
+				`Get details of an SQLServer Flex database with name "my-database" of instance with ID "xxx" in JSON format`,
+				"$ stackit beta sqlserverflex database describe my-database --instance-id xxx --output-format json"),
 		),
-		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
-
 			// Configure API client
 			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
@@ -68,26 +61,25 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get SQLServer Flex user: %w", err)
+				return fmt.Errorf("read SQLServer Flex database: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, *resp.Item)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
-
 	configureFlags(cmd)
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "SQLServer Flex instance ID")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	databaseName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -96,8 +88,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		DatabaseName:    databaseName,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		UserId:          userId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -112,51 +104,61 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetDatabaseRequest {
+	req := apiClient.GetDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.UserResponseUser) error {
+func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex.GetDatabaseResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
+		details, err := json.MarshalIndent(database, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(database, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
+			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
+		database := database.Database
 		table := tables.NewTable()
-		table.AddRow("ID", *user.Id)
+		table.AddRow("ID", *database.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", *user.Username)
-		if user.Roles != nil && len(*user.Roles) != 0 {
+		table.AddRow("NAME", *database.Name)
+		table.AddSeparator()
+		if database.CreateDate != nil {
+			table.AddRow("CREATE DATE", *database.CreateDate)
 			table.AddSeparator()
-			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))
 		}
-		if user.DefaultDatabase != nil && *user.DefaultDatabase != "" {
+		if database.Collation != nil {
+			table.AddRow("COLLATION", *database.Collation)
 			table.AddSeparator()
-			table.AddRow("DATABASE", *user.DefaultDatabase)
 		}
-		if user.Host != nil && *user.Host != "" {
-			table.AddSeparator()
-			table.AddRow("HOST", *user.Host)
+		if database.Options != nil {
+			if database.Options.CompatibilityLevel != nil {
+				table.AddRow("COMPATIBILITY LEVEL", *database.Options.CompatibilityLevel)
+				table.AddSeparator()
+			}
+			if database.Options.IsEncrypted != nil {
+				table.AddRow("IS ENCRYPTED", *database.Options.IsEncrypted)
+				table.AddSeparator()
+			}
+			if database.Options.Owner != nil {
+				table.AddRow("OWNER", *database.Options.Owner)
+				table.AddSeparator()
+			}
+			if database.Options.UserAccess != nil {
+				table.AddRow("USER ACCESS", *database.Options.UserAccess)
+			}
 		}
-		if user.Port != nil {
-			table.AddSeparator()
-			table.AddRow("PORT", *user.Port)
-		}
-
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

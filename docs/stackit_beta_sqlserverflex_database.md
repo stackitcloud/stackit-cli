@@ -31,4 +31,6 @@ stackit beta sqlserverflex database [flags]
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit beta sqlserverflex database create](./stackit_beta_sqlserverflex_database_create.md)	 - Creates a SQLServer Flex database
 * [stackit beta sqlserverflex database delete](./stackit_beta_sqlserverflex_database_delete.md)	 - Deletes a SQLServer Flex database
+* [stackit beta sqlserverflex database describe](./stackit_beta_sqlserverflex_database_describe.md)	 - Shows details of an SQLServer Flex database
+* [stackit beta sqlserverflex database list](./stackit_beta_sqlserverflex_database_list.md)	 - Lists all SQLServer Flex databases
 

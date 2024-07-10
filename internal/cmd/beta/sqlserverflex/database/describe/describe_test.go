@@ -1,4 +1,4 @@
-package create
+package describe
 
 import (
 	"context"
@@ -6,13 +6,11 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -23,13 +21,22 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
+var testDatabaseName = "my-database"
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testDatabaseName,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		usernameFlag:   "johndoe",
-		rolesFlag:      "read",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,9 +50,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceId: testInstanceId,
-		Username:   utils.Ptr("johndoe"),
-		Roles:      utils.Ptr([]string{"read"}),
+		DatabaseName: testDatabaseName,
+		InstanceId:   testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -53,13 +59,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) sqlserverflex.ApiCreateUserRequest {
-	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
-	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
-		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]string{"read"}),
-	})
-
+func fixtureRequest(mods ...func(request *sqlserverflex.ApiGetDatabaseRequest)) sqlserverflex.ApiGetDatabaseRequest {
+	request := testClient.GetDatabase(testCtx, testProjectId, testInstanceId, testDatabaseName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -69,41 +70,39 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) s
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
-
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no username specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, usernameFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "no roles specified",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, rolesFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = nil
-			}),
-		},
-		{
 			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
@@ -111,6 +110,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
@@ -118,6 +118,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
@@ -125,6 +126,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "instance id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, instanceIdFlag)
 			}),
@@ -132,22 +134,36 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "instance id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[instanceIdFlag] = ""
 			}),
 			isValid: false,
 		},
+		{
+			description: "instance id invalid 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "database name invalid",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
-
-			configureFlags(cmd)
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -159,6 +175,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -167,13 +191,12 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error parsing flags: %v", err)
+				t.Fatalf("error parsing input: %v", err)
 			}
 
 			if !tt.isValid {
@@ -191,21 +214,12 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sqlserverflex.ApiCreateUserRequest
+		expectedRequest sqlserverflex.ApiGetDatabaseRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "no username specified",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-			}),
-			expectedRequest: fixtureRequest().CreateUserPayload(sqlserverflex.CreateUserPayload{
-				Roles: utils.Ptr([]string{"read"}),
-			}),
 		},
 	}
 

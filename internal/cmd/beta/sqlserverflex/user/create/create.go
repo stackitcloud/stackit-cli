@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -36,20 +37,22 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a SQLServer Flex user",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n\n%s\n%s",
 			"Creates a SQLServer Flex user for an instance.",
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 			"Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.",
+			"The allowed user roles for your instance can be obtained by running:",
+			"  $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a SQLServer Flex user for instance with ID "xxx" and specify the username, role and database`,
-				"$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles my-role --database my-database"),
+				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "##STACKIT_DatabaseManager##" --database my-database`),
 			examples.NewExample(
 				`Create a SQLServer Flex user for instance with ID "xxx", specifying multiple roles`,
-				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "my-role-1,my-role-2"`),
+				`$ stackit beta sqlserverflex user create --instance-id xxx --username johndoe --roles "##STACKIT_LoginManager##,##STACKIT_DatabaseManager##"`),
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -132,21 +135,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateUserRequest {
 	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId)
 
-	var roles []sqlserverflex.Role
-	if model.Roles != nil {
-		for _, r := range *model.Roles {
-			roles = append(roles, sqlserverflex.Role(r))
-		}
-	}
-
 	req = req.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: model.Username,
-		Roles:    &roles,
+		Roles:    model.Roles,
 	})
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.User) error {
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.SingleUser) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
@@ -169,7 +165,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		p.Outputf("Username: %s\n", *user.Username)
 		p.Outputf("Password: %s\n", *user.Password)
 		if user.Roles != nil && len(*user.Roles) != 0 {
-			p.Outputf("Roles: %v\n", *user.Roles)
+			p.Outputf("Roles: [%v]\n", strings.Join(*user.Roles, ", "))
 		}
 		if user.Host != nil && *user.Host != "" {
 			p.Outputf("Host: %s\n", *user.Host)
