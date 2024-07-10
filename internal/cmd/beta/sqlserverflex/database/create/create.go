@@ -14,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/spf13/cobra"
@@ -125,9 +124,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId)
 	payload := sqlserverflex.CreateDatabasePayload{
 		Name: &model.DatabaseName,
-		Options: utils.Ptr(map[string]string{
-			"owner": model.Owner,
-		}),
+		// Options: utils.Ptr(map[string]string{
+		// 	"owner": model.Owner,
+		// }),
+		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
+			Owner: &model.Owner,
+		},
 	}
 	req = req.CreateDatabasePayload(payload)
 	return req

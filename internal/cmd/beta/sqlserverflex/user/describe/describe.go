@@ -117,7 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.InstanceResponseUser) error {
+func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.UserResponseUser) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
@@ -144,9 +144,9 @@ func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.Inst
 			table.AddSeparator()
 			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))
 		}
-		if user.Database != nil && *user.Database != "" {
+		if user.DefaultDatabase != nil && *user.DefaultDatabase != "" {
 			table.AddSeparator()
-			table.AddRow("DATABASE", *user.Database)
+			table.AddRow("DATABASE", *user.DefaultDatabase)
 		}
 		if user.Host != nil && *user.Host != "" {
 			table.AddSeparator()

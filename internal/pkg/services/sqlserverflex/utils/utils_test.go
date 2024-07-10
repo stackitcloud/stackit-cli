@@ -434,7 +434,7 @@ func TestGetUserName(t *testing.T) {
 		{
 			description: "base",
 			getUserResp: &sqlserverflex.GetUserResponse{
-				Item: &sqlserverflex.InstanceResponseUser{
+				Item: &sqlserverflex.UserResponseUser{
 					Username: utils.Ptr(testUserName),
 				},
 			},

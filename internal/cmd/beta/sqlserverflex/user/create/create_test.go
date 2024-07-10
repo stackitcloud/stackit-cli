@@ -57,7 +57,7 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) s
 	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId)
 	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]sqlserverflex.Role{"read"}),
+		Roles:    utils.Ptr([]string{"read"}),
 	})
 
 	for _, mod := range mods {
@@ -204,7 +204,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Username = nil
 			}),
 			expectedRequest: fixtureRequest().CreateUserPayload(sqlserverflex.CreateUserPayload{
-				Roles: utils.Ptr([]sqlserverflex.Role{"read"}),
+				Roles: utils.Ptr([]string{"read"}),
 			}),
 		},
 	}

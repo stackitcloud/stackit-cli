@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 
 	"github.com/google/go-cmp/cmp"
@@ -67,9 +66,9 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateDatabaseRequest
 	request := testClient.CreateDatabase(testCtx, testProjectId, testInstanceId)
 	payload := sqlserverflex.CreateDatabasePayload{
 		Name: &testDatabaseName,
-		Options: utils.Ptr(map[string]string{
-			"owner": testOwner,
-		}),
+		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
+			Owner: &testOwner,
+		},
 	}
 	request = request.CreateDatabasePayload(payload)
 	for _, mod := range mods {
