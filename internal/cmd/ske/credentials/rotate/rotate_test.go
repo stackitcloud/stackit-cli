@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiTriggerRotateCredentialsRequest)) ske.ApiTriggerRotateCredentialsRequest {
-	request := testClient.TriggerRotateCredentials(testCtx, testProjectId, testClusterName)
+	request := testClient.TriggerRotateCredentials(testCtx, testProjectId, testClusterName) //nolint:staticcheck //command will be removed in a later update
 	for _, mod := range mods {
 		mod(&request)
 	}
