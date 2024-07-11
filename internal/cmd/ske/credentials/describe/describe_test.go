@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiGetCredentialsRequest)) ske.ApiGetCredentialsRequest {
-	request := testClient.GetCredentials(testCtx, testProjectId, testClusterName)
+	request := testClient.GetCredentials(testCtx, testProjectId, testClusterName) //nolint:staticcheck //command will be removed in a later update
 	for _, mod := range mods {
 		mod(&request)
 	}

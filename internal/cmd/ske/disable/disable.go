@@ -112,6 +112,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId)
+	req := apiClient.DisableService(ctx, model.ProjectId) //nolint:staticcheck //command will be removed in a later update
 	return req
 }

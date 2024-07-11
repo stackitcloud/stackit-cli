@@ -46,7 +46,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiEnableServiceRequest)) ske.ApiEnableServiceRequest {
-	request := testClient.EnableService(testCtx, testProjectId)
+	request := testClient.EnableService(testCtx, testProjectId) //nolint:staticcheck //command will be removed in a later update
 	for _, mod := range mods {
 		mod(&request)
 	}

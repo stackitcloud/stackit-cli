@@ -81,7 +81,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetServiceStatusRequest {
-	req := apiClient.GetServiceStatus(ctx, model.ProjectId)
+	req := apiClient.GetServiceStatus(ctx, model.ProjectId) //nolint:staticcheck //command will be removed in a later update
 	return req
 }
 

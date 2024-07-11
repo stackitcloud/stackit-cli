@@ -120,6 +120,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiTriggerRotateCredentialsRequest {
-	req := apiClient.TriggerRotateCredentials(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.TriggerRotateCredentials(ctx, model.ProjectId, model.ClusterName) //nolint:staticcheck //command will be removed in a later update
 	return req
 }
