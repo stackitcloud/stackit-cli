@@ -11,7 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Enabling SKE")
-				_, err = wait.EnableServiceWaitHandler(ctx, apiClient, model.ProjectId, utils.ServiceId).WaitWithContext(ctx)
+				_, err = wait.EnableServiceWaitHandler(ctx, apiClient, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SKE enabling: %w", err)
 				}
@@ -113,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiEnableServiceRequest {
-	req := apiClient.EnableService(ctx, model.ProjectId, utils.ServiceId)
+	req := apiClient.EnableService(ctx, model.ProjectId, utils.SKEServiceId)
 	return req
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -47,7 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serviceenablement.ApiDisableServiceRequest)) serviceenablement.ApiDisableServiceRequest {
-	request := testClient.DisableService(testCtx, testProjectId, utils.ServiceId)
+	request := testClient.DisableService(testCtx, testProjectId, utils.SKEServiceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
