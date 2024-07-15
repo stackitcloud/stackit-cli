@@ -23,24 +23,25 @@ const (
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
 
-	argusCustomEndpointFlag           = "argus-custom-endpoint"
-	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
-	dnsCustomEndpointFlag             = "dns-custom-endpoint"
-	loadBalancerCustomEndpointFlag    = "load-balancer-custom-endpoint"
-	logMeCustomEndpointFlag           = "logme-custom-endpoint"
-	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
-	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
-	objectStorageCustomEndpointFlag   = "object-storage-custom-endpoint"
-	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
-	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
-	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
-	redisCustomEndpointFlag           = "redis-custom-endpoint"
-	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
-	secretsManagerCustomEndpointFlag  = "secrets-manager-custom-endpoint"
-	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
-	serverBackupCustomEndpointFlag    = "serverbackup-custom-endpoint"
-	skeCustomEndpointFlag             = "ske-custom-endpoint"
-	sqlServerFlexCustomEndpointFlag   = "sqlserverflex-custom-endpoint"
+	argusCustomEndpointFlag             = "argus-custom-endpoint"
+	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	dnsCustomEndpointFlag               = "dns-custom-endpoint"
+	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
+	logMeCustomEndpointFlag             = "logme-custom-endpoint"
+	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
+	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
+	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
+	openSearchCustomEndpointFlag        = "opensearch-custom-endpoint"
+	postgresFlexCustomEndpointFlag      = "postgresflex-custom-endpoint"
+	rabbitMQCustomEndpointFlag          = "rabbitmq-custom-endpoint"
+	redisCustomEndpointFlag             = "redis-custom-endpoint"
+	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
+	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
+	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
+	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
+	skeCustomEndpointFlag               = "ske-custom-endpoint"
+	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 )
 
 type inputModel struct {
@@ -52,24 +53,25 @@ type inputModel struct {
 	SessionTimeLimit               bool
 	IdentityProviderCustomEndpoint bool
 
-	ArgusCustomEndpoint           bool
-	AuthorizationCustomEndpoint   bool
-	DNSCustomEndpoint             bool
-	LoadBalancerCustomEndpoint    bool
-	LogMeCustomEndpoint           bool
-	MariaDBCustomEndpoint         bool
-	MongoDBFlexCustomEndpoint     bool
-	ObjectStorageCustomEndpoint   bool
-	OpenSearchCustomEndpoint      bool
-	PostgresFlexCustomEndpoint    bool
-	RabbitMQCustomEndpoint        bool
-	RedisCustomEndpoint           bool
-	ResourceManagerCustomEndpoint bool
-	SecretsManagerCustomEndpoint  bool
-	ServerBackupCustomEndpoint    bool
-	ServiceAccountCustomEndpoint  bool
-	SKECustomEndpoint             bool
-	SQLServerFlexCustomEndpoint   bool
+	ArgusCustomEndpoint             bool
+	AuthorizationCustomEndpoint     bool
+	DNSCustomEndpoint               bool
+	LoadBalancerCustomEndpoint      bool
+	LogMeCustomEndpoint             bool
+	MariaDBCustomEndpoint           bool
+	MongoDBFlexCustomEndpoint       bool
+	ObjectStorageCustomEndpoint     bool
+	OpenSearchCustomEndpoint        bool
+	PostgresFlexCustomEndpoint      bool
+	RabbitMQCustomEndpoint          bool
+	RedisCustomEndpoint             bool
+	ResourceManagerCustomEndpoint   bool
+	SecretsManagerCustomEndpoint    bool
+	ServerBackupCustomEndpoint      bool
+	ServiceAccountCustomEndpoint    bool
+	ServiceEnablementCustomEndpoint bool
+	SKECustomEndpoint               bool
+	SQLServerFlexCustomEndpoint     bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -157,6 +159,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
 			}
+			if model.ServiceEnablementCustomEndpoint {
+				viper.Set(config.ServiceEnablementCustomEndpointKey, "")
+			}
 			if model.ServerBackupCustomEndpoint {
 				viper.Set(config.ServerBackupCustomEndpointKey, "")
 			}
@@ -201,7 +206,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(secretsManagerCustomEndpointFlag, false, "Secrets Manager API base URL. If unset, uses the default base URL")
-	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "Service Account API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(serviceEnablementCustomEndpointFlag, false, "Service Enablement API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serverBackupCustomEndpointFlag, false, "Server Backup base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
@@ -217,24 +223,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
 		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
 
-		ArgusCustomEndpoint:           flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
-		AuthorizationCustomEndpoint:   flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
-		DNSCustomEndpoint:             flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
-		LoadBalancerCustomEndpoint:    flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
-		LogMeCustomEndpoint:           flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
-		MariaDBCustomEndpoint:         flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
-		MongoDBFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
-		ObjectStorageCustomEndpoint:   flags.FlagToBoolValue(p, cmd, objectStorageCustomEndpointFlag),
-		OpenSearchCustomEndpoint:      flags.FlagToBoolValue(p, cmd, openSearchCustomEndpointFlag),
-		PostgresFlexCustomEndpoint:    flags.FlagToBoolValue(p, cmd, postgresFlexCustomEndpointFlag),
-		RabbitMQCustomEndpoint:        flags.FlagToBoolValue(p, cmd, rabbitMQCustomEndpointFlag),
-		RedisCustomEndpoint:           flags.FlagToBoolValue(p, cmd, redisCustomEndpointFlag),
-		ResourceManagerCustomEndpoint: flags.FlagToBoolValue(p, cmd, resourceManagerCustomEndpointFlag),
-		SecretsManagerCustomEndpoint:  flags.FlagToBoolValue(p, cmd, secretsManagerCustomEndpointFlag),
-		ServiceAccountCustomEndpoint:  flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
-		ServerBackupCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),
-		SKECustomEndpoint:             flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
-		SQLServerFlexCustomEndpoint:   flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
+		ArgusCustomEndpoint:             flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
+		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
+		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
+		LoadBalancerCustomEndpoint:      flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
+		LogMeCustomEndpoint:             flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
+		MariaDBCustomEndpoint:           flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
+		MongoDBFlexCustomEndpoint:       flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
+		ObjectStorageCustomEndpoint:     flags.FlagToBoolValue(p, cmd, objectStorageCustomEndpointFlag),
+		OpenSearchCustomEndpoint:        flags.FlagToBoolValue(p, cmd, openSearchCustomEndpointFlag),
+		PostgresFlexCustomEndpoint:      flags.FlagToBoolValue(p, cmd, postgresFlexCustomEndpointFlag),
+		RabbitMQCustomEndpoint:          flags.FlagToBoolValue(p, cmd, rabbitMQCustomEndpointFlag),
+		RedisCustomEndpoint:             flags.FlagToBoolValue(p, cmd, redisCustomEndpointFlag),
+		ResourceManagerCustomEndpoint:   flags.FlagToBoolValue(p, cmd, resourceManagerCustomEndpointFlag),
+		SecretsManagerCustomEndpoint:    flags.FlagToBoolValue(p, cmd, secretsManagerCustomEndpointFlag),
+		ServiceAccountCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
+		ServiceEnablementCustomEndpoint: flags.FlagToBoolValue(p, cmd, serviceEnablementCustomEndpointFlag),
+		ServerBackupCustomEndpoint:      flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),
+		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
+		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 	}
 
 	if p.IsVerbosityDebug() {

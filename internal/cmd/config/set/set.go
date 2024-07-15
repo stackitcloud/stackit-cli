@@ -20,24 +20,25 @@ const (
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
 
-	argusCustomEndpointFlag           = "argus-custom-endpoint"
-	authorizationCustomEndpointFlag   = "authorization-custom-endpoint"
-	dnsCustomEndpointFlag             = "dns-custom-endpoint"
-	loadBalancerCustomEndpointFlag    = "load-balancer-custom-endpoint"
-	logMeCustomEndpointFlag           = "logme-custom-endpoint"
-	mariaDBCustomEndpointFlag         = "mariadb-custom-endpoint"
-	mongoDBFlexCustomEndpointFlag     = "mongodbflex-custom-endpoint"
-	objectStorageCustomEndpointFlag   = "object-storage-custom-endpoint"
-	openSearchCustomEndpointFlag      = "opensearch-custom-endpoint"
-	postgresFlexCustomEndpointFlag    = "postgresflex-custom-endpoint"
-	rabbitMQCustomEndpointFlag        = "rabbitmq-custom-endpoint"
-	redisCustomEndpointFlag           = "redis-custom-endpoint"
-	resourceManagerCustomEndpointFlag = "resource-manager-custom-endpoint"
-	secretsManagerCustomEndpointFlag  = "secrets-manager-custom-endpoint"
-	serverBackupCustomEndpointFlag    = "serverbackup-custom-endpoint"
-	serviceAccountCustomEndpointFlag  = "service-account-custom-endpoint"
-	skeCustomEndpointFlag             = "ske-custom-endpoint"
-	sqlServerFlexCustomEndpointFlag   = "sqlserverflex-custom-endpoint"
+	argusCustomEndpointFlag             = "argus-custom-endpoint"
+	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	dnsCustomEndpointFlag               = "dns-custom-endpoint"
+	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
+	logMeCustomEndpointFlag             = "logme-custom-endpoint"
+	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
+	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
+	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
+	openSearchCustomEndpointFlag        = "opensearch-custom-endpoint"
+	postgresFlexCustomEndpointFlag      = "postgresflex-custom-endpoint"
+	rabbitMQCustomEndpointFlag          = "rabbitmq-custom-endpoint"
+	redisCustomEndpointFlag             = "redis-custom-endpoint"
+	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
+	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
+	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
+	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
+	skeCustomEndpointFlag               = "ske-custom-endpoint"
+	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 )
 
 type inputModel struct {
@@ -141,6 +142,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource Manager API base URL, used in calls to this API")
 	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Manager API base URL, used in calls to this API")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
+	cmd.Flags().String(serviceEnablementCustomEndpointFlag, "", "Service Enablement API base URL, used in calls to this API")
 	cmd.Flags().String(serverBackupCustomEndpointFlag, "", "Server Backup API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
@@ -181,6 +183,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ServerBackupCustomEndpointKey, cmd.Flags().Lookup(serverBackupCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.ServiceEnablementCustomEndpointKey, cmd.Flags().Lookup(serviceEnablementCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)

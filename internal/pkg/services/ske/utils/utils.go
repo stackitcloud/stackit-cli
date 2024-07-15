@@ -28,6 +28,8 @@ const (
 	defaultNodepoolVolumeSize       = 50
 
 	supportedState = "supported"
+
+	ServiceId = "cloud.stackit.ske"
 )
 
 type SKEClient interface {
