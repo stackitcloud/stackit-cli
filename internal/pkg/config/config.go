@@ -19,24 +19,25 @@ const (
 
 	IdentityProviderCustomEndpointKey = "identity_provider_custom_endpoint"
 
-	ArgusCustomEndpointKey          = "argus_custom_endpoint"
-	AuthorizationCustomEndpointKey  = "authorization_custom_endpoint"
-	DNSCustomEndpointKey            = "dns_custom_endpoint"
-	LoadBalancerCustomEndpointKey   = "load_balancer_custom_endpoint"
-	LogMeCustomEndpointKey          = "logme_custom_endpoint"
-	MariaDBCustomEndpointKey        = "mariadb_custom_endpoint"
-	MongoDBFlexCustomEndpointKey    = "mongodbflex_custom_endpoint"
-	ObjectStorageCustomEndpointKey  = "object_storage_custom_endpoint"
-	OpenSearchCustomEndpointKey     = "opensearch_custom_endpoint"
-	PostgresFlexCustomEndpointKey   = "postgresflex_custom_endpoint"
-	RabbitMQCustomEndpointKey       = "rabbitmq_custom_endpoint"
-	RedisCustomEndpointKey          = "redis_custom_endpoint"
-	ResourceManagerEndpointKey      = "resource_manager_custom_endpoint"
-	SecretsManagerCustomEndpointKey = "secrets_manager_custom_endpoint"
-	ServiceAccountCustomEndpointKey = "service_account_custom_endpoint"
-	ServerBackupCustomEndpointKey   = "serverbackup_custom_endpoint"
-	SKECustomEndpointKey            = "ske_custom_endpoint"
-	SQLServerFlexCustomEndpointKey  = "sqlserverflex_custom_endpoint"
+	ArgusCustomEndpointKey             = "argus_custom_endpoint"
+	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
+	DNSCustomEndpointKey               = "dns_custom_endpoint"
+	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
+	LogMeCustomEndpointKey             = "logme_custom_endpoint"
+	MariaDBCustomEndpointKey           = "mariadb_custom_endpoint"
+	MongoDBFlexCustomEndpointKey       = "mongodbflex_custom_endpoint"
+	ObjectStorageCustomEndpointKey     = "object_storage_custom_endpoint"
+	OpenSearchCustomEndpointKey        = "opensearch_custom_endpoint"
+	PostgresFlexCustomEndpointKey      = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey          = "rabbitmq_custom_endpoint"
+	RedisCustomEndpointKey             = "redis_custom_endpoint"
+	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
+	SecretsManagerCustomEndpointKey    = "secrets_manager_custom_endpoint"
+	ServiceAccountCustomEndpointKey    = "service_account_custom_endpoint"
+	ServiceEnablementCustomEndpointKey = "service_enablement_custom_endpoint"
+	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
+	SKECustomEndpointKey               = "ske_custom_endpoint"
+	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -81,6 +82,7 @@ var ConfigKeys = []string{
 	ResourceManagerEndpointKey,
 	SecretsManagerCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
+	ServiceEnablementCustomEndpointKey,
 	ServerBackupCustomEndpointKey,
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
@@ -152,6 +154,7 @@ func setConfigDefaults() {
 	viper.SetDefault(ResourceManagerEndpointKey, "")
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
+	viper.SetDefault(ServiceEnablementCustomEndpointKey, "")
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")

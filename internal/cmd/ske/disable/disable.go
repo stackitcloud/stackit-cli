@@ -10,12 +10,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
+	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/wait"
 )
 
 type inputModel struct {
@@ -62,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			_, err = req.Execute()
+			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("disable SKE: %w", err)
 			}
@@ -71,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Disabling SKE")
-				_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.ProjectId).WaitWithContext(ctx)
+				_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SKE disabling: %w", err)
 				}
@@ -111,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId) //nolint:staticcheck //command will be removed in a later update
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiDisableServiceRequest {
+	req := apiClient.DisableService(ctx, model.ProjectId, utils.SKEServiceId)
 	return req
 }
