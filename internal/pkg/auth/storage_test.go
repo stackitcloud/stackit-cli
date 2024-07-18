@@ -1181,11 +1181,25 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 				t.Errorf("AuthorizeUserProfileAuth() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
+			// Test values
+			testLoginAuthFields := []string{
+				tt.args.sessionExpiresAtUnix,
+				tt.args.accessToken,
+				tt.args.refreshToken,
+				tt.args.email,
+			}
+
 			// Check if the fields are set
-			for _, key := range loginAuthFieldKeys {
-				field, err := GetAuthField(key)
-				
-				
+			for i := range loginAuthFieldKeys {
+				gotKey, err := GetAuthField(loginAuthFieldKeys[i])
+				if err != nil {
+					t.Errorf("Field \"%s\" not set after authorization", loginAuthFieldKeys[i])
+				}
+				expectedKey := testLoginAuthFields[i]
+				if gotKey != expectedKey {
+					t.Errorf("Field \"%s\" is wrong: expected \"%s\", got \"%s\"", loginAuthFieldKeys[i], expectedKey, gotKey)
+				}
+			}
 
 			if err := LogoutUser(); err != nil {
 				t.Errorf("DeauthorizeUserProfileAuth() error = %v", err)
