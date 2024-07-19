@@ -62,6 +62,15 @@ var authFieldKeys = []authFieldKey{
 	authFlowType,
 }
 
+// All fields that are set when a user logs in
+// These fields should match the ones in LoginUser, which is ensured by the tests
+var loginAuthFieldKeys = []authFieldKey{
+	SESSION_EXPIRES_AT_UNIX,
+	ACCESS_TOKEN,
+	REFRESH_TOKEN,
+	USER_EMAIL,
+}
+
 func SetAuthFlow(value AuthFlow) error {
 	return SetAuthField(authFlowType, string(value))
 }
@@ -103,6 +112,65 @@ func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string)
 		return keyring.Set(activeProfileKeyring, string(key), value)
 	}
 	return keyring.Set(keyringService, string(key), value)
+}
+
+func DeleteAuthField(key authFieldKey) error {
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+	return deleteAuthFieldWithProfile(activeProfile, key)
+}
+
+func deleteAuthFieldWithProfile(profile string, key authFieldKey) error {
+	err := deleteAuthFieldInKeyring(profile, key)
+	if err != nil {
+		// if the key is not found, we can ignore the error
+		if !errors.Is(err, keyring.ErrNotFound) {
+			errFallback := deleteAuthFieldInEncodedTextFile(profile, key)
+			if errFallback != nil {
+				return fmt.Errorf("delete from keyring failed (%w), try deleting from encoded text file: %w", err, errFallback)
+			}
+		}
+	}
+	return nil
+}
+
+func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
+	err := createEncodedTextFile(activeProfile)
+	if err != nil {
+		return err
+	}
+
+	textFileDir := config.GetProfileFolderPath(activeProfile)
+	textFilePath := filepath.Join(textFileDir, textFileName)
+
+	contentEncoded, err := os.ReadFile(textFilePath)
+	if err != nil {
+		return fmt.Errorf("read file: %w", err)
+	}
+	contentBytes, err := base64.StdEncoding.DecodeString(string(contentEncoded))
+	if err != nil {
+		return fmt.Errorf("decode file: %w", err)
+	}
+	content := map[authFieldKey]string{}
+	err = json.Unmarshal(contentBytes, &content)
+	if err != nil {
+		return fmt.Errorf("unmarshal file: %w", err)
+	}
+
+	delete(content, key)
+
+	contentBytes, err = json.Marshal(content)
+	if err != nil {
+		return fmt.Errorf("marshal file: %w", err)
+	}
+	contentEncoded = []byte(base64.StdEncoding.EncodeToString(contentBytes))
+	err = os.WriteFile(textFilePath, contentEncoded, 0o600)
+	if err != nil {
+		return fmt.Errorf("write file: %w", err)
+	}
+	return nil
 }
 
 func deleteAuthFieldInKeyring(activeProfile string, key authFieldKey) error {
@@ -273,7 +341,32 @@ func GetProfileEmail(profile string) string {
 	return email
 }
 
-func DeleteProfileFromKeyring(profile string) error {
+func LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix string) error {
+	authFields := map[authFieldKey]string{
+		SESSION_EXPIRES_AT_UNIX: sessionExpiresAtUnix,
+		ACCESS_TOKEN:            accessToken,
+		REFRESH_TOKEN:           refreshToken,
+		USER_EMAIL:              email,
+	}
+
+	err := SetAuthFieldMap(authFields)
+	if err != nil {
+		return fmt.Errorf("set auth fields: %w", err)
+	}
+	return nil
+}
+
+func LogoutUser() error {
+	for _, key := range loginAuthFieldKeys {
+		err := DeleteAuthField(key)
+		if err != nil {
+			return fmt.Errorf("delete auth field \"%s\": %w", key, err)
+		}
+	}
+	return nil
+}
+
+func DeleteProfileAuth(profile string) error {
 	err := config.ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
@@ -284,12 +377,9 @@ func DeleteProfileFromKeyring(profile string) error {
 	}
 
 	for _, key := range authFieldKeys {
-		err := deleteAuthFieldInKeyring(profile, key)
+		err := deleteAuthFieldWithProfile(profile, key)
 		if err != nil {
-			// if the key is not found, we can ignore the error
-			if !errors.Is(err, keyring.ErrNotFound) {
-				return fmt.Errorf("delete auth field \"%s\" from keyring: %w", key, err)
-			}
+			return fmt.Errorf("delete auth field \"%s\": %w", key, err)
 		}
 	}
 

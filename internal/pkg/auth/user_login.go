@@ -167,13 +167,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		p.Debug(print.DebugLevel, "user %s logged in successfully", email)
 
-		authFields := map[authFieldKey]string{
-			SESSION_EXPIRES_AT_UNIX: sessionExpiresAtUnix,
-			ACCESS_TOKEN:            accessToken,
-			REFRESH_TOKEN:           refreshToken,
-			USER_EMAIL:              email,
-		}
-		err = SetAuthFieldMap(authFields)
+		err = LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix)
 		if err != nil {
 			errServer = fmt.Errorf("set in auth storage: %w", err)
 			return

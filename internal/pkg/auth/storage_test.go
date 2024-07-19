@@ -1,17 +1,13 @@
 package auth
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/zalando/go-keyring"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/zalando/go-keyring"
 )
 
 func TestSetGetAuthField(t *testing.T) {
@@ -317,7 +313,7 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 				}
 			}
 
-			err = deleteAuthFieldProfile(tt.activeProfile)
+			err = deleteProfileFiles(tt.activeProfile)
 			if err != nil {
 				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
@@ -468,6 +464,156 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 	}
 }
 
+func TestDeleteAuthField(t *testing.T) {
+	tests := []struct {
+		description  string
+		keyringFails bool
+		key          authFieldKey
+		noKey        bool
+	}{
+		{
+			description: "base",
+			key:         "test-field-1",
+		},
+		{
+			description: "key doesnt exist",
+			key:         "doesnt-exist",
+			noKey:       true,
+		},
+		{
+			description:  "keyring fails",
+			keyringFails: true,
+			key:          "test-field-1",
+		},
+		{
+			description:  "keyring fails, no key exists",
+			keyringFails: true,
+			noKey:        true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if !tt.keyringFails {
+				keyring.MockInit()
+			} else {
+				keyring.MockInitWithError(fmt.Errorf("keyring unavailable for testing"))
+			}
+
+			// Append random string to auth field key and value to avoid conflicts
+			testField1 := authFieldKey(fmt.Sprintf("test-field-1-%s", time.Now().Format(time.RFC3339)))
+			testValue1 := fmt.Sprintf("value-1-%s", time.Now().Format(time.RFC3339))
+
+			if !tt.noKey {
+				err := SetAuthField(testField1, testValue1)
+				if err != nil {
+					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", testField1, testValue1, err)
+				}
+			}
+
+			err := DeleteAuthField(tt.key)
+			if err != nil {
+				t.Fatalf("Failed to delete field \"%s\": %v", tt.key, err)
+			}
+
+			// Check if key still exists
+			_, err = GetAuthField(tt.key)
+			if err == nil {
+				t.Fatalf("Key \"%s\" still exists after deletion", tt.key)
+			}
+		})
+	}
+}
+
+func TestDeleteAuthFieldWithProfile(t *testing.T) {
+	tests := []struct {
+		description  string
+		keyringFails bool
+		profile      string
+		key          authFieldKey
+		noKey        bool
+	}{
+		{
+			description: "base",
+			profile:     "default",
+			key:         "test-field-1",
+		},
+		{
+			description: "key doesnt exist",
+			profile:     "default",
+			key:         "doesnt-exist",
+			noKey:       true,
+		},
+		{
+			description:  "keyring fails",
+			profile:      "default",
+			keyringFails: true,
+			key:          "test-field-1",
+		},
+		{
+			description:  "keyring fails, no key exists",
+			profile:      "default",
+			keyringFails: true,
+			noKey:        true,
+		},
+		{
+			description: "base, custom profile",
+			profile:     "test-profile",
+			key:         "test-field-1",
+		},
+		{
+			description: "key doesnt exist, custom profile",
+			profile:     "test-profile",
+			key:         "doesnt-exist",
+			noKey:       true,
+		},
+		{
+			description:  "keyring fails, custom profile",
+			profile:      "test-profile",
+			keyringFails: true,
+			key:          "test-field-1",
+		},
+		{
+			description:  "keyring fails, no key exists, custom profile",
+			profile:      "test-profile",
+			keyringFails: true,
+			noKey:        true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if !tt.keyringFails {
+				keyring.MockInit()
+			} else {
+				keyring.MockInitWithError(fmt.Errorf("keyring unavailable for testing"))
+			}
+
+			// Append random string to auth field key and value to avoid conflicts
+			testField1 := authFieldKey(fmt.Sprintf("test-field-1-%s", time.Now().Format(time.RFC3339)))
+			testValue1 := fmt.Sprintf("value-1-%s", time.Now().Format(time.RFC3339))
+
+			if !tt.noKey {
+				err := SetAuthField(testField1, testValue1)
+				if err != nil {
+					t.Fatalf("Failed to set \"%s\" as \"%s\": %v", testField1, testValue1, err)
+				}
+			}
+
+			err := deleteAuthFieldWithProfile(tt.profile, tt.key)
+			if err != nil {
+				t.Fatalf("Failed to delete field \"%s\": %v", tt.key, err)
+			}
+
+			// Check if key still exists
+			_, err = GetAuthField(tt.key)
+			if err == nil {
+				t.Fatalf("Key \"%s\" still exists after deletion", tt.key)
+			}
+		})
+	}
+}
+
 func TestDeleteAuthFieldKeyring(t *testing.T) {
 	tests := []struct {
 		description   string
@@ -606,7 +752,7 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 				}
 			}
 
-			err := DeleteProfileFromKeyring(tt.activeProfile)
+			err := DeleteProfileAuth(tt.activeProfile)
 			if err != nil {
 				if tt.isValid {
 					t.Fatalf("Failed to delete profile \"%s\" from keyring: %v", tt.activeProfile, err)
@@ -767,7 +913,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 				}
 			}
 
-			err = deleteAuthFieldProfile(tt.activeProfile)
+			err = deleteProfileFiles(tt.activeProfile)
 			if err != nil {
 				t.Errorf("Post-test cleanup failed: remove profile \"%s\": %v. Please remove it manually", tt.activeProfile, err)
 			}
@@ -925,7 +1071,7 @@ func TestGetProfileEmail(t *testing.T) {
 				t.Fatalf("Failed to remove service account email: %v", err)
 			}
 
-			err = deleteAuthFieldProfile(tt.activeProfile)
+			err = deleteProfileFiles(tt.activeProfile)
 			if err != nil {
 				t.Fatalf("Failed to remove profile: %v", err)
 			}
@@ -933,44 +1079,7 @@ func TestGetProfileEmail(t *testing.T) {
 	}
 }
 
-func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
-	err := createEncodedTextFile(activeProfile)
-	if err != nil {
-		return err
-	}
-
-	textFileDir := config.GetProfileFolderPath(activeProfile)
-	textFilePath := filepath.Join(textFileDir, textFileName)
-
-	contentEncoded, err := os.ReadFile(textFilePath)
-	if err != nil {
-		return fmt.Errorf("read file: %w", err)
-	}
-	contentBytes, err := base64.StdEncoding.DecodeString(string(contentEncoded))
-	if err != nil {
-		return fmt.Errorf("decode file: %w", err)
-	}
-	content := map[authFieldKey]string{}
-	err = json.Unmarshal(contentBytes, &content)
-	if err != nil {
-		return fmt.Errorf("unmarshal file: %w", err)
-	}
-
-	delete(content, key)
-
-	contentBytes, err = json.Marshal(content)
-	if err != nil {
-		return fmt.Errorf("marshal file: %w", err)
-	}
-	contentEncoded = []byte(base64.StdEncoding.EncodeToString(contentBytes))
-	err = os.WriteFile(textFilePath, contentEncoded, 0o600)
-	if err != nil {
-		return fmt.Errorf("write file: %w", err)
-	}
-	return nil
-}
-
-func deleteAuthFieldProfile(activeProfile string) error {
+func deleteProfileFiles(activeProfile string) error {
 	if activeProfile == config.DefaultProfileName {
 		// Do not delete the default profile
 		return nil
@@ -989,4 +1098,120 @@ func makeProfileNameUnique(profile string) string {
 		return profile
 	}
 	return fmt.Sprintf("%s-%s", profile, time.Now().Format("20060102150405"))
+}
+
+func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
+	type args struct {
+		sessionExpiresAtUnix string
+		accessToken          string
+		refreshToken         string
+		email                string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				sessionExpiresAtUnix: "1234567890",
+				accessToken:          "accessToken",
+				refreshToken:         "refreshToken",
+				email:                "test@example.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "no email",
+			args: args{
+				sessionExpiresAtUnix: "1234567890",
+				accessToken:          "accessToken",
+				refreshToken:         "refreshToken",
+				email:                "",
+			},
+			wantErr: false,
+		},
+		{
+			name: "no session expires",
+			args: args{
+				sessionExpiresAtUnix: "",
+				accessToken:          "accessToken",
+				refreshToken:         "refreshToken",
+				email:                "test@example.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "no access token",
+			args: args{
+				sessionExpiresAtUnix: "1234567890",
+				accessToken:          "",
+				refreshToken:         "refreshToken",
+				email:                "test@example.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "no refresh token",
+			args: args{
+				sessionExpiresAtUnix: "1234567890",
+				accessToken:          "accessToken",
+				refreshToken:         "",
+				email:                "test@example.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "all empty args",
+			args: args{
+				sessionExpiresAtUnix: "",
+				accessToken:          "",
+				refreshToken:         "",
+				email:                "",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keyring.MockInit()
+
+			if err := LoginUser(tt.args.email, tt.args.accessToken, tt.args.refreshToken, tt.args.sessionExpiresAtUnix); (err != nil) != tt.wantErr {
+				t.Errorf("AuthorizeUserProfileAuth() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			// Test values
+			testLoginAuthFields := []string{
+				tt.args.sessionExpiresAtUnix,
+				tt.args.accessToken,
+				tt.args.refreshToken,
+				tt.args.email,
+			}
+
+			// Check if the fields are set
+			for i := range loginAuthFieldKeys {
+				gotKey, err := GetAuthField(loginAuthFieldKeys[i])
+				if err != nil {
+					t.Errorf("Field \"%s\" not set after authorization", loginAuthFieldKeys[i])
+				}
+				expectedKey := testLoginAuthFields[i]
+				if gotKey != expectedKey {
+					t.Errorf("Field \"%s\" is wrong: expected \"%s\", got \"%s\"", loginAuthFieldKeys[i], expectedKey, gotKey)
+				}
+			}
+
+			if err := LogoutUser(); err != nil {
+				t.Errorf("DeauthorizeUserProfileAuth() error = %v", err)
+			}
+
+			// Check if the fields are deleted
+			for _, key := range loginAuthFieldKeys {
+				_, err := GetAuthField(key)
+				if err == nil {
+					t.Errorf("Field \"%s\" still exists after deauthorization", key)
+				}
+			}
+		})
+	}
 }
