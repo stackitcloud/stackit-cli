@@ -25,7 +25,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := auth.LogoutUser()
 			if err != nil {
-				return fmt.Errorf("authorization failed: %w", err)
+				return fmt.Errorf("log out failed: %w", err)
 			}
 
 			p.Info("Successfully logged out of the STACKIT CLI.\n")

@@ -78,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			err = auth.DeleteProfileAuth(model.Profile)
 			if err != nil {
-				return fmt.Errorf("delete profile from keyring: %w", err)
+				return fmt.Errorf("delete profile authentication: %w", err)
 			}
 
 			p.Info("Successfully deleted profile %q\n", model.Profile)
