@@ -29,6 +29,7 @@ stackit dns zone [flags]
 ### SEE ALSO
 
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
+* [stackit dns zone clone](./stackit_dns_zone_clone.md)	 - Clones a DNS zone
 * [stackit dns zone create](./stackit_dns_zone_create.md)	 - Creates a DNS zone
 * [stackit dns zone delete](./stackit_dns_zone_delete.md)	 - Deletes a DNS zone
 * [stackit dns zone describe](./stackit_dns_zone_describe.md)	 - Shows details of a DNS zone

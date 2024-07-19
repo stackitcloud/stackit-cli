@@ -1,6 +1,7 @@
 package zone
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/clone"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone/describe"
@@ -31,4 +32,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(describe.NewCmd(p))
 	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(clone.NewCmd(p))
 }
