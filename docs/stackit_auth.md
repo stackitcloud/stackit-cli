@@ -31,4 +31,5 @@ stackit auth [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit auth activate-service-account](./stackit_auth_activate-service-account.md)	 - Authenticates using a service account
 * [stackit auth login](./stackit_auth_login.md)	 - Logs in to the STACKIT CLI
+* [stackit auth logout](./stackit_auth_logout.md)	 - Logs the user account out of the STACKIT CLI
 
