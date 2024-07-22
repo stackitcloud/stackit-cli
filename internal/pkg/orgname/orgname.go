@@ -8,9 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 )
 
-// Returns the project name associated to the project ID set in config
-//
-// Uses the one stored in config if it's valid, otherwise gets it from the API
+// GetOrganizationName returns the name of an organization by its ID.
 func GetOrganizationName(ctx context.Context, p *print.Printer, orgId string) (string, error) {
 	apiClient, err := client.ConfigureClient(p)
 	if err != nil {
