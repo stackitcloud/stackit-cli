@@ -134,29 +134,17 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 		table.AddSeparator()
 		table.AddRow("NAME", *database.Name)
 		table.AddSeparator()
-		if database.CreateDate != nil {
-			table.AddRow("CREATE DATE", *database.CreateDate)
-			table.AddSeparator()
-		}
-		if database.Collation != nil {
-			table.AddRow("COLLATION", *database.Collation)
-			table.AddSeparator()
-		}
 		if database.Options != nil {
 			if database.Options.CompatibilityLevel != nil {
 				table.AddRow("COMPATIBILITY LEVEL", *database.Options.CompatibilityLevel)
-				table.AddSeparator()
-			}
-			if database.Options.IsEncrypted != nil {
-				table.AddRow("IS ENCRYPTED", *database.Options.IsEncrypted)
 				table.AddSeparator()
 			}
 			if database.Options.Owner != nil {
 				table.AddRow("OWNER", *database.Options.Owner)
 				table.AddSeparator()
 			}
-			if database.Options.UserAccess != nil {
-				table.AddRow("USER ACCESS", *database.Options.UserAccess)
+			if database.Options.CollationName != nil {
+				table.AddRow("COLLATION", *database.Options.CollationName)
 			}
 		}
 		err := table.Display(p)
