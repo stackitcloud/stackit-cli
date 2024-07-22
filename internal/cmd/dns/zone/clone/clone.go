@@ -50,11 +50,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com"`,
 				"$ stackit dns zone clone xxx --dns-name www.my-zone.com"),
 			examples.NewExample(
-				`Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and adjust records "true"`,
-				"$ stackit dns zone clone xxx --dns-name www.my-zone.com --adjust-records"),
-			examples.NewExample(
 				`Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and display name "new-zone"`,
 				"$ stackit dns zone clone xxx --dns-name www.my-zone.com --name new-zone"),
+			examples.NewExample(
+				`Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and adjust records "true"`,
+				"$ stackit dns zone clone xxx --dns-name www.my-zone.com --adjust-records"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
