@@ -30,4 +30,5 @@ stackit beta network-area [flags]
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta network-area create](./stackit_beta_network-area_create.md)	 - Creates a network area
+* [stackit beta network-area update](./stackit_beta_network-area_update.md)	 - Updates a network area
 

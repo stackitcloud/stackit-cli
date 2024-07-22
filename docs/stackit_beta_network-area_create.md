@@ -13,14 +13,14 @@ stackit beta network-area create [flags]
 ### Examples
 
 ```
-  Create a network area with name "network-area-1" in organization with ID "org-1" with network ranges and a transfer network
-  $ stackit beta network-area create --name network-area-1 --organization-id org-1 --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24"
+  Create a network area with name "network-area-1" in organization with ID "xxx" with network ranges and a transfer network
+  $ stackit beta network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24"
 
-  Create a network area with name "network-area-2" in organization with ID "org-2" with network ranges, transfer network and DNS name server
-  $ stackit beta network-area create --name network-area-2 --organization-id org-2 --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --dns-name-servers "1.1.1.1"
+  Create a network area with name "network-area-2" in organization with ID "xxx" with network ranges, transfer network and DNS name server
+  $ stackit beta network-area create --name network-area-2 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --dns-name-servers "1.1.1.1"
 
-  Create a network area with name "network-area-3" in organization with ID "org-3" with network ranges, transfer network and additional options
-  $ stackit beta network-area create --name network-area-3 --organization-id org-3 --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --default-prefix-length 25 --max-prefix-length 29 --min-prefix-length 24
+  Create a network area with name "network-area-3" in organization with ID "xxx" with network ranges, transfer network and additional options
+  $ stackit beta network-area create --name network-area-3 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --default-prefix-length 25 --max-prefix-length 29 --min-prefix-length 24
 ```
 
 ### Options

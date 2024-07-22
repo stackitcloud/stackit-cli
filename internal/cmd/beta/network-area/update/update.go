@@ -1,4 +1,4 @@
-package create
+package update
 
 import (
 	"context"
@@ -20,11 +20,12 @@ import (
 )
 
 const (
+	areaIdArg = "AREA_ID"
+
 	nameFlag                = "name"
 	organizationIdFlag      = "organization-id"
+	areaIdFlag              = "area-id"
 	dnsNameServersFlag      = "dns-name-servers"
-	networkRangesFlag       = "network-ranges"
-	transferNetworkFlag     = "transfer-network"
 	defaultPrefixLengthFlag = "default-prefix-length"
 	maxPrefixLengthFlag     = "max-prefix-length"
 	minPrefixLengthFlag     = "min-prefix-length"
@@ -32,11 +33,10 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	AreaId              string
 	Name                *string
 	OrganizationId      *string
 	DnsNameServers      *[]string
-	NetworkRanges       *[]string
-	TransferNetwork     *string
 	DefaultPrefixLength *int64
 	MaxPrefixLength     *int64
 	MinPrefixLength     *int64
@@ -44,27 +44,19 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates a network area",
-		Long:  "Creates a network area in an organization.",
-		Args:  args.NoArgs,
+		Use:   "update",
+		Short: "Updates a network area",
+		Long:  "Updates a network area in an organization.",
+		Args:  args.SingleArg(areaIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a network area with name "network-area-1" in organization with ID "xxx" with network ranges and a transfer network`,
-				`$ stackit beta network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24"`,
-			),
-			examples.NewExample(
-				`Create a network area with name "network-area-2" in organization with ID "xxx" with network ranges, transfer network and DNS name server`,
-				`$ stackit beta network-area create --name network-area-2 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --dns-name-servers "1.1.1.1"`,
-			),
-			examples.NewExample(
-				`Create a network area with name "network-area-3" in organization with ID "xxx" with network ranges, transfer network and additional options`,
-				`$ stackit beta network-area create --name network-area-3 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --default-prefix-length 25 --max-prefix-length 29 --min-prefix-length 24`,
+				`Update network area with ID "xxx" in organization with ID "yyy" with new name "network-area-1-new"`,
+				"$ stackit beta network-area update xxx --organization-id yyy --name network-area-1-new",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -82,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a network area for organization %q?", orgLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update a network area for organization %q?", orgLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -93,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create network area: %w", err)
+				return fmt.Errorf("update network area: %w", err)
 			}
 
 			return outputResult(p, model, orgLabel, resp)
@@ -107,26 +99,25 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network area name")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 	cmd.Flags().StringSlice(dnsNameServersFlag, nil, "List of DNS name server IPs")
-	cmd.Flags().Var(flags.CIDRSliceFlag(), networkRangesFlag, "List of network ranges")
-	cmd.Flags().Var(flags.CIDRFlag(), transferNetworkFlag, "Transfer network in CIDR notation")
 	cmd.Flags().Int64(defaultPrefixLengthFlag, 0, "The default prefix length for networks in the network area")
 	cmd.Flags().Int64(maxPrefixLengthFlag, 0, "The maximum prefix length for networks in the network area")
 	cmd.Flags().Int64(minPrefixLengthFlag, 0, "The minimum prefix length for networks in the network area")
 
-	err := flags.MarkFlagsRequired(cmd, nameFlag, organizationIdFlag, networkRangesFlag, transferNetworkFlag)
+	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	areaId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
 		GlobalFlagModel:     globalFlags,
 		Name:                flags.FlagToStringPointer(p, cmd, nameFlag),
 		OrganizationId:      flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		AreaId:              areaId,
 		DnsNameServers:      flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
-		NetworkRanges:       flags.FlagToStringSlicePointer(p, cmd, networkRangesFlag),
-		TransferNetwork:     flags.FlagToStringPointer(p, cmd, transferNetworkFlag),
 		DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, defaultPrefixLengthFlag),
 		MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, maxPrefixLengthFlag),
 		MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, minPrefixLengthFlag),
@@ -144,23 +135,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRequest {
-	req := apiClient.CreateNetworkArea(ctx, *model.OrganizationId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkAreaRequest {
+	req := apiClient.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 
-	networkRanges := make([]iaas.NetworkRange, len(*model.NetworkRanges))
-	for i, networkRange := range *model.NetworkRanges {
-		networkRanges[i] = iaas.NetworkRange{
-			Prefix: utils.Ptr(networkRange),
-		}
-	}
-
-	payload := iaas.CreateNetworkAreaPayload{
+	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name: model.Name,
-		AddressFamily: &iaas.CreateAreaAddressFamily{
-			Ipv4: &iaas.CreateAreaIPv4{
+		AddressFamily: &iaas.UpdateAreaAddressFamily{
+			Ipv4: &iaas.UpdateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,
-				NetworkRanges:      utils.Ptr(networkRanges),
-				TransferNetwork:    model.TransferNetwork,
 				DefaultPrefixLen:   model.DefaultPrefixLength,
 				MaxPrefixLen:       model.MaxPrefixLength,
 				MinPrefixLen:       model.MinPrefixLength,
@@ -168,7 +150,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		},
 	}
 
-	return req.CreateNetworkAreaPayload(payload)
+	return req.PartialUpdateNetworkAreaPayload(payload)
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, networkArea *iaas.NetworkArea) error {
@@ -190,7 +172,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, netw
 
 		return nil
 	default:
-		p.Outputf("Created network area for project %q.\n", projectLabel)
+		p.Outputf("Updated network area for project %q.\n", projectLabel)
 		return nil
 	}
 }

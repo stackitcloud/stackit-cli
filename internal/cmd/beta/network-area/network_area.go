@@ -2,6 +2,7 @@ package networkarea
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -23,4 +24,5 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(create.NewCmd(p))
+	cmd.AddCommand(update.NewCmd(p))
 }
