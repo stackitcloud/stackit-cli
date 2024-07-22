@@ -16,11 +16,11 @@ stackit dns zone clone [flags]
   Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com"
   $ stackit dns zone clone xxx --dns-name www.my-zone.com
 
-  Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and adjust records "true"
-  $ stackit dns zone clone xxx --dns-name www.my-zone.com --adjust-records
-
   Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and display name "new-zone"
   $ stackit dns zone clone xxx --dns-name www.my-zone.com --name new-zone
+
+  Clones a DNS zone with ID "xxx" to a new zone with DNS name "www.my-zone.com" and adjust records "true"
+  $ stackit dns zone clone xxx --dns-name www.my-zone.com --adjust-records
 ```
 
 ### Options
