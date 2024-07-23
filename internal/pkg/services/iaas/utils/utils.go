@@ -18,3 +18,7 @@ func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationI
 	}
 	return *resp.Name, nil
 }
+
+func ListProjectsAttached(ctx context.Context, apiClient iaas.APIClient, organizationId, areaId string) ([]string, error) {
+	resp, err := apiClient.
+}
