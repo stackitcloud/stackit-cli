@@ -197,7 +197,7 @@ func outputResult(p *print.Printer, model *inputModel, orgLabel string, networkA
 
 		return nil
 	default:
-		p.Outputf("Created network area for organization %q.\n", orgLabel)
+		p.Outputf("Created network area for organization %q.\nNetwork area ID: %s\n", orgLabel, *networkArea.AreaId)
 		return nil
 	}
 }
