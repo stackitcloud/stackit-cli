@@ -5,6 +5,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -31,4 +32,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(list.NewCmd(p))
 	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(describe.NewCmd(p))
 }
