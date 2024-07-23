@@ -10,9 +10,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/orgname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
+	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
@@ -67,10 +68,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			orgLabel, err := orgname.GetOrganizationName(ctx, p, *model.OrganizationId)
-			if err != nil {
-				p.Debug(print.ErrorLevel, "get organization name: %v", err)
-				orgLabel = *model.OrganizationId
+			var orgLabel string
+			rmApiClient, err := rmClient.ConfigureClient(p)
+			if err == nil {
+				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get organization name: %v", err)
+					orgLabel = *model.OrganizationId
+				}
+			} else {
+				p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 			}
 
 			if !model.AssumeYes {
