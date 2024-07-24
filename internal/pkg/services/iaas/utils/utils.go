@@ -23,7 +23,7 @@ func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationI
 func ListAttachedProjects(ctx context.Context, iaasApiClient IaaSClient, organizationId, areaId string) ([]string, error) {
 	resp, err := iaasApiClient.ListNetworkAreaProjectsExecute(ctx, organizationId, areaId)
 	if err != nil {
-		return nil, fmt.Errorf("get network area: %w", err)
+		return nil, fmt.Errorf("list network area attached projects: %w", err)
 	}
 	return *resp.Items, nil
 }

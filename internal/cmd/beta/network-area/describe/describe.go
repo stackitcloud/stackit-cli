@@ -71,7 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete network area: %w", err)
+				return fmt.Errorf("read network area: %w", err)
 			}
 
 			var projects []string
