@@ -46,8 +46,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Updates a network area",
-		Long:  "Updates a network area in an organization.",
+		Short: "Updates a STACKIT Network Area (SNA)",
+		Long:  "Updates a STACKIT Network Area (SNA) in an organization.",
 		Args:  args.SingleArg(areaIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
@@ -179,7 +179,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, netw
 
 		return nil
 	default:
-		p.Outputf("Updated network area for project %q.\n", projectLabel)
+		p.Outputf("Updated STACKIT Network Area for project %q.\n", projectLabel)
 		return nil
 	}
 }

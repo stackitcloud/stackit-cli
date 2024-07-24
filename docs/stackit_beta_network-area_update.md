@@ -1,10 +1,10 @@
 ## stackit beta network-area update
 
-Updates a network area
+Updates a STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Updates a network area in an organization.
+Updates a STACKIT Network Area (SNA) in an organization.
 
 ```
 stackit beta network-area update [flags]

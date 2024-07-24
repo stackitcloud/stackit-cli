@@ -35,8 +35,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all network areas of an organization",
-		Long:  "Lists all network areas of an organization.",
+		Short: "Lists all STACKIT Network Areas (SNA) of an organization",
+		Long:  "Lists all STACKIT Network Areas (SNA) of an organization.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -84,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				} else {
 					p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 				}
-				p.Info("No network areas found for organization %q\n", orgLabel)
+				p.Info("No STACKIT Network Areas found for organization %q\n", orgLabel)
 				return nil
 			}
 

@@ -1,10 +1,10 @@
 ## stackit beta network-area describe
 
-Shows details of a network area
+Shows details of a STACKIT Network Area
 
 ### Synopsis
 
-Shows details of a network area in an organization.
+Shows details of a STACKIT Network Area in an organization.
 
 ```
 stackit beta network-area describe [flags]

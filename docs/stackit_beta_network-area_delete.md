@@ -1,10 +1,12 @@
 ## stackit beta network-area delete
 
-Deletes a network area
+Deletes a STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Deletes a network area in an organization.
+Deletes a STACKIT Network Area (SNA) in an organization.
+If the SNA is attached to any projects, the deletion will fail
+
 
 ```
 stackit beta network-area delete [flags]

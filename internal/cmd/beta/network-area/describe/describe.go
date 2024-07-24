@@ -37,8 +37,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Shows details of a network area",
-		Long:  "Shows details of a network area in an organization.",
+		Short: "Shows details of a STACKIT Network Area",
+		Long:  "Shows details of a STACKIT Network Area in an organization.",
 		Args:  args.SingleArg(areaIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

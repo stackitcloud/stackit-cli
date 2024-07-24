@@ -1,10 +1,10 @@
 ## stackit beta network-area list
 
-Lists all network areas of an organization
+Lists all STACKIT Network Areas (SNA) of an organization
 
 ### Synopsis
 
-Lists all network areas of an organization.
+Lists all STACKIT Network Areas (SNA) of an organization.
 
 ```
 stackit beta network-area list [flags]

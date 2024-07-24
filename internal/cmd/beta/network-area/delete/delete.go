@@ -33,9 +33,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Deletes a network area",
-		Long:  "Deletes a network area in an organization.",
-		Args:  args.SingleArg(areaIdArg, utils.ValidateUUID),
+		Short: "Deletes a STACKIT Network Area (SNA)",
+		Long: fmt.Sprintf("%s\n%s\n",
+			"Deletes a STACKIT Network Area (SNA) in an organization.",
+			"If the SNA is attached to any projects, the deletion will fail",
+		),
+		Args: args.SingleArg(areaIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete network area with ID "xxx" in organization with ID "yyy"`,
@@ -82,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Start("Deleting network area")
 				_, err = wait.DeleteNetworkAreaWaitHandler(ctx, apiClient, *model.OrganizationId, model.AreaId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Redis instance deletion: %w", err)
+					return fmt.Errorf("wait for network area deletion: %w", err)
 				}
 				s.Stop()
 			}
@@ -91,7 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s network area %q\n", operationState, networkAreaLabel)
+			p.Info("%s STACKIT Network Area %q\n", operationState, networkAreaLabel)
 			return nil
 		},
 	}

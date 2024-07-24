@@ -1,10 +1,10 @@
 ## stackit beta network-area create
 
-Creates a network area
+Creates a STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Creates a network area in an organization.
+Creates a STACKIT Network Area (SNA) in an organization.
 
 ```
 stackit beta network-area create [flags]
