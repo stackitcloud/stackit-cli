@@ -2,8 +2,6 @@ package networkarea
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/list"
