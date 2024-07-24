@@ -33,5 +33,6 @@ stackit beta network-area [flags]
 * [stackit beta network-area delete](./stackit_beta_network-area_delete.md)	 - Deletes a STACKIT Network Area (SNA)
 * [stackit beta network-area describe](./stackit_beta_network-area_describe.md)	 - Shows details of a STACKIT Network Area
 * [stackit beta network-area list](./stackit_beta_network-area_list.md)	 - Lists all STACKIT Network Areas (SNA) of an organization
+* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for Network Area
 * [stackit beta network-area update](./stackit_beta_network-area_update.md)	 - Updates a STACKIT Network Area (SNA)
 
