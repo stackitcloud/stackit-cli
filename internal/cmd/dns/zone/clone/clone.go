@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to clone the zone %s?", zoneLabel)
+				prompt := fmt.Sprintf("Are you sure you want to clone the zone %q?", zoneLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
