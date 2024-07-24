@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -21,14 +22,16 @@ import (
 )
 
 const (
-	areaIdArg          = "AREA_ID"
-	organizationIdFlag = "organization-id"
+	areaIdArg                = "AREA_ID"
+	organizationIdFlag       = "organization-id"
+	showAttachedProjectsFlag = "show-attached-projects"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	OrganizationId *string
-	AreaId         string
+	OrganizationId       *string
+	AreaId               string
+	ShowAttachedProjects bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -41,6 +44,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Show details of a network area with ID "xxx" in organization with ID "yyy"`,
 				"$ stackit beta network-area describe xxx --organization-id yyy",
+			),
+			examples.NewExample(
+				`Show details of a network area with ID "xxx" in organization with ID "yyy" and show attached projects`,
+				"$ stackit beta network-area describe xxx --organization-id yyy --show-attached-projects",
 			),
 			examples.NewExample(
 				`Show details of a network area with ID "xxx" in organization with ID "yyy" in JSON format`,
@@ -67,7 +74,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete network area: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			var projects []string
+
+			if model.ShowAttachedProjects {
+				projects, err = iaasUtils.ListAttachedProjects(ctx, apiClient, *model.OrganizationId, model.AreaId)
+				if err != nil {
+					return fmt.Errorf("get attached projects: %w", err)
+				}
+			}
+
+			return outputResult(p, model.OutputFormat, resp, projects)
 		},
 	}
 	configureFlags(cmd)
@@ -76,6 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
+	cmd.Flags().Bool(showAttachedProjectsFlag, false, "Whether to show attached projects. If a network area has several attached projects, their retrieval may take some time and the output may be extensive.")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
@@ -87,9 +104,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		AreaId:          areaId,
+		GlobalFlagModel:      globalFlags,
+		OrganizationId:       flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		AreaId:               areaId,
+		ShowAttachedProjects: flags.FlagToBoolValue(p, cmd, showAttachedProjectsFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -108,12 +126,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.NetworkArea) error {
+func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.NetworkArea, attachedProjects []string) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkArea, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+			return fmt.Errorf("marshal network area: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -121,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(networkArea, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+			return fmt.Errorf("marshal network area: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -174,6 +192,13 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		}
 		if networkArea.Ipv4.MinPrefixLen != nil {
 			table.AddRow("MIN PREFIX LENGTH", *networkArea.Ipv4.MinPrefixLen)
+			table.AddSeparator()
+		}
+		if len(attachedProjects) > 0 {
+			table.AddRow("ATTACHED PROJECTS IDS", strings.Join(attachedProjects, "\n"))
+			table.AddSeparator()
+		} else {
+			table.AddRow("# ATTACHED PROJECTS", *networkArea.ProjectCount)
 			table.AddSeparator()
 		}
 

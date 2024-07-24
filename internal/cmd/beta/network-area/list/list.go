@@ -11,9 +11,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/orgname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
+	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
@@ -53,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -72,10 +73,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				orgLabel, err := orgname.GetOrganizationName(ctx, p, *model.OrganizationId)
-				if err != nil {
-					p.Debug(print.ErrorLevel, "get organization name: %v", err)
-					orgLabel = *model.OrganizationId
+				var orgLabel string
+				rmApiClient, err := rmClient.ConfigureClient(p)
+				if err == nil {
+					orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
+					if err != nil {
+						p.Debug(print.ErrorLevel, "get organization name: %v", err)
+						orgLabel = *model.OrganizationId
+					}
+				} else {
+					p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 				}
 				p.Info("No network areas found for organization %q\n", orgLabel)
 				return nil
@@ -102,7 +109,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
@@ -139,7 +146,7 @@ func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.Net
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkAreas, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+			return fmt.Errorf("marshal network area: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -147,14 +154,21 @@ func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.Net
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(networkAreas, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance: %w", err)
+			return fmt.Errorf("marshal area: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Network Ranges", "Attached Projects")
+		table.SetHeader("ID", "Name", "Status", "Network Ranges", "# Attached Projects")
+
+		for _, networkArea := range networkAreas {
+			table.AddRow(*networkArea.AreaId, *networkArea.Name, *networkArea.State, len(*networkArea.Ipv4.NetworkRanges), *networkArea.ProjectCount)
+			table.AddSeparator()
+		}
+
+		p.Outputln(table.Render())
 		return nil
 	}
 }

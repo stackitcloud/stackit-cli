@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,12 +34,11 @@ func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (
 	if err != nil {
 		return "", fmt.Errorf("configure resource manager client: %w", err)
 	}
-	req := apiClient.GetProject(ctx, projectId)
-	resp, err := req.Execute()
+
+	projectName, err := utils.GetProjectName(ctx, apiClient, projectId)
 	if err != nil {
-		return "", fmt.Errorf("read project details: %w", err)
+		return "", fmt.Errorf("get project name: %w", err)
 	}
-	projectName := *resp.Name
 
 	// If project ID is set in config, we store the project name in config
 	// (So next time we can just pull it from there)

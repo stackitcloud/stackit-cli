@@ -9,6 +9,7 @@ import (
 
 type IaaSClient interface {
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
+	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 }
 
 func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationId, areaId string) (string, error) {
@@ -19,6 +20,10 @@ func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationI
 	return *resp.Name, nil
 }
 
-func ListProjectsAttached(ctx context.Context, apiClient iaas.APIClient, organizationId, areaId string) ([]string, error) {
-	resp, err := apiClient.
+func ListAttachedProjects(ctx context.Context, iaasApiClient IaaSClient, organizationId, areaId string) ([]string, error) {
+	resp, err := iaasApiClient.ListNetworkAreaProjectsExecute(ctx, organizationId, areaId)
+	if err != nil {
+		return nil, fmt.Errorf("get network area: %w", err)
+	}
+	return *resp.Items, nil
 }
