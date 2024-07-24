@@ -30,4 +30,5 @@ stackit beta network-area network-ranges [flags]
 
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for Network Area
 * [stackit beta network-area network-ranges create](./stackit_beta_network-area_network-ranges_create.md)	 - Creates a network range in a STACKIT Network Area (SNA)
+* [stackit beta network-area network-ranges delete](./stackit_beta_network-area_network-ranges_delete.md)	 - Deletes a network range in a STACKIT Network Area (SNA)
 

@@ -1,4 +1,4 @@
-package create
+package delete
 
 import (
 	"context"
@@ -21,12 +21,22 @@ var testClient = &iaas.APIClient{}
 
 var testOrgId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
+var testNetworkRangeId = uuid.NewString()
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testNetworkRangeId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		organizationIdFlag: testOrgId,
 		networkAreaIdFlag:  testNetworkAreaId,
-		networkRangeFlag:   "1.1.1.0/24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		NetworkRange:   utils.Ptr("1.1.1.0/24"),
+		NetworkRangeId: testNetworkRangeId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,32 +59,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRangeRequest)) iaas.ApiCreateNetworkAreaRangeRequest {
-	request := testClient.CreateNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId)
-	request = request.CreateNetworkAreaRangePayload(fixturePayload())
+func fixtureRequest(mods ...func(request *iaas.ApiDeleteNetworkAreaRangeRequest)) iaas.ApiDeleteNetworkAreaRangeRequest {
+	request := testClient.DeleteNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testNetworkRangeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
 }
 
-func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRangePayload)) iaas.CreateNetworkAreaRangePayload {
-	payload := iaas.CreateNetworkAreaRangePayload{
-		Ipv4: &[]iaas.NetworkRange{
-			{
-				Prefix: utils.Ptr("1.1.1.0/24"),
-			},
-		},
-	}
-	for _, mod := range mods {
-		mod(&payload)
-	}
-	return payload
-}
-
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		aclValues     []string
 		isValid       bool
@@ -82,16 +78,10 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
-		},
-		{
-			description: "network range missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, networkRangeFlag)
-			}),
-			isValid: false,
 		},
 		{
 			description: "no values",
@@ -140,6 +130,27 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "network range id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, networkRangeIdArg)
+			}),
+			isValid: false,
+		},
+		{
+			description: "network range id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[networkRangeIdArg] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "network range id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[networkRangeIdArg] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -161,6 +172,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error parsing args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -169,7 +188,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -192,7 +211,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiCreateNetworkAreaRangeRequest
+		expectedRequest iaas.ApiDeleteNetworkAreaRangeRequest
 	}{
 		{
 			description:     "base",
