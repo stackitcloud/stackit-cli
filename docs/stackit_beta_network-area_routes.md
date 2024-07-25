@@ -30,4 +30,5 @@ stackit beta network-area routes [flags]
 
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for Network Area
 * [stackit beta network-area routes create](./stackit_beta_network-area_routes_create.md)	 - Creates a static route in a STACKIT Network Area (SNA)
+* [stackit beta network-area routes delete](./stackit_beta_network-area_routes_delete.md)	 - Deletes a static route in a STACKIT Network Area (SNA)
 
