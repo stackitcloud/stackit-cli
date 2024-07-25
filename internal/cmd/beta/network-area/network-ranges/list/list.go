@@ -152,14 +152,14 @@ func outputResult(p *print.Printer, outputFormat string, networkRanges []iaas.Ne
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(networkRanges, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal ranges: %w", err)
+			return fmt.Errorf("marshal network ranges: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("Network Range ID", "Prefix")
+		table.SetHeader("ID", "Network Range")
 
 		for _, networkRange := range networkRanges {
 			table.AddRow(*networkRange.NetworkRangeId, *networkRange.Prefix)
