@@ -34,5 +34,6 @@ stackit beta network-area [flags]
 * [stackit beta network-area describe](./stackit_beta_network-area_describe.md)	 - Shows details of a STACKIT Network Area
 * [stackit beta network-area list](./stackit_beta_network-area_list.md)	 - Lists all STACKIT Network Areas (SNA) of an organization
 * [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
+* [stackit beta network-area routes](./stackit_beta_network-area_routes.md)	 - Provides functionality for static routes in STACKIT Network Areas
 * [stackit beta network-area update](./stackit_beta_network-area_update.md)	 - Updates a STACKIT Network Area (SNA)
 
