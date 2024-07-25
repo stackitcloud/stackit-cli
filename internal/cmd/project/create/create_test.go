@@ -21,13 +21,15 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &resourcemanager.APIClient{}
 var testParentId = uuid.NewString()
+var testNetworkAreaId = uuid.NewString()
 var testEmail = "email"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		parentIdFlag: testParentId,
-		nameFlag:     "name",
-		labelFlag:    "key=value",
+		parentIdFlag:      testParentId,
+		nameFlag:          "name",
+		labelFlag:         "key=value",
+		networkAreaIdFlag: testNetworkAreaId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,6 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
+		NetworkAreaId: utils.Ptr(testNetworkAreaId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -50,13 +53,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectRequest)) resourcemanager.ApiCreateProjectRequest {
-	request := testClient.CreateProject(testCtx)
-	request = request.CreateProjectPayload(resourcemanager.CreateProjectPayload{
+func fixturePayload(mods ...func(payload *resourcemanager.CreateProjectPayload)) resourcemanager.CreateProjectPayload {
+	payload := resourcemanager.CreateProjectPayload{
 		ContainerParentId: utils.Ptr(testParentId),
 		Name:              utils.Ptr(nameFlag),
 		Labels: utils.Ptr(map[string]string{
-			"key": "value",
+			"key":            "value",
+			networkAreaLabel: testNetworkAreaId,
 		}),
 		Members: &[]resourcemanager.Member{
 			{
@@ -64,7 +67,16 @@ func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectReques
 				Subject: utils.Ptr(testEmail),
 			},
 		},
-	})
+	}
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
+}
+
+func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectRequest)) resourcemanager.ApiCreateProjectRequest {
+	request := testClient.CreateProject(testCtx)
+	request = request.CreateProjectPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -135,6 +147,31 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			labelValues: []string{"key"},
 			isValid:     false,
+		},
+		{
+			description: "network_area_id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, networkAreaIdFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(
+				func(model *inputModel) {
+					model.NetworkAreaId = nil
+				}),
+		},
+		{
+			description: "network_area_id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[networkAreaIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "network_area_id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[networkAreaIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
 		},
 	}
 
@@ -227,6 +264,51 @@ func TestBuildRequest(t *testing.T) {
 			user_email:      utils.Ptr(testEmail),
 			expectedRequest: fixtureRequest(),
 			isValid:         true,
+		},
+		{
+			description: "missing_network_area_id sa_key",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.NetworkAreaId = nil
+				}),
+			authFlow: auth.AUTH_FLOW_SERVICE_ACCOUNT_KEY,
+			sa_email: utils.Ptr(testEmail),
+			expectedRequest: fixtureRequest().CreateProjectPayload(fixturePayload(
+				func(payload *resourcemanager.CreateProjectPayload) {
+					delete((*payload.Labels), networkAreaLabel)
+				}),
+			),
+			isValid: true,
+		},
+		{
+			description: "missing_network_area_id sa_token",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.NetworkAreaId = nil
+				}),
+			authFlow: auth.AUTH_FLOW_SERVICE_ACCOUNT_TOKEN,
+			sa_email: utils.Ptr(testEmail),
+			expectedRequest: fixtureRequest().CreateProjectPayload(fixturePayload(
+				func(payload *resourcemanager.CreateProjectPayload) {
+					delete((*payload.Labels), networkAreaLabel)
+				}),
+			),
+			isValid: true,
+		},
+		{
+			description: "missing_network_area_id user",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.NetworkAreaId = nil
+				}),
+			authFlow:   auth.AUTH_FLOW_USER_TOKEN,
+			user_email: utils.Ptr(testEmail),
+			expectedRequest: fixtureRequest().CreateProjectPayload(fixturePayload(
+				func(payload *resourcemanager.CreateProjectPayload) {
+					delete((*payload.Labels), networkAreaLabel)
+				}),
+			),
+			isValid: true,
 		},
 		{
 			description: "missing_auth_flow",

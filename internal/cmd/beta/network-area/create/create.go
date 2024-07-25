@@ -46,8 +46,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a network area",
-		Long:  "Creates a network area in an organization.",
+		Short: "Creates a STACKIT Network Area (SNA)",
+		Long:  "Creates a STACKIT Network Area (SNA) in an organization.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -197,7 +197,7 @@ func outputResult(p *print.Printer, model *inputModel, orgLabel string, networkA
 
 		return nil
 	default:
-		p.Outputf("Created network area for organization %q.\nNetwork area ID: %s\n", orgLabel, *networkArea.AreaId)
+		p.Outputf("Created STACKIT Network Area for organization %q.\nNetwork area ID: %s\n", orgLabel, *networkArea.AreaId)
 		return nil
 	}
 }
