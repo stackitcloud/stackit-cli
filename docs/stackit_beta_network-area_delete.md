@@ -38,5 +38,5 @@ stackit beta network-area delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for Network Area
+* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area
 

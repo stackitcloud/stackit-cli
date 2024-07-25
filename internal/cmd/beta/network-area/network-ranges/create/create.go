@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			networkRange, err := getNetworkRangeFromCIDR(*model.NetworkRange, resp.Items)
+			networkRange, err := getNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -161,11 +161,11 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 	}
 }
 
-// getNetworkRangeFromCIDR returns the network range from the API response that matches the given CIDR
+// getNetworkRangeFromAPIResponse returns the network range from the API response that matches the given prefix
 // This works because network range prefixes are unique in the same SNA
-func getNetworkRangeFromCIDR(cidr string, networkRanges *[]iaas.NetworkRange) (iaas.NetworkRange, error) {
+func getNetworkRangeFromAPIResponse(prefix string, networkRanges *[]iaas.NetworkRange) (iaas.NetworkRange, error) {
 	for _, networkRange := range *networkRanges {
-		if *networkRange.Prefix == cidr {
+		if *networkRange.Prefix == prefix {
 			return networkRange, nil
 		}
 	}

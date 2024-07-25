@@ -38,5 +38,5 @@ stackit beta network-area network-ranges create [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for Network Area
+* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 

@@ -1,10 +1,10 @@
 ## stackit beta network-area network-ranges
 
-Provides functionality for Network Area
+Provides functionality for network ranges in STACKIT Network Areas
 
 ### Synopsis
 
-Provides functionality for Network Area.
+Provides functionality for network ranges in STACKIT Network Areas.
 
 ```
 stackit beta network-area network-ranges [flags]
@@ -28,7 +28,7 @@ stackit beta network-area network-ranges [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for Network Area
+* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area
 * [stackit beta network-area network-ranges create](./stackit_beta_network-area_network-ranges_create.md)	 - Creates a network range in a STACKIT Network Area (SNA)
 * [stackit beta network-area network-ranges delete](./stackit_beta_network-area_network-ranges_delete.md)	 - Deletes a network range in a STACKIT Network Area (SNA)
 

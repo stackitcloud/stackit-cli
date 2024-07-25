@@ -14,8 +14,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "network-ranges",
 		Aliases: []string{"ranges"},
-		Short:   "Provides functionality for Network Area",
-		Long:    "Provides functionality for Network Area.",
+		Short:   "Provides functionality for network ranges in STACKIT Network Areas",
+		Long:    "Provides functionality for network ranges in STACKIT Network Areas.",
 		Args:    args.NoArgs,
 		Run:     utils.CmdHelp,
 	}
