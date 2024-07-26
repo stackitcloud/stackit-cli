@@ -37,8 +37,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a static route in a STACKIT Network Area (SNA)",
-		Long:  "Creates a static route in a STACKIT Network Area (SNA).",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s\n",
+			"Creates a static route in a STACKIT Network Area (SNA).",
+			"This command is currently asynchonous only due to limitations in the waiting functionality of the SDK. This will be updated in a future release.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a static route with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,

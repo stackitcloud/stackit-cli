@@ -5,6 +5,8 @@ Creates a static route in a STACKIT Network Area (SNA)
 ### Synopsis
 
 Creates a static route in a STACKIT Network Area (SNA).
+This command is currently asynchonous only due to limitations in the waiting functionality of the SDK. This will be updated in a future release.
+
 
 ```
 stackit beta network-area routes create [flags]
