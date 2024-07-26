@@ -80,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get organization name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
 				}
-				p.Info("No network ranges found for STACKIT Network Area %q\n", networkAreaLabel)
+				p.Info("No network ranges found for SNA %q\n", networkAreaLabel)
 				return nil
 			}
 
@@ -100,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
 	cobra.CheckErr(err)

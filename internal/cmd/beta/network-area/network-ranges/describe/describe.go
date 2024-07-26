@@ -74,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
 	cobra.CheckErr(err)

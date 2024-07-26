@@ -21,7 +21,7 @@ stackit beta network-area network-ranges describe [flags]
 
 ```
   -h, --help                     Help for "stackit beta network-area network-ranges describe"
-      --network-area-id string   STACKIT Network Area ID
+      --network-area-id string   STACKIT Network Area (SNA) ID
       --organization-id string   Organization ID
 ```
 
@@ -37,5 +37,5 @@ stackit beta network-area network-ranges describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for Network Area
+* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 
