@@ -13,7 +13,7 @@ stackit beta network-area network-ranges describe [flags]
 ### Examples
 
 ```
-  Show details of a network range with id "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
+  Show details of a network range with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
   $ stackit beta network-area network-ranges describe xxx --network-area-id yyy --organization-id zzz
 ```
 

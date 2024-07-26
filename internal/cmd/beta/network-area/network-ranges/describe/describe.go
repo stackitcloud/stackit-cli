@@ -41,7 +41,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(networkRangeIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Show details of a network range with id "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
+				`Show details of a network range with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
 				`$ stackit beta network-area network-ranges describe xxx --network-area-id yyy --organization-id zzz`,
 			),
 		),
@@ -108,10 +108,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.NetworkRange) error {
+func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.NetworkRange) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkArea, "", "  ")
+		details, err := json.MarshalIndent(networkRange, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal network area: %w", err)
 		}
@@ -119,7 +119,7 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkArea, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true))
 		if err != nil {
 			return fmt.Errorf("marshal network area: %w", err)
 		}
@@ -128,9 +128,9 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *networkArea.NetworkRangeId)
+		table.AddRow("ID", *networkRange.NetworkRangeId)
 		table.AddSeparator()
-		table.AddRow("Network range", *networkArea.Prefix)
+		table.AddRow("Network range", *networkRange.Prefix)
 
 		err := table.Display(p)
 		if err != nil {
