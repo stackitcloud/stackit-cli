@@ -14,6 +14,8 @@ type IaaSClientMocked struct {
 	GetNetworkAreaResp       *iaas.NetworkArea
 	GetAttachedProjectsFails bool
 	GetAttachedProjectsResp  *iaas.ProjectListResponse
+	GetNetworkAreaRangeFails bool
+	GetNetworkAreaRangeResp  *iaas.NetworkRange
 }
 
 func (m *IaaSClientMocked) GetNetworkAreaExecute(_ context.Context, _, _ string) (*iaas.NetworkArea, error) {
@@ -28,6 +30,13 @@ func (m *IaaSClientMocked) ListNetworkAreaProjectsExecute(_ context.Context, _, 
 		return nil, fmt.Errorf("could not get attached projects")
 	}
 	return m.GetAttachedProjectsResp, nil
+}
+
+func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _ string) (*iaas.NetworkRange, error) {
+	if m.GetNetworkAreaRangeFails {
+		return nil, fmt.Errorf("could not get network range")
+	}
+	return m.GetNetworkAreaRangeResp, nil
 }
 
 func TestGetNetworkAreaName(t *testing.T) {
@@ -117,6 +126,52 @@ func TestListAttachedProjects(t *testing.T) {
 			}
 			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
 				t.Errorf("GetAttachedProjects() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetNetworkRangePrefix(t *testing.T) {
+	type args struct {
+		getNetworkAreaRangeFails bool
+		getNetworkAreaRangeResp  *iaas.NetworkRange
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getNetworkAreaRangeResp: &iaas.NetworkRange{
+					Prefix: utils.Ptr("test"),
+				},
+			},
+			want: "test",
+		},
+		{
+			name: "get network area range fails",
+			args: args{
+				getNetworkAreaRangeFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetNetworkAreaRangeFails: tt.args.getNetworkAreaRangeFails,
+				GetNetworkAreaRangeResp:  tt.args.getNetworkAreaRangeResp,
+			}
+			got, err := GetNetworkRangePrefix(context.Background(), m, "", "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}
 		})
 	}
