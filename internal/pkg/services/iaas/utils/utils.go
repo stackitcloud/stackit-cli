@@ -36,3 +36,25 @@ func GetNetworkRangePrefix(ctx context.Context, apiClient IaaSClient, organizati
 	}
 	return *resp.Prefix, nil
 }
+
+// GetRouteFromAPIResponse returns the static route from the API response that matches the prefix and nexthop
+// This works because static routes are unique by prefix and nexthop
+func GetRouteFromAPIResponse(prefix, nexthop string, routes *[]iaas.Route) (iaas.Route, error) {
+	for _, route := range *routes {
+		if *route.Prefix == prefix && *route.Nexthop == nexthop {
+			return route, nil
+		}
+	}
+	return iaas.Route{}, fmt.Errorf("new static route not found in API response")
+}
+
+// GetNetworkRangeFromAPIResponse returns the network range from the API response that matches the given prefix
+// This works because network range prefixes are unique in the same SNA
+func GetNetworkRangeFromAPIResponse(prefix string, networkRanges *[]iaas.NetworkRange) (iaas.NetworkRange, error) {
+	for _, networkRange := range *networkRanges {
+		if *networkRange.Prefix == prefix {
+			return networkRange, nil
+		}
+	}
+	return iaas.NetworkRange{}, fmt.Errorf("new network range not found in API response")
+}

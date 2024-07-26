@@ -21,26 +21,31 @@ import (
 const (
 	organizationIdFlag = "organization-id"
 	networkAreaIdFlag  = "network-area-id"
-	networkRangeFlag   = "network-range"
+	prefixFlag         = "prefix"
+	nexthopFlag        = "next-hop"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	OrganizationId *string
 	NetworkAreaId  *string
-	NetworkRange   *string
+	Prefix         *string
+	Nexthop        *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a network range in a STACKIT Network Area (SNA)",
-		Long:  "Creates a network range in a STACKIT Network Area (SNA).",
-		Args:  args.NoArgs,
+		Short: "Creates a static route in a STACKIT Network Area (SNA)",
+		Long: fmt.Sprintf("%s\n%s\n",
+			"Creates a static route in a STACKIT Network Area (SNA).",
+			"This command is currently asynchonous only due to limitations in the waiting functionality of the SDK. This will be updated in a future release.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a network range in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
-				`$ stackit beta network-area network-ranges create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
+				`Create a static route with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
+				"$ stackit beta network-area routes create --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -64,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a network range for STACKIT Network Area (SNA) %q?", networkAreaLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a static route for STACKIT Network Area (SNA) %q?", networkAreaLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -75,19 +80,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create network range: %w", err)
+				return fmt.Errorf("create static route: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				return fmt.Errorf("empty response from API")
 			}
 
-			networkRange, err := utils.GetNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
+			route, err := utils.GetRouteFromAPIResponse(*model.Prefix, *model.Nexthop, resp.Items)
 			if err != nil {
 				return err
 			}
 
-			return outputResult(p, model, networkAreaLabel, networkRange)
+			return outputResult(p, model, networkAreaLabel, route)
 		},
 	}
 	configureFlags(cmd)
@@ -96,10 +101,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
-	cmd.Flags().Var(flags.CIDRFlag(), networkRangeFlag, "Network range to create in CIDR notation")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
+	cmd.Flags().Var(flags.CIDRFlag(), prefixFlag, "Static route prefix")
+	cmd.Flags().String(nexthopFlag, "", "Next hop IP address. Must be a valid IPv4")
 
-	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, networkRangeFlag)
+	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, prefixFlag, nexthopFlag)
 	cobra.CheckErr(err)
 }
 
@@ -110,7 +116,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
 		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		NetworkRange:    flags.FlagToStringPointer(p, cmd, networkRangeFlag),
+		Prefix:          flags.FlagToStringPointer(p, cmd, prefixFlag),
+		Nexthop:         flags.FlagToStringPointer(p, cmd, nexthopFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -125,38 +132,39 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRangeRequest {
-	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId)
-	payload := iaas.CreateNetworkAreaRangePayload{
-		Ipv4: &[]iaas.NetworkRange{
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRouteRequest {
+	req := apiClient.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId)
+	payload := iaas.CreateNetworkAreaRoutePayload{
+		Ipv4: &[]iaas.Route{
 			{
-				Prefix: model.NetworkRange,
+				Prefix:  model.Prefix,
+				Nexthop: model.Nexthop,
 			},
 		},
 	}
-	return req.CreateNetworkAreaRangePayload(payload)
+	return req.CreateNetworkAreaRoutePayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, networkRange iaas.NetworkRange) error {
+func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, route iaas.Route) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRange, "", "  ")
+		details, err := json.MarshalIndent(route, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
+			return fmt.Errorf("marshal static route: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(route, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
+			return fmt.Errorf("marshal static route: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
-		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, *networkRange.NetworkRangeId)
+		p.Outputf("Created static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, *route.RouteId)
 		return nil
 	}
 }
