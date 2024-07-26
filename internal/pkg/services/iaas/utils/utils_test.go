@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -172,6 +173,154 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetNetworkRangePrefix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetRouteFromAPIResponse(t *testing.T) {
+	type args struct {
+		prefix  string
+		nexthop string
+		routes  *[]iaas.Route
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    iaas.Route
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				prefix:  "1.1.1.0/24",
+				nexthop: "1.1.1.1",
+				routes: &[]iaas.Route{
+					{
+						Prefix:  utils.Ptr("1.1.1.0/24"),
+						Nexthop: utils.Ptr("1.1.1.1"),
+					},
+					{
+						Prefix:  utils.Ptr("2.2.2.0/24"),
+						Nexthop: utils.Ptr("2.2.2.2"),
+					},
+					{
+						Prefix:  utils.Ptr("3.3.3.0/24"),
+						Nexthop: utils.Ptr("3.3.3.3"),
+					},
+				},
+			},
+			want: iaas.Route{
+				Prefix:  utils.Ptr("1.1.1.0/24"),
+				Nexthop: utils.Ptr("1.1.1.1"),
+			},
+		},
+		{
+			name: "not found",
+			args: args{
+				prefix:  "1.1.1.0/24",
+				nexthop: "1.1.1.1",
+				routes: &[]iaas.Route{
+					{
+						Prefix:  utils.Ptr("2.2.2.0/24"),
+						Nexthop: utils.Ptr("2.2.2.2"),
+					},
+					{
+						Prefix:  utils.Ptr("3.3.3.0/24"),
+						Nexthop: utils.Ptr("3.3.3.3"),
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty",
+			args: args{
+				prefix:  "1.1.1.0/24",
+				nexthop: "1.1.1.1",
+				routes:  &[]iaas.Route{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetRouteFromAPIResponse(tt.args.prefix, tt.args.nexthop, tt.args.routes)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetRouteFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetRouteFromAPIResponse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
+	type args struct {
+		prefix        string
+		networkRanges *[]iaas.NetworkRange
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    iaas.NetworkRange
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				prefix: "1.1.1.0/24",
+				networkRanges: &[]iaas.NetworkRange{
+					{
+						Prefix: utils.Ptr("1.1.1.0/24"),
+					},
+					{
+						Prefix: utils.Ptr("2.2.2.0/24"),
+					},
+					{
+						Prefix: utils.Ptr("3.3.3.0/24"),
+					},
+				},
+			},
+			want: iaas.NetworkRange{
+				Prefix: utils.Ptr("1.1.1.0/24"),
+			},
+		},
+		{
+			name: "not found",
+			args: args{
+				prefix: "1.1.1.0/24",
+				networkRanges: &[]iaas.NetworkRange{
+					{
+						Prefix: utils.Ptr("2.2.2.0/24"),
+					},
+					{
+						Prefix: utils.Ptr("3.3.3.0/24"),
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty",
+			args: args{
+				prefix:        "1.1.1.0/24",
+				networkRanges: &[]iaas.NetworkRange{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetNetworkRangeFromAPIResponse(tt.args.prefix, tt.args.networkRanges)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetNetworkRangeFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetNetworkRangeFromAPIResponse() = %v, want %v", got, tt.want)
 			}
 		})
 	}

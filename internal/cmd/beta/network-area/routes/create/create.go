@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a static route for STACKIT Network Area %q?", networkAreaLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a static route for STACKIT Network Area (SNA) %q?", networkAreaLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			route, err := getRouteFromAPIResponse(*model.Prefix, *model.Nexthop, resp.Items)
+			route, err := utils.GetRouteFromAPIResponse(*model.Prefix, *model.Nexthop, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -167,15 +167,4 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 		p.Outputf("Created static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, *route.RouteId)
 		return nil
 	}
-}
-
-// getRouteFromAPIResponse returns the static route from the API response that matches the prefix and nexthop
-// This works because static routes are unique by prefix and nexthop
-func getRouteFromAPIResponse(prefix, nexthop string, routes *[]iaas.Route) (iaas.Route, error) {
-	for _, route := range *routes {
-		if *route.Prefix == prefix && *route.Nexthop == nexthop {
-			return route, nil
-		}
-	}
-	return iaas.Route{}, fmt.Errorf("new static route not found in API response")
 }

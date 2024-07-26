@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			networkRange, err := getNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
+			networkRange, err := utils.GetNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -159,15 +159,4 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, *networkRange.NetworkRangeId)
 		return nil
 	}
-}
-
-// getNetworkRangeFromAPIResponse returns the network range from the API response that matches the given prefix
-// This works because network range prefixes are unique in the same SNA
-func getNetworkRangeFromAPIResponse(prefix string, networkRanges *[]iaas.NetworkRange) (iaas.NetworkRange, error) {
-	for _, networkRange := range *networkRanges {
-		if *networkRange.Prefix == prefix {
-			return networkRange, nil
-		}
-	}
-	return iaas.NetworkRange{}, fmt.Errorf("new network range not found in API response")
 }
