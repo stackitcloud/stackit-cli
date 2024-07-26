@@ -43,5 +43,5 @@ stackit beta network-area list [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area
+* [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
 

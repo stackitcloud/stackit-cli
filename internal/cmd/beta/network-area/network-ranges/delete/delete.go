@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area %q?", networkRangeLabel, networkAreaLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area (SNA) %q?", networkRangeLabel, networkAreaLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete network range: %w", err)
 			}
 
-			p.Info("Deleted network range %q on STACKIT Network Area %q\n", networkRangeLabel, networkAreaLabel)
+			p.Info("Deleted network range %q on SNA %q\n", networkRangeLabel, networkAreaLabel)
 
 			return nil
 		},
@@ -93,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
 	cobra.CheckErr(err)

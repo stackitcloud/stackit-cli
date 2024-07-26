@@ -40,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a network range in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
-				`$ stackit beta network-area network-ranges create --organization-id yyy --network-area-id xxx --network-range "1.1.1.0/24"`,
+				`$ stackit beta network-area network-ranges create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -64,7 +64,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a network range for STACKIT Network Area %q?", networkAreaLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a network range for STACKIT Network Area (SNA) %q?", networkAreaLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -96,7 +96,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
 	cmd.Flags().Var(flags.CIDRFlag(), networkRangeFlag, "Network range to create in CIDR notation")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, networkRangeFlag)

@@ -21,7 +21,7 @@ stackit beta network-area network-ranges delete [flags]
 
 ```
   -h, --help                     Help for "stackit beta network-area network-ranges delete"
-      --network-area-id string   STACKIT Network Area ID
+      --network-area-id string   STACKIT Network Area (SNA) ID
       --organization-id string   Organization ID
 ```
 

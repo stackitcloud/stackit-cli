@@ -17,8 +17,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "network-area",
-		Short: "Provides functionality for STACKIT Network Area",
-		Long:  "Provides functionality for STACKIT Network Area.",
+		Short: "Provides functionality for STACKIT Network Area (SNA)",
+		Long:  "Provides functionality for STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

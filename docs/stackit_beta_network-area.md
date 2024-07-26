@@ -1,10 +1,10 @@
 ## stackit beta network-area
 
-Provides functionality for STACKIT Network Area
+Provides functionality for STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Provides functionality for STACKIT Network Area.
+Provides functionality for STACKIT Network Area (SNA).
 
 ```
 stackit beta network-area [flags]

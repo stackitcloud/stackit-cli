@@ -14,14 +14,14 @@ stackit beta network-area network-ranges create [flags]
 
 ```
   Create a network range in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area network-ranges create --organization-id yyy --network-area-id xxx --network-range "1.1.1.0/24"
+  $ stackit beta network-area network-ranges create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"
 ```
 
 ### Options
 
 ```
   -h, --help                     Help for "stackit beta network-area network-ranges create"
-      --network-area-id string   STACKIT Network Area ID
+      --network-area-id string   STACKIT Network Area (SNA) ID
       --network-range string     Network range to create in CIDR notation
       --organization-id string   Organization ID
 ```
