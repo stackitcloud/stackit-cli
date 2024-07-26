@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete static route %q on STACKIT Network Area %q?", model.RouteId, networkAreaLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete static route %q on STACKIT Network Area (SNA) %q?", model.RouteId, networkAreaLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
