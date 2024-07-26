@@ -113,7 +113,7 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkRange, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
+			return fmt.Errorf("marshal network range: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -121,7 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
+			return fmt.Errorf("marshal network range: %w", err)
 		}
 		p.Outputln(string(details))
 
