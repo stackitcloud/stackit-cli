@@ -103,7 +103,7 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "org area id invalid 2",
+			description: "org id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[organizationIdFlag] = "invalid-uuid"
 			}),
