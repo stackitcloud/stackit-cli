@@ -131,7 +131,7 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "network range id missing",
+			description: "network route id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, routeIdArg)
 			}),
