@@ -42,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
-				`$ stackit beta network-area routes describe xxx --organization-id zzz --network-area-id yyy`,
+				`$ stackit beta network-area routes describe xxx --network-area-id yyy --organization-id zzz`,
 			),
 			examples.NewExample(
 				`Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz" in JSON format`,
