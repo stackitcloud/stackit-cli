@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				var networkAreaLabel string
 				networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get organization name: %v", err)
+					p.Debug(print.ErrorLevel, "get network area name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
 				}
 				p.Info("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
