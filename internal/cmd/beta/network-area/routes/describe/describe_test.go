@@ -145,7 +145,7 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "network range id invalid 2",
+			description: "network route id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[routeIdArg] = "invalid-uuid"
 			}),
