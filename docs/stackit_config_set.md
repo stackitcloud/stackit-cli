@@ -33,6 +33,7 @@ stackit config set [flags]
       --authorization-custom-endpoint string        Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                  DNS API base URL, used in calls to this API
   -h, --help                                        Help for "stackit config set"
+      --iaas-custom-endpoint string                 IaaS API base URL, used in calls to this API
       --identity-provider-custom-endpoint string    Identity Provider base URL, used for user authentication
       --load-balancer-custom-endpoint string        Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string                LogMe API base URL, used in calls to this API
