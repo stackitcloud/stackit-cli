@@ -23,6 +23,12 @@ func ConfigureClient(p *print.Printer) (*iaas.APIClient, error) {
 	}
 	cfgOptions = append(cfgOptions, authCfgOption)
 
+	iaasCustomEndpoint := viper.GetString(config.IaaSCustomEndpointKey)
+
+	if iaasCustomEndpoint != "" {
+		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(iaasCustomEndpoint))
+	}
+
 	customEndpoint := viper.GetString(config.ServerBackupCustomEndpointKey)
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))

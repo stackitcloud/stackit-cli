@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		serverBackupCustomEndpointFlag:    true,
 		skeCustomEndpointFlag:             true,
 		sqlServerFlexCustomEndpointFlag:   true,
+		iaasCustomEndpointFlag:            true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -68,6 +69,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServerBackupCustomEndpoint:    true,
 		SKECustomEndpoint:             true,
 		SQLServerFlexCustomEndpoint:   true,
+		IaaSCustomEndpoint:            true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -117,6 +119,7 @@ func TestParseInput(t *testing.T) {
 				model.ServerBackupCustomEndpoint = false
 				model.SKECustomEndpoint = false
 				model.SQLServerFlexCustomEndpoint = false
+				model.IaaSCustomEndpoint = false
 			}),
 		},
 		{
