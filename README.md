@@ -66,9 +66,9 @@ Help is available for any command by specifying the special flag `--help` (or si
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
 | Service                            | CLI Commands              | Status                    |
-| ---------------------------------- | ------------------------- | ------------------------- |
+| ---------------------------------- |---------------------------|---------------------------|
 | Argus                              | `argus`                   | :white_check_mark:        |
-| Infrastructure as a Service (IaaS) |                           | Will be integrated soon   |
+| Infrastructure as a Service (IaaS) | `beta network-area`       | :white_check_mark: (beta) |
 | Authorization                      | `project`, `organization` | :white_check_mark:        |
 | DNS                                | `dns`                     | :white_check_mark:        |
 | Kubernetes Engine (SKE)            | `ske`                     | :white_check_mark:        |
