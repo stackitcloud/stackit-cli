@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				zoneLabel = model.ZoneId
 			}
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete zone %s? (This cannot be undone)", zoneLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete zone %q? (This cannot be undone)", zoneLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

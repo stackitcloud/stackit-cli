@@ -42,6 +42,7 @@ const (
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
+	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 )
 
 type inputModel struct {
@@ -72,6 +73,7 @@ type inputModel struct {
 	ServiceEnablementCustomEndpoint bool
 	SKECustomEndpoint               bool
 	SQLServerFlexCustomEndpoint     bool
+	IaaSCustomEndpoint              bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -171,6 +173,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.SQLServerFlexCustomEndpoint {
 				viper.Set(config.SQLServerFlexCustomEndpointKey, "")
 			}
+			if model.IaaSCustomEndpoint {
+				viper.Set(config.IaaSCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -211,6 +216,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(serverBackupCustomEndpointFlag, false, "Server Backup base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -242,6 +248,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServerBackupCustomEndpoint:      flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
+		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 	}
 
 	if p.IsVerbosityDebug() {
