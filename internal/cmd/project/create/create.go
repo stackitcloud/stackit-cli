@@ -22,28 +22,37 @@ import (
 )
 
 const (
-	parentIdFlag = "parent-id"
-	nameFlag     = "name"
-	labelFlag    = "label"
+	parentIdFlag      = "parent-id"
+	nameFlag          = "name"
+	labelFlag         = "label"
+	networkAreaIdFlag = "network-area-id"
 
-	ownerRole       = "project.owner"
-	labelKeyRegex   = `[A-ZÄÜÖa-zäüöß0-9_-]{1,64}`
-	labelValueRegex = `^$|[A-ZÄÜÖa-zäüöß0-9_-]{1,64}`
+	ownerRole        = "project.owner"
+	labelKeyRegex    = `[A-ZÄÜÖa-zäüöß0-9_-]{1,64}`
+	labelValueRegex  = `^$|[A-ZÄÜÖa-zäüöß0-9_-]{1,64}`
+	networkAreaLabel = "networkArea"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ParentId *string
-	Name     *string
-	Labels   *map[string]string
+	ParentId      *string
+	Name          *string
+	Labels        *map[string]string
+	NetworkAreaId *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a STACKIT project",
-		Long:  "Creates a STACKIT project.",
-		Args:  args.NoArgs,
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
+			"Creates a STACKIT project.",
+			"You can associate a project with a STACKIT Network Area (SNA) by providing the ID of the SNA.",
+			"The STACKIT Network Area (SNA) allows projects within an organization to be connected to each other on a network level.",
+			"This makes it possible to connect various resources of the projects within an SNA and also simplifies the connection with on-prem environments (hybrid cloud).",
+			"The network type can no longer be changed after the project has been created. If you require a different network type, you must create a new project.",
+		),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a STACKIT project`,
@@ -51,6 +60,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a STACKIT project with a set of labels`,
 				"$ stackit project create --parent-id xxxx --name my-project --label key=value --label foo=bar"),
+			examples.NewExample(
+				`Create a STACKIT project with a network area`,
+				"$ stackit project create --parent-id xxxx --name my-project --network-area-id yyyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -94,6 +106,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(parentIdFlag, "", "Parent resource identifier. Both container ID (user-friendly) and UUID are supported")
 	cmd.Flags().String(nameFlag, "", "Project name")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a project. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "ID of a STACKIT Network Area (SNA) to associate with the project.")
 
 	err := flags.MarkFlagsRequired(cmd, parentIdFlag, nameFlag)
 	cobra.CheckErr(err)
@@ -128,6 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		ParentId:        flags.FlagToStringPointer(p, cmd, parentIdFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Labels:          labels,
+		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -174,10 +188,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 		return req, fmt.Errorf("the authenticated subject email cannot be empty, please report this issue")
 	}
 
+	labels := model.Labels
+
+	if model.NetworkAreaId != nil {
+		if labels == nil {
+			labels = &map[string]string{}
+		}
+		(*labels)[networkAreaLabel] = *model.NetworkAreaId
+	}
+
 	req = req.CreateProjectPayload(resourcemanager.CreateProjectPayload{
 		ContainerParentId: model.ParentId,
 		Name:              model.Name,
-		Labels:            model.Labels,
+		Labels:            labels,
 		Members: &[]resourcemanager.Member{
 			{
 				Role:    utils.Ptr(ownerRole),
