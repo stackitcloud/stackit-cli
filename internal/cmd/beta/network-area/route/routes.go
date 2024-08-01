@@ -1,10 +1,10 @@
-package routes
+package route
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/routes/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/routes/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/routes/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/routes/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/route/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/route/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/route/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/route/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -14,7 +14,7 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "routes",
+		Use:   "route",
 		Short: "Provides functionality for static routes in STACKIT Network Areas",
 		Long:  "Provides functionality for static routes in STACKIT Network Areas.",
 		Args:  args.NoArgs,

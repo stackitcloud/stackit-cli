@@ -1,4 +1,4 @@
-## stackit beta network-area routes describe
+## stackit beta network-area route describe
 
 Shows details of a static route in a STACKIT Network Area (SNA)
 
@@ -7,23 +7,23 @@ Shows details of a static route in a STACKIT Network Area (SNA)
 Shows details of a static route in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area routes describe [flags]
+stackit beta network-area route describe [flags]
 ```
 
 ### Examples
 
 ```
   Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
-  $ stackit beta network-area routes describe xxx --network-area-id yyy --organization-id zzz
+  $ stackit beta network-area route describe xxx --network-area-id yyy --organization-id zzz
 
   Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz" in JSON format
-  $ stackit beta network-area routes describe xxx --network-area-id yyy --organization-id zzz --output-format json
+  $ stackit beta network-area route describe xxx --network-area-id yyy --organization-id zzz --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area routes describe"
+  -h, --help                     Help for "stackit beta network-area route describe"
       --network-area-id string   STACKIT Network Area ID
       --organization-id string   Organization ID
 ```
@@ -40,5 +40,5 @@ stackit beta network-area routes describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area routes](./stackit_beta_network-area_routes.md)	 - Provides functionality for static routes in STACKIT Network Areas
+* [stackit beta network-area route](./stackit_beta_network-area_route.md)	 - Provides functionality for static routes in STACKIT Network Areas
 

@@ -1,4 +1,4 @@
-## stackit beta network-area network-ranges create
+## stackit beta network-area network-range create
 
 Creates a network range in a STACKIT Network Area (SNA)
 
@@ -7,20 +7,20 @@ Creates a network range in a STACKIT Network Area (SNA)
 Creates a network range in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area network-ranges create [flags]
+stackit beta network-area network-range create [flags]
 ```
 
 ### Examples
 
 ```
   Create a network range in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area network-ranges create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"
+  $ stackit beta network-area network-range create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area network-ranges create"
+  -h, --help                     Help for "stackit beta network-area network-range create"
       --network-area-id string   STACKIT Network Area (SNA) ID
       --network-range string     Network range to create in CIDR notation
       --organization-id string   Organization ID
@@ -38,5 +38,5 @@ stackit beta network-area network-ranges create [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
+* [stackit beta network-area network-range](./stackit_beta_network-area_network-range.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 

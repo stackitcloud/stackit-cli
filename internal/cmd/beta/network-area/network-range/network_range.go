@@ -1,10 +1,10 @@
 package networkranges
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-ranges/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-ranges/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-ranges/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-ranges/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-range/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-range/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-range/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area/network-range/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -14,8 +14,8 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "network-ranges",
-		Aliases: []string{"ranges"},
+		Use:     "network-range",
+		Aliases: []string{"range"},
 		Short:   "Provides functionality for network ranges in STACKIT Network Areas",
 		Long:    "Provides functionality for network ranges in STACKIT Network Areas.",
 		Args:    args.NoArgs,

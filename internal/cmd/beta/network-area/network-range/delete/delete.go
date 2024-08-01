@@ -40,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete network range with id "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
-				`$ stackit beta network-area network-ranges delete xxx --network-area-id yyy --organization-id zzz`,
+				`$ stackit beta network-area network-range delete xxx --network-area-id yyy --organization-id zzz`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
