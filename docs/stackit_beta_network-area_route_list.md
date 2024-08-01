@@ -1,4 +1,4 @@
-## stackit beta network-area routes list
+## stackit beta network-area route list
 
 Lists all static routes in a STACKIT Network Area (SNA)
 
@@ -7,26 +7,26 @@ Lists all static routes in a STACKIT Network Area (SNA)
 Lists all static routes in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area routes list [flags]
+stackit beta network-area route list [flags]
 ```
 
 ### Examples
 
 ```
   Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area routes list --network-area-id xxx --organization-id yyy
+  $ stackit beta network-area route list --network-area-id xxx --organization-id yyy
 
   Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy" in JSON format
-  $ stackit beta network-area routes list --network-area-id xxx --organization-id yyy --output-format json
+  $ stackit beta network-area route list --network-area-id xxx --organization-id yyy --output-format json
 
   Lists up to 10 static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area routes list --network-area-id xxx --organization-id yyy --limit 10
+  $ stackit beta network-area route list --network-area-id xxx --organization-id yyy --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area routes list"
+  -h, --help                     Help for "stackit beta network-area route list"
       --limit int                Maximum number of entries to list
       --network-area-id string   STACKIT Network Area ID
       --organization-id string   Organization ID
@@ -44,5 +44,5 @@ stackit beta network-area routes list [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area routes](./stackit_beta_network-area_routes.md)	 - Provides functionality for static routes in STACKIT Network Areas
+* [stackit beta network-area route](./stackit_beta_network-area_route.md)	 - Provides functionality for static routes in STACKIT Network Areas
 

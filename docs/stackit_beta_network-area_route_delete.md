@@ -1,4 +1,4 @@
-## stackit beta network-area routes delete
+## stackit beta network-area route delete
 
 Deletes a static route in a STACKIT Network Area (SNA)
 
@@ -7,20 +7,20 @@ Deletes a static route in a STACKIT Network Area (SNA)
 Deletes a static route in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area routes delete [flags]
+stackit beta network-area route delete [flags]
 ```
 
 ### Examples
 
 ```
   Delete a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
-  $ stackit beta network-area routes delete xxx --organization-id zzz --network-area-id yyy
+  $ stackit beta network-area route delete xxx --organization-id zzz --network-area-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area routes delete"
+  -h, --help                     Help for "stackit beta network-area route delete"
       --network-area-id string   STACKIT Network Area ID
       --organization-id string   Organization ID
 ```
@@ -37,5 +37,5 @@ stackit beta network-area routes delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area routes](./stackit_beta_network-area_routes.md)	 - Provides functionality for static routes in STACKIT Network Areas
+* [stackit beta network-area route](./stackit_beta_network-area_route.md)	 - Provides functionality for static routes in STACKIT Network Areas
 

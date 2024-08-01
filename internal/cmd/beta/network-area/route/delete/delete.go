@@ -1,18 +1,16 @@
-package describe
+package delete
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
@@ -35,18 +33,14 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
-		Short: "Shows details of a static route in a STACKIT Network Area (SNA)",
-		Long:  "Shows details of a static route in a STACKIT Network Area (SNA).",
+		Use:   "delete",
+		Short: "Deletes a static route in a STACKIT Network Area (SNA)",
+		Long:  "Deletes a static route in a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(routeIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
-				`$ stackit beta network-area routes describe xxx --network-area-id yyy --organization-id zzz`,
-			),
-			examples.NewExample(
-				`Show details of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz" in JSON format`,
-				`$ stackit beta network-area routes describe xxx --network-area-id yyy --organization-id zzz --output-format json`,
+				`Delete a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"`,
+				"$ stackit beta network-area route delete xxx --organization-id zzz --network-area-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -62,14 +56,29 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
-				return fmt.Errorf("describe static route: %w", err)
+				p.Debug(print.ErrorLevel, "get network area name: %v", err)
+				networkAreaLabel = *model.NetworkAreaId
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to delete static route %q on STACKIT Network Area (SNA) %q?", model.RouteId, networkAreaLabel)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete static route: %w", err)
+			}
+
+			p.Info("Deleted static route %q on SNA %q\n", model.RouteId, networkAreaLabel)
+			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -107,41 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRouteRequest {
-	req := apiClient.GetNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.RouteId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNetworkAreaRouteRequest {
+	req := apiClient.DeleteNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.RouteId)
 	return req
-}
-
-func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(route, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal static route: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(route, yaml.IndentSequence(true))
-		if err != nil {
-			return fmt.Errorf("marshal static route: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		table := tables.NewTable()
-		table.AddRow("ID", *route.RouteId)
-		table.AddSeparator()
-		table.AddRow("Prefix", *route.Prefix)
-		table.AddSeparator()
-		table.AddRow("Nexthop", *route.Nexthop)
-
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
-		return nil
-	}
 }

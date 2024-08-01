@@ -1,4 +1,4 @@
-## stackit beta network-area network-ranges list
+## stackit beta network-area network-range list
 
 Lists all network ranges in a STACKIT Network Area (SNA)
 
@@ -7,26 +7,26 @@ Lists all network ranges in a STACKIT Network Area (SNA)
 Lists all network ranges in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area network-ranges list [flags]
+stackit beta network-area network-range list [flags]
 ```
 
 ### Examples
 
 ```
   Lists all network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy
+  $ stackit beta network-area network-range list --network-area-id xxx --organization-id yyy
 
   Lists all network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy" in JSON format
-  $ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy --output-format json
+  $ stackit beta network-area network-range list --network-area-id xxx --organization-id yyy --output-format json
 
   Lists up to 10 network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy --limit 10
+  $ stackit beta network-area network-range list --network-area-id xxx --organization-id yyy --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area network-ranges list"
+  -h, --help                     Help for "stackit beta network-area network-range list"
       --limit int                Maximum number of entries to list
       --network-area-id string   STACKIT Network Area (SNA) ID
       --organization-id string   Organization ID
@@ -44,5 +44,5 @@ stackit beta network-area network-ranges list [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
+* [stackit beta network-area network-range](./stackit_beta_network-area_network-range.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 

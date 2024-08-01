@@ -40,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a network range in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
-				`$ stackit beta network-area network-ranges create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
+				`$ stackit beta network-area network-range create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

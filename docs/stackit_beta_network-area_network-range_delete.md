@@ -1,4 +1,4 @@
-## stackit beta network-area network-ranges delete
+## stackit beta network-area network-range delete
 
 Deletes a network range in a STACKIT Network Area (SNA)
 
@@ -7,20 +7,20 @@ Deletes a network range in a STACKIT Network Area (SNA)
 Deletes a network range in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area network-ranges delete [flags]
+stackit beta network-area network-range delete [flags]
 ```
 
 ### Examples
 
 ```
   Delete network range with id "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
-  $ stackit beta network-area network-ranges delete xxx --network-area-id yyy --organization-id zzz
+  $ stackit beta network-area network-range delete xxx --network-area-id yyy --organization-id zzz
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area network-ranges delete"
+  -h, --help                     Help for "stackit beta network-area network-range delete"
       --network-area-id string   STACKIT Network Area (SNA) ID
       --organization-id string   Organization ID
 ```
@@ -37,5 +37,5 @@ stackit beta network-area network-ranges delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-area network-ranges](./stackit_beta_network-area_network-ranges.md)	 - Provides functionality for network ranges in STACKIT Network Areas
+* [stackit beta network-area network-range](./stackit_beta_network-area_network-range.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 

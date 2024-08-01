@@ -36,21 +36,21 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all network ranges in a STACKIT Network Area (SNA)",
-		Long:  "Lists all network ranges in a STACKIT Network Area (SNA).",
+		Short: "Lists all static routes in a STACKIT Network Area (SNA)",
+		Long:  "Lists all static routes in a STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Lists all network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
-				"$ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy",
+				`Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
+				"$ stackit beta network-area route list --network-area-id xxx --organization-id yyy",
 			),
 			examples.NewExample(
-				`Lists all network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy" in JSON format`,
-				"$ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy --output-format json",
+				`Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy" in JSON format`,
+				"$ stackit beta network-area route list --network-area-id xxx --organization-id yyy --output-format json",
 			),
 			examples.NewExample(
-				`Lists up to 10 network ranges in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
-				"$ stackit beta network-area network-ranges list --network-area-id xxx --organization-id yyy --limit 10",
+				`Lists up to 10 static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
+				"$ stackit beta network-area route list --network-area-id xxx --organization-id yyy --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -70,17 +70,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list network ranges: %w", err)
+				return fmt.Errorf("list static routes: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				var networkAreaLabel string
 				networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get organization name: %v", err)
+					p.Debug(print.ErrorLevel, "get network area name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
 				}
-				p.Info("No network ranges found for SNA %q\n", networkAreaLabel)
+				p.Info("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
 				return nil
 			}
 
@@ -100,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
-	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area (SNA) ID")
+	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
 	cobra.CheckErr(err)
@@ -135,34 +135,34 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRangesRequest {
-	return apiClient.ListNetworkAreaRanges(ctx, *model.OrganizationId, *model.NetworkAreaId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRoutesRequest {
+	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkRanges []iaas.NetworkRange) error {
+func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRanges, "", "  ")
+		details, err := json.MarshalIndent(routes, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal network ranges: %w", err)
+			return fmt.Errorf("marshal static routes: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRanges, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(routes, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal network ranges: %w", err)
+			return fmt.Errorf("marshal static routes: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Network Range")
+		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
 
-		for _, networkRange := range networkRanges {
-			table.AddRow(*networkRange.NetworkRangeId, *networkRange.Prefix)
+		for _, route := range routes {
+			table.AddRow(*route.RouteId, *route.Nexthop, *route.Prefix)
 		}
 
 		p.Outputln(table.Render())
