@@ -2,11 +2,9 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -155,28 +153,4 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	return req.PartialUpdateNetworkPayload(payload)
-}
-
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, network *iaas.Network) error {
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(network, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(network, yaml.IndentSequence(true))
-		if err != nil {
-			return fmt.Errorf("marshal network: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		p.Outputf("Updated network %q for project %q.\n", network.Name, projectLabel)
-		return nil
-	}
 }
