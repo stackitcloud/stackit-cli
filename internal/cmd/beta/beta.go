@@ -3,6 +3,7 @@ package beta
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
@@ -40,4 +41,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(sqlserverflex.NewCmd(p))
 	cmd.AddCommand(server.NewCmd(p))
 	cmd.AddCommand(networkArea.NewCmd(p))
+	cmd.AddCommand(network.NewCmd(p))
 }

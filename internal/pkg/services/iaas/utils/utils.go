@@ -8,9 +8,18 @@ import (
 )
 
 type IaaSClient interface {
+	GetNetworkExecute(ctx context.Context, projectId, networkId string) (*iaas.Network, error)
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
+}
+
+func GetNetworkName(ctx context.Context, apiClient IaaSClient, projectId, networkId string) (string, error) {
+	resp, err := apiClient.GetNetworkExecute(ctx, projectId, networkId)
+	if err != nil {
+		return "", fmt.Errorf("get network: %w", err)
+	}
+	return *resp.Name, nil
 }
 
 func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationId, areaId string) (string, error) {
