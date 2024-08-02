@@ -11,12 +11,21 @@ import (
 )
 
 type IaaSClientMocked struct {
+	GetNetworkFails          bool
+	GetNetworkResp           *iaas.Network
 	GetNetworkAreaFails      bool
 	GetNetworkAreaResp       *iaas.NetworkArea
 	GetAttachedProjectsFails bool
 	GetAttachedProjectsResp  *iaas.ProjectListResponse
 	GetNetworkAreaRangeFails bool
 	GetNetworkAreaRangeResp  *iaas.NetworkRange
+}
+
+func (m *IaaSClientMocked) GetNetworkExecute(_ context.Context, _, _ string) (*iaas.Network, error) {
+	if m.GetNetworkFails {
+		return nil, fmt.Errorf("could not get network")
+	}
+	return m.GetNetworkResp, nil
 }
 
 func (m *IaaSClientMocked) GetNetworkAreaExecute(_ context.Context, _, _ string) (*iaas.NetworkArea, error) {
@@ -38,6 +47,52 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
+}
+
+func TestGetNetworkName(t *testing.T) {
+	type args struct {
+		getInstanceFails bool
+		getInstanceResp  *iaas.Network
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getInstanceResp: &iaas.Network{
+					Name: utils.Ptr("test"),
+				},
+			},
+			want: "test",
+		},
+		{
+			name: "get network fails",
+			args: args{
+				getInstanceFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetNetworkFails: tt.args.getInstanceFails,
+				GetNetworkResp:  tt.args.getInstanceResp,
+			}
+			got, err := GetNetworkName(context.Background(), m, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetNetworkName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetNetworkName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestGetNetworkAreaName(t *testing.T) {

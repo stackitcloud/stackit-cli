@@ -121,16 +121,12 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 	default:
 		var nameservers []string
 		if network.Nameservers != nil {
-			for _, nameserver := range *network.Nameservers {
-				nameservers = append(nameservers, nameserver)
-			}
+			nameservers = append(nameservers, *network.Nameservers...)
 		}
 
 		var prefixes []string
 		if network.Prefixes != nil {
-			for _, prefix := range *network.Prefixes {
-				prefixes = append(prefixes, prefix)
-			}
+			prefixes = append(prefixes, *network.Prefixes...)
 		}
 
 		table := tables.NewTable()
