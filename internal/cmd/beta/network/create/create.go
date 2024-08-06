@@ -46,7 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network create --name network-1`,
 			),
 			examples.NewExample(
-				`Create a network with name "network-1" with dns servers and a prefix length`,
+				`Create a network with name "network-1" with DNS servers and a prefix length`,
 				`$ stackit beta network create --name network-1  --dns-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25`,
 			),
 		),
