@@ -143,7 +143,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		}
 		table.AddSeparator()
 		if len(prefixes) > 0 {
-			table.AddRow("PREFIXES", strings.Join(prefixes, ","))
+			table.AddRow("PREFIXES", strings.Join(prefixes, ", "))
 		}
 		table.AddSeparator()
 
