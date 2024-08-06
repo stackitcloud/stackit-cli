@@ -23,10 +23,10 @@ stackit beta network create [flags]
 ### Options
 
 ```
-      --dns-name-servers strings   List of DNS servers/nameservers IPs
+      --dns-name-servers strings   List of DNS name servers IPs
   -h, --help                       Help for "stackit beta network create"
   -n, --name string                Network name
-      --prefix-length int          The default prefix length for networks
+      --prefix-length int          The prefix length of the network
 ```
 
 ### Options inherited from parent commands

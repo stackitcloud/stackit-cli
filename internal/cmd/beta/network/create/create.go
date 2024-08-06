@@ -105,8 +105,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(dnsNameServersFlag, []string{}, "List of DNS servers/nameservers IPs")
-	cmd.Flags().Int64(prefixLengthFlag, 0, "The default prefix length for networks")
+	cmd.Flags().StringSlice(dnsNameServersFlag, []string{}, "List of DNS name servers IPs")
+	cmd.Flags().Int64(prefixLengthFlag, 0, "The prefix length of the network")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
