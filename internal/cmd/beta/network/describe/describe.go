@@ -139,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddRow("PUBLIC IP", *network.PublicIp)
 		table.AddSeparator()
 		if len(nameservers) > 0 {
-			table.AddRow("NAME SERVERS", strings.Join(nameservers, ","))
+			table.AddRow("NAME SERVERS", strings.Join(nameservers, ", "))
 		}
 		table.AddSeparator()
 		if len(prefixes) > 0 {
