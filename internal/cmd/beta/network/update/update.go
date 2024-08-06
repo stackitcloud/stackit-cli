@@ -23,15 +23,15 @@ import (
 const (
 	networkIdArg = "NETWORK_ID"
 
-	nameFlag       = "name"
-	dnsServersFlag = "dns-servers"
+	nameFlag           = "name"
+	dnsNameServersFlag = "dns-name-servers"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId  string
-	Name       *string
-	DnsServers *[]string
+	NetworkId      string
+	Name           *string
+	DnsNameServers *[]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -46,8 +46,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network update xxx --name network-1-new`,
 			),
 			examples.NewExample(
-				`Update network with ID "xxx" with new name "network-1-new" and new DNS servers`,
-				`$ stackit beta network update xxx --name network-1-new --dns-servers "2.2.2.2"`,
+				`Update network with ID "xxx" with new name "network-1-new" and new DNS name servers`,
+				`$ stackit beta network update xxx --name network-1-new --dns-name-servers "2.2.2.2"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -110,7 +110,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(dnsServersFlag, nil, "List of DNS servers/nameservers IPs")
+	cmd.Flags().StringSlice(dnsNameServersFlag, nil, "List of DNS name servers IPs")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkId:       networkId,
-		DnsServers:      flags.FlagToStringSlicePointer(p, cmd, dnsServersFlag),
+		DnsNameServers:  flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -147,7 +147,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Name: model.Name,
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
 			Ipv4: &iaas.UpdateNetworkIPv4{
-				Nameservers: model.DnsServers,
+				Nameservers: model.DnsNameServers,
 			},
 		},
 	}

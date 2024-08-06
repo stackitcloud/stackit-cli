@@ -16,16 +16,16 @@ stackit beta network update [flags]
   Update network with ID "xxx" with new name "network-1-new"
   $ stackit beta network update xxx --name network-1-new
 
-  Update network with ID "xxx" with new name "network-1-new" and new dns servers
-  $ stackit beta network update xxx --name network-1-new --dns-servers "2.2.2.2"
+  Update network with ID "xxx" with new name "network-1-new" and new DNS name servers
+  $ stackit beta network update xxx --name network-1-new --dns-name-servers "2.2.2.2"
 ```
 
 ### Options
 
 ```
-      --dns-servers strings   List of DNS servers/nameservers IPs
-  -h, --help                  Help for "stackit beta network update"
-  -n, --name string           Network name
+      --dns-name-servers strings   List of DNS name servers IPs
+  -h, --help                       Help for "stackit beta network update"
+  -n, --name string                Network name
 ```
 
 ### Options inherited from parent commands

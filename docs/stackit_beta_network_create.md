@@ -16,17 +16,17 @@ stackit beta network create [flags]
   Create a network with name "network-1"
   $ stackit beta network create --name network-1
 
-  Create a network with name "network-1" with dns servers and a prefix length
-  $ stackit beta network create --name network-1  --dns-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25
+  Create a network with name "network-1" with DNS name servers and a prefix length
+  $ stackit beta network create --name network-1  --dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25
 ```
 
 ### Options
 
 ```
-      --dns-servers strings   List of DNS servers/nameservers IPs
-  -h, --help                  Help for "stackit beta network create"
-  -n, --name string           Network name
-      --prefix-length int     The default prefix length for networks
+      --dns-name-servers strings   List of DNS servers/nameservers IPs
+  -h, --help                       Help for "stackit beta network create"
+  -n, --name string                Network name
+      --prefix-length int          The default prefix length for networks
 ```
 
 ### Options inherited from parent commands

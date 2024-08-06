@@ -36,9 +36,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		nameFlag:       "example-network-name",
-		projectIdFlag:  testProjectId,
-		dnsServersFlag: "1.1.1.0,1.1.2.0",
+		nameFlag:           "example-network-name",
+		projectIdFlag:      testProjectId,
+		dnsNameServersFlag: "1.1.1.0,1.1.2.0",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,9 +52,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:       utils.Ptr("example-network-name"),
-		NetworkId:  testNetworkId,
-		DnsServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+		Name:           utils.Ptr("example-network-name"),
+		NetworkId:      testNetworkId,
+		DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -106,11 +106,11 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dnsServersFlag)
+				delete(flagValues, dnsNameServersFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsServers = nil
+				model.DnsNameServers = nil
 			}),
 		},
 

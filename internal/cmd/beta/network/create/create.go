@@ -22,16 +22,16 @@ import (
 )
 
 const (
-	nameFlag         = "name"
-	dnsServersFlag   = "dns-servers"
-	prefixLengthFlag = "prefix-length"
+	nameFlag           = "name"
+	dnsNameServersFlag = "dns-name-servers"
+	prefixLengthFlag   = "prefix-length"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name         *string
-	DnsServers   *[]string
-	PrefixLength *int64
+	Name           *string
+	DnsNameServers *[]string
+	PrefixLength   *int64
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -46,8 +46,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network create --name network-1`,
 			),
 			examples.NewExample(
-				`Create a network with name "network-1" with DNS servers and a prefix length`,
-				`$ stackit beta network create --name network-1  --dns-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25`,
+				`Create a network with name "network-1" with DNS name servers and a prefix length`,
+				`$ stackit beta network create --name network-1  --dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -105,7 +105,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(dnsServersFlag, []string{}, "List of DNS servers/nameservers IPs")
+	cmd.Flags().StringSlice(dnsNameServersFlag, []string{}, "List of DNS servers/nameservers IPs")
 	cmd.Flags().Int64(prefixLengthFlag, 0, "The default prefix length for networks")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
-		DnsServers:      flags.FlagToStringSlicePointer(p, cmd, dnsServersFlag),
+		DnsNameServers:  flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
 		PrefixLength:    flags.FlagToInt64Pointer(p, cmd, prefixLengthFlag),
 	}
 
@@ -144,7 +144,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Name: model.Name,
 		AddressFamily: &iaas.CreateNetworkAddressFamily{
 			Ipv4: &iaas.CreateNetworkIPv4{
-				Nameservers:  model.DnsServers,
+				Nameservers:  model.DnsNameServers,
 				PrefixLength: model.PrefixLength,
 			},
 		},

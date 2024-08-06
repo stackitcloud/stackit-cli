@@ -25,10 +25,10 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:    testProjectId,
-		nameFlag:         "example-network-name",
-		dnsServersFlag:   "1.1.1.0,1.1.2.0",
-		prefixLengthFlag: "24",
+		projectIdFlag:      testProjectId,
+		nameFlag:           "example-network-name",
+		dnsNameServersFlag: "1.1.1.0,1.1.2.0",
+		prefixLengthFlag:   "24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -42,9 +42,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:         utils.Ptr("example-network-name"),
-		DnsServers:   utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-		PrefixLength: utils.Ptr(int64(24)),
+		Name:           utils.Ptr("example-network-name"),
+		DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+		PrefixLength:   utils.Ptr(int64(24)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -93,12 +93,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dnsServersFlag)
+				delete(flagValues, dnsNameServersFlag)
 				delete(flagValues, prefixLengthFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsServers = nil
+				model.DnsNameServers = nil
 				model.PrefixLength = nil
 			}),
 		},
@@ -138,12 +138,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "use dns servers and prefix",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[dnsServersFlag] = "1.1.1.1"
+				flagValues[dnsNameServersFlag] = "1.1.1.1"
 				flagValues[prefixLengthFlag] = "25"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsServers = utils.Ptr([]string{"1.1.1.1"})
+				model.DnsNameServers = utils.Ptr([]string{"1.1.1.1"})
 				model.PrefixLength = utils.Ptr(int64(25))
 			}),
 		},
