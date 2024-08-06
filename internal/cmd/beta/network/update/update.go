@@ -46,7 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network update xxx --name network-1-new`,
 			),
 			examples.NewExample(
-				`Update network with ID "xxx" with new name "network-1-new" and new dns servers`,
+				`Update network with ID "xxx" with new name "network-1-new" and new DNS servers`,
 				`$ stackit beta network update xxx --name network-1-new --dns-servers "2.2.2.2"`,
 			),
 		),
