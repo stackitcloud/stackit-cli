@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Update IPv6 network with ID "xxx" with new name "network-1-new" and new DNS name servers`,
-				`$ stackit beta network update xxx --name network-1-new --ipv6-dns-name-servers "2.2.2.2"`,
+				`$ stackit beta network update xxx --name network-1-new --ipv6-dns-name-servers "2001:4860:4860::8888"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -151,17 +151,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkRequest {
 	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.NetworkId)
+	addressFamily := &iaas.UpdateNetworkAddressFamily{}
 
-	payload := iaas.PartialUpdateNetworkPayload{
-		Name: model.Name,
-		AddressFamily: &iaas.UpdateNetworkAddressFamily{
-			Ipv4: &iaas.UpdateNetworkIPv4{
-				Nameservers: model.IPv4DnsNameServers,
-			},
+	if model.IPv6DnsNameServers != nil {
+		addressFamily = &iaas.UpdateNetworkAddressFamily{
 			Ipv6: &iaas.V1UpdateNetworkIPv6{
 				Nameservers: model.IPv6DnsNameServers,
 			},
-		},
+		}
+	}
+
+	if model.IPv4DnsNameServers != nil {
+		addressFamily = &iaas.UpdateNetworkAddressFamily{
+			Ipv4: &iaas.UpdateNetworkIPv4{
+				Nameservers: model.IPv4DnsNameServers,
+			},
+		}
+	}
+
+	payload := iaas.PartialUpdateNetworkPayload{
+		Name:          model.Name,
+		AddressFamily: addressFamily,
 	}
 
 	return req.PartialUpdateNetworkPayload(payload)

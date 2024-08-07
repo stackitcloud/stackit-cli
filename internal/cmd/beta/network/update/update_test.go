@@ -80,9 +80,6 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaa
 			Ipv4: &iaas.UpdateNetworkIPv4{
 				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 			},
-			Ipv6: &iaas.V1UpdateNetworkIPv6{
-				Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
-			},
 		},
 	}
 	for _, mod := range mods {

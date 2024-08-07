@@ -20,7 +20,7 @@ stackit beta network create [flags]
   $ stackit beta network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix-length 25
 
   Create an IPv6 network with name "network-1" with DNS name servers and a prefix length
-  $ stackit beta network create --name network-1  --ipv6-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv6-prefix-length 25
+  $ stackit beta network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix-length 56
 ```
 
 ### Options

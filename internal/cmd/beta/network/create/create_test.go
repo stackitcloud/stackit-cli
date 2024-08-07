@@ -73,10 +73,6 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.Creat
 				Nameservers:  utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 				PrefixLength: utils.Ptr(int64(24)),
 			},
-			Ipv6: &iaas.V1CreateNetworkIPv6{
-				Nameservers:  utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
-				PrefixLength: utils.Ptr(int64(24)),
-			},
 		},
 	}
 	for _, mod := range mods {
