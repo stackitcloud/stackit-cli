@@ -30,10 +30,10 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.4.0
 	github.com/zalando/go-keyring v0.2.5
-	golang.org/x/mod v0.19.0
-	golang.org/x/oauth2 v0.21.0
-	golang.org/x/term v0.22.0
-	golang.org/x/text v0.16.0
+	golang.org/x/mod v0.20.0
+	golang.org/x/oauth2 v0.22.0
+	golang.org/x/term v0.23.0
+	golang.org/x/text v0.17.0
 	k8s.io/apimachinery v0.29.2
 	k8s.io/client-go v0.29.2
 )
@@ -86,7 +86,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
