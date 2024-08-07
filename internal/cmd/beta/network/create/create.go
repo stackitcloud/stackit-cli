@@ -22,16 +22,20 @@ import (
 )
 
 const (
-	nameFlag           = "name"
-	dnsNameServersFlag = "dns-name-servers"
-	prefixLengthFlag   = "prefix-length"
+	nameFlag               = "name"
+	ipv4DnsNameServersFlag = "ipv4-dns-name-servers"
+	ipv4PrefixLengthFlag   = "ipv4-prefix-length"
+	ipv6DnsNameServersFlag = "ipv6-dns-name-servers"
+	ipv6PrefixLengthFlag   = "ipv6-prefix-length"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name           *string
-	DnsNameServers *[]string
-	PrefixLength   *int64
+	Name               *string
+	IPv4DnsNameServers *[]string
+	IPv4PrefixLength   *int64
+	IPv6DnsNameServers *[]string
+	IPv6PrefixLength   *int64
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -46,8 +50,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network create --name network-1`,
 			),
 			examples.NewExample(
-				`Create a network with name "network-1" with DNS name servers and a prefix length`,
-				`$ stackit beta network create --name network-1  --dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --prefix-length 25`,
+				`Create an IPv4 network with name "network-1" with DNS name servers and a prefix length`,
+				`$ stackit beta network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix-length 25`,
+			),
+			examples.NewExample(
+				`Create an IPv6 network with name "network-1" with DNS name servers and a prefix length`,
+				`$ stackit beta network create --name network-1  --ipv6-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv6-prefix-length 25`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -105,8 +113,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(dnsNameServersFlag, []string{}, "List of DNS name servers IPs")
-	cmd.Flags().Int64(prefixLengthFlag, 0, "The prefix length of the network")
+	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, []string{}, "List of DNS name servers for IPv4")
+	cmd.Flags().Int64(ipv4PrefixLengthFlag, 0, "The prefix length of the IPv4 network")
+	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, []string{}, "List of DNS name servers for IPv6")
+	cmd.Flags().Int64(ipv6PrefixLengthFlag, 0, "The prefix length of the IPv6 network")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
@@ -119,10 +129,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
-		DnsNameServers:  flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
-		PrefixLength:    flags.FlagToInt64Pointer(p, cmd, prefixLengthFlag),
+		GlobalFlagModel:    globalFlags,
+		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
+		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
+		IPv4PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv4PrefixLengthFlag),
+		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
+		IPv6PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv6PrefixLengthFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -144,8 +156,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Name: model.Name,
 		AddressFamily: &iaas.CreateNetworkAddressFamily{
 			Ipv4: &iaas.CreateNetworkIPv4{
-				Nameservers:  model.DnsNameServers,
-				PrefixLength: model.PrefixLength,
+				Nameservers:  model.IPv4DnsNameServers,
+				PrefixLength: model.IPv4PrefixLength,
+			},
+			Ipv6: &iaas.V1CreateNetworkIPv6{
+				Nameservers:  model.IPv6DnsNameServers,
+				PrefixLength: model.IPv6PrefixLength,
 			},
 		},
 	}

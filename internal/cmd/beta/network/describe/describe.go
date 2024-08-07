@@ -119,14 +119,24 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 
 		return nil
 	default:
-		var nameservers []string
+		var ipv4nameservers []string
 		if network.Nameservers != nil {
-			nameservers = append(nameservers, *network.Nameservers...)
+			ipv4nameservers = append(ipv4nameservers, *network.Nameservers...)
 		}
 
-		var prefixes []string
+		var ipv4prefixes []string
 		if network.Prefixes != nil {
-			prefixes = append(prefixes, *network.Prefixes...)
+			ipv4prefixes = append(ipv4prefixes, *network.Prefixes...)
+		}
+
+		var ipv6nameservers []string
+		if network.NameserversV6 != nil {
+			ipv6nameservers = append(ipv6nameservers, *network.NameserversV6...)
+		}
+
+		var ipv6prefixes []string
+		if network.PrefixesV6 != nil {
+			ipv6prefixes = append(ipv6prefixes, *network.PrefixesV6...)
 		}
 
 		table := tables.NewTable()
@@ -138,12 +148,20 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddSeparator()
 		table.AddRow("PUBLIC IP", *network.PublicIp)
 		table.AddSeparator()
-		if len(nameservers) > 0 {
-			table.AddRow("NAME SERVERS", strings.Join(nameservers, ", "))
+		if len(ipv4nameservers) > 0 {
+			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4nameservers, ", "))
 		}
 		table.AddSeparator()
-		if len(prefixes) > 0 {
-			table.AddRow("PREFIXES", strings.Join(prefixes, ", "))
+		if len(ipv4prefixes) > 0 {
+			table.AddRow("IPv4 PREFIXES", strings.Join(ipv4prefixes, ", "))
+		}
+		table.AddSeparator()
+		if len(ipv6nameservers) > 0 {
+			table.AddRow("IPv6 NAME SERVERS", strings.Join(ipv6nameservers, ", "))
+		}
+		table.AddSeparator()
+		if len(ipv6prefixes) > 0 {
+			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6prefixes, ", "))
 		}
 		table.AddSeparator()
 

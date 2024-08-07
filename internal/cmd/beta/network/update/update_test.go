@@ -36,9 +36,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		nameFlag:           "example-network-name",
-		projectIdFlag:      testProjectId,
-		dnsNameServersFlag: "1.1.1.0,1.1.2.0",
+		nameFlag:               "example-network-name",
+		projectIdFlag:          testProjectId,
+		ipv4DnsNameServersFlag: "1.1.1.0,1.1.2.0",
+		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,9 +53,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:           utils.Ptr("example-network-name"),
-		NetworkId:      testNetworkId,
-		DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+		Name:               utils.Ptr("example-network-name"),
+		NetworkId:          testNetworkId,
+		IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -77,6 +79,9 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaa
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
 			Ipv4: &iaas.UpdateNetworkIPv4{
 				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+			},
+			Ipv6: &iaas.V1UpdateNetworkIPv6{
+				Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 			},
 		},
 	}
@@ -106,14 +111,13 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dnsNameServersFlag)
+				delete(flagValues, ipv4DnsNameServersFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = nil
+				model.IPv4DnsNameServers = nil
 			}),
 		},
-
 		{
 			description: "no values",
 			argValues:   []string{},
@@ -155,6 +159,28 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
+		},
+		{
+			description: "use dns servers and prefix",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[ipv4DnsNameServersFlag] = "1.1.1.1"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IPv4DnsNameServers = utils.Ptr([]string{"1.1.1.1"})
+			}),
+		},
+		{
+			description: "use ipv6 dns servers and prefix",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[ipv6DnsNameServersFlag] = "2001:4860:4860::8888"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IPv6DnsNameServers = utils.Ptr([]string{"2001:4860:4860::8888"})
+			}),
 		},
 	}
 

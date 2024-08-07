@@ -23,15 +23,18 @@ import (
 const (
 	networkIdArg = "NETWORK_ID"
 
-	nameFlag           = "name"
-	dnsNameServersFlag = "dns-name-servers"
+	nameFlag               = "name"
+	ipv4DnsNameServersFlag = "ipv4-dns-name-servers"
+	ipv6DnsNameServersFlag = "ipv6-dns-name-servers"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId      string
-	Name           *string
-	DnsNameServers *[]string
+	NetworkId          string
+	Name               *string
+	IPv4DnsNameServers *[]string
+	IPv6DnsNameServers *[]string
+	IPv6PrefixLength   *int64
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -46,8 +49,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network update xxx --name network-1-new`,
 			),
 			examples.NewExample(
-				`Update network with ID "xxx" with new name "network-1-new" and new DNS name servers`,
-				`$ stackit beta network update xxx --name network-1-new --dns-name-servers "2.2.2.2"`,
+				`Update IPv4 network with ID "xxx" with new name "network-1-new" and new DNS name servers`,
+				`$ stackit beta network update xxx --name network-1-new --ipv4-dns-name-servers "2.2.2.2"`,
+			),
+			examples.NewExample(
+				`Update IPv6 network with ID "xxx" with new name "network-1-new" and new DNS name servers`,
+				`$ stackit beta network update xxx --name network-1-new --ipv6-dns-name-servers "2.2.2.2"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -110,7 +117,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(dnsNameServersFlag, nil, "List of DNS name servers IPs")
+	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, nil, "List of DNS name servers IPv4")
+	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -122,10 +130,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
-		NetworkId:       networkId,
-		DnsNameServers:  flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
+		GlobalFlagModel:    globalFlags,
+		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
+		NetworkId:          networkId,
+		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
+		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -147,7 +156,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Name: model.Name,
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
 			Ipv4: &iaas.UpdateNetworkIPv4{
-				Nameservers: model.DnsNameServers,
+				Nameservers: model.IPv4DnsNameServers,
+			},
+			Ipv6: &iaas.V1UpdateNetworkIPv6{
+				Nameservers: model.IPv6DnsNameServers,
 			},
 		},
 	}

@@ -25,10 +25,12 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		nameFlag:           "example-network-name",
-		dnsNameServersFlag: "1.1.1.0,1.1.2.0",
-		prefixLengthFlag:   "24",
+		projectIdFlag:          testProjectId,
+		nameFlag:               "example-network-name",
+		ipv4DnsNameServersFlag: "1.1.1.0,1.1.2.0",
+		ipv4PrefixLengthFlag:   "24",
+		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
+		ipv6PrefixLengthFlag:   "24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -42,9 +44,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:           utils.Ptr("example-network-name"),
-		DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-		PrefixLength:   utils.Ptr(int64(24)),
+		Name:               utils.Ptr("example-network-name"),
+		IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+		IPv4PrefixLength:   utils.Ptr(int64(24)),
+		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
+		IPv6PrefixLength:   utils.Ptr(int64(24)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -67,6 +71,10 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.Creat
 		AddressFamily: &iaas.CreateNetworkAddressFamily{
 			Ipv4: &iaas.CreateNetworkIPv4{
 				Nameservers:  utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+				PrefixLength: utils.Ptr(int64(24)),
+			},
+			Ipv6: &iaas.V1CreateNetworkIPv6{
+				Nameservers:  utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 				PrefixLength: utils.Ptr(int64(24)),
 			},
 		},
@@ -93,13 +101,13 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dnsNameServersFlag)
-				delete(flagValues, prefixLengthFlag)
+				delete(flagValues, ipv4DnsNameServersFlag)
+				delete(flagValues, ipv4PrefixLengthFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = nil
-				model.PrefixLength = nil
+				model.IPv4DnsNameServers = nil
+				model.IPv4PrefixLength = nil
 			}),
 		},
 		{
@@ -138,13 +146,25 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "use dns servers and prefix",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[dnsNameServersFlag] = "1.1.1.1"
-				flagValues[prefixLengthFlag] = "25"
+				flagValues[ipv4DnsNameServersFlag] = "1.1.1.1"
+				flagValues[ipv4PrefixLengthFlag] = "25"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = utils.Ptr([]string{"1.1.1.1"})
-				model.PrefixLength = utils.Ptr(int64(25))
+				model.IPv4DnsNameServers = utils.Ptr([]string{"1.1.1.1"})
+				model.IPv4PrefixLength = utils.Ptr(int64(25))
+			}),
+		},
+		{
+			description: "use ipv6 dns servers and prefix",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[ipv6DnsNameServersFlag] = "2001:4860:4860::8888"
+				flagValues[ipv6PrefixLengthFlag] = "25"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IPv6DnsNameServers = utils.Ptr([]string{"2001:4860:4860::8888"})
+				model.IPv6PrefixLength = utils.Ptr(int64(25))
 			}),
 		},
 	}
