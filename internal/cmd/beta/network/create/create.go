@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create an IPv6 network with name "network-1" with DNS name servers and a prefix length`,
-				`$ stackit beta network create --name network-1  --ipv6-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv6-prefix-length 25`,
+				`$ stackit beta network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix-length 56`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -151,19 +151,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkRequest {
 	req := apiClient.CreateNetwork(ctx, model.ProjectId)
+	addressFamily := &iaas.CreateNetworkAddressFamily{}
+
+	if model.IPv6DnsNameServers != nil {
+		addressFamily.Ipv6 = &iaas.V1CreateNetworkIPv6{
+			Nameservers:  model.IPv6DnsNameServers,
+			PrefixLength: model.IPv6PrefixLength,
+		}
+	}
+
+	if model.IPv4DnsNameServers != nil {
+		addressFamily.Ipv4 = &iaas.CreateNetworkIPv4{
+			Nameservers:  model.IPv4DnsNameServers,
+			PrefixLength: model.IPv4PrefixLength,
+		}
+	}
 
 	payload := iaas.CreateNetworkPayload{
-		Name: model.Name,
-		AddressFamily: &iaas.CreateNetworkAddressFamily{
-			Ipv4: &iaas.CreateNetworkIPv4{
-				Nameservers:  model.IPv4DnsNameServers,
-				PrefixLength: model.IPv4PrefixLength,
-			},
-			Ipv6: &iaas.V1CreateNetworkIPv6{
-				Nameservers:  model.IPv6DnsNameServers,
-				PrefixLength: model.IPv6PrefixLength,
-			},
-		},
+		Name:          model.Name,
+		AddressFamily: addressFamily,
 	}
 
 	return req.CreateNetworkPayload(payload)

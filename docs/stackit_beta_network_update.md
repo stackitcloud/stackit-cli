@@ -20,7 +20,7 @@ stackit beta network update [flags]
   $ stackit beta network update xxx --name network-1-new --ipv4-dns-name-servers "2.2.2.2"
 
   Update IPv6 network with ID "xxx" with new name "network-1-new" and new DNS name servers
-  $ stackit beta network update xxx --name network-1-new --ipv6-dns-name-servers "2.2.2.2"
+  $ stackit beta network update xxx --name network-1-new --ipv6-dns-name-servers "2001:4860:4860::8888"
 ```
 
 ### Options
