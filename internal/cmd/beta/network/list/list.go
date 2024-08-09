@@ -75,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No networks found for organization %q\n", projectLabel)
+				p.Info("No networks found for project %q\n", projectLabel)
 				return nil
 			}
 

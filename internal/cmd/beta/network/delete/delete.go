@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete network  %q?", networkLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete network %q?", networkLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
