@@ -66,7 +66,7 @@ Help is available for any command by specifying the special flag `--help` (or si
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
 | Service                            | CLI Commands              | Status                    |
-| ---------------------------------- |---------------------------|---------------------------|
+|------------------------------------|---------------------------|---------------------------|
 | Argus                              | `argus`                   | :white_check_mark:        |
 | Infrastructure as a Service (IaaS) | `beta network-area`       | :white_check_mark: (beta) |
 | Authorization                      | `project`, `organization` | :white_check_mark:        |
@@ -83,7 +83,8 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Redis                              | `redis`                   | :white_check_mark:        |
 | Resource Manager                   | `project`                 | :white_check_mark:        |
 | Secrets Manager                    | `secrets-manager`         | :white_check_mark:        |
-| Server Backup Management           | `beta server backup`      | :white_check_mark:        |
+| Server Backup Management           | `beta server backup`      | :white_check_mark: (beta) |
+| Server Command (Run Command)       | `beta server command`     | :white_check_mark: (beta) |
 | Service Account                    | `service-account`         | :white_check_mark:        |
 | SQLServer Flex                     | `beta sqlserverflex`      | :white_check_mark: (beta) |
 
