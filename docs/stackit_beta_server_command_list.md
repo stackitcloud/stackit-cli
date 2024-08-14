@@ -1,19 +1,31 @@
-## stackit beta server
+## stackit beta server command list
 
-Provides functionality for Server
+Lists all server commands
 
 ### Synopsis
 
-Provides functionality for Server.
+Lists all server commands.
 
 ```
-stackit beta server [flags]
+stackit beta server command list [flags]
+```
+
+### Examples
+
+```
+  List all commands for a server with ID "xxx"
+  $ stackit beta server command list --server-id xxx
+
+  List all commands for a server with ID "xxx" in JSON format
+  $ stackit beta server command list --server-id xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta server"
+  -h, --help               Help for "stackit beta server command list"
+      --limit int          Maximum number of entries to list
+  -s, --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -28,7 +40,5 @@ stackit beta server [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
 * [stackit beta server command](./stackit_beta_server_command.md)	 - Provides functionality for Server Command
 

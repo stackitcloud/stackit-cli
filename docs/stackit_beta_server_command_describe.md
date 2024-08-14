@@ -1,19 +1,30 @@
-## stackit beta server
+## stackit beta server command describe
 
-Provides functionality for Server
+Shows details of a Server Command
 
 ### Synopsis
 
-Provides functionality for Server.
+Shows details of a Server Command.
 
 ```
-stackit beta server [flags]
+stackit beta server command describe COMMAND_ID [flags]
+```
+
+### Examples
+
+```
+  Get details of a Server Command with ID "xxx" for server with ID "yyy"
+  $ stackit beta server command describe xxx --server-id=yyy
+
+  Get details of a Server Command with ID "xxx" for server with ID "yyy" in JSON format
+  $ stackit beta server command describe xxx --server-id=yyy --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta server"
+  -h, --help               Help for "stackit beta server command describe"
+  -s, --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -28,7 +39,5 @@ stackit beta server [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
 * [stackit beta server command](./stackit_beta_server_command.md)	 - Provides functionality for Server Command
 

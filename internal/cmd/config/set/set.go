@@ -35,6 +35,7 @@ const (
 	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
 	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
+	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
 	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
@@ -145,6 +146,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(serviceEnablementCustomEndpointFlag, "", "Service Enablement API base URL, used in calls to this API")
 	cmd.Flags().String(serverBackupCustomEndpointFlag, "", "Server Backup API base URL, used in calls to this API")
+	cmd.Flags().String(runCommandCustomEndpointFlag, "", "Run Command API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
@@ -183,6 +185,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServerBackupCustomEndpointKey, cmd.Flags().Lookup(serverBackupCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RunCommandCustomEndpointKey, cmd.Flags().Lookup(runCommandCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
 	cobra.CheckErr(err)

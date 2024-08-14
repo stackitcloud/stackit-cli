@@ -1,19 +1,19 @@
-## stackit beta server
+## stackit beta server command template
 
-Provides functionality for Server
+Provides functionality for Server Command Template
 
 ### Synopsis
 
-Provides functionality for Server.
+Provides functionality for Server Command Template.
 
 ```
-stackit beta server [flags]
+stackit beta server command template [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta server"
+  -h, --help   Help for "stackit beta server command template"
 ```
 
 ### Options inherited from parent commands
@@ -28,7 +28,7 @@ stackit beta server [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
 * [stackit beta server command](./stackit_beta_server_command.md)	 - Provides functionality for Server Command
+* [stackit beta server command template describe](./stackit_beta_server_command_template_describe.md)	 - Shows details of a Server Command Template
+* [stackit beta server command template list](./stackit_beta_server_command_template_list.md)	 - Lists all server command templates
 
