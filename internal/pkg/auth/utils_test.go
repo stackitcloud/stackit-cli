@@ -52,3 +52,44 @@ func TestGetIDPEndpoint(t *testing.T) {
 		})
 	}
 }
+
+func TestGetIDPClientID(t *testing.T) {
+	tests := []struct {
+		name              string
+		idpCustomClientID string
+		isValid           bool
+		expected          string
+	}{
+		{
+			name:              "custom client ID specified",
+			idpCustomClientID: "custom-client-id",
+			isValid:           true,
+			expected:          "custom-client-id",
+		},
+		{
+			name:              "custom client ID not specified",
+			idpCustomClientID: "",
+			isValid:           true,
+			expected:          defaultCLIClientID,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			viper.Reset()
+			viper.Set(config.IdentityProviderCustomClientIdKey, tt.idpCustomClientID)
+
+			got, err := getIDPClientID()
+
+			if tt.isValid && err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if !tt.isValid && err == nil {
+				t.Fatalf("expected error, got none")
+			}
+
+			if got != tt.expected {
+				t.Fatalf("expected idp client ID %q, got %q", tt.expected, got)
+			}
+		})
+	}
+}

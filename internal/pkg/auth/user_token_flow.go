@@ -161,6 +161,11 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 		return nil, err
 	}
 
+	idpClientID, err := getIDPClientID()
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("%s/token", idpEndpoint),
@@ -171,7 +176,7 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	}
 	reqQuery := url.Values{}
 	reqQuery.Set("grant_type", "refresh_token")
-	reqQuery.Set("client_id", cliClientID)
+	reqQuery.Set("client_id", idpClientID)
 	reqQuery.Set("refresh_token", utf.refreshToken)
 	reqQuery.Set("token_format", "jwt")
 	req.URL.RawQuery = reqQuery.Encode()

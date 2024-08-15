@@ -18,6 +18,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 		sessionTimeLimitFlag:               true,
 		identityProviderCustomEndpointFlag: true,
+		identityProviderCustomClientIdFlag: true,
 
 		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
@@ -53,6 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 		SessionTimeLimit:               true,
 		IdentityProviderCustomEndpoint: true,
+		IdentityProviderCustomClientID: true,
 
 		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
@@ -104,6 +106,7 @@ func TestParseInput(t *testing.T) {
 
 				model.SessionTimeLimit = false
 				model.IdentityProviderCustomEndpoint = false
+				model.IdentityProviderCustomClientID = false
 
 				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
@@ -153,6 +156,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.IdentityProviderCustomEndpoint = false
+			}),
+		},
+		{
+			description: "identity provider custom client id empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[identityProviderCustomClientIdFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IdentityProviderCustomClientID = false
 			}),
 		},
 		{
