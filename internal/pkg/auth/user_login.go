@@ -70,8 +70,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	}
 
-	// TODO here implement the client id get client id usage like above
-
 	if isReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
 		if err != nil {
