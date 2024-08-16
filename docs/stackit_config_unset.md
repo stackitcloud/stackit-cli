@@ -32,6 +32,7 @@ stackit config unset [flags]
       --dns-custom-endpoint                  DNS API base URL. If unset, uses the default base URL
   -h, --help                                 Help for "stackit config unset"
       --iaas-custom-endpoint                 IaaS API base URL. If unset, uses the default base URL
+      --identity-provider-custom-client-id   Identity Provider client ID, used for user authentication
       --identity-provider-custom-endpoint    Identity Provider base URL. If unset, uses the default base URL
       --load-balancer-custom-endpoint        Load Balancer API base URL. If unset, uses the default base URL
       --logme-custom-endpoint                LogMe API base URL. If unset, uses the default base URL

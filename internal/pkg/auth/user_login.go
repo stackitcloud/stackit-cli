@@ -24,7 +24,7 @@ import (
 
 const (
 	defaultIDPEndpoint = "https://accounts.stackit.cloud/oauth/v2"
-	cliClientID        = "stackit-cli-0000-0000-000000000001"
+	defaultCLIClientID = "stackit-cli-0000-0000-000000000001"
 
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
@@ -52,6 +52,18 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 	if idpEndpoint != defaultIDPEndpoint {
 		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpEndpoint)
+		err := p.PromptForEnter("Press Enter to proceed with the login...")
+		if err != nil {
+			return err
+		}
+	}
+
+	idpClientID, err := getIDPClientID()
+	if err != nil {
+		return err
+	}
+	if idpClientID != defaultCLIClientID {
+		p.Warn("You are using a custom client ID (%s) for authentication.\n", idpClientID)
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return err
@@ -86,7 +98,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 
 	conf := &oauth2.Config{
-		ClientID: cliClientID,
+		ClientID: idpClientID,
 		Endpoint: oauth2.Endpoint{
 			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
 		},
@@ -131,7 +143,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, cliClientID, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, idpClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -207,6 +219,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
 	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
+	p.Debug(print.DebugLevel, "using client ID %s for authentication ", idpClientID)
 
 	// Open a browser window to the authorizationURL
 	err = openBrowser(authorizationURL)
