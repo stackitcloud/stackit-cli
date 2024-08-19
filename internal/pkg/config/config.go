@@ -19,6 +19,7 @@ const (
 
 	IdentityProviderCustomEndpointKey = "identity_provider_custom_endpoint"
 	IdentityProviderCustomClientIdKey = "identity_provider_custom_client_id"
+	AllowedUrlDomainKey               = "allowed_url_domain"
 
 	ArgusCustomEndpointKey             = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
@@ -47,6 +48,8 @@ const (
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
+
+	AllowedUrlDomainDefault = "stackit.cloud"
 )
 
 const (
@@ -69,6 +72,7 @@ var ConfigKeys = []string{
 
 	IdentityProviderCustomEndpointKey,
 	IdentityProviderCustomClientIdKey,
+	AllowedUrlDomainKey,
 
 	DNSCustomEndpointKey,
 	LoadBalancerCustomEndpointKey,
@@ -151,6 +155,7 @@ func setConfigDefaults() {
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
 	viper.SetDefault(IdentityProviderCustomEndpointKey, "")
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
+	viper.SetDefault(AllowedUrlDomainKey, "")
 	viper.SetDefault(DNSCustomEndpointKey, "")
 	viper.SetDefault(ArgusCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")

@@ -23,6 +23,7 @@ const (
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
 	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
+	allowedUrlDomainFlag               = "allowed-url-domain"
 
 	argusCustomEndpointFlag             = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
@@ -56,6 +57,7 @@ type inputModel struct {
 	SessionTimeLimit               bool
 	IdentityProviderCustomEndpoint bool
 	IdentityProviderCustomClientID bool
+	AllowedUrlDomain               bool
 
 	ArgusCustomEndpoint             bool
 	AuthorizationCustomEndpoint     bool
@@ -121,6 +123,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			if model.IdentityProviderCustomClientID {
 				viper.Set(config.IdentityProviderCustomClientIdKey, "")
+			}
+			if model.AllowedUrlDomain {
+				viper.Set(config.AllowedUrlDomainKey, "")
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -207,6 +212,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID, used for user authentication")
+	cmd.Flags().Bool(allowedUrlDomainFlag, false, "Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands")
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
@@ -241,6 +247,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
 		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
 		IdentityProviderCustomClientID: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
+		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 
 		ArgusCustomEndpoint:             flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),

@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail`,
 			),
 		),
-		Args: args.SingleArg(urlArg, utils.ValidateSTACKITURL),
+		Args: args.SingleArg(urlArg, utils.ValidateURL),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			model, err := parseInput(p, cmd, args)
 			if err != nil {

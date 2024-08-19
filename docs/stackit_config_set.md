@@ -29,6 +29,7 @@ stackit config set [flags]
 ### Options
 
 ```
+      --allowed-url-domain string                   Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands
       --argus-custom-endpoint string                Argus API base URL, used in calls to this API
       --authorization-custom-endpoint string        Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                  DNS API base URL, used in calls to this API

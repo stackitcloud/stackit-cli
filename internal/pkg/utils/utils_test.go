@@ -2,6 +2,9 @@ package utils
 
 import (
 	"testing"
+
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestConvertInt64PToFloat64P(t *testing.T) {
@@ -46,21 +49,36 @@ func TestConvertInt64PToFloat64P(t *testing.T) {
 	}
 }
 
-func TestValidateSTACKITURL(t *testing.T) {
+func TestValidateURL(t *testing.T) {
 	tests := []struct {
-		name    string
-		input   string
-		isValid bool
+		name             string
+		allowedUrlDomain string
+		isValid          bool
+		input            string
 	}{
 		{
-			name:    "STACKIT URL",
-			input:   "https://example.stackit.cloud",
-			isValid: true,
+			name:             "STACKIT URL valid",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://example.stackit.cloud",
+			isValid:          true,
 		},
 		{
-			name:    "non-STACKIT URL",
-			input:   "https://www.very-suspicious-website.com/",
-			isValid: false,
+			name:             "STACKIT URL invalid",
+			allowedUrlDomain: "example.com",
+			input:            "https://example.stackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "non-STACKIT URL invalid",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://www.very-suspicious-website.com/",
+			isValid:          false,
+		},
+		{
+			name:             "non-STACKIT URL valid",
+			allowedUrlDomain: "example.com",
+			input:            "https://www.test.example.com/",
+			isValid:          true,
 		},
 		{
 			name:    "invalid URL",
@@ -71,7 +89,10 @@ func TestValidateSTACKITURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateSTACKITURL(tt.input)
+			viper.Reset()
+			viper.Set(config.AllowedUrlDomainKey, tt.allowedUrlDomain)
+
+			err := ValidateURL(tt.input)
 			if tt.isValid && err != nil {
 				t.Errorf("expected URL to be valid, got error: %v", err)
 			}
