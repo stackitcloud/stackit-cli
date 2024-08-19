@@ -39,6 +39,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		skeCustomEndpointFlag:             true,
 		sqlServerFlexCustomEndpointFlag:   true,
 		iaasCustomEndpointFlag:            true,
+		tokenCustomEndpointFlag:           true,
+		jwksCustomEndpointFlag:            true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -76,6 +78,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		SKECustomEndpoint:             true,
 		SQLServerFlexCustomEndpoint:   true,
 		IaaSCustomEndpoint:            true,
+		TokenCustomEndpoint:           true,
+		JwksCustomEndpoint:            true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -129,6 +133,8 @@ func TestParseInput(t *testing.T) {
 				model.SKECustomEndpoint = false
 				model.SQLServerFlexCustomEndpoint = false
 				model.IaaSCustomEndpoint = false
+				model.TokenCustomEndpoint = false
+				model.JwksCustomEndpoint = false
 			}),
 		},
 		{
@@ -259,6 +265,26 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.RunCommandCustomEndpoint = false
+			}),
+		},
+		{
+			description: "token custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[tokenCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.TokenCustomEndpoint = false
+			}),
+		},
+		{
+			description: "jwks custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[jwksCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.JwksCustomEndpoint = false
 			}),
 		},
 	}

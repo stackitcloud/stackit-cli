@@ -3,7 +3,9 @@ package activateserviceaccount
 import (
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/zalando/go-keyring"
@@ -11,13 +13,14 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+var testTokenCustomEndpoint = "token_url"
+var testJwksCustomEndpoint = "jwks_url"
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		serviceAccountTokenFlag:   "token",
 		serviceAccountKeyPathFlag: "sa_key",
 		privateKeyPathFlag:        "private_key",
-		tokenCustomEndpointFlag:   "token_url",
-		jwksCustomEndpointFlag:    "jwks_url",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,21 +44,27 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
-		description   string
-		flagValues    map[string]string
-		isValid       bool
-		expectedModel *inputModel
+		description         string
+		flagValues          map[string]string
+		tokenCustomEndpoint string
+		jwksCustomEndpoint  string
+		isValid             bool
+		expectedModel       *inputModel
 	}{
 		{
-			description:   "base",
-			flagValues:    fixtureFlagValues(),
-			isValid:       true,
-			expectedModel: fixtureInputModel(),
+			description:         "base",
+			flagValues:          fixtureFlagValues(),
+			tokenCustomEndpoint: testTokenCustomEndpoint,
+			jwksCustomEndpoint:  testJwksCustomEndpoint,
+			isValid:             true,
+			expectedModel:       fixtureInputModel(),
 		},
 		{
-			description: "no values",
-			flagValues:  map[string]string{},
-			isValid:     true,
+			description:         "no values",
+			flagValues:          map[string]string{},
+			tokenCustomEndpoint: "",
+			jwksCustomEndpoint:  "",
+			isValid:             true,
 			expectedModel: &inputModel{
 				ServiceAccountToken:   "",
 				ServiceAccountKeyPath: "",
@@ -70,10 +79,10 @@ func TestParseInput(t *testing.T) {
 				serviceAccountTokenFlag:   "",
 				serviceAccountKeyPathFlag: "",
 				privateKeyPathFlag:        "",
-				tokenCustomEndpointFlag:   "",
-				jwksCustomEndpointFlag:    "",
 			},
-			isValid: true,
+			tokenCustomEndpoint: "",
+			jwksCustomEndpoint:  "",
+			isValid:             true,
 			expectedModel: &inputModel{
 				ServiceAccountToken:   "",
 				ServiceAccountKeyPath: "",
@@ -109,6 +118,10 @@ func TestParseInput(t *testing.T) {
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
+
+			viper.Reset()
+			viper.Set(config.TokenCustomEndpointKey, tt.tokenCustomEndpoint)
+			viper.Set(config.JwksCustomEndpointKey, tt.jwksCustomEndpoint)
 
 			model := parseInput(p, cmd)
 

@@ -43,6 +43,8 @@ const (
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
+	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	jwksCustomEndpointFlag              = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
@@ -154,6 +156,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
+	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
+	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
@@ -205,6 +209,10 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.SQLServerFlexCustomEndpointKey, cmd.Flags().Lookup(sqlServerFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IaaSCustomEndpointKey, cmd.Flags().Lookup(iaasCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.TokenCustomEndpointKey, cmd.Flags().Lookup(tokenCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.JwksCustomEndpointKey, cmd.Flags().Lookup(jwksCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

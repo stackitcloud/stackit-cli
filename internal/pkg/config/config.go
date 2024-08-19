@@ -42,14 +42,14 @@ const (
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
+	TokenCustomEndpointKey             = "token_custom_endpoint"
+	JwksCustomEndpointKey              = "jwks_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
-
-	AllowedUrlDomainDefault = "stackit.cloud"
 )
 
 const (
@@ -96,6 +96,8 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
 	IaaSCustomEndpointKey,
+	TokenCustomEndpointKey,
+	JwksCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -172,6 +174,8 @@ func setConfigDefaults() {
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
+	viper.SetDefault(TokenCustomEndpointKey, "")
+	viper.SetDefault(JwksCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {

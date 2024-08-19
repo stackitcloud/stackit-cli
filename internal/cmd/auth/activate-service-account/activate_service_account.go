@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -20,8 +22,6 @@ const (
 	serviceAccountTokenFlag   = "service-account-token"
 	serviceAccountKeyPathFlag = "service-account-key-path"
 	privateKeyPathFlag        = "private-key-path"
-	tokenCustomEndpointFlag   = "token-custom-endpoint"
-	jwksCustomEndpointFlag    = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
@@ -100,17 +100,18 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountTokenFlag, "", "Service account long-lived access token")
 	cmd.Flags().String(serviceAccountKeyPathFlag, "", "Service account key path")
 	cmd.Flags().String(privateKeyPathFlag, "", "RSA private key path. It takes precedence over the private key included in the service account key, if present")
-	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
-	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
+	tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
+	jwksCustomEndpoint := viper.GetString(config.JwksCustomEndpointKey)
+
 	model := inputModel{
 		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
-		TokenCustomEndpoint:   flags.FlagToStringValue(p, cmd, tokenCustomEndpointFlag),
-		JwksCustomEndpoint:    flags.FlagToStringValue(p, cmd, jwksCustomEndpointFlag),
+		TokenCustomEndpoint:   tokenCustomEndpoint,
+		JwksCustomEndpoint:    jwksCustomEndpoint,
 	}
 
 	if p.IsVerbosityDebug() {

@@ -37,6 +37,7 @@ stackit config set [flags]
       --iaas-custom-endpoint string                 IaaS API base URL, used in calls to this API
       --identity-provider-custom-client-id string   Identity Provider client ID, used for user authentication
       --identity-provider-custom-endpoint string    Identity Provider base URL, used for user authentication
+      --jwks-custom-endpoint string                 Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated
       --load-balancer-custom-endpoint string        Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string                LogMe API base URL, used in calls to this API
       --mariadb-custom-endpoint string              MariaDB API base URL, used in calls to this API
@@ -55,6 +56,7 @@ stackit config set [flags]
       --session-time-limit string                   Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)
       --ske-custom-endpoint string                  SKE API base URL, used in calls to this API
       --sqlserverflex-custom-endpoint string        SQLServer Flex API base URL, used in calls to this API
+      --token-custom-endpoint string                Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated
 ```
 
 ### Options inherited from parent commands
