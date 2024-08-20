@@ -135,8 +135,12 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		// Get the authorization code
 		code := r.URL.Query().Get("code")
+		errDescription := r.URL.Query().Get("error_description")
 		if code == "" {
 			errServer = fmt.Errorf("could not find 'code' URL parameter")
+			if errDescription != "" {
+				errServer = fmt.Errorf("%w: %s", errServer, errDescription)
+			}
 			return
 		}
 
