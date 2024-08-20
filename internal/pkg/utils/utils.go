@@ -57,7 +57,7 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	return &f
 }
 
-func ValidateURL(value string) error {
+func ValidateURLDomain(value string) error {
 	urlStruct, err := url.Parse(value)
 	if err != nil {
 		return fmt.Errorf("parse url: %w", err)

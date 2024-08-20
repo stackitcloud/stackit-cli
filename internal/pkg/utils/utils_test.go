@@ -49,7 +49,7 @@ func TestConvertInt64PToFloat64P(t *testing.T) {
 	}
 }
 
-func TestValidateURL(t *testing.T) {
+func TestValidateURLDomain(t *testing.T) {
 	tests := []struct {
 		name             string
 		allowedUrlDomain string
@@ -92,7 +92,7 @@ func TestValidateURL(t *testing.T) {
 			viper.Reset()
 			viper.Set(config.AllowedUrlDomainKey, tt.allowedUrlDomain)
 
-			err := ValidateURL(tt.input)
+			err := ValidateURLDomain(tt.input)
 			if tt.isValid && err != nil {
 				t.Errorf("expected URL to be valid, got error: %v", err)
 			}
