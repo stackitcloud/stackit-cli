@@ -129,7 +129,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				viper.Set(config.IdentityProviderCustomClientIdKey, "")
 			}
 			if model.AllowedUrlDomain {
-				viper.Set(config.AllowedUrlDomainKey, "")
+				viper.Set(config.AllowedUrlDomainKey, config.AllowedUrlDomainDefault)
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -222,7 +222,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID, used for user authentication")
-	cmd.Flags().Bool(allowedUrlDomainFlag, false, "Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands")
+	cmd.Flags().Bool(allowedUrlDomainFlag, false, fmt.Sprintf("Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to %s", config.AllowedUrlDomainDefault))
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")

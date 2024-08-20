@@ -11,10 +11,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
-const (
-	defaultAllowedUrlDomain = "stackit.cloud"
-)
-
 // Ptr Returns the pointer to any type T
 func Ptr[T any](v T) *T {
 	return &v
@@ -70,11 +66,11 @@ func ValidateURLDomain(value string) error {
 	allowedUrlDomain := viper.GetString(config.AllowedUrlDomainKey)
 
 	if allowedUrlDomain == "" {
-		allowedUrlDomain = defaultAllowedUrlDomain
+		allowedUrlDomain = config.AllowedUrlDomainDefault
 	}
 
 	if !strings.HasSuffix(urlHost, allowedUrlDomain) {
-		return fmt.Errorf(`only urls belonging to domain %s are allowed"`, allowedUrlDomain)
+		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
 	return nil
 }

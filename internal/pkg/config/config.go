@@ -50,6 +50,8 @@ const (
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
+
+	AllowedUrlDomainDefault = "stackit.cloud"
 )
 
 const (
@@ -157,7 +159,7 @@ func setConfigDefaults() {
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
 	viper.SetDefault(IdentityProviderCustomEndpointKey, "")
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
-	viper.SetDefault(AllowedUrlDomainKey, "")
+	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
 	viper.SetDefault(ArgusCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")

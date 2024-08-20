@@ -26,7 +26,7 @@ stackit config unset [flags]
 ### Options
 
 ```
-      --allowed-url-domain                   Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands
+      --allowed-url-domain                   Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
       --argus-custom-endpoint                Argus API base URL. If unset, uses the default base URL
       --async                                Configuration option to run commands asynchronously
       --authorization-custom-endpoint        Authorization API base URL. If unset, uses the default base URL
