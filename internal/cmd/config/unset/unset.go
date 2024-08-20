@@ -195,6 +195,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.IaaSCustomEndpoint {
 				viper.Set(config.IaaSCustomEndpointKey, "")
 			}
+			if model.TokenCustomEndpoint {
+				viper.Set(config.TokenCustomEndpointKey, "")
+			}
+			if model.JwksCustomEndpoint {
+				viper.Set(config.JwksCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
