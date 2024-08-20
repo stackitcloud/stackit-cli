@@ -139,7 +139,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		if code == "" {
 			errServer = fmt.Errorf("could not find 'code' URL parameter")
 			if errDescription != "" {
-				errServer = fmt.Errorf("%w.\nError: %s", errServer, errDescription)
+				errServer = fmt.Errorf("%w: %s", errServer, errDescription)
 			}
 			return
 		}
