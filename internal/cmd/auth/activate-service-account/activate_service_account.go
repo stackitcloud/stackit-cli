@@ -28,8 +28,6 @@ type inputModel struct {
 	ServiceAccountToken   string
 	ServiceAccountKeyPath string
 	PrivateKeyPath        string
-	TokenCustomEndpoint   string
-	JwksCustomEndpoint    string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -56,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model := parseInput(p, cmd)
 
-			err := storeFlags(model)
+			tokenCustomEndpoint, jwksCustomEndpoint, err := storeFlags()
 			if err != nil {
 				return err
 			}
@@ -65,8 +63,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				Token:                 model.ServiceAccountToken,
 				ServiceAccountKeyPath: model.ServiceAccountKeyPath,
 				PrivateKeyPath:        model.PrivateKeyPath,
-				TokenCustomUrl:        model.TokenCustomEndpoint,
-				JWKSCustomUrl:         model.JwksCustomEndpoint,
+				TokenCustomUrl:        tokenCustomEndpoint,
+				JWKSCustomUrl:         jwksCustomEndpoint,
 			}
 
 			// Setup authentication based on the provided credentials and the environment
@@ -103,15 +101,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
-	tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
-	jwksCustomEndpoint := viper.GetString(config.JwksCustomEndpointKey)
-
 	model := inputModel{
 		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
-		TokenCustomEndpoint:   tokenCustomEndpoint,
-		JwksCustomEndpoint:    jwksCustomEndpoint,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -126,14 +119,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	return &model
 }
 
-func storeFlags(model *inputModel) error {
-	err := auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, model.TokenCustomEndpoint)
+func storeFlags() (tokenCustomEndpoint, jwksCustomEndpoint string, err error) {
+	tokenCustomEndpoint = viper.GetString(config.TokenCustomEndpointKey)
+	jwksCustomEndpoint = viper.GetString(config.JwksCustomEndpointKey)
+
+	err = auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint)
 	if err != nil {
-		return fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
+		return "", "", fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
 	}
-	err = auth.SetAuthField(auth.JWKS_CUSTOM_ENDPOINT, model.JwksCustomEndpoint)
+	err = auth.SetAuthField(auth.JWKS_CUSTOM_ENDPOINT, jwksCustomEndpoint)
 	if err != nil {
-		return fmt.Errorf("set %s: %w", auth.JWKS_CUSTOM_ENDPOINT, err)
+		return "", "", fmt.Errorf("set %s: %w", auth.JWKS_CUSTOM_ENDPOINT, err)
 	}
-	return nil
+	return tokenCustomEndpoint, jwksCustomEndpoint, nil
 }
