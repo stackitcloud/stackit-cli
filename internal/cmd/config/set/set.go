@@ -234,6 +234,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		projectIdSet = true
 	}
 
+	allowedUrlDomainFromFlag := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)
+	if allowedUrlDomainFromFlag == "" {
+		p.Warn("The allowed URL domain is set to empty. All URLs will be accepted regardless of their domain.\n")
+	}
+
 	model := inputModel{
 		SessionTimeLimit: sessionTimeLimit,
 		ProjectIdSet:     projectIdSet,

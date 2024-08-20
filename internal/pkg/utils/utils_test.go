@@ -81,6 +81,12 @@ func TestValidateURLDomain(t *testing.T) {
 			isValid:          true,
 		},
 		{
+			name:             "every URL valid",
+			allowedUrlDomain: "",
+			input:            "https://www.test.example.com/",
+			isValid:          true,
+		},
+		{
 			name:    "invalid URL",
 			input:   "",
 			isValid: false,
