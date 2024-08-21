@@ -154,13 +154,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	addressFamily := &iaas.UpdateNetworkAddressFamily{}
 
 	if model.IPv6DnsNameServers != nil {
-		addressFamily.Ipv6 = &iaas.V1UpdateNetworkIPv6{
+		addressFamily.Ipv6 = &iaas.UpdateNetworkIPv6Body{
 			Nameservers: model.IPv6DnsNameServers,
 		}
 	}
 
 	if model.IPv4DnsNameServers != nil {
-		addressFamily.Ipv4 = &iaas.UpdateNetworkIPv4{
+		addressFamily.Ipv4 = &iaas.UpdateNetworkIPv4Body{
 			Nameservers: model.IPv4DnsNameServers,
 		}
 	}

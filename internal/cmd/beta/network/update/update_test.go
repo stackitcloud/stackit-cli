@@ -77,10 +77,10 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaa
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name: utils.Ptr("example-network-name"),
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
-			Ipv4: &iaas.UpdateNetworkIPv4{
+			Ipv4: &iaas.UpdateNetworkIPv4Body{
 				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 			},
-			Ipv6: &iaas.V1UpdateNetworkIPv6{
+			Ipv6: &iaas.UpdateNetworkIPv6Body{
 				Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 			},
 		},
