@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -20,16 +22,12 @@ const (
 	serviceAccountTokenFlag   = "service-account-token"
 	serviceAccountKeyPathFlag = "service-account-key-path"
 	privateKeyPathFlag        = "private-key-path"
-	tokenCustomEndpointFlag   = "token-custom-endpoint"
-	jwksCustomEndpointFlag    = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
 	ServiceAccountToken   string
 	ServiceAccountKeyPath string
 	PrivateKeyPath        string
-	TokenCustomEndpoint   string
-	JwksCustomEndpoint    string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -56,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model := parseInput(p, cmd)
 
-			err := storeFlags(model)
+			tokenCustomEndpoint, jwksCustomEndpoint, err := storeFlags()
 			if err != nil {
 				return err
 			}
@@ -65,8 +63,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				Token:                 model.ServiceAccountToken,
 				ServiceAccountKeyPath: model.ServiceAccountKeyPath,
 				PrivateKeyPath:        model.PrivateKeyPath,
-				TokenCustomUrl:        model.TokenCustomEndpoint,
-				JWKSCustomUrl:         model.JwksCustomEndpoint,
+				TokenCustomUrl:        tokenCustomEndpoint,
+				JWKSCustomUrl:         jwksCustomEndpoint,
 			}
 
 			// Setup authentication based on the provided credentials and the environment
@@ -100,8 +98,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountTokenFlag, "", "Service account long-lived access token")
 	cmd.Flags().String(serviceAccountKeyPathFlag, "", "Service account key path")
 	cmd.Flags().String(privateKeyPathFlag, "", "RSA private key path. It takes precedence over the private key included in the service account key, if present")
-	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
-	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -109,8 +105,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
-		TokenCustomEndpoint:   flags.FlagToStringValue(p, cmd, tokenCustomEndpointFlag),
-		JwksCustomEndpoint:    flags.FlagToStringValue(p, cmd, jwksCustomEndpointFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -125,14 +119,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	return &model
 }
 
-func storeFlags(model *inputModel) error {
-	err := auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, model.TokenCustomEndpoint)
+func storeFlags() (tokenCustomEndpoint, jwksCustomEndpoint string, err error) {
+	tokenCustomEndpoint = viper.GetString(config.TokenCustomEndpointKey)
+	jwksCustomEndpoint = viper.GetString(config.JwksCustomEndpointKey)
+
+	err = auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint)
 	if err != nil {
-		return fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
+		return "", "", fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
 	}
-	err = auth.SetAuthField(auth.JWKS_CUSTOM_ENDPOINT, model.JwksCustomEndpoint)
+	err = auth.SetAuthField(auth.JWKS_CUSTOM_ENDPOINT, jwksCustomEndpoint)
 	if err != nil {
-		return fmt.Errorf("set %s: %w", auth.JWKS_CUSTOM_ENDPOINT, err)
+		return "", "", fmt.Errorf("set %s: %w", auth.JWKS_CUSTOM_ENDPOINT, err)
 	}
-	return nil
+	return tokenCustomEndpoint, jwksCustomEndpoint, nil
 }

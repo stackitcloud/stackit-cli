@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -78,6 +80,7 @@ func TestParseInput(t *testing.T) {
 		argValues        []string
 		flagValues       map[string]string
 		headerFlagValues []string
+		allowedURLDomain string
 		isValid          bool
 		expectedModel    *inputModel
 	}{
@@ -123,10 +126,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "URL outside STACKIT",
 			argValues: []string{
-				"https://www.very-suspicious-website.com/",
+				"https://www.example.website.com/",
 			},
-			flagValues: fixtureFlagValues(),
-			isValid:    false,
+			flagValues:       fixtureFlagValues(),
+			allowedURLDomain: "",
+			isValid:          true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.URL = "https://www.example.website.com/"
+			}),
 		},
 		{
 			description: "invalid method 1",
@@ -212,6 +219,9 @@ func TestParseInput(t *testing.T) {
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
+
+			viper.Reset()
+			viper.Set(config.AllowedUrlDomainKey, tt.allowedURLDomain)
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)

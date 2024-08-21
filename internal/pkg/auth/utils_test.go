@@ -11,23 +11,47 @@ func TestGetIDPEndpoint(t *testing.T) {
 	tests := []struct {
 		name              string
 		idpCustomEndpoint string
+		allowedUrlDomain  string
 		isValid           bool
 		expected          string
 	}{
 		{
 			name:              "custom endpoint specified",
 			idpCustomEndpoint: "https://example.stackit.cloud",
+			allowedUrlDomain:  "stackit.cloud",
 			isValid:           true,
 			expected:          "https://example.stackit.cloud",
 		},
 		{
 			name:              "custom endpoint outside STACKIT",
 			idpCustomEndpoint: "https://www.very-suspicious-website.com/",
+			allowedUrlDomain:  "stackit.cloud",
 			isValid:           false,
+		},
+		{
+			name:              "non-STACKIT custom endpoint invalid",
+			idpCustomEndpoint: "https://www.very-suspicious-website.com/",
+			allowedUrlDomain:  "stackit.cloud",
+			isValid:           false,
+		},
+		{
+			name:              "non-STACKIT custom endpoint valid",
+			idpCustomEndpoint: "https://www.test.example.com/",
+			allowedUrlDomain:  "example.com",
+			isValid:           true,
+			expected:          "https://www.test.example.com/",
+		},
+		{
+			name:              "every URL valid",
+			idpCustomEndpoint: "https://www.test.example.com/",
+			allowedUrlDomain:  "",
+			isValid:           true,
+			expected:          "https://www.test.example.com/",
 		},
 		{
 			name:              "custom endpoint not specified",
 			idpCustomEndpoint: "",
+			allowedUrlDomain:  "",
 			isValid:           true,
 			expected:          defaultIDPEndpoint,
 		},
@@ -36,6 +60,7 @@ func TestGetIDPEndpoint(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			viper.Reset()
 			viper.Set(config.IdentityProviderCustomEndpointKey, tt.idpCustomEndpoint)
+			viper.Set(config.AllowedUrlDomainKey, tt.allowedUrlDomain)
 
 			got, err := getIDPEndpoint()
 

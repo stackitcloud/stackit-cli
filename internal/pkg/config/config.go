@@ -19,6 +19,7 @@ const (
 
 	IdentityProviderCustomEndpointKey = "identity_provider_custom_endpoint"
 	IdentityProviderCustomClientIdKey = "identity_provider_custom_client_id"
+	AllowedUrlDomainKey               = "allowed_url_domain"
 
 	ArgusCustomEndpointKey             = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
@@ -41,12 +42,16 @@ const (
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
+	TokenCustomEndpointKey             = "token_custom_endpoint"
+	JwksCustomEndpointKey              = "jwks_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
 
 	AsyncDefault            = false
 	SessionTimeLimitDefault = "2h"
+
+	AllowedUrlDomainDefault = "stackit.cloud"
 )
 
 const (
@@ -69,6 +74,7 @@ var ConfigKeys = []string{
 
 	IdentityProviderCustomEndpointKey,
 	IdentityProviderCustomClientIdKey,
+	AllowedUrlDomainKey,
 
 	DNSCustomEndpointKey,
 	LoadBalancerCustomEndpointKey,
@@ -92,6 +98,8 @@ var ConfigKeys = []string{
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
 	IaaSCustomEndpointKey,
+	TokenCustomEndpointKey,
+	JwksCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -151,6 +159,7 @@ func setConfigDefaults() {
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
 	viper.SetDefault(IdentityProviderCustomEndpointKey, "")
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
+	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
 	viper.SetDefault(ArgusCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
@@ -167,6 +176,8 @@ func setConfigDefaults() {
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
+	viper.SetDefault(TokenCustomEndpointKey, "")
+	viper.SetDefault(JwksCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {

@@ -23,6 +23,7 @@ const (
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
 	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
+	allowedUrlDomainFlag               = "allowed-url-domain"
 
 	argusCustomEndpointFlag             = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
@@ -45,6 +46,8 @@ const (
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
+	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	jwksCustomEndpointFlag              = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
@@ -56,6 +59,7 @@ type inputModel struct {
 	SessionTimeLimit               bool
 	IdentityProviderCustomEndpoint bool
 	IdentityProviderCustomClientID bool
+	AllowedUrlDomain               bool
 
 	ArgusCustomEndpoint             bool
 	AuthorizationCustomEndpoint     bool
@@ -78,6 +82,8 @@ type inputModel struct {
 	SKECustomEndpoint               bool
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
+	TokenCustomEndpoint             bool
+	JwksCustomEndpoint              bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -121,6 +127,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			if model.IdentityProviderCustomClientID {
 				viper.Set(config.IdentityProviderCustomClientIdKey, "")
+			}
+			if model.AllowedUrlDomain {
+				viper.Set(config.AllowedUrlDomainKey, config.AllowedUrlDomainDefault)
 			}
 
 			if model.ArgusCustomEndpoint {
@@ -186,6 +195,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.IaaSCustomEndpoint {
 				viper.Set(config.IaaSCustomEndpointKey, "")
 			}
+			if model.TokenCustomEndpoint {
+				viper.Set(config.TokenCustomEndpointKey, "")
+			}
+			if model.JwksCustomEndpoint {
+				viper.Set(config.JwksCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -207,6 +222,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID, used for user authentication")
+	cmd.Flags().Bool(allowedUrlDomainFlag, false, fmt.Sprintf("Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to %s", config.AllowedUrlDomainDefault))
 
 	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
@@ -229,6 +245,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
+	cmd.Flags().Bool(jwksCustomEndpointFlag, false, "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -241,6 +259,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
 		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
 		IdentityProviderCustomClientID: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
+		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 
 		ArgusCustomEndpoint:             flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
@@ -263,6 +282,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
+		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
+		JwksCustomEndpoint:              flags.FlagToBoolValue(p, cmd, jwksCustomEndpointFlag),
 	}
 
 	if p.IsVerbosityDebug() {

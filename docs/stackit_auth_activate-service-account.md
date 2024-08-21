@@ -29,11 +29,9 @@ stackit auth activate-service-account [flags]
 
 ```
   -h, --help                              Help for "stackit auth activate-service-account"
-      --jwks-custom-endpoint string       Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated
       --private-key-path string           RSA private key path. It takes precedence over the private key included in the service account key, if present
       --service-account-key-path string   Service account key path
       --service-account-token string      Service account long-lived access token
-      --token-custom-endpoint string      Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated
 ```
 
 ### Options inherited from parent commands

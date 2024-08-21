@@ -20,6 +20,7 @@ const (
 	sessionTimeLimitFlag               = "session-time-limit"
 	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
 	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
+	allowedUrlDomainFlag               = "allowed-url-domain"
 
 	argusCustomEndpointFlag             = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
@@ -42,6 +43,8 @@ const (
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
+	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	jwksCustomEndpointFlag              = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
@@ -131,6 +134,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sessionTimeLimitFlag, "", "Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)")
 	cmd.Flags().String(identityProviderCustomEndpointFlag, "", "Identity Provider base URL, used for user authentication")
 	cmd.Flags().String(identityProviderCustomClientIdFlag, "", "Identity Provider client ID, used for user authentication")
+	cmd.Flags().String(allowedUrlDomainFlag, "", `Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command`)
 	cmd.Flags().String(argusCustomEndpointFlag, "", "Argus API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
@@ -152,12 +156,16 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
+	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
+	cmd.Flags().String(jwksCustomEndpointFlag, "", "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IdentityProviderCustomEndpointKey, cmd.Flags().Lookup(identityProviderCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IdentityProviderCustomClientIdKey, cmd.Flags().Lookup(identityProviderCustomClientIdFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.AllowedUrlDomainKey, cmd.Flags().Lookup(allowedUrlDomainFlag))
 	cobra.CheckErr(err)
 
 	err = viper.BindPFlag(config.ArgusCustomEndpointKey, cmd.Flags().Lookup(argusCustomEndpointFlag))
@@ -202,6 +210,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IaaSCustomEndpointKey, cmd.Flags().Lookup(iaasCustomEndpointFlag))
 	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.TokenCustomEndpointKey, cmd.Flags().Lookup(tokenCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.JwksCustomEndpointKey, cmd.Flags().Lookup(jwksCustomEndpointFlag))
+	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -220,6 +232,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	projectIdSet := false
 	if projectIdFromFlag != nil {
 		projectIdSet = true
+	}
+
+	allowedUrlDomainFromFlag := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)
+	if allowedUrlDomainFromFlag == "" {
+		p.Warn("The allowed URL domain is set to empty. All URLs will be accepted regardless of their domain.\n")
 	}
 
 	model := inputModel{

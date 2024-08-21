@@ -15,7 +15,7 @@ func getIDPEndpoint() (string, error) {
 	if customIDPEndpoint != "" {
 		idpEndpoint = customIDPEndpoint
 	}
-	err := utils.ValidateSTACKITURL(idpEndpoint)
+	err := utils.ValidateURLDomain(idpEndpoint)
 	if err != nil {
 		return "", fmt.Errorf("validate custom identity provider endpoint: %w", err)
 	}

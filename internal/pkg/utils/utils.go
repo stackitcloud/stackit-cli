@@ -7,6 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 // Ptr Returns the pointer to any type T
@@ -51,7 +53,7 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	return &f
 }
 
-func ValidateSTACKITURL(value string) error {
+func ValidateURLDomain(value string) error {
 	urlStruct, err := url.Parse(value)
 	if err != nil {
 		return fmt.Errorf("parse url: %w", err)
@@ -60,8 +62,11 @@ func ValidateSTACKITURL(value string) error {
 	if urlHost == "" {
 		return fmt.Errorf("bad url")
 	}
-	if !strings.HasSuffix(urlHost, "stackit.cloud") {
-		return fmt.Errorf(`only urls belonging to STACKIT are allowed, hostname must end in "stackit.cloud"`)
+
+	allowedUrlDomain := viper.GetString(config.AllowedUrlDomainKey)
+
+	if !strings.HasSuffix(urlHost, allowedUrlDomain) {
+		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
 	return nil
 }
