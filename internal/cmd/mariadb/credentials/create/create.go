@@ -139,14 +139,14 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal Argus credentials list: %w", err)
+			return fmt.Errorf("marshal MariaDB credentials list: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
-		// The username field cannot be set by the user so we only display it if it's not returned empty
+		// The username field cannot be set by the user, so we only display it if it's not returned empty
 		username := *resp.Raw.Credentials.Username
 		if username != "" {
 			p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)

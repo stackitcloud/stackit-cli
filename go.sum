@@ -125,8 +125,6 @@ github.com/spf13/viper v1.19.0 h1:RWq5SEjt8o25SROyN3z2OrDB9l7RPd3lwTWU8EcEdcI=
 github.com/spf13/viper v1.19.0/go.mod h1:GQUN9bilAbhU/jgc1bKs99f/suXKeUMct8Adx5+Ntkg=
 github.com/stackitcloud/stackit-sdk-go/core v0.12.0 h1:auIzUUNRuydKOScvpICP4MifGgvOajiDQd+ncGmBL0U=
 github.com/stackitcloud/stackit-sdk-go/core v0.12.0/go.mod h1:mDX1mSTsB3mP+tNBGcFNx6gH1mGBN4T+dVt+lcw7nlw=
-github.com/stackitcloud/stackit-sdk-go/services/argus v0.11.0 h1:JVEx/ouHB6PlwGzQa3ywyDym1HTWo3WgrxAyXprCnuM=
-github.com/stackitcloud/stackit-sdk-go/services/argus v0.11.0/go.mod h1:nVllQfYODhX1q3bgwVTLO7wHOp+8NMLiKbn3u/Dg5nU=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.3.0 h1:AyzBgcbd0rCm+2+xaWqtfibjWmkKlO+U+7qxqvtKpJ8=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.3.0/go.mod h1:1sLuXa7Qvp9f+wKWdRjyNe8B2F8JX7nSTd8fBKadri4=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.10.0 h1:QIZfs6nJ/l2pOweH1E+wazXnlAUtqisVbYUxWAokTbc=
@@ -143,6 +141,8 @@ github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.14.0 h1:FaJYVfha+
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.14.0/go.mod h1:iFerEzGmkg6R13ldFUyHUWHm0ac9cS4ftTDLhP0k/dU=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.10.0 h1:tn1MD1nu+gYEbT3lslRI6BrapKwuvHv5Wi2Zw9uVPPc=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.10.0/go.mod h1:dkVMJI88eJ3Xs0ZV15r4tUpgitUGJXcvrX3RL4Zq2bQ=
+github.com/stackitcloud/stackit-sdk-go/services/observability v0.1.0 h1:VdxYMJqGKUvk7/l2b83Z/bB0FUYuFbELK/ipTicJ5QY=
+github.com/stackitcloud/stackit-sdk-go/services/observability v0.1.0/go.mod h1:cSnBZGdtx4jnn9HEefkQHDrm8+PuS0NCWvukVfuwP/8=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.16.0 h1:EEjhfIFiC4TsaFKB4mkxz6NFz4InfVs5STmWc+oEjgQ=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.16.0/go.mod h1:ZecMIf9oYj2DGZqWh93l97WdVaRdLl+tW5Fq3YKGwBM=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.15.0 h1:05wQYhO37Z4y8xAD+4OTYz6rYu6eJEmwMfCG4tjETEc=

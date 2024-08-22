@@ -27,7 +27,6 @@ stackit config unset [flags]
 
 ```
       --allowed-url-domain                   Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
-      --argus-custom-endpoint                Argus API base URL. If unset, uses the default base URL
       --async                                Configuration option to run commands asynchronously
       --authorization-custom-endpoint        Authorization API base URL. If unset, uses the default base URL
       --dns-custom-endpoint                  DNS API base URL. If unset, uses the default base URL
@@ -41,6 +40,7 @@ stackit config unset [flags]
       --mariadb-custom-endpoint              MariaDB API base URL. If unset, uses the default base URL
       --mongodbflex-custom-endpoint          MongoDB Flex API base URL. If unset, uses the default base URL
       --object-storage-custom-endpoint       Object Storage API base URL. If unset, uses the default base URL
+      --observability-custom-endpoint        Observability API base URL. If unset, uses the default base URL
       --opensearch-custom-endpoint           OpenSearch API base URL. If unset, uses the default base URL
       --output-format                        Output format
       --postgresflex-custom-endpoint         PostgreSQL Flex API base URL. If unset, uses the default base URL

@@ -38,7 +38,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Adds observability credentials to Load Balancer",
-		Long:  "Adds existing observability credentials (username and password) to Load Balancer. The credentials can be for Argus or another monitoring tool.",
+		Long:  "Adds existing observability credentials (username and password) to Load Balancer. The credentials can be for Observability or another monitoring tool.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

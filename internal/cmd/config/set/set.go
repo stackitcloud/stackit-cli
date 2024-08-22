@@ -22,7 +22,6 @@ const (
 	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
 	allowedUrlDomainFlag               = "allowed-url-domain"
 
-	argusCustomEndpointFlag             = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
@@ -30,6 +29,7 @@ const (
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
 	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
+	observabilityCustomEndpointFlag     = "observability-custom-endpoint"
 	openSearchCustomEndpointFlag        = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag      = "postgresflex-custom-endpoint"
 	rabbitMQCustomEndpointFlag          = "rabbitmq-custom-endpoint"
@@ -135,7 +135,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(identityProviderCustomEndpointFlag, "", "Identity Provider base URL, used for user authentication")
 	cmd.Flags().String(identityProviderCustomClientIdFlag, "", "Identity Provider client ID, used for user authentication")
 	cmd.Flags().String(allowedUrlDomainFlag, "", `Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command`)
-	cmd.Flags().String(argusCustomEndpointFlag, "", "Argus API base URL, used in calls to this API")
+	cmd.Flags().String(observabilityCustomEndpointFlag, "", "Observability API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
 	cmd.Flags().String(loadBalancerCustomEndpointFlag, "", "Load Balancer API base URL, used in calls to this API")
@@ -168,7 +168,7 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.AllowedUrlDomainKey, cmd.Flags().Lookup(allowedUrlDomainFlag))
 	cobra.CheckErr(err)
 
-	err = viper.BindPFlag(config.ArgusCustomEndpointKey, cmd.Flags().Lookup(argusCustomEndpointFlag))
+	err = viper.BindPFlag(config.ObservabilityCustomEndpointKey, cmd.Flags().Lookup(observabilityCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
 	cobra.CheckErr(err)
