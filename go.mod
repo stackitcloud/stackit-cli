@@ -77,11 +77,11 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/argus v0.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.10.0
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.17.0
 	github.com/subosito/gotenv v1.6.0 // indirect

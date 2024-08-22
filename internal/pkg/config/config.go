@@ -21,7 +21,6 @@ const (
 	IdentityProviderCustomClientIdKey = "identity_provider_custom_client_id"
 	AllowedUrlDomainKey               = "allowed_url_domain"
 
-	ArgusCustomEndpointKey             = "argus_custom_endpoint"
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
 	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
@@ -29,6 +28,7 @@ const (
 	MariaDBCustomEndpointKey           = "mariadb_custom_endpoint"
 	MongoDBFlexCustomEndpointKey       = "mongodbflex_custom_endpoint"
 	ObjectStorageCustomEndpointKey     = "object_storage_custom_endpoint"
+	ObservabilityCustomEndpointKey     = "observability_custom_endpoint"
 	OpenSearchCustomEndpointKey        = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey      = "postgresflex_custom_endpoint"
 	RabbitMQCustomEndpointKey          = "rabbitmq_custom_endpoint"
@@ -84,7 +84,7 @@ var ConfigKeys = []string{
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	ResourceManagerEndpointKey,
-	ArgusCustomEndpointKey,
+	ObservabilityCustomEndpointKey,
 	AuthorizationCustomEndpointKey,
 	MongoDBFlexCustomEndpointKey,
 	RabbitMQCustomEndpointKey,
@@ -161,7 +161,7 @@ func setConfigDefaults() {
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
 	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
-	viper.SetDefault(ArgusCustomEndpointKey, "")
+	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ObjectStorageCustomEndpointKey, "")

@@ -25,7 +25,6 @@ const (
 	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
 	allowedUrlDomainFlag               = "allowed-url-domain"
 
-	argusCustomEndpointFlag             = "argus-custom-endpoint"
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
@@ -33,6 +32,7 @@ const (
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
 	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
+	observabilityCustomEndpointFlag     = "observability-custom-endpoint"
 	openSearchCustomEndpointFlag        = "opensearch-custom-endpoint"
 	postgresFlexCustomEndpointFlag      = "postgresflex-custom-endpoint"
 	rabbitMQCustomEndpointFlag          = "rabbitmq-custom-endpoint"
@@ -61,7 +61,6 @@ type inputModel struct {
 	IdentityProviderCustomClientID bool
 	AllowedUrlDomain               bool
 
-	ArgusCustomEndpoint             bool
 	AuthorizationCustomEndpoint     bool
 	DNSCustomEndpoint               bool
 	LoadBalancerCustomEndpoint      bool
@@ -69,6 +68,7 @@ type inputModel struct {
 	MariaDBCustomEndpoint           bool
 	MongoDBFlexCustomEndpoint       bool
 	ObjectStorageCustomEndpoint     bool
+	ObservabilityCustomEndpoint     bool
 	OpenSearchCustomEndpoint        bool
 	PostgresFlexCustomEndpoint      bool
 	RabbitMQCustomEndpoint          bool
@@ -132,8 +132,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				viper.Set(config.AllowedUrlDomainKey, config.AllowedUrlDomainDefault)
 			}
 
-			if model.ArgusCustomEndpoint {
-				viper.Set(config.ArgusCustomEndpointKey, "")
+			if model.ObservabilityCustomEndpoint {
+				viper.Set(config.ObservabilityCustomEndpointKey, "")
 			}
 			if model.AuthorizationCustomEndpoint {
 				viper.Set(config.AuthorizationCustomEndpointKey, "")
@@ -224,7 +224,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID, used for user authentication")
 	cmd.Flags().Bool(allowedUrlDomainFlag, false, fmt.Sprintf("Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to %s", config.AllowedUrlDomainDefault))
 
-	cmd.Flags().Bool(argusCustomEndpointFlag, false, "Argus API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(observabilityCustomEndpointFlag, false, "Observability API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(loadBalancerCustomEndpointFlag, false, "Load Balancer API base URL. If unset, uses the default base URL")
@@ -261,7 +261,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		IdentityProviderCustomClientID: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
 		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 
-		ArgusCustomEndpoint:             flags.FlagToBoolValue(p, cmd, argusCustomEndpointFlag),
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
 		LoadBalancerCustomEndpoint:      flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
@@ -269,6 +268,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		MariaDBCustomEndpoint:           flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:       flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
 		ObjectStorageCustomEndpoint:     flags.FlagToBoolValue(p, cmd, objectStorageCustomEndpointFlag),
+		ObservabilityCustomEndpoint:     flags.FlagToBoolValue(p, cmd, observabilityCustomEndpointFlag),
 		OpenSearchCustomEndpoint:        flags.FlagToBoolValue(p, cmd, openSearchCustomEndpointFlag),
 		PostgresFlexCustomEndpoint:      flags.FlagToBoolValue(p, cmd, postgresFlexCustomEndpointFlag),
 		RabbitMQCustomEndpoint:          flags.FlagToBoolValue(p, cmd, rabbitMQCustomEndpointFlag),

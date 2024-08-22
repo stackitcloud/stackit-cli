@@ -29,8 +29,7 @@ stackit config set [flags]
 ### Options
 
 ```
-      --allowed-url-domain string                   Domain name, used for the verification of the URLs that are given in the custom identidy provider endpoint and "STACKIT curl" command
-      --argus-custom-endpoint string                Argus API base URL, used in calls to this API
+      --allowed-url-domain string                   Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command
       --authorization-custom-endpoint string        Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                  DNS API base URL, used in calls to this API
   -h, --help                                        Help for "stackit config set"
@@ -43,6 +42,7 @@ stackit config set [flags]
       --mariadb-custom-endpoint string              MariaDB API base URL, used in calls to this API
       --mongodbflex-custom-endpoint string          MongoDB Flex API base URL, used in calls to this API
       --object-storage-custom-endpoint string       Object Storage API base URL, used in calls to this API
+      --observability-custom-endpoint string        Observability API base URL, used in calls to this API
       --opensearch-custom-endpoint string           OpenSearch API base URL, used in calls to this API
       --postgresflex-custom-endpoint string         PostgreSQL Flex API base URL, used in calls to this API
       --rabbitmq-custom-endpoint string             RabbitMQ API base URL, used in calls to this API

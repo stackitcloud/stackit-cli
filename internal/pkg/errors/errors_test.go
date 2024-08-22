@@ -90,7 +90,7 @@ func TestSimpleErrors(t *testing.T) {
 	}
 }
 
-func TestArgusInputPlanError(t *testing.T) {
+func TestObservabilityInputPlanError(t *testing.T) {
 	tests := []struct {
 		description string
 		args        []string
@@ -99,19 +99,19 @@ func TestArgusInputPlanError(t *testing.T) {
 		{
 			description: "base",
 			args:        []string{"arg1", "arg2"},
-			expectedMsg: fmt.Sprintf(ARGUS_INVALID_INPUT_PLAN, "stackit service resource operation arg1 arg2", "service"),
+			expectedMsg: fmt.Sprintf(OBSERVABILITY_INVALID_INPUT_PLAN, "stackit service resource operation arg1 arg2", "service"),
 		},
 		{
 			description: "no args",
 			args:        []string{},
-			expectedMsg: fmt.Sprintf(ARGUS_INVALID_INPUT_PLAN, "stackit service resource operation", "service"),
+			expectedMsg: fmt.Sprintf(OBSERVABILITY_INVALID_INPUT_PLAN, "stackit service resource operation", "service"),
 		},
 	}
 
 	setupCmd()
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := &ArgusInputPlanError{
+			err := &ObservabilityInputPlanError{
 				Cmd:  operation,
 				Args: tt.args,
 			}
@@ -149,7 +149,7 @@ func TestSetInexistentProfile(t *testing.T) {
 	}
 }
 
-func TestArgusInvalidPlanError(t *testing.T) {
+func TestObservabilityInvalidPlanError(t *testing.T) {
 	tests := []struct {
 		description string
 		details     string
@@ -160,25 +160,25 @@ func TestArgusInvalidPlanError(t *testing.T) {
 			description: "base",
 			details:     "details",
 			service:     "service",
-			expectedMsg: fmt.Sprintf(ARGUS_INVALID_PLAN, "details", "service"),
+			expectedMsg: fmt.Sprintf(OBSERVABILITY_INVALID_PLAN, "details", "service"),
 		},
 		{
 			description: "no details",
 			details:     "",
 			service:     "service",
-			expectedMsg: fmt.Sprintf(ARGUS_INVALID_PLAN, "", "service"),
+			expectedMsg: fmt.Sprintf(OBSERVABILITY_INVALID_PLAN, "", "service"),
 		},
 		{
 			description: "no service",
 			details:     "details",
 			service:     "",
-			expectedMsg: fmt.Sprintf(ARGUS_INVALID_PLAN, "details", ""),
+			expectedMsg: fmt.Sprintf(OBSERVABILITY_INVALID_PLAN, "details", ""),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := &ArgusInvalidPlanError{
+			err := &ObservabilityInvalidPlanError{
 				Service: tt.service,
 				Details: tt.details,
 			}

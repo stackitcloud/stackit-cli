@@ -4,7 +4,7 @@ Adds observability credentials to Load Balancer
 
 ### Synopsis
 
-Adds existing observability credentials (username and password) to Load Balancer. The credentials can be for Argus or another monitoring tool.
+Adds existing observability credentials (username and password) to Load Balancer. The credentials can be for Observability or another monitoring tool.
 
 ```
 stackit load-balancer observability-credentials add [flags]

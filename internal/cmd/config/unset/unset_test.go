@@ -21,13 +21,13 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		identityProviderCustomClientIdFlag: true,
 		allowedUrlDomainFlag:               true,
 
-		argusCustomEndpointFlag:           true,
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
 		loadBalancerCustomEndpointFlag:    true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
 		objectStorageCustomEndpointFlag:   true,
+		observabilityCustomEndpointFlag:   true,
 		openSearchCustomEndpointFlag:      true,
 		rabbitMQCustomEndpointFlag:        true,
 		redisCustomEndpointFlag:           true,
@@ -60,13 +60,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IdentityProviderCustomClientID: true,
 		AllowedUrlDomain:               true,
 
-		ArgusCustomEndpoint:           true,
 		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
 		LoadBalancerCustomEndpoint:    true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
 		ObjectStorageCustomEndpoint:   true,
+		ObservabilityCustomEndpoint:   true,
 		OpenSearchCustomEndpoint:      true,
 		RabbitMQCustomEndpoint:        true,
 		RedisCustomEndpoint:           true,
@@ -115,13 +115,13 @@ func TestParseInput(t *testing.T) {
 				model.IdentityProviderCustomClientID = false
 				model.AllowedUrlDomain = false
 
-				model.ArgusCustomEndpoint = false
 				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
 				model.LoadBalancerCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
 				model.ObjectStorageCustomEndpoint = false
+				model.ObservabilityCustomEndpoint = false
 				model.OpenSearchCustomEndpoint = false
 				model.RabbitMQCustomEndpoint = false
 				model.RedisCustomEndpoint = false
@@ -188,13 +188,13 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description: "argus custom endpoint empty",
+			description: "observability custom endpoint empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
-				flagValues[argusCustomEndpointFlag] = false
+				flagValues[observabilityCustomEndpointFlag] = false
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ArgusCustomEndpoint = false
+				model.ObservabilityCustomEndpoint = false
 			}),
 		},
 		{

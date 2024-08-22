@@ -50,7 +50,7 @@ To list all profiles, run:
 
 	DELETE_DEFAULT_PROFILE = `the default configuration profile %q cannot be deleted.`
 
-	ARGUS_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
+	OBSERVABILITY_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
 
 Either provide the plan ID:
   $ %[1]s --plan-id <PLAN ID> [flags]
@@ -61,7 +61,7 @@ or provide plan name:
 For more details on the available plans, run:
   $ stackit %[2]s plans`
 
-	ARGUS_INVALID_PLAN = `the provided instance plan is not valid.
+	OBSERVABILITY_INVALID_PLAN = `the provided instance plan is not valid.
 	
   %s
   
@@ -188,12 +188,12 @@ func (e *DeleteDefaultProfile) Error() string {
 	return fmt.Sprintf(DELETE_DEFAULT_PROFILE, e.DefaultProfile)
 }
 
-type ArgusInputPlanError struct {
+type ObservabilityInputPlanError struct {
 	Cmd  *cobra.Command
 	Args []string
 }
 
-func (e *ArgusInputPlanError) Error() string {
+func (e *ObservabilityInputPlanError) Error() string {
 	fullCommandPath := e.Cmd.CommandPath()
 	if len(e.Args) > 0 {
 		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
@@ -201,16 +201,16 @@ func (e *ArgusInputPlanError) Error() string {
 	// Assumes a structure of the form "stackit <service> <resource> <operation>"
 	service := e.Cmd.Parent().Parent().Use
 
-	return fmt.Sprintf(ARGUS_INVALID_INPUT_PLAN, fullCommandPath, service)
+	return fmt.Sprintf(OBSERVABILITY_INVALID_INPUT_PLAN, fullCommandPath, service)
 }
 
-type ArgusInvalidPlanError struct {
+type ObservabilityInvalidPlanError struct {
 	Service string
 	Details string
 }
 
-func (e *ArgusInvalidPlanError) Error() string {
-	return fmt.Sprintf(ARGUS_INVALID_PLAN, e.Details, e.Service)
+func (e *ObservabilityInvalidPlanError) Error() string {
+	return fmt.Sprintf(OBSERVABILITY_INVALID_PLAN, e.Details, e.Service)
 }
 
 type DSAInputPlanError struct {

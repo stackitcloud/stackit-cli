@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/argus"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
@@ -17,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
 	objectstorage "github.com/stackitcloud/stackit-cli/internal/cmd/object-storage"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/observability"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
@@ -144,7 +144,6 @@ func configureFlags(cmd *cobra.Command) error {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(argus.NewCmd(p))
 	cmd.AddCommand(auth.NewCmd(p))
 	cmd.AddCommand(configCmd.NewCmd(p))
 	cmd.AddCommand(beta.NewCmd(p))
@@ -155,6 +154,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(mariadb.NewCmd(p))
 	cmd.AddCommand(mongodbflex.NewCmd(p))
 	cmd.AddCommand(objectstorage.NewCmd(p))
+	cmd.AddCommand(observability.NewCmd(p))
 	cmd.AddCommand(opensearch.NewCmd(p))
 	cmd.AddCommand(organization.NewCmd(p))
 	cmd.AddCommand(postgresflex.NewCmd(p))

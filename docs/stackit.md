@@ -26,7 +26,6 @@ stackit [flags]
 
 ### SEE ALSO
 
-* [stackit argus](./stackit_argus.md)	 - Provides functionality for Argus
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
@@ -37,6 +36,7 @@ stackit [flags]
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
 * [stackit object-storage](./stackit_object-storage.md)	 - Provides functionality for Object Storage
+* [stackit observability](./stackit_observability.md)	 - Provides functionality for Observability
 * [stackit opensearch](./stackit_opensearch.md)	 - Provides functionality for OpenSearch
 * [stackit organization](./stackit_organization.md)	 - Manages organizations
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
