@@ -16,13 +16,13 @@ stackit observability grafana describe INSTANCE_ID [flags]
 
 ```
   Get details of the Grafana configuration of an Observability instance with ID "xxx"
-  $ stackit observability credentials describe xxx
+  $ stackit observability grafana describe xxx
 
   Get details of the Grafana configuration of an Observability instance with ID "xxx" and show the initial admin password
-  $ stackit observability credentials describe xxx --show-password
+  $ stackit observability grafana describe xxx --show-password
 
   Get details of the Grafana configuration of an Observability instance with ID "xxx" in JSON format
-  $ stackit observability credentials describe xxx --output-format json
+  $ stackit observability grafana describe xxx --output-format json
 ```
 
 ### Options
