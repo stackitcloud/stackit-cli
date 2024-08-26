@@ -14,10 +14,10 @@ func getIDPEndpoint() (string, error) {
 	customIDPEndpoint := viper.GetString(config.IdentityProviderCustomEndpointKey)
 	if customIDPEndpoint != "" {
 		idpEndpoint = customIDPEndpoint
-	}
-	err := utils.ValidateURLDomain(idpEndpoint)
-	if err != nil {
-		return "", fmt.Errorf("validate custom identity provider endpoint: %w", err)
+		err := utils.ValidateURLDomain(idpEndpoint)
+		if err != nil {
+			return "", fmt.Errorf("validate custom identity provider endpoint: %w", err)
+		}
 	}
 
 	return idpEndpoint, nil
