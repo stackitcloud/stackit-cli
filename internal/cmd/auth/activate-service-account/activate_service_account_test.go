@@ -14,7 +14,6 @@ import (
 )
 
 var testTokenCustomEndpoint = "token_url"
-var testJwksCustomEndpoint = "jwks_url"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -45,7 +44,6 @@ func TestParseInput(t *testing.T) {
 		description         string
 		flagValues          map[string]string
 		tokenCustomEndpoint string
-		jwksCustomEndpoint  string
 		isValid             bool
 		expectedModel       *inputModel
 	}{
@@ -53,7 +51,6 @@ func TestParseInput(t *testing.T) {
 			description:         "base",
 			flagValues:          fixtureFlagValues(),
 			tokenCustomEndpoint: testTokenCustomEndpoint,
-			jwksCustomEndpoint:  testJwksCustomEndpoint,
 			isValid:             true,
 			expectedModel:       fixtureInputModel(),
 		},
@@ -61,7 +58,6 @@ func TestParseInput(t *testing.T) {
 			description:         "no values",
 			flagValues:          map[string]string{},
 			tokenCustomEndpoint: "",
-			jwksCustomEndpoint:  "",
 			isValid:             true,
 			expectedModel: &inputModel{
 				ServiceAccountToken:   "",
@@ -77,7 +73,6 @@ func TestParseInput(t *testing.T) {
 				privateKeyPathFlag:        "",
 			},
 			tokenCustomEndpoint: "",
-			jwksCustomEndpoint:  "",
 			isValid:             true,
 			expectedModel: &inputModel{
 				ServiceAccountToken:   "",
@@ -131,14 +126,12 @@ func TestStoreFlags(t *testing.T) {
 		description         string
 		model               *inputModel
 		tokenCustomEndpoint string
-		jwksCustomEndpoint  string
 		isValid             bool
 	}{
 		{
 			description:         "base",
 			model:               fixtureInputModel(),
 			tokenCustomEndpoint: testTokenCustomEndpoint,
-			jwksCustomEndpoint:  testJwksCustomEndpoint,
 			isValid:             true,
 		},
 		{
@@ -149,7 +142,6 @@ func TestStoreFlags(t *testing.T) {
 				PrivateKeyPath:        "",
 			},
 			tokenCustomEndpoint: "",
-			jwksCustomEndpoint:  "",
 			isValid:             true,
 		},
 	}
@@ -161,9 +153,8 @@ func TestStoreFlags(t *testing.T) {
 
 			viper.Reset()
 			viper.Set(config.TokenCustomEndpointKey, tt.tokenCustomEndpoint)
-			viper.Set(config.JwksCustomEndpointKey, tt.jwksCustomEndpoint)
 
-			tokenCustomEndpoint, jwksCustomEndpoint, err := storeFlags()
+			tokenCustomEndpoint, err := storeFlags()
 			if !tt.isValid {
 				if err == nil {
 					t.Fatalf("did not fail on invalid input")
@@ -180,14 +171,6 @@ func TestStoreFlags(t *testing.T) {
 			}
 			if value != tokenCustomEndpoint {
 				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint, value)
-			}
-
-			value, err = auth.GetAuthField(auth.JWKS_CUSTOM_ENDPOINT)
-			if err != nil {
-				t.Errorf("Failed to get value of auth field: %v", err)
-			}
-			if value != jwksCustomEndpoint {
-				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.JWKS_CUSTOM_ENDPOINT, jwksCustomEndpoint, value)
 			}
 		})
 	}

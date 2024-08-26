@@ -34,7 +34,6 @@ stackit config unset [flags]
       --iaas-custom-endpoint                 IaaS API base URL. If unset, uses the default base URL
       --identity-provider-custom-client-id   Identity Provider client ID, used for user authentication
       --identity-provider-custom-endpoint    Identity Provider base URL. If unset, uses the default base URL
-      --jwks-custom-endpoint                 Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated
       --load-balancer-custom-endpoint        Load Balancer API base URL. If unset, uses the default base URL
       --logme-custom-endpoint                LogMe API base URL. If unset, uses the default base URL
       --mariadb-custom-endpoint              MariaDB API base URL. If unset, uses the default base URL
