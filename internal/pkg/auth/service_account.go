@@ -102,7 +102,6 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 		SERVICE_ACCOUNT_KEY:   "",
 		PRIVATE_KEY:           "",
 		TOKEN_CUSTOM_ENDPOINT: "",
-		JWKS_CUSTOM_ENDPOINT:  "",
 	}
 	err := GetAuthFieldMap(authFields)
 	if err != nil {

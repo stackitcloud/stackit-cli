@@ -37,7 +37,6 @@ const (
 	SERVICE_ACCOUNT_KEY     authFieldKey = "service_account_key"
 	PRIVATE_KEY             authFieldKey = "private_key"
 	TOKEN_CUSTOM_ENDPOINT   authFieldKey = "token_custom_endpoint"
-	JWKS_CUSTOM_ENDPOINT    authFieldKey = "jwks_custom_endpoint"
 )
 
 const (
@@ -58,7 +57,6 @@ var authFieldKeys = []authFieldKey{
 	SERVICE_ACCOUNT_KEY,
 	PRIVATE_KEY,
 	TOKEN_CUSTOM_ENDPOINT,
-	JWKS_CUSTOM_ENDPOINT,
 	authFlowType,
 }
 
