@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
