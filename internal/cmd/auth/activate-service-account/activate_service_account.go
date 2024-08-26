@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model := parseInput(p, cmd)
 
-			tokenCustomEndpoint, jwksCustomEndpoint, err := storeFlags()
+			tokenCustomEndpoint, err := storeFlags()
 			if err != nil {
 				return err
 			}
@@ -64,7 +64,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				ServiceAccountKeyPath: model.ServiceAccountKeyPath,
 				PrivateKeyPath:        model.PrivateKeyPath,
 				TokenCustomUrl:        tokenCustomEndpoint,
-				JWKSCustomUrl:         jwksCustomEndpoint,
 			}
 
 			// Setup authentication based on the provided credentials and the environment
@@ -119,17 +118,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	return &model
 }
 
-func storeFlags() (tokenCustomEndpoint, jwksCustomEndpoint string, err error) {
+func storeFlags() (tokenCustomEndpoint string, err error) {
 	tokenCustomEndpoint = viper.GetString(config.TokenCustomEndpointKey)
-	jwksCustomEndpoint = viper.GetString(config.JwksCustomEndpointKey)
 
 	err = auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint)
 	if err != nil {
-		return "", "", fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
+		return "", fmt.Errorf("set %s: %w", auth.TOKEN_CUSTOM_ENDPOINT, err)
 	}
-	err = auth.SetAuthField(auth.JWKS_CUSTOM_ENDPOINT, jwksCustomEndpoint)
-	if err != nil {
-		return "", "", fmt.Errorf("set %s: %w", auth.JWKS_CUSTOM_ENDPOINT, err)
-	}
-	return tokenCustomEndpoint, jwksCustomEndpoint, nil
+	return tokenCustomEndpoint, nil
 }

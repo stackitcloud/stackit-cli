@@ -47,7 +47,6 @@ const (
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
-	jwksCustomEndpointFlag              = "jwks-custom-endpoint"
 )
 
 type inputModel struct {
@@ -83,7 +82,6 @@ type inputModel struct {
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
-	JwksCustomEndpoint              bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -198,9 +196,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.TokenCustomEndpoint {
 				viper.Set(config.TokenCustomEndpointKey, "")
 			}
-			if model.JwksCustomEndpoint {
-				viper.Set(config.JwksCustomEndpointKey, "")
-			}
 
 			err := config.Write()
 			if err != nil {
@@ -246,7 +241,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
-	cmd.Flags().Bool(jwksCustomEndpointFlag, false, "Custom endpoint for the jwks API, which is used to get the json web key sets (jwks) to validate tokens when the service-account authentication is activated")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -283,7 +277,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
-		JwksCustomEndpoint:              flags.FlagToBoolValue(p, cmd, jwksCustomEndpointFlag),
 	}
 
 	if p.IsVerbosityDebug() {
