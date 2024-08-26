@@ -70,7 +70,6 @@ func TestAuthenticationConfig(t *testing.T) {
 		saKey                         string
 		privateKeySet                 bool
 		tokenEndpoint                 string
-		jwksEndpoint                  string
 		isValid                       bool
 		expectedCustomAuthSet         bool
 		expectedTokenSet              bool
@@ -102,7 +101,6 @@ func TestAuthenticationConfig(t *testing.T) {
 			saKey:                 testServiceAccountKey,
 			privateKeySet:         true,
 			tokenEndpoint:         "token_url",
-			jwksEndpoint:          "jwks_url",
 			isValid:               true,
 			expectedCustomAuthSet: true,
 		},
@@ -115,7 +113,6 @@ func TestAuthenticationConfig(t *testing.T) {
 			saKey:            testServiceAccountKey,
 			privateKeySet:    true,
 			tokenEndpoint:    "token_url",
-			jwksEndpoint:     "jwks_url",
 			isValid:          false,
 		},
 		{
@@ -180,7 +177,6 @@ func TestAuthenticationConfig(t *testing.T) {
 			authFields[REFRESH_TOKEN] = tt.refreshToken
 			authFields[SERVICE_ACCOUNT_KEY] = tt.saKey
 			authFields[TOKEN_CUSTOM_ENDPOINT] = tt.tokenEndpoint
-			authFields[JWKS_CUSTOM_ENDPOINT] = tt.jwksEndpoint
 
 			err = SetAuthFlow(tt.flow)
 			if err != nil {
@@ -245,7 +241,6 @@ func TestInitKeyFlow(t *testing.T) {
 		saKey          string
 		privateKeySet  bool
 		tokenEndpoint  string
-		jwksEndpoint   string
 		isValid        bool
 	}{
 		{
@@ -255,7 +250,6 @@ func TestInitKeyFlow(t *testing.T) {
 			saKey:          testServiceAccountKey,
 			privateKeySet:  true,
 			tokenEndpoint:  "token_url",
-			jwksEndpoint:   "jwks_url",
 			isValid:        true,
 		},
 		{
@@ -265,7 +259,6 @@ func TestInitKeyFlow(t *testing.T) {
 			saKey:          "",
 			privateKeySet:  true,
 			tokenEndpoint:  "token_url",
-			jwksEndpoint:   "jwks_url",
 			isValid:        false,
 		},
 		{
@@ -275,7 +268,6 @@ func TestInitKeyFlow(t *testing.T) {
 			saKey:          testServiceAccountKey,
 			privateKeySet:  false,
 			tokenEndpoint:  "token_url",
-			jwksEndpoint:   "jwks_url",
 			isValid:        false,
 		},
 		{
@@ -285,7 +277,6 @@ func TestInitKeyFlow(t *testing.T) {
 			saKey:          testServiceAccountKey,
 			privateKeySet:  true,
 			tokenEndpoint:  "token_url",
-			jwksEndpoint:   "jwks_url",
 			isValid:        false,
 		},
 		{
@@ -295,7 +286,6 @@ func TestInitKeyFlow(t *testing.T) {
 			saKey:          testServiceAccountKey,
 			privateKeySet:  true,
 			tokenEndpoint:  "token_url",
-			jwksEndpoint:   "jwks_url",
 			isValid:        false,
 		},
 	}
@@ -326,7 +316,6 @@ func TestInitKeyFlow(t *testing.T) {
 			authFields[REFRESH_TOKEN] = tt.refreshToken
 			authFields[SERVICE_ACCOUNT_KEY] = tt.saKey
 			authFields[TOKEN_CUSTOM_ENDPOINT] = tt.tokenEndpoint
-			authFields[JWKS_CUSTOM_ENDPOINT] = tt.jwksEndpoint
 			err = SetAuthFieldMap(authFields)
 			if err != nil {
 				t.Fatalf("Failed to set in auth storage: %v", err)
