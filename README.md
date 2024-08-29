@@ -17,18 +17,11 @@ Your feedback is appreciated!
 <a name="warning-new-stackit-idp"></a>
 
 > [!WARNING]
-> On August 26 2024, The STACKIT Argus service was renamed to STACKIT Observability. 
+> On August 26 2024, The STACKIT Argus service was renamed to STACKIT Observability.
 >
 > This means that there is a new command group `observability`, which offers the same functionality as the deprecated `argus` command.
 >
 > Please make sure to **update your STACKIT CLI to the latest version after August 26 2024** to ensure that you start using `observability` command.
-
-> [!WARNING]
-> On July 9 2024, the new [STACKIT Identity Provider (IDP)](https://docs.stackit.cloud/stackit/en/release-notes-23101442.html#ReleaseNotes-2024-06-21-identity-provider) was released. We are happy to announce that on [v0.9.0](https://github.com/stackitcloud/stackit-cli/releases/tag/v0.9.0), the new IDP was integrated in the STACKIT CLI, where it is used for user authentication.
->
-> This also means that the **user authentication on STACKIT CLI versions released before July 9 2024 is no longer guaranteed to work for all services**.
->
-> Please make sure to **update your STACKIT CLI to the latest version after July 9 2024** to ensure that you can continue to use all STACKIT services.
 
 ## Installation
 
@@ -73,7 +66,7 @@ Help is available for any command by specifying the special flag `--help` (or si
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
 | Service                            | CLI Commands              | Status                    |
-|------------------------------------|---------------------------|---------------------------|
+| ---------------------------------- | ------------------------- | ------------------------- |
 | Observability                      | `observability`           | :white_check_mark:        |
 | Infrastructure as a Service (IaaS) | `beta network-area`       | :white_check_mark: (beta) |
 | Authorization                      | `project`, `organization` | :white_check_mark:        |
