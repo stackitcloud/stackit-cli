@@ -66,6 +66,8 @@ sudo apt-get update
 sudo apt-get install stackit
 ```
 
+If you can't get latest updates due to an expired key, please go back to Step 1 and execute the commands again to fetch and use the latest key.
+
 #### Any distribution
 
 Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
