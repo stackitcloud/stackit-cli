@@ -50,6 +50,9 @@ aptly snapshot create new-snapshot from repo new-repo
 printf "\n>>> Merging snapshots \n"
 aptly snapshot pull -no-remove -architectures="amd64,i386,arm64" current-snapshot new-snapshot updated-snapshot ${DISTRIBUTION}
 
+# Import new public key (temporary)
+gpg --no-default-keyring --keyring=${CUSTOM_KEYRING_FILE} --import new-public-key.gpg
+
 # Publish the new snapshot to the remote repo
 printf "\n>>> Publishing updated snapshot \n"
 aptly publish snapshot -keyring="${CUSTOM_KEYRING_FILE}" -gpg-key="${GPG_PRIVATE_KEY_FINGERPRINT}" -passphrase "${GPG_PASSPHRASE}" -config "${APTLY_CONFIG_FILE_PATH}" updated-snapshot "s3:${APT_BUCKET_NAME}:${APT_REPO_FOLDER}"
