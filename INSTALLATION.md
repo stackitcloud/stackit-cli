@@ -66,7 +66,7 @@ sudo apt-get update
 sudo apt-get install stackit
 ```
 
-> If you can't install a package due to an expired key, please go back to step `1` to import the latest public key.
+> If you can't install the `stackit` package due to an expired key, please go back to step `1` to import the latest public key.
 
 #### Any distribution
 
