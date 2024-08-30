@@ -65,6 +65,17 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.Ap
 	return request
 }
 
+func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
+	request := testClient.CreateNetwork(testCtx, testProjectId)
+	request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
+		Name: utils.Ptr("example-network-name"),
+	})
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.CreateNetworkPayload {
 	payload := iaas.CreateNetworkPayload{
 		Name: utils.Ptr("example-network-name"),
@@ -225,6 +236,17 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "only name in payload",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				Name: utils.Ptr("example-network-name"),
+			},
+			expectedRequest: fixtureRequiredRequest(),
 		},
 	}
 

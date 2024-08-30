@@ -34,7 +34,6 @@ type inputModel struct {
 	Name               *string
 	IPv4DnsNameServers *[]string
 	IPv6DnsNameServers *[]string
-	IPv6PrefixLength   *int64
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -166,8 +165,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
-		Name:          model.Name,
-		AddressFamily: addressFamily,
+		Name: model.Name,
+	}
+
+	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {
+		payload.AddressFamily = addressFamily
 	}
 
 	return req.PartialUpdateNetworkPayload(payload)

@@ -153,14 +153,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.CreateNetwork(ctx, model.ProjectId)
 	addressFamily := &iaas.CreateNetworkAddressFamily{}
 
-	if model.IPv6DnsNameServers != nil {
+	if model.IPv6DnsNameServers != nil || model.IPv6PrefixLength != nil {
 		addressFamily.Ipv6 = &iaas.CreateNetworkIPv6Body{
 			Nameservers:  model.IPv6DnsNameServers,
 			PrefixLength: model.IPv6PrefixLength,
 		}
 	}
 
-	if model.IPv4DnsNameServers != nil {
+	if model.IPv4DnsNameServers != nil || model.IPv4PrefixLength != nil {
 		addressFamily.Ipv4 = &iaas.CreateNetworkIPv4Body{
 			Nameservers:  model.IPv4DnsNameServers,
 			PrefixLength: model.IPv4PrefixLength,
@@ -168,8 +168,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.CreateNetworkPayload{
-		Name:          model.Name,
-		AddressFamily: addressFamily,
+		Name: model.Name,
+	}
+
+	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {
+		payload.AddressFamily = addressFamily
 	}
 
 	return req.CreateNetworkPayload(payload)
