@@ -14,6 +14,10 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
+const (
+	testTokenEndpoint = "https://accounts.stackit.cloud/oauth/v2/token"
+)
+
 type clientTransport struct {
 	t                               *testing.T // May write test errors
 	requestURL                      string
@@ -28,11 +32,7 @@ func (rt *clientTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if reqURL == rt.requestURL {
 		return rt.roundTripRequest()
 	}
-	idpEndpoint, err := getIDPEndpoint()
-	if err != nil {
-		rt.t.Fatalf("get IDP endpoint for test: %v", err)
-	}
-	if fmt.Sprintf("https://%s", reqURL) == fmt.Sprintf("%s/token", idpEndpoint) {
+	if fmt.Sprintf("https://%s", reqURL) == testTokenEndpoint {
 		return rt.roundTripRefreshTokens()
 	}
 	rt.t.Fatalf("unexpected request to %q", reqURL)
@@ -354,8 +354,9 @@ func setAuthStorage(accessTokenExpiresAt, refreshTokenExpiresAt time.Time, acces
 		return fmt.Errorf("set auth flow type: %w", err)
 	}
 	err = SetAuthFieldMap(map[authFieldKey]string{
-		ACCESS_TOKEN:  accessToken,
-		REFRESH_TOKEN: refreshToken,
+		ACCESS_TOKEN:       accessToken,
+		REFRESH_TOKEN:      refreshToken,
+		IDP_TOKEN_ENDPOINT: testTokenEndpoint,
 	})
 	if err != nil {
 		return fmt.Errorf("set refreshed tokens in auth storage: %w", err)

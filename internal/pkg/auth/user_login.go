@@ -46,16 +46,22 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
-	idpWellKnownConfig, customIDP, err := getIDPWellKnownConfig(p)
+	idpWellKnownConfigURL, err := getIDPWellKnownConfigURL()
 	if err != nil {
 		return fmt.Errorf("get IDP well-known configuration: %w", err)
 	}
-	if customIDP {
-		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpWellKnownConfig.Issuer)
+	if idpWellKnownConfigURL != defaultWellKnownConfig {
+		p.Warn("You are using a custom identity provider well-known configuration (%s) for authentication.\n", idpWellKnownConfigURL)
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return err
 		}
+	}
+
+	p.Debug(print.DebugLevel, "get IDP well-known configuration from %s", idpWellKnownConfigURL)
+	idpWellKnownConfig, err := parseWellKnownConfiguration(idpWellKnownConfigURL)
+	if err != nil {
+		return fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
 
 	idpClientID, err := getIDPClientID()
@@ -329,4 +335,53 @@ func openBrowser(pageUrl string) error {
 		return err
 	}
 	return nil
+}
+
+// parseWellKnownConfiguration gets the well-known OpenID configuration from the provided URL and returns it as a JSON
+// the method also stores the IDP token endpoint in the authentication storage
+func parseWellKnownConfiguration(wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
+	req, _ := http.NewRequest("GET", wellKnownConfigURL, nil)
+	httpClient := &http.Client{}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("make the request: %w", err)
+	}
+
+	// Process the response
+	defer func() {
+		closeErr := res.Body.Close()
+		if closeErr != nil {
+			err = fmt.Errorf("close response body: %w", closeErr)
+		}
+	}()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+
+	err = json.Unmarshal(body, &wellKnownConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal response: %w", err)
+	}
+	if wellKnownConfig == nil {
+		return nil, fmt.Errorf("nil well-known configuration response")
+	}
+	if wellKnownConfig.Issuer == "" {
+		return nil, fmt.Errorf("found no issuer")
+	}
+	if wellKnownConfig.TokenEndpoint == "" {
+		return nil, fmt.Errorf("found no token endpoint")
+	}
+	if wellKnownConfig.AuthorizationEndpoint == "" {
+		return nil, fmt.Errorf("found no authorization endpoint")
+	}
+	if wellKnownConfig.TokenEndpoint == "" {
+		return nil, fmt.Errorf("found no token endpoint")
+	}
+
+	err = SetAuthField(IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
+	if err != nil {
+		return nil, fmt.Errorf("set token endpoint in the authentication storage: %w", err)
+	}
+	return wellKnownConfig, err
 }
