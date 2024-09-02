@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	testTokenEndpoint = "https://accounts.stackit.cloud/oauth/v2/token"
+	testTokenEndpoint = "https://accounts.stackit.cloud/oauth/v2/token" //nolint:gosec // linter false positive
 )
 
 type clientTransport struct {

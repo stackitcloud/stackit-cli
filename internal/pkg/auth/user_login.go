@@ -340,7 +340,7 @@ func openBrowser(pageUrl string) error {
 // parseWellKnownConfiguration gets the well-known OpenID configuration from the provided URL and returns it as a JSON
 // the method also stores the IDP token endpoint in the authentication storage
 func parseWellKnownConfiguration(wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
-	req, _ := http.NewRequest("GET", wellKnownConfigURL, nil)
+	req, _ := http.NewRequest("GET", wellKnownConfigURL, http.NoBody)
 	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
 	if err != nil {

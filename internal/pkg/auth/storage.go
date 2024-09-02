@@ -37,7 +37,7 @@ const (
 	SERVICE_ACCOUNT_KEY     authFieldKey = "service_account_key"
 	PRIVATE_KEY             authFieldKey = "private_key"
 	TOKEN_CUSTOM_ENDPOINT   authFieldKey = "token_custom_endpoint"
-	IDP_TOKEN_ENDPOINT      authFieldKey = "idp_token_endpoint"
+	IDP_TOKEN_ENDPOINT      authFieldKey = "idp_token_endpoint" //nolint:gosec // linter false positive
 )
 
 const (
