@@ -59,7 +59,7 @@ func TestGetIDPEndpoint(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			viper.Reset()
-			viper.Set(config.IdentityProviderCustomEndpointKey, tt.idpCustomEndpoint)
+			viper.Set(config.IdentityProviderCustomWellKnownConfigurationKey, tt.idpCustomEndpoint)
 			viper.Set(config.AllowedUrlDomainKey, tt.allowedUrlDomain)
 
 			got, err := getIDPEndpoint()

@@ -37,6 +37,7 @@ const (
 	SERVICE_ACCOUNT_KEY     authFieldKey = "service_account_key"
 	PRIVATE_KEY             authFieldKey = "private_key"
 	TOKEN_CUSTOM_ENDPOINT   authFieldKey = "token_custom_endpoint"
+	IDP_TOKEN_ENDPOINT      authFieldKey = "idp_token_endpoint"
 )
 
 const (
@@ -57,6 +58,7 @@ var authFieldKeys = []authFieldKey{
 	SERVICE_ACCOUNT_KEY,
 	PRIVATE_KEY,
 	TOKEN_CUSTOM_ENDPOINT,
+	IDP_TOKEN_ENDPOINT,
 	authFlowType,
 }
 

@@ -20,10 +20,10 @@ const (
 	projectIdFlag    = globalflags.ProjectIdFlag
 	verbosityFlag    = globalflags.VerbosityFlag
 
-	sessionTimeLimitFlag               = "session-time-limit"
-	identityProviderCustomEndpointFlag = "identity-provider-custom-endpoint"
-	identityProviderCustomClientIdFlag = "identity-provider-custom-client-id"
-	allowedUrlDomainFlag               = "allowed-url-domain"
+	sessionTimeLimitFlag                             = "session-time-limit"
+	identityProviderCustomWellKnownConfigurationFlag = "identity-provider-custom-well-known-configuration"
+	identityProviderCustomClientIdFlag               = "identity-provider-custom-client-id"
+	allowedUrlDomainFlag                             = "allowed-url-domain"
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
@@ -121,7 +121,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
 			if model.IdentityProviderCustomEndpoint {
-				viper.Set(config.IdentityProviderCustomEndpointKey, "")
+				viper.Set(config.IdentityProviderCustomWellKnownConfigurationKey, "")
 			}
 			if model.IdentityProviderCustomClientID {
 				viper.Set(config.IdentityProviderCustomClientIdKey, "")
@@ -215,7 +215,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(verbosityFlag, false, "Verbosity of the CLI")
 
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
-	cmd.Flags().Bool(identityProviderCustomEndpointFlag, false, "Identity Provider base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(identityProviderCustomWellKnownConfigurationFlag, false, "Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider")
 	cmd.Flags().Bool(identityProviderCustomClientIdFlag, false, "Identity Provider client ID, used for user authentication")
 	cmd.Flags().Bool(allowedUrlDomainFlag, false, fmt.Sprintf("Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to %s", config.AllowedUrlDomainDefault))
 
@@ -251,7 +251,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		Verbosity:    flags.FlagToBoolValue(p, cmd, verbosityFlag),
 
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
-		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomEndpointFlag),
+		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomWellKnownConfigurationFlag),
 		IdentityProviderCustomClientID: flags.FlagToBoolValue(p, cmd, identityProviderCustomClientIdFlag),
 		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 

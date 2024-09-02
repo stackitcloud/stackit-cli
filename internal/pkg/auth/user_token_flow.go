@@ -19,6 +19,7 @@ type userTokenFlow struct {
 	authFlow               AuthFlow
 	accessToken            string
 	refreshToken           string
+	tokenEndpoint          string
 }
 
 // Ensure the implementation satisfies the expected interface
@@ -76,8 +77,9 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 		return fmt.Errorf("get auth flow type: %w", err)
 	}
 	authFields := map[authFieldKey]string{
-		ACCESS_TOKEN:  "",
-		REFRESH_TOKEN: "",
+		ACCESS_TOKEN:       "",
+		REFRESH_TOKEN:      "",
+		IDP_TOKEN_ENDPOINT: "",
 	}
 	err = GetAuthFieldMap(authFields)
 	if err != nil {
@@ -87,6 +89,7 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 	utf.authFlow = authFlow
 	utf.accessToken = authFields[ACCESS_TOKEN]
 	utf.refreshToken = authFields[REFRESH_TOKEN]
+	utf.tokenEndpoint = authFields[IDP_TOKEN_ENDPOINT]
 	return nil
 }
 
@@ -156,11 +159,6 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 }
 
 func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
-	idpEndpoint, err := getIDPEndpoint()
-	if err != nil {
-		return nil, err
-	}
-
 	idpClientID, err := getIDPClientID()
 	if err != nil {
 		return nil, err
@@ -168,7 +166,7 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("%s/token", idpEndpoint),
+		utf.tokenEndpoint,
 		http.NoBody,
 	)
 	if err != nil {

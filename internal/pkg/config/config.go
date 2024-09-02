@@ -17,9 +17,9 @@ const (
 	SessionTimeLimitKey = "session_time_limit"
 	VerbosityKey        = "verbosity"
 
-	IdentityProviderCustomEndpointKey = "identity_provider_custom_endpoint"
-	IdentityProviderCustomClientIdKey = "identity_provider_custom_client_id"
-	AllowedUrlDomainKey               = "allowed_url_domain"
+	IdentityProviderCustomWellKnownConfigurationKey = "identity_provider_custom_well_known_configuration"
+	IdentityProviderCustomClientIdKey               = "identity_provider_custom_client_id"
+	AllowedUrlDomainKey                             = "allowed_url_domain"
 
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
@@ -71,7 +71,7 @@ var ConfigKeys = []string{
 	SessionTimeLimitKey,
 	VerbosityKey,
 
-	IdentityProviderCustomEndpointKey,
+	IdentityProviderCustomWellKnownConfigurationKey,
 	IdentityProviderCustomClientIdKey,
 	AllowedUrlDomainKey,
 
@@ -155,7 +155,7 @@ func setConfigDefaults() {
 	viper.SetDefault(OutputFormatKey, "")
 	viper.SetDefault(ProjectIdKey, "")
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
-	viper.SetDefault(IdentityProviderCustomEndpointKey, "")
+	viper.SetDefault(IdentityProviderCustomWellKnownConfigurationKey, "")
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
 	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")

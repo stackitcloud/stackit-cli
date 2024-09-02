@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	defaultIDPEndpoint = "https://accounts.stackit.cloud/oauth/v2"
-	defaultCLIClientID = "stackit-cli-0000-0000-000000000001"
+	defaultWellKnownConfig = "https://accounts.stackit.cloud/.well-known/openid-configuration"
+	defaultCLIClientID     = "stackit-cli-0000-0000-000000000001"
 
 	loginSuccessPath        = "/login-successful"
 	stackitLandingPage      = "https://www.stackit.de"
@@ -46,12 +46,12 @@ type User struct {
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
-	idpEndpoint, err := getIDPEndpoint()
+	idpWellKnownConfig, customIDP, err := getIDPWellKnownConfig(p)
 	if err != nil {
-		return err
+		return fmt.Errorf("get IDP well-known configuration: %w", err)
 	}
-	if idpEndpoint != defaultIDPEndpoint {
-		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpEndpoint)
+	if customIDP {
+		p.Warn("You are using a custom identity provider (%s) for authentication.\n", idpWellKnownConfig.Issuer)
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return err
@@ -100,7 +100,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	conf := &oauth2.Config{
 		ClientID: idpClientID,
 		Endpoint: oauth2.Endpoint{
-			AuthURL: fmt.Sprintf("%s/authorize", idpEndpoint),
+			AuthURL: idpWellKnownConfig.AuthorizationEndpoint,
 		},
 		Scopes:      []string{"openid offline_access email"},
 		RedirectURL: redirectURL,
@@ -147,7 +147,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpEndpoint, idpClientID, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpWellKnownConfig, idpClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -222,7 +222,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	p.Debug(print.DebugLevel, "opening browser for authentication")
-	p.Debug(print.DebugLevel, "using authentication server on %s", idpEndpoint)
+	p.Debug(print.DebugLevel, "using authentication server on %s", idpWellKnownConfig.Issuer)
 	p.Debug(print.DebugLevel, "using client ID %s for authentication ", idpClientID)
 
 	// Open a browser window to the authorizationURL
@@ -248,9 +248,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 }
 
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
-func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
-	// Set the authUrl and form-encoded data for the POST to the access token endpoint
-	authUrl := fmt.Sprintf("%s/token", authDomain)
+func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
+	// Set form-encoded data for the POST to the access token endpoint
 	data := fmt.Sprintf(
 		"grant_type=authorization_code&client_id=%s"+
 			"&code_verifier=%s"+
@@ -260,7 +259,7 @@ func getUserAccessAndRefreshTokens(authDomain, clientID, codeVerifier, authoriza
 	payload := strings.NewReader(data)
 
 	// Create the request and execute it
-	req, _ := http.NewRequest("POST", authUrl, payload)
+	req, _ := http.NewRequest("POST", idpWellKnownConfig.TokenEndpoint, payload)
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
 	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
