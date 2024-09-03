@@ -44,6 +44,10 @@ type User struct {
 	Email string
 }
 
+type apiClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // AuthorizeUser implements the PKCE OAuth2 flow.
 func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	idpWellKnownConfigURL, err := getIDPWellKnownConfigURL()
@@ -59,7 +63,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 
 	p.Debug(print.DebugLevel, "get IDP well-known configuration from %s", idpWellKnownConfigURL)
-	idpWellKnownConfig, err := parseWellKnownConfiguration(idpWellKnownConfigURL)
+	httpClient := &http.Client{}
+	idpWellKnownConfig, err := parseWellKnownConfiguration(httpClient, idpWellKnownConfigURL)
 	if err != nil {
 		return fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
@@ -339,9 +344,8 @@ func openBrowser(pageUrl string) error {
 
 // parseWellKnownConfiguration gets the well-known OpenID configuration from the provided URL and returns it as a JSON
 // the method also stores the IDP token endpoint in the authentication storage
-func parseWellKnownConfiguration(wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
+func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
 	req, _ := http.NewRequest("GET", wellKnownConfigURL, http.NoBody)
-	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("make the request: %w", err)
@@ -368,9 +372,6 @@ func parseWellKnownConfiguration(wellKnownConfigURL string) (wellKnownConfig *we
 	}
 	if wellKnownConfig.Issuer == "" {
 		return nil, fmt.Errorf("found no issuer")
-	}
-	if wellKnownConfig.TokenEndpoint == "" {
-		return nil, fmt.Errorf("found no token endpoint")
 	}
 	if wellKnownConfig.AuthorizationEndpoint == "" {
 		return nil, fmt.Errorf("found no authorization endpoint")
