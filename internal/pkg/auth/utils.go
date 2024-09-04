@@ -8,19 +8,25 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func getIDPEndpoint() (string, error) {
-	idpEndpoint := defaultIDPEndpoint
+type wellKnownConfig struct {
+	Issuer                string `json:"issuer"`
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	TokenEndpoint         string `json:"token_endpoint"`
+}
 
-	customIDPEndpoint := viper.GetString(config.IdentityProviderCustomEndpointKey)
-	if customIDPEndpoint != "" {
-		idpEndpoint = customIDPEndpoint
-		err := utils.ValidateURLDomain(idpEndpoint)
+func getIDPWellKnownConfigURL() (wellKnownConfigURL string, err error) {
+	wellKnownConfigURL = defaultWellKnownConfig
+
+	customWellKnownConfig := viper.GetString(config.IdentityProviderCustomWellKnownConfigurationKey)
+	if customWellKnownConfig != "" {
+		wellKnownConfigURL = customWellKnownConfig
+		err := utils.ValidateURLDomain(wellKnownConfigURL)
 		if err != nil {
-			return "", fmt.Errorf("validate custom identity provider endpoint: %w", err)
+			return "", fmt.Errorf("validate custom identity provider well-known configuration: %w", err)
 		}
 	}
 
-	return idpEndpoint, nil
+	return wellKnownConfigURL, nil
 }
 
 func getIDPClientID() (string, error) {

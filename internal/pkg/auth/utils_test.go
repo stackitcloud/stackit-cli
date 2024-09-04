@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
-func TestGetIDPEndpoint(t *testing.T) {
+func TestGetWellKnownConfig(t *testing.T) {
 	tests := []struct {
 		name              string
 		idpCustomEndpoint string
@@ -53,16 +53,16 @@ func TestGetIDPEndpoint(t *testing.T) {
 			idpCustomEndpoint: "",
 			allowedUrlDomain:  "",
 			isValid:           true,
-			expected:          defaultIDPEndpoint,
+			expected:          defaultWellKnownConfig,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			viper.Reset()
-			viper.Set(config.IdentityProviderCustomEndpointKey, tt.idpCustomEndpoint)
+			viper.Set(config.IdentityProviderCustomWellKnownConfigurationKey, tt.idpCustomEndpoint)
 			viper.Set(config.AllowedUrlDomainKey, tt.allowedUrlDomain)
 
-			got, err := getIDPEndpoint()
+			got, err := getIDPWellKnownConfigURL()
 
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)

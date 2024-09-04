@@ -16,10 +16,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		projectIdFlag:    true,
 		verbosityFlag:    true,
 
-		sessionTimeLimitFlag:               true,
-		identityProviderCustomEndpointFlag: true,
-		identityProviderCustomClientIdFlag: true,
-		allowedUrlDomainFlag:               true,
+		sessionTimeLimitFlag:                             true,
+		identityProviderCustomWellKnownConfigurationFlag: true,
+		identityProviderCustomClientIdFlag:               true,
+		allowedUrlDomainFlag:                             true,
 
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
@@ -157,7 +157,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "identity provider custom endpoint empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
-				flagValues[identityProviderCustomEndpointFlag] = false
+				flagValues[identityProviderCustomWellKnownConfigurationFlag] = false
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
