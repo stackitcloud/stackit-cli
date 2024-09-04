@@ -190,7 +190,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
+	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(resourceManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
