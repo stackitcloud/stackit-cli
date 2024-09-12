@@ -240,7 +240,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
-	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated")
+	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
