@@ -55,7 +55,7 @@ stackit config unset [flags]
       --session-time-limit                                  Maximum time before authentication is required again. If unset, defaults to 2h
       --ske-custom-endpoint                                 SKE API base URL. If unset, uses the default base URL
       --sqlserverflex-custom-endpoint                       SQLServer Flex API base URL. If unset, uses the default base URL
-      --token-custom-endpoint                               Custom endpoint for the token API, which is used to request access tokens when the service-account authentication is activated
+      --token-custom-endpoint                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
       --verbosity                                           Verbosity of the CLI
 ```
 
