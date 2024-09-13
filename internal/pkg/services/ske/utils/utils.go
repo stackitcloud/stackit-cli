@@ -21,6 +21,7 @@ const (
 	defaultNodepoolMachineType      = "b1.2"
 	defaultNodepoolMachineImageName = "flatcar"
 	defaultNodepoolMaxSurge         = 1
+	defaultNodepoolMaxUnavailable   = 0
 	defaultNodepoolMaximum          = 2
 	defaultNodepoolMinimum          = 1
 	defaultNodepoolName             = "pool-default"
@@ -138,10 +139,11 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 				Name: utils.Ptr(defaultNodepoolMachineImageName),
 			},
 		},
-		MaxSurge: utils.Ptr(int64(defaultNodepoolMaxSurge)),
-		Maximum:  utils.Ptr(int64(defaultNodepoolMaximum)),
-		Minimum:  utils.Ptr(int64(defaultNodepoolMinimum)),
-		Name:     utils.Ptr(defaultNodepoolName),
+		MaxSurge:       utils.Ptr(int64(defaultNodepoolMaxSurge)),
+		MaxUnavailable: utils.Ptr(int64(defaultNodepoolMaxUnavailable)),
+		Maximum:        utils.Ptr(int64(defaultNodepoolMaximum)),
+		Minimum:        utils.Ptr(int64(defaultNodepoolMinimum)),
+		Name:           utils.Ptr(defaultNodepoolName),
 		Volume: &ske.Volume{
 			Type: utils.Ptr(defaultNodepoolVolumeType),
 			Size: utils.Ptr(int64(defaultNodepoolVolumeSize)),
