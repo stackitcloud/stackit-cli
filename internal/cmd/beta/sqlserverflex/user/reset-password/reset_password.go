@@ -132,7 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *sqlserverflex.User) error {
+func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *sqlserverflex.SingleUser) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
