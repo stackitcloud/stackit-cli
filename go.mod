@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/jedib0t/go-pretty/v6 v6.5.9
+	github.com/jedib0t/go-pretty/v6 v6.6.0
 	github.com/lmittmann/tint v1.0.5
 	github.com/mattn/go-colorable v0.1.13
 	github.com/spf13/cobra v1.8.1
@@ -32,7 +32,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.6.0
 	github.com/zalando/go-keyring v0.2.5
 	golang.org/x/mod v0.20.0
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/oauth2 v0.23.0
 	golang.org/x/term v0.25.0
 	golang.org/x/text v0.18.0
 	k8s.io/apimachinery v0.29.2
