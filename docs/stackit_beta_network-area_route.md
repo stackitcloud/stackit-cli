@@ -33,4 +33,5 @@ stackit beta network-area route [flags]
 * [stackit beta network-area route delete](./stackit_beta_network-area_route_delete.md)	 - Deletes a static route in a STACKIT Network Area (SNA)
 * [stackit beta network-area route describe](./stackit_beta_network-area_route_describe.md)	 - Shows details of a static route in a STACKIT Network Area (SNA)
 * [stackit beta network-area route list](./stackit_beta_network-area_route_list.md)	 - Lists all static routes in a STACKIT Network Area (SNA)
+* [stackit beta network-area route update](./stackit_beta_network-area_route_update.md)	 - Updates a static route in a STACKIT Network Area (SNA)
 
