@@ -165,6 +165,16 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "optional labels is provided",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[labelFlag] = "key=value"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = utils.Ptr(map[string]string{"key": "value"})
+			}),
+			isValid: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -223,6 +233,17 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "optional labels provided",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Labels = utils.Ptr(map[string]string{"key": "value"})
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
+				*request = request.CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
+					(*payload.Ipv4)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
+				}))
+			}),
 		},
 	}
 
