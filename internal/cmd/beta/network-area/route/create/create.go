@@ -12,7 +12,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -23,6 +24,7 @@ const (
 	networkAreaIdFlag  = "network-area-id"
 	prefixFlag         = "prefix"
 	nexthopFlag        = "next-hop"
+	labelFlag          = "labels"
 )
 
 type inputModel struct {
@@ -31,6 +33,7 @@ type inputModel struct {
 	NetworkAreaId  *string
 	Prefix         *string
 	Nexthop        *string
+	Labels         *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -47,6 +50,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a static route with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
 				"$ stackit beta network-area route create --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1",
 			),
+			examples.NewExample(
+				`Create a static route with labels "key:value" and "foo:bar" with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"`,
+				"$ stackit beta network-area route create --labels key=value,foo=bar --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -62,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := utils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -87,7 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			route, err := utils.GetRouteFromAPIResponse(*model.Prefix, *model.Nexthop, resp.Items)
+			route, err := iaasUtils.GetRouteFromAPIResponse(*model.Prefix, *model.Nexthop, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -104,6 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "STACKIT Network Area ID")
 	cmd.Flags().Var(flags.CIDRFlag(), prefixFlag, "Static route prefix")
 	cmd.Flags().String(nexthopFlag, "", "Next hop IP address. Must be a valid IPv4")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a route. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, prefixFlag, nexthopFlag)
 	cobra.CheckErr(err)
@@ -118,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
 		Prefix:          flags.FlagToStringPointer(p, cmd, prefixFlag),
 		Nexthop:         flags.FlagToStringPointer(p, cmd, nexthopFlag),
+		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -134,11 +143,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRouteRequest {
 	req := apiClient.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId)
+
+	var labelsMap *map[string]interface{}
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+
 	payload := iaas.CreateNetworkAreaRoutePayload{
 		Ipv4: &[]iaas.Route{
 			{
 				Prefix:  model.Prefix,
 				Nexthop: model.Nexthop,
+				Labels:  labelsMap,
 			},
 		},
 	}
