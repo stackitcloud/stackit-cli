@@ -85,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(sizeFlag, 0, "Volume size")
+	cmd.Flags().Int64(sizeFlag, 0, "Volume size (GB)")
 
 	err := flags.MarkFlagsRequired(cmd, sizeFlag)
 	cobra.CheckErr(err)
