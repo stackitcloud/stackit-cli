@@ -167,7 +167,11 @@ func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) 
 		table.SetHeader("ID", "Name", "Status", "Server", "Public IP")
 
 		for _, volume := range volumes {
-			table.AddRow(*volume.Id, *volume.Name, *volume.Status, *volume.ServerId, *volume.AvailabilityZone, *volume.Size)
+			serverId := ""
+			if volume.ServerId != nil {
+				serverId = *volume.ServerId
+			}
+			table.AddRow(*volume.Id, *volume.Name, *volume.Status, serverId, *volume.AvailabilityZone, *volume.Size)
 			table.AddSeparator()
 		}
 
