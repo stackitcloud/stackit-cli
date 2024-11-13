@@ -124,9 +124,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
-	cmd.Flags().Int64(sizeFlag, 0, "Volume size (GB). Either size or source ID and type flags must be given.")
-	cmd.Flags().String(sourceIdFlag, "", "ID of the source object of volume. Either size or source id and type flags must be given. Source ID and type must be provided together.")
-	cmd.Flags().String(sourceTypeFlag, "", "Type of the source object of volume. Either size or source id and type flags must be given. Source ID and type must be provided together.")
+	cmd.Flags().Int64(sizeFlag, 0, "Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given")
+	cmd.Flags().String(sourceIdFlag, "", "ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")
+	cmd.Flags().String(sourceTypeFlag, "", "Type of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")
 
 	err := flags.MarkFlagsRequired(cmd, availabilityZoneFlag)
 	cobra.CheckErr(err)
