@@ -2,6 +2,7 @@ package beta
 
 import (
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
@@ -42,4 +43,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(server.NewCmd(p))
 	cmd.AddCommand(networkArea.NewCmd(p))
 	cmd.AddCommand(network.NewCmd(p))
+	cmd.AddCommand(volume.NewCmd(p))
 }
