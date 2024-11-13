@@ -17,7 +17,7 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "network",
+		Use:   "volume",
 		Short: "Provides functionality for Volume",
 		Long:  "Provides functionality for Volume.",
 		Args:  args.NoArgs,

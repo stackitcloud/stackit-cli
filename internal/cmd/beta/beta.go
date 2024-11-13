@@ -2,12 +2,12 @@ package beta
 
 import (
 	"fmt"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
