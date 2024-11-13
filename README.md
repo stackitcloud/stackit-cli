@@ -68,7 +68,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Service                            | CLI Commands                                                   | Status                    |
 | ---------------------------------- |----------------------------------------------------------------| ------------------------- |
 | Observability                      | `observability`                                                | :white_check_mark:        |
-| Infrastructure as a Service (IaaS) | `beta network-area`   <br/> `beta network` <br/> `beta volume` | :white_check_mark: (beta) |
+| Infrastructure as a Service (IaaS) | `beta network-area`   <br/> `beta network` <br/> `beta volume` <br/> `beta network-interface`| :white_check_mark: (beta) |
 | Authorization                      | `project`, `organization`                                      | :white_check_mark:        |
 | DNS                                | `dns`                                                          | :white_check_mark:        |
 | Kubernetes Engine (SKE)            | `ske`                                                          | :white_check_mark:        |
