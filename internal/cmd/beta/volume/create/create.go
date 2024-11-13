@@ -53,16 +53,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a volume with availability zone "eu01-1"`,
-				`$ stackit beta volume create --availability-zone eu01-1`,
+				`Create a volume with availability zone "eu01-1" and size 64 GB`,
+				`$ stackit beta volume create --availability-zone eu01-1 --size 64`,
 			),
 			examples.NewExample(
-				`Create a volume with name "volume-1"`,
-				`$ stackit beta volume create --availability-zone eu01-1 --name volume-1`,
+				`Create a volume with name "volume-1", source id "xxx" and type "image"`,
+				`$ stackit beta volume create --availability-zone eu01-1 --name volume-1 --source-id xxx --source-type image`,
 			),
 			examples.NewExample(
-				`Create a volume with availability zone "eu01-1", performance class "storage_premium_perf1"`,
-				`$ stackit beta volume create --availability-zone eu01-1 --performance-class storage_premium_perf1`,
+				`Create a volume with availability zone "eu01-1", performance class "storage_premium_perf1" and size 64 GB`,
+				`$ stackit beta volume create --availability-zone eu01-1 --performance-class storage_premium_perf1 --size 64`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

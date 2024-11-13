@@ -164,7 +164,7 @@ func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Server", "Public IP")
+		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
 
 		for _, volume := range volumes {
 			serverId := ""

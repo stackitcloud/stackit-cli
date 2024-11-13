@@ -119,16 +119,6 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 
 		return nil
 	default:
-		serverId := ""
-		if volume.ServerId != nil {
-			serverId = *volume.ServerId
-		}
-
-		sourceId := ""
-		if volume.Source != nil {
-			sourceId = *volume.Source.Id
-		}
-
 		table := tables.NewTable()
 		table.AddRow("ID", *volume.Id)
 		table.AddSeparator()
@@ -142,10 +132,18 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 		table.AddSeparator()
 		table.AddRow("AVAILABILITY ZONE", *volume.AvailabilityZone)
 		table.AddSeparator()
-		table.AddRow("SOURCE", sourceId)
-		table.AddSeparator()
-		table.AddRow("SERVER", serverId)
-		table.AddSeparator()
+
+		if volume.Source != nil {
+			sourceId := *volume.Source.Id
+			table.AddRow("SOURCE", sourceId)
+			table.AddSeparator()
+		}
+
+		if volume.ServerId != nil {
+			serverId := *volume.ServerId
+			table.AddRow("SERVER", serverId)
+			table.AddSeparator()
+		}
 
 		err := table.Display(p)
 		if err != nil {

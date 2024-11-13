@@ -148,7 +148,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateVolumePayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, volume *iaas.Volume) error {
+func outputResult(p *print.Printer, model *inputModel, volumeLabel string, volume *iaas.Volume) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")
@@ -167,7 +167,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, volu
 
 		return nil
 	default:
-		p.Outputf("Updated volume for project %q.\n", projectLabel)
+		p.Outputf("Updated volume %q.\n", volumeLabel)
 		return nil
 	}
 }

@@ -21,7 +21,7 @@ stackit beta volume resize [flags]
 
 ```
   -h, --help       Help for "stackit beta volume resize"
-      --size int   Volume size
+      --size int   Volume size (GB)
 ```
 
 ### Options inherited from parent commands
