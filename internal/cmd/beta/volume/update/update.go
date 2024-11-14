@@ -100,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Volume name")
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be seperated by commas(,) e.g. --labels key=value,foo=bar.")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be separated by commas(,) e.g. --labels key=value,foo=bar.")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

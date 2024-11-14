@@ -28,7 +28,7 @@ stackit beta volume update [flags]
 ```
       --description string      Volume description
   -h, --help                    Help for "stackit beta volume update"
-      --labels stringToString   Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be seperated by commas(,) e.g. --labels key=value,foo=bar. (default [])
+      --labels stringToString   Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be separated by commas(,) e.g. --labels key=value,foo=bar. (default [])
   -n, --name string             Volume name
 ```
 

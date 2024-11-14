@@ -126,7 +126,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(availabilityZoneFlag, "", "Availability zone")
 	cmd.Flags().StringP(nameFlag, "n", "", "Volume name")
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be seperated by commas(,) e.g. --labels key=value,foo=bar.")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be separated by commas(,) e.g. --labels key=value,foo=bar.")
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
 	cmd.Flags().Int64(sizeFlag, 0, "Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given")
 	cmd.Flags().String(sourceIdFlag, "", "ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")

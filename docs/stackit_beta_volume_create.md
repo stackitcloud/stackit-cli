@@ -32,7 +32,7 @@ stackit beta volume create [flags]
       --availability-zone string   Availability zone
       --description string         Volume description
   -h, --help                       Help for "stackit beta volume create"
-      --labels stringToString      Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be seperated by commas(,) e.g. --labels key=value,foo=bar. (default [])
+      --labels stringToString      Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be separated by commas(,) e.g. --labels key=value,foo=bar. (default [])
   -n, --name string                Volume name
       --performance-class string   Performance class
       --size int                   Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given
