@@ -18,15 +18,18 @@ stackit beta volume update [flags]
 
   Update volume with ID "xxx" with new name "volume-1-new" and new description "volume-1-desc-new"
   $ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new
+
+  Update volume with ID "xxx" with new name "volume-1-new", new description "volume-1-desc-new" and label(s)
+  $ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new --labels key=value,foo=bar
 ```
 
 ### Options
 
 ```
-      --description string     Volume description
-  -h, --help                   Help for "stackit beta volume update"
-      --label stringToString   Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels (default [])
-  -n, --name string            Volume name
+      --description string      Volume description
+  -h, --help                    Help for "stackit beta volume update"
+      --labels stringToString   Labels are key-value string pairs which can be attached to a volume. E.g. '--labels key1=value1,key2=value2,...' (default [])
+  -n, --name string             Volume name
 ```
 
 ### Options inherited from parent commands

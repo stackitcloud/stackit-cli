@@ -25,7 +25,7 @@ const (
 
 	nameFlag        = "name"
 	descriptionFlag = "description"
-	labelFlag       = "label"
+	labelFlag       = "labels"
 )
 
 type inputModel struct {
@@ -50,6 +50,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Update volume with ID "xxx" with new name "volume-1-new" and new description "volume-1-desc-new"`,
 				`$ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new`,
+			),
+			examples.NewExample(
+				`Update volume with ID "xxx" with new name "volume-1-new", new description "volume-1-desc-new" and label(s)`,
+				`$ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new --labels key=value,foo=bar`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -96,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Volume name")
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

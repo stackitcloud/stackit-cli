@@ -26,7 +26,7 @@ const (
 	availabilityZoneFlag = "availability-zone"
 	nameFlag             = "name"
 	descriptionFlag      = "description"
-	labelFlag            = "label"
+	labelFlag            = "labels"
 	performanceClassFlag = "performance-class"
 	sizeFlag             = "size"
 	sourceIdFlag         = "source-id"
@@ -55,6 +55,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a volume with availability zone "eu01-1" and size 64 GB`,
 				`$ stackit beta volume create --availability-zone eu01-1 --size 64`,
+			),
+			examples.NewExample(
+				`Create a volume with availability zone "eu01-1", size 64 GB and labels`,
+				`$ stackit beta volume create --availability-zone eu01-1 --size 64 --labels key=value,foo=bar`,
 			),
 			examples.NewExample(
 				`Create a volume with name "volume-1", from a source image with ID "xxx"`,
@@ -122,7 +126,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(availabilityZoneFlag, "", "Availability zone")
 	cmd.Flags().StringP(nameFlag, "n", "", "Volume name")
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a volume. E.g. '--labels key1=value1,key2=value2,...'")
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
 	cmd.Flags().Int64(sizeFlag, 0, "Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given")
 	cmd.Flags().String(sourceIdFlag, "", "ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")

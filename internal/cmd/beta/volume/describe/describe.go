@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 
@@ -143,6 +144,14 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 			serverId := *volume.ServerId
 			table.AddRow("SERVER", serverId)
 			table.AddSeparator()
+		}
+
+		if volume.Labels != nil && len(*volume.Labels) > 0 {
+			labels := []string{}
+			for key, value := range *volume.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			}
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
 		}
 
 		err := table.Display(p)
