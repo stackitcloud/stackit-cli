@@ -1,16 +1,15 @@
-package create
+package update
 
 import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -21,13 +20,23 @@ var testClient = &iaas.APIClient{}
 
 var testOrgId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
+var testRouteId = uuid.NewString()
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testRouteId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		organizationIdFlag: testOrgId,
 		networkAreaIdFlag:  testNetworkAreaId,
-		prefixFlag:         "1.1.1.0/24",
-		nexthopFlag:        "1.1.1.1",
+		labelFlag:          "value=key",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -35,15 +44,40 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
+func fixturePayload(mods ...func(payload *iaas.UpdateNetworkAreaRoutePayload)) iaas.UpdateNetworkAreaRoutePayload {
+	payload := iaas.UpdateNetworkAreaRoutePayload{
+		Labels: &map[string]interface{}{
+			"value": "key",
+		},
+	}
+
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
+}
+
+func fixturePayloadAsStringMap() map[string]string {
+	payload := fixturePayload()
+	labelsMap := make(map[string]string)
+	for k, v := range *payload.Labels {
+		if value, ok := v.(string); ok {
+			labelsMap[k] = value
+		}
+	}
+	return labelsMap
+}
+
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
+	payload := fixturePayloadAsStringMap()
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		Prefix:         utils.Ptr("1.1.1.0/24"),
-		Nexthop:        utils.Ptr("1.1.1.1"),
+		RouteId:        testRouteId,
+		Labels:         utils.Ptr(payload),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -51,51 +85,29 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRouteRequest)) iaas.ApiCreateNetworkAreaRouteRequest {
-	request := testClient.CreateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId)
-	request = request.CreateNetworkAreaRoutePayload(fixturePayload())
+func fixtureRequest(mods ...func(request *iaas.ApiUpdateNetworkAreaRouteRequest)) iaas.ApiUpdateNetworkAreaRouteRequest {
+	request := testClient.UpdateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRouteId)
+	request = request.UpdateNetworkAreaRoutePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
 }
 
-func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRoutePayload)) iaas.CreateNetworkAreaRoutePayload {
-	payload := iaas.CreateNetworkAreaRoutePayload{
-		Ipv4: &[]iaas.Route{
-			{
-				Prefix:  utils.Ptr("1.1.1.0/24"),
-				Nexthop: utils.Ptr("1.1.1.1"),
-			},
-		},
-	}
-	for _, mod := range mods {
-		mod(&payload)
-	}
-	return payload
-}
-
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
-		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
-		},
-
-		{
-			description: "next hop missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nexthopFlag)
-			}),
-			isValid: false,
 		},
 		{
 			description: "no values",
@@ -145,35 +157,32 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "prefix missing",
+			description: "route id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, prefixFlag)
+				delete(flagValues, routeIdArg)
 			}),
 			isValid: false,
 		},
 		{
-			description: "prefix invalid 1",
+			description: "route id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = ""
+				flagValues[routeIdArg] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "prefix invalid 2",
+			description: "route id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = "invalid-prefix"
+				flagValues[routeIdArg] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "optional labels is provided",
+			description: "labels missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[labelFlag] = "key=value"
+				delete(flagValues, labelFlag)
 			}),
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
-			}),
-			isValid: true,
+			isValid: false,
 		},
 	}
 
@@ -196,6 +205,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error parsing args: %v", err)
+			}
+
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -204,7 +221,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -227,23 +244,12 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiCreateNetworkAreaRouteRequest
+		expectedRequest iaas.ApiUpdateNetworkAreaRouteRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "optional labels provided",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
-			}),
-			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
-				*request = request.CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
-					(*payload.Ipv4)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
-				}))
-			}),
 		},
 	}
 

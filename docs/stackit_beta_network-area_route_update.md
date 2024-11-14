@@ -1,36 +1,31 @@
-## stackit beta network-area route create
+## stackit beta network-area route update
 
-Creates a static route in a STACKIT Network Area (SNA)
+Updates a static route in a STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Creates a static route in a STACKIT Network Area (SNA).
+Updates a static route in a STACKIT Network Area (SNA).
 This command is currently asynchonous only due to limitations in the waiting functionality of the SDK. This will be updated in a future release.
 
 
 ```
-stackit beta network-area route create [flags]
+stackit beta network-area route update [flags]
 ```
 
 ### Examples
 
 ```
-  Create a static route with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area route create --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1
-
-  Create a static route with labels "key:value" and "foo:bar" with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit beta network-area route create --labels key=value,foo=bar --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1
+  Updates the label(s) of a static route with ID "xxx" in a STACKIT Network Area with ID "yyy" in organization with ID "zzz"
+  $ stackit beta network-area route update xxx --labels key=value,foo=bar --organization-id yyy --network-area-id zzz
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit beta network-area route create"
+  -h, --help                     Help for "stackit beta network-area route update"
       --labels stringToString    Labels are key-value string pairs which can be attached to a route. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels (default [])
       --network-area-id string   STACKIT Network Area ID
-      --next-hop string          Next hop IP address. Must be a valid IPv4
       --organization-id string   Organization ID
-      --prefix string            Static route prefix
 ```
 
 ### Options inherited from parent commands
