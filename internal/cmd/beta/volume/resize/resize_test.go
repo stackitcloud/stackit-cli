@@ -1,4 +1,4 @@
-package create
+package resize
 
 import (
 	"context"
@@ -14,20 +14,30 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+var projectIdFlag = globalflags.ProjectIdFlag
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var testOrgId = uuid.NewString()
-var testNetworkAreaId = uuid.NewString()
+var testProjectId = uuid.NewString()
+var testVolumeId = uuid.NewString()
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testVolumeId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		organizationIdFlag: testOrgId,
-		networkAreaIdFlag:  testNetworkAreaId,
-		prefixFlag:         "1.1.1.0/24",
-		nexthopFlag:        "1.1.1.1",
+		sizeFlag:      "10",
+		projectIdFlag: testProjectId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -38,12 +48,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		OrganizationId: utils.Ptr(testOrgId),
-		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		Prefix:         utils.Ptr("1.1.1.0/24"),
-		Nexthop:        utils.Ptr("1.1.1.1"),
+		Size:     utils.Ptr(int64(10)),
+		VolumeId: testVolumeId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -51,23 +60,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRouteRequest)) iaas.ApiCreateNetworkAreaRouteRequest {
-	request := testClient.CreateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId)
-	request = request.CreateNetworkAreaRoutePayload(fixturePayload())
+func fixtureRequest(mods ...func(request *iaas.ApiResizeVolumeRequest)) iaas.ApiResizeVolumeRequest {
+	request := testClient.ResizeVolume(testCtx, testProjectId, testVolumeId)
+	request = request.ResizeVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
 }
 
-func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRoutePayload)) iaas.CreateNetworkAreaRoutePayload {
-	payload := iaas.CreateNetworkAreaRoutePayload{
-		Ipv4: &[]iaas.Route{
-			{
-				Prefix:  utils.Ptr("1.1.1.0/24"),
-				Nexthop: utils.Ptr("1.1.1.1"),
-			},
-		},
+func fixturePayload(mods ...func(payload *iaas.ResizeVolumePayload)) iaas.ResizeVolumePayload {
+	payload := iaas.ResizeVolumePayload{
+		Size: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -78,102 +82,70 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRoutePayload)) i
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
-		aclValues     []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
-
-		{
-			description: "next hop missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nexthopFlag)
-			}),
-			isValid: false,
-		},
 		{
 			description: "no values",
+			argValues:   []string{},
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
-			description: "org id missing",
+			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, organizationIdFlag)
+				delete(flagValues, projectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "org id invalid 1",
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[organizationIdFlag] = ""
+				flagValues[projectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "org area id invalid 2",
+			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[organizationIdFlag] = "invalid-uuid"
+				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "network area id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, networkAreaIdFlag)
-			}),
-			isValid: false,
+			description: "volume id invalid 1",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
-			description: "network area id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[networkAreaIdFlag] = ""
-			}),
-			isValid: false,
+			description: "volume id invalid 2",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
-			description: "network area id invalid 2",
+			description: "resize",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[networkAreaIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "prefix missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, prefixFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "prefix invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "prefix invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = "invalid-prefix"
-			}),
-			isValid: false,
-		},
-		{
-			description: "optional labels is provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[labelFlag] = "key=value"
-			}),
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
+				flagValues[sizeFlag] = "15"
 			}),
 			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Size = utils.Ptr(int64(15))
+			}),
 		},
 	}
 
@@ -204,7 +176,15 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd)
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
+
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -227,23 +207,12 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiCreateNetworkAreaRouteRequest
+		expectedRequest iaas.ApiResizeVolumeRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "optional labels provided",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
-			}),
-			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
-				*request = request.CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
-					(*payload.Ipv4)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
-				}))
-			}),
 		},
 	}
 

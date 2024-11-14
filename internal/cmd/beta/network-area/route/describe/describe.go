@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -134,9 +135,17 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		table := tables.NewTable()
 		table.AddRow("ID", *route.RouteId)
 		table.AddSeparator()
-		table.AddRow("Prefix", *route.Prefix)
+		table.AddRow("PREFIX", *route.Prefix)
 		table.AddSeparator()
-		table.AddRow("Nexthop", *route.Nexthop)
+		table.AddRow("NEXTHOP", *route.Nexthop)
+		if route.Labels != nil && len(*route.Labels) > 0 {
+			labels := []string{}
+			for key, value := range *route.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			}
+			table.AddSeparator()
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
+		}
 
 		err := table.Display(p)
 		if err != nil {

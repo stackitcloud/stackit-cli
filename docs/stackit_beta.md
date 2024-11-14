@@ -44,4 +44,5 @@ stackit beta [flags]
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
 * [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for Server
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
 
