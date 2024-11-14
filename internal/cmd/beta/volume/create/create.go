@@ -57,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta volume create --availability-zone eu01-1 --size 64`,
 			),
 			examples.NewExample(
-				`Create a volume with name "volume-1", source id "xxx" and type "image"`,
+				`Create a volume with name "volume-1", from a source image with ID "xxx"`,
 				`$ stackit beta volume create --availability-zone eu01-1 --name volume-1 --source-id xxx --source-type image`,
 			),
 			examples.NewExample(
