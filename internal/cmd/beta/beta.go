@@ -7,6 +7,7 @@ import (
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -42,4 +43,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(server.NewCmd(p))
 	cmd.AddCommand(networkArea.NewCmd(p))
 	cmd.AddCommand(network.NewCmd(p))
+	cmd.AddCommand(volume.NewCmd(p))
 }
