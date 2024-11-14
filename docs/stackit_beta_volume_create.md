@@ -16,7 +16,10 @@ stackit beta volume create [flags]
   Create a volume with availability zone "eu01-1" and size 64 GB
   $ stackit beta volume create --availability-zone eu01-1 --size 64
 
-  Create a volume with name "volume-1", source id "xxx" and type "image"
+  Create a volume with availability zone "eu01-1", size 64 GB and labels
+  $ stackit beta volume create --availability-zone eu01-1 --size 64 --labels key=value,foo=bar
+
+  Create a volume with name "volume-1", from a source image with ID "xxx"
   $ stackit beta volume create --availability-zone eu01-1 --name volume-1 --source-id xxx --source-type image
 
   Create a volume with availability zone "eu01-1", performance class "storage_premium_perf1" and size 64 GB
@@ -29,7 +32,7 @@ stackit beta volume create [flags]
       --availability-zone string   Availability zone
       --description string         Volume description
   -h, --help                       Help for "stackit beta volume create"
-      --label stringToString       Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels (default [])
+      --labels stringToString      Labels are key-value string pairs which can be attached to a volume. A label can be provided with the format key=value. To provide a list of labels, key=value pairs must be seperated by commas(,) e.g. --labels key=value,foo=bar. (default [])
   -n, --name string                Volume name
       --performance-class string   Performance class
       --size int                   Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given
