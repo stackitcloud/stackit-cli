@@ -24,7 +24,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Login to the STACKIT CLI. This command will open a browser window where you can login to your STACKIT account`,
 				"$ stackit auth login"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			err := auth.AuthorizeUser(p, false)
 			if err != nil {
 				return fmt.Errorf("authorization failed: %w", err)

@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a DNS zone with name "my-zone", DNS name "www.my-zone.com" and default time to live of 1000ms`,
 				"$ stackit dns zone create --name my-zone --dns-name www.my-zone.com --default-ttl 1000"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

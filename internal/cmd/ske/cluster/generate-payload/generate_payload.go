@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Generate a payload with values of a cluster, and preview it in the terminal`,
 				`$ stackit ske cluster generate-payload --cluster-name my-cluster`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

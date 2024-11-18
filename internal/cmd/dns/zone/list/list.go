@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -30,6 +31,7 @@ const (
 	limitFlag          = "limit"
 	pageSizeFlag       = "page-size"
 
+	defaultPage          = 1
 	pageSizeDefault      = 100
 	deleteSucceededState = "DELETE_SUCCEEDED"
 )
@@ -66,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List DNS zones, including deleted`,
 				"$ stackit dns zone list --include-deleted"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
@@ -181,8 +183,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, p
 	if !model.IncludeDeleted {
 		req = req.StateNeq(deleteSucceededState)
 	}
-	req = req.PageSize(int32(model.PageSize))
-	req = req.Page(int32(page))
+
+	// check integer overflows
+	if model.PageSize > math.MaxInt32 || model.PageSize < math.MinInt32 {
+		req = req.PageSize(pageSizeDefault)
+	} else {
+		req = req.PageSize(int32(model.PageSize))
+	}
+
+	if page > math.MaxInt32 || page < math.MinInt32 {
+		req = req.Page(defaultPage)
+	} else {
+		req = req.Page(int32(page))
+	}
+
 	return req
 }
 

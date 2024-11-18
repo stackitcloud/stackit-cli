@@ -32,7 +32,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Delete observability credentials unused by any Load Balancer`,
 				"$ stackit load-balancer observability-credentials cleanup"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

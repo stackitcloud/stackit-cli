@@ -43,7 +43,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network-area network-range create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

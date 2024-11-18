@@ -227,7 +227,7 @@ func TestBuildRequest(t *testing.T) {
 	}{
 		{
 			description:     "base",
-			model:           fixtureInputModel(func(model *inputModel) {}),
+			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
 	}

@@ -101,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Unset the DNS custom endpoint stored in your configuration`,
 				"$ stackit config unset --dns-custom-endpoint"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			model := parseInput(p, cmd)
 
 			if model.Async {

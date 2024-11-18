@@ -53,7 +53,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Update the name of a STACKIT project by explicitly providing the project ID`,
 				"$ stackit project update --name my-updated-project --project-id xxx"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

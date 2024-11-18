@@ -34,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Delete a STACKIT project by explicitly providing the project ID`,
 				"$ stackit project delete --project-id xxx"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			p.Info("Deleted project %q\n", projectLabel)
-			p.Warn(fmt.Sprintf("%s\n%s\n",
+			p.Warn("%s", fmt.Sprintf("%s\n%s\n",
 				"If this was your default project, consider configuring a new project ID by running:",
 				"  $ stackit config set --project-id <PROJECT_ID>",
 			))

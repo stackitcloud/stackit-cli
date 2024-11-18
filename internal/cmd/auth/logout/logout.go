@@ -22,7 +22,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Log out of the STACKIT CLI.`,
 				"$ stackit auth logout"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			err := auth.LogoutUser()
 			if err != nil {
 				return fmt.Errorf("log out failed: %w", err)

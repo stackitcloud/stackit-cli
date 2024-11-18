@@ -48,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List up to 10 credentials' IDs for a RabbitMQ instance`,
 				"$ stackit rabbitmq credentials list --instance-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

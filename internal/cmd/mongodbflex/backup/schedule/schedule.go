@@ -42,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Get details of the backup schedule of a MongoDB Flex instance with ID "xxx" in JSON format`,
 				"$ stackit mongodbflex backup schedule --instance-id xxx --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

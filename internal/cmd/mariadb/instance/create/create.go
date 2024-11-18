@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a MariaDB instance with name "my-instance" and specify IP range which is allowed to access it`,
 				"$ stackit mariadb instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

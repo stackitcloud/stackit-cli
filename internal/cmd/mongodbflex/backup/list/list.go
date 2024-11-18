@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit mongodbflex backup list --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

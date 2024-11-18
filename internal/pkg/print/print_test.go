@@ -69,7 +69,7 @@ func TestOutputf(t *testing.T) {
 			}
 
 			if len(tt.args) == 0 {
-				p.Outputf(tt.message)
+				p.Outputf("%s", tt.message)
 			} else {
 				p.Outputf(tt.message, tt.args...)
 			}
@@ -360,7 +360,7 @@ func TestInfo(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
-			p.Info(tt.message)
+			p.Info("%s", tt.message)
 
 			expectedOutput := tt.message
 			output := buf.String()
@@ -419,7 +419,7 @@ func TestWarn(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
-			p.Warn(tt.message)
+			p.Warn("%s", tt.message)
 
 			expectedOutput := fmt.Sprintf("Warning: %s", tt.message)
 			output := buf.String()
@@ -478,7 +478,7 @@ func TestError(t *testing.T) {
 				Verbosity: tt.verbosity,
 			}
 
-			p.Error(tt.message)
+			p.Error("%s", tt.message)
 
 			expectedOutput := fmt.Sprintf("Error: %s\n", tt.message)
 			output := buf.String()

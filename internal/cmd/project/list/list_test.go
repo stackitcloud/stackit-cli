@@ -483,7 +483,7 @@ func TestFetchProjects(t *testing.T) {
 				}
 				return
 			}
-			if err == nil && tt.apiCallFails {
+			if tt.apiCallFails {
 				t.Fatalf("did not fail on invalid input")
 			}
 			if numAPICalls != tt.expectedNumAPICalls {

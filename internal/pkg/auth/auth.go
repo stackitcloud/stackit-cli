@@ -22,7 +22,7 @@ type tokenClaims struct {
 // It returns the configuration option that can be used to create an authenticated SDK client.
 //
 // If the user was logged in and the user session expired, reauthorizeUserRoutine is called to reauthenticate the user again.
-func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print.Printer, isReauthentication bool) error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
+func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print.Printer, _ bool) error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
 	flow, err := GetAuthFlow()
 	if err != nil {
 		return nil, fmt.Errorf("get authentication flow: %w", err)

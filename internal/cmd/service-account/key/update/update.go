@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			p.Info(string(key))
+			p.Info("%s", string(key))
 			return nil
 		},
 	}

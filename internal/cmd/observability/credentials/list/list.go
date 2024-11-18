@@ -48,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List the usernames of up to 10 credentials for an Observability instance`,
 				"$ stackit observability credentials list --instance-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

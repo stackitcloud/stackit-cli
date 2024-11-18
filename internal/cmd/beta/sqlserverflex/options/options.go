@@ -93,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit beta sqlserverflex instance list"`,
 				"$ stackit beta sqlserverflex options --user-roles --db-compatibilities --instance-id <INSTANCE_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

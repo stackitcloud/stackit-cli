@@ -51,7 +51,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Activate service account authentication in the STACKIT CLI using the service account token`,
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			model := parseInput(p, cmd)
 
 			tokenCustomEndpoint, err := storeFlags()

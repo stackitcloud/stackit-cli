@@ -207,7 +207,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		http.Redirect(w, r, loginSuccessURL, http.StatusSeeOther)
 	})
 
-	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, _ *http.Request) {
 		defer cleanup(server)
 
 		email, err := GetAuthField(USER_EMAIL)

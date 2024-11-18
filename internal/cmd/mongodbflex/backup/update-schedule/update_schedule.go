@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit mongodbflex backup update-schedule --instance-id xxx --store-for-days 5"),
 		),
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

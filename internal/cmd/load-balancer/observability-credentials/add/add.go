@@ -48,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
 				"$ stackit load-balancer observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a server command for server with ID "xxx", template name "RunShellScript" and a script provided on the command line`,
 				`$ stackit beta server command create --server-id xxx --template-name=RunShellScript --params script='echo hello'`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

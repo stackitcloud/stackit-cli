@@ -26,7 +26,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Unset the currently active configuration profile. The default profile will be used.`,
 				"$ stackit config profile unset"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			err := config.UnsetProfile(p)
 			if err != nil {
 				return fmt.Errorf("unset profile: %w", err)

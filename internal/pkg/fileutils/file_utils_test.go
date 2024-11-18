@@ -125,7 +125,7 @@ func TestCopyFile(t *testing.T) {
 			src := filepath.Join(basePath, "file-with-content.txt")
 			dst := filepath.Join(basePath, "file-with-content-copy.txt")
 
-			err := os.MkdirAll(basePath, os.ModePerm)
+			err := os.MkdirAll(basePath, 0o750)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}

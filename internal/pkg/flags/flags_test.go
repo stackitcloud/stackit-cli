@@ -83,7 +83,7 @@ func TestEnumFlag(t *testing.T) {
 			flag := EnumFlag(tt.ignoreCase, "", options...)
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -236,7 +236,7 @@ func TestEnumSliceFlag(t *testing.T) {
 			flag := EnumSliceFlag(tt.ignoreCase, tt.defaultValue, options...)
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -302,7 +302,7 @@ func TestUUIDFlag(t *testing.T) {
 			flag := UUIDFlag()
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -400,7 +400,7 @@ func TestUUIDSliceFlag(t *testing.T) {
 			flag := UUIDSliceFlag()
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -513,7 +513,7 @@ func TestCIDRFlag(t *testing.T) {
 			flag := CIDRFlag()
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -615,7 +615,7 @@ func TestCIDRSliceFlag(t *testing.T) {
 			flag := CIDRSliceFlag()
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}
@@ -717,7 +717,7 @@ func TestReadFromFileFlag(t *testing.T) {
 			}
 			cmd := &cobra.Command{
 				Use: "test",
-				RunE: func(cmd *cobra.Command, args []string) error {
+				RunE: func(_ *cobra.Command, _ []string) error {
 					return nil
 				},
 			}

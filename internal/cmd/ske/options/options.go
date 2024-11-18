@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List SKE options regarding Kubernetes versions and machine images`,
 				"$ stackit ske options --kubernetes-versions --machine-images"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
