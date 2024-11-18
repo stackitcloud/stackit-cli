@@ -46,7 +46,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		SilenceErrors:     true, // Error is beautified in a custom way before being printed
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			p.Cmd = cmd
 			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
 
@@ -82,7 +82,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
 				p.Outputf("STACKIT CLI (beta)\n")
 
@@ -187,7 +187,7 @@ func Execute(version, date string) {
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
 		p.Debug(print.ErrorLevel, "execute command: %v", err)
-		p.Error(err.Error())
+		p.Error("%s", err.Error())
 		os.Exit(1)
 	}
 }

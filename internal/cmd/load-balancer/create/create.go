@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`<Modify payload in file>`,
 				`$ stackit load-balancer create --payload @./payload.json`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

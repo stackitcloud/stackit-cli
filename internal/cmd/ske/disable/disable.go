@@ -34,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Disable SKE functionality for your project, deleting all associated clusters`,
 				"$ stackit ske disable"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

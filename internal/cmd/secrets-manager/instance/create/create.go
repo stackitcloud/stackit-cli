@@ -46,7 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a Secrets Manager instance with name "my-instance" and specify IP range which is allowed to access it`,
 				`$ stackit secrets-manager instance create --name my-instance --acl 1.2.3.0/24`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

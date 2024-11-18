@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create an access token for the service account with email "my-service-account-1234567@sa.stackit.cloud" with a time to live of 10 days`,
 				"$ stackit service-account token create --email my-service-account-1234567@sa.stackit.cloud --ttl-days 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

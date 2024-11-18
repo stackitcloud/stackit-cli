@@ -58,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix-length 56`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

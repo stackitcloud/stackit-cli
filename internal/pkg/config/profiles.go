@@ -100,7 +100,7 @@ func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bo
 		return fmt.Errorf("profile %q already exists", profile)
 	}
 
-	err = os.MkdirAll(configFolderPath, os.ModePerm)
+	err = os.MkdirAll(configFolderPath, 0o750)
 	if err != nil {
 		return fmt.Errorf("create config folder: %w", err)
 	}
@@ -190,7 +190,7 @@ func SetProfile(p *print.Printer, profile string) error {
 		profileFilePath = getInitialProfileFilePath()
 	}
 
-	err = os.WriteFile(profileFilePath, []byte(profile), os.ModePerm)
+	err = os.WriteFile(profileFilePath, []byte(profile), 0o600)
 	if err != nil {
 		return fmt.Errorf("write profile to file: %w", err)
 	}

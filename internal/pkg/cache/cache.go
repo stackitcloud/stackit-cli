@@ -43,7 +43,7 @@ func PutObject(identifier string, data []byte) error {
 		return ErrorInvalidCacheIdentifier
 	}
 
-	err := os.MkdirAll(cacheFolderPath, os.ModePerm)
+	err := os.MkdirAll(cacheFolderPath, 0o750)
 	if err != nil {
 		return err
 	}

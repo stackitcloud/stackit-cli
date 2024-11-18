@@ -133,7 +133,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Generate a payload with values of an existing load balancer, and preview it in the terminal`,
 				`$ stackit load-balancer generate-payload --lb-name xxx`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

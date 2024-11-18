@@ -352,7 +352,7 @@ type SubcommandMissingError struct {
 }
 
 func (e *SubcommandMissingError) Error() string {
-	err := fmt.Errorf(SUBCOMMAND_MISSING)
+	err := fmt.Errorf("%s", SUBCOMMAND_MISSING)
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 

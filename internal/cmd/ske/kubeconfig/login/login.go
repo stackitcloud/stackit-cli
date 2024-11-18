@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ kubectl cluster-info",
 				"$ kubectl get pods"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			if err := cache.Init(); err != nil {
@@ -223,7 +223,7 @@ func output(p *print.Printer, cacheKey string, kubeconfig *rest.Config) error {
 		return fmt.Errorf("marshal ExecCredential: %w", err)
 	}
 
-	p.Outputf(string(output))
+	p.Outputf("%s", string(output))
 	return nil
 }
 

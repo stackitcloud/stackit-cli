@@ -31,7 +31,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Disable Object Storage functionality for your project.`,
 				"$ stackit object-storage disable"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

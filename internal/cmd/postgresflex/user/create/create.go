@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit postgresflex user create --instance-id xxx --username johndoe --role createdb"),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

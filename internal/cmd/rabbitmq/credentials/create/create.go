@@ -44,7 +44,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create credentials for a RabbitMQ instance and show the password in the output`,
 				"$ stackit rabbitmq credentials create --instance-id xxx --show-password"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta volume create --availability-zone eu01-1 --performance-class storage_premium_perf1 --size 64`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

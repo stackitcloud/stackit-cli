@@ -48,7 +48,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List up to 10 SQLServer Flex databases of instance with ID "xxx"`,
 				"$ stackit beta sqlserverflex database list --instance-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

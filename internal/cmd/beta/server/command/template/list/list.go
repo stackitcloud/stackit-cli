@@ -44,7 +44,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List all commands templates in JSON format`,
 				"$ stackit beta server command template list --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

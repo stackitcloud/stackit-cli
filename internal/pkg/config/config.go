@@ -141,7 +141,7 @@ func InitConfig() {
 
 // Write saves the config file (wrapping `viper.WriteConfig`) and ensures that its directory exists
 func Write() error {
-	err := os.MkdirAll(configFolderPath, os.ModePerm)
+	err := os.MkdirAll(configFolderPath, 0o750)
 	if err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}

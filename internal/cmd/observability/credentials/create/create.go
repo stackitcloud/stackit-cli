@@ -41,7 +41,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create credentials for Observability instance with ID "xxx"`,
 				"$ stackit observability credentials create --instance-id xxx"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a Server Backup with name "mybackup" and retention period of 5 days`,
 				`$ stackit beta server backup create --server-id xxx --name=mybackup --retention-period=5`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

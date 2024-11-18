@@ -34,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List the configuration profiles in a json format`,
 				"$ stackit config profile list --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			model := parseInput(p, cmd)
 
 			profiles, err := config.ListProfiles()

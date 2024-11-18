@@ -46,7 +46,7 @@ func TestGetObject(t *testing.T) {
 
 			// setup
 			if tt.expectFile {
-				err := os.MkdirAll(cacheFolderPath, os.ModePerm)
+				err := os.MkdirAll(cacheFolderPath, 0o750)
 				if err != nil {
 					t.Fatalf("create cache folder: %s", err.Error())
 				}

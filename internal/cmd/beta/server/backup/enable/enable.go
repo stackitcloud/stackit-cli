@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Enable Server Backup functionality for your server`,
 				"$ stackit beta server backup enable --server-id=zzz"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

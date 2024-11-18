@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Restore a MongoDB Flex instance with ID "yyy", using backup from instance with ID "zzz" with backup ID "xxx"`,
 				`$ stackit mongodbflex backup restore --instance-id zzz --backup-instance-id yyy --backup-id xxx`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

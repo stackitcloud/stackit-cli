@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Generate an Update payload with the values of an existing configuration named "my-config" for Observability instance xxx, and preview it in the terminal`,
 				`$ stackit observability scrape-config generate-payload --job-name my-config --instance-id xxx`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

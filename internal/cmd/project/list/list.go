@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List all STACKIT projects that a certain user is a member of`,
 				"$ stackit project list --member example@email.com"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

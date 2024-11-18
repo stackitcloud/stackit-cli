@@ -45,7 +45,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List all commands for a server with ID "xxx" in JSON format`,
 				"$ stackit beta server command list --server-id xxx --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

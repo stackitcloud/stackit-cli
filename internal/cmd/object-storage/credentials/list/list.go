@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List up to 10 credentials for a credentials group with ID "xxx"`,
 				"$ stackit object-storage credentials list --credentials-group-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

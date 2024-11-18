@@ -14,7 +14,7 @@ if [ "$action" = "help" ]; then
 elif [ "$action" = "tools" ]; then
     cd ${ROOT_DIR}
     go mod download
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.0
 else
     echo "Invalid action: '$action', please use $0 help for help"
 fi

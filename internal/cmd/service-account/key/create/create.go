@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a key for the service account with email "my-service-account-1234567@sa.stackit.cloud" and provide the public key in a .pem file"`,
 				`$ stackit service-account key create --email my-service-account-1234567@sa.stackit.cloud --public-key @./public.pem`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

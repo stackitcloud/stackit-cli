@@ -299,7 +299,7 @@ func createEncodedTextFile(activeProfile string) error {
 	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
-	err := os.MkdirAll(textFileDir, os.ModePerm)
+	err := os.MkdirAll(textFileDir, 0o750)
 	if err != nil {
 		return fmt.Errorf("create file dir: %w", err)
 	}

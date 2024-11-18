@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create credentials for a credentials group with ID "xxx", including a specific expiration date`,
 				"$ stackit object-storage credentials create --credentials-group-id xxx --expire-date 2024-03-06T00:00:00.000Z"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

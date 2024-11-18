@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List PostgreSQL Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit postgresflex options --flavors"`,
 				"$ stackit postgresflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

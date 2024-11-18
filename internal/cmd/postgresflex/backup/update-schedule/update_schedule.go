@@ -40,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit postgresflex backup update-schedule --instance-id xxx --schedule '6 6 * * *'"),
 		),
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(p, cmd)

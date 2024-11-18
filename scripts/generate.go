@@ -27,12 +27,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error removing old documentation directory: %v", err)
 	}
-	err = os.Mkdir(docsDir, os.ModePerm)
+	err = os.Mkdir(docsDir, 0o750)
 	if err != nil {
 		log.Fatalf("Error creating new documentation directory: %v", err)
 	}
 
-	filePrepender := func(filename string) string {
+	filePrepender := func(_ string) string {
 		return ""
 	}
 	linkHandler := func(filename string) string {

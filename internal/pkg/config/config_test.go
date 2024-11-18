@@ -37,7 +37,7 @@ func TestWrite(t *testing.T) {
 			configFolderPath = filepath.Dir(configPath)
 
 			if tt.folderExists {
-				err := os.MkdirAll(configFolderPath, os.ModePerm)
+				err := os.MkdirAll(configFolderPath, 0o750)
 				if err != nil {
 					t.Fatalf("expected error to be nil, got %v", err)
 				}

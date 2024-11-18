@@ -53,7 +53,7 @@ func TestSingleArg(t *testing.T) {
 		{
 			description: "valid",
 			args:        []string{"arg"},
-			validateFunc: func(value string) error {
+			validateFunc: func(_ string) error {
 				return nil
 			},
 			isValid: true,
@@ -76,7 +76,7 @@ func TestSingleArg(t *testing.T) {
 		{
 			description: "invalid_arg",
 			args:        []string{"arg"},
-			validateFunc: func(value string) error {
+			validateFunc: func(_ string) error {
 				return fmt.Errorf("error")
 			},
 			isValid: false,
@@ -118,7 +118,7 @@ func TestSingleOptionalArg(t *testing.T) {
 		{
 			description: "valid",
 			args:        []string{"arg"},
-			validateFunc: func(value string) error {
+			validateFunc: func(_ string) error {
 				return nil
 			},
 			isValid: true,
@@ -141,7 +141,7 @@ func TestSingleOptionalArg(t *testing.T) {
 		{
 			description: "invalid_arg",
 			args:        []string{"arg"},
-			validateFunc: func(value string) error {
+			validateFunc: func(_ string) error {
 				return fmt.Errorf("error")
 			},
 			isValid: false,

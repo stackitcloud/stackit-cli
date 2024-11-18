@@ -45,7 +45,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create credentials for a MariaDB instance and show the password in the output`,
 				"$ stackit mariadb credentials create --instance-id xxx --show-password"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {

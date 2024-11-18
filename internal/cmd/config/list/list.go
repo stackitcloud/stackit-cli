@@ -47,7 +47,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`List your active configuration in a json format`,
 				"$ stackit config list --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configData := viper.AllSettings()
 
 			model := parseInput(p, cmd)

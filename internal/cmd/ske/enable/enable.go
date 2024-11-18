@@ -34,7 +34,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Enable SKE functionality for your project`,
 				"$ stackit ske enable"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
