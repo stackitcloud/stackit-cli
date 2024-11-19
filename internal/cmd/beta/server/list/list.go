@@ -178,9 +178,9 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Availability Zones")
 
-		for _, server := range servers {
+		for i := range servers {
+			server := servers[i]
 			table.AddRow(*server.Id, *server.Name, *server.Status, *server.AvailabilityZone)
-			table.AddSeparator()
 		}
 
 		p.Outputln(table.Render())

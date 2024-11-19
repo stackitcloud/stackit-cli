@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -12,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
@@ -191,17 +191,13 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
 			emails := []string{}
-			for _, email := range *server.ServiceAccountMails {
-				emails = append(emails, email)
-			}
+			emails = append(emails, *server.ServiceAccountMails...)
 			table.AddRow("SERVICE ACCOUNTS", strings.Join(emails, "\n"))
 		}
 
 		if server.Volumes != nil && len(*server.Volumes) > 0 {
 			volumes := []string{}
-			for _, volume := range *server.Volumes {
-				volumes = append(volumes, volume)
-			}
+			volumes = append(volumes, *server.Volumes...)
 			table.AddRow("VOLUMES", strings.Join(volumes, "\n"))
 		}
 
