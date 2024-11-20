@@ -169,6 +169,9 @@ func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error 
 
 		for _, nic := range nics {
 			name := ""
+			if nic.Name != nil {
+				name = *nic.Name
+			}
 			table.AddRow(*nic.Id, name, *nic.NicSecurity, *nic.Status, *nic.Type)
 			table.AddSeparator()
 		}
