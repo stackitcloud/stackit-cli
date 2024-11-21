@@ -28,7 +28,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag:     testProjectId,
 		limitFlag:         "10",
 		labelSelectorFlag: testLabelSelector,
-		detailsFlag:       "true",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,7 +43,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		Limit:         utils.Ptr(int64(10)),
 		LabelSelector: utils.Ptr(testLabelSelector),
-		Details:       true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -55,7 +53,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *iaas.ApiListServersRequest)) iaas.ApiListServersRequest {
 	request := testClient.ListServers(testCtx, testProjectId)
 	request = request.LabelSelector(testLabelSelector)
-	request = request.Details(true)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -128,16 +125,6 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.LabelSelector = utils.Ptr("")
-			}),
-		},
-		{
-			description: "details flag false",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[detailsFlag] = "false"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Details = false
 			}),
 		},
 	}

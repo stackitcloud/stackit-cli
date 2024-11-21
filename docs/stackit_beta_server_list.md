@@ -19,9 +19,6 @@ stackit beta server list [flags]
   Lists all servers which contains the label xxx
   $ stackit beta server list --label-selector xxx
 
-  Lists all servers with detailed information
-  $ stackit beta server list --details
-
   Lists all servers in JSON format
   $ stackit beta server list --output-format json
 
@@ -32,7 +29,6 @@ stackit beta server list [flags]
 ### Options
 
 ```
-      --details                 Show detailed information about server
   -h, --help                    Help for "stackit beta server list"
       --label-selector string   Filter by label
       --limit int               Maximum number of entries to list

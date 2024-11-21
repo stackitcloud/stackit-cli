@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -120,7 +120,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) error {
+func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) error {
+	outputFormat := model.OutputFormat
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(server, "", "  ")
@@ -173,32 +175,43 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			table.AddSeparator()
 		}
 
-		if server.Nics != nil && len(*server.Nics) > 0 {
-			nics := []string{}
-			for _, nic := range *server.Nics {
-				nics = append(nics, *nic.NicId)
-			}
-			table.AddRow("NICS", strings.Join(nics, "\n"))
-		}
-
 		if server.Labels != nil && len(*server.Labels) > 0 {
 			labels := []string{}
 			for key, value := range *server.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
-		}
-
-		if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
-			emails := []string{}
-			emails = append(emails, *server.ServiceAccountMails...)
-			table.AddRow("SERVICE ACCOUNTS", strings.Join(emails, "\n"))
+			table.AddSeparator()
 		}
 
 		if server.Volumes != nil && len(*server.Volumes) > 0 {
 			volumes := []string{}
 			volumes = append(volumes, *server.Volumes...)
 			table.AddRow("VOLUMES", strings.Join(volumes, "\n"))
+			table.AddSeparator()
+		}
+
+		if model.Details {
+			if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
+				emails := []string{}
+				emails = append(emails, *server.ServiceAccountMails...)
+				table.AddRow("SERVICE ACCOUNTS", strings.Join(emails, "\n"))
+				table.AddSeparator()
+			}
+
+			if server.Nics != nil && len(*server.Nics) > 0 {
+				nics := []string{}
+				for _, nic := range *server.Nics {
+					nics = append(nics, *nic.NicId)
+				}
+				table.AddRow("NICS", strings.Join(nics, "\n"))
+				table.AddSeparator()
+			}
+
+			if server.UserData != nil {
+				table.AddRow("USER DATA", *server.UserData)
+				table.AddSeparator()
+			}
 		}
 
 		err := table.Display(p)

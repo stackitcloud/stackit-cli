@@ -23,14 +23,12 @@ import (
 const (
 	limitFlag         = "limit"
 	labelSelectorFlag = "label-selector"
-	detailsFlag       = "details"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit         *int64
 	LabelSelector *string
-	Details       bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -47,10 +45,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Lists all servers which contains the label xxx`,
 				"$ stackit beta server list --label-selector xxx",
-			),
-			examples.NewExample(
-				`Lists all servers with detailed information`,
-				"$ stackit beta server list --details",
 			),
 			examples.NewExample(
 				`Lists all servers in JSON format`,
@@ -107,7 +101,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
-	cmd.Flags().Bool(detailsFlag, false, "Show detailed information about server")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -128,7 +121,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
-		Details:         flags.FlagToBoolValue(p, cmd, detailsFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -147,10 +139,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.ListServers(ctx, model.ProjectId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
-	}
-
-	if model.Details {
-		req = req.Details(true)
 	}
 
 	return req
