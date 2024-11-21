@@ -128,11 +128,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if bootVolumeSize == 0 {
 					p.Warn("Boot volume size must be provided when `source_type` is `image`.\n")
 				}
-				cmd.MarkFlagRequired(bootVolumeSizeFlag)
+				err := cmd.MarkFlagRequired(bootVolumeSizeFlag)
+				cobra.CheckErr(err)
 			}
 
 			if bootVolumeSourceId == "" && bootVolumeSourceType == "" {
-				cmd.MarkFlagRequired(imageIdFlag)
+				err := cmd.MarkFlagRequired(imageIdFlag)
+				cobra.CheckErr(err)
 			}
 
 			if imageId != "" && (bootVolumeSourceId != "" || bootVolumeSourceType != "") {
