@@ -207,11 +207,6 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 				table.AddRow("NICS", strings.Join(nics, "\n"))
 				table.AddSeparator()
 			}
-
-			if server.UserData != nil {
-				table.AddRow("USER DATA", *server.UserData)
-				table.AddSeparator()
-			}
 		}
 
 		err := table.Display(p)
