@@ -8,8 +8,8 @@ import (
 )
 
 type ServerBackupClient interface {
-	ListBackupSchedulesExecute(ctx context.Context, projectId, serverId string) (*serverbackup.ListBackupSchedules200Response, error)
-	ListBackupsExecute(ctx context.Context, projectId, serverId string) (*serverbackup.ListBackups200Response, error)
+	ListBackupSchedulesExecute(ctx context.Context, projectId, serverId string) (*serverbackup.GetBackupSchedulesResponse, error)
+	ListBackupsExecute(ctx context.Context, projectId, serverId string) (*serverbackup.GetBackupsListResponse, error)
 }
 
 func CanDisableBackupService(ctx context.Context, client ServerBackupClient, projectId, serverId string) (bool, error) {
