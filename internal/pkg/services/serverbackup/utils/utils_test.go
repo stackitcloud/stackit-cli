@@ -18,19 +18,19 @@ var (
 
 type serverbackupClientMocked struct {
 	listBackupSchedulesFails bool
-	listBackupSchedulesResp  *serverbackup.ListBackupSchedules200Response
+	listBackupSchedulesResp  *serverbackup.GetBackupSchedulesResponse
 	listBackupsFails         bool
-	listBackupsResp          *serverbackup.ListBackups200Response
+	listBackupsResp          *serverbackup.GetBackupsListResponse
 }
 
-func (m *serverbackupClientMocked) ListBackupSchedulesExecute(_ context.Context, _, _ string) (*serverbackup.ListBackupSchedules200Response, error) {
+func (m *serverbackupClientMocked) ListBackupSchedulesExecute(_ context.Context, _, _ string) (*serverbackup.GetBackupSchedulesResponse, error) {
 	if m.listBackupSchedulesFails {
 		return nil, fmt.Errorf("could not list backup schedules")
 	}
 	return m.listBackupSchedulesResp, nil
 }
 
-func (m *serverbackupClientMocked) ListBackupsExecute(_ context.Context, _, _ string) (*serverbackup.ListBackups200Response, error) {
+func (m *serverbackupClientMocked) ListBackupsExecute(_ context.Context, _, _ string) (*serverbackup.GetBackupsListResponse, error) {
 	if m.listBackupsFails {
 		return nil, fmt.Errorf("could not list backups")
 	}
@@ -42,8 +42,8 @@ func TestCanDisableBackupService(t *testing.T) {
 		description              string
 		listBackupsFails         bool
 		listBackupSchedulesFails bool
-		listBackups              *serverbackup.ListBackups200Response
-		listBackupSchedules      *serverbackup.ListBackupSchedules200Response
+		listBackups              *serverbackup.GetBackupsListResponse
+		listBackupSchedules      *serverbackup.GetBackupSchedulesResponse
 		isValid                  bool // isValid ==> err == nil
 		expectedOutput           bool // expectedCanDisable
 	}{
@@ -51,8 +51,8 @@ func TestCanDisableBackupService(t *testing.T) {
 			description:              "base-ok-can-disable-backups-service-no-backups-no-backup-schedules",
 			listBackupsFails:         false,
 			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.ListBackups200Response{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.ListBackupSchedules200Response{Items: &[]serverbackup.BackupSchedule{}},
+			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
+			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
 			isValid:                  true,
 			expectedOutput:           true,
 		},
@@ -60,8 +60,8 @@ func TestCanDisableBackupService(t *testing.T) {
 			description:              "not-ok-api-error-list-backups",
 			listBackupsFails:         true,
 			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.ListBackups200Response{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.ListBackupSchedules200Response{Items: &[]serverbackup.BackupSchedule{}},
+			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
+			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
 			isValid:                  false,
 			expectedOutput:           false,
 		},
@@ -69,8 +69,8 @@ func TestCanDisableBackupService(t *testing.T) {
 			description:              "not-ok-api-error-list-backup-schedules",
 			listBackupsFails:         true,
 			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.ListBackups200Response{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.ListBackupSchedules200Response{Items: &[]serverbackup.BackupSchedule{}},
+			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
+			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
 			isValid:                  false,
 			expectedOutput:           false,
 		},
@@ -78,7 +78,7 @@ func TestCanDisableBackupService(t *testing.T) {
 			description:              "not-ok-has-backups-cannot-disable",
 			listBackupsFails:         false,
 			listBackupSchedulesFails: false,
-			listBackups: &serverbackup.ListBackups200Response{
+			listBackups: &serverbackup.GetBackupsListResponse{
 				Items: &[]serverbackup.Backup{
 					{
 						CreatedAt:      utils.Ptr("test timestamp"),
@@ -92,7 +92,7 @@ func TestCanDisableBackupService(t *testing.T) {
 					},
 				},
 			},
-			listBackupSchedules: &serverbackup.ListBackupSchedules200Response{Items: &[]serverbackup.BackupSchedule{}},
+			listBackupSchedules: &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
 			isValid:             true,
 			expectedOutput:      false,
 		},
@@ -100,8 +100,8 @@ func TestCanDisableBackupService(t *testing.T) {
 			description:              "not-ok-has-backups-schedules-cannot-disable",
 			listBackupsFails:         false,
 			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.ListBackups200Response{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules: &serverbackup.ListBackupSchedules200Response{
+			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
+			listBackupSchedules: &serverbackup.GetBackupSchedulesResponse{
 				Items: &[]serverbackup.BackupSchedule{
 					{
 						BackupProperties: nil,
