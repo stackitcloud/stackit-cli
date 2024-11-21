@@ -85,6 +85,36 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64`,
 			),
 		),
+		PreRun: func(cmd *cobra.Command, _ []string) {
+			bootVolumeSourceId, _ := cmd.Flags().GetString(bootVolumeSourceIdFlag)
+			bootVolumeSourceType, _ := cmd.Flags().GetString(bootVolumeSourceTypeFlag)
+			bootVolumeSize, _ := cmd.Flags().GetInt64(bootVolumeSizeFlag)
+			imageId, _ := cmd.Flags().GetString(imageIdFlag)
+
+			if imageId == "" && bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+				p.Warn("Either Image ID or boot volume flags must be provided.\n")
+			}
+
+			if imageId == "" {
+				err := flags.MarkFlagsRequired(cmd, bootVolumeSourceIdFlag, bootVolumeSourceTypeFlag)
+				cobra.CheckErr(err)
+			}
+
+			if bootVolumeSourceType == "image" {
+				if bootVolumeSize == 0 {
+					p.Warn("Boot volume size must be provided when `source_type` is `image`.\n")
+				}
+				cmd.MarkFlagRequired(bootVolumeSizeFlag)
+			}
+
+			if bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+				cmd.MarkFlagRequired(imageIdFlag)
+			}
+
+			if imageId != "" && (bootVolumeSourceId != "" || bootVolumeSourceType != "") {
+				p.Warn("Image ID flag cannot be used together with any of the boot volume flags.\n")
+			}
+		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
