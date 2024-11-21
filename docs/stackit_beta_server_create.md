@@ -27,23 +27,23 @@ stackit beta server create [flags]
 
 ```
       --affinity-group string                  The affinity group the server is assigned to
-      --availability-zone string               Availability zone
+      --availability-zone string               The availability zone of the server
       --boot-volume-delete-on-termination      Delete the volume during the termination of the server. Defaults to false
       --boot-volume-performance-class string   Boot volume performance class
-      --boot-volume-size int                   Boot volume size (GB). Size is required for the image type boot volumes
+      --boot-volume-size source_type           The size of the boot volume in GB. Must be provided when source_type is `image`
       --boot-volume-source-id string           ID of the source object of boot volume. It can be either 'image-id' or 'volume-id'
       --boot-volume-source-type string         Type of the source object of boot volume. It can be either  'image' or 'volume'
   -h, --help                                   Help for "stackit beta server create"
-      --image-id string                        ID of the image. Either image-id or boot volume is required
-      --keypair-name string                    The SSH keypair used during the server creation
+      --image-id string                        The image ID to be used for an ephemeral disk on the server. Either image-id or boot volume is required
+      --keypair-name string                    The name of the SSH keypair used during the server creation
       --labels stringToString                  Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...' (default [])
-      --machine-type string                    Machine type the server shall belong to
+      --machine-type string                    Name of the type of the machine for the server. Possible values are documented in [Virtual machine flavors](https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html)
   -n, --name string                            Server name
       --network-id string                      ID of the network for the initial networking setup for the server creation
       --network-interface-ids strings          List of network interface IDs for the initial networking setup for the server creation
       --security-groups strings                The initial security groups for the server creation
       --service-account-emails strings         List of the service account mails
-      --user-data string                       User data that is provided to the server
+      --user-data string                       User data that is passed via cloud-init to the server
       --volumes strings                        The list of volumes attached to the server
 ```
 
