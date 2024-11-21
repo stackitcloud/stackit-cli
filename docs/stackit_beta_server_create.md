@@ -13,14 +13,32 @@ stackit beta server create [flags]
 ### Examples
 
 ```
-  Create a server with machine type "t1.1", name "server1" and image with id xxx
+  Create a server from an image with id xxx
   $ stackit beta server create --machine-type t1.1 --name server1 --image-id xxx
 
-  Create a server with machine type "t1.1", name "server1", image with id xxx and labels
+  Create a server with labels from an image with id xxx
   $ stackit beta server create --machine-type t1.1 --name server1 --image-id xxx --labels key=value,foo=bar
 
-  Create a server with machine type "t1.1", name "server1", boot volume source id "xxx", type "image" and size 64GB
+  Create a server with a boot volume
   $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64
+
+  Create a server with a boot volume from an existing volume
+  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type volume
+
+  Create a server with a keypair
+  $ stackit beta server create --machine-type t1.1 --name server1 --image-id xxx --keypair-name example
+
+  Create a server with a network
+  $ stackit beta server create --machine-type t1.1 --name server1 --image-id xxx --network-id yyy
+
+  Create a server with a network interface
+  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy
+
+  Create a server with an attached volume
+  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy
+
+  Create a server with user data (cloud-init)
+  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data file("${path.module}/cloud-init.yaml")
 ```
 
 ### Options
