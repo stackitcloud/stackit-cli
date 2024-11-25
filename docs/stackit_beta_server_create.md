@@ -38,7 +38,7 @@ stackit beta server create [flags]
   $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy
 
   Create a server with user data (cloud-init)
-  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data file("${path.module}/cloud-init.yaml")
+  $ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml")
 ```
 
 ### Options

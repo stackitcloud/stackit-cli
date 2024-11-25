@@ -211,7 +211,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice(networkInterfaceIdsFlag, []string{}, "List of network interface IDs for the initial networking setup for the server creation")
 	cmd.Flags().StringSlice(securityGroupsFlag, []string{}, "The initial security groups for the server creation")
 	cmd.Flags().StringSlice(serviceAccountEmailsFlag, []string{}, "List of the service account mails")
-	cmd.Flags().String(userDataFlag, "", "User data that is passed via cloud-init to the server")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), userDataFlag, "User data that is passed via cloud-init to the server")
 	cmd.Flags().StringSlice(volumesFlag, []string{}, "The list of volumes attached to the server")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag, machineTypeFlag)
