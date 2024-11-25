@@ -149,7 +149,7 @@ type ServerCreateMissingFlagsError struct {
 }
 
 func (e *ServerCreateMissingFlagsError) Error() string {
-	return fmt.Sprintf(IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS)
+	return IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS
 }
 
 type ServerCreateError struct {
@@ -157,7 +157,7 @@ type ServerCreateError struct {
 }
 
 func (e *ServerCreateError) Error() string {
-	return fmt.Sprintf(IAAS_SERVER_MISSING_VOLUME_SIZE)
+	return IAAS_SERVER_MISSING_VOLUME_SIZE
 }
 
 type ProjectIdError struct{}
