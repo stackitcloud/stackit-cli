@@ -167,7 +167,6 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumeSizeFlag)
 				delete(flagValues, bootVolumePerformanceClassFlag)
 				delete(flagValues, bootVolumeDeleteOnTerminationFlag)
-				delete(flagValues, imageIdFlag)
 				delete(flagValues, keypairNameFlag)
 				delete(flagValues, networkIdFlag)
 				delete(flagValues, networkInterfaceIdsFlag)
@@ -186,7 +185,6 @@ func TestParseInput(t *testing.T) {
 				model.BootVolumeSize = nil
 				model.BootVolumePerformanceClass = nil
 				model.BootVolumeDeleteOnTermination = nil
-				model.ImageId = nil
 				model.KeypairName = nil
 				model.NetworkId = nil
 				model.NetworkInterfaceIds = nil

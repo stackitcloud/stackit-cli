@@ -109,38 +109,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml")`,
 			),
 		),
-		PreRun: func(cmd *cobra.Command, _ []string) {
-			bootVolumeSourceId, _ := cmd.Flags().GetString(bootVolumeSourceIdFlag)
-			bootVolumeSourceType, _ := cmd.Flags().GetString(bootVolumeSourceTypeFlag)
-			bootVolumeSize, _ := cmd.Flags().GetInt64(bootVolumeSizeFlag)
-			imageId, _ := cmd.Flags().GetString(imageIdFlag)
-
-			if imageId == "" && bootVolumeSourceId == "" && bootVolumeSourceType == "" {
-				p.Warn("Either Image ID or boot volume flags must be provided.\n")
-			}
-
-			if imageId == "" {
-				err := flags.MarkFlagsRequired(cmd, bootVolumeSourceIdFlag, bootVolumeSourceTypeFlag)
-				cobra.CheckErr(err)
-			}
-
-			if bootVolumeSourceType == "image" {
-				if bootVolumeSize == 0 {
-					p.Warn("Boot volume size must be provided when `source_type` is `image`.\n")
-				}
-				err := cmd.MarkFlagRequired(bootVolumeSizeFlag)
-				cobra.CheckErr(err)
-			}
-
-			if bootVolumeSourceId == "" && bootVolumeSourceType == "" {
-				err := cmd.MarkFlagRequired(imageIdFlag)
-				cobra.CheckErr(err)
-			}
-
-			if imageId != "" && (bootVolumeSourceId != "" || bootVolumeSourceType != "") {
-				p.Warn("Image ID flag cannot be used together with any of the boot volume flags.\n")
-			}
-		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
@@ -215,6 +183,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice(volumesFlag, []string{}, "The list of volumes attached to the server")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag, machineTypeFlag)
+	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceIdFlag)
+	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceTypeFlag)
+	cmd.MarkFlagsMutuallyExclusive(networkIdFlag, networkInterfaceIdsFlag)
 	cobra.CheckErr(err)
 }
 
@@ -222,6 +193,35 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
+	}
+
+	bootVolumeSourceId, _ := cmd.Flags().GetString(bootVolumeSourceIdFlag)
+	bootVolumeSourceType, _ := cmd.Flags().GetString(bootVolumeSourceTypeFlag)
+	bootVolumeSize, _ := cmd.Flags().GetInt64(bootVolumeSizeFlag)
+	imageId, _ := cmd.Flags().GetString(imageIdFlag)
+
+	if imageId == "" && bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+		return nil, &cliErr.ServerCreateMissingFlagsError{
+			Cmd: cmd,
+		}
+	}
+
+	if imageId == "" {
+		err := flags.MarkFlagsRequired(cmd, bootVolumeSourceIdFlag, bootVolumeSourceTypeFlag)
+		cobra.CheckErr(err)
+	}
+
+	if bootVolumeSourceType == "image" && bootVolumeSize == 0 {
+		err := cmd.MarkFlagRequired(bootVolumeSizeFlag)
+		cobra.CheckErr(err)
+		return nil, &cliErr.ServerCreateError{
+			Cmd: cmd,
+		}
+	}
+
+	if bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+		err := cmd.MarkFlagRequired(imageIdFlag)
+		cobra.CheckErr(err)
 	}
 
 	model := inputModel{
@@ -303,7 +303,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			payload.Networking.CreateServerNetworkingWithNics = &iaas.CreateServerNetworkingWithNics{
 				NicIds: model.NetworkInterfaceIds,
 			}
-		} else if model.NetworkId != nil {
+		}
+		if model.NetworkId != nil {
 			payload.Networking.CreateServerNetworking = &iaas.CreateServerNetworking{
 				NetworkId: model.NetworkId,
 			}

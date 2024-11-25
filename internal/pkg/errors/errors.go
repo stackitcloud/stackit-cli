@@ -138,7 +138,27 @@ The profile name can only contain lowercase letters, numbers, and "-" and cannot
 
 To enable it, run:
   $ stackit %s enable`
+
+	IAAS_SERVER_MISSING_VOLUME_SIZE = `Boot volume size must be provided when "source_type" is "image".`
+
+	IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS = `Either Image ID or boot volume flags must be provided.`
 )
+
+type ServerCreateMissingFlagsError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateMissingFlagsError) Error() string {
+	return fmt.Sprintf(IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS)
+}
+
+type ServerCreateError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateError) Error() string {
+	return fmt.Sprintf(IAAS_SERVER_MISSING_VOLUME_SIZE)
+}
 
 type ProjectIdError struct{}
 
