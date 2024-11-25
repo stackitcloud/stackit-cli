@@ -48,11 +48,11 @@ stackit beta server create [flags]
       --availability-zone string               The availability zone of the server
       --boot-volume-delete-on-termination      Delete the volume during the termination of the server. Defaults to false
       --boot-volume-performance-class string   Boot volume performance class
-      --boot-volume-size source_type           The size of the boot volume in GB. Must be provided when source_type is `image`
-      --boot-volume-source-id string           ID of the source object of boot volume. It can be either 'image-id' or 'volume-id'
+      --boot-volume-size int                   The size of the boot volume in GB. Must be provided when 'boot-volume-source-type' is 'image'
+      --boot-volume-source-id string           ID of the source object of boot volume. It can be either an image or volume ID
       --boot-volume-source-type string         Type of the source object of boot volume. It can be either  'image' or 'volume'
   -h, --help                                   Help for "stackit beta server create"
-      --image-id string                        The image ID to be used for an ephemeral disk on the server. Either image-id or boot volume is required
+      --image-id string                        The image ID to be used for an ephemeral disk on the server. Either 'image-id' or 'boot-volume-...' flags are required
       --keypair-name string                    The name of the SSH keypair used during the server creation
       --labels stringToString                  Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --machine-type string                    Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html
