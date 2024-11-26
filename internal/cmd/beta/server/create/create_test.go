@@ -260,6 +260,68 @@ func TestParseInput(t *testing.T) {
 				model.BootVolumeSourceType = utils.Ptr("image")
 			}),
 		},
+		{
+			description: "invalid without image-id, boot-volume-source-id and type",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, bootVolumeSourceIdFlag)
+				delete(flagValues, bootVolumeSourceTypeFlag)
+				delete(flagValues, imageIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "invalid with boot-volume-source-id and without type",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, bootVolumeSourceTypeFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "invalid with boot-volume-source-type is image and without size",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, bootVolumeSizeFlag)
+				flagValues[bootVolumeSourceIdFlag] = testImageId
+				flagValues[bootVolumeSourceTypeFlag] = "image"
+			}),
+			isValid: false,
+		},
+		{
+			description: "valid with image-id",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, bootVolumeSourceIdFlag)
+				delete(flagValues, bootVolumeSourceTypeFlag)
+				delete(flagValues, bootVolumeSizeFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.BootVolumeSourceId = nil
+				model.BootVolumeSourceType = nil
+				model.BootVolumeSize = nil
+			}),
+		},
+		{
+			description: "valid with boot-volume-source-id and type volume",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, imageIdFlag)
+				delete(flagValues, bootVolumeSizeFlag)
+
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ImageId = nil
+				model.BootVolumeSize = nil
+			}),
+		},
+		{
+			description: "valid with boot-volume-source-id, type volume and size",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, imageIdFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ImageId = nil
+			}),
+		},
 	}
 
 	for _, tt := range tests {
