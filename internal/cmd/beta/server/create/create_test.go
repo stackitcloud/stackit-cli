@@ -304,7 +304,6 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, imageIdFlag)
 				delete(flagValues, bootVolumeSizeFlag)
-
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
