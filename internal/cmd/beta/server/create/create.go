@@ -195,31 +195,51 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	bootVolumeSourceId, _ := cmd.Flags().GetString(bootVolumeSourceIdFlag)
-	bootVolumeSourceType, _ := cmd.Flags().GetString(bootVolumeSourceTypeFlag)
-	bootVolumeSize, _ := cmd.Flags().GetInt64(bootVolumeSizeFlag)
-	imageId, _ := cmd.Flags().GetString(imageIdFlag)
+	bootVolumeSourceId := flags.FlagToStringPointer(p, cmd, bootVolumeSourceIdFlag)
+	bootVolumeSourceType := flags.FlagToStringPointer(p, cmd, bootVolumeSourceTypeFlag)
+	bootVolumeSize := flags.FlagToInt64Pointer(p, cmd, bootVolumeSizeFlag)
+	imageId := flags.FlagToStringPointer(p, cmd, imageIdFlag)
 
-	if imageId == "" && bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+	if imageId == nil && bootVolumeSourceId == nil && bootVolumeSourceType == nil {
 		return nil, &cliErr.ServerCreateMissingFlagsError{
 			Cmd: cmd,
 		}
 	}
 
-	if imageId == "" {
+	if imageId == nil {
 		err := flags.MarkFlagsRequired(cmd, bootVolumeSourceIdFlag, bootVolumeSourceTypeFlag)
 		cobra.CheckErr(err)
 	}
 
-	if bootVolumeSourceType == "image" && bootVolumeSize == 0 {
-		err := cmd.MarkFlagRequired(bootVolumeSizeFlag)
+	if bootVolumeSourceId != nil && bootVolumeSourceType == nil {
+		err := cmd.MarkFlagRequired(bootVolumeSourceTypeFlag)
 		cobra.CheckErr(err)
-		return nil, &cliErr.ServerCreateError{
+
+		return nil, &cliErr.ServerCreateMissingVolumeTypeError{
 			Cmd: cmd,
 		}
 	}
 
-	if bootVolumeSourceId == "" && bootVolumeSourceType == "" {
+	if bootVolumeSourceType != nil {
+		if bootVolumeSourceId == nil {
+			err := cmd.MarkFlagRequired(bootVolumeSourceIdFlag)
+			cobra.CheckErr(err)
+
+			return nil, &cliErr.ServerCreateMissingVolumeIdError{
+				Cmd: cmd,
+			}
+		}
+
+		if *bootVolumeSourceType == "image" && bootVolumeSize == nil {
+			err := cmd.MarkFlagRequired(bootVolumeSizeFlag)
+			cobra.CheckErr(err)
+			return nil, &cliErr.ServerCreateError{
+				Cmd: cmd,
+			}
+		}
+	}
+
+	if bootVolumeSourceId == nil && bootVolumeSourceType == nil {
 		err := cmd.MarkFlagRequired(imageIdFlag)
 		cobra.CheckErr(err)
 	}
