@@ -146,8 +146,12 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddSeparator()
 		table.AddRow("STATE", *network.State)
 		table.AddSeparator()
-		table.AddRow("PUBLIC IP", *network.PublicIp)
-		table.AddSeparator()
+
+		if network.PublicIp != nil {
+			table.AddRow("PUBLIC IP", *network.PublicIp)
+			table.AddSeparator()
+		}
+
 		if len(ipv4nameservers) > 0 {
 			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4nameservers, ", "))
 		}
