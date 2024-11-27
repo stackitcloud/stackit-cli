@@ -8,11 +8,20 @@ import (
 )
 
 type IaaSClient interface {
+	GetServerExecute(ctx context.Context, projectId, serverId string) (*iaas.Server, error)
 	GetVolumeExecute(ctx context.Context, projectId, volumeId string) (*iaas.Volume, error)
 	GetNetworkExecute(ctx context.Context, projectId, networkId string) (*iaas.Network, error)
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
+}
+
+func GetServerName(ctx context.Context, apiClient IaaSClient, projectId, serverId string) (string, error) {
+	resp, err := apiClient.GetServerExecute(ctx, projectId, serverId)
+	if err != nil {
+		return "", fmt.Errorf("get server: %w", err)
+	}
+	return *resp.Name, nil
 }
 
 func GetVolumeName(ctx context.Context, apiClient IaaSClient, projectId, volumeId string) (string, error) {

@@ -138,7 +138,47 @@ The profile name can only contain lowercase letters, numbers, and "-" and cannot
 
 To enable it, run:
   $ stackit %s enable`
+
+	IAAS_SERVER_MISSING_VOLUME_SIZE = `The "boot-volume-size" flag must be provided when "boot-volume-source-type" is "image".`
+
+	IAAS_SERVER_MISSING_VOLUME_ID = `The "boot-volume-source-id" flag must be provided together with "boot-volume-source-type" flag.`
+
+	IAAS_SERVER_MISSING_VOLUME_TYPE = `The "boot-volume-source-type" flag must be provided together with "boot-volume-source-id" flag.`
+
+	IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS = `Either "image-id" or "boot-volume-source-type" and "boot-volume-source-id" flags must be provided.`
 )
+
+type ServerCreateMissingVolumeIdError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateMissingVolumeIdError) Error() string {
+	return IAAS_SERVER_MISSING_VOLUME_ID
+}
+
+type ServerCreateMissingVolumeTypeError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateMissingVolumeTypeError) Error() string {
+	return IAAS_SERVER_MISSING_VOLUME_TYPE
+}
+
+type ServerCreateMissingFlagsError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateMissingFlagsError) Error() string {
+	return IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS
+}
+
+type ServerCreateError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerCreateError) Error() string {
+	return IAAS_SERVER_MISSING_VOLUME_SIZE
+}
 
 type ProjectIdError struct{}
 
