@@ -13,6 +13,8 @@ import (
 type IaaSClientMocked struct {
 	GetPublicIpFails         bool
 	GetPublicIpResp          *iaas.PublicIp
+	GetServerFails           bool
+	GetServerResp            *iaas.Server
 	GetVolumeFails           bool
 	GetVolumeResp            *iaas.Volume
 	GetNetworkFails          bool
@@ -30,6 +32,12 @@ func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*
 		return nil, fmt.Errorf("could not get public ip")
 	}
 	return m.GetPublicIpResp, nil
+
+func (m *IaaSClientMocked) GetServerExecute(_ context.Context, _, _ string) (*iaas.Server, error) {
+	if m.GetServerFails {
+		return nil, fmt.Errorf("could not get server")
+	}
+	return m.GetServerResp, nil
 }
 
 func (m *IaaSClientMocked) GetVolumeExecute(_ context.Context, _, _ string) (*iaas.Volume, error) {
@@ -66,7 +74,7 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 	}
 	return m.GetNetworkAreaRangeResp, nil
 }
-
+  
 func TestGetPublicIp(t *testing.T) {
 	type args struct {
 		getPublicIpFails bool
@@ -108,6 +116,52 @@ func TestGetPublicIp(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetPublicIP() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+  
+func TestGetServerName(t *testing.T) {
+	type args struct {
+		getInstanceFails bool
+		getInstanceResp  *iaas.Server
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getInstanceResp: &iaas.Server{
+					Name: utils.Ptr("test"),
+				},
+			},
+			want: "test",
+		},
+		{
+			name: "get server fails",
+			args: args{
+				getInstanceFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetServerFails: tt.args.getInstanceFails,
+				GetServerResp:  tt.args.getInstanceResp,
+			}
+			got, err := GetServerName(context.Background(), m, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetServerName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetServerName() = %v, want %v", got, tt.want)
 			}
 		})
 	}
