@@ -11,6 +11,8 @@ import (
 )
 
 type IaaSClientMocked struct {
+	GetPublicIpFails         bool
+	GetPublicIpResp          *iaas.PublicIp
 	GetVolumeFails           bool
 	GetVolumeResp            *iaas.Volume
 	GetNetworkFails          bool
@@ -21,6 +23,13 @@ type IaaSClientMocked struct {
 	GetAttachedProjectsResp  *iaas.ProjectListResponse
 	GetNetworkAreaRangeFails bool
 	GetNetworkAreaRangeResp  *iaas.NetworkRange
+}
+
+func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*iaas.PublicIp, error) {
+	if m.GetPublicIpFails {
+		return nil, fmt.Errorf("could not get public ip")
+	}
+	return m.GetPublicIpResp, nil
 }
 
 func (m *IaaSClientMocked) GetVolumeExecute(_ context.Context, _, _ string) (*iaas.Volume, error) {
@@ -56,6 +65,52 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
+}
+
+func TestGetPublicIp(t *testing.T) {
+	type args struct {
+		getPublicIpFails bool
+		getPublicIpResp  *iaas.PublicIp
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getPublicIpResp: &iaas.PublicIp{
+					Ip: utils.Ptr("1.2.3.4"),
+				},
+			},
+			want: "1.2.3.4",
+		},
+		{
+			name: "get public ip fails",
+			args: args{
+				getPublicIpFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetPublicIpFails: tt.args.getPublicIpFails,
+				GetPublicIpResp:  tt.args.getPublicIpResp,
+			}
+			got, err := GetPublicIP(context.Background(), m, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetPublicIP() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestGetVolumeName(t *testing.T) {
