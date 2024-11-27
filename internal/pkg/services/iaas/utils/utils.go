@@ -23,6 +23,7 @@ func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpI
 		return "", fmt.Errorf("get public ip: %w", err)
 	}
 	return *resp.Ip, nil
+}
 
 func GetServerName(ctx context.Context, apiClient IaaSClient, projectId, serverId string) (string, error) {
 	resp, err := apiClient.GetServerExecute(ctx, projectId, serverId)

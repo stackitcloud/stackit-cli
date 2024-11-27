@@ -32,6 +32,7 @@ func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*
 		return nil, fmt.Errorf("could not get public ip")
 	}
 	return m.GetPublicIpResp, nil
+}
 
 func (m *IaaSClientMocked) GetServerExecute(_ context.Context, _, _ string) (*iaas.Server, error) {
 	if m.GetServerFails {
@@ -74,7 +75,7 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 	}
 	return m.GetNetworkAreaRangeResp, nil
 }
-  
+
 func TestGetPublicIp(t *testing.T) {
 	type args struct {
 		getPublicIpFails bool
@@ -120,7 +121,7 @@ func TestGetPublicIp(t *testing.T) {
 		})
 	}
 }
-  
+
 func TestGetServerName(t *testing.T) {
 	type args struct {
 		getInstanceFails bool
