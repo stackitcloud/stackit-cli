@@ -1,10 +1,10 @@
 ## stackit beta public-ip disassociate
 
-Disassociates a public IP from a network interface or a virtual IP
+Disassociates a Public IP from a network interface or a virtual IP
 
 ### Synopsis
 
-Disassociates a public IP from a network interface or a virtual IP.
+Disassociates a Public IP from a network interface or a virtual IP.
 
 ```
 stackit beta public-ip disassociate [flags]

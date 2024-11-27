@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all public IPs of a project",
-		Long:  "Lists all public IPs of a project.",
+		Short: "Lists all Public IPs of a project",
+		Long:  "Lists all Public IPs of a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -167,7 +167,11 @@ func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.Public
 		table.SetHeader("ID", "IP ADDRESS", "USED BY")
 
 		for _, publicIp := range publicIps {
-			table.AddRow(*publicIp.Id, *publicIp.Ip, *publicIp.NetworkInterface)
+			networkInterfaceId := ""
+			if publicIp.NetworkInterface != nil {
+				networkInterfaceId = *publicIp.GetNetworkInterface()
+			}
+			table.AddRow(*publicIp.Id, *publicIp.Ip, networkInterfaceId)
 			table.AddSeparator()
 		}
 

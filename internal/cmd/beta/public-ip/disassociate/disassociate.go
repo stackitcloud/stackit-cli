@@ -29,8 +29,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "disassociate",
-		Short: "Disassociates a public IP from a network interface or a virtual IP",
-		Long:  "Disassociates a public IP from a network interface or a virtual IP.",
+		Short: "Disassociates a Public IP from a network interface or a virtual IP",
+		Long:  "Disassociates a Public IP from a network interface or a virtual IP.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

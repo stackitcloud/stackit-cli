@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Shows details of a public IP",
-		Long:  "Shows details of a public IP.",
+		Short: "Shows details of a Public IP",
+		Long:  "Shows details of a Public IP.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
@@ -125,8 +125,12 @@ func outputResult(p *print.Printer, outputFormat string, publicIp *iaas.PublicIp
 		table.AddSeparator()
 		table.AddRow("IP ADDRESS", *publicIp.Ip)
 		table.AddSeparator()
-		table.AddRow("ASSOCIATED TO", *publicIp.NetworkInterface)
-		table.AddSeparator()
+
+		if publicIp.NetworkInterface != nil {
+			networkInterfaceId := *publicIp.GetNetworkInterface()
+			table.AddRow("ASSOCIATED TO", networkInterfaceId)
+			table.AddSeparator()
+		}
 
 		if publicIp.Labels != nil && len(*publicIp.Labels) > 0 {
 			labels := []string{}

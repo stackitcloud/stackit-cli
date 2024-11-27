@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "associate",
-		Short: "Associates a public IP with a network interface or a virtual IP",
-		Long:  "Associates a public IP with a network interface or a virtual IP.",
+		Short: "Associates a Public IP with a network interface or a virtual IP",
+		Long:  "Associates a Public IP with a network interface or a virtual IP.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to associate public IP %q with resource %v?", publicIpLabel, model.AssociatedResourceId)
+				prompt := fmt.Sprintf("Are you sure you want to associate public IP %q with resource %v?", publicIpLabel, *model.AssociatedResourceId)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

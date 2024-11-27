@@ -29,11 +29,11 @@ stackit beta public-ip [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta public-ip associate](./stackit_beta_public-ip_associate.md)	 - Associates a public IP with a network interface or a virtual IP
+* [stackit beta public-ip associate](./stackit_beta_public-ip_associate.md)	 - Associates a Public IP with a network interface or a virtual IP
 * [stackit beta public-ip create](./stackit_beta_public-ip_create.md)	 - Creates a Public IP
 * [stackit beta public-ip delete](./stackit_beta_public-ip_delete.md)	 - Deletes a Public IP
-* [stackit beta public-ip describe](./stackit_beta_public-ip_describe.md)	 - Shows details of a public IP
-* [stackit beta public-ip disassociate](./stackit_beta_public-ip_disassociate.md)	 - Disassociates a public IP from a network interface or a virtual IP
-* [stackit beta public-ip list](./stackit_beta_public-ip_list.md)	 - Lists all public IPs of a project
+* [stackit beta public-ip describe](./stackit_beta_public-ip_describe.md)	 - Shows details of a Public IP
+* [stackit beta public-ip disassociate](./stackit_beta_public-ip_disassociate.md)	 - Disassociates a Public IP from a network interface or a virtual IP
+* [stackit beta public-ip list](./stackit_beta_public-ip_list.md)	 - Lists all Public IPs of a project
 * [stackit beta public-ip update](./stackit_beta_public-ip_update.md)	 - Updates a Public IP
 

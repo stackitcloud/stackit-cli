@@ -1,10 +1,10 @@
 ## stackit beta public-ip describe
 
-Shows details of a public IP
+Shows details of a Public IP
 
 ### Synopsis
 
-Shows details of a public IP.
+Shows details of a Public IP.
 
 ```
 stackit beta public-ip describe [flags]

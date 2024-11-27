@@ -1,10 +1,10 @@
 ## stackit beta public-ip associate
 
-Associates a public IP with a network interface or a virtual IP
+Associates a Public IP with a network interface or a virtual IP
 
 ### Synopsis
 
-Associates a public IP with a network interface or a virtual IP.
+Associates a Public IP with a network interface or a virtual IP.
 
 ```
 stackit beta public-ip associate [flags]

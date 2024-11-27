@@ -1,10 +1,10 @@
 ## stackit beta public-ip list
 
-Lists all public IPs of a project
+Lists all Public IPs of a project
 
 ### Synopsis
 
-Lists all public IPs of a project.
+Lists all Public IPs of a project.
 
 ```
 stackit beta public-ip list [flags]
