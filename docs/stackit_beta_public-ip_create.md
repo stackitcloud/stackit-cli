@@ -16,10 +16,10 @@ stackit beta public-ip create [flags]
   Create a public IP
   $ stackit beta public-ip create
 
-  Create a public IP with associated resource with ID "xxx"
+  Create a public IP with associated resource ID "xxx"
   $ stackit beta public-ip create --associated-resource-id xxx
 
-  Create a public IP with associated resource with ID "xxx" and labels
+  Create a public IP with associated resource ID "xxx" and labels
   $ stackit beta public-ip create --associated-resource-id xxx --labels key=value,foo=bar
 ```
 

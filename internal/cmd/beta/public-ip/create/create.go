@@ -46,7 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta public-ip create --associated-resource-id xxx`,
 			),
 			examples.NewExample(
-				`Create a public IP with associated resource with ID "xxx" and labels`,
+				`Create a public IP with associated resource ID "xxx" and labels`,
 				`$ stackit beta public-ip create --associated-resource-id xxx --labels key=value,foo=bar`,
 			),
 		),

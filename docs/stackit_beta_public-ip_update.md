@@ -16,7 +16,7 @@ stackit beta public-ip update [flags]
   Update public IP with ID "xxx"
   $ stackit beta public-ip update xxx
 
-  Update public IP with ID "xxx" with new associated resource with ID "yyy"
+  Update public IP with ID "xxx" with new associated resource ID "yyy"
   $ stackit beta public-ip update xxx --associated-resource-id yyy
 
   Update public IP with ID "xxx" with new labels

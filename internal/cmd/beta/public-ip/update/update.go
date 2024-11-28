@@ -46,7 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta public-ip update xxx`,
 			),
 			examples.NewExample(
-				`Update public IP with ID "xxx" with new associated resource with ID "yyy"`,
+				`Update public IP with ID "xxx" with new associated resource ID "yyy"`,
 				`$ stackit beta public-ip update xxx --associated-resource-id yyy`,
 			),
 			examples.NewExample(
