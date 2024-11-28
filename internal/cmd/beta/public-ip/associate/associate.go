@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("associate public IP: %w", err)
 			}
 
-			p.Outputf("Associated public IP %q with resource %v.\n", publicIpLabel, resp.NetworkInterface)
+			p.Outputf("Associated public IP %q with resource %v.\n", publicIpLabel, *resp.GetNetworkInterface())
 			return nil
 		},
 	}
