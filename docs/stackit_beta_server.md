@@ -35,6 +35,7 @@ stackit beta server [flags]
 * [stackit beta server delete](./stackit_beta_server_delete.md)	 - Deletes a server
 * [stackit beta server describe](./stackit_beta_server_describe.md)	 - Shows details of a server
 * [stackit beta server list](./stackit_beta_server_list.md)	 - Lists all servers of a project
+* [stackit beta server network-interface](./stackit_beta_server_network-interface.md)	 - Allows attaching/detaching network interfaces to servers
 * [stackit beta server public-ip](./stackit_beta_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
 * [stackit beta server update](./stackit_beta_server_update.md)	 - Updates a server
 * [stackit beta server volume](./stackit_beta_server_volume.md)	 - Provides functionality for server volumes
