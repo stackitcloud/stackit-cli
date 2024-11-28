@@ -47,7 +47,7 @@ type inputModel struct {
 	IPv6PrefixLength   *int64
 	IPv6Prefix         *string
 	IPv6Gateway        *string
-	Routed             *bool
+	Routed             bool
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
 }
@@ -170,7 +170,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		IPv6PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv6PrefixLengthFlag),
 		IPv6Prefix:         flags.FlagToStringPointer(p, cmd, ipv6PrefixFlag),
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
-		Routed:             flags.FlagToBoolPointer(p, cmd, routedFlag),
+		Routed:             flags.FlagToBoolValue(p, cmd, routedFlag),
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4Gateway),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6Gateway),
 	}
@@ -191,37 +191,37 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.CreateNetwork(ctx, model.ProjectId)
 	addressFamily := &iaas.CreateNetworkAddressFamily{}
 
-	if model.IPv6DnsNameServers != nil || model.IPv6PrefixLength != nil || model.IPv6Prefix != nil {
+	if model.IPv6DnsNameServers != nil || model.IPv6PrefixLength != nil || model.IPv6Prefix != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		addressFamily.Ipv6 = &iaas.CreateNetworkIPv6Body{
 			Nameservers:  model.IPv6DnsNameServers,
 			PrefixLength: model.IPv6PrefixLength,
 			Prefix:       model.IPv6Prefix,
 		}
+
+		if model.NoIPv6Gateway {
+			addressFamily.Ipv6.Gateway = iaas.NewNullableString(nil)
+		} else if model.IPv6Gateway != nil {
+			addressFamily.Ipv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
+		}
 	}
 
-	if model.NoIPv6Gateway {
-		addressFamily.Ipv6.Gateway = iaas.NewNullableString(nil)
-	} else if model.IPv6Gateway != nil {
-		addressFamily.Ipv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
-	}
-
-	if model.IPv4DnsNameServers != nil || model.IPv4PrefixLength != nil || model.IPv4Prefix != nil {
+	if model.IPv4DnsNameServers != nil || model.IPv4PrefixLength != nil || model.IPv4Prefix != nil || model.NoIPv4Gateway || model.IPv4Gateway != nil {
 		addressFamily.Ipv4 = &iaas.CreateNetworkIPv4Body{
 			Nameservers:  model.IPv4DnsNameServers,
 			PrefixLength: model.IPv4PrefixLength,
 			Prefix:       model.IPv4Prefix,
 		}
-	}
 
-	if model.NoIPv4Gateway {
-		addressFamily.Ipv4.Gateway = iaas.NewNullableString(nil)
-	} else if model.IPv4Gateway != nil {
-		addressFamily.Ipv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+		if model.NoIPv4Gateway {
+			addressFamily.Ipv4.Gateway = iaas.NewNullableString(nil)
+		} else if model.IPv4Gateway != nil {
+			addressFamily.Ipv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+		}
 	}
 
 	payload := iaas.CreateNetworkPayload{
 		Name:   model.Name,
-		Routed: model.Routed,
+		Routed: &model.Routed,
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

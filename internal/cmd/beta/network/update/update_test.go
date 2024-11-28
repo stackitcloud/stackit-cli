@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		Name:               utils.Ptr("example-network-name"),
 		NetworkId:          testNetworkId,
-		Routed:             utils.Ptr(true),
+		Routed:             true,
 		IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 		IPv4Gateway:        utils.Ptr("10.1.2.3"),
 		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
@@ -229,7 +229,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Routed = utils.Ptr(true)
+				model.Routed = true
 			}),
 		},
 	}

@@ -37,7 +37,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NetworkId          string
 	Name               *string
-	Routed             *bool
+	Routed             bool
 	IPv4DnsNameServers *[]string
 	IPv4Gateway        *string
 	IPv6DnsNameServers *[]string
@@ -158,7 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel:    globalFlags,
 		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkId:          networkId,
-		Routed:             flags.FlagToBoolPointer(p, cmd, routedFlag),
+		Routed:             flags.FlagToBoolValue(p, cmd, routedFlag),
 		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
 		IPv4Gateway:        flags.FlagToStringPointer(p, cmd, ipv4GatewayFlag),
 		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
@@ -183,33 +183,33 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.NetworkId)
 	addressFamily := &iaas.UpdateNetworkAddressFamily{}
 
-	if model.IPv6DnsNameServers != nil {
+	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		addressFamily.Ipv6 = &iaas.UpdateNetworkIPv6Body{
 			Nameservers: model.IPv6DnsNameServers,
 		}
-	}
 
-	if model.NoIPv6Gateway {
-		addressFamily.Ipv6.Gateway = iaas.NewNullableString(nil)
-	} else if model.IPv6Gateway != nil {
-		addressFamily.Ipv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
-	}
-
-	if model.IPv4DnsNameServers != nil {
-		addressFamily.Ipv4 = &iaas.UpdateNetworkIPv4Body{
-			Nameservers: model.IPv4DnsNameServers,
+		if model.NoIPv6Gateway {
+			addressFamily.Ipv6.Gateway = iaas.NewNullableString(nil)
+		} else if model.IPv6Gateway != nil {
+			addressFamily.Ipv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
 		}
 	}
 
-	if model.NoIPv4Gateway {
-		addressFamily.Ipv4.Gateway = iaas.NewNullableString(nil)
-	} else if model.IPv4Gateway != nil {
-		addressFamily.Ipv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+	if model.IPv4DnsNameServers != nil || model.NoIPv4Gateway || model.IPv4Gateway != nil {
+		addressFamily.Ipv4 = &iaas.UpdateNetworkIPv4Body{
+			Nameservers: model.IPv4DnsNameServers,
+		}
+
+		if model.NoIPv4Gateway {
+			addressFamily.Ipv4.Gateway = iaas.NewNullableString(nil)
+		} else if model.IPv4Gateway != nil {
+			addressFamily.Ipv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+		}
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name:   model.Name,
-		Routed: model.Routed,
+		Routed: &model.Routed,
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

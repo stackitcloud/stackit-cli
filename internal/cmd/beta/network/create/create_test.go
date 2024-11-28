@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IPv6PrefixLength:   utils.Ptr(int64(24)),
 		IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
 		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
-		Routed:             utils.Ptr(true),
+		Routed:             true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -78,7 +78,8 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.Ap
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
 	request := testClient.CreateNetwork(testCtx, testProjectId)
 	request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
-		Name: utils.Ptr("example-network-name"),
+		Name:   utils.Ptr("example-network-name"),
+		Routed: utils.Ptr(false),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -232,7 +233,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Routed = utils.Ptr(true)
+				model.Routed = true
 			}),
 		},
 	}
