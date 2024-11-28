@@ -146,7 +146,27 @@ To enable it, run:
 	IAAS_SERVER_MISSING_VOLUME_TYPE = `The "boot-volume-source-type" flag must be provided together with "boot-volume-source-id" flag.`
 
 	IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS = `Either "image-id" or "boot-volume-source-type" and "boot-volume-source-id" flags must be provided.`
+
+	IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "create" flag is not provided.`
+
+	IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "delete" flag is not provided.`
 )
+
+type ServerNicAttachMissingNicIdError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerNicAttachMissingNicIdError) Error() string {
+	return IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID
+}
+
+type ServerNicDetachMissingNicIdError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerNicDetachMissingNicIdError) Error() string {
+	return IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID
+}
 
 type ServerCreateMissingVolumeIdError struct {
 	Cmd *cobra.Command
