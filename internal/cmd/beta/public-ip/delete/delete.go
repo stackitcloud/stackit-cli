@@ -60,7 +60,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete public IP %q?", publicIpLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete public IP %q? (This cannot be undone)", publicIpLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
