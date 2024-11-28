@@ -51,14 +51,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			publicIpLabel, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
+			publicIpLabel, associatedResourceId, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to disassociate public IP %q from the associated resource?", publicIpLabel)
+				prompt := fmt.Sprintf("Are you sure you want to disassociate public IP %q from the associated resource %q?", publicIpLabel, associatedResourceId)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("disassociate public IP: %w", err)
 			}
 
-			p.Outputf("Disassociated public IP %q from the associated resource.\n", publicIpLabel)
+			p.Outputf("Disassociated public IP %q from the associated resource %q.\n", publicIpLabel, associatedResourceId)
 			return nil
 		},
 	}

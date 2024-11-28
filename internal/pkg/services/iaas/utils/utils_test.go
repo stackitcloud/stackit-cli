@@ -91,7 +91,8 @@ func TestGetPublicIp(t *testing.T) {
 			name: "base",
 			args: args{
 				getPublicIpResp: &iaas.PublicIp{
-					Ip: utils.Ptr("1.2.3.4"),
+					Ip:               utils.Ptr("1.2.3.4"),
+					NetworkInterface: iaas.NewNullableString(utils.Ptr("1.2.3.4")),
 				},
 			},
 			want: "1.2.3.4",
@@ -110,7 +111,7 @@ func TestGetPublicIp(t *testing.T) {
 				GetPublicIpFails: tt.args.getPublicIpFails,
 				GetPublicIpResp:  tt.args.getPublicIpResp,
 			}
-			got, err := GetPublicIP(context.Background(), m, "", "")
+			got, _, err := GetPublicIP(context.Background(), m, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
 				return

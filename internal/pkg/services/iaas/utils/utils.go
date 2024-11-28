@@ -17,12 +17,16 @@ type IaaSClient interface {
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
 }
 
-func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpId string) (string, error) {
+func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpId string) (string, string, error) {
 	resp, err := apiClient.GetPublicIPExecute(ctx, projectId, publicIpId)
 	if err != nil {
-		return "", fmt.Errorf("get public ip: %w", err)
+		return "", "", fmt.Errorf("get public ip: %w", err)
 	}
-	return *resp.Ip, nil
+	associatedResourceId := ""
+	if resp.GetNetworkInterface() != nil {
+		associatedResourceId = *resp.GetNetworkInterface()
+	}
+	return *resp.Ip, associatedResourceId, nil
 }
 
 func GetServerName(ctx context.Context, apiClient IaaSClient, projectId, serverId string) (string, error) {

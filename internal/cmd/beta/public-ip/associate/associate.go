@@ -55,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			publicIpLabel, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
+			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
