@@ -29,8 +29,13 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameFlag:               "example-network-name",
 		ipv4DnsNameServersFlag: "1.1.1.0,1.1.2.0",
 		ipv4PrefixLengthFlag:   "24",
+		ipv4PrefixFlag:         "10.1.2.0/24",
+		ipv4GatewayFlag:        "10.1.2.3",
 		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
 		ipv6PrefixLengthFlag:   "24",
+		ipv6PrefixFlag:         "2001:4860:4860::8888",
+		ipv6GatewayFlag:        "2001:4860:4860::8888",
+		routedFlag:             "true",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,8 +52,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:               utils.Ptr("example-network-name"),
 		IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 		IPv4PrefixLength:   utils.Ptr(int64(24)),
+		IPv4Prefix:         utils.Ptr("10.1.2.0/24"),
+		IPv4Gateway:        utils.Ptr("10.1.2.3"),
 		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 		IPv6PrefixLength:   utils.Ptr(int64(24)),
+		IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
+		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
+		Routed:             utils.Ptr(true),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -78,15 +88,20 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest))
 
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.CreateNetworkPayload {
 	payload := iaas.CreateNetworkPayload{
-		Name: utils.Ptr("example-network-name"),
+		Name:   utils.Ptr("example-network-name"),
+		Routed: utils.Ptr(true),
 		AddressFamily: &iaas.CreateNetworkAddressFamily{
 			Ipv4: &iaas.CreateNetworkIPv4Body{
 				Nameservers:  utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 				PrefixLength: utils.Ptr(int64(24)),
+				Prefix:       utils.Ptr("10.1.2.0/24"),
+				Gateway:      iaas.NewNullableString(utils.Ptr("10.1.2.3")),
 			},
 			Ipv6: &iaas.CreateNetworkIPv6Body{
 				Nameservers:  utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 				PrefixLength: utils.Ptr(int64(24)),
+				Prefix:       utils.Ptr("2001:4860:4860::8888"),
+				Gateway:      iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
 			},
 		},
 	}
@@ -155,27 +170,69 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "use dns servers and prefix",
+			description: "use dns servers, prefix, gateway and prefix length",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[ipv4DnsNameServersFlag] = "1.1.1.1"
 				flagValues[ipv4PrefixLengthFlag] = "25"
+				flagValues[ipv4PrefixFlag] = "10.1.2.0/24"
+				flagValues[ipv4GatewayFlag] = "10.1.2.3"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.IPv4DnsNameServers = utils.Ptr([]string{"1.1.1.1"})
 				model.IPv4PrefixLength = utils.Ptr(int64(25))
+				model.IPv4Prefix = utils.Ptr("10.1.2.0/24")
+				model.IPv4Gateway = utils.Ptr("10.1.2.3")
 			}),
 		},
 		{
-			description: "use ipv6 dns servers and prefix",
+			description: "use ipv4 gateway nil",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[noIpv4Gateway] = "true"
+				delete(flagValues, ipv4GatewayFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.NoIPv4Gateway = true
+				model.IPv4Gateway = nil
+			}),
+		},
+		{
+			description: "use ipv6 dns servers, prefix, gateway and prefix length",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[ipv6DnsNameServersFlag] = "2001:4860:4860::8888"
 				flagValues[ipv6PrefixLengthFlag] = "25"
+				flagValues[ipv6PrefixFlag] = "2001:4860:4860::8888"
+				flagValues[ipv6GatewayFlag] = "2001:4860:4860::8888"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.IPv6DnsNameServers = utils.Ptr([]string{"2001:4860:4860::8888"})
 				model.IPv6PrefixLength = utils.Ptr(int64(25))
+				model.IPv6Prefix = utils.Ptr("2001:4860:4860::8888")
+				model.IPv6Gateway = utils.Ptr("2001:4860:4860::8888")
+			}),
+		},
+		{
+			description: "use ipv6 gateway nil",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[noIpv6Gateway] = "true"
+				delete(flagValues, ipv6GatewayFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.NoIPv6Gateway = true
+				model.IPv6Gateway = nil
+			}),
+		},
+		{
+			description: "use routed true",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[routedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Routed = utils.Ptr(true)
 			}),
 		},
 	}
@@ -257,6 +314,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -152,6 +152,16 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddSeparator()
 		}
 
+		if network.Routed != nil {
+			table.AddRow("ROUTED", *network.Routed)
+			table.AddSeparator()
+		}
+
+		if network.Gateway != nil {
+			table.AddRow("IPv4 GATEWAY", *network.Gateway.Get())
+			table.AddSeparator()
+		}
+
 		if len(ipv4nameservers) > 0 {
 			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4nameservers, ", "))
 		}
@@ -160,6 +170,12 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddRow("IPv4 PREFIXES", strings.Join(ipv4prefixes, ", "))
 		}
 		table.AddSeparator()
+
+		if network.Gatewayv6 != nil {
+			table.AddRow("IPv6 GATEWAY", *network.Gatewayv6.Get())
+			table.AddSeparator()
+		}
+
 		if len(ipv6nameservers) > 0 {
 			table.AddRow("IPv6 NAME SERVERS", strings.Join(ipv6nameservers, ", "))
 		}
