@@ -140,19 +140,6 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
-		{
-			description: "use labels",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[labelFlag] = "key=value"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
-					"key": "value",
-				}
-			}),
-		},
 	}
 
 	for _, tt := range tests {

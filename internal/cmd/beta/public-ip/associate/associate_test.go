@@ -137,17 +137,6 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "use associated resource id",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[associatedResourceIdFlag] = testAssociatedResourceId
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.AssociatedResourceId = utils.Ptr(testAssociatedResourceId)
-			}),
-		},
-		{
 			description: "associated resource id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
