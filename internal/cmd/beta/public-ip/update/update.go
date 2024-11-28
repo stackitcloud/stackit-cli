@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -101,10 +102,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+
+	if labels == nil {
+		return nil, &errors.EmptyUpdateError{}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		PublicIpId:      publicIpId,
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          labels,
 	}
 
 	if p.IsVerbosityDebug() {
