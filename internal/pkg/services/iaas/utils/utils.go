@@ -17,7 +17,7 @@ type IaaSClient interface {
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
 }
 
-func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpId string) (string, string, error) {
+func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpId string) (ip, associatedResource string, err error) {
 	resp, err := apiClient.GetPublicIPExecute(ctx, projectId, publicIpId)
 	if err != nil {
 		return "", "", fmt.Errorf("get public ip: %w", err)
