@@ -16,9 +16,6 @@ stackit beta public-ip update [flags]
   Update public IP with ID "xxx"
   $ stackit beta public-ip update xxx
 
-  Update public IP with ID "xxx" with new associated resource ID "yyy"
-  $ stackit beta public-ip update xxx --associated-resource-id yyy
-
   Update public IP with ID "xxx" with new labels
   $ stackit beta public-ip update xxx --labels key=value,foo=bar
 ```
@@ -26,9 +23,8 @@ stackit beta public-ip update [flags]
 ### Options
 
 ```
-      --associated-resource-id string   Associates the public IP with a network interface or virtual IP (ID)
-  -h, --help                            Help for "stackit beta public-ip update"
-      --labels stringToString           Labels are key-value string pairs which can be attached to a public IP. E.g. '--labels key1=value1,key2=value2,...' (default [])
+  -h, --help                    Help for "stackit beta public-ip update"
+      --labels stringToString   Labels are key-value string pairs which can be attached to a public IP. E.g. '--labels key1=value1,key2=value2,...' (default [])
 ```
 
 ### Options inherited from parent commands

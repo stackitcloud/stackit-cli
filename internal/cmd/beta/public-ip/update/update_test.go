@@ -22,7 +22,6 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
 var testProjectId = uuid.NewString()
-var testAssociatedResourceId = uuid.NewString()
 var testPublicIpId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -37,9 +36,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		associatedResourceIdFlag: testAssociatedResourceId,
-		labelFlag:                "key=value",
+		projectIdFlag: testProjectId,
+		labelFlag:     "key=value",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -53,8 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		PublicIpId:           testPublicIpId,
-		AssociatedResourceId: utils.Ptr(testAssociatedResourceId),
+		PublicIpId: testPublicIpId,
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
@@ -76,7 +73,6 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdatePublicIPRequest)) iaas.A
 
 func fixturePayload(mods ...func(payload *iaas.UpdatePublicIPPayload)) iaas.UpdatePublicIPPayload {
 	payload := iaas.UpdatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(utils.Ptr(testAssociatedResourceId)),
 		Labels: utils.Ptr(map[string]interface{}{
 			"key": "value",
 		}),
@@ -143,17 +139,6 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
-		},
-		{
-			description: "use associated resource id",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[associatedResourceIdFlag] = testAssociatedResourceId
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.AssociatedResourceId = utils.Ptr(testAssociatedResourceId)
-			}),
 		},
 		{
 			description: "use labels",

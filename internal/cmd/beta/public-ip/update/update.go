@@ -23,15 +23,13 @@ import (
 const (
 	publicIpIdArg = "PUBLIC_IP_ID"
 
-	associatedResourceIdFlag = "associated-resource-id"
-	labelFlag                = "labels"
+	labelFlag = "labels"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	PublicIpId           string
-	AssociatedResourceId *string
-	Labels               *map[string]string
+	PublicIpId string
+	Labels     *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -44,10 +42,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Update public IP with ID "xxx"`,
 				`$ stackit beta public-ip update xxx`,
-			),
-			examples.NewExample(
-				`Update public IP with ID "xxx" with new associated resource ID "yyy"`,
-				`$ stackit beta public-ip update xxx --associated-resource-id yyy`,
 			),
 			examples.NewExample(
 				`Update public IP with ID "xxx" with new labels`,
@@ -96,7 +90,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), associatedResourceIdFlag, "Associates the public IP with a network interface or virtual IP (ID)")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a public IP. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
@@ -109,10 +102,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel:      globalFlags,
-		PublicIpId:           publicIpId,
-		AssociatedResourceId: flags.FlagToStringPointer(p, cmd, associatedResourceIdFlag),
-		Labels:               flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		GlobalFlagModel: globalFlags,
+		PublicIpId:      publicIpId,
+		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -140,8 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.UpdatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(model.AssociatedResourceId),
-		Labels:           labelsMap,
+		Labels: labelsMap,
 	}
 
 	return req.UpdatePublicIPPayload(payload)
