@@ -1,33 +1,19 @@
-## stackit beta server describe
+## stackit beta server public-ip
 
-Shows details of a server
+Allows attaching/detaching public IPs to servers
 
 ### Synopsis
 
-Shows details of a server.
+Allows attaching/detaching public IPs to servers.
 
 ```
-stackit beta server describe [flags]
-```
-
-### Examples
-
-```
-  Show details of a server with ID "xxx"
-  $ stackit beta server describe xxx
-
-  Show detailed information of a server with ID "xxx"
-  $ stackit beta server describe xxx --details
-
-  Show details of a server with ID "xxx" in JSON format
-  $ stackit beta server describe xxx --output-format json
+stackit beta server public-ip [flags]
 ```
 
 ### Options
 
 ```
-      --details   Show detailed information about server
-  -h, --help      Help for "stackit beta server describe"
+  -h, --help   Help for "stackit beta server public-ip"
 ```
 
 ### Options inherited from parent commands
@@ -43,4 +29,6 @@ stackit beta server describe [flags]
 ### SEE ALSO
 
 * [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
+* [stackit beta server public-ip attach](./stackit_beta_server_public-ip_attach.md)	 - Attaches a public IP to a server
+* [stackit beta server public-ip detach](./stackit_beta_server_public-ip_detach.md)	 - Detaches a public IP from a server
 

@@ -1,10 +1,10 @@
 ## stackit beta network
 
-Provides functionality for Network
+Provides functionality for networks
 
 ### Synopsis
 
-Provides functionality for Network.
+Provides functionality for networks.
 
 ```
 stackit beta network [flags]

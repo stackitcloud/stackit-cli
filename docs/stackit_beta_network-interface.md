@@ -1,10 +1,10 @@
 ## stackit beta network-interface
 
-Provides functionality for Network Interface
+Provides functionality for network interfaces
 
 ### Synopsis
 
-Provides functionality for Network Interface.
+Provides functionality for network interfaces.
 
 ```
 stackit beta network-interface [flags]

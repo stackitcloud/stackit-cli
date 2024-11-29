@@ -38,5 +38,5 @@ stackit beta volume describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
+* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for volumes
 
