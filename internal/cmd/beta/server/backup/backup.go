@@ -20,8 +20,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
-		Short: "Provides functionality for Server Backup",
-		Long:  "Provides functionality for Server Backup.",
+		Short: "Provides functionality for server backups",
+		Long:  "Provides functionality for server backups.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

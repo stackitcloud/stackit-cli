@@ -142,6 +142,9 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 		return nil
 	default:
 		table := tables.NewTable()
+		if model.Details {
+			table.SetTitle("Server")
+		}
 		table.AddRow("ID", *server.Id)
 		table.AddSeparator()
 		table.AddRow("NAME", *server.Name)
@@ -184,6 +187,11 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			table.AddSeparator()
 		}
 
+		if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
+			table.AddRow("SERVICE ACCOUNTS", strings.Join(*server.ServiceAccountMails, "\n"))
+			table.AddSeparator()
+		}
+
 		if server.Volumes != nil && len(*server.Volumes) > 0 {
 			volumes := []string{}
 			volumes = append(volumes, *server.Volumes...)
@@ -191,28 +199,38 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			table.AddSeparator()
 		}
 
-		if model.Details {
-			if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
-				emails := []string{}
-				emails = append(emails, *server.ServiceAccountMails...)
-				table.AddRow("SERVICE ACCOUNTS", strings.Join(emails, "\n"))
-				table.AddSeparator()
-			}
-
-			if server.Nics != nil && len(*server.Nics) > 0 {
-				nics := []string{}
-				for _, nic := range *server.Nics {
-					nics = append(nics, *nic.NicId)
-				}
-				table.AddRow("NICS", strings.Join(nics, "\n"))
-				table.AddSeparator()
-			}
-		}
-
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
+		if !model.Details {
+			return nil
+		}
+
+		// Additional details to be displayed when --details flag is set
+		if server.Nics != nil && len(*server.Nics) > 0 {
+			for i, nic := range *server.Nics {
+				nicsTable := tables.NewTable()
+				nicsTable.SetTitle(fmt.Sprintf("Attached Network Interface #%d", i))
+
+				nicsTable.AddRow("ID", *nic.NicId)
+				nicsTable.AddSeparator()
+				nicsTable.AddRow("NETWORK ID", *nic.NetworkId)
+				nicsTable.AddSeparator()
+				nicsTable.AddRow("NETWORK NAME", *nic.NetworkName)
+				nicsTable.AddSeparator()
+				if nic.PublicIp != nil {
+					nicsTable.AddRow("PUBLIC IP", *nic.PublicIp)
+				}
+
+				nicsTable.Display(p)
+				if err != nil {
+					return fmt.Errorf("render table: %w", err)
+				}
+			}
+		}
+
 		return nil
 	}
 }
