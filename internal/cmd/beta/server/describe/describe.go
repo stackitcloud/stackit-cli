@@ -204,11 +204,11 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			return fmt.Errorf("render table: %w", err)
 		}
 
+		// If no --details is set, we only display the overview table
 		if !model.Details {
 			return nil
 		}
 
-		// Additional details to be displayed when --details flag is set
 		if server.Nics != nil && len(*server.Nics) > 0 {
 			for i, nic := range *server.Nics {
 				nicsTable := tables.NewTable()
