@@ -82,20 +82,22 @@ func TestGetPublicIp(t *testing.T) {
 		getPublicIpResp  *iaas.PublicIp
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
+		name                   string
+		args                   args
+		wantPublicIp           string
+		wantAssociatedResource string
+		wantErr                bool
 	}{
 		{
 			name: "base",
 			args: args{
 				getPublicIpResp: &iaas.PublicIp{
 					Ip:               utils.Ptr("1.2.3.4"),
-					NetworkInterface: iaas.NewNullableString(utils.Ptr("1.2.3.4")),
+					NetworkInterface: iaas.NewNullableString(utils.Ptr("5.6.7.8")),
 				},
 			},
-			want: "1.2.3.4",
+			wantPublicIp:           "1.2.3.4",
+			wantAssociatedResource: "5.6.7.8",
 		},
 		{
 			name: "get public ip fails",
@@ -111,13 +113,16 @@ func TestGetPublicIp(t *testing.T) {
 				GetPublicIpFails: tt.args.getPublicIpFails,
 				GetPublicIpResp:  tt.args.getPublicIpResp,
 			}
-			got, _, err := GetPublicIP(context.Background(), m, "", "")
+			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), m, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("GetPublicIP() = %v, want %v", got, tt.want)
+			if gotPublicIP != tt.wantPublicIp {
+				t.Errorf("GetPublicIP() = %v, want public IP %v", gotPublicIP, tt.wantPublicIp)
+			}
+			if gotAssociatedResource != tt.wantAssociatedResource {
+				t.Errorf("GetPublicIP() = %v, want associated resource %v", gotAssociatedResource, tt.wantAssociatedResource)
 			}
 		})
 	}
