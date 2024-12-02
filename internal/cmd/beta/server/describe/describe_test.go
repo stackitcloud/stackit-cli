@@ -35,7 +35,6 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		detailsFlag:   "true",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,7 +49,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ServerId: testServerId,
-		Details:  true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -135,17 +133,6 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{"invalid-uuid"},
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
-		},
-		{
-			description: "details flag false",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[detailsFlag] = "false"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Details = false
-			}),
 		},
 	}
 

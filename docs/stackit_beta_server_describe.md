@@ -16,9 +16,6 @@ stackit beta server describe [flags]
   Show details of a server with ID "xxx"
   $ stackit beta server describe xxx
 
-  Show detailed information of a server with ID "xxx"
-  $ stackit beta server describe xxx --details
-
   Show details of a server with ID "xxx" in JSON format
   $ stackit beta server describe xxx --output-format json
 ```
@@ -26,8 +23,7 @@ stackit beta server describe [flags]
 ### Options
 
 ```
-      --details   Show detailed information about server
-  -h, --help      Help for "stackit beta server describe"
+  -h, --help   Help for "stackit beta server describe"
 ```
 
 ### Options inherited from parent commands
