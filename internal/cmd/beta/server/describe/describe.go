@@ -224,7 +224,7 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 					nicsTable.AddRow("PUBLIC IP", *nic.PublicIp)
 				}
 
-				nicsTable.Display(p)
+				err := nicsTable.Display(p)
 				if err != nil {
 					return fmt.Errorf("render table: %w", err)
 				}
