@@ -210,24 +210,22 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 		}
 
 		if server.Nics != nil && len(*server.Nics) > 0 {
-			for i, nic := range *server.Nics {
-				nicsTable := tables.NewTable()
-				nicsTable.SetTitle(fmt.Sprintf("Attached Network Interface #%d", i))
+			nicsTable := tables.NewTable()
+			nicsTable.SetTitle("Attached Network Interfaces")
+			nicsTable.SetHeader("ID", "NETWORK ID", "NETWORK NAME", "PUBLIC IP")
 
-				nicsTable.AddRow("ID", *nic.NicId)
-				nicsTable.AddSeparator()
-				nicsTable.AddRow("NETWORK ID", *nic.NetworkId)
-				nicsTable.AddSeparator()
-				nicsTable.AddRow("NETWORK NAME", *nic.NetworkName)
-				nicsTable.AddSeparator()
+			for _, nic := range *server.Nics {
+				publicIp := ""
 				if nic.PublicIp != nil {
-					nicsTable.AddRow("PUBLIC IP", *nic.PublicIp)
+					publicIp = *nic.PublicIp
 				}
+				nicsTable.AddRow(*nic.NicId, *nic.NetworkId, *nic.NetworkName, publicIp)
+				nicsTable.AddSeparator()
+			}
 
-				err := nicsTable.Display(p)
-				if err != nil {
-					return fmt.Errorf("render table: %w", err)
-				}
+			err := nicsTable.Display(p)
+			if err != nil {
+				return fmt.Errorf("render table: %w", err)
 			}
 		}
 
