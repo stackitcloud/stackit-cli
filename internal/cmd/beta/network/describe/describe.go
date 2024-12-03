@@ -152,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddSeparator()
 		}
 
-		routed := false
+		routed := true
 		if network.Routed != nil {
 			routed = *network.Routed
 		}

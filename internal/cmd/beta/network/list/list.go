@@ -159,7 +159,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 				publicIp = *network.PublicIp
 			}
 
-			routed := false
+			routed := true
 			if network.Routed != nil {
 				routed = *network.Routed
 			}
