@@ -38,7 +38,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		nameFlag:               "example-network-name",
 		projectIdFlag:          testProjectId,
-		routedFlag:             "true",
 		ipv4DnsNameServersFlag: "1.1.1.0,1.1.2.0",
 		ipv4GatewayFlag:        "10.1.2.3",
 		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
@@ -58,7 +57,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		Name:               utils.Ptr("example-network-name"),
 		NetworkId:          testNetworkId,
-		Routed:             true,
 		IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
 		IPv4Gateway:        utils.Ptr("10.1.2.3"),
 		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
@@ -81,8 +79,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) 
 
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaas.PartialUpdateNetworkPayload {
 	payload := iaas.PartialUpdateNetworkPayload{
-		Name:   utils.Ptr("example-network-name"),
-		Routed: utils.Ptr(true),
+		Name: utils.Ptr("example-network-name"),
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
 			Ipv4: &iaas.UpdateNetworkIPv4Body{
 				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
@@ -219,17 +216,6 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.NoIPv6Gateway = true
 				model.IPv6Gateway = nil
-			}),
-		},
-		{
-			description: "use routed true",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[routedFlag] = "true"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Routed = true
 			}),
 		},
 	}

@@ -24,7 +24,6 @@ const (
 	networkIdArg = "NETWORK_ID"
 
 	nameFlag               = "name"
-	routedFlag             = "routed"
 	ipv4DnsNameServersFlag = "ipv4-dns-name-servers"
 	ipv4GatewayFlag        = "ipv4-gateway"
 	ipv6DnsNameServersFlag = "ipv6-dns-name-servers"
@@ -37,7 +36,6 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NetworkId          string
 	Name               *string
-	Routed             bool
 	IPv4DnsNameServers *[]string
 	IPv4Gateway        *string
 	IPv6DnsNameServers *[]string
@@ -56,10 +54,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Update network with ID "xxx" with new name "network-1-new"`,
 				`$ stackit beta network update xxx --name network-1-new`,
-			),
-			examples.NewExample(
-				`Update network with ID "xxx" with routed true`,
-				`$ stackit beta network update xxx --routed`,
 			),
 			examples.NewExample(
 				`Update network with ID "xxx" with no gateway`,
@@ -134,16 +128,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().Bool(routedFlag, false, "If set to true, the network is routed and therefore accessible from other networks")
 	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, nil, "List of DNS name servers IPv4. Nameservers cannot be defined for routed networks")
 	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks")
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
-
-	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
-	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -158,7 +148,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel:    globalFlags,
 		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkId:          networkId,
-		Routed:             flags.FlagToBoolValue(p, cmd, routedFlag),
 		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
 		IPv4Gateway:        flags.FlagToStringPointer(p, cmd, ipv4GatewayFlag),
 		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
@@ -208,8 +197,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
-		Name:   model.Name,
-		Routed: &model.Routed,
+		Name: model.Name,
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

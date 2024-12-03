@@ -16,9 +16,6 @@ stackit beta network update [flags]
   Update network with ID "xxx" with new name "network-1-new"
   $ stackit beta network update xxx --name network-1-new
 
-  Update network with ID "xxx" with routed true
-  $ stackit beta network update xxx --routed
-
   Update network with ID "xxx" with no gateway
   $ stackit beta network update --no-ipv4-gateway
 
@@ -40,7 +37,6 @@ stackit beta network update [flags]
   -n, --name string                     Network name
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
-      --routed                          If set to true, the network is routed and therefore accessible from other networks
 ```
 
 ### Options inherited from parent commands
