@@ -23,8 +23,8 @@ func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpI
 		return "", "", fmt.Errorf("get public ip: %w", err)
 	}
 	associatedResourceId := ""
-	if resp.GetNetworkInterface() != nil {
-		associatedResourceId = *resp.GetNetworkInterface()
+	if resp.NetworkInterface != nil {
+		associatedResourceId = *resp.NetworkInterface.Get()
 	}
 	return *resp.Ip, associatedResourceId, nil
 }
