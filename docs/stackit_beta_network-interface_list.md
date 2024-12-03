@@ -47,5 +47,5 @@ stackit beta network-interface list [flags]
 
 ### SEE ALSO
 
-* [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for Network Interface
+* [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for network interfaces
 

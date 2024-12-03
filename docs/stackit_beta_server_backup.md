@@ -1,10 +1,10 @@
 ## stackit beta server backup
 
-Provides functionality for Server Backup
+Provides functionality for server backups
 
 ### Synopsis
 
-Provides functionality for Server Backup.
+Provides functionality for server backups.
 
 ```
 stackit beta server backup [flags]
@@ -28,7 +28,7 @@ stackit beta server backup [flags]
 
 ### SEE ALSO
 
-* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for Server
+* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 * [stackit beta server backup create](./stackit_beta_server_backup_create.md)	 - Creates a Server Backup.
 * [stackit beta server backup delete](./stackit_beta_server_backup_delete.md)	 - Deletes a Server Backup.
 * [stackit beta server backup describe](./stackit_beta_server_backup_describe.md)	 - Shows details of a Server Backup

@@ -40,5 +40,5 @@ stackit beta server volume attach [flags]
 
 ### SEE ALSO
 
-* [stackit beta server volume](./stackit_beta_server_volume.md)	 - Provides functionality for Server volumes
+* [stackit beta server volume](./stackit_beta_server_volume.md)	 - Provides functionality for server volumes
 

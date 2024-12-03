@@ -1,28 +1,19 @@
-## stackit beta server delete
+## stackit beta server public-ip
 
-Deletes a server
+Allows attaching/detaching public IPs to servers
 
 ### Synopsis
 
-Deletes a server.
-If the server is still in use, the deletion will fail
-
+Allows attaching/detaching public IPs to servers.
 
 ```
-stackit beta server delete [flags]
-```
-
-### Examples
-
-```
-  Delete server with ID "xxx"
-  $ stackit beta server delete xxx
+stackit beta server public-ip [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta server delete"
+  -h, --help   Help for "stackit beta server public-ip"
 ```
 
 ### Options inherited from parent commands
@@ -38,4 +29,6 @@ stackit beta server delete [flags]
 ### SEE ALSO
 
 * [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
+* [stackit beta server public-ip attach](./stackit_beta_server_public-ip_attach.md)	 - Attaches a public IP to a server
+* [stackit beta server public-ip detach](./stackit_beta_server_public-ip_detach.md)	 - Detaches a public IP from a server
 

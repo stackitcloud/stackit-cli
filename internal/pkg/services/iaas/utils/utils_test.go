@@ -11,6 +11,8 @@ import (
 )
 
 type IaaSClientMocked struct {
+	GetPublicIpFails         bool
+	GetPublicIpResp          *iaas.PublicIp
 	GetServerFails           bool
 	GetServerResp            *iaas.Server
 	GetVolumeFails           bool
@@ -23,6 +25,13 @@ type IaaSClientMocked struct {
 	GetAttachedProjectsResp  *iaas.ProjectListResponse
 	GetNetworkAreaRangeFails bool
 	GetNetworkAreaRangeResp  *iaas.NetworkRange
+}
+
+func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*iaas.PublicIp, error) {
+	if m.GetPublicIpFails {
+		return nil, fmt.Errorf("could not get public ip")
+	}
+	return m.GetPublicIpResp, nil
 }
 
 func (m *IaaSClientMocked) GetServerExecute(_ context.Context, _, _ string) (*iaas.Server, error) {
@@ -65,6 +74,58 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
+}
+
+func TestGetPublicIp(t *testing.T) {
+	type args struct {
+		getPublicIpFails bool
+		getPublicIpResp  *iaas.PublicIp
+	}
+	tests := []struct {
+		name                   string
+		args                   args
+		wantPublicIp           string
+		wantAssociatedResource string
+		wantErr                bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getPublicIpResp: &iaas.PublicIp{
+					Ip:               utils.Ptr("1.2.3.4"),
+					NetworkInterface: iaas.NewNullableString(utils.Ptr("5.6.7.8")),
+				},
+			},
+			wantPublicIp:           "1.2.3.4",
+			wantAssociatedResource: "5.6.7.8",
+		},
+		{
+			name: "get public ip fails",
+			args: args{
+				getPublicIpFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetPublicIpFails: tt.args.getPublicIpFails,
+				GetPublicIpResp:  tt.args.getPublicIpResp,
+			}
+			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), m, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotPublicIP != tt.wantPublicIp {
+				t.Errorf("GetPublicIP() = %v, want public IP %v", gotPublicIP, tt.wantPublicIp)
+			}
+			if gotAssociatedResource != tt.wantAssociatedResource {
+				t.Errorf("GetPublicIP() = %v, want associated resource %v", gotAssociatedResource, tt.wantAssociatedResource)
+			}
+		})
+	}
 }
 
 func TestGetServerName(t *testing.T) {

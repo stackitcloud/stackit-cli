@@ -1,4 +1,4 @@
-package describe
+package attach
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -21,10 +22,11 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
+var testPublicIpId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testServerId,
+		testPublicIpId,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -35,6 +37,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
+		serverIdFlag:  testServerId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -45,10 +48,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			ProjectId: testProjectId,
 		},
-		ServerId: testServerId,
+		ServerId:   utils.Ptr(testServerId),
+		PublicIpId: testPublicIpId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -56,9 +60,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiGetServerRequest)) iaas.ApiGetServerRequest {
-	request := testClient.GetServer(testCtx, testProjectId, testServerId)
-	request = request.Details(true)
+func fixtureRequest(mods ...func(request *iaas.ApiAddPublicIpToServerRequest)) iaas.ApiAddPublicIpToServerRequest {
+	request := testClient.AddPublicIpToServer(testCtx, testProjectId, testServerId, testPublicIpId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -82,18 +85,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no values",
-			argValues:   []string{},
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "no flag values",
 			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
@@ -123,15 +114,32 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "server id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, serverIdFlag)
+			}),
+			isValid: false,
+		},
+		{
 			description: "server id invalid 1",
-			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[serverIdFlag] = ""
+			}),
+			isValid: false,
 		},
 		{
 			description: "server id invalid 2",
-			argValues:   []string{"invalid-uuid"},
-			flagValues:  fixtureFlagValues(),
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[serverIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "volume id argument missing",
+			argValues:   []string{},
 			isValid:     false,
 		},
 	}
@@ -160,7 +168,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error validating args: %v", err)
+				t.Fatalf("error parsing args: %v", err)
 			}
 
 			err = cmd.ValidateRequiredFlags()
@@ -194,7 +202,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiGetServerRequest
+		expectedRequest iaas.ApiAddPublicIpToServerRequest
 	}{
 		{
 			description:     "base",

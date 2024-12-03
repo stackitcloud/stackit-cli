@@ -77,5 +77,5 @@ stackit beta server create [flags]
 
 ### SEE ALSO
 
-* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for Server
+* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 

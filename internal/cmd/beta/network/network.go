@@ -16,8 +16,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "network",
-		Short: "Provides functionality for Network",
-		Long:  "Provides functionality for Network.",
+		Short: "Provides functionality for networks",
+		Long:  "Provides functionality for networks.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

@@ -1,27 +1,27 @@
-## stackit beta server backup enable
+## stackit beta server public-ip attach
 
-Enables Server Backup service
+Attaches a public IP to a server
 
 ### Synopsis
 
-Enables Server Backup service.
+Attaches a public IP to a server.
 
 ```
-stackit beta server backup enable [flags]
+stackit beta server public-ip attach [flags]
 ```
 
 ### Examples
 
 ```
-  Enable Server Backup functionality for your server
-  $ stackit beta server backup enable --server-id=zzz
+  Attach a public IP with ID "xxx" to a server with ID "yyy"
+  $ stackit beta server public-ip attach xxx --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help               Help for "stackit beta server backup enable"
-  -s, --server-id string   Server ID
+  -h, --help               Help for "stackit beta server public-ip attach"
+      --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta server backup enable [flags]
 
 ### SEE ALSO
 
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for server backups
+* [stackit beta server public-ip](./stackit_beta_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
 

@@ -28,7 +28,7 @@ stackit beta server backup schedule [flags]
 
 ### SEE ALSO
 
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
+* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for server backups
 * [stackit beta server backup schedule create](./stackit_beta_server_backup_schedule_create.md)	 - Creates a Server Backup Schedule
 * [stackit beta server backup schedule delete](./stackit_beta_server_backup_schedule_delete.md)	 - Deletes a Server Backup Schedule
 * [stackit beta server backup schedule describe](./stackit_beta_server_backup_schedule_describe.md)	 - Shows details of a Server Backup Schedule

@@ -11,7 +11,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
@@ -24,13 +23,11 @@ import (
 
 const (
 	serverIdArg = "SERVER_ID"
-	detailsFlag = "details"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ServerId string
-	Details  bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -43,10 +40,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Show details of a server with ID "xxx"`,
 				"$ stackit beta server describe xxx",
-			),
-			examples.NewExample(
-				`Show detailed information of a server with ID "xxx"`,
-				"$ stackit beta server describe xxx --details",
 			),
 			examples.NewExample(
 				`Show details of a server with ID "xxx" in JSON format`,
@@ -76,12 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			return outputResult(p, model, resp)
 		},
 	}
-	configureFlags(cmd)
 	return cmd
-}
-
-func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(detailsFlag, false, "Show detailed information about server")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -95,7 +83,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ServerId:        serverId,
-		Details:         flags.FlagToBoolValue(p, cmd, detailsFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -112,10 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetServerRequest {
 	req := apiClient.GetServer(ctx, model.ProjectId, model.ServerId)
-
-	if model.Details {
-		req = req.Details(true)
-	}
+	req = req.Details(true)
 
 	return req
 }
@@ -142,6 +126,8 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 		return nil
 	default:
 		table := tables.NewTable()
+		table.SetTitle("Server")
+
 		table.AddRow("ID", *server.Id)
 		table.AddSeparator()
 		table.AddRow("NAME", *server.Name)
@@ -184,6 +170,11 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			table.AddSeparator()
 		}
 
+		if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
+			table.AddRow("SERVICE ACCOUNTS", strings.Join(*server.ServiceAccountMails, "\n"))
+			table.AddSeparator()
+		}
+
 		if server.Volumes != nil && len(*server.Volumes) > 0 {
 			volumes := []string{}
 			volumes = append(volumes, *server.Volumes...)
@@ -191,28 +182,31 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			table.AddSeparator()
 		}
 
-		if model.Details {
-			if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
-				emails := []string{}
-				emails = append(emails, *server.ServiceAccountMails...)
-				table.AddRow("SERVICE ACCOUNTS", strings.Join(emails, "\n"))
-				table.AddSeparator()
-			}
-
-			if server.Nics != nil && len(*server.Nics) > 0 {
-				nics := []string{}
-				for _, nic := range *server.Nics {
-					nics = append(nics, *nic.NicId)
-				}
-				table.AddRow("NICS", strings.Join(nics, "\n"))
-				table.AddSeparator()
-			}
-		}
-
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
+		if server.Nics != nil && len(*server.Nics) > 0 {
+			nicsTable := tables.NewTable()
+			nicsTable.SetTitle("Attached Network Interfaces")
+			nicsTable.SetHeader("ID", "NETWORK ID", "NETWORK NAME", "PUBLIC IP")
+
+			for _, nic := range *server.Nics {
+				publicIp := ""
+				if nic.PublicIp != nil {
+					publicIp = *nic.PublicIp
+				}
+				nicsTable.AddRow(*nic.NicId, *nic.NetworkId, *nic.NetworkName, publicIp)
+				nicsTable.AddSeparator()
+			}
+
+			err := nicsTable.Display(p)
+			if err != nil {
+				return fmt.Errorf("render table: %w", err)
+			}
+		}
+
 		return nil
 	}
 }

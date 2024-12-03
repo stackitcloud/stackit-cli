@@ -1,10 +1,10 @@
 ## stackit beta server volume
 
-Provides functionality for Server volumes
+Provides functionality for server volumes
 
 ### Synopsis
 
-Provides functionality for Server volumes.
+Provides functionality for server volumes.
 
 ```
 stackit beta server volume [flags]
@@ -28,7 +28,7 @@ stackit beta server volume [flags]
 
 ### SEE ALSO
 
-* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for Server
+* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 * [stackit beta server volume attach](./stackit_beta_server_volume_attach.md)	 - Attaches a volume to a server
 * [stackit beta server volume describe](./stackit_beta_server_volume_describe.md)	 - Describes a server volume attachment
 * [stackit beta server volume detach](./stackit_beta_server_volume_detach.md)	 - Detaches a volume from a server
