@@ -152,10 +152,13 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddSeparator()
 		}
 
+		routed := false
 		if network.Routed != nil {
-			table.AddRow("ROUTED", *network.Routed)
-			table.AddSeparator()
+			routed = *network.Routed
 		}
+
+		table.AddRow("ROUTED", routed)
+		table.AddSeparator()
 
 		if network.Gateway != nil {
 			table.AddRow("IPv4 GATEWAY", *network.Gateway.Get())
