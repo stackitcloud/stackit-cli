@@ -227,13 +227,13 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description: "use routed true",
+			description: "non-routed network",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nonRoutedFlag] = "false"
+				flagValues[nonRoutedFlag] = "true"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.NonRouted = false
+				model.NonRouted = true
 			}),
 		},
 	}
