@@ -186,7 +186,7 @@ func TestParseInput(t *testing.T) {
 			description: "use ipv4 gateway nil",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[noIpv4Gateway] = "true"
+				flagValues[noIpv4GatewayFlag] = "true"
 				delete(flagValues, ipv4GatewayFlag)
 			}),
 			isValid: true,
@@ -212,7 +212,7 @@ func TestParseInput(t *testing.T) {
 			description: "use ipv6 gateway nil",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[noIpv6Gateway] = "true"
+				flagValues[noIpv6GatewayFlag] = "true"
 				delete(flagValues, ipv6GatewayFlag)
 			}),
 			isValid: true,

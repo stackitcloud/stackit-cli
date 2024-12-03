@@ -29,8 +29,8 @@ const (
 	ipv4GatewayFlag        = "ipv4-gateway"
 	ipv6DnsNameServersFlag = "ipv6-dns-name-servers"
 	ipv6GatewayFlag        = "ipv6-gateway"
-	noIpv4Gateway          = "no-ipv4-gateway"
-	noIpv6Gateway          = "no-ipv6-gateway"
+	noIpv4GatewayFlag      = "no-ipv4-gateway"
+	noIpv6GatewayFlag      = "no-ipv6-gateway"
 )
 
 type inputModel struct {
@@ -139,8 +139,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks")
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
-	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway")
-	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway")
+	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
+	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
 
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)
@@ -163,8 +163,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		IPv4Gateway:        flags.FlagToStringPointer(p, cmd, ipv4GatewayFlag),
 		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
-		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4Gateway),
-		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6Gateway),
+		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
+		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
 	}
 
 	if p.IsVerbosityDebug() {

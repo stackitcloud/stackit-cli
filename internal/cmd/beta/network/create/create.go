@@ -32,8 +32,8 @@ const (
 	ipv6PrefixFlag         = "ipv6-prefix"
 	ipv6GatewayFlag        = "ipv6-gateway"
 	routedFlag             = "routed"
-	noIpv4Gateway          = "no-ipv4-gateway"
-	noIpv6Gateway          = "no-ipv6-gateway"
+	noIpv4GatewayFlag      = "no-ipv4-gateway"
+	noIpv6GatewayFlag      = "no-ipv6-gateway"
 )
 
 type inputModel struct {
@@ -144,8 +144,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(ipv6PrefixFlag, "", "The IPv6 prefix of the network (CIDR)")
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().Bool(routedFlag, false, "If set to true, the network is routed and therefore accessible from other networks")
-	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway")
-	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway")
+	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
+	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
 
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)
@@ -171,8 +171,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		IPv6Prefix:         flags.FlagToStringPointer(p, cmd, ipv6PrefixFlag),
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
 		Routed:             flags.FlagToBoolValue(p, cmd, routedFlag),
-		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4Gateway),
-		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6Gateway),
+		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
+		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
 	}
 
 	if p.IsVerbosityDebug() {
