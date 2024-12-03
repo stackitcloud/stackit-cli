@@ -18,8 +18,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "public-ip",
-		Short: "Provides functionality for Public IP",
-		Long:  "Provides functionality for Public IP.",
+		Short: "Provides functionality for public IPs",
+		Long:  "Provides functionality for public IPs.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

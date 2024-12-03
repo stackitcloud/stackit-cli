@@ -1,10 +1,10 @@
 ## stackit beta public-ip
 
-Provides functionality for Public IP
+Provides functionality for public IPs
 
 ### Synopsis
 
-Provides functionality for Public IP.
+Provides functionality for public IPs.
 
 ```
 stackit beta public-ip [flags]

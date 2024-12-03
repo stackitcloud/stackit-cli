@@ -46,5 +46,5 @@ stackit beta public-ip list [flags]
 
 ### SEE ALSO
 
-* [stackit beta public-ip](./stackit_beta_public-ip.md)	 - Provides functionality for Public IP
+* [stackit beta public-ip](./stackit_beta_public-ip.md)	 - Provides functionality for public IPs
 
