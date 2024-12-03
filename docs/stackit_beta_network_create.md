@@ -22,11 +22,11 @@ stackit beta network create [flags]
   Create a network with name "network-1" and no gateway
   $ stackit beta network create --name network-1 --no-ipv4-gateway
 
-  Create an IPv4 network with name "network-1" with DNS name servers, a prefix, a gateway and a prefix length
-  $ stackit beta network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix-length 25 --ipv4-prefix "10.1.2.0/24" --ipv4-gateway "10.1.2.3"
+  Create an IPv4 network with name "network-1" with DNS name servers, a prefix and a gateway
+  $ stackit beta network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix "10.1.2.0/24" --ipv4-gateway "10.1.2.3"
 
-  Create an IPv6 network with name "network-1" with DNS name servers, a prefix, a gateway and a prefix length
-  $ stackit beta network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix-length 56 --ipv6-prefix "2001:4860:4860::8888" --ipv6-gateway "2001:4860:4860::8888"
+  Create an IPv6 network with name "network-1" with DNS name servers, a prefix and a gateway
+  $ stackit beta network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix "2001:4860:4860::8888" --ipv6-gateway "2001:4860:4860::8888"
 ```
 
 ### Options
