@@ -154,7 +154,12 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 		table.SetHeader("ID", "Name", "Status", "Public IP")
 
 		for _, network := range networks {
-			table.AddRow(*network.NetworkId, *network.Name, *network.State, *network.PublicIp)
+			publicIp := ""
+			if network.PublicIp != nil {
+				publicIp = *network.PublicIp
+			}
+
+			table.AddRow(*network.NetworkId, *network.Name, *network.State, publicIp)
 			table.AddSeparator()
 		}
 

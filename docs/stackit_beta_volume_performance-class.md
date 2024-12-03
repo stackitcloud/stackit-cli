@@ -28,7 +28,7 @@ stackit beta volume performance-class [flags]
 
 ### SEE ALSO
 
-* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
+* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for volumes
 * [stackit beta volume performance-class describe](./stackit_beta_volume_performance-class_describe.md)	 - Shows details of a volume performance class
 * [stackit beta volume performance-class list](./stackit_beta_volume_performance-class_list.md)	 - Lists all volume performance classes for a project
 

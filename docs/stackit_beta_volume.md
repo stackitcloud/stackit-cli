@@ -1,10 +1,10 @@
 ## stackit beta volume
 
-Provides functionality for Volume
+Provides functionality for volumes
 
 ### Synopsis
 
-Provides functionality for Volume.
+Provides functionality for volumes.
 
 ```
 stackit beta volume [flags]

@@ -44,5 +44,5 @@ stackit beta network update [flags]
 
 ### SEE ALSO
 
-* [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for Network
+* [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for networks
 

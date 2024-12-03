@@ -1,27 +1,27 @@
-## stackit beta server backup enable
+## stackit beta server public-ip detach
 
-Enables Server Backup service
+Detaches a public IP from a server
 
 ### Synopsis
 
-Enables Server Backup service.
+Detaches a public IP from a server.
 
 ```
-stackit beta server backup enable [flags]
+stackit beta server public-ip detach [flags]
 ```
 
 ### Examples
 
 ```
-  Enable Server Backup functionality for your server
-  $ stackit beta server backup enable --server-id=zzz
+  Detaches a public IP with ID "xxx" from a server with ID "yyy"
+  $ stackit beta server public-ip detach xxx --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help               Help for "stackit beta server backup enable"
-  -s, --server-id string   Server ID
+  -h, --help               Help for "stackit beta server public-ip detach"
+      --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta server backup enable [flags]
 
 ### SEE ALSO
 
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for server backups
+* [stackit beta server public-ip](./stackit_beta_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
 

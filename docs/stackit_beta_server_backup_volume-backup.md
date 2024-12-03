@@ -28,7 +28,7 @@ stackit beta server backup volume-backup [flags]
 
 ### SEE ALSO
 
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
+* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for server backups
 * [stackit beta server backup volume-backup delete](./stackit_beta_server_backup_volume-backup_delete.md)	 - Deletes a Server Volume Backup.
 * [stackit beta server backup volume-backup restore](./stackit_beta_server_backup_volume-backup_restore.md)	 - Restore a Server Volume Backup to a volume.
 

@@ -42,5 +42,5 @@ stackit beta server backup create [flags]
 
 ### SEE ALSO
 
-* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for Server Backup
+* [stackit beta server backup](./stackit_beta_server_backup.md)	 - Provides functionality for server backups
 

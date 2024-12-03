@@ -40,11 +40,11 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for Network
+* [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for networks
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
-* [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for Network Interface
-* [stackit beta public-ip](./stackit_beta_public-ip.md)	 - Provides functionality for Public IP
-* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for Server
+* [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for network interfaces
+* [stackit beta public-ip](./stackit_beta_public-ip.md)	 - Provides functionality for public IPs
+* [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
-* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
+* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for volumes
 
