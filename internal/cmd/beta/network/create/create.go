@@ -135,17 +135,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
-	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, []string{}, "List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks.")
+	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, []string{}, "List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks")
 	cmd.Flags().Int64(ipv4PrefixLengthFlag, 0, "The prefix length of the IPv4 network")
 	cmd.Flags().String(ipv4PrefixFlag, "", "The IPv4 prefix of the network (CIDR)")
-	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.")
-	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, []string{}, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks.")
+	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
+	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, []string{}, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks")
 	cmd.Flags().Int64(ipv6PrefixLengthFlag, 0, "The prefix length of the IPv6 network")
 	cmd.Flags().String(ipv6PrefixFlag, "", "The IPv6 prefix of the network (CIDR)")
-	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.")
+	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().Bool(routedFlag, false, "If set to true, the network is routed and therefore accessible from other networks")
-	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway.")
-	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway.")
+	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway")
+	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway")
 
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)

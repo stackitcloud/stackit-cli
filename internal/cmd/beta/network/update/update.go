@@ -135,12 +135,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
 	cmd.Flags().Bool(routedFlag, false, "If set to true, the network is routed and therefore accessible from other networks")
-	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, nil, "List of DNS name servers IPv4. Nameservers cannot be defined for routed networks.")
-	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.")
-	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks.")
-	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.")
-	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway.")
-	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway.")
+	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, nil, "List of DNS name servers IPv4. Nameservers cannot be defined for routed networks")
+	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
+	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks")
+	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
+	cmd.Flags().Bool(noIpv4Gateway, false, "If set to true, the network doesn't have an IPv4 gateway")
+	cmd.Flags().Bool(noIpv6Gateway, false, "If set to true, the network doesn't have an IPv6 gateway")
 
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
 	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)

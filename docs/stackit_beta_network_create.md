@@ -33,17 +33,17 @@ stackit beta network create [flags]
 
 ```
   -h, --help                            Help for "stackit beta network create"
-      --ipv4-dns-name-servers strings   List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks.
-      --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.
+      --ipv4-dns-name-servers strings   List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks
+      --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --ipv4-prefix string              The IPv4 prefix of the network (CIDR)
       --ipv4-prefix-length int          The prefix length of the IPv4 network
-      --ipv6-dns-name-servers strings   List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks.
-      --ipv6-gateway string             The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway. If 'null' is sent, then the network doesn't have a gateway.
+      --ipv6-dns-name-servers strings   List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks
+      --ipv6-gateway string             The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --ipv6-prefix string              The IPv6 prefix of the network (CIDR)
       --ipv6-prefix-length int          The prefix length of the IPv6 network
   -n, --name string                     Network name
-      --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway.
-      --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway.
+      --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
+      --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
       --routed                          If set to true, the network is routed and therefore accessible from other networks
 ```
 
