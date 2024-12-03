@@ -65,28 +65,28 @@ Help is available for any command by specifying the special flag `--help` (or si
 
 Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
 
-| Service                            | CLI Commands                                                                                                    | Status                    |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| Observability                      | `observability`                                                                                                 | :white_check_mark:        |
-| Infrastructure as a Service (IaaS) | `beta network-area` <br/> `beta network` <br/> `beta volume` <br/> `beta network-interface` <br/> `beta server` | :white_check_mark: (beta) |
-| Authorization                      | `project`, `organization`                                                                                       | :white_check_mark:        |
-| DNS                                | `dns`                                                                                                           | :white_check_mark:        |
-| Kubernetes Engine (SKE)            | `ske`                                                                                                           | :white_check_mark:        |
-| Load Balancer                      | `load-balancer`                                                                                                 | :white_check_mark:        |
-| LogMe                              | `logme`                                                                                                         | :white_check_mark:        |
-| MariaDB                            | `mariadb`                                                                                                       | :white_check_mark:        |
-| MongoDB Flex                       | `mongodbflex`                                                                                                   | :white_check_mark:        |
-| Object Storage                     | `object-storage`                                                                                                | :white_check_mark:        |
-| OpenSearch                         | `opensearch`                                                                                                    | :white_check_mark:        |
-| PostgreSQL Flex                    | `postgresflex`                                                                                                  | :white_check_mark:        |
-| RabbitMQ                           | `rabbitmq`                                                                                                      | :white_check_mark:        |
-| Redis                              | `redis`                                                                                                         | :white_check_mark:        |
-| Resource Manager                   | `project`                                                                                                       | :white_check_mark:        |
-| Secrets Manager                    | `secrets-manager`                                                                                               | :white_check_mark:        |
-| Server Backup Management           | `beta server backup`                                                                                            | :white_check_mark: (beta) |
-| Server Command (Run Command)       | `beta server command`                                                                                           | :white_check_mark: (beta) |
-| Service Account                    | `service-account`                                                                                               | :white_check_mark:        |
-| SQLServer Flex                     | `beta sqlserverflex`                                                                                            | :white_check_mark: (beta) |
+| Service                            | CLI Commands                                                                                                         | Status                    |
+| ---------------------------------- |----------------------------------------------------------------------------------------------------------------------| ------------------------- |
+| Observability                      | `observability`                                                                                                      | :white_check_mark:        |
+| Infrastructure as a Service (IaaS) | `beta network-area`   <br/> `beta network` <br/> `beta volume` <br/> `beta network-interface` <br/> `beta public-ip` | :white_check_mark: (beta) |
+| Authorization                      | `project`, `organization`                                                                                            | :white_check_mark:        |
+| DNS                                | `dns`                                                                                                                | :white_check_mark:        |
+| Kubernetes Engine (SKE)            | `ske`                                                                                                                | :white_check_mark:        |
+| Load Balancer                      | `load-balancer`                                                                                                      | :white_check_mark:        |
+| LogMe                              | `logme`                                                                                                              | :white_check_mark:        |
+| MariaDB                            | `mariadb`                                                                                                            | :white_check_mark:        |
+| MongoDB Flex                       | `mongodbflex`                                                                                                        | :white_check_mark:        |
+| Object Storage                     | `object-storage`                                                                                                     | :white_check_mark:        |
+| OpenSearch                         | `opensearch`                                                                                                         | :white_check_mark:        |
+| PostgreSQL Flex                    | `postgresflex`                                                                                                       | :white_check_mark:        |
+| RabbitMQ                           | `rabbitmq`                                                                                                           | :white_check_mark:        |
+| Redis                              | `redis`                                                                                                              | :white_check_mark:        |
+| Resource Manager                   | `project`                                                                                                            | :white_check_mark:        |
+| Secrets Manager                    | `secrets-manager`                                                                                                    | :white_check_mark:        |
+| Server Backup Management           | `beta server backup`                                                                                                 | :white_check_mark: (beta) |
+| Server Command (Run Command)       | `beta server command`                                                                                                | :white_check_mark: (beta) |
+| Service Account                    | `service-account`                                                                                                    | :white_check_mark:        |
+| SQLServer Flex                     | `beta sqlserverflex`                                                                                                 | :white_check_mark: (beta) |
 
 ## Authentication
 
