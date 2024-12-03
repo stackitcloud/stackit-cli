@@ -285,7 +285,7 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
-	tests := []struct {
+	var tests = []struct {
 		description     string
 		model           *inputModel
 		expectedRequest iaas.ApiCreateNetworkRequest
@@ -306,8 +306,108 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: fixtureRequiredRequest(),
 		},
+		{
+			description: "non-routed network",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				Name:      utils.Ptr("example-network-name"),
+				NonRouted: true,
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				Name:   utils.Ptr("example-network-name"),
+				Routed: utils.Ptr(false),
+			}),
+		},
+		{
+			description: "use dns servers, prefix, gateway and prefix length",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.1"}),
+				IPv4PrefixLength:   utils.Ptr(int64(25)),
+				IPv4Prefix:         utils.Ptr("10.1.2.0/24"),
+				IPv4Gateway:        utils.Ptr("10.1.2.3"),
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				AddressFamily: &iaas.CreateNetworkAddressFamily{
+					Ipv4: &iaas.CreateNetworkIPv4Body{
+						Nameservers:  utils.Ptr([]string{"1.1.1.1"}),
+						PrefixLength: utils.Ptr(int64(25)),
+						Prefix:       utils.Ptr("10.1.2.0/24"),
+						Gateway:      iaas.NewNullableString(utils.Ptr("10.1.2.3")),
+					},
+				},
+				Routed: utils.Ptr(true),
+			}),
+		},
+		{
+			description: "use ipv4 gateway nil",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				NoIPv4Gateway: true,
+				IPv4Gateway:   nil,
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				AddressFamily: &iaas.CreateNetworkAddressFamily{
+					Ipv4: &iaas.CreateNetworkIPv4Body{
+						Gateway: iaas.NewNullableString(nil),
+					},
+				},
+				Routed: utils.Ptr(true),
+			}),
+		},
+		{
+			description: "use ipv6 dns servers, prefix, gateway and prefix length",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888"}),
+				IPv6PrefixLength:   utils.Ptr(int64(25)),
+				IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
+				IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				AddressFamily: &iaas.CreateNetworkAddressFamily{
+					Ipv6: &iaas.CreateNetworkIPv6Body{
+						Nameservers:  utils.Ptr([]string{"2001:4860:4860::8888"}),
+						PrefixLength: utils.Ptr(int64(25)),
+						Prefix:       utils.Ptr("2001:4860:4860::8888"),
+						Gateway:      iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
+					},
+				},
+				Routed: utils.Ptr(true),
+			}),
+		},
+		{
+			description: "use ipv6 gateway nil",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				NoIPv6Gateway: true,
+				IPv6Gateway:   nil,
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				AddressFamily: &iaas.CreateNetworkAddressFamily{
+					Ipv6: &iaas.CreateNetworkIPv6Body{
+						Gateway: iaas.NewNullableString(nil),
+					},
+				},
+				Routed: utils.Ptr(true),
+			}),
+		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
