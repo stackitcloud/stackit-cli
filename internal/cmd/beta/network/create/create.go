@@ -31,7 +31,7 @@ const (
 	ipv6PrefixLengthFlag   = "ipv6-prefix-length"
 	ipv6PrefixFlag         = "ipv6-prefix"
 	ipv6GatewayFlag        = "ipv6-gateway"
-	routedFlag             = "routed"
+	nonRoutedFlag          = "non-routed"
 	noIpv4GatewayFlag      = "no-ipv4-gateway"
 	noIpv6GatewayFlag      = "no-ipv6-gateway"
 )
@@ -47,7 +47,7 @@ type inputModel struct {
 	IPv6PrefixLength   *int64
 	IPv6Prefix         *string
 	IPv6Gateway        *string
-	Routed             bool
+	NonRouted          bool
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
 }
@@ -64,8 +64,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`$ stackit beta network create --name network-1`,
 			),
 			examples.NewExample(
-				`Create a routed network with name "network-1"`,
-				`$ stackit beta network create --name network-1 --routed`,
+				`Create a non-routed network with name "network-1"`,
+				`$ stackit beta network create --name network-1 --non-routed`,
 			),
 			examples.NewExample(
 				`Create a network with name "network-1" and no gateway`,
@@ -143,12 +143,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(ipv6PrefixLengthFlag, 0, "The prefix length of the IPv6 network")
 	cmd.Flags().String(ipv6PrefixFlag, "", "The IPv6 prefix of the network (CIDR)")
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
-	cmd.Flags().Bool(routedFlag, false, "If set to true, the network is routed and therefore accessible from other networks")
+	cmd.Flags().Bool(nonRoutedFlag, false, "If set to true, the network is not routed and therefore not accessible from other networks")
 	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
 
-	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv4DnsNameServersFlag)
-	cmd.MarkFlagsMutuallyExclusive(routedFlag, ipv6DnsNameServersFlag)
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
 }
@@ -170,7 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		IPv6PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv6PrefixLengthFlag),
 		IPv6Prefix:         flags.FlagToStringPointer(p, cmd, ipv6PrefixFlag),
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
-		Routed:             flags.FlagToBoolValue(p, cmd, routedFlag),
+		NonRouted:          flags.FlagToBoolValue(p, cmd, nonRoutedFlag),
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
 	}
@@ -219,9 +217,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
+	routed := true
+	if model.NonRouted {
+		routed = false
+	}
+
 	payload := iaas.CreateNetworkPayload{
 		Name:   model.Name,
-		Routed: &model.Routed,
+		Routed: &routed,
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

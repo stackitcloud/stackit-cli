@@ -35,7 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		ipv6PrefixLengthFlag:   "24",
 		ipv6PrefixFlag:         "2001:4860:4860::8888",
 		ipv6GatewayFlag:        "2001:4860:4860::8888",
-		routedFlag:             "true",
+		nonRoutedFlag:          "false",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IPv6PrefixLength:   utils.Ptr(int64(24)),
 		IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
 		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
-		Routed:             true,
+		NonRouted:          false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,7 +79,7 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest))
 	request := testClient.CreateNetwork(testCtx, testProjectId)
 	request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
 		Name:   utils.Ptr("example-network-name"),
-		Routed: utils.Ptr(false),
+		Routed: utils.Ptr(true),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -229,11 +229,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "use routed true",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[routedFlag] = "true"
+				flagValues[nonRoutedFlag] = "false"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Routed = true
+				model.NonRouted = false
 			}),
 		},
 	}

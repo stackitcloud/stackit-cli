@@ -16,8 +16,8 @@ stackit beta network create [flags]
   Create a network with name "network-1"
   $ stackit beta network create --name network-1
 
-  Create a routed network with name "network-1"
-  $ stackit beta network create --name network-1 --routed
+  Create a non-routed network with name "network-1"
+  $ stackit beta network create --name network-1 --non-routed
 
   Create a network with name "network-1" and no gateway
   $ stackit beta network create --name network-1 --no-ipv4-gateway
@@ -44,7 +44,7 @@ stackit beta network create [flags]
   -n, --name string                     Network name
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
-      --routed                          If set to true, the network is routed and therefore accessible from other networks
+      --non-routed                      If set to true, the network is not routed and therefore not accessible from other networks
 ```
 
 ### Options inherited from parent commands
