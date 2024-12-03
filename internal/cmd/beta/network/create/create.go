@@ -253,7 +253,11 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, netw
 
 		return nil
 	default:
-		p.Outputf("Created network for project %q.\nNetwork ID: %s\n", projectLabel, *network.NetworkId)
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, *network.NetworkId)
 		return nil
 	}
 }
