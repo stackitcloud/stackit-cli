@@ -3,6 +3,7 @@ package beta
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group"
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/beta/key-pair"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
@@ -50,6 +51,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(volume.NewCmd(p))
 	cmd.AddCommand(networkinterface.NewCmd(p))
 	cmd.AddCommand(publicip.NewCmd(p))
+	cmd.AddCommand(security_group.NewCmd(p))
 	cmd.AddCommand(securitygroup.NewCmd(p))
 	cmd.AddCommand(keypair.NewCmd(p))
 }
