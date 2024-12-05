@@ -14,7 +14,7 @@ stackit beta server service-account detach [flags]
 
 ```
   Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"
-  $ stackit beta server service-account attach xxx@sa.stackit.cloud --server-id yyy
+  $ stackit beta server service-account detach xxx@sa.stackit.cloud --server-id yyy
 ```
 
 ### Options

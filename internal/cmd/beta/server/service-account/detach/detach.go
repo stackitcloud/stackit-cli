@@ -40,7 +40,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"`,
-				"$ stackit beta server service-account attach xxx@sa.stackit.cloud --server-id yyy",
+				"$ stackit beta server service-account detach xxx@sa.stackit.cloud --server-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
