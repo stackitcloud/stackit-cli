@@ -76,6 +76,8 @@ func executeList(cmd *cobra.Command, p *print.Printer, _ []string) error {
 		operationState = "Triggered enablement of"
 	}
 	p.Info("%s security group for %q\n", operationState, projectLabel)
+
+	panic("todo: implement client invocation and output")
 	return nil
 }
 
