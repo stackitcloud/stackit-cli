@@ -124,6 +124,13 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "name too long",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["name"] = strings.Repeat("toolong", 1000)
+			}),
+			isValid: false,
+		},
+		{
 			description: "description too long",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["description"] = strings.Repeat("toolong", 1000)
