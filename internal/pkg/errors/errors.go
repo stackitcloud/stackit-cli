@@ -146,7 +146,27 @@ To enable it, run:
 	IAAS_SERVER_MISSING_VOLUME_TYPE = `The "boot-volume-source-type" flag must be provided together with "boot-volume-source-id" flag.`
 
 	IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS = `Either "image-id" or "boot-volume-source-type" and "boot-volume-source-id" flags must be provided.`
+
+	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT = `"port-range-min" and "port-range-max" attributes can't be provided if "protocol-name" is set to "icmp" or "ipv6-icmp"`
+
+	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PARAMETERS_CONFLICT = `"icmp-parameter-code" and "icmp-parameter-type" attributes can't be provided if "protocol-name" is not "icmp" or "ipv6-icmp"`
 )
+
+type SecurityGroupRuleProtocolParametersConflictError struct {
+	Cmd *cobra.Command
+}
+
+func (e *SecurityGroupRuleProtocolParametersConflictError) Error() string {
+	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_PARAMETERS_CONFLICT
+}
+
+type SecurityGroupRuleProtocolPortRangeConflictError struct {
+	Cmd *cobra.Command
+}
+
+func (e *SecurityGroupRuleProtocolPortRangeConflictError) Error() string {
+	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT
+}
 
 type ServerCreateMissingVolumeIdError struct {
 	Cmd *cobra.Command
