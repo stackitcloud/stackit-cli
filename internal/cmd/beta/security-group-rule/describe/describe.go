@@ -134,22 +134,48 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 		table := tables.NewTable()
 		table.AddRow("ID", *securityGroupRule.Id)
 		table.AddSeparator()
-		table.AddRow("PROTOCOL NAME", *securityGroupRule.Protocol.Name)
-		table.AddSeparator()
-		table.AddRow("PROTOCOL NUMBER", *securityGroupRule.Protocol.Number)
-		table.AddSeparator()
+
+		if securityGroupRule.Protocol != nil {
+			if securityGroupRule.Protocol.Name != nil {
+				table.AddRow("PROTOCOL NAME", *securityGroupRule.Protocol.Name)
+				table.AddSeparator()
+			}
+
+			if securityGroupRule.Protocol.Number != nil {
+				table.AddRow("PROTOCOL NUMBER", *securityGroupRule.Protocol.Number)
+				table.AddSeparator()
+			}
+		}
+
 		table.AddRow("DIRECTION", *securityGroupRule.Direction)
 		table.AddSeparator()
-		table.AddRow("START PORT", *securityGroupRule.PortRange.Min)
-		table.AddSeparator()
-		table.AddRow("END PORT", *securityGroupRule.PortRange.Max)
-		table.AddSeparator()
-		table.AddRow("ETHER TYPE", *securityGroupRule.Ethertype)
-		table.AddSeparator()
-		table.AddRow("IP RANGE", *securityGroupRule.IpRange)
-		table.AddSeparator()
-		table.AddRow("REMOTE SECURITY GROUP", *securityGroupRule.RemoteSecurityGroupId)
-		table.AddSeparator()
+
+		if securityGroupRule.PortRange != nil {
+			if securityGroupRule.PortRange.Min != nil {
+				table.AddRow("START PORT", *securityGroupRule.PortRange.Min)
+				table.AddSeparator()
+			}
+
+			if securityGroupRule.PortRange.Max != nil {
+				table.AddRow("END PORT", *securityGroupRule.PortRange.Max)
+				table.AddSeparator()
+			}
+		}
+
+		if securityGroupRule.Ethertype != nil {
+			table.AddRow("ETHER TYPE", *securityGroupRule.Ethertype)
+			table.AddSeparator()
+		}
+
+		if securityGroupRule.IpRange != nil {
+			table.AddRow("IP RANGE", *securityGroupRule.IpRange)
+			table.AddSeparator()
+		}
+
+		if securityGroupRule.RemoteSecurityGroupId != nil {
+			table.AddRow("REMOTE SECURITY GROUP", *securityGroupRule.RemoteSecurityGroupId)
+			table.AddSeparator()
+		}
 
 		err := table.Display(p)
 		if err != nil {

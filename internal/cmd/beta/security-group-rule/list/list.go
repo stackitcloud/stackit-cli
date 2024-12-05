@@ -169,7 +169,19 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL")
 
 		for _, securityGroupRule := range securityGroupRules {
-			table.AddRow(*securityGroupRule.Id, *securityGroupRule.Ethertype, *securityGroupRule.Direction, *securityGroupRule.Protocol.Name)
+			etherType := ""
+			if securityGroupRule.Ethertype != nil {
+				etherType = *securityGroupRule.Ethertype
+			}
+
+			protocolName := ""
+			if securityGroupRule.Protocol != nil {
+				if securityGroupRule.Protocol.Name != nil {
+					protocolName = *securityGroupRule.Protocol.Name
+				}
+			}
+
+			table.AddRow(*securityGroupRule.Id, etherType, *securityGroupRule.Direction, protocolName)
 			table.AddSeparator()
 		}
 
