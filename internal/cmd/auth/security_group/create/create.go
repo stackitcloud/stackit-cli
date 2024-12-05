@@ -45,7 +45,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String("name", "", "the name of the security group")
+	cmd.Flags().String("name", "", "the name of the security group. Must be <= 63 chars")
 	cmd.Flags().String("description", "", "an optional description of the security group. Must be <= 127 chars")
 	cmd.Flags().Bool("stateful", false, "create a stateful or a stateless security group")
 	cmd.Flags().StringSlice("labels", nil, "a list of labels in the form <key>=<value>")
@@ -95,6 +95,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+	name := flags.FlagToStringValue(p, cmd, "name")
+	if len(name) >= 64 {
+		return nil, &errors.ArgValidationError{
+			Arg:     "invalid name",
+			Details: "name exceeds 63 characters in length",
+		}
+	}
 
 	labels := make(map[string]any)
 	for _, label := range flags.FlagToStringSliceValue(p, cmd, "labels") {
@@ -117,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringValue(p, cmd, "name"),
+		Name:            name,
 
 		Labels:      labels,
 		Description: description,
