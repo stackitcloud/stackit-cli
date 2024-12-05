@@ -117,7 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, serverId string, serverName string, serviceAccounts []string) error {
+func outputResult(p *print.Printer, outputFormat, serverId, serverName string, serviceAccounts []string) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")

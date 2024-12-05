@@ -3,7 +3,7 @@ package attach
 import (
 	"context"
 	"testing"
-	
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

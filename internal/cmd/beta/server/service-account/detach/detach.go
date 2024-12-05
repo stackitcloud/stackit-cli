@@ -73,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("detach service account request: %v", err)
+				return fmt.Errorf("detach service account request: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, model.ServiceAccMail, serverLabel, resp)
@@ -90,8 +90,8 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
-	serviceAccMail := args[0]
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	serviceAccMail := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -120,7 +120,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, serviceAccMail string, serverLabel string, service *iaas.ServiceAccountMailListResponse) error {
+func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, service *iaas.ServiceAccountMailListResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(service, "", "  ")
