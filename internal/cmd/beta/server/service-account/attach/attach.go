@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_MAIL"
+	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL"
 
 	serverIdFlag = "server-id"
 )

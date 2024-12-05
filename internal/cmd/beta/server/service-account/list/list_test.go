@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -22,11 +23,13 @@ var testCtx = context.WithValue(context.Background(), &testCtxKey{}, "test")
 var testClient = &iaas.APIClient{}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
+var testLimit = int64(10)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
 		serverIdFlag:  testServerId,
+		limitFlag:     strconv.FormatInt(testLimit, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,6 +44,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		ServerId: utils.Ptr(testServerId),
+		Limit:    utils.Ptr(testLimit),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -113,6 +117,30 @@ func TestParseInput(t *testing.T) {
 			description: "server id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[serverIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "without limit",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, limitFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
+		},
+		{
+			description: "limit invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},

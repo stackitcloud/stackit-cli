@@ -1,10 +1,10 @@
 ## stackit beta server service-account list
 
-List all attached service accounts from a server
+List all attached service accounts for a server
 
 ### Synopsis
 
-List all attached service accounts from a server
+List all attached service accounts for a server
 
 ```
 stackit beta server service-account list [flags]
@@ -16,6 +16,9 @@ stackit beta server service-account list [flags]
   List all attached service accounts for a server with ID "xxx"
   $ stackit beta server service-account list --server-id xxx
 
+  List up to 10 attached service accounts for a server with ID "xxx"
+  $ stackit beta server service-account list --server-id xxx --limit 10
+
   List all attached service accounts for a server with ID "xxx" in JSON format
   $ stackit beta server service-account list --server-id xxx --output-format json
 ```
@@ -24,6 +27,7 @@ stackit beta server service-account list [flags]
 
 ```
   -h, --help               Help for "stackit beta server service-account list"
+      --limit int          Maximum number of entries to list
   -s, --server-id string   Server ID
 ```
 

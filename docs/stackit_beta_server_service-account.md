@@ -31,5 +31,5 @@ stackit beta server service-account [flags]
 * [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 * [stackit beta server service-account attach](./stackit_beta_server_service-account_attach.md)	 - Attach a service account to a server
 * [stackit beta server service-account detach](./stackit_beta_server_service-account_detach.md)	 - Detach a service account from a server
-* [stackit beta server service-account list](./stackit_beta_server_service-account_list.md)	 - List all attached service accounts from a server
+* [stackit beta server service-account list](./stackit_beta_server_service-account_list.md)	 - List all attached service accounts for a server
 

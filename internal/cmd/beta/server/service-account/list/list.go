@@ -21,23 +21,29 @@ import (
 
 const (
 	serverIdFlag = "server-id"
+	limitFlag    = "limit"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit    *int64
 	ServerId *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all attached service accounts from a server",
-		Long:  "List all attached service accounts from a server",
+		Short: "List all attached service accounts for a server",
+		Long:  "List all attached service accounts for a server",
 		Args:  cobra.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List all attached service accounts for a server with ID "xxx"`,
 				"$ stackit beta server service-account list --server-id xxx",
+			),
+			examples.NewExample(
+				`List up to 10 attached service accounts for a server with ID "xxx"`,
+				"$ stackit beta server service-account list --server-id xxx --limit 10",
 			),
 			examples.NewExample(
 				`List all attached service accounts for a server with ID "xxx" in JSON format`,
@@ -75,6 +81,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return nil
 			}
 
+			if model.Limit != nil && len(serviceAccounts) > int(*model.Limit) {
+				serviceAccounts = serviceAccounts[:int(*model.Limit)]
+			}
+
 			return outputResult(p, model.OutputFormat, *model.ServerId, serverName, serviceAccounts)
 		},
 	}
@@ -84,6 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
@@ -95,8 +106,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		Limit:           limit,
 		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
 	}
 
