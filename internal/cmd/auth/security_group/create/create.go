@@ -2,9 +2,11 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -12,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -69,26 +70,34 @@ func executeCreate(cmd *cobra.Command, p *print.Printer, _ []string) error {
 		return err
 	}
 
-	projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
-	if err != nil {
-		p.Debug(print.ErrorLevel, "get project name: %v", err)
-		projectLabel = model.ProjectId
+	if !model.AssumeYes {
+		prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", model.Name)
+		err = p.PromptForConfirmation(prompt)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Call API
-	req := buildRequest(ctx, model, apiClient)
-	_, err = req.Execute()
+	request := buildRequest(ctx, model, apiClient)
+	_, err = request.Execute()
 	if err != nil {
 		return fmt.Errorf("create security group: %w", err)
 	}
 
 	operationState := "Enabled"
 	if model.Async {
-		operationState = "Triggered enablement of"
+		operationState = "Triggered label creation"
 	}
-	p.Info("%s security group %q for %q\n", operationState, model.Name, projectLabel)
+	p.Info("%s security group %q for %q\n", operationState, model.Name, model.ProjectId)
 
-	panic("todo: invocation not implemented!")
+	group, err := request.Execute()
+	if err != nil {
+		return fmt.Errorf("create security group: %w", err)
+	}
+	if err:=outputResult(p, model, group);err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -161,4 +170,32 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 
+}
+
+func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup) error {
+	switch model.OutputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal security group: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
+		if err != nil {
+			return fmt.Errorf("marshal security group: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s security group %q\n", operationState, model.Name)
+		return nil
+	}
 }
