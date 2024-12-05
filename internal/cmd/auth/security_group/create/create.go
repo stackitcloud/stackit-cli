@@ -87,6 +87,9 @@ func executeCreate(cmd *cobra.Command, p *print.Printer, _ []string) error {
 		operationState = "Triggered enablement of"
 	}
 	p.Info("%s security group %q for %q\n", operationState, model.Name, projectLabel)
+
+	panic("todo: invocation not implemented!")
+
 	return nil
 }
 
