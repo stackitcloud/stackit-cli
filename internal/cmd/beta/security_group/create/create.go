@@ -80,14 +80,10 @@ func executeCreate(cmd *cobra.Command, p *print.Printer, _ []string) error {
 
 	// Call API
 	request := buildRequest(ctx, model, apiClient)
-	_, err = request.Execute()
-	if err != nil {
-		return fmt.Errorf("create security group: %w", err)
-	}
 
 	operationState := "Enabled"
 	if model.Async {
-		operationState = "Triggered label creation"
+		operationState = "Triggered security group creation"
 	}
 	p.Info("%s security group %q for %q\n", operationState, model.Name, model.ProjectId)
 
