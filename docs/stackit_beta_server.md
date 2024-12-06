@@ -36,7 +36,6 @@ stackit beta server [flags]
 * [stackit beta server describe](./stackit_beta_server_describe.md)	 - Shows details of a server
 * [stackit beta server list](./stackit_beta_server_list.md)	 - Lists all servers of a project
 * [stackit beta server public-ip](./stackit_beta_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
-* [stackit beta server service-account](./stackit_beta_server_service-account.md)	 - Allows attaching/detaching service accounts to servers
 * [stackit beta server update](./stackit_beta_server_update.md)	 - Updates a server
 * [stackit beta server volume](./stackit_beta_server_volume.md)	 - Provides functionality for server volumes
 
