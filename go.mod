@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.8.0
 	github.com/zalando/go-keyring v0.2.6
