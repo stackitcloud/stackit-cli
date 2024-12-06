@@ -46,6 +46,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	globalflags.Configure(cmd.Flags())
 	cmd.Flags().String("name", "", "the name of the security group. Must be <= 63 chars")
 	cmd.Flags().String("description", "", "an optional description of the security group. Must be <= 127 chars")
 	cmd.Flags().Bool("stateful", false, "create a stateful or a stateless security group")
