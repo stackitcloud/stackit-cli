@@ -7,12 +7,10 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -24,6 +22,7 @@ var (
 	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient      = &iaas.APIClient{}
 	testProjectId   = uuid.NewString()
+	testGroupId     = []string{uuid.NewString()}
 	testName        = "new-security-group"
 	testDescription = "a test description"
 	testLabels      = map[string]any{
@@ -31,7 +30,6 @@ var (
 		"barKey": "barValue",
 		"bazKey": "bazValue",
 	}
-	testStateful = true
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -39,7 +37,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag: testProjectId,
 		"description": testDescription,
 		"labels":      "fooKey=fooValue,barKey=barValue,bazKey=bazValue",
-		"stateful":    "true",
 		"name":        testName,
 	}
 	for _, mod := range mods {
@@ -51,10 +48,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Labels:          testLabels,
-		Description:     testDescription,
-		Name:            testName,
-		Stateful:        testStateful,
+		Labels:          &testLabels,
+		Description:     &testDescription,
+		Name:            &testName,
+		SecurityGroupId: testGroupId[0],
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -62,14 +59,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) iaas.ApiCreateSecurityGroupRequest {
-	request := testClient.CreateSecurityGroup(testCtx, testProjectId)
-	request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
-		Description: utils.Ptr(testDescription),
+func fixtureRequest(mods ...func(request *iaas.ApiUpdateSecurityGroupRequest)) iaas.ApiUpdateSecurityGroupRequest {
+	request := testClient.UpdateSecurityGroup(testCtx, testProjectId, testGroupId[0])
+	request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
+		Description: &testDescription,
 		Labels:      &testLabels,
-		Name:        utils.Ptr(testName),
-		Rules:       nil,
-		Stateful:    utils.Ptr(testStateful),
+		Name:        &testName,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -81,6 +76,7 @@ func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
 		flagValues    map[string]string
+		args          []string
 		isValid       bool
 		expectedModel *inputModel
 	}{
@@ -88,18 +84,28 @@ func TestParseInput(t *testing.T) {
 			description:   "base",
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
+			args:          testGroupId,
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no values",
-			flagValues:  map[string]string{},
-			isValid:     false,
+			description: "no values but valid group id",
+			flagValues: map[string]string{
+				projectIdFlag: testProjectId,
+			},
+			args:    testGroupId,
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = nil
+				model.Name = nil
+				model.Description = nil
+			}),
 		},
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
@@ -107,6 +113,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
@@ -114,20 +121,37 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
-			description: "name missing",
+			description: "no name passed",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, "name")
 			}),
-			isValid: false,
+			args: testGroupId,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Name = nil
+			}),
+			isValid: true,
+		},
+		{
+			description: "no description passed",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, "description")
+			}),
+			args: testGroupId,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = nil
+			}),
+			isValid: true,
 		},
 		{
 			description: "name too long",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["name"] = strings.Repeat("toolong", 1000)
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
@@ -135,6 +159,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["description"] = strings.Repeat("toolong", 1000)
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
@@ -142,19 +167,21 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, "labels")
 			}),
-			isValid: true,
+			args: testGroupId,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = map[string]any{}
+				model.Labels = nil
 			}),
+			isValid: true,
 		},
 		{
 			description: "single label",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["labels"] = "foo=bar"
 			}),
+			args:    testGroupId,
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = map[string]any{
+				model.Labels = &map[string]any{
 					"foo": "bar",
 				}
 			}),
@@ -164,6 +191,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["labels"] = "foo=bar=baz"
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
@@ -171,32 +199,37 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues["labels"] = "foobarbaz"
 			}),
+			args:    testGroupId,
 			isValid: false,
 		},
 		{
-			description: "stateless security group",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["stateful"] = "false"
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Stateful = false
-			}),
+			description: "no group id passed",
+			flagValues:  fixtureFlagValues(),
+			args:        nil,
+			isValid:     false,
+		},
+		{
+			description: "invalid group id passed",
+			flagValues:  fixtureFlagValues(),
+			args:        []string{"foobar"},
+			isValid:     false,
+		},
+		{
+			description: "multiple group ids passed",
+			flagValues:  fixtureFlagValues(),
+			args:        []string{uuid.NewString(), uuid.NewString()},
+			isValid:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
-			configureFlags(cmd)
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 
 			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
+
+				if err := cmd.Flags().Set(flag, value); err != nil {
 					if !tt.isValid {
 						return
 					}
@@ -204,16 +237,14 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
+			if err := cmd.ValidateRequiredFlags(); err != nil {
 				if !tt.isValid {
 					return
 				}
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.args)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -236,7 +267,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiCreateSecurityGroupRequest
+		expectedRequest iaas.ApiUpdateSecurityGroupRequest
 	}{
 		{
 			description:     "base",
@@ -248,26 +279,11 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(func(model *inputModel) {
 				model.Labels = nil
 			}),
-			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateSecurityGroupRequest) {
+				*request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      nil,
 					Name:        &testName,
-					Stateful:    &testStateful,
-				})
-			}),
-		},
-		{
-			description: "stateless security group",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Stateful = false
-			}),
-			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
-					Description: &testDescription,
-					Labels:      &testLabels,
-					Name:        &testName,
-					Stateful:    utils.Ptr(false),
 				})
 			}),
 		},

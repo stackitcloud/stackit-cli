@@ -10,7 +10,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -95,11 +94,18 @@ func TestParseInput(t *testing.T) {
 			args: []string{"foo","bar"},
 			isValid: false,
 		},
+		{
+			description: "invalid group id",
+			flagValues: fixtureFlagValues(),
+			args: []string{"foo"},
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			p := print.NewPrinter()
+			cmd:=NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -124,7 +130,6 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
 			model, err := parseInput(p, cmd, tt.args)
 			if err != nil {
 				if !tt.isValid {
