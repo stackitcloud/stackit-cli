@@ -2,8 +2,11 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -13,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -65,19 +69,17 @@ func executeList(cmd *cobra.Command, p *print.Printer, _ []string) error {
 	}
 
 	// Call API
-	req := buildRequest(ctx, model, apiClient)
-	_, err = req.Execute()
+	request := buildRequest(ctx, model, apiClient)
+	response, err := request.Execute()
 	if err != nil {
 		return fmt.Errorf("list security group: %w", err)
 	}
-
-	operationState := "Enabled"
-	if model.Async {
-		operationState = "Triggered enablement of"
+	if items := response.GetItems(); items == nil || len(*items) > 0 {
+		p.Info("no security groups found for %q", projectLabel)
+	} else {
+		outputResult(p, model.OutputFormat, *items)
 	}
-	p.Info("%s security group for %q\n", operationState, projectLabel)
 
-	panic("todo: implement client invocation and output")
 	return nil
 }
 
@@ -111,4 +113,47 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 
+}
+func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGroup) error {
+	switch outputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(items, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true))
+		if err != nil {
+			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "LABELS", "STATEFUL")
+		for _, item := range items {
+			table.AddRow(item.Id, item.Name, concatLabels(item.Labels), item.Stateful)
+		}
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
+		return nil
+	}
+}
+
+func concatLabels(item *map[string]any) string {
+	if item == nil {
+		return ""
+	}
+	var builder strings.Builder
+	for k, v := range *item {
+		builder.WriteString(fmt.Sprintf("%s=%v ", k, v))
+	}
+	return builder.String()
 }
