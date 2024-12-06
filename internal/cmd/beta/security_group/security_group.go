@@ -1,11 +1,11 @@
 package security_group
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/security_group/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
