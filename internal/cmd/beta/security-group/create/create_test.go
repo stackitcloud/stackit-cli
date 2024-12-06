@@ -12,7 +12,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -65,11 +64,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) iaas.ApiCreateSecurityGroupRequest {
 	request := testClient.CreateSecurityGroup(testCtx, testProjectId)
 	request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
-		Description: utils.Ptr(testDescription),
+		Description: &testDescription,
 		Labels:      &testLabels,
-		Name:        utils.Ptr(testName),
+		Name:        &testName,
 		Rules:       nil,
-		Stateful:    utils.Ptr(testStateful),
+		Stateful:    &testStateful,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -187,12 +186,8 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
-			configureFlags(cmd)
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
+			p := print.NewPrinter()
+			cmd := NewCmd(p)
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -204,15 +199,13 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
+			if err := cmd.ValidateRequiredFlags(); err != nil {
 				if !tt.isValid {
 					return
 				}
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
 			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
