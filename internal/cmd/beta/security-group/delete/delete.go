@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -20,12 +22,14 @@ type inputModel struct {
 	Id string
 }
 
+const argNameGroupId = "groupId"
+
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete a security group",
 		Long:  "delete a security group by its internal id",
-		Args:  cobra.ExactArgs(1),
+		Args:  args.SingleArg(argNameGroupId, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(`delete a named group`, `$ stackit beta security-group delete 43ad419a-c68b-4911-87cd-e05752ac1e31`),
 		),
@@ -80,9 +84,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+	if err := cmd.ValidateArgs(args); err != nil {
+		return nil, &errors.ArgValidationError{
+			Arg:     argNameGroupId,
+			Details: fmt.Sprintf("arg validation failed: %v", err),
+		}
+	}
 
 	if len(args) != 1 {
-		return nil,&errors.ArgValidationError{}
+		return nil, &errors.ArgValidationError{
+			Arg:     argNameGroupId,
+			Details: "wrong number of arguments",
+		}
 	}
 
 	name := flags.FlagToStringValue(p, cmd, "name")

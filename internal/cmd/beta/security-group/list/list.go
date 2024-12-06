@@ -45,6 +45,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	globalflags.Configure(cmd.Flags())
 	cmd.Flags().String("labels", "", "a list of labels in the form <key>=<value>")
 }
 
