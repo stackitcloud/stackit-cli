@@ -8,7 +8,7 @@ import (
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/public-ip"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security_group"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
