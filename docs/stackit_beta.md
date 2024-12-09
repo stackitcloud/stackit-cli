@@ -40,6 +40,7 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for Keypairs
 * [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for networks
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
 * [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for network interfaces
