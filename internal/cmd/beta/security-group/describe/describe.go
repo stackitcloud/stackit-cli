@@ -39,7 +39,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			return executeDescribe(cmd, p, args)
 		},
 	}
-	configureFlags(cmd)
 
 	return cmd
 }
@@ -72,10 +71,6 @@ func executeDescribe(cmd *cobra.Command, p *print.Printer, args []string) error 
 	}
 
 	return nil
-}
-
-func configureFlags(cmd *cobra.Command) {
-	globalflags.Configure(cmd.Flags())
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRequest {
