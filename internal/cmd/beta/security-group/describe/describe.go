@@ -134,12 +134,12 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 		table.AddSeparator()
 
 		if name := resp.Name; name != nil {
-			table.AddRow("NAME", name)
+			table.AddRow("NAME", *name)
 			table.AddSeparator()
 		}
 
 		if description := resp.Description; description != nil {
-			table.AddRow("DESCRIPTION", description)
+			table.AddRow("DESCRIPTION", *description)
 			table.AddSeparator()
 		}
 
@@ -153,7 +153,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 		}
 
 		if stateful := resp.Stateful; stateful != nil {
-			table.AddRow("STATEFUL", stateful)
+			table.AddRow("STATEFUL", *stateful)
 			table.AddSeparator()
 		}
 

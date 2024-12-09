@@ -30,7 +30,7 @@ const argNameGroupId = "argGroupId"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "Update",
+		Use:   "update",
 		Short: "Update a security group",
 		Long:  "Update a named security group",
 		Args:  args.SingleArg(argNameGroupId, utils.ValidateUUID),
