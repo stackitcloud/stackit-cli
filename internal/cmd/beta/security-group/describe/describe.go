@@ -24,76 +24,63 @@ type inputModel struct {
 	SecurityGroupId string
 }
 
-const argNameGroupId = "argGroupId"
+const groupIdArg = "GROUP_ID"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "describe security groups",
-		Long:  "describe security groups",
-		Args:  args.SingleArg(argNameGroupId, utils.ValidateUUID),
+		Short: "Describes security groups",
+		Long:  "Describes security groups by its internal ID.",
+		Args:  args.SingleArg(groupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`describe an existing group`, `$ stackit beta security-group describe 9e9c44fe-eb9a-4d45-bf08-365e961845d1`),
+			examples.NewExample(`Describe group "xxx"`, `$ stackit beta security-group describe xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeDescribe(cmd, p, args)
+			ctx := context.Background()
+			model, err := parseInput(p, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
+			// Call API
+			request := buildRequest(ctx, model, apiClient)
+
+			group, err := request.Execute()
+			if err != nil {
+				return fmt.Errorf("get security group: %w", err)
+			}
+
+			if err := outputResult(p, model, group); err != nil {
+				return err
+			}
+
+			return nil
 		},
 	}
 
 	return cmd
 }
 
-func executeDescribe(cmd *cobra.Command, p *print.Printer, args []string) error {
-	p.Info("executing describe command")
-	ctx := context.Background()
-	model, err := parseInput(p, cmd, args)
-	if err != nil {
-		return err
-	}
-
-	// Configure API client
-	apiClient, err := client.ConfigureClient(p)
-	if err != nil {
-		return err
-	}
-
-	// Call API
-	request := buildRequest(ctx, model, apiClient)
-
-	p.Info("security group %q for %q\n", model.SecurityGroupId, model.ProjectId)
-
-	group, err := request.Execute()
-	if err != nil {
-		return fmt.Errorf("get security group: %w", err)
-	}
-	if err := outputResult(p, model, group); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRequest {
 	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
 	return request
-
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
-	if err := cmd.ValidateArgs(args); err != nil {
-		return nil, &errors.ArgValidationError{
-			Arg:     argNameGroupId,
-			Details: fmt.Sprintf("argument validation failed: %v", err),
-		}
-	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		SecurityGroupId: args[0],
+		SecurityGroupId: cliArgs[0],
 	}
 
 	if p.IsVerbosityDebug() {
@@ -143,17 +130,12 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 			table.AddSeparator()
 		}
 
-		if labels := resp.Labels; labels != nil {
-			var builder strings.Builder
-			for k, v := range *labels {
-				builder.WriteString(fmt.Sprintf("%s=%s ", k, v))
+		if resp.Labels != nil && len(*resp.Labels) > 0 {
+			labels := []string{}
+			for key, value := range *resp.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
-			table.AddRow("LABELS", builder.String())
-			table.AddSeparator()
-		}
-
-		if stateful := resp.Stateful; stateful != nil {
-			table.AddRow("STATEFUL", *stateful)
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
 

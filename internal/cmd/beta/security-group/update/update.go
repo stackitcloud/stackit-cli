@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -20,26 +19,59 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels          *map[string]any
+	Labels          *map[string]string
 	Description     *string
 	Name            *string
 	SecurityGroupId string
 }
 
-const argNameGroupId = "argGroupId"
+const groupNameArg = "GROUP_ID"
+
+const (
+	nameArg        = "name"
+	descriptionArg = "description"
+	labelsArg      = "labels"
+)
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update a security group",
-		Long:  "Update a named security group",
-		Args:  args.SingleArg(argNameGroupId, utils.ValidateUUID),
+		Short: "Updates a security group",
+		Long:  "Updates a named security group",
+		Args:  args.SingleArg(groupNameArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`Update the name of a group`, `$ stackit beta security-group update 541d122f-0a5f-4bb0-94b9-b1ccbd7ba776 --name my-new-name`),
-			examples.NewExample(`Update the labels of a group`, `$ stackit beta security-group update 541d122f-0a5f-4bb0-94b9-b1ccbd7ba776 --labels label1=value1,label2=value2`),
+			examples.NewExample(`Update the name of group "xxx"`, `$ stackit beta security-group update xxx --name my-new-name`),
+			examples.NewExample(`Update the labels of group "xxx"`, `$ stackit beta security-group update xxx --labels label1=value1,label2=value2`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeUpdate(cmd, p, args)
+			ctx := context.Background()
+			model, err := parseInput(p, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+
+			_, err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("update security group: %w", err)
+			}
+			p.Info("Updated security group \"%v\" for %q\n", model.Name, projectLabel)
+
+			return nil
 		},
 	}
 
@@ -48,104 +80,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String("name", "", "the name of the security group. Must be <= 63 chars")
-	cmd.Flags().String("description", "", "an optional description of the security group. Must be <= 127 chars")
-	cmd.Flags().StringSlice("labels", nil, "a list of labels in the form <key>=<value>")
+	cmd.Flags().String(nameArg, "", "The name of the security group.")
+	cmd.Flags().String(descriptionArg, "", "An optional description of the security group.")
+	cmd.Flags().StringToString(labelsArg, nil, "Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
-func executeUpdate(cmd *cobra.Command, p *print.Printer, args []string) error {
-	p.Info("executing update command")
-	ctx := context.Background()
-	model, err := parseInput(p, cmd, args)
-	if err != nil {
-		return err
-	}
-
-	// Configure API client
-	apiClient, err := client.ConfigureClient(p)
-	if err != nil {
-		return err
-	}
-
-	projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
-	if err != nil {
-		p.Debug(print.ErrorLevel, "get project name: %v", err)
-		projectLabel = model.ProjectId
-	}
-
-	// Call API
-	req := buildRequest(ctx, model, apiClient)
-	_, err = req.Execute()
-	if err != nil {
-		return fmt.Errorf("^date security group: %w", err)
-	}
-
-	operationState := "Enabled"
-	if model.Async {
-		operationState = "Triggered update of"
-	}
-	p.Info("%s security group \"%v\" for %q\n", operationState, model.Name, projectLabel)
-	return nil
-}
-
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	if err := cmd.ValidateArgs(args); err != nil {
-		return nil, &errors.ArgValidationError{
-			Arg:     argNameGroupId,
-			Details: fmt.Sprintf("argument validation failed: %v", err),
-		}
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-	}
-	if len(args) != 1 {
-		return nil, &errors.ArgValidationError{
-			Arg:     argNameGroupId,
-			Details: "wrong number of arguments",
-		}
-	}
-	model.SecurityGroupId = args[0]
-
-	if cmd.Flags().Lookup("name").Changed {
-		name := flags.FlagToStringValue(p, cmd, "name")
-		if len(name) >= 64 {
-			return nil, &errors.ArgValidationError{
-				Arg:     "invalid name",
-				Details: "name exceeds 63 characters in length",
-			}
-		}
-		model.Name = &name
-	}
-
-	if cmd.Flags().Lookup("labels").Changed {
-		labels := make(map[string]any)
-		for _, label := range flags.FlagToStringSliceValue(p, cmd, "labels") {
-			parts := strings.Split(label, "=")
-			if len(parts) != 2 {
-				return nil, &errors.ArgValidationError{
-					Arg:     "labels",
-					Details: "invalid label declaration. Must be in the form <key>=<value>",
-				}
-			}
-			labels[parts[0]] = parts[1]
-		}
-		model.Labels = &labels
-	}
-	if cmd.Flags().Lookup("description").Changed {
-		description := flags.FlagToStringValue(p, cmd, "description")
-		if len(description) >= 128 {
-			return nil, &errors.ArgValidationError{
-				Arg:     "invalid description",
-				Details: "description exceeds 127 characters in length",
-			}
-		}
-		model.Description = &description
+		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsArg),
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionArg),
+		Name:            flags.FlagToStringPointer(p, cmd, nameArg),
+		SecurityGroupId: cliArgs[0],
 	}
 
 	if p.IsVerbosityDebug() {
@@ -164,10 +115,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	request := apiClient.UpdateSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
 	payload := iaas.NewUpdateSecurityGroupPayload()
 	payload.Description = model.Description
-	payload.Labels = model.Labels
+	var labelsMap *map[string]any
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+	payload.Labels = labelsMap
 	payload.Name = model.Name
 	request = request.UpdateSecurityGroupPayload(*payload)
 
 	return request
-
 }

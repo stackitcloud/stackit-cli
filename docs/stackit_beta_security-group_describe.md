@@ -1,10 +1,10 @@
 ## stackit beta security-group describe
 
-describe security groups
+Describe security groups
 
 ### Synopsis
 
-describe security groups
+Describe security groups.
 
 ```
 stackit beta security-group describe [flags]
@@ -35,5 +35,5 @@ stackit beta security-group describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - manage security groups.
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 

@@ -65,13 +65,13 @@ func TestParseInput(t *testing.T) {
 			description:   "base",
 			flagValues:    fixtureFlagValues(),
 			expectedModel: fixtureInputModel(),
-			args: testSecurityGroupId,
+			args:          testSecurityGroupId,
 			isValid:       true,
 		},
 		{
 			description: "no values",
 			flagValues:  map[string]string{},
-			args: testSecurityGroupId,
+			args:        testSecurityGroupId,
 			isValid:     false,
 		},
 		{
@@ -79,7 +79,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
 			}),
-			args: testSecurityGroupId,
+			args:    testSecurityGroupId,
 			isValid: false,
 		},
 		{
@@ -87,7 +87,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = ""
 			}),
-			args: testSecurityGroupId,
+			args:    testSecurityGroupId,
 			isValid: false,
 		},
 		{
@@ -95,7 +95,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[projectIdFlag] = "invalid-uuid"
 			}),
-			args: testSecurityGroupId,
+			args:    testSecurityGroupId,
 			isValid: false,
 		},
 		{
@@ -139,6 +139,12 @@ func TestParseInput(t *testing.T) {
 					return
 				}
 				t.Fatalf("error validating flags: %v", err)
+			}
+
+			if err := cmd.ValidateArgs(tt.args); err != nil {
+				if !tt.isValid {
+					return
+				}
 			}
 
 			model, err := parseInput(p, cmd, tt.args)

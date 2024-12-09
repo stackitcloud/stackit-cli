@@ -17,8 +17,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "security-group",
-		Short: "manage security groups.",
-		Long:  "manage the lifecycle of security groups.",
+		Short: "Manage security groups",
+		Long:  "Manage the lifecycle of security groups.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

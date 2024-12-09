@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -25,7 +24,7 @@ var (
 	testProjectId   = uuid.NewString()
 	testName        = "new-security-group"
 	testDescription = "a test description"
-	testLabels      = map[string]any{
+	testLabels      = map[string]string{
 		"fooKey": "fooValue",
 		"barKey": "barValue",
 		"bazKey": "bazValue",
@@ -35,11 +34,11 @@ var (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		"description": testDescription,
-		"labels":      "fooKey=fooValue,barKey=barValue,bazKey=bazValue",
-		"stateful":    "true",
-		"name":        testName,
+		projectIdFlag:   testProjectId,
+		descriptionFlag: testDescription,
+		labelsFlag:      "fooKey=fooValue,barKey=barValue,bazKey=bazValue",
+		statefulFlag:    "true",
+		nameFlag:        testName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,10 +49,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Labels:          testLabels,
-		Description:     testDescription,
-		Name:            testName,
-		Stateful:        testStateful,
+		Labels:          &testLabels,
+		Description:     &testDescription,
+		Name:            &testName,
+		Stateful:        &testStateful,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,11 +60,22 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
+func toStringAnyMapPtr(m map[string]string) map[string]any {
+	if m == nil {
+		return nil
+	}
+	result := map[string]any{}
+	for k, v := range m {
+		result[k] = v
+	}
+	return result
+}
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) iaas.ApiCreateSecurityGroupRequest {
 	request := testClient.CreateSecurityGroup(testCtx, testProjectId)
+
 	request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 		Description: &testDescription,
-		Labels:      &testLabels,
+		Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
 		Name:        &testName,
 		Rules:       nil,
 		Stateful:    &testStateful,
@@ -118,68 +128,40 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "name missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, "name")
-			}),
-			isValid: false,
-		},
-		{
-			description: "name too long",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["name"] = strings.Repeat("toolong", 1000)
-			}),
-			isValid: false,
-		},
-		{
-			description: "description too long",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["description"] = strings.Repeat("toolong", 1000)
+				delete(flagValues, nameFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "no labels",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, "labels")
+				delete(flagValues, labelsFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = map[string]any{}
+				model.Labels = nil
 			}),
 		},
 		{
 			description: "single label",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["labels"] = "foo=bar"
+				flagValues[labelsFlag] = "foo=bar"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = map[string]any{
+				model.Labels = &map[string]string{
 					"foo": "bar",
 				}
 			}),
 		},
 		{
-			description: "malformed labels 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["labels"] = "foo=bar=baz"
-			}),
-			isValid: false,
-		},
-		{
-			description: "malformed labels 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["labels"] = "foobarbaz"
-			}),
-			isValid: false,
-		},
-		{
 			description: "stateless security group",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["stateful"] = "false"
+				flagValues[statefulFlag] = "false"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Stateful = false
+				model.Stateful = utils.Ptr(false)
 			}),
 		},
 	}
@@ -256,12 +238,12 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "stateless security group",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Stateful = false
+				model.Stateful = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
 				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 					Description: &testDescription,
-					Labels:      &testLabels,
+					Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
 					Name:        &testName,
 					Stateful:    utils.Ptr(false),
 				})

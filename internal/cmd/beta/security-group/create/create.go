@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -15,29 +14,69 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	nameFlag        = "name"
+	descriptionFlag = "description"
+	statefulFlag    = "stateful"
+	labelsFlag      = "labels"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels      map[string]any
-	Description string
-	Name        string
-	Stateful    bool
+	Labels      *map[string]string
+	Description *string
+	Name        *string
+	Stateful    *bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "create security groups",
-		Long:  "create security groups",
+		Short: "Creates security groups",
+		Long:  "Creates security groups.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(`create a named group`, `$ stackit beta security-group create --name my-new-group`),
-			examples.NewExample(`create a named group with labels`, `$ stackit beta security-group create --name my-new-group --labels label1=value1,label2=value2`),
+			examples.NewExample(`Create a named group`, `$ stackit beta security-group create --name my-new-group`),
+			examples.NewExample(`Create a named group with labels`, `$ stackit beta security-group create --name my-new-group --labels label1=value1,label2=value2`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreate(cmd, p, args)
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			ctx := context.Background()
+			model, err := parseInput(p, cmd)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", *model.Name)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
+			// Call API
+			request := buildRequest(ctx, model, apiClient)
+
+			group, err := request.Execute()
+			if err != nil {
+				return fmt.Errorf("create security group: %w", err)
+			}
+
+			if err := outputResult(p, model, group); err != nil {
+				return err
+			}
+
+			return nil
 		},
 	}
 
@@ -46,56 +85,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String("name", "", "the name of the security group. Must be <= 63 chars")
-	cmd.Flags().String("description", "", "an optional description of the security group. Must be <= 127 chars")
-	cmd.Flags().Bool("stateful", false, "create a stateful or a stateless security group")
-	cmd.Flags().StringSlice("labels", nil, "a list of labels in the form <key>=<value>")
+	cmd.Flags().String(nameFlag, "", "The name of the security group.")
+	cmd.Flags().String(descriptionFlag, "", "An optional description of the security group.")
+	cmd.Flags().Bool(statefulFlag, false, "Create a stateful or a stateless security group")
+	cmd.Flags().StringToString(labelsFlag, nil, "Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'")
 
-	if err := flags.MarkFlagsRequired(cmd, "name"); err != nil {
+	if err := flags.MarkFlagsRequired(cmd, nameFlag); err != nil {
 		cobra.CheckErr(err)
 	}
-}
-
-func executeCreate(cmd *cobra.Command, p *print.Printer, _ []string) error {
-	p.Info("executing create command")
-	ctx := context.Background()
-	model, err := parseInput(p, cmd)
-	if err != nil {
-		return err
-	}
-
-	// Configure API client
-	apiClient, err := client.ConfigureClient(p)
-	if err != nil {
-		return err
-	}
-
-	if !model.AssumeYes {
-		prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", model.Name)
-		err = p.PromptForConfirmation(prompt)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Call API
-	request := buildRequest(ctx, model, apiClient)
-
-	operationState := "Enabled"
-	if model.Async {
-		operationState = "Triggered security group creation"
-	}
-	p.Info("%s security group %q for %q\n", operationState, model.Name, model.ProjectId)
-
-	group, err := request.Execute()
-	if err != nil {
-		return fmt.Errorf("create security group: %w", err)
-	}
-	if err:=outputResult(p, model, group);err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -103,40 +100,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
-	name := flags.FlagToStringValue(p, cmd, "name")
-	if len(name) >= 64 {
-		return nil, &errors.ArgValidationError{
-			Arg:     "invalid name",
-			Details: "name exceeds 63 characters in length",
-		}
-	}
+	name := flags.FlagToStringValue(p, cmd, nameFlag)
 
-	labels := make(map[string]any)
-	for _, label := range flags.FlagToStringSliceValue(p, cmd, "labels") {
-		parts := strings.Split(label, "=")
-		if len(parts) != 2 {
-			return nil, &errors.ArgValidationError{
-				Arg:     "labels",
-				Details: "invalid label declaration. Must be in the form <key>=<value>",
-			}
-		}
-		labels[parts[0]] = parts[1]
-
-	}
-	description := flags.FlagToStringValue(p, cmd, "description")
-	if len(description) >= 128 {
-		return nil, &errors.ArgValidationError{
-			Arg:     "invalid description",
-			Details: "description exceeds 127 characters in length",
-		}
-	}
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            name,
+		Name:            &name,
 
-		Labels:      labels,
-		Description: description,
-		Stateful:    flags.FlagToBoolValue(p, cmd, "stateful"),
+		Labels:      flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Description: flags.FlagToStringPointer(p, cmd, descriptionFlag),
+		Stateful:    flags.FlagToBoolPointer(p, cmd, statefulFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -153,19 +125,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRequest {
 	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId)
-	payload := iaas.NewCreateSecurityGroupPayload(&model.Name)
-	payload.Description = &model.Description
-	if model.Labels != nil {
-		// this check assure that we don't end up with a pointer to nil
-		// which is a thing in go!
-		payload.Labels = &model.Labels
+
+	var labelsMap *map[string]any
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
 	}
-	payload.Name = &model.Name
-	payload.Stateful = &model.Stateful
-	request = request.CreateSecurityGroupPayload(*payload)
+	payload := iaas.CreateSecurityGroupPayload{
+		Description: model.Description,
+		Labels:      labelsMap,
+		Name:        model.Name,
+		Stateful:    model.Stateful,
+	}
 
-	return request
-
+	return request.CreateSecurityGroupPayload(payload)
 }
 
 func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup) error {
@@ -187,11 +163,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 
 		return nil
 	default:
-		operationState := "Created"
-		if model.Async {
-			operationState = "Triggered creation of"
-		}
-		p.Outputf("%s security group %q\n", operationState, model.Name)
+		p.Outputf("Created security group %q\n", *model.Name)
 		return nil
 	}
 }

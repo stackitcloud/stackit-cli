@@ -1,10 +1,10 @@
 ## stackit beta security-group
 
-manage security groups.
+Manage security groups
 
 ### Synopsis
 
-manage the lifecycle of security groups.
+Manage the lifecycle of security groups.
 
 ```
 stackit beta security-group [flags]
@@ -29,9 +29,9 @@ stackit beta security-group [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta security-group create](./stackit_beta_security-group_create.md)	 - create security groups
-* [stackit beta security-group delete](./stackit_beta_security-group_delete.md)	 - delete a security group
-* [stackit beta security-group describe](./stackit_beta_security-group_describe.md)	 - describe security groups
-* [stackit beta security-group list](./stackit_beta_security-group_list.md)	 - list security groups
+* [stackit beta security-group create](./stackit_beta_security-group_create.md)	 - Create security groups
+* [stackit beta security-group delete](./stackit_beta_security-group_delete.md)	 - Delete a security group
+* [stackit beta security-group describe](./stackit_beta_security-group_describe.md)	 - Describe security groups
+* [stackit beta security-group list](./stackit_beta_security-group_list.md)	 - List security groups
 * [stackit beta security-group update](./stackit_beta_security-group_update.md)	 - Update a security group
 
