@@ -22,7 +22,7 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels string
+	Labels *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -74,7 +74,7 @@ func executeList(cmd *cobra.Command, p *print.Printer, _ []string) error {
 	if err != nil {
 		return fmt.Errorf("list security group: %w", err)
 	}
-	if items := response.GetItems(); items == nil || len(*items) > 0 {
+	if items := response.GetItems(); items == nil || len(*items) == 0 {
 		p.Info("no security groups found for %q", projectLabel)
 	} else {
 		outputResult(p, model.OutputFormat, *items)
@@ -91,8 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-
-		Labels: flags.FlagToStringValue(p, cmd, "labels"),
+		Labels:          flags.FlagToStringPointer(p, cmd, "labels"),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -109,7 +108,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupsRequest {
 	request := apiClient.ListSecurityGroups(ctx, model.ProjectId)
-	request = request.LabelSelector(model.Labels)
+	if model.Labels != nil {
+		request = request.LabelSelector(*model.Labels)
+	}
 
 	return request
 
@@ -136,7 +137,7 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGr
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "LABELS", "STATEFUL")
 		for _, item := range items {
-			table.AddRow(item.Id, item.Name, concatLabels(item.Labels), item.Stateful)
+			table.AddRow(ptrString(item.Id), ptrString(item.Name), concatLabels(item.Labels), ptrString(item.Stateful))
 		}
 		err := table.Display(p)
 		if err != nil {
@@ -145,6 +146,13 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGr
 
 		return nil
 	}
+}
+
+func ptrString[T any](t*T) string {
+	if t != nil {
+		return fmt.Sprintf("%v",*t)
+	}
+	return ""
 }
 
 func concatLabels(item *map[string]any) string {

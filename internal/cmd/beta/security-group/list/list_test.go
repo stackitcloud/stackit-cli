@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -39,7 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Labels:          testLabels,
+		Labels:          utils.Ptr(testLabels),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -102,7 +103,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = ""
+				model.Labels = nil
 			}),
 		},
 		{
@@ -112,7 +113,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = "foo=bar"
+				model.Labels = utils.Ptr("foo=bar")
 			}),
 		},
 	}
@@ -175,7 +176,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "no labels",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = ""
+				model.Labels = utils.Ptr("")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListSecurityGroupsRequest) {
 				*request = request.LabelSelector("")
@@ -184,7 +185,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "single label",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = "foo=bar"
+				model.Labels = utils.Ptr("foo=bar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListSecurityGroupsRequest) {
 				*request = request.LabelSelector("foo=bar")
