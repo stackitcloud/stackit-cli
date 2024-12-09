@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -53,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit beta key-pair create --public-key ssh-rsa xxx --labels key=value,key1=value1",
 			),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
@@ -67,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are your sure you want to create a keypair")
+				prompt := "Are your sure you want to create a keypair"
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

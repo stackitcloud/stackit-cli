@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
@@ -131,7 +131,6 @@ func outputResult(p *print.Printer, outputFormat string, shpwOnlyPublicKey bool,
 			return nil
 		}
 		table := tables.NewTable()
-		//table.SetHeader("KEYPAIR NAME", "LABELS", "FINGERPRINT", "PUBLIC KEY", "CREATED AT", "UPDATED AT")
 		table.AddRow("KEYPAIR NAME", *keypair.Name)
 		table.AddSeparator()
 
