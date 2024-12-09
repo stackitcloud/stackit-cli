@@ -82,7 +82,7 @@ func executeUpdate(cmd *cobra.Command, p *print.Printer, args []string) error {
 
 	operationState := "Enabled"
 	if model.Async {
-		operationState = "Triggered enablement of"
+		operationState = "Triggered update of"
 	}
 	p.Info("%s security group \"%v\" for %q\n", operationState, model.Name, projectLabel)
 	return nil
