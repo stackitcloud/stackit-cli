@@ -188,6 +188,9 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
 			cmd := NewCmd(p)
+			if err := globalflags.Configure(cmd.Flags()); err != nil {
+				t.Errorf("cannot configure global flags: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
