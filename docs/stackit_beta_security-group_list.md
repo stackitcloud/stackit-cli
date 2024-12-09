@@ -1,10 +1,10 @@
 ## stackit beta security-group list
 
-list security groups
+List security groups
 
 ### Synopsis
 
-list security groups
+List security groups.
 
 ```
 stackit beta security-group list [flags]
@@ -23,8 +23,8 @@ stackit beta security-group list [flags]
 ### Options
 
 ```
-  -h, --help            Help for "stackit beta security-group list"
-      --labels string   a list of labels in the form <key>=<value>
+  -h, --help                    Help for "stackit beta security-group list"
+      --label-selector string   Filter by label
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +39,5 @@ stackit beta security-group list [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - manage security groups.
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 

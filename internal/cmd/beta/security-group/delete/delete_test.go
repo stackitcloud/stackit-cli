@@ -84,28 +84,28 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no arguments",
-			flagValues: fixtureFlagValues(),
-			args: nil,
-			isValid: false,
+			flagValues:  fixtureFlagValues(),
+			args:        nil,
+			isValid:     false,
 		},
 		{
 			description: "multiple arguments",
-			flagValues: fixtureFlagValues(),
-			args: []string{"foo","bar"},
-			isValid: false,
+			flagValues:  fixtureFlagValues(),
+			args:        []string{"foo", "bar"},
+			isValid:     false,
 		},
 		{
 			description: "invalid group id",
-			flagValues: fixtureFlagValues(),
-			args: []string{"foo"},
-			isValid: false,
+			flagValues:  fixtureFlagValues(),
+			args:        []string{"foo"},
+			isValid:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd:=NewCmd(p)
+			cmd := NewCmd(p)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -119,6 +119,12 @@ func TestParseInput(t *testing.T) {
 						return
 					}
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
+				}
+			}
+
+			if err := cmd.ValidateArgs(tt.args); err != nil {
+				if !tt.isValid {
+					return
 				}
 			}
 

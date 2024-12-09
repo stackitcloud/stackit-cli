@@ -1,10 +1,10 @@
 ## stackit beta security-group create
 
-create security groups
+Create security groups
 
 ### Synopsis
 
-create security groups
+Create security groups.
 
 ```
 stackit beta security-group create [flags]
@@ -25,7 +25,7 @@ stackit beta security-group create [flags]
 ```
       --description string   an optional description of the security group. Must be <= 127 chars
   -h, --help                 Help for "stackit beta security-group create"
-      --labels strings       a list of labels in the form <key>=<value>
+      --labels strings       Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'
       --name string          the name of the security group. Must be <= 63 chars
       --stateful             create a stateful or a stateless security group
 ```
@@ -42,5 +42,5 @@ stackit beta security-group create [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - manage security groups.
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 

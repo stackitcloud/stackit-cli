@@ -25,7 +25,7 @@ stackit beta security-group update [flags]
 ```
       --description string   an optional description of the security group. Must be <= 127 chars
   -h, --help                 Help for "stackit beta security-group update"
-      --labels strings       a list of labels in the form <key>=<value>
+      --labels strings       Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'
       --name string          the name of the security group. Must be <= 63 chars
 ```
 
@@ -41,5 +41,5 @@ stackit beta security-group update [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - manage security groups.
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 

@@ -1,10 +1,10 @@
 ## stackit beta security-group
 
-Provides functionality for security groups
+Manage security groups
 
 ### Synopsis
 
-Provides functionality for security groups.
+Manage the lifecycle of security groups.
 
 ```
 stackit beta security-group [flags]

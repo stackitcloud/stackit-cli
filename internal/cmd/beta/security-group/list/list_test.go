@@ -23,13 +23,12 @@ var (
 	testClient    = &iaas.APIClient{}
 	testProjectId = uuid.NewString()
 	testLabels    = "fooKey=fooValue,barKey=barValue,bazKey=bazValue"
-	testStateful  = true
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		"labels":      testLabels,
+		projectIdFlag:     testProjectId,
+		labelSelectorFlag: testLabels,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,7 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Labels:          utils.Ptr(testLabels),
+		LabelSelector:   utils.Ptr(testLabels),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -99,21 +98,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no labels",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, "labels")
+				delete(flagValues, labelSelectorFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = nil
+				model.LabelSelector = nil
 			}),
 		},
 		{
 			description: "single label",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues["labels"] = "foo=bar"
+				flagValues[labelSelectorFlag] = "foo=bar"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr("foo=bar")
+				model.LabelSelector = utils.Ptr("foo=bar")
 			}),
 		},
 	}
@@ -176,7 +175,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "no labels",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr("")
+				model.LabelSelector = utils.Ptr("")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListSecurityGroupsRequest) {
 				*request = request.LabelSelector("")
@@ -185,7 +184,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "single label",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr("foo=bar")
+				model.LabelSelector = utils.Ptr("foo=bar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListSecurityGroupsRequest) {
 				*request = request.LabelSelector("foo=bar")

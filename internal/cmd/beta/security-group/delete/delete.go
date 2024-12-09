@@ -3,13 +3,11 @@ package delete
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
@@ -22,112 +20,62 @@ type inputModel struct {
 	Id string
 }
 
-const argNameGroupId = "groupId"
+const groupIdArg = "GROUP_ID"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "delete a security group",
-		Long:  "delete a security group by its internal id",
-		Args:  args.SingleArg(argNameGroupId, utils.ValidateUUID),
+		Short: "Deletes a security group",
+		Long:  "Deletes a security group by its internal ID.",
+		Args:  args.SingleArg(groupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`delete a named group`, `$ stackit beta security-group delete 43ad419a-c68b-4911-87cd-e05752ac1e31`),
+			examples.NewExample(`Delete a named group with ID "xxx"`, `$ stackit beta security-group delete xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeDelete(cmd, p, args)
+			ctx := context.Background()
+			model, err := parseInput(p, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q?", model.Id)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
+			// Call API
+			request := buildRequest(ctx, model, apiClient)
+
+			if err := request.Execute(); err != nil {
+				return fmt.Errorf("delete security group: %w", err)
+			}
+			p.Info("Deleted security group %q for %q\n", model.Id, model.ProjectId)
+
+			return nil
 		},
 	}
 
 	return cmd
 }
 
-func executeDelete(cmd *cobra.Command, p *print.Printer, args []string) error {
-	p.Info("executing delete command")
-	ctx := context.Background()
-	model, err := parseInput(p, cmd, args)
-	if err != nil {
-		return err
-	}
-
-	// Configure API client
-	apiClient, err := client.ConfigureClient(p)
-	if err != nil {
-		return err
-	}
-
-	if !model.AssumeYes {
-		prompt := fmt.Sprintf("Are you sure you want to delete the security group %q?", model.Id)
-		err = p.PromptForConfirmation(prompt)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Call API
-	request := buildRequest(ctx, model, apiClient)
-
-	operationState := "Enabled"
-	if model.Async {
-		operationState = "Triggered security group deletion"
-	}
-	p.Info("%s security group %q for %q\n", operationState, model.Id, model.ProjectId)
-
-	if err := request.Execute(); err != nil {
-		return fmt.Errorf("delete security group: %w", err)
-	}
-
-	return nil
-}
-
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
-	if err := cmd.ValidateArgs(args); err != nil {
-		return nil, &errors.ArgValidationError{
-			Arg:     argNameGroupId,
-			Details: fmt.Sprintf("arg validation failed: %v", err),
-		}
-	}
 
-	if len(args) != 1 {
-		return nil, &errors.ArgValidationError{
-			Arg:     argNameGroupId,
-			Details: "wrong number of arguments",
-		}
-	}
-
-	name := flags.FlagToStringValue(p, cmd, "name")
-	if len(name) >= 64 {
-		return nil, &errors.ArgValidationError{
-			Arg:     "invalid name",
-			Details: "name exceeds 63 characters in length",
-		}
-	}
-
-	labels := make(map[string]any)
-	for _, label := range flags.FlagToStringSliceValue(p, cmd, "labels") {
-		parts := strings.Split(label, "=")
-		if len(parts) != 2 {
-			return nil, &errors.ArgValidationError{
-				Arg:     "labels",
-				Details: "invalid label declaration. Must be in the form <key>=<value>",
-			}
-		}
-		labels[parts[0]] = parts[1]
-
-	}
-	description := flags.FlagToStringValue(p, cmd, "description")
-	if len(description) >= 128 {
-		return nil, &errors.ArgValidationError{
-			Arg:     "invalid description",
-			Details: "description exceeds 127 characters in length",
-		}
-	}
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Id:              args[0],
+		Id:              cliArgs[0],
 	}
 
 	if p.IsVerbosityDebug() {
