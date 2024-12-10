@@ -171,21 +171,17 @@ func TestParseInput(t *testing.T) {
 			description: "direction missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, directionFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "protocol is icmp and parameters are missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, icmpParameterCodeFlag)
-				delete(flagValues, icmpParameterTypeFlag)
+				delete(flagValues, protocolNumberFlag)
+				delete(flagValues, protocolNameFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "protocol is icmp and port range values are provided",
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, protocolNumberFlag)
+			}),
+			isValid: false,
 		},
 		{
 			description: "protocol is not icmp and port range values are provided",
@@ -207,6 +203,7 @@ func TestParseInput(t *testing.T) {
 			description: "protocol is not icmp and icmp parameters are provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[protocolNameFlag] = "not-icmp"
+				delete(flagValues, protocolNumberFlag)
 			}),
 			isValid: false,
 		},
