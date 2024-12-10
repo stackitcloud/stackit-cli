@@ -256,7 +256,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, securityGro
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s security group rule for security group %q in project %q.\nSecurity group rule ID: %s\n", operationState, projectLabel, securityGroupName, *securityGroupRule.SecurityGroupId)
+		p.Outputf("%s security group rule for security group %q in project %q.\nSecurity group rule ID: %s\n", operationState, securityGroupName, projectLabel, *securityGroupRule.Id)
 		return nil
 	}
 }
