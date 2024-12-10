@@ -30,7 +30,7 @@ stackit beta security-group-rules create [flags]
 
 ```
       --description string                The rule description
-      --direction ingress                 The direction of the traffic which the rule should match. Some of the possible values are: ingress, `egress`
+      --direction ingress                 The direction of the traffic which the rule should match. The possible values are: ingress, `egress`
       --ether-type string                 The ethertype which the rule should match
   -h, --help                              Help for "stackit beta security-group-rules create"
       --icmp-parameter-code int           ICMP code. Can be set if the protocol is ICMP

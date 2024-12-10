@@ -4,7 +4,7 @@ Lists all security group rules in a security group of a project
 
 ### Synopsis
 
-Lists all security group rules in a security group of a project
+Lists all security group rules in a security group of a project.
 
 ```
 stackit beta security-group-rules list [flags]
