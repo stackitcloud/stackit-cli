@@ -34,24 +34,24 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all SSH Keypairs",
-		Long:  "Lists all SSH Keypairs.",
+		Short: "Lists all Key Pairs",
+		Long:  "Lists all Key Pairs.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Lists all ssh keypairs`,
+				`Lists all Key Pairs`,
 				"$ stackit beta key-pair list",
 			),
 			examples.NewExample(
-				`Lists all ssh keypairs which contains the label xxx`,
+				`Lists all Key Pairs which contains the label xxx`,
 				"$ stackit beta key-pair list --label-selector xxx",
 			),
 			examples.NewExample(
-				`Lists all ssh keypairs in JSON format`,
+				`Lists all Key Pairs in JSON format`,
 				"$ stackit beta key-pair list --output-format json",
 			),
 			examples.NewExample(
-				`Lists up to 10 ssh keypairs`,
+				`Lists up to 10 Key Pairs`,
 				"$ stackit beta key-pair list --limit 10",
 			),
 		),
@@ -72,11 +72,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list keypairs: %w", err)
+				return fmt.Errorf("list Key Pairs: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				p.Info("No key pairs found\n")
+				p.Info("No Key Pairs found\n")
 				return nil
 			}
 
@@ -93,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(limitFlag, 0, "Number of SSH keypairs to list")
+	cmd.Flags().Int64(limitFlag, 0, "Number of Key Pairs to list")
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 }
 
@@ -134,35 +134,35 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, keypairs []iaas.Keypair) error {
+func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keypairs, "", "  ")
+		details, err := json.MarshalIndent(keyPairs, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal keypairs: %w", err)
+			return fmt.Errorf("marshal Key Pairs: %w", err)
 		}
 		p.Outputln(string(details))
 
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keypairs, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(keyPairs, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal keypairs: %w", err)
+			return fmt.Errorf("marshal Key Pairs: %w", err)
 		}
 		p.Outputln(string(details))
 
 	default:
 		table := tables.NewTable()
-		table.SetHeader("KEYPAIR NAME", "LABELS", "FINGERPRINT", "CREATED AT", "UPDATED AT")
+		table.SetHeader("KEY PAIR NAME", "LABELS", "FINGERPRINT", "CREATED AT", "UPDATED AT")
 
-		for idx := range keypairs {
-			keypair := keypairs[idx]
+		for idx := range keyPairs {
+			keyPair := keyPairs[idx]
 
 			var labels []string
-			for key, value := range *keypair.Labels {
+			for key, value := range *keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 
-			table.AddRow(*keypair.Name, strings.Join(labels, ", "), *keypair.Fingerprint, *keypair.CreatedAt, *keypair.UpdatedAt)
+			table.AddRow(*keyPair.Name, strings.Join(labels, ", "), *keyPair.Fingerprint, *keyPair.CreatedAt, *keyPair.UpdatedAt)
 		}
 
 		p.Outputln(table.Render())

@@ -33,25 +33,25 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a keypair",
-		Long:  "Create a keypair.",
+		Short: "Create a Key Pair",
+		Long:  "Create a Key Pair.",
 		Args:  cobra.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new key-pair with public-key "ssh-rsa xxx"`,
-				"$ stackit beta key-pair create --public-key ssh-rsa xxx",
+				`Create a new Key Pair with public-key "ssh-rsa xxx"`,
+				"$ stackit beta key-pair create --public-key `ssh-rsa xxx`",
 			),
 			examples.NewExample(
-				`Create a new key-pair with public-key from file "/Users/username/.ssh/id_rsa.pub"`,
-				"$ stackit beta key-pair create --public-key @/Users/username/.ssh/id_rsa.pub",
+				`Create a new Key Pair with public-key from file "/Users/username/.ssh/id_rsa.pub"`,
+				"$ stackit beta key-pair create --public-key `@/Users/username/.ssh/id_rsa.pub`",
 			),
 			examples.NewExample(
-				`Create a new key-pair with name "KEYPAIR_NAME" and public-key "ssh-rsa yyy"`,
-				"$ stackit beta key-pair create --name KEYPAIR_NAME --public-key ssh-rsa yyy",
+				`Create a new Key Pair with name "KEY_PAIR_NAME" and public-key "ssh-rsa yyy"`,
+				"$ stackit beta key-pair create --name KEY_PAIR_NAME --public-key `ssh-rsa yyy`",
 			),
 			examples.NewExample(
-				`Create a new key-pair with public-key "ssh-rsa xxx" and labels "key=value,key1=value1"`,
-				"$ stackit beta key-pair create --public-key ssh-rsa xxx --labels key=value,key1=value1",
+				`Create a new Key Pair with public-key "ssh-rsa xxx" and labels "key=value,key1=value1"`,
+				"$ stackit beta key-pair create --public-key `ssh-rsa xxx` --labels key=value,key1=value1",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Are your sure you want to create a keypair"
+				prompt := "Are your sure you want to create a Key Pair?"
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create keypair: %w", err)
+				return fmt.Errorf("create Key Pair: %w", err)
 			}
 
 			return outputResult(p, model, resp)
@@ -90,9 +90,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(nameFlag, "", "Name of the key which will be created")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), publicKeyFlag, "Public key which should be add (format: ssh-rsa|sha-ed25519)")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...'")
+	cmd.Flags().String(nameFlag, "", "Key Pair name")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), publicKeyFlag, "Public key to be imported (format: ssh-rsa|ssh-ed25519)")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a Key Pair. E.g. '--labels key1=value1,key2=value2,...'")
 
 	err := cmd.MarkFlagRequired(publicKeyFlag)
 	cobra.CheckErr(err)
@@ -146,17 +146,17 @@ func outputResult(p *print.Printer, model *inputModel, item *iaas.Keypair) error
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(item, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Created keypair %q.\nKeypair Fingerprint: %q\n", *item.Name, *item.Fingerprint)
+		p.Outputf("Created Key Pair %q.\nKey Pair Fingerprint: %q\n", *item.Name, *item.Fingerprint)
 	}
 	return nil
 }

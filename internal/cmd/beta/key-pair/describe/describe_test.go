@@ -16,12 +16,12 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "test")
 var testClient = &iaas.APIClient{}
-var testKeypairName = "foobar"
+var testKeyPairName = "foobar"
 var testPublicKeyFlag = "true"
 
 func fixtureArgValues(mods ...func(argVales []string)) []string {
 	argVales := []string{
-		testKeypairName,
+		testKeyPairName,
 	}
 	for _, m := range mods {
 		m(argVales)
@@ -42,7 +42,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		KeypairName: testKeypairName,
+		KeyPairName: testKeyPairName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetKeyPairRequest)) iaas.ApiGetKeyPairRequest {
-	request := testClient.GetKeyPair(testCtx, testKeypairName)
+	request := testClient.GetKeyPair(testCtx, testKeyPairName)
 	for _, mod := range mods {
 		mod(&request)
 	}

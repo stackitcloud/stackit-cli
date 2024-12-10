@@ -18,11 +18,11 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var testKeypairName = "foobar_key"
+var testKeyPairName = "foobar_key"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testKeypairName,
+		testKeyPairName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Labels: utils.Ptr(map[string]string{
 			"foo": "bar",
 		}),
-		KeypairName: utils.Ptr(testKeypairName),
+		KeyPairName: utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateKeyPairRequest)) iaas.ApiUpdateKeyPairRequest {
-	request := testClient.UpdateKeyPair(testCtx, testKeypairName)
+	request := testClient.UpdateKeyPair(testCtx, testKeyPairName)
 	request = request.UpdateKeyPairPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)

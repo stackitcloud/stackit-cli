@@ -19,26 +19,26 @@ import (
 )
 
 const (
-	keypairNameArg = "KEYPAIR_NAME"
+	keyPairNameArg = "KEY_PAIR_NAME"
 	labelsFlag     = "labels"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Labels      *map[string]string
-	KeypairName *string
+	KeyPairName *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update key pair",
-		Long:  "Update key pair.",
-		Args:  args.SingleArg(keypairNameArg, nil),
+		Short: "Update Key Pair",
+		Long:  "Update Key Pair.",
+		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the labels of a keypair KEYPAIR_NAME with "key=value,key1=value1"`,
-				"$ stackit beta key-pair update --labels key=value,key1=value1",
+				`Update the labels of a Key Pair KEY_PAIR_NAME with "key=value,key1=value1"`,
+				"$ stackit beta key-pair update KEY_PAIR_NAME --labels key=value,key1=value1",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -55,10 +55,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeypairName)
+				prompt := fmt.Sprintf("Are you sure you want to update Key Pair %q?", *model.KeyPairName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
-					return fmt.Errorf("update keypair: %w", err)
+					return fmt.Errorf("update Key Pair: %w", err)
 				}
 			}
 
@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update keypair: %w", err)
+				return fmt.Errorf("update Key Pair: %w", err)
 			}
 
 			return outputResult(p, model, resp)
@@ -84,7 +84,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateKeyPairRequest {
-	req := apiClient.UpdateKeyPair(ctx, *model.KeypairName)
+	req := apiClient.UpdateKeyPair(ctx, *model.KeyPairName)
 
 	var labelsMap *map[string]interface{}
 	if model.Labels != nil && len(*model.Labels) > 0 {
@@ -101,13 +101,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	keypairName := inputArgs[0]
+	keyPairName := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
-		KeypairName:     utils.Ptr(keypairName),
+		KeyPairName:     utils.Ptr(keyPairName),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -122,22 +122,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, keypair *iaas.Keypair) error {
+func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) error {
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keypair, "", "  ")
+		details, err := json.MarshalIndent(keyPair, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keypair, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Updated labels of Keypair %q\n", *model.KeypairName)
+		p.Outputf("Updated labels of Key Pair %q\n", *model.KeyPairName)
 	}
 	return nil
 }

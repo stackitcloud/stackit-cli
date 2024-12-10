@@ -20,13 +20,13 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
 var testPublicKey = "ssh-rsa <key>"
-var testKeypairName = "foobar_key"
+var testKeyPairName = "foobar_key"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		publicKeyFlag: testPublicKey,
 		labelFlag:     "foo=bar",
-		nameFlag:      testKeypairName,
+		nameFlag:      testKeyPairName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,7 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			"foo": "bar",
 		}),
 		PublicKey: utils.Ptr(testPublicKey),
-		Name:      utils.Ptr(testKeypairName),
+		Name:      utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -66,7 +66,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateKeyPairPayload)) iaas.Creat
 			"foo": "bar",
 		}),
 		PublicKey: utils.Ptr(testPublicKey),
-		Name:      utils.Ptr(testKeypairName),
+		Name:      utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -102,11 +102,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "read public key from file",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[publicKeyFlag] = "@./create_test.go"
+				flagValues[publicKeyFlag] = "@/template/id_ed25519.pub"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				file, err := os.ReadFile("./create_test.go")
+				file, err := os.ReadFile("./template/id_ed25519.pub")
 				if err != nil {
 					t.Fatal("could not create expected Model", err)
 				}

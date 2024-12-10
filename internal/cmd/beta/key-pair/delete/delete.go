@@ -15,24 +15,24 @@ import (
 )
 
 const (
-	keypairNameArg = "KEYPAIR_NAME"
+	keyPairNameArg = "KEY_PAIR_NAME"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	KeypairName string
+	KeyPairName string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete a keypair",
-		Long:  "Delete a keypair.",
-		Args:  args.SingleArg(keypairNameArg, nil),
+		Short: "Delete a Key Pair",
+		Long:  "Delete a Key Pair.",
+		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete keypair with name "XXX"`,
-				"$ stackit beta keypair delete XXX",
+				`Delete Key Pair with name "KEY_PAIR_NAME"`,
+				"$ stackit beta key-pair delete KEY_PAIR_NAME",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete keypair %q?", model.KeypairName)
+				prompt := fmt.Sprintf("Are you sure you want to delete Key Pair %q?", model.KeyPairName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -60,10 +60,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete keypair: %w", err)
+				return fmt.Errorf("delete Key Pair: %w", err)
 			}
 
-			p.Info("Deleted keypair %q\n", model.KeypairName)
+			p.Info("Deleted Key Pair %q\n", model.KeyPairName)
 
 			return nil
 		},
@@ -72,13 +72,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	keypairName := inputArgs[0]
+	keyPairName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeypairName:     keypairName,
+		KeyPairName:     keyPairName,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -94,5 +94,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteKeyPairRequest {
-	return apiClient.DeleteKeyPair(ctx, model.KeypairName)
+	return apiClient.DeleteKeyPair(ctx, model.KeyPairName)
 }

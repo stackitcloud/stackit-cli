@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	keypairNameArg = "KEYPAIR_NAME"
+	keyPairNameArg = "KEY_PAIR_NAME"
 
 	publicKeyFlag = "public-key"
 
@@ -29,24 +29,24 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	KeypairName string
+	KeyPairName string
 	PublicKey   bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Describe a keypair",
-		Long:  "Describe a keypair.",
-		Args:  args.SingleArg(keypairNameArg, nil),
+		Short: "Describe a Key Pair",
+		Long:  "Describe a Key Pair.",
+		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details about a keypair named "KEYPAIR_NAME"`,
-				"$ stackit beta keypair describe KEYPAIR_NAME",
+				`Get details about a Key Pair with name "KEY_PAIR_NAME"`,
+				"$ stackit beta key-pair describe KEY_PAIR_NAME",
 			),
 			examples.NewExample(
-				`Get only the SSH public key of a keypair with the name "KEYPAIR_NAME"`,
-				"$ stackit beta keypair describe KEYPAIR_NAME --public-key",
+				`Get only the SSH public key of a Key Pair with name "KEY_PAIR_NAME"`,
+				"$ stackit beta key-pair describe KEY_PAIR_NAME --public-key",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read keypair: %w", err)
+				return fmt.Errorf("read Key Pair: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, model.PublicKey, resp)
@@ -81,13 +81,13 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	keypairName := inputArgs[0]
+	keyPairName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeypairName:     keypairName,
+		KeyPairName:     keyPairName,
 		PublicKey:       flags.FlagToBoolValue(p, cmd, publicKeyFlag),
 	}
 
@@ -104,56 +104,70 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetKeyPairRequest {
-	return apiClient.GetKeyPair(ctx, model.KeypairName)
+	return apiClient.GetKeyPair(ctx, model.KeyPairName)
 }
 
-func outputResult(p *print.Printer, outputFormat string, shpwOnlyPublicKey bool, keypair *iaas.Keypair) error {
+func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair *iaas.Keypair) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keypair, "", "  ")
+		details, err := json.MarshalIndent(keyPair, "", "  ")
+		if showOnlyPublicKey {
+			onlyPublicKey := map[string]string{
+				"publicKey": *keyPair.PublicKey,
+			}
+			details, err = json.MarshalIndent(onlyPublicKey, "", "  ")
+		}
+
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keypair, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true))
+		if showOnlyPublicKey {
+			onlyPublicKey := map[string]string{
+				"publicKey": *keyPair.PublicKey,
+			}
+			details, err = yaml.MarshalWithOptions(onlyPublicKey, yaml.IndentSequence(true))
+		}
+
 		if err != nil {
-			return fmt.Errorf("marshal keypair: %w", err)
+			return fmt.Errorf("marshal Key Pair: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
-		if shpwOnlyPublicKey {
-			p.Outputln(*keypair.PublicKey)
+		if showOnlyPublicKey {
+			p.Outputln(*keyPair.PublicKey)
 			return nil
 		}
 		table := tables.NewTable()
-		table.AddRow("KEYPAIR NAME", *keypair.Name)
+		table.AddRow("KEY PAIR NAME", *keyPair.Name)
 		table.AddSeparator()
 
-		if *keypair.Labels != nil && len(*keypair.Labels) > 0 {
+		if *keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
 			var labels []string
-			for key, value := range *keypair.Labels {
+			for key, value := range *keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
 
-		table.AddRow("FINGERPRINT", *keypair.Fingerprint)
+		table.AddRow("FINGERPRINT", *keyPair.Fingerprint)
 		table.AddSeparator()
 
-		truncatedPublicKey := (*keypair.PublicKey)[:maxLengthPublicKey] + "..."
+		truncatedPublicKey := (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
 		table.AddRow("PUBLIC KEY", truncatedPublicKey)
 		table.AddSeparator()
 
-		table.AddRow("CREATED AT", *keypair.CreatedAt)
+		table.AddRow("CREATED AT", *keyPair.CreatedAt)
 		table.AddSeparator()
 
-		table.AddRow("UPDATED AT", *keypair.UpdatedAt)
+		table.AddRow("UPDATED AT", *keyPair.UpdatedAt)
 		table.AddSeparator()
 
 		p.Outputln(table.Render())

@@ -16,11 +16,11 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "test")
 var testClient = &iaas.APIClient{}
-var testKeypairName = "keypair-name"
+var testKeyPairName = "key-pair-name"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testKeypairName,
+		testKeyPairName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -41,7 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		KeypairName: testKeypairName,
+		KeyPairName: testKeyPairName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiDeleteKeyPairRequest)) iaas.ApiDeleteKeyPairRequest {
-	request := testClient.DeleteKeyPair(testCtx, testKeypairName)
+	request := testClient.DeleteKeyPair(testCtx, testKeyPairName)
 	for _, mod := range mods {
 		mod(&request)
 	}

@@ -15,8 +15,8 @@ import (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "key-pair",
-		Short: "Provides functionality for Keypairs",
-		Long:  "Provides functionality for Keypairs",
+		Short: "Provides functionality for SSH Key Pairs",
+		Long:  "Provides functionality for SSH Key Pairs",
 		Args:  cobra.NoArgs,
 		Run:   utils.CmdHelp,
 	}

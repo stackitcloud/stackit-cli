@@ -1,10 +1,10 @@
 ## stackit beta key-pair delete
 
-Delete a keypair
+Delete a Key Pair
 
 ### Synopsis
 
-Delete a keypair.
+Delete a Key Pair.
 
 ```
 stackit beta key-pair delete [flags]
@@ -13,8 +13,8 @@ stackit beta key-pair delete [flags]
 ### Examples
 
 ```
-  Delete keypair with name "XXX"
-  $ stackit beta keypair delete XXX
+  Delete Key Pair with name "KEY_PAIR_NAME"
+  $ stackit beta key-pair delete KEY_PAIR_NAME
 ```
 
 ### Options
@@ -35,5 +35,5 @@ stackit beta key-pair delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for Keypairs
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH Key Pairs
 
