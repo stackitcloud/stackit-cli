@@ -11,20 +11,38 @@ import (
 )
 
 type IaaSClientMocked struct {
-	GetPublicIpFails         bool
-	GetPublicIpResp          *iaas.PublicIp
-	GetServerFails           bool
-	GetServerResp            *iaas.Server
-	GetVolumeFails           bool
-	GetVolumeResp            *iaas.Volume
-	GetNetworkFails          bool
-	GetNetworkResp           *iaas.Network
-	GetNetworkAreaFails      bool
-	GetNetworkAreaResp       *iaas.NetworkArea
-	GetAttachedProjectsFails bool
-	GetAttachedProjectsResp  *iaas.ProjectListResponse
-	GetNetworkAreaRangeFails bool
-	GetNetworkAreaRangeResp  *iaas.NetworkRange
+	GetSecurityGroupRuleFails bool
+	GetSecurityGroupRuleResp  *iaas.SecurityGroupRule
+	GetSecurityGroupFails     bool
+	GetSecurityGroupResp      *iaas.SecurityGroup
+	GetPublicIpFails          bool
+	GetPublicIpResp           *iaas.PublicIp
+	GetServerFails            bool
+	GetServerResp             *iaas.Server
+	GetVolumeFails            bool
+	GetVolumeResp             *iaas.Volume
+	GetNetworkFails           bool
+	GetNetworkResp            *iaas.Network
+	GetNetworkAreaFails       bool
+	GetNetworkAreaResp        *iaas.NetworkArea
+	GetAttachedProjectsFails  bool
+	GetAttachedProjectsResp   *iaas.ProjectListResponse
+	GetNetworkAreaRangeFails  bool
+	GetNetworkAreaRangeResp   *iaas.NetworkRange
+}
+
+func (m *IaaSClientMocked) GetSecurityGroupRuleExecute(_ context.Context, _, _, _ string) (*iaas.SecurityGroupRule, error) {
+	if m.GetSecurityGroupRuleFails {
+		return nil, fmt.Errorf("could not get security group rule")
+	}
+	return m.GetSecurityGroupRuleResp, nil
+}
+
+func (m *IaaSClientMocked) GetSecurityGroupExecute(_ context.Context, _, _ string) (*iaas.SecurityGroup, error) {
+	if m.GetSecurityGroupFails {
+		return nil, fmt.Errorf("could not get security group")
+	}
+	return m.GetSecurityGroupResp, nil
 }
 
 func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*iaas.PublicIp, error) {
@@ -74,6 +92,99 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
+}
+
+func TestGetSecurityGroupRuleName(t *testing.T) {
+	type args struct {
+		getInstanceFails bool
+		getInstanceResp  *iaas.SecurityGroupRule
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getInstanceResp: &iaas.SecurityGroupRule{
+					Ethertype: utils.Ptr("IPv6"),
+					Direction: utils.Ptr("ingress"),
+				},
+			},
+			want: "IPv6, ingress",
+		},
+		{
+			name: "get security group rule fails",
+			args: args{
+				getInstanceFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetSecurityGroupRuleFails: tt.args.getInstanceFails,
+				GetSecurityGroupRuleResp:  tt.args.getInstanceResp,
+			}
+			got, err := GetSecurityGroupRuleName(context.Background(), m, "", "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetSecurityGroupRuleName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetSecurityGroupRuleName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetSecurityGroupName(t *testing.T) {
+	type args struct {
+		getInstanceFails bool
+		getInstanceResp  *iaas.SecurityGroup
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getInstanceResp: &iaas.SecurityGroup{
+					Name: utils.Ptr("test"),
+				},
+			},
+			want: "test",
+		},
+		{
+			name: "get security group fails",
+			args: args{
+				getInstanceFails: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetSecurityGroupFails: tt.args.getInstanceFails,
+				GetSecurityGroupResp:  tt.args.getInstanceResp,
+			}
+			got, err := GetSecurityGroupName(context.Background(), m, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetSecurityGroupName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetSecurityGroupName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestGetPublicIp(t *testing.T) {
