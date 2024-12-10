@@ -102,7 +102,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "read public key from file",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[publicKeyFlag] = "@/template/id_ed25519.pub"
+				flagValues[publicKeyFlag] = "@./template/id_ed25519.pub"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
