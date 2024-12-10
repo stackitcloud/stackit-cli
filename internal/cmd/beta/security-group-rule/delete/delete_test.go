@@ -116,6 +116,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, securityGroupIdFlag)
 			}),
