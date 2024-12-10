@@ -68,6 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if items := response.GetItems(); items == nil || len(*items) == 0 {
 				p.Info("No security groups found for project %q", projectLabel)
+			} else {
 				if err := outputResult(p, model.OutputFormat, *items); err != nil {
 					return fmt.Errorf("output security groups: %w", err)
 				}
