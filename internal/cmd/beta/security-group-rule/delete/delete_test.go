@@ -132,6 +132,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[securityGroupIdFlag] = "invalid-uuid"
 			}),
