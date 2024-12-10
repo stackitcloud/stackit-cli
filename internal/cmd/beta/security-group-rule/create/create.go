@@ -124,7 +124,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(securityGroupIdFlag, "", "The security group ID")
-	cmd.Flags().String(directionFlag, "", "The direction of the traffic which the rule should match. Some of the possible values are: `ingress`, `egress`")
+	cmd.Flags().String(directionFlag, "", "The direction of the traffic which the rule should match. The possible values are: `ingress`, `egress`")
 	cmd.Flags().String(descriptionFlag, "", "The rule description")
 	cmd.Flags().String(etherTypeFlag, "", "The ethertype which the rule should match")
 	cmd.Flags().Int64(icmpParameterCodeFlag, 0, "ICMP code. Can be set if the protocol is ICMP")
