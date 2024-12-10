@@ -130,11 +130,13 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, portRangeMaxFlag)
 				delete(flagValues, portRangeMinFlag)
+				delete(flagValues, protocolNumberFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.PortRangeMax = nil
 				model.PortRangeMin = nil
+				model.ProtocolNumber = nil
 			}),
 		},
 		{
@@ -191,12 +193,14 @@ func TestParseInput(t *testing.T) {
 				flagValues[protocolNameFlag] = "not-icmp"
 				delete(flagValues, icmpParameterCodeFlag)
 				delete(flagValues, icmpParameterTypeFlag)
+				delete(flagValues, protocolNumberFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.IcmpParameterCode = nil
 				model.IcmpParameterType = nil
 				model.ProtocolName = utils.Ptr("not-icmp")
+				model.ProtocolNumber = nil
 			}),
 		},
 		{
