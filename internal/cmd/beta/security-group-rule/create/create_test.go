@@ -274,6 +274,13 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
+			err = cmd.ValidateFlagGroups()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating flag groups: %v", err)
+			}
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
