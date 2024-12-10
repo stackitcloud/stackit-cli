@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/list"
+	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/public-ip"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/update"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/volume"
@@ -39,4 +40,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(publicip.NewCmd(p))
 	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(volume.NewCmd(p))
+	cmd.AddCommand(networkinterface.NewCmd(p))
 }

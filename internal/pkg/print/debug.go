@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"slices"
 	"sort"
 	"strings"
@@ -141,13 +142,18 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 		return nil, fmt.Errorf("request is invalid")
 	}
 
-	status := fmt.Sprintf("request to %s: %s %s", req.URL, req.Method, req.Proto)
+	// unescape url in order to get rid of e.g. %40
+	unescapedURL, err := url.PathUnescape(req.URL.String())
+	if err != nil {
+		return nil, fmt.Errorf("unescape request url: %w", err)
+	}
+
+	status := fmt.Sprintf("request to %s: %s %s", unescapedURL, req.Method, req.Proto)
 
 	headersMap := buildHeaderMap(req.Header, includeHeaders)
 	headers := fmt.Sprintf("request headers: %v", BuildDebugStrFromMap(headersMap))
 
 	var save io.ReadCloser
-	var err error
 
 	save, req.Body, err = drainBody(req.Body)
 	if err != nil {
@@ -184,13 +190,19 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 		return nil, fmt.Errorf("response is invalid")
 	}
 
-	status := fmt.Sprintf("response from %s: %s %s", resp.Request.URL, resp.Proto, resp.Status)
+	var err error
+	// unescape url in order to get rid of e.g. %40
+	unescapedURL, err := url.PathUnescape(resp.Request.URL.String())
+	if err != nil {
+		return nil, fmt.Errorf("unescape response url: %w", err)
+	}
+
+	status := fmt.Sprintf("response from %s: %s %s", unescapedURL, resp.Proto, resp.Status)
 
 	headersMap := buildHeaderMap(resp.Header, includeHeaders)
 	headers := fmt.Sprintf("response headers: %v", BuildDebugStrFromMap(headersMap))
 
 	var save io.ReadCloser
-	var err error
 
 	save, resp.Body, err = drainBody(resp.Body)
 	if err != nil {

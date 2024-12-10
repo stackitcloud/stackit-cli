@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/goccy/go-yaml v1.15.6
+	github.com/goccy/go-yaml v1.15.7
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.8.0
 	github.com/zalando/go-keyring v0.2.6

@@ -150,6 +150,10 @@ To enable it, run:
 	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT = `"port-range-min" and "port-range-max" attributes can't be provided if "protocol-name" is set to "icmp" or "ipv6-icmp"`
 
 	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PARAMETERS_CONFLICT = `"icmp-parameter-code" and "icmp-parameter-type" attributes can't be provided if "protocol-name" is not "icmp" or "ipv6-icmp"`
+  
+  IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "create" flag is not provided.`
+
+	IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "delete" flag is not provided.`
 )
 
 type SecurityGroupRuleProtocolParametersConflictError struct {
@@ -166,6 +170,22 @@ type SecurityGroupRuleProtocolPortRangeConflictError struct {
 
 func (e *SecurityGroupRuleProtocolPortRangeConflictError) Error() string {
 	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT
+)
+
+type ServerNicAttachMissingNicIdError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerNicAttachMissingNicIdError) Error() string {
+	return IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID
+}
+
+type ServerNicDetachMissingNicIdError struct {
+	Cmd *cobra.Command
+}
+
+func (e *ServerNicDetachMissingNicIdError) Error() string {
+	return IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID
 }
 
 type ServerCreateMissingVolumeIdError struct {

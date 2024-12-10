@@ -78,6 +78,28 @@ func fixtureHTTPRequest(mods ...func(req *http.Request)) *http.Request {
 	return request
 }
 
+func fixtureHTTPRequestUnescaped(mods ...func(req *http.Request)) *http.Request {
+	testBody, err := json.Marshal(map[string]string{"key": "value"})
+	if err != nil {
+		return nil
+	}
+
+	request, err := http.NewRequest("GET", "http://example.com/v2/projects?limit=50&member=User.Name%40stackit.cloud", bytes.NewReader(testBody))
+	if err != nil {
+		return nil
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Length", "15")
+
+	for _, mod := range mods {
+		mod(request)
+	}
+
+	return request
+}
+
 func fixtureHTTPResponse(mods ...func(resp *http.Response)) *http.Response {
 	testBody, err := json.Marshal(map[string]string{"key": "value"})
 	if err != nil {
@@ -399,6 +421,16 @@ func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 			expected: []string{
 				"request to http://example.com: GET HTTP/1.1",
 				"request headers: [Accept: application/json, Content-Length: 15, Content-Type: application/json]",
+			},
+			isValid: true,
+		},
+		{
+			description: "unescaped test",
+			inputReq:    fixtureHTTPRequestUnescaped(),
+			expected: []string{
+				"request to http://example.com/v2/projects?limit=50&member=User.Name@stackit.cloud: GET HTTP/1.1",
+				"request headers: [Accept: application/json, Content-Length: 15, Content-Type: application/json]",
+				"request body: [key: value]",
 			},
 			isValid: true,
 		},
