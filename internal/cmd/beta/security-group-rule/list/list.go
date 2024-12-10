@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all security group rules in a security group of a project",
-		Long:  "Lists all security group rules in a security group of a project",
+		Long:  "Lists all security group rules in a security group of a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
