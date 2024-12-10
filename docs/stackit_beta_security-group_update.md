@@ -1,10 +1,10 @@
 ## stackit beta security-group update
 
-Update a security group
+Updates a security group
 
 ### Synopsis
 
-Update a named security group
+Updates a named security group
 
 ```
 stackit beta security-group update [flags]
@@ -13,20 +13,20 @@ stackit beta security-group update [flags]
 ### Examples
 
 ```
-  Update the name of a group
-  $ stackit beta security-group update 541d122f-0a5f-4bb0-94b9-b1ccbd7ba776 --name my-new-name
+  Update the name of group "xxx"
+  $ stackit beta security-group update xxx --name my-new-name
 
-  Update the labels of a group
-  $ stackit beta security-group update 541d122f-0a5f-4bb0-94b9-b1ccbd7ba776 --labels label1=value1,label2=value2
+  Update the labels of group "xxx"
+  $ stackit beta security-group update xxx --labels label1=value1,label2=value2
 ```
 
 ### Options
 
 ```
-      --description string   an optional description of the security group. Must be <= 127 chars
-  -h, --help                 Help for "stackit beta security-group update"
-      --labels strings       Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'
-      --name string          the name of the security group. Must be <= 63 chars
+      --description string      An optional description of the security group.
+  -h, --help                    Help for "stackit beta security-group update"
+      --labels stringToString   Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...' (default [])
+      --name string             The name of the security group.
 ```
 
 ### Options inherited from parent commands

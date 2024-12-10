@@ -1,10 +1,10 @@
 ## stackit beta security-group describe
 
-Describe security groups
+Describes security groups
 
 ### Synopsis
 
-Describe security groups.
+Describes security groups by its internal ID.
 
 ```
 stackit beta security-group describe [flags]
@@ -13,8 +13,8 @@ stackit beta security-group describe [flags]
 ### Examples
 
 ```
-  describe an existing group
-  $ stackit beta security-group describe 9e9c44fe-eb9a-4d45-bf08-365e961845d1
+  Describe group "xxx"
+  $ stackit beta security-group describe xxx
 ```
 
 ### Options
