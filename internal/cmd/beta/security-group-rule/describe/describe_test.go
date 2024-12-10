@@ -127,6 +127,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, securityGroupIdFlag)
 			}),
@@ -134,6 +135,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[securityGroupIdFlag] = ""
 			}),
@@ -141,6 +143,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[securityGroupIdFlag] = "invalid-uuid"
 			}),
