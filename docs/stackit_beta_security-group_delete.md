@@ -1,10 +1,10 @@
 ## stackit beta security-group delete
 
-Delete a security group
+Deletes a security group
 
 ### Synopsis
 
-Delete a security group by its internal id.
+Deletes a security group by its internal ID.
 
 ```
 stackit beta security-group delete [flags]
@@ -13,8 +13,8 @@ stackit beta security-group delete [flags]
 ### Examples
 
 ```
-  delete a named group
-  $ stackit beta security-group delete 43ad419a-c68b-4911-87cd-e05752ac1e31
+  Delete a named group with ID "xxx"
+  $ stackit beta security-group delete xxx
 ```
 
 ### Options

@@ -1,10 +1,10 @@
 ## stackit beta security-group list
 
-List security groups
+Lists security groups
 
 ### Synopsis
 
-List security groups.
+Lists security groups by its internal ID.
 
 ```
 stackit beta security-group list [flags]
@@ -13,10 +13,10 @@ stackit beta security-group list [flags]
 ### Examples
 
 ```
-  list all groups
+  List all groups
   $ stackit beta security-group list
 
-  list groups with labels
+  List groups with labels
   $ stackit beta security-group list --labels label1=value1,label2=value2
 ```
 

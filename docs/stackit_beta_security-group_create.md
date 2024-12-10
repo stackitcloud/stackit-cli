@@ -1,10 +1,10 @@
 ## stackit beta security-group create
 
-Create security groups
+Creates security groups
 
 ### Synopsis
 
-Create security groups.
+Creates security groups.
 
 ```
 stackit beta security-group create [flags]
@@ -13,21 +13,21 @@ stackit beta security-group create [flags]
 ### Examples
 
 ```
-  create a named group
+  Create a named group
   $ stackit beta security-group create --name my-new-group
 
-  create a named group with labels
+  Create a named group with labels
   $ stackit beta security-group create --name my-new-group --labels label1=value1,label2=value2
 ```
 
 ### Options
 
 ```
-      --description string   an optional description of the security group. Must be <= 127 chars
-  -h, --help                 Help for "stackit beta security-group create"
-      --labels strings       Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...'
-      --name string          the name of the security group. Must be <= 63 chars
-      --stateful             create a stateful or a stateless security group
+      --description string      An optional description of the security group.
+  -h, --help                    Help for "stackit beta security-group create"
+      --labels stringToString   Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...' (default [])
+      --name string             The name of the security group.
+      --stateful                Create a stateful or a stateless security group
 ```
 
 ### Options inherited from parent commands
