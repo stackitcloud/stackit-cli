@@ -133,8 +133,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(portRangeMaxFlag, 0, "The maximum port number. Should be greater or equal to the minimum. This should only be provided if the protocol is not ICMP")
 	cmd.Flags().Int64(portRangeMinFlag, 0, "The minimum port number. Should be less or equal to the maximum. This should only be provided if the protocol is not ICMP")
 	cmd.Flags().Var(flags.UUIDFlag(), remoteSecurityGroupIdFlag, "The remote security group which the rule should match")
-	cmd.Flags().Int64(protocolNumberFlag, 0, "The protocol number which the rule should match. If a protocol is to be defined, either `name` or `number` must be provided")
-	cmd.Flags().String(protocolNameFlag, "", "The protocol name which the rule should match. If a protocol is to be defined, either `name` or `number` must be provided")
+	cmd.Flags().Int64(protocolNumberFlag, 0, "The protocol number which the rule should match. If a protocol is to be defined, either `protocol-name` or `protocol-number` must be provided")
+	cmd.Flags().String(protocolNameFlag, "", "The protocol name which the rule should match. If a protocol is to be defined, either `protocol-name` or `protocol-number` must be provided")
 
 	err := flags.MarkFlagsRequired(cmd, securityGroupIdFlag, directionFlag)
 	cmd.MarkFlagsMutuallyExclusive(protocolNumberFlag, protocolNameFlag)

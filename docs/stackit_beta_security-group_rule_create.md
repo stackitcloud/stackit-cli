@@ -38,8 +38,8 @@ stackit beta security-group rule create [flags]
       --ip-range string                   The remote IP range which the rule should match
       --port-range-max int                The maximum port number. Should be greater or equal to the minimum. This should only be provided if the protocol is not ICMP
       --port-range-min int                The minimum port number. Should be less or equal to the maximum. This should only be provided if the protocol is not ICMP
-      --protocol-name name                The protocol name which the rule should match. If a protocol is to be defined, either name or `number` must be provided
-      --protocol-number name              The protocol number which the rule should match. If a protocol is to be defined, either name or `number` must be provided
+      --protocol-name protocol-name       The protocol name which the rule should match. If a protocol is to be defined, either protocol-name or `protocol-number` must be provided
+      --protocol-number protocol-name     The protocol number which the rule should match. If a protocol is to be defined, either protocol-name or `protocol-number` must be provided
       --remote-security-group-id string   The remote security group which the rule should match
       --security-group-id string          The security group ID
 ```
