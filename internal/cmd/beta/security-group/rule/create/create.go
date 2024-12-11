@@ -60,19 +60,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a security group rule for security group with ID "xxx" with direction "ingress"`,
-				`$ stackit beta security-group-rule create --security-group-id xxx --direction ingress`,
+				`$ stackit beta security-group rule create --security-group-id xxx --direction ingress`,
 			),
 			examples.NewExample(
 				`Create a security group rule for security group with ID "xxx" with direction "egress", protocol "icmp" and icmp parameters`,
-				`$ stackit beta security-group-rule create --security-group-id xxx --direction egress --protocol icmp --icmp-parameter-code 0 --icmp-parameter-type 8`,
+				`$ stackit beta security-group rule create --security-group-id xxx --direction egress --protocol-name icmp --icmp-parameter-code 0 --icmp-parameter-type 8`,
 			),
 			examples.NewExample(
-				`Create a security group rule for security group with ID "xxx" with direction "ingress" and port range values`,
-				`$ stackit beta security-group-rule create --security-group-id xxx --direction ingress --port-range-max 24 --port-range-min 22`,
+				`Create a security group rule for security group with ID "xxx" with direction "ingress", protocol "tcp" and port range values`,
+				`$ stackit beta security-group rule create --security-group-id xxx --direction ingress --protocol-name tcp --port-range-max 24 --port-range-min 22`,
 			),
 			examples.NewExample(
 				`Create a security group rule for security group with ID "xxx" with direction "ingress" and protocol number 1 `,
-				`$ stackit beta security-group-rule create --security-group-id xxx --direction ingress --protocol-number 1`,
+				`$ stackit beta security-group rule create --security-group-id xxx --direction ingress --protocol-number 1`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -123,7 +123,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(securityGroupIdFlag, "", "The security group ID")
+	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, "The security group ID")
 	cmd.Flags().String(directionFlag, "", "The direction of the traffic which the rule should match. The possible values are: `ingress`, `egress`")
 	cmd.Flags().String(descriptionFlag, "", "The rule description")
 	cmd.Flags().String(etherTypeFlag, "", "The ethertype which the rule should match")
@@ -133,8 +133,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(portRangeMaxFlag, 0, "The maximum port number. Should be greater or equal to the minimum. This should only be provided if the protocol is not ICMP")
 	cmd.Flags().Int64(portRangeMinFlag, 0, "The minimum port number. Should be less or equal to the maximum. This should only be provided if the protocol is not ICMP")
 	cmd.Flags().Var(flags.UUIDFlag(), remoteSecurityGroupIdFlag, "The remote security group which the rule should match")
-	cmd.Flags().Int64(protocolNumberFlag, 0, "The protocol number which the rule should match. Either `name` or `number` must be provided")
-	cmd.Flags().String(protocolNameFlag, "", "The protocol name which the rule should match. Either `name` or `number` must be provided")
+	cmd.Flags().Int64(protocolNumberFlag, 0, "The protocol number which the rule should match. If a protocol is to be defined, either `name` or `number` must be provided")
+	cmd.Flags().String(protocolNameFlag, "", "The protocol name which the rule should match. If a protocol is to be defined, either `name` or `number` must be provided")
 
 	err := flags.MarkFlagsRequired(cmd, securityGroupIdFlag, directionFlag)
 	cmd.MarkFlagsMutuallyExclusive(protocolNumberFlag, protocolNameFlag)

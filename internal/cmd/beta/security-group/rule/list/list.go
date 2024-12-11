@@ -42,15 +42,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Lists all security group rules in security group with ID "xxx"`,
-				"$ stackit beta security-group-rule list --security-group-id xxx",
+				"$ stackit beta security-group rule list --security-group-id xxx",
 			),
 			examples.NewExample(
 				`Lists all security group rules in security group with ID "xxx" in JSON format`,
-				"$ stackit beta security-group-rule list --security-group-id xxx --output-format json",
+				"$ stackit beta security-group rule list --security-group-id xxx --output-format json",
 			),
 			examples.NewExample(
 				`Lists up to 10 security group rules in security group with ID "xxx"`,
-				"$ stackit beta security-group-rule list --security-group-id xxx --limit 10",
+				"$ stackit beta security-group rule list --security-group-id xxx --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

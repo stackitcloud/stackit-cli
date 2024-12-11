@@ -41,7 +41,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete security group rule with ID "xxx" in security group with ID "yyy"`,
-				"$ stackit beta security-group-rule delete xxx --security-group-id yyy",
+				"$ stackit beta security-group rule delete xxx --security-group-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

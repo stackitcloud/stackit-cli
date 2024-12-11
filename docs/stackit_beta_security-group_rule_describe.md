@@ -1,4 +1,4 @@
-## stackit beta security-group-rules describe
+## stackit beta security-group rule describe
 
 Shows details of a security group rule
 
@@ -7,23 +7,23 @@ Shows details of a security group rule
 Shows details of a security group rule.
 
 ```
-stackit beta security-group-rules describe [flags]
+stackit beta security-group rule describe [flags]
 ```
 
 ### Examples
 
 ```
   Show details of a security group rule with ID "xxx" in security group with ID "yyy"
-  $ stackit beta security-group-rule describe xxx --security-group-id yyy
+  $ stackit beta security-group rule describe xxx --security-group-id yyy
 
   Show details of a security group rule with ID "xxx" in security group with ID "yyy" in JSON format
-  $ stackit beta security-group-rule describe xxx --security-group-id yyy --output-format json
+  $ stackit beta security-group rule describe xxx --security-group-id yyy --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help                       Help for "stackit beta security-group-rules describe"
+  -h, --help                       Help for "stackit beta security-group rule describe"
       --security-group-id string   The security group ID
 ```
 
@@ -39,5 +39,5 @@ stackit beta security-group-rules describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group-rules](./stackit_beta_security-group-rules.md)	 - Provides functionality for security group rules
+* [stackit beta security-group rule](./stackit_beta_security-group_rule.md)	 - Provides functionality for security group rules
 

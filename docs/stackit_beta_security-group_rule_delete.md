@@ -1,4 +1,4 @@
-## stackit beta security-group-rules delete
+## stackit beta security-group rule delete
 
 Deletes a security group rule
 
@@ -9,20 +9,20 @@ If the security group rule is still in use, the deletion will fail
 
 
 ```
-stackit beta security-group-rules delete [flags]
+stackit beta security-group rule delete [flags]
 ```
 
 ### Examples
 
 ```
   Delete security group rule with ID "xxx" in security group with ID "yyy"
-  $ stackit beta security-group-rule delete xxx --security-group-id yyy
+  $ stackit beta security-group rule delete xxx --security-group-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help                       Help for "stackit beta security-group-rules delete"
+  -h, --help                       Help for "stackit beta security-group rule delete"
       --security-group-id string   The security group ID
 ```
 
@@ -38,5 +38,5 @@ stackit beta security-group-rules delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group-rules](./stackit_beta_security-group-rules.md)	 - Provides functionality for security group rules
+* [stackit beta security-group rule](./stackit_beta_security-group_rule.md)	 - Provides functionality for security group rules
 

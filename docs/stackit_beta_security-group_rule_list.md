@@ -1,4 +1,4 @@
-## stackit beta security-group-rules list
+## stackit beta security-group rule list
 
 Lists all security group rules in a security group of a project
 
@@ -7,26 +7,26 @@ Lists all security group rules in a security group of a project
 Lists all security group rules in a security group of a project.
 
 ```
-stackit beta security-group-rules list [flags]
+stackit beta security-group rule list [flags]
 ```
 
 ### Examples
 
 ```
   Lists all security group rules in security group with ID "xxx"
-  $ stackit beta security-group-rule list --security-group-id xxx
+  $ stackit beta security-group rule list --security-group-id xxx
 
   Lists all security group rules in security group with ID "xxx" in JSON format
-  $ stackit beta security-group-rule list --security-group-id xxx --output-format json
+  $ stackit beta security-group rule list --security-group-id xxx --output-format json
 
   Lists up to 10 security group rules in security group with ID "xxx"
-  $ stackit beta security-group-rule list --security-group-id xxx --limit 10
+  $ stackit beta security-group rule list --security-group-id xxx --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help                       Help for "stackit beta security-group-rules list"
+  -h, --help                       Help for "stackit beta security-group rule list"
       --limit int                  Maximum number of entries to list
       --security-group-id string   The security group ID
 ```
@@ -43,5 +43,5 @@ stackit beta security-group-rules list [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group-rules](./stackit_beta_security-group-rules.md)	 - Provides functionality for security group rules
+* [stackit beta security-group rule](./stackit_beta_security-group_rule.md)	 - Provides functionality for security group rules
 

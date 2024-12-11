@@ -7,7 +7,7 @@ import (
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/public-ip"
-	securitygrouprule "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group-rule"
+	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
@@ -49,5 +49,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(volume.NewCmd(p))
 	cmd.AddCommand(networkinterface.NewCmd(p))
 	cmd.AddCommand(publicip.NewCmd(p))
-	cmd.AddCommand(securitygrouprule.NewCmd(p))
+	cmd.AddCommand(securitygroup.NewCmd(p))
 }

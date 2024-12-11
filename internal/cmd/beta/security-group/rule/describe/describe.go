@@ -41,11 +41,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Show details of a security group rule with ID "xxx" in security group with ID "yyy"`,
-				"$ stackit beta security-group-rule describe xxx --security-group-id yyy",
+				"$ stackit beta security-group rule describe xxx --security-group-id yyy",
 			),
 			examples.NewExample(
 				`Show details of a security group rule with ID "xxx" in security group with ID "yyy" in JSON format`,
-				"$ stackit beta security-group-rule describe xxx --security-group-id yyy --output-format json",
+				"$ stackit beta security-group rule describe xxx --security-group-id yyy --output-format json",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
