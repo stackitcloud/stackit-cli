@@ -104,7 +104,7 @@ func TestParseInput(t *testing.T) {
 				projectIdFlag: testProjectId,
 			},
 			args:    testGroupId,
-			isValid: true,
+			isValid: false,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Labels = nil
 				model.Name = nil

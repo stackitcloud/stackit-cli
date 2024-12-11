@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	cmd_utils "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -62,14 +63,22 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update the security group %q?", model.SecurityGroupId)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 
-			_, err = req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update security group: %w", err)
 			}
-			p.Info("Updated security group \"%v\" for %q\n", model.Name, projectLabel)
+			p.Info("Updated security group \"%v\" for %q\n", cmd_utils.PtrString(resp.Name), projectLabel)
 
 			return nil
 		},
@@ -97,6 +106,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionArg),
 		Name:            flags.FlagToStringPointer(p, cmd, nameArg),
 		SecurityGroupId: cliArgs[0],
+	}
+
+	if model.Labels == nil && model.Description == nil && model.Name == nil {
+		return nil, fmt.Errorf("no flags have been passed")
 	}
 
 	if p.IsVerbosityDebug() {

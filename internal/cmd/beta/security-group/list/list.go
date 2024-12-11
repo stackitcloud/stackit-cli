@@ -37,7 +37,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(`List all groups`, `$ stackit beta security-group list`),
-			examples.NewExample(`List groups with labels`, `$ stackit beta security-group list --labels label1=value1,label2=value2`),
+			examples.NewExample(`List groups with labels`, `$ stackit beta security-group list --label-selector label1=value1,label2=value2`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

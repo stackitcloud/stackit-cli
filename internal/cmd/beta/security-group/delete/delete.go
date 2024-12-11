@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -17,7 +18,7 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Id string
+	SecurityGroupId string
 }
 
 const groupIdArg = "GROUP_ID"
@@ -44,8 +45,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				return fmt.Errorf("get project name: %w", err)
+			}
+
+			securityGroupResp, err := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId).Execute()
+			if err != nil {
+				return fmt.Errorf("get security group %q: %w", model.SecurityGroupId, err)
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q?", model.Id)
+				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q for %q?", *securityGroupResp.Name, projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -58,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err := request.Execute(); err != nil {
 				return fmt.Errorf("delete security group: %w", err)
 			}
-			p.Info("Deleted security group %q for %q\n", model.Id, model.ProjectId)
+			p.Info("Deleted security group %q for %q\n", *securityGroupResp.Name, projectLabel)
 
 			return nil
 		},
@@ -75,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Id:              cliArgs[0],
+		SecurityGroupId: cliArgs[0],
 	}
 
 	if p.IsVerbosityDebug() {
@@ -91,6 +102,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSecurityGroupRequest {
-	request := apiClient.DeleteSecurityGroup(ctx, model.ProjectId, model.Id)
+	request := apiClient.DeleteSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
 	return request
 }
