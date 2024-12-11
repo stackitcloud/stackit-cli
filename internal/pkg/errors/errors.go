@@ -147,40 +147,10 @@ To enable it, run:
 
 	IAAS_SERVER_MISSING_IMAGE_OR_VOLUME_FLAGS = `Either "image-id" or "boot-volume-source-type" and "boot-volume-source-id" flags must be provided.`
 
-	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT = `"port-range-min" and "port-range-max" attributes can't be provided if "protocol-name" is set to "icmp" or "ipv6-icmp"`
-
-	IAAS_SECURITY_GROUP_RULE_PROTOCOL_PARAMETERS_CONFLICT = `"icmp-parameter-code" and "icmp-parameter-type" attributes can't be provided if "protocol-name" is not "icmp" or "ipv6-icmp"`
-
-	IAAS_SECURITY_GROUP_RULE_PROTOCOL_MISSING_FOR_PORT_RANGE = `"protocol-name" or "protocol-number" must be provided if "port-range-min" and "port-range-max" attributes are given`
-
 	IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "create" flag is not provided.`
 
 	IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "delete" flag is not provided.`
 )
-
-type SecurityGroupRuleProtocolMissingForPortRangeError struct {
-	Cmd *cobra.Command
-}
-
-func (e *SecurityGroupRuleProtocolMissingForPortRangeError) Error() string {
-	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_MISSING_FOR_PORT_RANGE
-}
-
-type SecurityGroupRuleProtocolParametersConflictError struct {
-	Cmd *cobra.Command
-}
-
-func (e *SecurityGroupRuleProtocolParametersConflictError) Error() string {
-	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_PARAMETERS_CONFLICT
-}
-
-type SecurityGroupRuleProtocolPortRangeConflictError struct {
-	Cmd *cobra.Command
-}
-
-func (e *SecurityGroupRuleProtocolPortRangeConflictError) Error() string {
-	return IAAS_SECURITY_GROUP_RULE_PROTOCOL_PORT_RANGE_CONFLICT
-}
 
 type ServerNicAttachMissingNicIdError struct {
 	Cmd *cobra.Command

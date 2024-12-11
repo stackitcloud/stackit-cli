@@ -163,28 +163,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		ProtocolName:          flags.FlagToStringPointer(p, cmd, protocolNameFlag),
 	}
 
-	if model.ProtocolName != nil {
-		if *model.ProtocolName == "icmp" || *model.ProtocolName == "ipv6-icmp" {
-			if model.PortRangeMin != nil || model.PortRangeMax != nil {
-				return nil, &cliErr.SecurityGroupRuleProtocolPortRangeConflictError{
-					Cmd: cmd,
-				}
-			}
-		} else {
-			if model.IcmpParameterCode != nil || model.IcmpParameterType != nil {
-				return nil, &cliErr.SecurityGroupRuleProtocolParametersConflictError{
-					Cmd: cmd,
-				}
-			}
-		}
-	}
-
-	if (model.PortRangeMin != nil || model.PortRangeMax != nil) && (model.ProtocolNumber == nil && model.ProtocolName == nil) {
-		return nil, &cliErr.SecurityGroupRuleProtocolMissingForPortRangeError{
-			Cmd: cmd,
-		}
-	}
-
 	if p.IsVerbosityDebug() {
 		modelStr, err := print.BuildDebugStrFromInputModel(model)
 		if err != nil {

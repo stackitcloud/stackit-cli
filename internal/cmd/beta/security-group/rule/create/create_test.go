@@ -177,13 +177,6 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "protocol is icmp and port range values are provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, protocolNumberFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "protocol is not icmp and port range values are provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[protocolNameFlag] = "not-icmp"
@@ -198,14 +191,6 @@ func TestParseInput(t *testing.T) {
 				model.ProtocolName = utils.Ptr("not-icmp")
 				model.ProtocolNumber = nil
 			}),
-		},
-		{
-			description: "protocol is not icmp and icmp parameters are provided",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[protocolNameFlag] = "not-icmp"
-				delete(flagValues, protocolNumberFlag)
-			}),
-			isValid: false,
 		},
 		{
 			description: "no values",
