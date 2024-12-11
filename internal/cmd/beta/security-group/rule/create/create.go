@@ -179,6 +179,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		}
 	}
 
+	if (model.PortRangeMin != nil || model.PortRangeMax != nil) && (model.ProtocolNumber == nil && model.ProtocolName == nil) {
+		return nil, &cliErr.SecurityGroupRuleProtocolMissingForPortRangeError{
+			Cmd: cmd,
+		}
+	}
+
 	if p.IsVerbosityDebug() {
 		modelStr, err := print.BuildDebugStrFromInputModel(model)
 		if err != nil {
