@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(nameFlag, "", "key pair name")
+	cmd.Flags().String(nameFlag, "", "Key pair name")
 	cmd.Flags().Var(flags.ReadFromFileFlag(), publicKeyFlag, "Public key to be imported (format: ssh-rsa|ssh-ed25519)")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a key pair. E.g. '--labels key1=value1,key2=value2,...'")
 

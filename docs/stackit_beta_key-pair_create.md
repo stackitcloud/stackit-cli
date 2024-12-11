@@ -31,7 +31,7 @@ stackit beta key-pair create [flags]
 ```
   -h, --help                    Help for "stackit beta key-pair create"
       --labels stringToString   Labels are key-value string pairs which can be attached to a key pair. E.g. '--labels key1=value1,key2=value2,...' (default [])
-      --name string             key pair name
+      --name string             Key pair name
       --public-key string       Public key to be imported (format: ssh-rsa|ssh-ed25519)
 ```
 
