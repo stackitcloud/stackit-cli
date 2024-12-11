@@ -1,10 +1,10 @@
 ## stackit beta key-pair create
 
-Create a Key Pair
+Creates a key pair
 
 ### Synopsis
 
-Create a Key Pair.
+Creates a key pair.
 
 ```
 stackit beta key-pair create [flags]
@@ -13,16 +13,16 @@ stackit beta key-pair create [flags]
 ### Examples
 
 ```
-  Create a new Key Pair with public-key "ssh-rsa xxx"
+  Create a new key pair with public-key "ssh-rsa xxx"
   $ stackit beta key-pair create --public-key `ssh-rsa xxx`
 
-  Create a new Key Pair with public-key from file "/Users/username/.ssh/id_rsa.pub"
+  Create a new key pair with public-key from file "/Users/username/.ssh/id_rsa.pub"
   $ stackit beta key-pair create --public-key `@/Users/username/.ssh/id_rsa.pub`
 
-  Create a new Key Pair with name "KEY_PAIR_NAME" and public-key "ssh-rsa yyy"
+  Create a new key pair with name "KEY_PAIR_NAME" and public-key "ssh-rsa yyy"
   $ stackit beta key-pair create --name KEY_PAIR_NAME --public-key `ssh-rsa yyy`
 
-  Create a new Key Pair with public-key "ssh-rsa xxx" and labels "key=value,key1=value1"
+  Create a new key pair with public-key "ssh-rsa xxx" and labels "key=value,key1=value1"
   $ stackit beta key-pair create --public-key `ssh-rsa xxx` --labels key=value,key1=value1
 ```
 
@@ -30,8 +30,8 @@ stackit beta key-pair create [flags]
 
 ```
   -h, --help                    Help for "stackit beta key-pair create"
-      --labels stringToString   Labels are key-value string pairs which can be attached to a Key Pair. E.g. '--labels key1=value1,key2=value2,...' (default [])
-      --name string             Key Pair name
+      --labels stringToString   Labels are key-value string pairs which can be attached to a key pair. E.g. '--labels key1=value1,key2=value2,...' (default [])
+      --name string             key pair name
       --public-key string       Public key to be imported (format: ssh-rsa|ssh-ed25519)
 ```
 
@@ -47,5 +47,5 @@ stackit beta key-pair create [flags]
 
 ### SEE ALSO
 
-* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH Key Pairs
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH key pairs
 

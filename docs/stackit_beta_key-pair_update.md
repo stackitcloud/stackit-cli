@@ -1,10 +1,10 @@
 ## stackit beta key-pair update
 
-Update Key Pair
+Updates a key pair
 
 ### Synopsis
 
-Update Key Pair.
+Updates a key pair.
 
 ```
 stackit beta key-pair update [flags]
@@ -13,7 +13,7 @@ stackit beta key-pair update [flags]
 ### Examples
 
 ```
-  Update the labels of a Key Pair KEY_PAIR_NAME with "key=value,key1=value1"
+  Update the labels of a key pair with name "KEY_PAIR_NAME" with "key=value,key1=value1"
   $ stackit beta key-pair update KEY_PAIR_NAME --labels key=value,key1=value1
 ```
 
@@ -36,5 +36,5 @@ stackit beta key-pair update [flags]
 
 ### SEE ALSO
 
-* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH Key Pairs
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH key pairs
 

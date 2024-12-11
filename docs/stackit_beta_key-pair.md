@@ -1,10 +1,10 @@
 ## stackit beta key-pair
 
-Provides functionality for SSH Key Pairs
+Provides functionality for SSH key pairs
 
 ### Synopsis
 
-Provides functionality for SSH Key Pairs
+Provides functionality for SSH key pairs
 
 ```
 stackit beta key-pair [flags]
@@ -29,9 +29,9 @@ stackit beta key-pair [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta key-pair create](./stackit_beta_key-pair_create.md)	 - Create a Key Pair
-* [stackit beta key-pair delete](./stackit_beta_key-pair_delete.md)	 - Delete a Key Pair
-* [stackit beta key-pair describe](./stackit_beta_key-pair_describe.md)	 - Describe a Key Pair
-* [stackit beta key-pair list](./stackit_beta_key-pair_list.md)	 - Lists all Key Pairs
-* [stackit beta key-pair update](./stackit_beta_key-pair_update.md)	 - Update Key Pair
+* [stackit beta key-pair create](./stackit_beta_key-pair_create.md)	 - Creates a key pair
+* [stackit beta key-pair delete](./stackit_beta_key-pair_delete.md)	 - Deletes a key pair
+* [stackit beta key-pair describe](./stackit_beta_key-pair_describe.md)	 - Describes a key pair
+* [stackit beta key-pair list](./stackit_beta_key-pair_list.md)	 - Lists all key pairs
+* [stackit beta key-pair update](./stackit_beta_key-pair_update.md)	 - Updates a key pair
 

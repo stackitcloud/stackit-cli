@@ -1,10 +1,10 @@
 ## stackit beta key-pair describe
 
-Describe a Key Pair
+Describes a key pair
 
 ### Synopsis
 
-Describe a Key Pair.
+Describes a key pair.
 
 ```
 stackit beta key-pair describe [flags]
@@ -13,10 +13,10 @@ stackit beta key-pair describe [flags]
 ### Examples
 
 ```
-  Get details about a Key Pair with name "KEY_PAIR_NAME"
+  Get details about a key pair with name "KEY_PAIR_NAME"
   $ stackit beta key-pair describe KEY_PAIR_NAME
 
-  Get only the SSH public key of a Key Pair with name "KEY_PAIR_NAME"
+  Get only the SSH public key of a key pair with name "KEY_PAIR_NAME"
   $ stackit beta key-pair describe KEY_PAIR_NAME --public-key
 ```
 
@@ -39,5 +39,5 @@ stackit beta key-pair describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH Key Pairs
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH key pairs
 

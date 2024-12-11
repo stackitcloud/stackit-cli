@@ -1,10 +1,10 @@
 ## stackit beta key-pair list
 
-Lists all Key Pairs
+Lists all key pairs
 
 ### Synopsis
 
-Lists all Key Pairs.
+Lists all key pairs.
 
 ```
 stackit beta key-pair list [flags]
@@ -13,16 +13,16 @@ stackit beta key-pair list [flags]
 ### Examples
 
 ```
-  Lists all Key Pairs
+  Lists all key pairs
   $ stackit beta key-pair list
 
-  Lists all Key Pairs which contains the label xxx
+  Lists all key pairs which contains the label xxx
   $ stackit beta key-pair list --label-selector xxx
 
-  Lists all Key Pairs in JSON format
+  Lists all key pairs in JSON format
   $ stackit beta key-pair list --output-format json
 
-  Lists up to 10 Key Pairs
+  Lists up to 10 key pairs
   $ stackit beta key-pair list --limit 10
 ```
 
@@ -31,7 +31,7 @@ stackit beta key-pair list [flags]
 ```
   -h, --help                    Help for "stackit beta key-pair list"
       --label-selector string   Filter by label
-      --limit int               Number of Key Pairs to list
+      --limit int               Number of key pairs to list
 ```
 
 ### Options inherited from parent commands
@@ -46,5 +46,5 @@ stackit beta key-pair list [flags]
 
 ### SEE ALSO
 
-* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH Key Pairs
+* [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH key pairs
 
