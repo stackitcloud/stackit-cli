@@ -32,12 +32,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update Key Pair",
-		Long:  "Update Key Pair.",
+		Short: "Updates a key pair",
+		Long:  "Updates a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the labels of a Key Pair KEY_PAIR_NAME with "key=value,key1=value1"`,
+				`Update the labels of a key pair with name "KEY_PAIR_NAME" with "key=value,key1=value1"`,
 				"$ stackit beta key-pair update KEY_PAIR_NAME --labels key=value,key1=value1",
 			),
 		),
@@ -55,10 +55,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update Key Pair %q?", *model.KeyPairName)
+				prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeyPairName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
-					return fmt.Errorf("update Key Pair: %w", err)
+					return fmt.Errorf("update key pair: %w", err)
 				}
 			}
 
@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update Key Pair: %w", err)
+				return fmt.Errorf("update key pair: %w", err)
 			}
 
 			return outputResult(p, model, resp)
@@ -127,17 +127,17 @@ func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) er
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Key Pair: %w", err)
+			return fmt.Errorf("marshal key pair: %w", err)
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal Key Pair: %w", err)
+			return fmt.Errorf("marshal key pair: %w", err)
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Updated labels of Key Pair %q\n", *model.KeyPairName)
+		p.Outputf("Updated labels of key pair %q\n", *model.KeyPairName)
 	}
 	return nil
 }

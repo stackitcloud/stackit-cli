@@ -36,16 +36,16 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
-		Short: "Describe a Key Pair",
-		Long:  "Describe a Key Pair.",
+		Short: "Describes a key pair",
+		Long:  "Describes a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details about a Key Pair with name "KEY_PAIR_NAME"`,
+				`Get details about a key pair with name "KEY_PAIR_NAME"`,
 				"$ stackit beta key-pair describe KEY_PAIR_NAME",
 			),
 			examples.NewExample(
-				`Get only the SSH public key of a Key Pair with name "KEY_PAIR_NAME"`,
+				`Get only the SSH public key of a key pair with name "KEY_PAIR_NAME"`,
 				"$ stackit beta key-pair describe KEY_PAIR_NAME --public-key",
 			),
 		),
@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read Key Pair: %w", err)
+				return fmt.Errorf("read key pair: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, model.PublicKey, resp)
@@ -119,7 +119,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		}
 
 		if err != nil {
-			return fmt.Errorf("marshal Key Pair: %w", err)
+			return fmt.Errorf("marshal key pair: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -134,7 +134,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		}
 
 		if err != nil {
-			return fmt.Errorf("marshal Key Pair: %w", err)
+			return fmt.Errorf("marshal key pair: %w", err)
 		}
 		p.Outputln(string(details))
 

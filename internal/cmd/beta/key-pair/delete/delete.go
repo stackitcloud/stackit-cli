@@ -26,12 +26,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete a Key Pair",
-		Long:  "Delete a Key Pair.",
+		Short: "Deletes a key pair",
+		Long:  "Deletes a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete Key Pair with name "KEY_PAIR_NAME"`,
+				`Delete key pair with name "KEY_PAIR_NAME"`,
 				"$ stackit beta key-pair delete KEY_PAIR_NAME",
 			),
 		),
@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete Key Pair %q?", model.KeyPairName)
+				prompt := fmt.Sprintf("Are you sure you want to delete key pair %q?", model.KeyPairName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -60,10 +60,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete Key Pair: %w", err)
+				return fmt.Errorf("delete key pair: %w", err)
 			}
 
-			p.Info("Deleted Key Pair %q\n", model.KeyPairName)
+			p.Info("Deleted key pair %q\n", model.KeyPairName)
 
 			return nil
 		},

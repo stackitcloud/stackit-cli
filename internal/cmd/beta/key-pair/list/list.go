@@ -34,24 +34,24 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all Key Pairs",
-		Long:  "Lists all Key Pairs.",
+		Short: "Lists all key pairs",
+		Long:  "Lists all key pairs.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Lists all Key Pairs`,
+				`Lists all key pairs`,
 				"$ stackit beta key-pair list",
 			),
 			examples.NewExample(
-				`Lists all Key Pairs which contains the label xxx`,
+				`Lists all key pairs which contains the label xxx`,
 				"$ stackit beta key-pair list --label-selector xxx",
 			),
 			examples.NewExample(
-				`Lists all Key Pairs in JSON format`,
+				`Lists all key pairs in JSON format`,
 				"$ stackit beta key-pair list --output-format json",
 			),
 			examples.NewExample(
-				`Lists up to 10 Key Pairs`,
+				`Lists up to 10 key pairs`,
 				"$ stackit beta key-pair list --limit 10",
 			),
 		),
@@ -72,11 +72,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list Key Pairs: %w", err)
+				return fmt.Errorf("list key pairs: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				p.Info("No Key Pairs found\n")
+				p.Info("No key pairs found\n")
 				return nil
 			}
 
@@ -93,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(limitFlag, 0, "Number of Key Pairs to list")
+	cmd.Flags().Int64(limitFlag, 0, "Number of key pairs to list")
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 }
 
@@ -139,14 +139,14 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPairs, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Key Pairs: %w", err)
+			return fmt.Errorf("marshal key pairs: %w", err)
 		}
 		p.Outputln(string(details))
 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(keyPairs, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal Key Pairs: %w", err)
+			return fmt.Errorf("marshal key pairs: %w", err)
 		}
 		p.Outputln(string(details))
 
