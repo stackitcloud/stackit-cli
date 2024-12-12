@@ -1,26 +1,26 @@
-## stackit beta security-group group describe
+## stackit beta security-group delete
 
-Describes security groups
+Deletes a security group
 
 ### Synopsis
 
-Describes security groups by its internal ID.
+Deletes a security group by its internal ID.
 
 ```
-stackit beta security-group group describe [flags]
+stackit beta security-group delete [flags]
 ```
 
 ### Examples
 
 ```
-  Describe group "xxx"
-  $ stackit beta security-group describe xxx
+  Delete a named group with ID "xxx"
+  $ stackit beta security-group delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta security-group group describe"
+  -h, --help   Help for "stackit beta security-group delete"
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +35,5 @@ stackit beta security-group group describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 

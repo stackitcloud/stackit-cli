@@ -1,4 +1,4 @@
-## stackit beta security-group group list
+## stackit beta security-group list
 
 Lists security groups
 
@@ -7,7 +7,7 @@ Lists security groups
 Lists security groups by its internal ID.
 
 ```
-stackit beta security-group group list [flags]
+stackit beta security-group list [flags]
 ```
 
 ### Examples
@@ -23,7 +23,7 @@ stackit beta security-group group list [flags]
 ### Options
 
 ```
-  -h, --help                    Help for "stackit beta security-group group list"
+  -h, --help                    Help for "stackit beta security-group list"
       --label-selector string   Filter by label
 ```
 
@@ -39,5 +39,5 @@ stackit beta security-group group list [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 
