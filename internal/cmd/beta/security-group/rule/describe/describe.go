@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, "The security group ID")
+	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, `The security group ID`)
 
 	err := flags.MarkFlagsRequired(cmd, securityGroupIdFlag)
 	cobra.CheckErr(err)

@@ -30,7 +30,7 @@ stackit beta security-group rule create [flags]
 
 ```
       --description string                The rule description
-      --direction ingress                 The direction of the traffic which the rule should match. The possible values are: ingress, `egress`
+      --direction string                  The direction of the traffic which the rule should match. The possible values are: "ingress", "egress"
       --ether-type string                 The ethertype which the rule should match
   -h, --help                              Help for "stackit beta security-group rule create"
       --icmp-parameter-code int           ICMP code. Can be set if the protocol is ICMP
@@ -38,8 +38,8 @@ stackit beta security-group rule create [flags]
       --ip-range string                   The remote IP range which the rule should match
       --port-range-max int                The maximum port number. Should be greater or equal to the minimum. This should only be provided if the protocol is not ICMP
       --port-range-min int                The minimum port number. Should be less or equal to the maximum. This should only be provided if the protocol is not ICMP
-      --protocol-name protocol-name       The protocol name which the rule should match. If a protocol is to be defined, either protocol-name or `protocol-number` must be provided
-      --protocol-number protocol-name     The protocol number which the rule should match. If a protocol is to be defined, either protocol-name or `protocol-number` must be provided
+      --protocol-name string              The protocol name which the rule should match. If a protocol is to be defined, either "protocol-name" or "protocol-number" must be provided
+      --protocol-number int               The protocol number which the rule should match. If a protocol is to be defined, either "protocol-name" or "protocol-number" must be provided
       --remote-security-group-id string   The remote security group which the rule should match
       --security-group-id string          The security group ID
 ```

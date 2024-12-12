@@ -103,8 +103,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, "The security group ID")
+	cmd.Flags().Int64(limitFlag, 0, `Maximum number of entries to list`)
+	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, `The security group ID`)
 
 	err := flags.MarkFlagsRequired(cmd, securityGroupIdFlag)
 	cobra.CheckErr(err)
