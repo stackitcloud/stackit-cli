@@ -1,4 +1,4 @@
-## stackit beta security-group describe
+## stackit beta security-group group describe
 
 Describes security groups
 
@@ -7,7 +7,7 @@ Describes security groups
 Describes security groups by its internal ID.
 
 ```
-stackit beta security-group describe [flags]
+stackit beta security-group group describe [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ stackit beta security-group describe [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta security-group describe"
+  -h, --help   Help for "stackit beta security-group group describe"
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +35,5 @@ stackit beta security-group describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
+* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
 

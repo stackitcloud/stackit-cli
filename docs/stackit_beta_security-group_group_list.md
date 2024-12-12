@@ -1,19 +1,30 @@
-## stackit beta security-group
+## stackit beta security-group group list
 
-Manage security groups
+Lists security groups
 
 ### Synopsis
 
-Manage the lifecycle of security groups and rules.
+Lists security groups by its internal ID.
 
 ```
-stackit beta security-group [flags]
+stackit beta security-group group list [flags]
+```
+
+### Examples
+
+```
+  List all groups
+  $ stackit beta security-group list
+
+  List groups with labels
+  $ stackit beta security-group list --label-selector label1=value1,label2=value2
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta security-group"
+  -h, --help                    Help for "stackit beta security-group group list"
+      --label-selector string   Filter by label
 ```
 
 ### Options inherited from parent commands
@@ -28,7 +39,5 @@ stackit beta security-group [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
-* [stackit beta security-group rule](./stackit_beta_security-group_rule.md)	 - Provides functionality for security group rules
 

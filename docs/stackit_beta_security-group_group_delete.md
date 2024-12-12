@@ -1,30 +1,26 @@
-## stackit beta security-group list
+## stackit beta security-group group delete
 
-Lists security groups
+Deletes a security group
 
 ### Synopsis
 
-Lists security groups by its internal ID.
+Deletes a security group by its internal ID.
 
 ```
-stackit beta security-group list [flags]
+stackit beta security-group group delete [flags]
 ```
 
 ### Examples
 
 ```
-  List all groups
-  $ stackit beta security-group list
-
-  List groups with labels
-  $ stackit beta security-group list --labels label1=value1,label2=value2
+  Delete a named group with ID "xxx"
+  $ stackit beta security-group delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help                    Help for "stackit beta security-group list"
-      --label-selector string   Filter by label
+  -h, --help   Help for "stackit beta security-group group delete"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +35,5 @@ stackit beta security-group list [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
+* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
 

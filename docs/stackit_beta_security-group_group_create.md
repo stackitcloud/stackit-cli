@@ -1,4 +1,4 @@
-## stackit beta security-group create
+## stackit beta security-group group create
 
 Creates security groups
 
@@ -7,7 +7,7 @@ Creates security groups
 Creates security groups.
 
 ```
-stackit beta security-group create [flags]
+stackit beta security-group group create [flags]
 ```
 
 ### Examples
@@ -24,7 +24,7 @@ stackit beta security-group create [flags]
 
 ```
       --description string      An optional description of the security group.
-  -h, --help                    Help for "stackit beta security-group create"
+  -h, --help                    Help for "stackit beta security-group group create"
       --labels stringToString   Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --name string             The name of the security group.
       --stateful                Create a stateful or a stateless security group
@@ -42,5 +42,5 @@ stackit beta security-group create [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
+* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
 

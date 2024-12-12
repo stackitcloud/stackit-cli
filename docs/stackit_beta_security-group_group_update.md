@@ -1,4 +1,4 @@
-## stackit beta security-group update
+## stackit beta security-group group update
 
 Updates a security group
 
@@ -7,7 +7,7 @@ Updates a security group
 Updates a named security group
 
 ```
-stackit beta security-group update [flags]
+stackit beta security-group group update [flags]
 ```
 
 ### Examples
@@ -24,7 +24,7 @@ stackit beta security-group update [flags]
 
 ```
       --description string      An optional description of the security group.
-  -h, --help                    Help for "stackit beta security-group update"
+  -h, --help                    Help for "stackit beta security-group group update"
       --labels stringToString   Labels are key-value string pairs which can be attached to a network-interface. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --name string             The name of the security group.
 ```
@@ -41,5 +41,5 @@ stackit beta security-group update [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
+* [stackit beta security-group group](./stackit_beta_security-group_group.md)	 - Manage security groups
 
