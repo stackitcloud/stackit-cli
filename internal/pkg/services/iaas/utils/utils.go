@@ -8,6 +8,8 @@ import (
 )
 
 type IaaSClient interface {
+	GetSecurityGroupRuleExecute(ctx context.Context, projectId, securityGroupRuleId, securityGroupId string) (*iaas.SecurityGroupRule, error)
+	GetSecurityGroupExecute(ctx context.Context, projectId, securityGroupId string) (*iaas.SecurityGroup, error)
 	GetPublicIPExecute(ctx context.Context, projectId, publicIpId string) (*iaas.PublicIp, error)
 	GetServerExecute(ctx context.Context, projectId, serverId string) (*iaas.Server, error)
 	GetVolumeExecute(ctx context.Context, projectId, volumeId string) (*iaas.Volume, error)
@@ -15,6 +17,23 @@ type IaaSClient interface {
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
+}
+
+func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupRuleId, securityGroupId string) (string, error) {
+	resp, err := apiClient.GetSecurityGroupRuleExecute(ctx, projectId, securityGroupRuleId, securityGroupId)
+	if err != nil {
+		return "", fmt.Errorf("get security group rule: %w", err)
+	}
+	securityGroupRuleName := *resp.Ethertype + ", " + *resp.Direction
+	return securityGroupRuleName, nil
+}
+
+func GetSecurityGroupName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupId string) (string, error) {
+	resp, err := apiClient.GetSecurityGroupExecute(ctx, projectId, securityGroupId)
+	if err != nil {
+		return "", fmt.Errorf("get security group: %w", err)
+	}
+	return *resp.Name, nil
 }
 
 func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, publicIpId string) (ip, associatedResource string, err error) {
