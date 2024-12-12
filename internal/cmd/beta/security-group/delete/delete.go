@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -47,16 +48,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
 			if err != nil {
-				return fmt.Errorf("get project name: %w", err)
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			securityGroupResp, err := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId).Execute()
+			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.SecurityGroupId)
 			if err != nil {
-				return fmt.Errorf("get security group %q: %w", model.SecurityGroupId, err)
+				p.Warn("get security group name: %v", err)
+				groupLabel = model.SecurityGroupId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q for %q?", *securityGroupResp.Name, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q for %q?", groupLabel, projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -69,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err := request.Execute(); err != nil {
 				return fmt.Errorf("delete security group: %w", err)
 			}
-			p.Info("Deleted security group %q for %q\n", *securityGroupResp.Name, projectLabel)
+			p.Info("Deleted security group %q for %q\n", groupLabel, projectLabel)
 
 			return nil
 		},

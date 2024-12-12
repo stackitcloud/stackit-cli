@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	cmd_utils "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -63,8 +63,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.SecurityGroupId)
+			if err != nil {
+				p.Warn("cannot retrieve groupname: %v", err)
+				groupLabel = model.SecurityGroupId
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update the security group %q?", model.SecurityGroupId)
+				prompt := fmt.Sprintf("Are you sure you want to update the security group %q?", groupLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -78,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update security group: %w", err)
 			}
-			p.Info("Updated security group \"%v\" for %q\n", cmd_utils.PtrString(resp.Name), projectLabel)
+			p.Info("Updated security group \"%v\" for %q\n", utils.PtrString(resp.Name), projectLabel)
 
 			return nil
 		},

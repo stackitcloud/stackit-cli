@@ -16,6 +16,15 @@ func Ptr[T any](v T) *T {
 	return &v
 }
 
+// PtrString creates a string representation of a passed object pointer or returns
+// an empty string, if the passed object is _nil_.
+func PtrString[T any](t *T) string {
+	if t != nil {
+		return fmt.Sprintf("%v", *t)
+	}
+	return ""
+}
+
 // Int64Ptr returns a pointer to an int64
 // Needed because the Ptr function only returns pointer to int
 func Int64Ptr(i int64) *int64 {
