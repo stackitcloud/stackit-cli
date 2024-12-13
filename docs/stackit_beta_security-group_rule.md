@@ -28,7 +28,7 @@ stackit beta security-group rule [flags]
 
 ### SEE ALSO
 
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Provides functionality for security groups
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 * [stackit beta security-group rule create](./stackit_beta_security-group_rule_create.md)	 - Creates a security group rule
 * [stackit beta security-group rule delete](./stackit_beta_security-group_rule_delete.md)	 - Deletes a security group rule
 * [stackit beta security-group rule describe](./stackit_beta_security-group_rule_describe.md)	 - Shows details of a security group rule

@@ -45,7 +45,7 @@ stackit beta [flags]
 * [stackit beta network-area](./stackit_beta_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
 * [stackit beta network-interface](./stackit_beta_network-interface.md)	 - Provides functionality for network interfaces
 * [stackit beta public-ip](./stackit_beta_public-ip.md)	 - Provides functionality for public IPs
-* [stackit beta security-group](./stackit_beta_security-group.md)	 - Provides functionality for security groups
+* [stackit beta security-group](./stackit_beta_security-group.md)	 - Manage security groups
 * [stackit beta server](./stackit_beta_server.md)	 - Provides functionality for servers
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for volumes
