@@ -3,13 +3,22 @@ package server
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/backup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/command"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/console"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/deallocate"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/log"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/public-ip"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/reboot"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/rescue"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/resize"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/service-account"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/start"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/stop"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/unrescue"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/update"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/volume"
 
@@ -44,4 +53,13 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(update.NewCmd(p))
 	cmd.AddCommand(volume.NewCmd(p))
 	cmd.AddCommand(networkinterface.NewCmd(p))
+	cmd.AddCommand(console.NewCmd(p))
+	cmd.AddCommand(log.NewCmd(p))
+	cmd.AddCommand(start.NewCmd(p))
+	cmd.AddCommand(stop.NewCmd(p))
+	cmd.AddCommand(reboot.NewCmd(p))
+	cmd.AddCommand(deallocate.NewCmd(p))
+	cmd.AddCommand(resize.NewCmd(p))
+	cmd.AddCommand(rescue.NewCmd(p))
+	cmd.AddCommand(unrescue.NewCmd(p))
 }
