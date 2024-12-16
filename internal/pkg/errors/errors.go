@@ -154,7 +154,7 @@ To enable it, run:
 	PROFILE_ALREADY_EXISTS = `profile %[1]q already exists. 
 
 To delete it, run:
-	$ stackit config profile delete %[1]s`
+  $ stackit config profile delete %[1]s`
 )
 
 type ServerNicAttachMissingNicIdError struct {
