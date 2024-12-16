@@ -14,16 +14,16 @@ stackit config profile import [flags]
 
 ```
   Import a config with name "PROFILE_NAME" from file "./config.json"
-  $ stackit config profile --name PROFILE_NAME --config `@./config.json`
+  $ stackit config profile import --name PROFILE_NAME --config `@./config.json`
 
-  Import a config with name "PROFILE_NAME" from file "./config.json" and set not as active
-  $ stackit config profile --name PROFILE_NAME --config `@./config.json` --no-set
+  Import a config with name "PROFILE_NAME" from file "./config.json" and do not set as active
+  $ stackit config profile import --name PROFILE_NAME --config `@./config.json` --no-set
 ```
 
 ### Options
 
 ```
-  -c, --config string   Config to be imported
+  -c, --config string   File where configuration will be imported from
   -h, --help            Help for "stackit config profile import"
       --name string     Profile name
       --no-set          Set the imported profile not as active
