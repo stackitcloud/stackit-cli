@@ -7,7 +7,7 @@ Deletes a static route in a STACKIT Network Area (SNA)
 Deletes a static route in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area route delete [flags]
+stackit beta network-area route delete ROUTE_ID [flags]
 ```
 
 ### Examples

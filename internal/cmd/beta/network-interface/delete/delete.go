@@ -29,7 +29,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", nicIdArg),
 		Short: "Deletes a network interface",
 		Long:  "Deletes a network interface.",
 		Args:  args.SingleArg(nicIdArg, utils.ValidateUUID),

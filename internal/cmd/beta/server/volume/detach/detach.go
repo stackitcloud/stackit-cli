@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "detach",
+		Use:   fmt.Sprintf("detach %s", volumeIdArg),
 		Short: "Detaches a volume from a server",
 		Long:  "Detaches a volume from a server.",
 		Args:  args.SingleArg(volumeIdArg, utils.ValidateUUID),

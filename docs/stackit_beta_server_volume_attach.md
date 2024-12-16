@@ -7,7 +7,7 @@ Attaches a volume to a server
 Attaches a volume to a server.
 
 ```
-stackit beta server volume attach [flags]
+stackit beta server volume attach VOLUME_ID [flags]
 ```
 
 ### Examples

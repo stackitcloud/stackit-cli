@@ -7,7 +7,7 @@ Updates a key pair
 Updates a key pair.
 
 ```
-stackit beta key-pair update [flags]
+stackit beta key-pair update KEY_PAIR_NAME [flags]
 ```
 
 ### Examples

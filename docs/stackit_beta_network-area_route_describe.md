@@ -7,7 +7,7 @@ Shows details of a static route in a STACKIT Network Area (SNA)
 Shows details of a static route in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area route describe [flags]
+stackit beta network-area route describe ROUTE_ID [flags]
 ```
 
 ### Examples

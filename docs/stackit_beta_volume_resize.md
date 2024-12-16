@@ -7,7 +7,7 @@ Resizes a volume
 Resizes a volume.
 
 ```
-stackit beta volume resize [flags]
+stackit beta volume resize VOLUME_ID [flags]
 ```
 
 ### Examples

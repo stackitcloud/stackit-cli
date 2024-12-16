@@ -7,7 +7,7 @@ Detach a service account from a server
 Detach a service account from a server
 
 ```
-stackit beta server service-account detach [flags]
+stackit beta server service-account detach SERVICE_ACCOUNT_EMAIL [flags]
 ```
 
 ### Examples

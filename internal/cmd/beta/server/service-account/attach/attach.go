@@ -33,7 +33,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "attach",
+		Use:   fmt.Sprintf("attach %s", serviceAccMailArg),
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
 		Args:  args.SingleArg(serviceAccMailArg, nil),

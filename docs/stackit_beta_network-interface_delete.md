@@ -7,7 +7,7 @@ Deletes a network interface
 Deletes a network interface.
 
 ```
-stackit beta network-interface delete [flags]
+stackit beta network-interface delete NIC_ID [flags]
 ```
 
 ### Examples

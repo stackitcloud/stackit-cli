@@ -7,7 +7,7 @@ Gets server console log
 Gets server console log.
 
 ```
-stackit beta server log [flags]
+stackit beta server log SERVER_ID [flags]
 ```
 
 ### Examples
