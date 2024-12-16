@@ -332,6 +332,9 @@ func DeleteProfile(p *print.Printer, profile string) error {
 	return nil
 }
 
+// ImportProfile imports a profile configuration
+// It imports the profile with the name profileName and a config json.
+// If setAsActive is true, it set the new profile as the active profile.
 func ImportProfile(p *print.Printer, profileName, config string, setAsActive bool) error {
 	err := ValidateProfile(profileName)
 	if err != nil || profileName == DefaultProfileName {
