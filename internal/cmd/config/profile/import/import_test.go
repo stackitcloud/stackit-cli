@@ -1,4 +1,4 @@
-package _import
+package importProfile
 
 import (
 	_ "embed"

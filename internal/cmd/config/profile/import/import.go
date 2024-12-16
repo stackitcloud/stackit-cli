@@ -1,4 +1,4 @@
-package _import
+package importProfile
 
 import (
 	"github.com/spf13/cobra"
@@ -32,11 +32,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Import a config with name "PROFILE_NAME" from file "./config.json"`,
-				"$ stackit config profile --name PROFILE_NAME --config `@./config.json`",
+				"$ stackit config profile import --name PROFILE_NAME --config `@./config.json`",
 			),
 			examples.NewExample(
-				`Import a config with name "PROFILE_NAME" from file "./config.json" and set not as active`,
-				"$ stackit config profile --name PROFILE_NAME --config `@./config.json` --no-set",
+				`Import a config with name "PROFILE_NAME" from file "./config.json" and do not set as active`,
+				"$ stackit config profile import --name PROFILE_NAME --config `@./config.json` --no-set",
 			),
 		),
 		Args: args.NoArgs,
@@ -62,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Profile name")
-	cmd.Flags().VarP(flags.ReadFromFileFlag(), configFlag, "c", "Config to be imported")
+	cmd.Flags().VarP(flags.ReadFromFileFlag(), configFlag, "c", "File where configuration will be imported from")
 	cmd.Flags().Bool(noSetFlag, false, "Set the imported profile not as active")
 
 	cobra.CheckErr(cmd.MarkFlagRequired(nameFlag))
