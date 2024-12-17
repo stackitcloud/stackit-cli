@@ -34,6 +34,7 @@ stackit config profile [flags]
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit config profile create](./stackit_config_profile_create.md)	 - Creates a CLI configuration profile
 * [stackit config profile delete](./stackit_config_profile_delete.md)	 - Delete a CLI configuration profile
+* [stackit config profile import](./stackit_config_profile_import.md)	 - Imports a CLI configuration profile
 * [stackit config profile list](./stackit_config_profile_list.md)	 - Lists all CLI configuration profiles
 * [stackit config profile set](./stackit_config_profile_set.md)	 - Set a CLI configuration profile
 * [stackit config profile unset](./stackit_config_profile_unset.md)	 - Unset the current active CLI configuration profile

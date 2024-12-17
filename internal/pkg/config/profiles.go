@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -326,6 +327,72 @@ func DeleteProfile(p *print.Printer, profile string) error {
 
 	if p != nil {
 		p.Debug(print.DebugLevel, "deleted profile %q", profile)
+	}
+
+	return nil
+}
+
+// ImportProfile imports a profile configuration
+// It imports the profile with the name profileName and a config json.
+// If setAsActive is true, it set the new profile as the active profile.
+func ImportProfile(p *print.Printer, profileName, config string, setAsActive bool) error {
+	err := ValidateProfile(profileName)
+	if err != nil || profileName == DefaultProfileName {
+		return &errors.InvalidProfileNameError{Profile: profileName}
+	}
+
+	exists, err := ProfileExists(profileName)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+	if exists {
+		return &errors.ProfileAlreadyExistsError{Profile: profileName}
+	}
+
+	importConfig := &map[string]interface{}{}
+	err = json.Unmarshal([]byte(config), importConfig)
+	if err != nil {
+		return fmt.Errorf("unmarshal config: %w", err)
+	}
+
+	configFolderPath = GetProfileFolderPath(profileName)
+	err = os.MkdirAll(configFolderPath, 0o750)
+	if err != nil {
+		return fmt.Errorf("create config folder: %w", err)
+	}
+
+	content, err := json.MarshalIndent(importConfig, "", "  ")
+	if err != nil {
+		cleanupErr := os.RemoveAll(configFolderPath)
+		if cleanupErr != nil {
+			return fmt.Errorf("json marshal config: %w, cleanup directories: %w", err, cleanupErr)
+		}
+		return fmt.Errorf("marshal config file: %w", err)
+	}
+
+	filePath := getConfigFilePath(configFolderPath)
+	err = os.WriteFile(filePath, content, 0o600)
+	if err != nil {
+		cleanupErr := os.RemoveAll(configFolderPath)
+		if cleanupErr != nil {
+			return fmt.Errorf("write config file: %w, cleanup directories: %w", err, cleanupErr)
+		}
+		return fmt.Errorf("write config file: %w", err)
+	}
+
+	if p.IsVerbosityDebug() {
+		p.Debug(print.DebugLevel, "profile %q imported", profileName)
+	}
+
+	if setAsActive {
+		err := SetProfile(&print.Printer{}, profileName)
+		if err != nil {
+			return fmt.Errorf("set active profile: %w", err)
+		}
+	}
+
+	if p.IsVerbosityDebug() {
+		p.Debug(print.DebugLevel, "active profile %q is now active", profileName)
 	}
 
 	return nil

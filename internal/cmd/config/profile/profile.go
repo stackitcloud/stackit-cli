@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/delete"
+	importProfile "github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/import"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/unset"
@@ -38,4 +39,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(create.NewCmd(p))
 	cmd.AddCommand(list.NewCmd(p))
 	cmd.AddCommand(delete.NewCmd(p))
+	cmd.AddCommand(importProfile.NewCmd(p))
 }

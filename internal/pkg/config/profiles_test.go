@@ -1,9 +1,16 @@
 package config
 
 import (
+	_ "embed"
+	"fmt"
 	"path/filepath"
 	"testing"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
+
+//go:embed template/test_profile.json
+var templateConfig string
 
 func TestValidateProfile(t *testing.T) {
 	tests := []struct {
@@ -111,6 +118,66 @@ func TestGetProfileFolderPath(t *testing.T) {
 			actual := GetProfileFolderPath(tt.profile)
 			if actual != tt.expected {
 				t.Errorf("expected profile folder path to be %q but got %q", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestImportProfile(t *testing.T) {
+	tests := []struct {
+		description string
+		profile     string
+		config      string
+		setAsActive bool
+		isValid     bool
+	}{
+		{
+			description: "valid profile",
+			profile:     "profile-name",
+			config:      templateConfig,
+			setAsActive: false,
+			isValid:     true,
+		},
+		{
+			description: "invalid profile name",
+			profile:     "invalid-profile-&",
+			config:      templateConfig,
+			setAsActive: false,
+			isValid:     false,
+		},
+		{
+			description: "invalid config",
+			profile:     "my-profile",
+			config:      `{ "invalid": "json }`,
+			setAsActive: false,
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			p := print.NewPrinter()
+			err := ImportProfile(p, tt.profile, tt.config, tt.setAsActive)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("profile should be valid but got error: %v\n", err)
+			}
+
+			if !tt.isValid {
+				t.Fatalf("profile should be invalid but got no error\n")
+			}
+		})
+
+		t.Cleanup(func() {
+			p := print.NewPrinter()
+			err := DeleteProfile(p, tt.profile)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				fmt.Printf("could not clean up imported profile: %v\n", err)
 			}
 		})
 	}

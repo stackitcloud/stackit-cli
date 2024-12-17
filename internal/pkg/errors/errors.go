@@ -150,6 +150,11 @@ To enable it, run:
 	IAAS_SERVER_NIC_ATTACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "create" flag is not provided.`
 
 	IAAS_SERVER_NIC_DETACH_MISSING_NIC_ID = `The "network-interface-id" flag must be provided if the "delete" flag is not provided.`
+
+	PROFILE_ALREADY_EXISTS = `profile %[1]q already exists. 
+
+To delete it, run:
+  $ stackit config profile delete %[1]s`
 )
 
 type ServerNicAttachMissingNicIdError struct {
@@ -436,4 +441,12 @@ type ServiceDisabledError struct {
 
 func (e *ServiceDisabledError) Error() string {
 	return fmt.Sprintf(SERVICE_DISABLED, e.Service)
+}
+
+type ProfileAlreadyExistsError struct {
+	Profile string
+}
+
+func (e *ProfileAlreadyExistsError) Error() string {
+	return fmt.Sprintf(PROFILE_ALREADY_EXISTS, e.Profile)
 }
