@@ -9,7 +9,7 @@ If the volume is still in use, the deletion will fail
 
 
 ```
-stackit beta volume delete [flags]
+stackit beta volume delete VOLUME_ID [flags]
 ```
 
 ### Examples

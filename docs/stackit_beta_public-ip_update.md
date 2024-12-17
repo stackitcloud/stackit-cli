@@ -7,7 +7,7 @@ Updates a Public IP
 Updates a Public IP.
 
 ```
-stackit beta public-ip update [flags]
+stackit beta public-ip update PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

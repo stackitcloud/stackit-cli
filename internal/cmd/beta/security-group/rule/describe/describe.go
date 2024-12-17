@@ -34,7 +34,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", securityGroupRuleIdArg),
 		Short: "Shows details of a security group rule",
 		Long:  "Shows details of a security group rule.",
 		Args:  args.SingleArg(securityGroupRuleIdArg, utils.ValidateUUID),

@@ -7,7 +7,7 @@ Stops an existing server
 Stops an existing server.
 
 ```
-stackit beta server stop [flags]
+stackit beta server stop SERVER_ID [flags]
 ```
 
 ### Examples

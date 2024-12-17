@@ -7,7 +7,7 @@ Updates a network
 Updates a network.
 
 ```
-stackit beta network update [flags]
+stackit beta network update NETWORK_ID [flags]
 ```
 
 ### Examples

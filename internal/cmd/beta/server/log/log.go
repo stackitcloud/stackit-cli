@@ -36,7 +36,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "log",
+		Use:   fmt.Sprintf("log %s", serverIdArg),
 		Short: "Gets server console log",
 		Long:  "Gets server console log.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

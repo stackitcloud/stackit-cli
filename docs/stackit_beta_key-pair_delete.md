@@ -7,7 +7,7 @@ Deletes a key pair
 Deletes a key pair.
 
 ```
-stackit beta key-pair delete [flags]
+stackit beta key-pair delete KEY_PAIR_NAME [flags]
 ```
 
 ### Examples

@@ -7,7 +7,7 @@ Describes security groups
 Describes security groups by its internal ID.
 
 ```
-stackit beta security-group describe [flags]
+stackit beta security-group describe GROUP_ID [flags]
 ```
 
 ### Examples

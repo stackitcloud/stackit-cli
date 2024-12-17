@@ -33,7 +33,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", routeIdArg),
 		Short: "Deletes a static route in a STACKIT Network Area (SNA)",
 		Long:  "Deletes a static route in a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(routeIdArg, utils.ValidateUUID),

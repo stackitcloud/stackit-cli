@@ -32,7 +32,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", areaIdArg),
 		Short: "Deletes a STACKIT Network Area (SNA)",
 		Long: fmt.Sprintf("%s\n%s\n",
 			"Deletes a STACKIT Network Area (SNA) in an organization.",

@@ -9,7 +9,7 @@ If the security group rule is still in use, the deletion will fail
 
 
 ```
-stackit beta security-group rule delete [flags]
+stackit beta security-group rule delete SECURITY_GROUP_RULE_ID [flags]
 ```
 
 ### Examples

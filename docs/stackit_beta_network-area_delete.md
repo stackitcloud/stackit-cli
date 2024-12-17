@@ -9,7 +9,7 @@ If the SNA is attached to any projects, the deletion will fail
 
 
 ```
-stackit beta network-area delete [flags]
+stackit beta network-area delete AREA_ID [flags]
 ```
 
 ### Examples

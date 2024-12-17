@@ -34,7 +34,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", nicIdArg),
 		Short: "Describes a network interface",
 		Long:  "Describes a network interface.",
 		Args:  args.SingleArg(nicIdArg, utils.ValidateUUID),

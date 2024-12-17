@@ -37,7 +37,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "attach",
+		Use:   fmt.Sprintf("attach %s", volumeIdArg),
 		Short: "Attaches a volume to a server",
 		Long:  "Attaches a volume to a server.",
 		Args:  args.SingleArg(volumeIdArg, utils.ValidateUUID),

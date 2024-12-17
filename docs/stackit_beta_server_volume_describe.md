@@ -7,7 +7,7 @@ Describes a server volume attachment
 Describes a server volume attachment.
 
 ```
-stackit beta server volume describe [flags]
+stackit beta server volume describe VOLUME_ID [flags]
 ```
 
 ### Examples

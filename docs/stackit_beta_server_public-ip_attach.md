@@ -7,7 +7,7 @@ Attaches a public IP to a server
 Attaches a public IP to a server.
 
 ```
-stackit beta server public-ip attach [flags]
+stackit beta server public-ip attach PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

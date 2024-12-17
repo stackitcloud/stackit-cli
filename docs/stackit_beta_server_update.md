@@ -7,7 +7,7 @@ Updates a server
 Updates a server.
 
 ```
-stackit beta server update [flags]
+stackit beta server update SERVER_ID [flags]
 ```
 
 ### Examples

@@ -7,7 +7,7 @@ Updates a security group
 Updates a named security group
 
 ```
-stackit beta security-group update [flags]
+stackit beta security-group update GROUP_ID [flags]
 ```
 
 ### Examples

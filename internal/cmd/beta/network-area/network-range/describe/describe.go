@@ -35,7 +35,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", networkRangeIdArg),
 		Short: "Shows details of a network range in a STACKIT Network Area (SNA)",
 		Long:  "Shows details of a network range in a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(networkRangeIdArg, utils.ValidateUUID),

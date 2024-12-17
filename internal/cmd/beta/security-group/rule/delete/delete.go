@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", securityGroupRuleIdArg),
 		Short: "Deletes a security group rule",
 		Long: fmt.Sprintf("%s\n%s\n",
 			"Deletes a security group rule.",

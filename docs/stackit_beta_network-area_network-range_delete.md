@@ -7,7 +7,7 @@ Deletes a network range in a STACKIT Network Area (SNA)
 Deletes a network range in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area network-range delete [flags]
+stackit beta network-area network-range delete NETWORK_RANGE_ID [flags]
 ```
 
 ### Examples

@@ -7,7 +7,7 @@ Resizes the server to the given machine type
 Resizes the server to the given machine type.
 
 ```
-stackit beta server resize [flags]
+stackit beta server resize SERVER_ID [flags]
 ```
 
 ### Examples

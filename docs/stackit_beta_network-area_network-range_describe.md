@@ -7,7 +7,7 @@ Shows details of a network range in a STACKIT Network Area (SNA)
 Shows details of a network range in a STACKIT Network Area (SNA).
 
 ```
-stackit beta network-area network-range describe [flags]
+stackit beta network-area network-range describe NETWORK_RANGE_ID [flags]
 ```
 
 ### Examples

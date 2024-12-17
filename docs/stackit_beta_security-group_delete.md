@@ -7,7 +7,7 @@ Deletes a security group
 Deletes a security group by its internal ID.
 
 ```
-stackit beta security-group delete [flags]
+stackit beta security-group delete GROUP_ID [flags]
 ```
 
 ### Examples

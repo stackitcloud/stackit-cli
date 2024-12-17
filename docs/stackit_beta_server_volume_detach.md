@@ -7,7 +7,7 @@ Detaches a volume from a server
 Detaches a volume from a server.
 
 ```
-stackit beta server volume detach [flags]
+stackit beta server volume detach VOLUME_ID [flags]
 ```
 
 ### Examples

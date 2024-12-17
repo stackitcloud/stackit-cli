@@ -7,7 +7,7 @@ Updates observability credentials for Load Balancer
 Updates existing observability credentials (username and password) for Load Balancer. The credentials can be for Observability or another monitoring tool.
 
 ```
-stackit load-balancer observability-credentials update [flags]
+stackit load-balancer observability-credentials update CREDENTIALS_REF [flags]
 ```
 
 ### Examples

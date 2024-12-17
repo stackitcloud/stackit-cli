@@ -37,7 +37,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update",
+		Use:   fmt.Sprintf("update %s", credentialsRefArg),
 		Short: "Updates observability credentials for Load Balancer",
 		Long:  "Updates existing observability credentials (username and password) for Load Balancer. The credentials can be for Observability or another monitoring tool.",
 		Args:  args.SingleArg(credentialsRefArg, nil),

@@ -7,7 +7,7 @@ Detaches a public IP from a server
 Detaches a public IP from a server.
 
 ```
-stackit beta server public-ip detach [flags]
+stackit beta server public-ip detach PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

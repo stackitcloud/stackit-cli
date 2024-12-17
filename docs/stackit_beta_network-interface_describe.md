@@ -7,7 +7,7 @@ Describes a network interface
 Describes a network interface.
 
 ```
-stackit beta network-interface describe [flags]
+stackit beta network-interface describe NIC_ID [flags]
 ```
 
 ### Examples
