@@ -3,6 +3,7 @@ package config
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -178,6 +179,62 @@ func TestImportProfile(t *testing.T) {
 					return
 				}
 				fmt.Printf("could not clean up imported profile: %v\n", err)
+			}
+		})
+	}
+}
+
+func TestExportProfile(t *testing.T) {
+	// Create directory where the export configs should be stored
+	testDir, err := os.MkdirTemp(os.TempDir(), "stackit-cli-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(testDir)
+
+	tests := []struct {
+		description string
+		profile     string
+		filePath    string
+		isValid     bool
+	}{
+		{
+			description: "valid profile",
+			profile:     "default",
+			filePath:    testDir,
+			isValid:     true,
+		},
+		{
+			description: "invalid profile",
+			profile:     "invalid-my-profile",
+			isValid:     false,
+		},
+		{
+			description: "custom file name",
+			profile:     "default",
+			filePath:    filepath.Join(testDir, fmt.Sprintf("custom-name.%s", configFileExtension)),
+			isValid:     true,
+		},
+		{
+			description: "not existing path",
+			profile:     "default",
+			filePath:    filepath.Join(testDir, "invalid", "path"),
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			p := print.NewPrinter()
+			err := ExportProfile(p, tt.profile, tt.filePath)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("export should be valid but got error: %v\n", err)
+			}
+			if !tt.isValid {
+				t.Fatalf("export should be invalid but got no error\n")
 			}
 		})
 	}

@@ -155,6 +155,13 @@ To enable it, run:
 
 To delete it, run:
   $ stackit config profile delete %[1]s`
+
+	PROFILE_DOES_NOT_EXIST = `The profile %q does not exist.
+
+To list all profiles, run:
+  $ stackit config profile list`
+
+	FILE_ALREADY_EXISTS = `file %q already exists in the export path. Delete the existing file or define a different export path`
 )
 
 type ServerNicAttachMissingNicIdError struct {
@@ -450,3 +457,17 @@ type ProfileAlreadyExistsError struct {
 func (e *ProfileAlreadyExistsError) Error() string {
 	return fmt.Sprintf(PROFILE_ALREADY_EXISTS, e.Profile)
 }
+
+type ProfileDoesNotExistError struct {
+	Profile string
+}
+
+func (e *ProfileDoesNotExistError) Error() string {
+	return fmt.Sprintf(PROFILE_DOES_NOT_EXIST, e.Profile)
+}
+
+type FileAlreadyExistsError struct {
+	Filename string
+}
+
+func (e *FileAlreadyExistsError) Error() string { return fmt.Sprintf(FILE_ALREADY_EXISTS, e.Filename) }

@@ -3,13 +3,12 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
-	"regexp"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"os"
+	"path/filepath"
+	"regexp"
 )
 
 const ProfileEnvVar = "STACKIT_CLI_PROFILE"
@@ -393,6 +392,55 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 
 	if p.IsVerbosityDebug() {
 		p.Debug(print.DebugLevel, "active profile %q is now active", profileName)
+	}
+
+	return nil
+}
+
+// ExportProfile exports a profile configuration
+// Is exports the profile to the filePath.
+func ExportProfile(p *print.Printer, profile, filePath string) error {
+	err := ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile: %w", err)
+	}
+
+	exists, err := ProfileExists(profile)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+	if !exists {
+		return &errors.ProfileDoesNotExistError{Profile: profile}
+	}
+
+	profilePath := GetProfileFolderPath(profile)
+	configFile := getConfigFilePath(profilePath)
+	exportFilePath := filePath
+
+	// Handle if exportFilePath is a directory
+	stats, err := os.Stat(exportFilePath)
+	if err == nil {
+		// If exportFilePath exists, and it is not a directory, then return an error
+		if !stats.IsDir() {
+			return &errors.FileAlreadyExistsError{Filename: exportFilePath}
+		}
+
+		exportFileName := fmt.Sprintf("%s.%s", profile, configFileExtension)
+		exportFilePath = filepath.Join(filePath, exportFileName)
+
+		_, err = os.Stat(exportFilePath)
+		if err == nil {
+			return &errors.FileAlreadyExistsError{Filename: exportFilePath}
+		}
+	}
+
+	err = fileutils.CopyFile(configFile, exportFilePath)
+	if err != nil {
+		return fmt.Errorf("export config file: %w", err)
+	}
+
+	if p != nil {
+		p.Debug(print.DebugLevel, "exported profile %q", profile)
 	}
 
 	return nil
