@@ -186,13 +186,34 @@ func TestImportProfile(t *testing.T) {
 
 func TestExportProfile(t *testing.T) {
 	// Create directory where the export configs should be stored
-	testDir, err := os.MkdirTemp(".", "stackit-cli-test")
+	testDir, err := os.MkdirTemp(os.TempDir(), "stackit-cli-test")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func(path string) {
-		_ = os.RemoveAll(path)
-	}(testDir)
+	t.Cleanup(func() {
+		func(path string) {
+			err := os.RemoveAll(path)
+			if err != nil {
+				fmt.Printf("could not clean up temp dir: %v\n", err)
+			}
+		}(testDir)
+	})
+
+	// Create prerequisite profile
+	p := print.NewPrinter()
+	profileName := "export-profile-test"
+	err = CreateProfile(p, profileName, false, false)
+	if err != nil {
+		t.Fatalf("could not create prerequisite profile, %v", err)
+	}
+	t.Cleanup(func() {
+		func(p *print.Printer, profile string) {
+			err := DeleteProfile(p, profile)
+			if err != nil {
+				fmt.Printf("could not clean up prerequisite profile %q, %v", profileName, err)
+			}
+		}(p, profileName)
+	})
 
 	tests := []struct {
 		description string
@@ -202,7 +223,7 @@ func TestExportProfile(t *testing.T) {
 	}{
 		{
 			description: "valid profile",
-			profile:     "default",
+			profile:     profileName,
 			filePath:    testDir,
 			isValid:     true,
 		},
@@ -213,13 +234,13 @@ func TestExportProfile(t *testing.T) {
 		},
 		{
 			description: "custom file name",
-			profile:     "default",
+			profile:     profileName,
 			filePath:    filepath.Join(testDir, fmt.Sprintf("custom-name.%s", configFileExtension)),
 			isValid:     true,
 		},
 		{
 			description: "not existing path",
-			profile:     "default",
+			profile:     profileName,
 			filePath:    filepath.Join(testDir, "invalid", "path"),
 			isValid:     false,
 		},
