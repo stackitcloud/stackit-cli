@@ -199,6 +199,12 @@ func TestExportProfile(t *testing.T) {
 		}(testDir)
 	})
 
+	defaultConfigFolderPath = filepath.Join(testDir, "config")
+	err = os.Mkdir(defaultConfigFolderPath, 0o750)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Create prerequisite profile
 	p := print.NewPrinter()
 	profileName := "export-profile-test"
@@ -206,7 +212,7 @@ func TestExportProfile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create prerequisite profile, %v", err)
 	}
-	InitConfig()
+	initConfig(defaultConfigFolderPath)
 	err = Write()
 	if err != nil {
 		t.Fatalf("could not write profile, %v", err)
@@ -229,7 +235,7 @@ func TestExportProfile(t *testing.T) {
 		{
 			description: "valid profile",
 			profile:     profileName,
-			filePath:    testDir,
+			filePath:    filepath.Join(testDir, fmt.Sprintf("custom-name.%s", configFileExtension)),
 			isValid:     true,
 		},
 		{
@@ -238,15 +244,9 @@ func TestExportProfile(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "custom file name",
-			profile:     profileName,
-			filePath:    filepath.Join(testDir, fmt.Sprintf("custom-name.%s", configFileExtension)),
-			isValid:     true,
-		},
-		{
 			description: "not existing path",
 			profile:     profileName,
-			filePath:    filepath.Join(testDir, "invalid", "path"),
+			filePath:    filepath.Join(testDir, "invalid", "path", fmt.Sprintf("custom-name.%s", configFileExtension)),
 			isValid:     false,
 		},
 	}

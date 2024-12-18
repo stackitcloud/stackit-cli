@@ -400,8 +400,8 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 }
 
 // ExportProfile exports a profile configuration
-// Is exports the profile to the filePath.
-func ExportProfile(p *print.Printer, profile, filePath string) error {
+// Is exports the profile to the exportPath. The exportPath must contain in the suffix `.json` as file extension
+func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	err := ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
@@ -418,24 +418,22 @@ func ExportProfile(p *print.Printer, profile, filePath string) error {
 	profilePath := GetProfileFolderPath(profile)
 	configFile := getConfigFilePath(profilePath)
 
-	exportFileName := fmt.Sprintf("%s.%s", profile, configFileExtension)
-	exportFilePath := filePath
-	if !strings.HasSuffix(exportFilePath, fmt.Sprintf(".%s", configFileExtension)) {
-		exportFilePath = filepath.Join(filePath, exportFileName)
+	if !strings.HasSuffix(exportPath, fmt.Sprintf(".%s", configFileExtension)) {
+		return fmt.Errorf("export file name must end with '.%s'", configFileExtension)
 	}
 
-	_, err = os.Stat(exportFilePath)
+	_, err = os.Stat(exportPath)
 	if err == nil {
-		return fmt.Errorf("file %q already exists in the export path. Delete the existing file or define a different export path", exportFileName)
+		return &errors.FileAlreadyExistsError{Filename: exportPath}
 	}
 
-	err = fileutils.CopyFile(configFile, exportFilePath)
+	err = fileutils.CopyFile(configFile, exportPath)
 	if err != nil {
-		return fmt.Errorf("export config file to %q: %w", exportFilePath, err)
+		return fmt.Errorf("export config file to %q: %w", exportPath, err)
 	}
 
 	if p != nil {
-		p.Debug(print.DebugLevel, "exported profile %q to %q", profile, exportFilePath)
+		p.Debug(print.DebugLevel, "exported profile %q to %q", profile, exportPath)
 	}
 
 	return nil

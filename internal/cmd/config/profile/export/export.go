@@ -2,6 +2,8 @@ package export
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -17,12 +19,14 @@ const (
 	profileNameArg = "PROFILE_NAME"
 
 	filePathFlag = "file-path"
+
+	configFileExtension = "json"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ProfileName string
-	ExportPath  string
+	FilePath    string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -32,7 +36,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long:  "Exports a CLI configuration profile.",
 		Example: examples.Build(
 			examples.NewExample(
-				`Export a profile with name "PROFILE_NAME" to the current path`,
+				`Export a profile with name "PROFILE_NAME" to a file in your current directory`,
 				"$ stackit config profile export PROFILE_NAME",
 			),
 			examples.NewExample(
@@ -47,12 +51,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			err = config.ExportProfile(p, model.ProfileName, model.ExportPath)
+			err = config.ExportProfile(p, model.ProfileName, model.FilePath)
 			if err != nil {
 				return fmt.Errorf("could not export profile: %w", err)
 			}
 
-			p.Info("Exported profile %q\n", model.ProfileName)
+			p.Info("Exported profile %q to %q\n", model.ProfileName, model.FilePath)
 
 			return nil
 		},
@@ -62,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(filePathFlag, "", "Path where the config should be saved. E.g. '--file-path ~/config.json', '--file-path ~/'")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given. If unset, writes the payload to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -72,7 +76,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ProfileName:     profileName,
-		ExportPath:      flags.FlagToStringValue(p, cmd, filePathFlag),
+		FilePath:        flags.FlagToStringValue(p, cmd, filePathFlag),
+	}
+
+	// If filePath contains does not contain a file name, then add a default name
+	if !strings.HasSuffix(model.FilePath, fmt.Sprintf(".%s", configFileExtension)) {
+		exportFileName := fmt.Sprintf("%s.%s", model.ProfileName, configFileExtension)
+		model.FilePath = filepath.Join(model.FilePath, exportFileName)
 	}
 
 	if p.IsVerbosityDebug() {

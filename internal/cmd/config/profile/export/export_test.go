@@ -1,6 +1,7 @@
 package export
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -11,7 +12,7 @@ import (
 
 const (
 	testProfileArg = "default"
-	testExportPath = "/tmp/stackit-profiles"
+	testExportPath = "/tmp/stackit-profiles/" + testProfileArg + ".json"
 )
 
 func fixtureArgValues(mods ...func(args []string)) []string {
@@ -40,7 +41,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ProfileName: testProfileArg,
-		ExportPath:  testExportPath,
+		FilePath:    testExportPath,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -81,7 +82,7 @@ func TestParseInput(t *testing.T) {
 			flagValues:  map[string]string{},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(inputModel *inputModel) {
-				inputModel.ExportPath = ""
+				inputModel.FilePath = fmt.Sprintf("%s.json", testProfileArg)
 			}),
 		},
 	}
