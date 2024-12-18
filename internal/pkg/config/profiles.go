@@ -3,12 +3,14 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 const ProfileEnvVar = "STACKIT_CLI_PROFILE"
@@ -415,32 +417,25 @@ func ExportProfile(p *print.Printer, profile, filePath string) error {
 
 	profilePath := GetProfileFolderPath(profile)
 	configFile := getConfigFilePath(profilePath)
+
+	exportFileName := fmt.Sprintf("%s.%s", profile, configFileExtension)
 	exportFilePath := filePath
-
-	// Handle if exportFilePath is a directory
-	stats, err := os.Stat(exportFilePath)
-	if err == nil {
-		// If exportFilePath exists, and it is not a directory, then return an error
-		if !stats.IsDir() {
-			return &errors.FileAlreadyExistsError{Filename: exportFilePath}
-		}
-
-		exportFileName := fmt.Sprintf("%s.%s", profile, configFileExtension)
+	if !strings.HasSuffix(exportFilePath, fmt.Sprintf(".%s", configFileExtension)) {
 		exportFilePath = filepath.Join(filePath, exportFileName)
+	}
 
-		_, err = os.Stat(exportFilePath)
-		if err == nil {
-			return &errors.FileAlreadyExistsError{Filename: exportFilePath}
-		}
+	_, err = os.Stat(exportFilePath)
+	if err == nil {
+		return fmt.Errorf("file %q already exists in the export path. Delete the existing file or define a different export path", exportFileName)
 	}
 
 	err = fileutils.CopyFile(configFile, exportFilePath)
 	if err != nil {
-		return fmt.Errorf("export config file: %w", err)
+		return fmt.Errorf("export config file to %q: %w", exportFilePath, err)
 	}
 
 	if p != nil {
-		p.Debug(print.DebugLevel, "exported profile %q", profile)
+		p.Debug(print.DebugLevel, "exported profile %q to %q", profile, exportFilePath)
 	}
 
 	return nil

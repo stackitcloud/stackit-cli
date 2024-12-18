@@ -190,7 +190,9 @@ func TestExportProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(testDir)
+	defer func(path string) {
+		_ = os.RemoveAll(path)
+	}(testDir)
 
 	tests := []struct {
 		description string

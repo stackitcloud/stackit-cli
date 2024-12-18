@@ -1,10 +1,12 @@
 package export
 
 import (
-	"github.com/google/go-cmp/cmp"
+	"testing"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 const (
@@ -77,7 +79,10 @@ func TestParseInput(t *testing.T) {
 			description: "no flags",
 			argsValues:  fixtureArgValues(),
 			flagValues:  map[string]string{},
-			isValid:     false,
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(inputModel *inputModel) {
+				inputModel.ExportPath = ""
+			}),
 		},
 	}
 
