@@ -186,7 +186,7 @@ func TestImportProfile(t *testing.T) {
 
 func TestExportProfile(t *testing.T) {
 	// Create directory where the export configs should be stored
-	testDir, err := os.MkdirTemp(os.TempDir(), "stackit-cli-test")
+	testDir, err := os.MkdirTemp(".", "stackit-cli-test")
 	if err != nil {
 		t.Fatal(err)
 	}
