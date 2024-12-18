@@ -202,10 +202,14 @@ func TestExportProfile(t *testing.T) {
 	// Create prerequisite profile
 	p := print.NewPrinter()
 	profileName := "export-profile-test"
-	InitConfig()
-	err = CreateProfile(p, profileName, false, false)
+	err = CreateProfile(p, profileName, true, true)
 	if err != nil {
 		t.Fatalf("could not create prerequisite profile, %v", err)
+	}
+	InitConfig()
+	err = Write()
+	if err != nil {
+		t.Fatalf("could not write profile, %v", err)
 	}
 	t.Cleanup(func() {
 		func(p *print.Printer, profile string) {
