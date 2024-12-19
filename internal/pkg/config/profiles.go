@@ -403,7 +403,7 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	err := ValidateProfile(profile)
 	if err != nil {
-		return fmt.Errorf("validate profile: %w", err)
+		return fmt.Errorf("validate profile name: %w", err)
 	}
 
 	exists, err := ProfileExists(profile)
@@ -417,8 +417,11 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	profilePath := GetProfileFolderPath(profile)
 	configFile := getConfigFilePath(profilePath)
 
-	_, err = os.Stat(exportPath)
+	stats, err := os.Stat(exportPath)
 	if err == nil {
+		if stats.IsDir() {
+			return fmt.Errorf("export path %q is a directory. Please specify a full path", exportPath)
+		}
 		return &errors.FileAlreadyExistsError{Filename: exportPath}
 	}
 

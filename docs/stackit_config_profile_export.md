@@ -23,7 +23,7 @@ stackit config profile export PROFILE_NAME [flags]
 ### Options
 
 ```
-  -f, --file-path string   If set, writes the config to the given. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'
+  -f, --file-path string   If set, writes the config to the given file path. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json'
   -h, --help               Help for "stackit config profile export"
 ```
 

@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the config to the given. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the config to the given file path. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
