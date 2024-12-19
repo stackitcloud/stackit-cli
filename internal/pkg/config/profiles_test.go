@@ -199,23 +199,20 @@ func TestExportProfile(t *testing.T) {
 		}(testDir)
 	})
 
-	defaultConfigFolderPath = filepath.Join(testDir, "config")
-	err = os.Mkdir(defaultConfigFolderPath, 0o750)
+	// Create test config directory
+	testConfigFolderPath := filepath.Join(testDir, "config")
+	initConfig(testConfigFolderPath)
+	err = Write()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("could not write profile, %v", err)
 	}
 
 	// Create prerequisite profile
 	p := print.NewPrinter()
 	profileName := "export-profile-test"
-	err = CreateProfile(p, profileName, true, true)
+	err = CreateProfile(p, profileName, true, false)
 	if err != nil {
 		t.Fatalf("could not create prerequisite profile, %v", err)
-	}
-	initConfig(defaultConfigFolderPath)
-	err = Write()
-	if err != nil {
-		t.Fatalf("could not write profile, %v", err)
 	}
 	t.Cleanup(func() {
 		func(p *print.Printer, profile string) {
