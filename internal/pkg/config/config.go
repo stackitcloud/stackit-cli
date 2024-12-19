@@ -105,7 +105,11 @@ var configFolderPath string
 var profileFilePath string
 
 func InitConfig() {
-	defaultConfigFolderPath = getInitialConfigDir()
+	initConfig(getInitialConfigDir())
+}
+
+func initConfig(configPath string) {
+	defaultConfigFolderPath = configPath
 	profileFilePath = getInitialProfileFilePath() // Profile file path is in the default config folder
 
 	configProfile, err := GetProfile()

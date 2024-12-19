@@ -397,3 +397,42 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 
 	return nil
 }
+
+// ExportProfile exports a profile configuration
+// Is exports the profile to the exportPath. The exportPath must contain the filename.
+func ExportProfile(p *print.Printer, profile, exportPath string) error {
+	err := ValidateProfile(profile)
+	if err != nil {
+		return fmt.Errorf("validate profile name: %w", err)
+	}
+
+	exists, err := ProfileExists(profile)
+	if err != nil {
+		return fmt.Errorf("check if profile exists: %w", err)
+	}
+	if !exists {
+		return &errors.ProfileDoesNotExistError{Profile: profile}
+	}
+
+	profilePath := GetProfileFolderPath(profile)
+	configFile := getConfigFilePath(profilePath)
+
+	stats, err := os.Stat(exportPath)
+	if err == nil {
+		if stats.IsDir() {
+			return fmt.Errorf("export path %q is a directory. Please specify a full path", exportPath)
+		}
+		return &errors.FileAlreadyExistsError{Filename: exportPath}
+	}
+
+	err = fileutils.CopyFile(configFile, exportPath)
+	if err != nil {
+		return fmt.Errorf("export config file to %q: %w", exportPath, err)
+	}
+
+	if p != nil {
+		p.Debug(print.DebugLevel, "exported profile %q to %q", profile, exportPath)
+	}
+
+	return nil
+}

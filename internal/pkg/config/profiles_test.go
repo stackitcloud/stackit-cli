@@ -3,6 +3,7 @@ package config
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -178,6 +179,93 @@ func TestImportProfile(t *testing.T) {
 					return
 				}
 				fmt.Printf("could not clean up imported profile: %v\n", err)
+			}
+		})
+	}
+}
+
+func TestExportProfile(t *testing.T) {
+	// Create directory where the export configs should be stored
+	testDir, err := os.MkdirTemp(os.TempDir(), "stackit-cli-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		func(path string) {
+			err := os.RemoveAll(path)
+			if err != nil {
+				fmt.Printf("could not clean up temp dir: %v\n", err)
+			}
+		}(testDir)
+	})
+
+	// Create test config directory
+	testConfigFolderPath := filepath.Join(testDir, "config")
+	initConfig(testConfigFolderPath)
+	err = Write()
+	if err != nil {
+		t.Fatalf("could not write profile, %v", err)
+	}
+
+	// Create prerequisite profile
+	p := print.NewPrinter()
+	profileName := "export-profile-test"
+	err = CreateProfile(p, profileName, true, false)
+	if err != nil {
+		t.Fatalf("could not create prerequisite profile, %v", err)
+	}
+	t.Cleanup(func() {
+		func(p *print.Printer, profile string) {
+			err := DeleteProfile(p, profile)
+			if err != nil {
+				fmt.Printf("could not clean up prerequisite profile %q, %v", profileName, err)
+			}
+		}(p, profileName)
+	})
+
+	tests := []struct {
+		description string
+		profile     string
+		filePath    string
+		isValid     bool
+	}{
+		{
+			description: "valid profile",
+			profile:     profileName,
+			filePath:    filepath.Join(testDir, fmt.Sprintf("custom-name.%s", configFileExtension)),
+			isValid:     true,
+		},
+		{
+			description: "invalid profile",
+			profile:     "invalid-my-profile",
+			isValid:     false,
+		},
+		{
+			description: "not existing path",
+			profile:     profileName,
+			filePath:    filepath.Join(testDir, "invalid", "path", fmt.Sprintf("custom-name.%s", configFileExtension)),
+			isValid:     false,
+		},
+		{
+			description: "export without file extension",
+			profile:     profileName,
+			filePath:    filepath.Join(testDir, "file-without-extension"),
+			isValid:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			p := print.NewPrinter()
+			err := ExportProfile(p, tt.profile, tt.filePath)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("export should be valid but got error: %v\n", err)
+			}
+			if !tt.isValid {
+				t.Fatalf("export should be invalid but got no error\n")
 			}
 		})
 	}
