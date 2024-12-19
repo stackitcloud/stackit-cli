@@ -85,6 +85,18 @@ func TestParseInput(t *testing.T) {
 				inputModel.FilePath = fmt.Sprintf("%s.json", testProfileArg)
 			}),
 		},
+		{
+			description: "custom file-path without file extension",
+			argsValues:  fixtureArgValues(),
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues[filePathFlag] = "./my-exported-config"
+				}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(inputModel *inputModel) {
+				inputModel.FilePath = "./my-exported-config"
+			}),
+		},
 	}
 
 	for _, tt := range tests {

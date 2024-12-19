@@ -13,7 +13,7 @@ stackit config profile export PROFILE_NAME [flags]
 ### Examples
 
 ```
-  Export a profile with name "PROFILE_NAME" to the current path
+  Export a profile with name "PROFILE_NAME" to a file in your current directory
   $ stackit config profile export PROFILE_NAME
 
   Export a profile with name "PROFILE_NAME"" to a specific file path FILE_PATH
@@ -23,7 +23,7 @@ stackit config profile export PROFILE_NAME [flags]
 ### Options
 
 ```
-      --file-path string   Path where the config should be saved. E.g. '--file-path ~/config.json', '--file-path ~/'
+  -f, --file-path string   If set, writes the config to the given. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'
   -h, --help               Help for "stackit config profile export"
 ```
 

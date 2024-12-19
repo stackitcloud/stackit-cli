@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
@@ -400,7 +399,7 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 }
 
 // ExportProfile exports a profile configuration
-// Is exports the profile to the exportPath. The exportPath must contain in the suffix `.json` as file extension
+// Is exports the profile to the exportPath. The exportPath must contain the filename.
 func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	err := ValidateProfile(profile)
 	if err != nil {
@@ -417,10 +416,6 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 
 	profilePath := GetProfileFolderPath(profile)
 	configFile := getConfigFilePath(profilePath)
-
-	if !strings.HasSuffix(exportPath, fmt.Sprintf(".%s", configFileExtension)) {
-		return fmt.Errorf("export file name must end with '.%s'", configFileExtension)
-	}
 
 	_, err = os.Stat(exportPath)
 	if err == nil {

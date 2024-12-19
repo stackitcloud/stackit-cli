@@ -249,6 +249,12 @@ func TestExportProfile(t *testing.T) {
 			filePath:    filepath.Join(testDir, "invalid", "path", fmt.Sprintf("custom-name.%s", configFileExtension)),
 			isValid:     false,
 		},
+		{
+			description: "export without file extension",
+			profile:     profileName,
+			filePath:    filepath.Join(testDir, "file-without-extension"),
+			isValid:     true,
+		},
 	}
 
 	for _, tt := range tests {

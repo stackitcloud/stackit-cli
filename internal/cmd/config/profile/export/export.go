@@ -3,7 +3,6 @@ package export
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -66,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given. If unset, writes the payload to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'")
+	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the config to the given. If unset, writes the config to you current directory with the name of the profile. E.g. '--file-path ~/my-config.json', '--file-path ~/'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -80,7 +79,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	// If filePath contains does not contain a file name, then add a default name
-	if !strings.HasSuffix(model.FilePath, fmt.Sprintf(".%s", configFileExtension)) {
+	if model.FilePath == "" {
 		exportFileName := fmt.Sprintf("%s.%s", model.ProfileName, configFileExtension)
 		model.FilePath = filepath.Join(model.FilePath, exportFileName)
 	}
