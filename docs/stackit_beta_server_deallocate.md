@@ -7,7 +7,7 @@ Deallocates an existing server
 Deallocates an existing server.
 
 ```
-stackit beta server deallocate [flags]
+stackit beta server deallocate SERVER_ID [flags]
 ```
 
 ### Examples

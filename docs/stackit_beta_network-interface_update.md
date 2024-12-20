@@ -7,7 +7,7 @@ Updates a network interface
 Updates a network interface.
 
 ```
-stackit beta network-interface update [flags]
+stackit beta network-interface update NIC_ID [flags]
 ```
 
 ### Examples

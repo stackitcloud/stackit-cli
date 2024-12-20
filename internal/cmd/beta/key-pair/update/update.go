@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update",
+		Use:   fmt.Sprintf("update %s", keyPairNameArg),
 		Short: "Updates a key pair",
 		Long:  "Updates a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),

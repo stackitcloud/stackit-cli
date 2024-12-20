@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", volumeIdArg),
 		Short: "Deletes a volume",
 		Long: fmt.Sprintf("%s\n%s\n",
 			"Deletes a volume.",

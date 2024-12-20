@@ -34,7 +34,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "rescue",
+		Use:   fmt.Sprintf("rescue %s", serverIdArg),
 		Short: "Rescues an existing server",
 		Long:  "Rescues an existing server.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

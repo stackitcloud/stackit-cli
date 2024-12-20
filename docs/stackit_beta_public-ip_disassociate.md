@@ -7,7 +7,7 @@ Disassociates a Public IP from a network interface or a virtual IP
 Disassociates a Public IP from a network interface or a virtual IP.
 
 ```
-stackit beta public-ip disassociate [flags]
+stackit beta public-ip disassociate PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

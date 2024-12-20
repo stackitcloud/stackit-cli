@@ -7,7 +7,7 @@ Unrescues an existing server
 Unrescues an existing server.
 
 ```
-stackit beta server unrescue [flags]
+stackit beta server unrescue SERVER_ID [flags]
 ```
 
 ### Examples

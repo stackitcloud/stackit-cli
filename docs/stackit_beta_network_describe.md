@@ -7,7 +7,7 @@ Shows details of a network
 Shows details of a network.
 
 ```
-stackit beta network describe [flags]
+stackit beta network describe NETWORK_ID [flags]
 ```
 
 ### Examples

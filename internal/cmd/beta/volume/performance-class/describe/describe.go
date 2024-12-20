@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", volumePerformanceClassArg),
 		Short: "Shows details of a volume performance class",
 		Long:  "Shows details of a volume performance class.",
 		Args:  args.SingleArg(volumePerformanceClassArg, nil),

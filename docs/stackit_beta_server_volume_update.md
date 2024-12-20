@@ -7,7 +7,7 @@ Updates an attached volume of a server
 Updates an attached volume of a server.
 
 ```
-stackit beta server volume update [flags]
+stackit beta server volume update VOLUME_ID [flags]
 ```
 
 ### Examples

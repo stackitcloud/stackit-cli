@@ -7,7 +7,7 @@ Starts an existing server or allocates the server if deallocated
 Starts an existing server or allocates the server if deallocated.
 
 ```
-stackit beta server start [flags]
+stackit beta server start SERVER_ID [flags]
 ```
 
 ### Examples

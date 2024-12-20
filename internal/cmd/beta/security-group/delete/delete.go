@@ -26,7 +26,7 @@ const groupIdArg = "GROUP_ID"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", groupIdArg),
 		Short: "Deletes a security group",
 		Long:  "Deletes a security group by its internal ID.",
 		Args:  args.SingleArg(groupIdArg, utils.ValidateUUID),

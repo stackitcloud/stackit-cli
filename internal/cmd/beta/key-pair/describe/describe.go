@@ -35,7 +35,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", keyPairNameArg),
 		Short: "Describes a key pair",
 		Long:  "Describes a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),

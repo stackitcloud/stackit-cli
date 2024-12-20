@@ -28,7 +28,7 @@ const groupIdArg = "GROUP_ID"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", groupIdArg),
 		Short: "Describes security groups",
 		Long:  "Describes security groups by its internal ID.",
 		Args:  args.SingleArg(groupIdArg, utils.ValidateUUID),

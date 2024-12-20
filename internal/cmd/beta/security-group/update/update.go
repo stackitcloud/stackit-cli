@@ -36,7 +36,7 @@ const (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update",
+		Use:   fmt.Sprintf("update %s", groupNameArg),
 		Short: "Updates a security group",
 		Long:  "Updates a named security group",
 		Args:  args.SingleArg(groupNameArg, utils.ValidateUUID),

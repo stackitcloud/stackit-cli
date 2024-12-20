@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "detach",
+		Use:   fmt.Sprintf("detach %s", publicIpIdArg),
 		Short: "Detaches a public IP from a server",
 		Long:  "Detaches a public IP from a server.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),

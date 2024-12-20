@@ -9,7 +9,7 @@ If the network is still in use, the deletion will fail
 
 
 ```
-stackit beta network delete [flags]
+stackit beta network delete NETWORK_ID [flags]
 ```
 
 ### Examples

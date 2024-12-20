@@ -7,7 +7,7 @@ Gets a URL for server remote console
 Gets a URL for server remote console.
 
 ```
-stackit beta server console [flags]
+stackit beta server console SERVER_ID [flags]
 ```
 
 ### Examples

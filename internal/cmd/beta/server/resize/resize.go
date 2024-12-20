@@ -34,7 +34,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "resize",
+		Use:   fmt.Sprintf("resize %s", serverIdArg),
 		Short: "Resizes the server to the given machine type",
 		Long:  "Resizes the server to the given machine type.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "stop",
+		Use:   fmt.Sprintf("stop %s", serverIdArg),
 		Short: "Stops an existing server",
 		Long:  "Stops an existing server.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

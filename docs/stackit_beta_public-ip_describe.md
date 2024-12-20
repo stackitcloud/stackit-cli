@@ -7,7 +7,7 @@ Shows details of a Public IP
 Shows details of a Public IP.
 
 ```
-stackit beta public-ip describe [flags]
+stackit beta public-ip describe PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

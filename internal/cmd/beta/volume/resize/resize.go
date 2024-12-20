@@ -32,7 +32,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "resize",
+		Use:   fmt.Sprintf("resize %s", volumeIdArg),
 		Short: "Resizes a volume",
 		Long:  "Resizes a volume.",
 		Args:  args.SingleArg(volumeIdArg, utils.ValidateUUID),

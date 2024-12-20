@@ -7,7 +7,7 @@ Shows details of a STACKIT Network Area
 Shows details of a STACKIT Network Area in an organization.
 
 ```
-stackit beta network-area describe [flags]
+stackit beta network-area describe AREA_ID [flags]
 ```
 
 ### Examples

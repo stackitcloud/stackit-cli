@@ -7,7 +7,7 @@ Describes a key pair
 Describes a key pair.
 
 ```
-stackit beta key-pair describe [flags]
+stackit beta key-pair describe KEY_PAIR_NAME [flags]
 ```
 
 ### Examples
