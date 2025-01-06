@@ -7,7 +7,7 @@ Associates a Public IP with a network interface or a virtual IP
 Associates a Public IP with a network interface or a virtual IP.
 
 ```
-stackit beta public-ip associate [flags]
+stackit beta public-ip associate PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

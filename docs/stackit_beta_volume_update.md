@@ -7,7 +7,7 @@ Updates a volume
 Updates a volume.
 
 ```
-stackit beta volume update [flags]
+stackit beta volume update VOLUME_ID [flags]
 ```
 
 ### Examples

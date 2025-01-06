@@ -32,7 +32,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
+		Use:   fmt.Sprintf("describe %s", serverIdArg),
 		Short: "Shows details of a server",
 		Long:  "Shows details of a server.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

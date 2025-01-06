@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "deallocate",
+		Use:   fmt.Sprintf("deallocate %s", serverIdArg),
 		Short: "Deallocates an existing server",
 		Long:  "Deallocates an existing server.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

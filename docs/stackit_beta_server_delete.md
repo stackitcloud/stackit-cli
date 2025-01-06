@@ -9,7 +9,7 @@ If the server is still in use, the deletion will fail
 
 
 ```
-stackit beta server delete [flags]
+stackit beta server delete SERVER_ID [flags]
 ```
 
 ### Examples

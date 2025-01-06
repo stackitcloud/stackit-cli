@@ -7,7 +7,7 @@ Shows details of a volume
 Shows details of a volume.
 
 ```
-stackit beta volume describe [flags]
+stackit beta volume describe VOLUME_ID [flags]
 ```
 
 ### Examples

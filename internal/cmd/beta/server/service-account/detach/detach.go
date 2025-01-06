@@ -33,7 +33,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "detach",
+		Use:   fmt.Sprintf("detach %s", serviceAccMailArg),
 		Short: "Detach a service account from a server",
 		Long:  "Detach a service account from a server",
 		Args:  args.SingleArg(serviceAccMailArg, nil),

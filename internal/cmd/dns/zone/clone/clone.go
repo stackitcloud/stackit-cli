@@ -41,7 +41,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "clone",
+		Use:   fmt.Sprintf("clone %s", zoneIdArg),
 		Short: "Clones a DNS zone",
 		Long:  "Clones an existing DNS zone with all record sets to a new zone with a different name.",
 		Args:  args.SingleArg(zoneIdArg, utils.ValidateUUID),

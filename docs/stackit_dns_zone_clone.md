@@ -7,7 +7,7 @@ Clones a DNS zone
 Clones an existing DNS zone with all record sets to a new zone with a different name.
 
 ```
-stackit dns zone clone [flags]
+stackit dns zone clone ZONE_ID [flags]
 ```
 
 ### Examples

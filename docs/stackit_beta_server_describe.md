@@ -7,7 +7,7 @@ Shows details of a server
 Shows details of a server.
 
 ```
-stackit beta server describe [flags]
+stackit beta server describe SERVER_ID [flags]
 ```
 
 ### Examples
