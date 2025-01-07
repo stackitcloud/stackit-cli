@@ -7,7 +7,7 @@ Attach a service account to a server
 Attach a service account to a server
 
 ```
-stackit beta server service-account attach [flags]
+stackit beta server service-account attach SERVICE_ACCOUNT_EMAIL [flags]
 ```
 
 ### Examples

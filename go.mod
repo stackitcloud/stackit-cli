@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/goccy/go-yaml v1.15.11
+	github.com/goccy/go-yaml v1.15.13
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
@@ -15,10 +15,10 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.14.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.4.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.12.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.18.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.16.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.19.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.16.0
@@ -32,7 +32,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.8.1
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.22.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.25.0
 	golang.org/x/term v0.28.0
 	golang.org/x/text v0.21.0
 	k8s.io/apimachinery v0.31.3

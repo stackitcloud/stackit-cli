@@ -9,7 +9,7 @@ This command is currently asynchonous only due to limitations in the waiting fun
 
 
 ```
-stackit beta network-area route update [flags]
+stackit beta network-area route update ROUTE_ID [flags]
 ```
 
 ### Examples

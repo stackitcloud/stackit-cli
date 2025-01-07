@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "console",
+		Use:   fmt.Sprintf("console %s", serverIdArg),
 		Short: "Gets a URL for server remote console",
 		Long:  "Gets a URL for server remote console.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

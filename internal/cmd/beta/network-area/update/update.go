@@ -45,7 +45,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update",
+		Use:   fmt.Sprintf("update %s", areaIdArg),
 		Short: "Updates a STACKIT Network Area (SNA)",
 		Long:  "Updates a STACKIT Network Area (SNA) in an organization.",
 		Args:  args.SingleArg(areaIdArg, utils.ValidateUUID),

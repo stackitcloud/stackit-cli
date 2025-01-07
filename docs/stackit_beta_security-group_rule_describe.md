@@ -7,7 +7,7 @@ Shows details of a security group rule
 Shows details of a security group rule.
 
 ```
-stackit beta security-group rule describe [flags]
+stackit beta security-group rule describe SECURITY_GROUP_RULE_ID [flags]
 ```
 
 ### Examples

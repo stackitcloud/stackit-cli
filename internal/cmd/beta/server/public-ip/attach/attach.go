@@ -31,7 +31,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "attach",
+		Use:   fmt.Sprintf("attach %s", publicIpIdArg),
 		Short: "Attaches a public IP to a server",
 		Long:  "Attaches a public IP to a server.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),

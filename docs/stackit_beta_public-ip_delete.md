@@ -9,7 +9,7 @@ If the public IP is still in use, the deletion will fail
 
 
 ```
-stackit beta public-ip delete [flags]
+stackit beta public-ip delete PUBLIC_IP_ID [flags]
 ```
 
 ### Examples

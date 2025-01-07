@@ -25,7 +25,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", keyPairNameArg),
 		Short: "Deletes a key pair",
 		Long:  "Deletes a key pair.",
 		Args:  args.SingleArg(keyPairNameArg, nil),

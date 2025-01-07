@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "start",
+		Use:   fmt.Sprintf("start %s", serverIdArg),
 		Short: "Starts an existing server or allocates the server if deallocated",
 		Long:  "Starts an existing server or allocates the server if deallocated.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

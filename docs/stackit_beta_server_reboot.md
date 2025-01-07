@@ -7,7 +7,7 @@ Reboots a server
 Reboots a server.
 
 ```
-stackit beta server reboot [flags]
+stackit beta server reboot SERVER_ID [flags]
 ```
 
 ### Examples

@@ -7,7 +7,7 @@ Shows details of a volume performance class
 Shows details of a volume performance class.
 
 ```
-stackit beta volume performance-class describe [flags]
+stackit beta volume performance-class describe VOLUME_PERFORMANCE_CLASS [flags]
 ```
 
 ### Examples

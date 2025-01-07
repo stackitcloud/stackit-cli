@@ -7,7 +7,7 @@ Updates a STACKIT Network Area (SNA)
 Updates a STACKIT Network Area (SNA) in an organization.
 
 ```
-stackit beta network-area update [flags]
+stackit beta network-area update AREA_ID [flags]
 ```
 
 ### Examples

@@ -27,7 +27,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", publicIpIdArg),
 		Short: "Deletes a Public IP",
 		Long: fmt.Sprintf("%s\n%s\n",
 			"Deletes a Public IP.",

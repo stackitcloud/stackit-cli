@@ -7,7 +7,7 @@ Rescues an existing server
 Rescues an existing server.
 
 ```
-stackit beta server rescue [flags]
+stackit beta server rescue SERVER_ID [flags]
 ```
 
 ### Examples

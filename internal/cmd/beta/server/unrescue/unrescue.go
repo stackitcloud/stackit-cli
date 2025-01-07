@@ -30,7 +30,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "unrescue",
+		Use:   fmt.Sprintf("unrescue %s", serverIdArg),
 		Short: "Unrescues an existing server",
 		Long:  "Unrescues an existing server.",
 		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),

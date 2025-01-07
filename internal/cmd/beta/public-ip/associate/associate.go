@@ -32,7 +32,7 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "associate",
+		Use:   fmt.Sprintf("associate %s", publicIpIdArg),
 		Short: "Associates a Public IP with a network interface or a virtual IP",
 		Long:  "Associates a Public IP with a network interface or a virtual IP.",
 		Args:  args.SingleArg(publicIpIdArg, utils.ValidateUUID),
