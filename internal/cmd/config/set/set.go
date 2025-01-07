@@ -230,6 +230,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		projectIdSet = true
 	}
 
+	//regionFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.RegionFlag)
+	//regionSet := false
+	//if regionFromFlag != nil {
+	//	regionSet = true
+	//}
+
 	allowedUrlDomainFromFlag := flags.FlagToStringPointer(p, cmd, allowedUrlDomainFlag)
 	allowedUrlDomainFlagValue := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)
 	if allowedUrlDomainFromFlag != nil && allowedUrlDomainFlagValue == "" {

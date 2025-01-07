@@ -17,6 +17,7 @@ const (
 	AssumeYesFlag    = "assume-yes"
 	OutputFormatFlag = "output-format"
 	ProjectIdFlag    = "project-id"
+	RegionFlag       = "region"
 	VerbosityFlag    = "verbosity"
 
 	DebugVerbosity   = string(print.DebugLevel)
@@ -35,6 +36,7 @@ type GlobalFlagModel struct {
 	AssumeYes    bool
 	OutputFormat string
 	ProjectId    string
+	Region       string
 	Verbosity    string
 }
 
@@ -65,6 +67,12 @@ func Configure(flagSet *pflag.FlagSet) error {
 		return fmt.Errorf("bind --%s flag to config: %w", VerbosityFlag, err)
 	}
 
+	flagSet.String(RegionFlag, "", "Target region for region-specific requests")
+	err = viper.BindPFlag(config.RegionKey, flagSet.Lookup(RegionFlag))
+	if err != nil {
+		return fmt.Errorf("bind --%s flag to config: %w", RegionFlag, err)
+	}
+
 	return nil
 }
 
@@ -74,6 +82,7 @@ func Parse(p *print.Printer, cmd *cobra.Command) *GlobalFlagModel {
 		AssumeYes:    flags.FlagToBoolValue(p, cmd, AssumeYesFlag),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
 		ProjectId:    viper.GetString(config.ProjectIdKey),
+		Region:       viper.GetString(config.RegionKey),
 		Verbosity:    viper.GetString(config.VerbosityKey),
 	}
 }
