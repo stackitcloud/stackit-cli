@@ -31,6 +31,7 @@ stackit beta server public-ip attach PUBLIC_IP_ID [flags]
       --async                  If set, runs the command asynchronously
   -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
   -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
 ```
 

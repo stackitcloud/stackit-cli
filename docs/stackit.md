@@ -20,6 +20,7 @@ stackit [flags]
   -h, --help                   Help for "stackit"
   -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
   -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
       --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
   -v, --version                Show "stackit" version
 ```

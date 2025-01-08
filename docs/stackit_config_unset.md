@@ -46,6 +46,7 @@ stackit config unset [flags]
       --project-id                                          Project ID
       --rabbitmq-custom-endpoint                            RabbitMQ API base URL. If unset, uses the default base URL
       --redis-custom-endpoint                               Redis API base URL. If unset, uses the default base URL
+      --region                                              Region
       --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
       --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
       --secrets-manager-custom-endpoint                     Secrets Manager API base URL. If unset, uses the default base URL
