@@ -206,18 +206,19 @@ func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.Lis
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
-	content := ""
-	if model.Flavors {
-		content += renderFlavors(*options.Flavors)
+	content := []tables.Table{}
+	if model.Flavors && len(*options.Flavors) != 0 {
+		content = append(content, buildFlavorsTable(*options.Flavors))
 	}
-	if model.Versions {
-		content += renderVersions(*options.Versions)
+	if model.Versions && len(*options.Versions) != 0 {
+		content = append(content, buildVersionsTable(*options.Versions))
 	}
-	if model.Storages {
-		content += renderStorages(options.Storages.Storages)
+	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) == 0 {
+		storagesTable := buildStoragesTable(*options.Storages.Storages.StorageClasses, *options.Storages.Storages.StorageRange.Min, *options.Storages.Storages.StorageRange.Max)
+		content = append(content, storagesTable)
 	}
 
-	err := p.PagerDisplay(content)
+	err := tables.DisplayTables(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -225,11 +226,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	return nil
 }
 
-func renderFlavors(flavors []postgresflex.Flavor) string {
-	if len(flavors) == 0 {
-		return ""
-	}
-
+func buildFlavorsTable(flavors []postgresflex.Flavor) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
@@ -237,14 +234,10 @@ func renderFlavors(flavors []postgresflex.Flavor) string {
 		f := flavors[i]
 		table.AddRow(*f.Id, *f.Cpu, *f.Memory, *f.Description)
 	}
-	return table.Render()
+	return table
 }
 
-func renderVersions(versions []string) string {
-	if len(versions) == 0 {
-		return ""
-	}
-
+func buildVersionsTable(versions []string) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
 	table.SetHeader("VERSION")
@@ -252,22 +245,17 @@ func renderVersions(versions []string) string {
 		v := versions[i]
 		table.AddRow(v)
 	}
-	return table.Render()
+	return table
 }
 
-func renderStorages(resp *postgresflex.ListStoragesResponse) string {
-	if resp.StorageClasses == nil || len(*resp.StorageClasses) == 0 {
-		return ""
-	}
-	storageClasses := *resp.StorageClasses
-
+func buildStoragesTable(storageClasses []string, min, max int64) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
 	for i := range storageClasses {
 		sc := storageClasses[i]
-		table.AddRow(*resp.StorageRange.Min, *resp.StorageRange.Max, sc)
+		table.AddRow(min, max, sc)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
-	return table.Render()
+	return table
 }

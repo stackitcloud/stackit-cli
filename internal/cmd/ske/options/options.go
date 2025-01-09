@@ -178,20 +178,32 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 }
 
 func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
-	content := ""
-	content += renderAvailabilityZones(options)
-
-	kubernetesVersionsRendered, err := renderKubernetesVersions(options)
-	if err != nil {
-		return fmt.Errorf("render Kubernetes versions: %w", err)
+	content := []tables.Table{}
+	if options.AvailabilityZones != nil && len(*options.AvailabilityZones) != 0 {
+		content = append(content, buildAvailabilityZonesTable(options))
 	}
-	content += kubernetesVersionsRendered
 
-	content += renderMachineImages(options)
-	content += renderMachineTypes(options)
-	content += renderVolumeTypes(options)
+	if options.KubernetesVersions != nil && len(*options.KubernetesVersions) != 0 {
+		kubernetesVersionsTable, err := buildKubernetesVersionsTable(options)
+		if err != nil {
+			return fmt.Errorf("build Kubernetes versions table: %w", err)
+		}
+		content = append(content, kubernetesVersionsTable)
+	}
 
-	err = p.PagerDisplay(content)
+	if options.MachineImages != nil && len(*options.MachineImages) != 0 {
+		content = append(content, buildMachineImagesTable(options))
+	}
+
+	if options.MachineTypes != nil && len(*options.MachineTypes) != 0 {
+		content = append(content, buildMachineTypesTable(options))
+	}
+
+	if options.VolumeTypes != nil && len(*options.VolumeTypes) != 0 {
+		content = append(content, buildVolumeTypesTable(options))
+	}
+
+	err := tables.DisplayTables(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -199,11 +211,7 @@ func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 	return nil
 }
 
-func renderAvailabilityZones(resp *ske.ProviderOptions) string {
-	if resp.AvailabilityZones == nil {
-		return ""
-	}
-
+func buildAvailabilityZonesTable(resp *ske.ProviderOptions) tables.Table {
 	zones := *resp.AvailabilityZones
 
 	table := tables.NewTable()
@@ -213,14 +221,10 @@ func renderAvailabilityZones(resp *ske.ProviderOptions) string {
 		z := zones[i]
 		table.AddRow(*z.Name)
 	}
-	return table.Render()
+	return table
 }
 
-func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
-	if resp.KubernetesVersions == nil {
-		return "", nil
-	}
-
+func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, error) {
 	versions := *resp.KubernetesVersions
 
 	table := tables.NewTable()
@@ -230,7 +234,7 @@ func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
 		v := versions[i]
 		featureGate, err := json.Marshal(*v.FeatureGates)
 		if err != nil {
-			return "", fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", *v.Version, err)
+			return table, fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", *v.Version, err)
 		}
 		expirationDate := ""
 		if v.ExpirationDate != nil {
@@ -238,14 +242,10 @@ func renderKubernetesVersions(resp *ske.ProviderOptions) (string, error) {
 		}
 		table.AddRow(*v.Version, *v.State, expirationDate, string(featureGate))
 	}
-	return table.Render(), nil
+	return table, nil
 }
 
-func renderMachineImages(resp *ske.ProviderOptions) string {
-	if resp.MachineImages == nil {
-		return ""
-	}
-
+func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 	images := *resp.MachineImages
 
 	table := tables.NewTable()
@@ -271,14 +271,10 @@ func renderMachineImages(resp *ske.ProviderOptions) string {
 		}
 	}
 	table.EnableAutoMergeOnColumns(1)
-	return table.Render()
+	return table
 }
 
-func renderMachineTypes(resp *ske.ProviderOptions) string {
-	if resp.MachineTypes == nil {
-		return ""
-	}
-
+func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 	types := *resp.MachineTypes
 
 	table := tables.NewTable()
@@ -288,14 +284,10 @@ func renderMachineTypes(resp *ske.ProviderOptions) string {
 		t := types[i]
 		table.AddRow(*t.Name, *t.Cpu, *t.Memory)
 	}
-	return table.Render()
+	return table
 }
 
-func renderVolumeTypes(resp *ske.ProviderOptions) string {
-	if resp.VolumeTypes == nil {
-		return ""
-	}
-
+func buildVolumeTypesTable(resp *ske.ProviderOptions) tables.Table {
 	types := *resp.VolumeTypes
 
 	table := tables.NewTable()
@@ -305,5 +297,5 @@ func renderVolumeTypes(resp *ske.ProviderOptions) string {
 		z := types[i]
 		table.AddRow(*z.Name)
 	}
-	return table.Render()
+	return table
 }

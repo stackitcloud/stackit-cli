@@ -78,3 +78,14 @@ func (t *Table) Render() string {
 func (t *Table) Display(p *print.Printer) error {
 	return p.PagerDisplay(t.Render())
 }
+
+// Displays multiple tables in the command's stdout
+func DisplayTables(p *print.Printer, tables []Table) error {
+	renderedTables := ""
+
+	for _, t := range tables {
+		renderedTables += t.Render()
+	}
+
+	return p.PagerDisplay(renderedTables)
+}
