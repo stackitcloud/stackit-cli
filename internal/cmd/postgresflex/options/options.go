@@ -214,8 +214,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 		content = append(content, buildVersionsTable(*options.Versions))
 	}
 	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) == 0 {
-		storagesTable := buildStoragesTable(*options.Storages.Storages.StorageClasses, *options.Storages.Storages.StorageRange.Min, *options.Storages.Storages.StorageRange.Max)
-		content = append(content, storagesTable)
+		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
 
 	err := tables.DisplayTables(p, content)
@@ -248,13 +247,14 @@ func buildVersionsTable(versions []string) tables.Table {
 	return table
 }
 
-func buildStoragesTable(storageClasses []string, min, max int64) tables.Table {
+func buildStoragesTable(storagesResp postgresflex.ListStoragesResponse) tables.Table {
+	storages := *storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storageClasses {
-		sc := storageClasses[i]
-		table.AddRow(min, max, sc)
+	for i := range storages {
+		sc := storages[i]
+		table.AddRow(*storagesResp.StorageRange.Min, *storagesResp.StorageRange.Max, sc)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
 	return table
