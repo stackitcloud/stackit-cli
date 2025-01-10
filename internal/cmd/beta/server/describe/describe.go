@@ -125,6 +125,8 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 
 		return nil
 	default:
+		content := []tables.Table{}
+
 		table := tables.NewTable()
 		table.SetTitle("Server")
 
@@ -182,10 +184,7 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			table.AddSeparator()
 		}
 
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
+		content = append(content, table)
 
 		if server.Nics != nil && len(*server.Nics) > 0 {
 			nicsTable := tables.NewTable()
@@ -201,10 +200,12 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 				nicsTable.AddSeparator()
 			}
 
-			err := nicsTable.Display(p)
-			if err != nil {
-				return fmt.Errorf("render table: %w", err)
-			}
+			content = append(content, nicsTable)
+		}
+
+		err := tables.DisplayTables(p, content)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
 		}
 
 		return nil

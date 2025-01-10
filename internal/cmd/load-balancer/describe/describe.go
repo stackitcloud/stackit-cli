@@ -121,17 +121,19 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 }
 
 func outputResultAsTable(p *print.Printer, loadBalancer *loadbalancer.LoadBalancer) error {
-	content := renderLoadBalancer(loadBalancer)
+	content := []tables.Table{}
+
+	content = append(content, buildLoadBalancerTable(loadBalancer))
 
 	if loadBalancer.Listeners != nil {
-		content += renderListeners(*loadBalancer.Listeners)
+		content = append(content, buildListenersTable(*loadBalancer.Listeners))
 	}
 
 	if loadBalancer.TargetPools != nil {
-		content += renderTargetPools(*loadBalancer.TargetPools)
+		content = append(content, buildTargetPoolsTable(*loadBalancer.TargetPools))
 	}
 
-	err := p.PagerDisplay(content)
+	err := tables.DisplayTables(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -139,7 +141,7 @@ func outputResultAsTable(p *print.Printer, loadBalancer *loadbalancer.LoadBalanc
 	return nil
 }
 
-func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
+func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Table {
 	acl := []string{}
 	privateAccessOnly := false
 	if loadBalancer.Options != nil {
@@ -187,10 +189,10 @@ func renderLoadBalancer(loadBalancer *loadbalancer.LoadBalancer) string {
 	table.AddRow("ATTACHED NETWORK ID", networkId)
 	table.AddSeparator()
 	table.AddRow("ACL", acl)
-	return table.Render()
+	return table
 }
 
-func renderListeners(listeners []loadbalancer.Listener) string {
+func buildListenersTable(listeners []loadbalancer.Listener) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Listeners")
 	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
@@ -198,15 +200,15 @@ func renderListeners(listeners []loadbalancer.Listener) string {
 		listener := listeners[i]
 		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
 	}
-	return table.Render()
+	return table
 }
 
-func renderTargetPools(targetPools []loadbalancer.TargetPool) string {
+func buildTargetPoolsTable(targetPools []loadbalancer.TargetPool) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Target Pools")
 	table.SetHeader("NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
 		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
 	}
-	return table.Render()
+	return table
 }

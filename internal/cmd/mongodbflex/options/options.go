@@ -206,18 +206,18 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
-	content := ""
-	if model.Flavors {
-		content += renderFlavors(*options.Flavors)
+	content := []tables.Table{}
+	if model.Flavors && len(*options.Flavors) != 0 {
+		content = append(content, buildFlavorsTable(*options.Flavors))
 	}
-	if model.Versions {
-		content += renderVersions(*options.Versions)
+	if model.Versions && len(*options.Versions) != 0 {
+		content = append(content, buildVersionsTable(*options.Versions))
 	}
-	if model.Storages {
-		content += renderStorages(options.Storages.Storages)
+	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) == 0 {
+		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
 
-	err := p.PagerDisplay(content)
+	err := tables.DisplayTables(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -225,11 +225,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	return nil
 }
 
-func renderFlavors(flavors []mongodbflex.HandlersInfraFlavor) string {
-	if len(flavors) == 0 {
-		return ""
-	}
-
+func buildFlavorsTable(flavors []mongodbflex.HandlersInfraFlavor) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION", "VALID INSTANCE TYPES")
@@ -237,14 +233,10 @@ func renderFlavors(flavors []mongodbflex.HandlersInfraFlavor) string {
 		f := flavors[i]
 		table.AddRow(*f.Id, *f.Cpu, *f.Memory, *f.Description, *f.Categories)
 	}
-	return table.Render()
+	return table
 }
 
-func renderVersions(versions []string) string {
-	if len(versions) == 0 {
-		return ""
-	}
-
+func buildVersionsTable(versions []string) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
 	table.SetHeader("VERSION")
@@ -252,22 +244,18 @@ func renderVersions(versions []string) string {
 		v := versions[i]
 		table.AddRow(v)
 	}
-	return table.Render()
+	return table
 }
 
-func renderStorages(resp *mongodbflex.ListStoragesResponse) string {
-	if resp.StorageClasses == nil || len(*resp.StorageClasses) == 0 {
-		return ""
-	}
-	storageClasses := *resp.StorageClasses
-
+func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Table {
+	storages := *storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storageClasses {
-		sc := storageClasses[i]
-		table.AddRow(*resp.StorageRange.Min, *resp.StorageRange.Max, sc)
+	for i := range storages {
+		sc := storages[i]
+		table.AddRow(*storagesResp.StorageRange.Min, *storagesResp.StorageRange.Max, sc)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
-	return table.Render()
+	return table
 }

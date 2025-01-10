@@ -300,28 +300,28 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
-	content := ""
-	if model.Flavors {
-		content += renderFlavors(*options.Flavors)
+	content := []tables.Table{}
+	if model.Flavors && len(*options.Flavors) != 0 {
+		content = append(content, buildFlavorsTable(*options.Flavors))
 	}
-	if model.Versions {
-		content += renderVersions(*options.Versions)
+	if model.Versions && len(*options.Versions) != 0 {
+		content = append(content, buildVersionsTable(*options.Versions))
 	}
-	if model.Storages {
-		content += renderStorages(options.Storages.Storages)
+	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) != 0 {
+		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
-	if model.UserRoles {
-		content += renderUserRoles(options.UserRoles)
+	if model.UserRoles && len(options.UserRoles.UserRoles) != 0 {
+		content = append(content, buildUserRoles(options.UserRoles))
 	}
-	if model.DBCompatibilities {
-		content += renderDBCompatibilities(options.DBCompatibilities)
+	if model.DBCompatibilities && len(options.DBCompatibilities.DBCompatibilities) != 0 {
+		content = append(content, buildDBCompatibilitiesTable(options.DBCompatibilities.DBCompatibilities))
 	}
 	// Rendered at last because table is very long
-	if model.DBCollations {
-		content += renderDBCollations(options.DBCollations)
+	if model.DBCollations && len(options.DBCollations.DBCollations) != 0 {
+		content = append(content, buildDBCollationsTable(options.DBCollations.DBCollations))
 	}
 
-	err := p.PagerDisplay(content)
+	err := tables.DisplayTables(p, content)
 	if err != nil {
 		return fmt.Errorf("display output: %w", err)
 	}
@@ -329,11 +329,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	return nil
 }
 
-func renderFlavors(flavors []sqlserverflex.InstanceFlavorEntry) string {
-	if len(flavors) == 0 {
-		return ""
-	}
-
+func buildFlavorsTable(flavors []sqlserverflex.InstanceFlavorEntry) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION", "VALID INSTANCE TYPES")
@@ -341,14 +337,10 @@ func renderFlavors(flavors []sqlserverflex.InstanceFlavorEntry) string {
 		f := flavors[i]
 		table.AddRow(*f.Id, *f.Cpu, *f.Memory, *f.Description, *f.Categories)
 	}
-	return table.Render()
+	return table
 }
 
-func renderVersions(versions []string) string {
-	if len(versions) == 0 {
-		return ""
-	}
-
+func buildVersionsTable(versions []string) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
 	table.SetHeader("VERSION")
@@ -356,64 +348,48 @@ func renderVersions(versions []string) string {
 		v := versions[i]
 		table.AddRow(v)
 	}
-	return table.Render()
+	return table
 }
 
-func renderStorages(resp *sqlserverflex.ListStoragesResponse) string {
-	if resp.StorageClasses == nil || len(*resp.StorageClasses) == 0 {
-		return ""
-	}
-	storageClasses := *resp.StorageClasses
-
+func buildStoragesTable(storagesResp sqlserverflex.ListStoragesResponse) tables.Table {
+	storages := *storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storageClasses {
-		sc := storageClasses[i]
-		table.AddRow(*resp.StorageRange.Min, *resp.StorageRange.Max, sc)
+	for i := range storages {
+		sc := storages[i]
+		table.AddRow(*storagesResp.StorageRange.Min, *storagesResp.StorageRange.Max, sc)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
-	return table.Render()
+	return table
 }
 
-func renderUserRoles(roles *instanceUserRoles) string {
-	if len(roles.UserRoles) == 0 {
-		return ""
-	}
-
+func buildUserRoles(roles *instanceUserRoles) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("User Roles")
 	table.SetHeader("ROLE")
 	for i := range roles.UserRoles {
 		table.AddRow(roles.UserRoles[i])
 	}
-	return table.Render()
+	return table
 }
 
-func renderDBCollations(dbCollations *instanceDBCollations) string {
-	if len(dbCollations.DBCollations) == 0 {
-		return ""
-	}
-
+func buildDBCollationsTable(dbCollations []sqlserverflex.MssqlDatabaseCollation) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Collations")
 	table.SetHeader("NAME", "DESCRIPTION")
-	for i := range dbCollations.DBCollations {
-		table.AddRow(*dbCollations.DBCollations[i].CollationName, *dbCollations.DBCollations[i].Description)
+	for i := range dbCollations {
+		table.AddRow(dbCollations[i].CollationName, dbCollations[i].Description)
 	}
-	return table.Render()
+	return table
 }
 
-func renderDBCompatibilities(dbCompatibilities *instanceDBCompatibilities) string {
-	if len(dbCompatibilities.DBCompatibilities) == 0 {
-		return ""
-	}
-
+func buildDBCompatibilitiesTable(dbCompatibilities []sqlserverflex.MssqlDatabaseCompatibility) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Compatibilities")
 	table.SetHeader("COMPATIBILITY LEVEL", "DESCRIPTION")
-	for i := range dbCompatibilities.DBCompatibilities {
-		table.AddRow(*dbCompatibilities.DBCompatibilities[i].CompatibilityLevel, *dbCompatibilities.DBCompatibilities[i].Description)
+	for i := range dbCompatibilities {
+		table.AddRow(dbCompatibilities[i].CompatibilityLevel, dbCompatibilities[i].Description)
 	}
-	return table.Render()
+	return table
 }
