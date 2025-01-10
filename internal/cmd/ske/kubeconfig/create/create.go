@@ -22,9 +22,10 @@ import (
 const (
 	clusterNameArg = "CLUSTER_NAME"
 
-	loginFlag      = "login"
-	expirationFlag = "expiration"
-	filepathFlag   = "filepath"
+	loginFlag          = "login"
+	expirationFlag     = "expiration"
+	filepathFlag       = "filepath"
+	disableWritingFlag = "disable-writing"
 )
 
 type inputModel struct {
@@ -33,6 +34,7 @@ type inputModel struct {
 	Filepath       *string
 	ExpirationTime *string
 	Login          bool
+	DisableWriting bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -63,6 +65,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath`,
 				"$ stackit ske kubeconfig create my-cluster --filepath /path/to/config"),
+			examples.NewExample(
+				`Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file. `,
+				""),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -77,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
+			if !model.AssumeYes && !model.DisableWriting {
 				prompt := fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
@@ -131,7 +136,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				kubeconfigPath = *model.Filepath
 			}
 
-			if model.OutputFormat != print.JSONOutputFormat {
+			if !model.DisableWriting {
 				err = skeUtils.WriteConfigFile(kubeconfigPath, kubeconfig)
 				if err != nil {
 					return fmt.Errorf("write kubeconfig file: %w", err)
@@ -149,6 +154,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
 	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
+	cmd.Flags().Bool(disableWritingFlag, false, fmt.Sprintf("Disable the writing of kubeconfig. Add --%s to display the kubeconfig.", globalflags.OutputFormatFlag))
 
 	cmd.MarkFlagsMutuallyExclusive(loginFlag, expirationFlag)
 }
@@ -174,12 +180,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		}
 	}
 
+	disableWriting := flags.FlagToBoolValue(p, cmd, disableWritingFlag)
+
+	isDefaultOutputFormat := globalFlags.OutputFormat != print.JSONOutputFormat && globalFlags.OutputFormat != print.YAMLOutputFormat
+	if disableWriting && isDefaultOutputFormat {
+		return nil, fmt.Errorf("when setting the flag --%s, you must specify --%s as one of the values: %s",
+			disableWritingFlag, globalflags.OutputFormatFlag, fmt.Sprintf("%s, %s", print.JSONOutputFormat, print.YAMLOutputFormat))
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ClusterName:     clusterName,
 		Filepath:        flags.FlagToStringPointer(p, cmd, filepathFlag),
 		ExpirationTime:  expTime,
 		Login:           flags.FlagToBoolValue(p, cmd, loginFlag),
+		DisableWriting:  disableWriting,
 	}
 
 	if p.IsVerbosityDebug() {

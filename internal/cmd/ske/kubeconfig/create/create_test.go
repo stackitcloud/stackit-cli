@@ -156,6 +156,27 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "disable writing and invalid output format",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[disableWritingFlag] = "true"
+			}),
+			isValid: false,
+		},
+		{
+			description: "disable writing and valid output format",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[disableWritingFlag] = "true"
+				flagValues[globalflags.OutputFormatFlag] = print.YAMLOutputFormat
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.DisableWriting = true
+				model.OutputFormat = print.YAMLOutputFormat
+			}),
+			isValid: true,
+		},
 	}
 
 	for _, tt := range tests {
