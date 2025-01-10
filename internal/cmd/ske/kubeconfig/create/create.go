@@ -182,7 +182,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	disableWriting := flags.FlagToBoolValue(p, cmd, disableWritingFlag)
 
-	fmt.Println(globalFlags.OutputFormat)
 	isInvalidOutputFormat := globalFlags.OutputFormat == "" || globalFlags.OutputFormat == print.NoneOutputFormat || globalFlags.OutputFormat == print.PrettyOutputFormat
 	if disableWriting && isInvalidOutputFormat {
 		return nil, fmt.Errorf("when setting the flag --%s, you must specify --%s as one of the values: %s",
