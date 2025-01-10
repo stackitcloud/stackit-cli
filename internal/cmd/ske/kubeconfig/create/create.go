@@ -66,8 +66,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath`,
 				"$ stackit ske kubeconfig create my-cluster --filepath /path/to/config"),
 			examples.NewExample(
-				`Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file. `,
-				""),
+				`Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json`,
+				"$ stackit ske kubeconfig create my-cluster --disable-writing --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -154,7 +154,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
 	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
-	cmd.Flags().Bool(disableWritingFlag, false, fmt.Sprintf("Disable the writing of kubeconfig. Add --%s to display the kubeconfig.", globalflags.OutputFormatFlag))
+	cmd.Flags().Bool(disableWritingFlag, false, fmt.Sprintf("Disable the writing of kubeconfig. Set the output format to json or yaml using the --%s flag to display the kubeconfig.", globalflags.OutputFormatFlag))
 
 	cmd.MarkFlagsMutuallyExclusive(loginFlag, expirationFlag)
 }
@@ -182,8 +182,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	disableWriting := flags.FlagToBoolValue(p, cmd, disableWritingFlag)
 
-	isDefaultOutputFormat := globalFlags.OutputFormat != print.JSONOutputFormat && globalFlags.OutputFormat != print.YAMLOutputFormat
-	if disableWriting && isDefaultOutputFormat {
+	fmt.Println(globalFlags.OutputFormat)
+	isInvalidOutputFormat := globalFlags.OutputFormat == "" || globalFlags.OutputFormat == print.NoneOutputFormat || globalFlags.OutputFormat == print.PrettyOutputFormat
+	if disableWriting && isInvalidOutputFormat {
 		return nil, fmt.Errorf("when setting the flag --%s, you must specify --%s as one of the values: %s",
 			disableWritingFlag, globalflags.OutputFormatFlag, fmt.Sprintf("%s, %s", print.JSONOutputFormat, print.YAMLOutputFormat))
 	}
