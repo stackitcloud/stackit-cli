@@ -27,7 +27,8 @@ func ConfigureClient(p *print.Printer) (*runcommand.APIClient, error) {
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	} else {
-		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
+		region := viper.GetString(config.RegionKey)
+		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
 	}
 
 	if p.IsVerbosityDebug() {

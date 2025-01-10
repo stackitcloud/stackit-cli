@@ -14,6 +14,7 @@ const (
 	AsyncKey            = "async"
 	OutputFormatKey     = "output_format"
 	ProjectIdKey        = "project_id"
+	RegionKey           = "region"
 	SessionTimeLimitKey = "session_time_limit"
 	VerbosityKey        = "verbosity"
 
@@ -48,6 +49,7 @@ const (
 	DefaultProfileName = "default"
 
 	AsyncDefault            = false
+	RegionDefault           = "eu01"
 	SessionTimeLimitDefault = "2h"
 
 	AllowedUrlDomainDefault = "stackit.cloud"
@@ -68,6 +70,7 @@ var ConfigKeys = []string{
 	AsyncKey,
 	OutputFormatKey,
 	ProjectIdKey,
+	RegionKey,
 	SessionTimeLimitKey,
 	VerbosityKey,
 
@@ -158,6 +161,7 @@ func setConfigDefaults() {
 	viper.SetDefault(AsyncKey, AsyncDefault)
 	viper.SetDefault(OutputFormatKey, "")
 	viper.SetDefault(ProjectIdKey, "")
+	viper.SetDefault(RegionKey, RegionDefault)
 	viper.SetDefault(SessionTimeLimitKey, SessionTimeLimitDefault)
 	viper.SetDefault(IdentityProviderCustomWellKnownConfigurationKey, "")
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")

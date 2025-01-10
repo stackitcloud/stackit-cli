@@ -21,7 +21,8 @@ func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
-	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
+	region := viper.GetString(config.RegionKey)
+	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
 
 	customEndpoint := viper.GetString(config.LogMeCustomEndpointKey)
 

@@ -18,6 +18,7 @@ const (
 	asyncFlag        = globalflags.AsyncFlag
 	outputFormatFlag = globalflags.OutputFormatFlag
 	projectIdFlag    = globalflags.ProjectIdFlag
+	regionFlag       = globalflags.RegionFlag
 	verbosityFlag    = globalflags.VerbosityFlag
 
 	sessionTimeLimitFlag                             = "session-time-limit"
@@ -53,6 +54,7 @@ type inputModel struct {
 	Async        bool
 	OutputFormat bool
 	ProjectId    bool
+	Region       bool
 	Verbosity    bool
 
 	SessionTimeLimit               bool
@@ -112,6 +114,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
+			}
+			if model.Region {
+				viper.Set(config.RegionKey, config.RegionDefault)
 			}
 			if model.Verbosity {
 				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
@@ -211,6 +216,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(asyncFlag, false, "Configuration option to run commands asynchronously")
 	cmd.Flags().Bool(projectIdFlag, false, "Project ID")
+	cmd.Flags().Bool(regionFlag, false, "Region")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 	cmd.Flags().Bool(verbosityFlag, false, "Verbosity of the CLI")
 
@@ -248,6 +254,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		Async:        flags.FlagToBoolValue(p, cmd, asyncFlag),
 		OutputFormat: flags.FlagToBoolValue(p, cmd, outputFormatFlag),
 		ProjectId:    flags.FlagToBoolValue(p, cmd, projectIdFlag),
+		Region:       flags.FlagToBoolValue(p, cmd, regionFlag),
 		Verbosity:    flags.FlagToBoolValue(p, cmd, verbosityFlag),
 
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
