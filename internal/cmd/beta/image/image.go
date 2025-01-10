@@ -1,6 +1,7 @@
 package security_group
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/image/create"
 	list "github.com/stackitcloud/stackit-cli/internal/cmd/beta/image/image"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -24,7 +25,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(
-		// create.NewCmd(p),
+		create.NewCmd(p),
 		list.NewCmd(p),
 	)
 }
