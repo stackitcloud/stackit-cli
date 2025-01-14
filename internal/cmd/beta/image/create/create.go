@@ -67,6 +67,7 @@ type imageConfig struct {
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
+	Id            *string
 	Name          string
 	DiskFormat    string
 	LocalFilePath string
@@ -74,10 +75,7 @@ type inputModel struct {
 	Config        *imageConfig
 	MinDiskSize   *int64
 	MinRam        *int64
-	Owner         *string
 	Protected     *bool
-	Scope         *string
-	Status        *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -90,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(`Create a named imaged`, `$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image`),
 			examples.NewExample(`Create a named image with labels`, `$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image--labels dev,amd64`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) (err error) {
 			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
@@ -108,7 +106,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create image: file %q is not readable: %w", model.LocalFilePath, err)
 			}
-			defer file.Close()
+			defer func() {
+				if inner := file.Close(); inner != nil {
+					err = fmt.Errorf("error closing input file: %w (%w)", inner, err)
+				}
+			}()
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create the image %q?", model.Name)
@@ -125,6 +127,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create image: %w", err)
 			}
+			model.Id = result.Id
 			url, ok := result.GetUploadUrlOk()
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
@@ -145,7 +148,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string) error {
+func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string) (err error) {
 	var filesize int64
 	if stat, err := file.Stat(); err != nil {
 		p.Debug(print.DebugLevel, "create image: cannot open file %q: %w", file.Name(), err)
@@ -168,6 +171,11 @@ func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string
 	if err != nil {
 		return fmt.Errorf("create image: error contacting server for upload: %w", err)
 	}
+	defer func() {
+		if inner := uploadResponse.Body.Close(); inner != nil {
+			err = fmt.Errorf("error closing file: %wqq (%w)", inner, err)
+		}
+	}()
 	if uploadResponse.StatusCode != http.StatusOK {
 		return fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
 	}
@@ -258,7 +266,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 
-func createPayload(ctx context.Context, model *inputModel) iaas.CreateImagePayload {
+func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload {
 	var labelsMap *map[string]any
 	if model.Labels != nil && len(*model.Labels) > 0 {
 		// convert map[string]string to map[string]interface{}
@@ -315,7 +323,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateRes
 
 		return nil
 	default:
-		p.Outputf("Created image %q\n", model.Name)
+		p.Outputf("Created image %q with id %s\n", model.Name, *model.Id)
 		return nil
 	}
 }

@@ -18,10 +18,10 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var (
-	testCtx             = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient          = &iaas.APIClient{}
-	testProjectId       = uuid.NewString()
-	testImageId = []string{uuid.NewString()}
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &iaas.APIClient{}
+	testProjectId = uuid.NewString()
+	testImageId   = []string{uuid.NewString()}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		ImageId: testImageId[0],
+		ImageId:         testImageId[0],
 	}
 	for _, mod := range mods {
 		mod(model)

@@ -150,7 +150,6 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 				}
 				if v := cfg.OperatingSystemDistro; v != nil && v.IsSet() {
 					distro = *v.Get()
-
 				}
 				if v := cfg.OperatingSystemVersion; v != nil && v.IsSet() {
 					version = *v.Get()

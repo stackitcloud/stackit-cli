@@ -78,14 +78,14 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func parseLabels(labelstring string) *map[string]string {
+func parseLabels(labelstring string) map[string]string {
 	labels := map[string]string{}
 	for _, part := range strings.Split(labelstring, ",") {
 		v := strings.Split(part, "=")
 		labels[v[0]] = v[1]
 	}
 
-	return &labels
+	return labels
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
@@ -94,7 +94,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:            testName,
 		DiskFormat:      testDiskFormat,
 		LocalFilePath:   testLocalImagePath,
-		Labels:          parseLabels(testLabels),
+		Labels:          utils.Ptr(parseLabels(testLabels)),
 		Config: &imageConfig{
 			BootMenu:               &testBootmenu,
 			CdromBus:               &testCdRomBus,
@@ -118,17 +118,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		mod(model)
 	}
 	return model
-}
-
-func toStringAnyMapPtr(m map[string]string) map[string]any {
-	if m == nil {
-		return nil
-	}
-	result := map[string]any{}
-	for k, v := range m {
-		result[k] = v
-	}
-	return result
 }
 
 func fixtureCreatePayload(mods ...func(payload *iaas.CreateImagePayload)) (payload iaas.CreateImagePayload) {
@@ -162,7 +151,7 @@ func fixtureCreatePayload(mods ...func(payload *iaas.CreateImagePayload)) (paylo
 	for _, mod := range mods {
 		mod(&payload)
 	}
-	return
+	return payload
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateImageRequest)) iaas.ApiCreateImageRequest {
@@ -347,7 +336,6 @@ func TestBuildRequest(t *testing.T) {
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
-
 		})
 	}
 }
