@@ -111,7 +111,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long:  "Updates an image",
 		Args:  args.SingleArg(imageIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`Update the name of image "xxx"`, `$ stackit beta image update xxx --name my-new-name`),
+			examples.NewExample(`Update the name of an image with ID "xxx"`, `$ stackit beta image update xxx --name my-new-name`),
 			examples.NewExample(`Update the labels of image "xxx"`, `$ stackit beta image update xxx --labels label1=value1,label2=value2`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
