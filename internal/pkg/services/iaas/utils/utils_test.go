@@ -29,6 +29,8 @@ type IaaSClientMocked struct {
 	GetAttachedProjectsResp   *iaas.ProjectListResponse
 	GetNetworkAreaRangeFails  bool
 	GetNetworkAreaRangeResp   *iaas.NetworkRange
+	GetImageFails             bool
+	GetImageResp              *iaas.Image
 }
 
 func (m *IaaSClientMocked) GetSecurityGroupRuleExecute(_ context.Context, _, _, _ string) (*iaas.SecurityGroupRule, error) {
@@ -92,6 +94,13 @@ func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
+}
+
+func (m *IaaSClientMocked) GetImageExecute(_ context.Context, _, _ string) (*iaas.Image, error) {
+	if m.GetImageFails {
+		return nil, fmt.Errorf("could not get image")
+	}
+	return m.GetImageResp, nil
 }
 
 func TestGetSecurityGroupRuleName(t *testing.T) {
@@ -658,6 +667,50 @@ func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetNetworkRangeFromAPIResponse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetImageName(t *testing.T) {
+	tests := []struct {
+		name      string
+		imageResp *iaas.Image
+		imageErr  bool
+		want      string
+		wantErr   bool
+	}{
+		{
+			name:      "successful retrieval",
+			imageResp: &iaas.Image{Name: utils.Ptr("test-image")},
+			want:      "test-image",
+			wantErr:   false,
+		},
+		{
+			name:     "error on retrieval",
+			imageErr: true,
+			wantErr:  true,
+		},
+		{
+			name:      "nil name",
+			imageErr:  false,
+			imageResp: &iaas.Image{},
+			want:      "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &IaaSClientMocked{
+				GetImageFails: tt.imageErr,
+				GetImageResp:  tt.imageResp,
+			}
+			got, err := GetImageName(context.Background(), client, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetImageName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetImageName() = %v, want %v", got, tt.want)
 			}
 		})
 	}
