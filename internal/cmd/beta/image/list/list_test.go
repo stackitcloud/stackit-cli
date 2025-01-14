@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -19,16 +20,18 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
-	testProjectId = uuid.NewString()
-	testLabels    = "fooKey=fooValue,barKey=barValue,bazKey=bazValue"
+	testCtx             = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient          = &iaas.APIClient{}
+	testProjectId       = uuid.NewString()
+	testLabels          = "fooKey=fooValue,barKey=barValue,bazKey=bazValue"
+	testLimit     int64 = 10
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:     testProjectId,
 		labelSelectorFlag: testLabels,
+		limitFlag:         strconv.Itoa(int(testLimit)),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,6 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
 		LabelSelector:   utils.Ptr(testLabels),
+		Limit:           &testLimit,
 	}
 	for _, mod := range mods {
 		mod(model)

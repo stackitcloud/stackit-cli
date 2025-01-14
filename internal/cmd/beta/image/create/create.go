@@ -85,8 +85,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long:  "Creates images.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(`Create a named imaged`, `$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image`),
-			examples.NewExample(`Create a named image with labels`, `$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image--labels dev,amd64`),
+			examples.NewExample(
+				`Create a named image 'my-new-image' from a raw disk image located in '/my/raw/image'`,
+				`$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image`,
+			),
+			examples.NewExample(
+				`Create a named image 'my-new-image' from a qcow2 image read from '/my/qcow2/image' with labels describing its contents`,
+				`$ stackit beta image create --name my-new-image --disk-format=qcow2 --local-file-path=/my/qcow2/image--labels os=linux,distro=alpine,version=3.12`,
+			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) (err error) {
 			ctx := context.Background()
@@ -132,7 +138,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
 			}
-			if err := uploadFile(ctx, p, file, *url); err != nil {
+			if err := uploadAsync(ctx, p, file, *url); err != nil {
 				return err
 			}
 
@@ -148,41 +154,69 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string) (err error) {
-	var filesize int64
-	if stat, err := file.Stat(); err != nil {
-		p.Debug(print.DebugLevel, "create image: cannot open file %q: %w", file.Name(), err)
-	} else {
-		filesize = stat.Size()
-	}
-	p.Debug(print.DebugLevel, "uploading image to %s", url)
+func uploadAsync(ctx context.Context, p *print.Printer, file *os.File, url string) error {
+	ticker := time.NewTicker(5 * time.Second)
+	ch := uploadFile(ctx, p, file, url)
+
 	start := time.Now()
-	// pass the file contents as stream, as they can get arbitrarily large. We do
-	// _not_ want to load them into an internal buffer. The downside is, that we
-	// have to set the content-length header manually
-	uploadRequest, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bufio.NewReader(file))
-	if err != nil {
-		return fmt.Errorf("create image: cannot create request: %w", err)
-	}
-	uploadRequest.Header.Add("Content-Type", "application/octet-stream")
-	uploadRequest.ContentLength = filesize
-
-	uploadResponse, err := http.DefaultClient.Do(uploadRequest)
-	if err != nil {
-		return fmt.Errorf("create image: error contacting server for upload: %w", err)
-	}
-	defer func() {
-		if inner := uploadResponse.Body.Close(); inner != nil {
-			err = fmt.Errorf("error closing file: %wqq (%w)", inner, err)
+	for {
+		select {
+		case <-ticker.C:
+			p.Info("uploading for %s\n", time.Since(start))
+		case err := <-ch:
+			return err
 		}
-	}()
-	if uploadResponse.StatusCode != http.StatusOK {
-		return fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
 	}
-	delay := time.Since(start)
-	p.Debug(print.DebugLevel, "uploaded %d bytes in %v", filesize, delay)
+}
 
-	return nil
+func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string) chan error {
+	ch := make(chan error)
+	go func() {
+		defer close(ch)
+		var filesize int64
+		if stat, err := file.Stat(); err != nil {
+			ch <- fmt.Errorf("create image: cannot read file size %q: %w", file.Name(), err)
+			return
+		} else {
+			filesize = stat.Size()
+		}
+		p.Debug(print.DebugLevel, "uploading image to %s", url)
+
+		start := time.Now()
+		// pass the file contents as stream, as they can get arbitrarily large. We do
+		// _not_ want to load them into an internal buffer. The downside is, that we
+		// have to set the content-length header manually
+		uploadRequest, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bufio.NewReader(file))
+		if err != nil {
+			ch <- fmt.Errorf("create image: cannot create request: %w", err)
+			return
+		}
+		uploadRequest.Header.Add("Content-Type", "application/octet-stream")
+		uploadRequest.ContentLength = filesize
+
+		uploadResponse, err := http.DefaultClient.Do(uploadRequest)
+		if err != nil {
+			ch <- fmt.Errorf("create image: error contacting server for upload: %w", err)
+			return
+		}
+		defer func() {
+			if inner := uploadResponse.Body.Close(); inner != nil {
+				err = fmt.Errorf("error closing file: %w (%w)", inner, err)
+			}
+		}()
+		if uploadResponse.StatusCode != http.StatusOK {
+			ch <- fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
+			return
+		}
+		delay := time.Since(start)
+		p.Debug(print.DebugLevel, "uploaded %d bytes in %v", filesize, delay)
+
+		ch <- nil
+		return
+
+	}()
+
+	return ch
 }
 
 func configureFlags(cmd *cobra.Command) {

@@ -23,10 +23,12 @@ import (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector *string
+	Limit         *int64
 }
 
 const (
 	labelSelectorFlag = "label-selector"
+	limitFlag         = "limit"
 )
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -36,8 +38,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Long:  "Lists images by their internal ID.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(`List all images`, `$ stackit beta image list`),
-			examples.NewExample(`List images with label`, `$ stackit beta image list --label-selector ARM64,dev`),
+			examples.NewExample(
+				`List all images`,
+				`$ stackit beta image list`,
+			),
+			examples.NewExample(
+				`List images with label`,
+				`$ stackit beta image list --label-selector ARM64,dev`,
+			),
+			examples.NewExample(
+				`List the first 10 images`,
+				`$ stackit beta image list --limit=10`,
+			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -69,6 +81,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if items := response.GetItems(); items == nil || len(*items) == 0 {
 				p.Info("No images found for project %q", projectLabel)
 			} else {
+				if model.Limit != nil && len(*items) > int(*model.Limit) {
+					*items = (*items)[:*model.Limit]
+				}
 				if err := outputResult(p, model.OutputFormat, *items); err != nil {
 					return fmt.Errorf("output images: %w", err)
 				}
@@ -84,6 +99,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
+	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -95,6 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
+		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}
 
 	if p.IsVerbosityDebug() {
