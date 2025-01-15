@@ -112,7 +112,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(imageIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(`Update the name of an image with ID "xxx"`, `$ stackit beta image update xxx --name my-new-name`),
-			examples.NewExample(`Update the labels of image "xxx"`, `$ stackit beta image update xxx --labels label1=value1,label2=value2`),
+			examples.NewExample(`Update the labels of an image with ID "xxx"`, `$ stackit beta image update xxx --labels label1=value1,label2=value2`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -135,7 +135,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.Id)
 			if err != nil {
-				p.Warn("cannot retrieve image name: %v", err)
+				p.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
 			}
 

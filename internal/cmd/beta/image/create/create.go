@@ -48,7 +48,6 @@ const (
 
 	minDiskSizeFlag = "min-disk-size"
 	minRamFlag      = "min-ram"
-	ownerFlag       = "owner"
 	protectedFlag   = "protected"
 )
 
@@ -90,12 +89,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a named image 'my-new-image' from a raw disk image located in '/my/raw/image'`,
+				`Create an image with name 'my-new-image' from a raw disk image located in '/my/raw/image'`,
 				`$ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image`,
 			),
 			examples.NewExample(
-				`Create a named image 'my-new-image' from a qcow2 image read from '/my/qcow2/image' with labels describing its contents`,
-				`$ stackit beta image create --name my-new-image --disk-format=qcow2 --local-file-path=/my/qcow2/image--labels os=linux,distro=alpine,version=3.12`,
+				`Create an image with name 'my-new-image' from a qcow2 image read from '/my/qcow2/image' with labels describing its contents`,
+				`$ stackit beta image create --name my-new-image --disk-format=qcow2 --local-file-path=/my/qcow2/image --labels os=linux,distro=alpine,version=3.12`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) (err error) {
@@ -173,12 +172,12 @@ func uploadAsync(ctx context.Context, p *print.Printer, model *inputModel, file 
 		go func() {
 			ticker := time.NewTicker(2 * time.Second)
 			var uploaded int
-			done:
+		done:
 			for {
 				select {
 				case <-ticker.C:
-					p.Info("uploaded %3.1f%%\n", 100.0/float64(stat.Size())*float64(uploaded))
-				case n,ok := <-ch:
+					p.Info("uploaded %3.1f%%\r", 100.0/float64(stat.Size())*float64(uploaded))
+				case n, ok := <-ch:
 					if !ok {
 						break done
 					}
@@ -204,7 +203,7 @@ type progressReader struct {
 	ch       chan int
 }
 
-func newProgressReader(delegate io.Reader) (io.Reader, <-chan int) {
+func newProgressReader(delegate io.Reader) (reader io.Reader, result <-chan int) {
 	ch := make(chan int)
 	return &progressReader{
 		delegate: delegate,

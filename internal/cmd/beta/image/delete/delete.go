@@ -54,7 +54,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			imageName, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.ImageId)
 			if err != nil {
-				p.Warn("get image name: %v", err)
+				p.Debug(print.ErrorLevel, "get image name: %v", err)
 				imageName = model.ImageId
 			}
 
