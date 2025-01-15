@@ -173,11 +173,15 @@ func uploadAsync(ctx context.Context, p *print.Printer, model *inputModel, file 
 		go func() {
 			ticker := time.NewTicker(2 * time.Second)
 			var uploaded int
+			done:
 			for {
 				select {
 				case <-ticker.C:
 					p.Info("uploaded %3.1f%%\n", 100.0/float64(stat.Size())*float64(uploaded))
-				case n := <-ch:
+				case n,ok := <-ch:
+					if !ok {
+						break done
+					}
 					if n >= 0 {
 						uploaded += n
 					}
