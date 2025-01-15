@@ -13,6 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
+	serviceEnablementClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
+	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -87,8 +89,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
+			// Configure ServiceEnable API client
+			serviceEnablementApiClient, err := serviceEnablementClient.ConfigureClient(p)
+			if err != nil {
+				return err
+			}
+
 			// Check if the project is enabled before trying to create
-			enabled, err := skeUtils.ProjectEnabled(ctx, apiClient, model.ProjectId)
+			enabled, err := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId)
 			if err != nil {
 				return err
 			}

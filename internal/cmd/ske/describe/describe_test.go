@@ -6,12 +6,13 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &serviceenablement.APIClient{}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -45,8 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *ske.ApiGetServiceStatusRequest)) ske.ApiGetServiceStatusRequest {
-	request := testClient.GetServiceStatus(testCtx, testProjectId) //nolint:staticcheck //command will be removed in a later update
+func fixtureRequest(mods ...func(request *serviceenablement.ApiGetServiceStatusRequest)) serviceenablement.ApiGetServiceStatusRequest {
+	request := testClient.GetServiceStatus(testCtx, testProjectId, serviceEnablementUtils.SKEServiceId) //nolint:staticcheck //command will be removed in a later update
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -145,7 +146,7 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		isValid         bool
-		expectedRequest ske.ApiGetServiceStatusRequest
+		expectedRequest serviceenablement.ApiGetServiceStatusRequest
 	}{
 		{
 			description:     "base",

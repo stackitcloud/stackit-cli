@@ -11,11 +11,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 type inputModel struct {
@@ -52,7 +53,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read SKE project details: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, resp, model.ProjectId)
 		},
 	}
 	return cmd
@@ -80,12 +81,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetServiceStatusRequest {
-	req := apiClient.GetServiceStatus(ctx, model.ProjectId) //nolint:staticcheck //command will be removed in a later update
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiGetServiceStatusRequest {
+	req := apiClient.GetServiceStatus(ctx, model.ProjectId, utils.SKEServiceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, project *ske.ProjectResponse) error {
+func outputResult(p *print.Printer, outputFormat string, project *serviceenablement.ServiceStatus, projectId string) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(project, "", "  ")
@@ -105,7 +106,7 @@ func outputResult(p *print.Printer, outputFormat string, project *ske.ProjectRes
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *project.ProjectId)
+		table.AddRow("ID", projectId)
 		table.AddSeparator()
 		table.AddRow("STATE", *project.State)
 		err := table.Display(p)
