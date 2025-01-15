@@ -17,6 +17,7 @@ type IaaSClient interface {
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
+	GetImageExecute(ctx context.Context, projectId string, imageId string) (*iaas.Image, error)
 }
 
 func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupRuleId, securityGroupId string) (string, error) {
@@ -116,4 +117,15 @@ func GetNetworkRangeFromAPIResponse(prefix string, networkRanges *[]iaas.Network
 		}
 	}
 	return iaas.NetworkRange{}, fmt.Errorf("new network range not found in API response")
+}
+
+func GetImageName(ctx context.Context, apiClient IaaSClient, projectId, imageId string) (string, error) {
+	resp, err := apiClient.GetImageExecute(ctx, projectId, imageId)
+	if err != nil {
+		return "", fmt.Errorf("get image: %w", err)
+	}
+	if resp.Name == nil {
+		return "", nil
+	}
+	return *resp.Name, nil
 }

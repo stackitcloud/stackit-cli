@@ -33,14 +33,14 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   Create a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath
   $ stackit ske kubeconfig create my-cluster --filepath /path/to/config
 
-  Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file. 
-  
+  Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json
+  $ stackit ske kubeconfig create my-cluster --disable-writing --output-format json
 ```
 
 ### Options
 
 ```
-      --disable-writing     Disable writing to the kubeconfig file.
+      --disable-writing     Disable the writing of kubeconfig. Set the output format to json or yaml using the --output-format flag to display the kubeconfig.
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
       --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
