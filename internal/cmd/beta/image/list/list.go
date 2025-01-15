@@ -177,7 +177,7 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 				os,
 				distro,
 				version,
-				utils.JoinStringKeysPtr(item.Labels, ","))
+				utils.JoinStringKeysPtr(*item.Labels, ","))
 		}
 		err := table.Display(p)
 		if err != nil {

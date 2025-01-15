@@ -9,7 +9,7 @@ import (
 func JoinStringKeys(m map[string]any, sep string) string {
 	keys := make([]string, len(m))
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
 		i++
 	}
@@ -18,9 +18,9 @@ func JoinStringKeys(m map[string]any, sep string) string {
 
 // JoinStringKeysPtr concatenates the string keys of a map pointer, each separatore by the
 // [sep] string.
-func JoinStringKeysPtr(m *map[string]any, sep string) string {
+func JoinStringKeysPtr(m map[string]any, sep string) string {
 	if m == nil {
 		return ""
 	}
-	return JoinStringKeys(*m, sep)
+	return JoinStringKeys(m, sep)
 }
