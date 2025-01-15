@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	goerrors "errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -23,9 +25,10 @@ import (
 )
 
 const (
-	nameFlag          = "name"
-	diskFormatFlag    = "disk-format"
-	localFilePathFlag = "local-file-path"
+	nameFlag                = "name"
+	diskFormatFlag          = "disk-format"
+	localFilePathFlag       = "local-file-path"
+	noProgressIndicatorFlag = "no-progress"
 
 	bootMenuFlag               = "boot-menu"
 	cdromBusFlag               = "cdrom-bus"
@@ -67,15 +70,16 @@ type imageConfig struct {
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	Id            *string
-	Name          string
-	DiskFormat    string
-	LocalFilePath string
-	Labels        *map[string]string
-	Config        *imageConfig
-	MinDiskSize   *int64
-	MinRam        *int64
-	Protected     *bool
+	Id                  *string
+	Name                string
+	DiskFormat          string
+	LocalFilePath       string
+	Labels              *map[string]string
+	Config              *imageConfig
+	MinDiskSize         *int64
+	MinRam              *int64
+	Protected           *bool
+	NoProgressIndicator *bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -138,7 +142,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
 			}
-			if err := uploadAsync(ctx, p, file, *url); err != nil {
+			if err := uploadAsync(ctx, p, model, file, *url); err != nil {
 				return err
 			}
 
@@ -154,75 +158,104 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func uploadAsync(ctx context.Context, p *print.Printer, file *os.File, url string) error {
-	ticker := time.NewTicker(5 * time.Second)
-	ch := uploadFile(ctx, p, file, url)
-
-	start := time.Now()
-	for {
-		select {
-		case <-ticker.C:
-			p.Info("uploading for %s\n", time.Since(start))
-		case err := <-ch:
-			return err
-		}
+func uploadAsync(ctx context.Context, p *print.Printer, model *inputModel, file *os.File, url string) error {
+	stat, err := file.Stat()
+	if err != nil {
+		return fmt.Errorf("upload file: %w", err)
 	}
-}
 
-func uploadFile(ctx context.Context, p *print.Printer, file *os.File, url string) chan error {
-	ch := make(chan error)
-	go func() {
-		defer close(ch)
-		var filesize int64
-		if stat, err := file.Stat(); err != nil {
-			ch <- fmt.Errorf("create image: cannot read file size %q: %w", file.Name(), err)
-			return
-		} else {
-			filesize = stat.Size()
-		}
-		p.Debug(print.DebugLevel, "uploading image to %s", url)
-
-		start := time.Now()
-		// pass the file contents as stream, as they can get arbitrarily large. We do
-		// _not_ want to load them into an internal buffer. The downside is, that we
-		// have to set the content-length header manually
-		uploadRequest, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bufio.NewReader(file))
-		if err != nil {
-			ch <- fmt.Errorf("create image: cannot create request: %w", err)
-			return
-		}
-		uploadRequest.Header.Add("Content-Type", "application/octet-stream")
-		uploadRequest.ContentLength = filesize
-
-		uploadResponse, err := http.DefaultClient.Do(uploadRequest)
-		if err != nil {
-			ch <- fmt.Errorf("create image: error contacting server for upload: %w", err)
-			return
-		}
-		defer func() {
-			if inner := uploadResponse.Body.Close(); inner != nil {
-				err = fmt.Errorf("error closing file: %w (%w)", inner, err)
+	var reader io.Reader
+	if model.NoProgressIndicator != nil && *model.NoProgressIndicator {
+		reader = file
+	} else {
+		var ch <-chan int
+		reader, ch = newProgressReader(file)
+		go func() {
+			ticker := time.NewTicker(2 * time.Second)
+			var uploaded int
+			for {
+				select {
+				case <-ticker.C:
+					p.Info("uploaded %3.1f%%\n", 100.0/float64(stat.Size())*float64(uploaded))
+				case n := <-ch:
+					if n >= 0 {
+						uploaded += n
+					}
+				}
 			}
 		}()
-		if uploadResponse.StatusCode != http.StatusOK {
-			ch <- fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
-			return
+	}
+
+	if err = uploadFile(ctx, p, reader, stat.Size(), url); err != nil {
+		return fmt.Errorf("upload file: %w", err)
+	}
+
+	return nil
+}
+
+var _ io.Reader = (*progressReader)(nil)
+
+type progressReader struct {
+	delegate io.Reader
+	ch       chan int
+}
+
+func newProgressReader(delegate io.Reader) (io.Reader, <-chan int) {
+	ch := make(chan int)
+	return &progressReader{
+		delegate: delegate,
+		ch:       ch,
+	}, ch
+}
+
+// Read implements io.Reader.
+func (pr *progressReader) Read(p []byte) (int, error) {
+	n, err := pr.delegate.Read(p)
+	if goerrors.Is(err, io.EOF) && n <= 0 {
+		close(pr.ch)
+	} else {
+		pr.ch <- n
+	}
+	return n, err
+}
+
+func uploadFile(ctx context.Context, p *print.Printer, reader io.Reader, filesize int64, url string) error {
+	p.Debug(print.DebugLevel, "uploading image to %s", url)
+
+	start := time.Now()
+	// pass the file contents as stream, as they can get arbitrarily large. We do
+	// _not_ want to load them into an internal buffer. The downside is, that we
+	// have to set the content-length header manually
+	uploadRequest, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bufio.NewReader(reader))
+	if err != nil {
+		return fmt.Errorf("create image: cannot create request: %w", err)
+	}
+	uploadRequest.Header.Add("Content-Type", "application/octet-stream")
+	uploadRequest.ContentLength = filesize
+
+	uploadResponse, err := http.DefaultClient.Do(uploadRequest)
+	if err != nil {
+		return fmt.Errorf("create image: error contacting server for upload: %w", err)
+	}
+	defer func() {
+		if inner := uploadResponse.Body.Close(); inner != nil {
+			err = fmt.Errorf("error closing file: %w (%w)", inner, err)
 		}
-		delay := time.Since(start)
-		p.Debug(print.DebugLevel, "uploaded %d bytes in %v", filesize, delay)
-
-		ch <- nil
-		return
-
 	}()
+	if uploadResponse.StatusCode != http.StatusOK {
+		return fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
+	}
+	delay := time.Since(start)
+	p.Debug(print.DebugLevel, "uploaded %d bytes in %v", filesize, delay)
 
-	return ch
+	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "The name of the image.")
 	cmd.Flags().String(diskFormatFlag, "", "The disk format of the image. ")
 	cmd.Flags().String(localFilePathFlag, "", "The path to the local disk image file.")
+	cmd.Flags().Bool(noProgressIndicatorFlag, false, "Show no progress indicator for upload.")
 
 	cmd.Flags().Bool(bootMenuFlag, false, "Enables the BIOS bootmenu.")
 	cmd.Flags().String(cdromBusFlag, "", "Sets CDROM bus controller type.")
@@ -257,11 +290,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Name:            name,
-		DiskFormat:      flags.FlagToStringValue(p, cmd, diskFormatFlag),
-		LocalFilePath:   flags.FlagToStringValue(p, cmd, localFilePathFlag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		GlobalFlagModel:     globalFlags,
+		Name:                name,
+		DiskFormat:          flags.FlagToStringValue(p, cmd, diskFormatFlag),
+		LocalFilePath:       flags.FlagToStringValue(p, cmd, localFilePathFlag),
+		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		NoProgressIndicator: flags.FlagToBoolPointer(p, cmd, noProgressIndicatorFlag),
 		Config: &imageConfig{
 			BootMenu:               flags.FlagToBoolPointer(p, cmd, bootMenuFlag),
 			CdromBus:               flags.FlagToStringPointer(p, cmd, cdromBusFlag),
