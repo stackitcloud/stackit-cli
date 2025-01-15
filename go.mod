@@ -25,7 +25,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.10.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.20.1
