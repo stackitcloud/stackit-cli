@@ -13,10 +13,10 @@ stackit beta image update IMAGE_ID [flags]
 ### Examples
 
 ```
-  Update the name of image "xxx"
+  Update the name of an image with ID "xxx"
   $ stackit beta image update xxx --name my-new-name
 
-  Update the labels of image "xxx"
+  Update the labels of an image with ID "xxx"
   $ stackit beta image update xxx --labels label1=value1,label2=value2
 ```
 

@@ -13,11 +13,11 @@ stackit beta image create [flags]
 ### Examples
 
 ```
-  Create a named imaged
+  Create an image with name 'my-new-image' from a raw disk image located in '/my/raw/image'
   $ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image
 
-  Create a named image with labels
-  $ stackit beta image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image--labels dev,amd64
+  Create an image with name 'my-new-image' from a qcow2 image read from '/my/qcow2/image' with labels describing its contents
+  $ stackit beta image create --name my-new-image --disk-format=qcow2 --local-file-path=/my/qcow2/image --labels os=linux,distro=alpine,version=3.12
 ```
 
 ### Options
@@ -34,6 +34,7 @@ stackit beta image create [flags]
       --min-ram int              Size in Megabyte.
       --name string              The name of the image.
       --nic-model string         Sets virtual nic model.
+      --no-progress              Show no progress indicator for upload.
       --os string                Enables OS specific optimizations.
       --os-distro string         Operating System Distribution.
       --os-version string        Version of the OS.

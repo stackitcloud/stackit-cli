@@ -18,6 +18,9 @@ stackit beta image list [flags]
 
   List images with label
   $ stackit beta image list --label-selector ARM64,dev
+
+  List the first 10 images
+  $ stackit beta image list --limit=10
 ```
 
 ### Options
@@ -25,6 +28,7 @@ stackit beta image list [flags]
 ```
   -h, --help                    Help for "stackit beta image list"
       --label-selector string   Filter by label
+      --limit int               Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands

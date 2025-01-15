@@ -3,13 +3,13 @@ package beta
 import (
 	"fmt"
 
+	image "github.com/stackitcloud/stackit-cli/internal/cmd/beta/image"
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/beta/key-pair"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/public-ip"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
-	image "github.com/stackitcloud/stackit-cli/internal/cmd/beta/image"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
