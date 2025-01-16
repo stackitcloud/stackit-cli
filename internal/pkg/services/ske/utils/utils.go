@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -251,15 +252,9 @@ func MergeKubeConfig(pathDestionationKubeConfig, contentNewKubeConfig string) er
 		return fmt.Errorf("error loading existing kubeconfig: %w", err)
 	}
 
-	for name, authInfo := range newConfig.AuthInfos {
-		existingConfig.AuthInfos[name] = authInfo
-	}
-	for name, context := range newConfig.Contexts {
-		existingConfig.Contexts[name] = context
-	}
-	for name, cluster := range newConfig.Clusters {
-		existingConfig.Clusters[name] = cluster
-	}
+	maps.Copy(existingConfig.AuthInfos, newConfig.AuthInfos)
+	maps.Copy(existingConfig.Contexts, newConfig.Contexts)
+	maps.Copy(existingConfig.Clusters, newConfig.Clusters)
 
 	err = clientcmd.WriteToFile(*existingConfig, pathDestionationKubeConfig)
 	if err != nil {

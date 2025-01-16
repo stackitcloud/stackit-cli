@@ -22,19 +22,21 @@ import (
 const (
 	clusterNameArg = "CLUSTER_NAME"
 
-	loginFlag          = "login"
+	disableWritingFlag = "disable-writing"
 	expirationFlag     = "expiration"
 	filepathFlag       = "filepath"
-	disableWritingFlag = "disable-writing"
+	loginFlag          = "login"
+	overwrite          = "overwrite"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ClusterName    string
-	Filepath       *string
-	ExpirationTime *string
-	Login          bool
 	DisableWriting bool
+	ExpirationTime *string
+	Filepath       *string
+	Login          bool
+	Overwrite      bool
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -50,7 +52,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a kubeconfig for the SKE cluster with name "my-cluster. If the config exits in the kubeconfig file the information will be updated."`,
+				`Create or update a kubeconfig for the SKE cluster with name "my-cluster. If the config exits in the kubeconfig file the information will be updated."`,
 				"$ stackit ske kubeconfig create my-cluster"),
 			examples.NewExample(
 				`Get a login kubeconfig for the SKE cluster with name "my-cluster". `+
@@ -68,6 +70,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json`,
 				"$ stackit ske kubeconfig create my-cluster --disable-writing --output-format json"),
+			examples.NewExample(
+				`Create a kubeconfig for the SKE cluster with name "my-cluster. It will OVERWRITE your current kubeconfig file."`,
+				"$ stackit ske kubeconfig create my-cluster --overwrite true"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -83,7 +88,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes && !model.DisableWriting {
-				prompt := fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \n If it the kubeconfig file doesn´t exists, it will create a new one.", model.ClusterName)
+				var prompt string
+				if model.Overwrite {
+					prompt = fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)
+				} else {
+					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \n If it the kubeconfig file doesn't exists, it will create a new one.", model.ClusterName)
+				}
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -137,7 +147,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.DisableWriting {
-				err = skeUtils.MergeKubeConfig(kubeconfigPath, kubeconfig)
+				if model.Overwrite {
+					err = skeUtils.WriteConfigFile(kubeconfigPath, kubeconfig)
+				} else {
+					err = skeUtils.MergeKubeConfig(kubeconfigPath, kubeconfig)
+				}
 				if err != nil {
 					return fmt.Errorf("write kubeconfig file: %w", err)
 				}
@@ -152,11 +166,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.")
-	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
-	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
 	cmd.Flags().Bool(disableWritingFlag, false, fmt.Sprintf("Disable the writing of kubeconfig. Set the output format to json or yaml using the --%s flag to display the kubeconfig.", globalflags.OutputFormatFlag))
-
+	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.")
+	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
+	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
+	cmd.Flags().Bool(overwrite, false, "Overwrite the kubeconfig file.")
 	cmd.MarkFlagsMutuallyExclusive(loginFlag, expirationFlag)
 }
 

@@ -20,7 +20,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Create a kubeconfig for the SKE cluster with name "my-cluster. If the config exits in the kubeconfig file the information will be updated."
+  Create or update a kubeconfig for the SKE cluster with name "my-cluster. If the config exits in the kubeconfig file the information will be updated."
   $ stackit ske kubeconfig create my-cluster
 
   Get a login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
@@ -37,6 +37,9 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 
   Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json
   $ stackit ske kubeconfig create my-cluster --disable-writing --output-format json
+
+  Create a kubeconfig for the SKE cluster with name "my-cluster. It will OVERWRITE your current kubeconfig file."
+  $ stackit ske kubeconfig create my-cluster --overwrite true
 ```
 
 ### Options
@@ -47,6 +50,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
       --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
   -l, --login               Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
+      --overwrite           Overwrite the kubeconfig file.
 ```
 
 ### Options inherited from parent commands
