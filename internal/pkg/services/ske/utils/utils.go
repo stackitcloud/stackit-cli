@@ -3,14 +3,11 @@ package utils
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"golang.org/x/mod/semver"
 )
@@ -35,21 +32,6 @@ type SKEClient interface {
 	GetServiceStatusExecute(ctx context.Context, projectId string) (*ske.ProjectResponse, error)
 	ListClustersExecute(ctx context.Context, projectId string) (*ske.ListClustersResponse, error)
 	ListProviderOptionsExecute(ctx context.Context) (*ske.ProviderOptions, error)
-}
-
-func ProjectEnabled(ctx context.Context, apiClient SKEClient, projectId string) (bool, error) {
-	project, err := apiClient.GetServiceStatusExecute(ctx, projectId)
-	if err != nil {
-		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
-		if !ok {
-			return false, err
-		}
-		if oapiErr.StatusCode == http.StatusNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-	return *project.State == ske.PROJECTSTATE_CREATED, nil
 }
 
 func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, clusterName string) (bool, error) {

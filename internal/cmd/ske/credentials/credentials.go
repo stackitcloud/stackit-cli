@@ -2,8 +2,6 @@ package credentials
 
 import (
 	completerotation "github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/complete-rotation"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/rotate"
 	startrotation "github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials/start-rotation"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -25,8 +23,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(describe.NewCmd(p))
-	cmd.AddCommand(rotate.NewCmd(p))
 	cmd.AddCommand(startrotation.NewCmd(p))
 	cmd.AddCommand(completerotation.NewCmd(p))
 }
