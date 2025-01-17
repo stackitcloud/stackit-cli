@@ -26,7 +26,6 @@ var (
 	testProjectId = uuid.NewString()
 
 	testImageId                      = []string{uuid.NewString()}
-	testLocalImagePath               = "/does/not/exist"
 	testDiskFormat                   = "raw"
 	testDiskSize               int64 = 16 * 1024 * 1024 * 1024
 	testRamSize                int64 = 8 * 1024 * 1024 * 1024
@@ -54,7 +53,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 		nameFlag:                   testName,
 		diskFormatFlag:             testDiskFormat,
-		localFilePathFlag:          testLocalImagePath,
 		bootMenuFlag:               strconv.FormatBool(testBootmenu),
 		cdromBusFlag:               testCdRomBus,
 		diskBusFlag:                testDiskBus,
@@ -95,7 +93,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Id:              testImageId[0],
 		Name:            &testName,
 		DiskFormat:      &testDiskFormat,
-		LocalFilePath:   &testLocalImagePath,
 		Labels:          utils.Ptr(parseLabels(testLabels)),
 		Config: &imageConfig{
 			BootMenu:               &testBootmenu,
@@ -271,6 +268,35 @@ func TestParseInput(t *testing.T) {
 			args:        []string{uuid.NewString(), uuid.NewString()},
 			isValid:     false,
 		},
+		{
+			description: "only rescue bus is invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueDeviceFlag)
+			}),
+			args:    []string{testImageId[0]},
+			isValid: false,
+		},
+		{
+			description: "only rescue device is invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueBusFlag)
+			}),
+			args:    []string{testImageId[0]},
+			isValid: false,
+		},
+		{
+			description: "no rescue device and no bus is valid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueBusFlag)
+				delete(flagValues, rescueDeviceFlag)
+			}),
+			isValid: true,
+			args:    []string{testImageId[0]},
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Config.RescueBus = nil
+				model.Config.RescueDevice = nil
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -295,6 +321,13 @@ func TestParseInput(t *testing.T) {
 					return
 				}
 				t.Fatalf("error validating flags: %v", err)
+			}
+
+			if err := cmd.ValidateFlagGroups(); err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating flag groups: %v", err)
 			}
 
 			if err := cmd.ValidateArgs(tt.args); err != nil {
