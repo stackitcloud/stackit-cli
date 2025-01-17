@@ -268,6 +268,35 @@ func TestParseInput(t *testing.T) {
 			args:        []string{uuid.NewString(), uuid.NewString()},
 			isValid:     false,
 		},
+		{
+			description: "only rescue bus is invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueDeviceFlag)
+			}),
+			args:    []string{testImageId[0]},
+			isValid: false,
+		},
+		{
+			description: "only rescue device is invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueBusFlag)
+			}),
+			args:    []string{testImageId[0]},
+			isValid: false,
+		},
+		{
+			description: "no rescue device and no bus is valid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, rescueBusFlag)
+				delete(flagValues, rescueDeviceFlag)
+			}),
+			isValid: true,
+			args:    []string{testImageId[0]},
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Config.RescueBus = nil
+				model.Config.RescueDevice = nil
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -292,6 +321,13 @@ func TestParseInput(t *testing.T) {
 					return
 				}
 				t.Fatalf("error validating flags: %v", err)
+			}
+
+			if err := cmd.ValidateFlagGroups(); err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating flag groups: %v", err)
 			}
 
 			if err := cmd.ValidateArgs(tt.args); err != nil {
