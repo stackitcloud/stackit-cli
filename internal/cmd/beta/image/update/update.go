@@ -53,21 +53,19 @@ func (ic *imageConfig) isEmpty() bool {
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	Id            string
-	Name          *string
-	DiskFormat    *string
-	LocalFilePath *string
-	Labels        *map[string]string
-	Config        *imageConfig
-	MinDiskSize   *int64
-	MinRam        *int64
-	Protected     *bool
+	Id          string
+	Name        *string
+	DiskFormat  *string
+	Labels      *map[string]string
+	Config      *imageConfig
+	MinDiskSize *int64
+	MinRam      *int64
+	Protected   *bool
 }
 
 func (im *inputModel) isEmpty() bool {
 	return im.Name == nil &&
 		im.DiskFormat == nil &&
-		im.LocalFilePath == nil &&
 		im.Labels == nil &&
 		(im.Config == nil || im.Config.isEmpty()) &&
 		im.MinDiskSize == nil &&
@@ -78,9 +76,8 @@ func (im *inputModel) isEmpty() bool {
 const imageIdArg = "IMAGE_ID"
 
 const (
-	nameFlag          = "name"
-	diskFormatFlag    = "disk-format"
-	localFilePathFlag = "local-file-path"
+	nameFlag       = "name"
+	diskFormatFlag = "disk-format"
 
 	bootMenuFlag               = "boot-menu"
 	cdromBusFlag               = "cdrom-bus"
@@ -167,7 +164,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "The name of the image.")
 	cmd.Flags().String(diskFormatFlag, "", "The disk format of the image. ")
-	cmd.Flags().String(localFilePathFlag, "", "The path to the local disk image file.")
 
 	cmd.Flags().Bool(bootMenuFlag, false, "Enables the BIOS bootmenu.")
 	cmd.Flags().String(cdromBusFlag, "", "Sets CDROM bus controller type.")
@@ -188,6 +184,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(minDiskSizeFlag, 0, "Size in Gigabyte.")
 	cmd.Flags().Int64(minRamFlag, 0, "Size in Megabyte.")
 	cmd.Flags().Bool(protectedFlag, false, "Protected VM.")
+
+	cmd.MarkFlagsRequiredTogether(rescueBusFlag, rescueDeviceFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
@@ -201,9 +199,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 		Id:              cliArgs[0],
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 
-		DiskFormat:    flags.FlagToStringPointer(p, cmd, diskFormatFlag),
-		LocalFilePath: flags.FlagToStringPointer(p, cmd, localFilePathFlag),
-		Labels:        flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		DiskFormat: flags.FlagToStringPointer(p, cmd, diskFormatFlag),
+		Labels:     flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 		Config: &imageConfig{
 			BootMenu:               flags.FlagToBoolPointer(p, cmd, bootMenuFlag),
 			CdromBus:               flags.FlagToStringPointer(p, cmd, cdromBusFlag),

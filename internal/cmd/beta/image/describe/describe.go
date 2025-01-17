@@ -141,11 +141,11 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.Image) error {
 				table.AddRow("OPERATING SYSTEM", *os)
 				table.AddSeparator()
 			}
-			if distro := config.OperatingSystemDistro; distro != nil {
+			if distro := config.OperatingSystemDistro; distro != nil && distro.IsSet() {
 				table.AddRow("OPERATING SYSTEM DISTRIBUTION", *distro.Get())
 				table.AddSeparator()
 			}
-			if version := config.OperatingSystemVersion; version != nil {
+			if version := config.OperatingSystemVersion; version != nil && version.IsSet() {
 				table.AddRow("OPERATING SYSTEM VERSION", *version.Get())
 				table.AddSeparator()
 			}

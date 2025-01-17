@@ -283,6 +283,7 @@ func configureFlags(cmd *cobra.Command) {
 	if err := flags.MarkFlagsRequired(cmd, nameFlag, diskFormatFlag, localFilePathFlag); err != nil {
 		cobra.CheckErr(err)
 	}
+	cmd.MarkFlagsRequiredTogether(rescueBusFlag, rescueDeviceFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {

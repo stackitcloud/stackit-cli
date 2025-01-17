@@ -26,7 +26,6 @@ var (
 	testProjectId = uuid.NewString()
 
 	testImageId                      = []string{uuid.NewString()}
-	testLocalImagePath               = "/does/not/exist"
 	testDiskFormat                   = "raw"
 	testDiskSize               int64 = 16 * 1024 * 1024 * 1024
 	testRamSize                int64 = 8 * 1024 * 1024 * 1024
@@ -54,7 +53,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 		nameFlag:                   testName,
 		diskFormatFlag:             testDiskFormat,
-		localFilePathFlag:          testLocalImagePath,
 		bootMenuFlag:               strconv.FormatBool(testBootmenu),
 		cdromBusFlag:               testCdRomBus,
 		diskBusFlag:                testDiskBus,
@@ -95,7 +93,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Id:              testImageId[0],
 		Name:            &testName,
 		DiskFormat:      &testDiskFormat,
-		LocalFilePath:   &testLocalImagePath,
 		Labels:          utils.Ptr(parseLabels(testLabels)),
 		Config: &imageConfig{
 			BootMenu:               &testBootmenu,
