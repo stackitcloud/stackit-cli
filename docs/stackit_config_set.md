@@ -49,6 +49,7 @@ stackit config set [flags]
       --resource-manager-custom-endpoint string                    Resource Manager API base URL, used in calls to this API
       --runcommand-custom-endpoint string                          Run Command API base URL, used in calls to this API
       --secrets-manager-custom-endpoint string                     Secrets Manager API base URL, used in calls to this API
+      --server-osupdate-custom-endpoint string                     Server Update Management API base URL, used in calls to this API
       --serverbackup-custom-endpoint string                        Server Backup API base URL, used in calls to this API
       --service-account-custom-endpoint string                     Service Account API base URL, used in calls to this API
       --service-enablement-custom-endpoint string                  Service Enablement API base URL, used in calls to this API
