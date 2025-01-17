@@ -3,11 +3,14 @@ package utils
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"k8s.io/client-go/tools/clientcmd"
+
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"golang.org/x/mod/semver"
 )
@@ -226,6 +229,39 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 
 	result := uint64(value) * multiplier
 	return utils.Ptr(strconv.FormatUint(result, 10)), nil
+}
+
+// Merge new Kubeconfig into existing Kubeconfig. If it doesn´t exits, creates a new one
+func MergeKubeConfig(pathDestionationKubeConfig, contentNewKubeConfig string) error {
+	if contentNewKubeConfig == "" {
+		return fmt.Errorf("no data to merge. the new kubeconfig is empty")
+	}
+
+	newConfig, err := clientcmd.Load([]byte(contentNewKubeConfig))
+	if err != nil {
+		return fmt.Errorf("error loading new kubeconfig: %w", err)
+	}
+
+	// if the destionation kubeconfig does not exist, create a new one
+	if _, err := os.Stat(pathDestionationKubeConfig); os.IsNotExist(err) {
+		return WriteConfigFile(pathDestionationKubeConfig, contentNewKubeConfig)
+	}
+
+	existingConfig, err := clientcmd.LoadFromFile(pathDestionationKubeConfig)
+	if err != nil {
+		return fmt.Errorf("error loading existing kubeconfig: %w", err)
+	}
+
+	maps.Copy(existingConfig.AuthInfos, newConfig.AuthInfos)
+	maps.Copy(existingConfig.Contexts, newConfig.Contexts)
+	maps.Copy(existingConfig.Clusters, newConfig.Clusters)
+
+	err = clientcmd.WriteToFile(*existingConfig, pathDestionationKubeConfig)
+	if err != nil {
+		return fmt.Errorf("error writing merged kubeconfig: %w", err)
+	}
+
+	return nil
 }
 
 // WriteConfigFile writes the given data to the given path.
