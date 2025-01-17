@@ -16,7 +16,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.15.1
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.5.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.12.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.16.1
