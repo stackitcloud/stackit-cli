@@ -9,6 +9,7 @@ import (
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-interface"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/public-ip"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/quota"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
@@ -54,4 +55,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(securitygroup.NewCmd(p))
 	cmd.AddCommand(keypair.NewCmd(p))
 	cmd.AddCommand(image.NewCmd(p))
+	cmd.AddCommand(quota.NewCmd(p))
 }
