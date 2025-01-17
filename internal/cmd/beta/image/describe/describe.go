@@ -106,7 +106,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.Image) error {
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal image: %w", err)
 		}
@@ -142,11 +142,11 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.Image) error {
 				table.AddSeparator()
 			}
 			if distro := config.OperatingSystemDistro; distro != nil {
-				table.AddRow("OPERATING SYSTEM DISTRIBUTION", *distro)
+				table.AddRow("OPERATING SYSTEM DISTRIBUTION", *distro.Get())
 				table.AddSeparator()
 			}
 			if version := config.OperatingSystemVersion; version != nil {
-				table.AddRow("OPERATING SYSTEM VERSION", *version)
+				table.AddRow("OPERATING SYSTEM VERSION", *version.Get())
 				table.AddSeparator()
 			}
 			if uefi := config.Uefi; uefi != nil {
