@@ -26,7 +26,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   Get a login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
   $ stackit ske kubeconfig create my-cluster --login
 
-  Create o kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days. If the config exits in the kubeconfig file the information will be updated.
+  Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days. If the config exits in the kubeconfig file the information will be updated.
   $ stackit ske kubeconfig create my-cluster --expiration 30d
 
   Create or update a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 2 months. If the config exits in the kubeconfig file the information will be updated.

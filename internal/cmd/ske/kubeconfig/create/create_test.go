@@ -176,6 +176,28 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 		},
+		{
+			description: "enable overwrite",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "true"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = true
+			}),
+			isValid: true,
+		},
+		{
+			description: "disable overwrite",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "false"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = false
+			}),
+			isValid: true,
+		},
 	}
 
 	for _, tt := range tests {
