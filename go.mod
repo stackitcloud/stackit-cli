@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/goccy/go-yaml v1.15.13
+	github.com/goccy/go-yaml v1.15.15
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
