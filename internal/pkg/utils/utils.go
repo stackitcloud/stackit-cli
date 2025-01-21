@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -78,4 +79,13 @@ func ValidateURLDomain(value string) error {
 		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
 	return nil
+}
+
+// ConvertTimePToDateTimeString converts a time.Time pointer to a string represented as "2006-01-02 15:04:05"
+// This function will return an empty string if the input is nil
+func ConvertTimePToDateTimeString(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return (*t).Format(time.DateTime)
 }

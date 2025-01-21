@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -166,7 +167,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL")
+		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 
 		for _, securityGroupRule := range securityGroupRules {
 			etherType := ""
@@ -181,7 +182,13 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 				}
 			}
 
-			table.AddRow(*securityGroupRule.Id, etherType, *securityGroupRule.Direction, protocolName)
+			table.AddRow(
+				utils.PtrString(securityGroupRule.Id),
+				etherType,
+				utils.PtrString(securityGroupRule.Direction),
+				protocolName,
+				utils.PtrString(securityGroupRule.RemoteSecurityGroupId),
+			)
 			table.AddSeparator()
 		}
 

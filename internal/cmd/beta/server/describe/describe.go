@@ -4,10 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/goccy/go-yaml"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -138,8 +136,10 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 		table.AddSeparator()
 		table.AddRow("AVAILABILITY ZONE", *server.AvailabilityZone)
 		table.AddSeparator()
-		table.AddRow("BOOT VOLUME", *server.BootVolume.Id)
-		table.AddSeparator()
+		if server.BootVolume != nil && server.BootVolume.Id != nil {
+			table.AddRow("BOOT VOLUME", *server.BootVolume.Id)
+			table.AddSeparator()
+		}
 		table.AddRow("POWER STATUS", *server.PowerStatus)
 		table.AddSeparator()
 
@@ -201,6 +201,36 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			}
 
 			content = append(content, nicsTable)
+		}
+
+		if server.MaintenanceWindow != nil {
+			maintenanceWindow := tables.NewTable()
+			maintenanceWindow.SetTitle("Maintenance Window")
+
+			if server.MaintenanceWindow.Status != nil {
+				maintenanceWindow.AddRow("STATUS", *server.MaintenanceWindow.Status)
+				maintenanceWindow.AddSeparator()
+			}
+			if server.MaintenanceWindow.Details != nil {
+				maintenanceWindow.AddRow("DETAILS", *server.MaintenanceWindow.Details)
+				maintenanceWindow.AddSeparator()
+			}
+			if server.MaintenanceWindow.StartsAt != nil {
+				maintenanceWindow.AddRow(
+					"STARTS AT",
+					utils.ConvertTimePToDateTimeString(server.MaintenanceWindow.StartsAt),
+				)
+				maintenanceWindow.AddSeparator()
+			}
+			if server.MaintenanceWindow.EndsAt != nil {
+				maintenanceWindow.AddRow(
+					"ENDS AT",
+					utils.ConvertTimePToDateTimeString(server.MaintenanceWindow.EndsAt),
+				)
+				maintenanceWindow.AddSeparator()
+			}
+
+			content = append(content, maintenanceWindow)
 		}
 
 		err := tables.DisplayTables(p, content)

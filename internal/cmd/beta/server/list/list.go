@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -140,6 +141,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
+	req = req.Details(true)
 
 	return req
 }
@@ -164,11 +166,36 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Availability Zones")
+		table.SetHeader("ID", "Name", "Status", "Machine Types", "Availability Zones", "Nic IPv4", "Public IPs")
 
 		for i := range servers {
 			server := servers[i]
-			table.AddRow(*server.Id, *server.Name, *server.Status, *server.AvailabilityZone)
+
+			nicIPv4 := ""
+			publicIPs := ""
+			if server.Nics != nil && len(*server.Nics) > 0 {
+				for i, nic := range *server.Nics {
+					if nic.Ipv4 != nil || nic.PublicIp != nil {
+						nicIPv4 += utils.PtrString(nic.Ipv4)
+						publicIPs = utils.PtrString(nic.PublicIp)
+
+						if i != len(*server.Nics)-1 {
+							publicIPs += "\n"
+							nicIPv4 += "\n"
+						}
+					}
+				}
+			}
+
+			table.AddRow(
+				utils.PtrString(server.Id),
+				utils.PtrString(server.Name),
+				utils.PtrString(server.Status),
+				utils.PtrString(server.MachineType),
+				utils.PtrString(server.AvailabilityZone),
+				nicIPv4,
+				publicIPs,
+			)
 		}
 
 		p.Outputln(table.Render())
