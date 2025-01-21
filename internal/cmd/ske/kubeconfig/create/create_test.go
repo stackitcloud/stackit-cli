@@ -4,13 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
@@ -174,6 +173,28 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.DisableWriting = true
 				model.OutputFormat = print.YAMLOutputFormat
+			}),
+			isValid: true,
+		},
+		{
+			description: "enable overwrite",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "true"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = true
+			}),
+			isValid: true,
+		},
+		{
+			description: "disable overwrite",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "false"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = false
 			}),
 			isValid: true,
 		},
