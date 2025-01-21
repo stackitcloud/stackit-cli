@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -60,8 +61,8 @@ var testPayload = &ske.CreateOrUpdateClusterPayload{
 			MachineImageVersion: utils.Ptr(true),
 		},
 		TimeWindow: &ske.TimeWindow{
-			End:   utils.Ptr("0000-01-01T05:00:00+02:00"),
-			Start: utils.Ptr("0000-01-01T03:00:00+02:00"),
+			End:   utils.Ptr(time.Date(0000, 01, 01, 5, 0, 0, 0, time.UTC)),
+			Start: utils.Ptr(time.Date(0000, 01, 01, 3, 0, 0, 0, time.UTC)),
 		},
 	},
 }
