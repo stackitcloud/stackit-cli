@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -238,7 +239,7 @@ func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, erro
 		}
 		expirationDate := ""
 		if v.ExpirationDate != nil {
-			expirationDate = *v.ExpirationDate
+			expirationDate = v.ExpirationDate.Format(time.RFC3339)
 		}
 		table.AddRow(*v.Version, *v.State, expirationDate, string(featureGate))
 	}
@@ -265,7 +266,7 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 
 			expirationDate := "-"
 			if version.ExpirationDate != nil {
-				expirationDate = *version.ExpirationDate
+				expirationDate = version.ExpirationDate.Format(time.RFC3339)
 			}
 			table.AddRow(*image.Name, *version.Version, *version.State, expirationDate, criNamesString)
 		}
