@@ -140,8 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGr
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATEFUL", "DESCRIPTION", "LABELS")
 		for _, item := range items {
-
-			labelsString := ""
+			var labelsString string
 			if item.Labels != nil {
 				var labels []string
 				for key, value := range *item.Labels {
