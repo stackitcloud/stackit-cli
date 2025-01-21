@@ -27,7 +27,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists quotas",
-		Long:  "Lists server quotas.",
+		Long:  "Lists project quotas.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -74,11 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		},
 	}
 
-	configureFlags(cmd)
 	return cmd
-}
-
-func configureFlags(_ *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -130,42 +126,42 @@ func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList)
 
 	default:
 		table := tables.NewTable()
-		table.SetHeader("NAME", "LIMIT", "USAGE", "PERCENT")
+		table.SetHeader("NAME", "LIMIT", "CURRENT USAGE", "PERCENT")
 		if val := quotas.BackupGigabytes; val != nil {
-			table.AddRow("Backup Gigabytes", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Total size in GiB of backups [GiB]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Backups; val != nil {
-			table.AddRow("Backups", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of backups [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Gigabytes; val != nil {
-			table.AddRow("Gigabytes", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Total size in GiB of volumes and snapshots [GiB]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Networks; val != nil {
-			table.AddRow("Networks", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of networks [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Nics; val != nil {
-			table.AddRow("Nics", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of network interfaces (nics) [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.PublicIps; val != nil {
-			table.AddRow("Public Ips", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of public IP addresses [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Ram; val != nil {
-			table.AddRow("Ram", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Amount of server RAM in MiB [MiB]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.SecurityGroupRules; val != nil {
-			table.AddRow("Security Group Rules", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of security group rules [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.SecurityGroups; val != nil {
-			table.AddRow("Security Groups", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of security groups [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Snapshots; val != nil {
-			table.AddRow("Snapshots", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of snapshots [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Vcpu; val != nil {
-			table.AddRow("Vcpu", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of server cores (vcpu) [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		if val := quotas.Volumes; val != nil {
-			table.AddRow("Volumes", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
+			table.AddRow("Number of volumes [Count]", conv(val.GetLimit()), conv(val.GetUsage()), percentage(val))
 		}
 		err := table.Display(p)
 		if err != nil {
