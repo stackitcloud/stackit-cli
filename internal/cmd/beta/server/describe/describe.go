@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -207,12 +206,6 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 			content = append(content, nicsTable)
 		}
 
-		server.MaintenanceWindow = &iaas.ServerMaintenance{
-			Details:  utils.Ptr("Details about maintenance"),
-			EndsAt:   utils.Ptr(time.Now()),
-			StartsAt: utils.Ptr(time.Now()),
-			Status:   utils.Ptr("PLANNED"),
-		}
 		if server.MaintenanceWindow != nil {
 			maintenanceWindow := tables.NewTable()
 			maintenanceWindow.SetTitle("Maintenance Window")

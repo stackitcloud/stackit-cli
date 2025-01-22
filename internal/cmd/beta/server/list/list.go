@@ -166,7 +166,7 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Machine Types", "Availability Zones", "Nic IPv4", "Public IPs")
+		table.SetHeader("ID", "Name", "Status", "Machine Type", "Availability Zones", "Nic IPv4", "Public IPs")
 
 		for i := range servers {
 			server := servers[i]
@@ -177,7 +177,7 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 				for i, nic := range *server.Nics {
 					if nic.Ipv4 != nil || nic.PublicIp != nil {
 						nicIPv4 += utils.PtrString(nic.Ipv4)
-						publicIPs = utils.PtrString(nic.PublicIp)
+						publicIPs += utils.PtrString(nic.PublicIp)
 
 						if i != len(*server.Nics)-1 {
 							publicIPs += "\n"
