@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,6 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -114,7 +115,11 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 
 		return nil
 	default:
+		var content []tables.Table
+
 		table := tables.NewTable()
+		table.SetTitle("SECURITY GROUP")
+
 		if id := resp.Id; id != nil {
 			table.AddRow("ID", *id)
 		}
@@ -130,8 +135,13 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 			table.AddSeparator()
 		}
 
+		if stateful := resp.Stateful; stateful != nil {
+			table.AddRow("STATEFUL", *stateful)
+			table.AddSeparator()
+		}
+
 		if resp.Labels != nil && len(*resp.Labels) > 0 {
-			labels := []string{}
+			var labels []string
 			for key, value := range *resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
@@ -139,7 +149,66 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 			table.AddSeparator()
 		}
 
-		if err := table.Display(p); err != nil {
+		if resp.CreatedAt != nil {
+			table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(resp.CreatedAt))
+			table.AddSeparator()
+		}
+
+		if resp.UpdatedAt != nil {
+			table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(resp.UpdatedAt))
+			table.AddSeparator()
+		}
+
+		content = append(content, table)
+
+		if resp.Rules != nil && len(*resp.Rules) > 0 {
+			rulesTable := tables.NewTable()
+			rulesTable.SetTitle("RULES")
+			rulesTable.SetHeader(
+				"ID",
+				"DESCRIPTION",
+				"PROTOCOL",
+				"DIRECTION",
+				"ETHER TYPE",
+				"PORT RANGE",
+				"IP RANGE",
+				"ICMP PARAMETERS",
+				"REMOTE SECURITY GROUP ID",
+			)
+
+			for _, rule := range *resp.Rules {
+				var portRange string
+				if rule.PortRange != nil {
+					portRange = fmt.Sprintf("%s-%s", utils.PtrString(rule.PortRange.Min), utils.PtrString(rule.PortRange.Max))
+				}
+
+				var protocol string
+				if rule.Protocol != nil {
+					protocol = utils.PtrString(rule.Protocol.Name)
+				}
+
+				var icmpParameter string
+				if rule.IcmpParameters != nil {
+					icmpParameter = fmt.Sprintf("type: %s, code: %s", utils.PtrString(rule.IcmpParameters.Type), utils.PtrString(rule.IcmpParameters.Code))
+				}
+
+				rulesTable.AddRow(
+					utils.PtrString(rule.Id),
+					utils.PtrString(rule.Description),
+					protocol,
+					utils.PtrString(rule.Direction),
+					utils.PtrString(rule.Ethertype),
+					portRange,
+					utils.PtrString(rule.IpRange),
+					icmpParameter,
+					utils.PtrString(rule.RemoteSecurityGroupId),
+				)
+			}
+
+			content = append(content, rulesTable)
+		}
+
+		if err := tables.DisplayTables(p, content); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
 

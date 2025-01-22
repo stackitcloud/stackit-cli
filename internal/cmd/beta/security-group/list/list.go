@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -137,9 +138,24 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGr
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATEFUL")
+		table.SetHeader("ID", "NAME", "STATEFUL", "DESCRIPTION", "LABELS")
 		for _, item := range items {
-			table.AddRow(utils.PtrString(item.Id), utils.PtrString(item.Name), utils.PtrString(item.Stateful))
+			var labelsString string
+			if item.Labels != nil {
+				var labels []string
+				for key, value := range *item.Labels {
+					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+				}
+				labelsString = strings.Join(labels, ", ")
+			}
+
+			table.AddRow(
+				utils.PtrString(item.Id),
+				utils.PtrString(item.Name),
+				utils.PtrString(item.Stateful),
+				utils.PtrString(item.Description),
+				labelsString,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -151,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "ROUTED")
+		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED")
 
 		for _, network := range networks {
 			publicIp := ""
@@ -163,8 +164,12 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 			if network.Routed != nil {
 				routed = *network.Routed
 			}
+			prefixes := ""
+			if network.Prefixes != nil && len(*network.Prefixes) > 0 {
+				prefixes = strings.Join(*network.Prefixes, ", ")
+			}
 
-			table.AddRow(*network.NetworkId, *network.Name, *network.State, publicIp, routed)
+			table.AddRow(*network.NetworkId, *network.Name, *network.State, publicIp, prefixes, routed)
 			table.AddSeparator()
 		}
 
