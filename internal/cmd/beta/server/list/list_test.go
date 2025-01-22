@@ -53,6 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *iaas.ApiListServersRequest)) iaas.ApiListServersRequest {
 	request := testClient.ListServers(testCtx, testProjectId)
 	request = request.LabelSelector(testLabelSelector)
+	request = request.Details(true)
 	for _, mod := range mods {
 		mod(&request)
 	}
