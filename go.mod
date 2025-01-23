@@ -19,17 +19,17 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.5.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.12.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.19.0
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.16.1
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.19.1
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.16.1
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.20.1
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.8.1
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.21.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.9.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.22.0
 	golang.org/x/oauth2 v0.25.0
@@ -79,7 +79,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.17.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.20.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.20.2
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.2.1
