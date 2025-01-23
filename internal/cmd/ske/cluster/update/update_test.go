@@ -61,8 +61,8 @@ var testPayload = ske.CreateOrUpdateClusterPayload{
 			MachineImageVersion: utils.Ptr(true),
 		},
 		TimeWindow: &ske.TimeWindow{
-			End:   utils.Ptr(time.Date(0000, 01, 01, 5, 0, 0, 0, time.UTC)),
-			Start: utils.Ptr(time.Date(0000, 01, 01, 3, 0, 0, 0, time.UTC)),
+			End:   utils.Ptr(time.Date(0000, 01, 01, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60))),
+			Start: utils.Ptr(time.Date(0000, 01, 01, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60))),
 		},
 	},
 }
