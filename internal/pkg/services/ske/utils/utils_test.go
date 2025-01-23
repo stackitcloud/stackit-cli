@@ -12,7 +12,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
@@ -65,23 +64,10 @@ users:
 )
 
 type skeClientMocked struct {
-	serviceDisabled          bool
-	getServiceStatusFails    bool
-	getServiceStatusResp     *ske.ProjectResponse
 	listClustersFails        bool
 	listClustersResp         *ske.ListClustersResponse
 	listProviderOptionsFails bool
 	listProviderOptionsResp  *ske.ProviderOptions
-}
-
-func (m *skeClientMocked) GetServiceStatusExecute(_ context.Context, _ string) (*ske.ProjectResponse, error) {
-	if m.getServiceStatusFails {
-		return nil, fmt.Errorf("could not get service status")
-	}
-	if m.serviceDisabled {
-		return nil, &oapierror.GenericOpenAPIError{StatusCode: 404}
-	}
-	return m.getServiceStatusResp, nil
 }
 
 func (m *skeClientMocked) ListClustersExecute(_ context.Context, _ string) (*ske.ListClustersResponse, error) {

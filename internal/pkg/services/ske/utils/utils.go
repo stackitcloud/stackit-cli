@@ -32,7 +32,6 @@ const (
 )
 
 type SKEClient interface {
-	GetServiceStatusExecute(ctx context.Context, projectId string) (*ske.ProjectResponse, error)
 	ListClustersExecute(ctx context.Context, projectId string) (*ske.ListClustersResponse, error)
 	ListProviderOptionsExecute(ctx context.Context) (*ske.ProviderOptions, error)
 }
