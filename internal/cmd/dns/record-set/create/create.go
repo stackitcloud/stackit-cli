@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -16,6 +15,7 @@ import (
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"math"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
@@ -31,6 +31,7 @@ const (
 	typeFlag    = "type"
 
 	defaultType = "A"
+	txtType     = "TXT"
 )
 
 type inputModel struct {
@@ -152,7 +153,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCreateRecordSetRequest {
 	records := make([]dns.RecordPayload, 0)
 	for _, r := range model.Records {
-		records = append(records, dns.RecordPayload{Content: utils.Ptr(r)})
+		result := r
+		if len(r) > 255 && model.Type == txtType {
+			result = ""
+			length := float64(len(r))
+			chunks := int(math.Ceil(length / 255))
+			for i := range chunks {
+				skip := 255 * i
+				if i == chunks-1 {
+					// Append the left record content
+					result += fmt.Sprintf("%q", r[0+skip:])
+				} else {
+					// Add 255 characters of the record data quoted to the result
+					result += fmt.Sprintf("%q ", r[0+skip:255+skip])
+				}
+			}
+		}
+		records = append(records, dns.RecordPayload{Content: utils.Ptr(result)})
 	}
 
 	req := apiClient.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)

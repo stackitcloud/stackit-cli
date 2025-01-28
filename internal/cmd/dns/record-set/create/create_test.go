@@ -2,6 +2,8 @@ package create
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -22,6 +24,12 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &dns.APIClient{}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
+
+var recordTxtOver255Char = []string{
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -324,6 +332,27 @@ func TestBuildRequest(t *testing.T) {
 						{Content: utils.Ptr("1.1.1.1")},
 					},
 					Type: utils.Ptr(defaultType),
+				}),
+		},
+		{
+			description: "add TXT record with > 255 characters",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Type = txtType
+				model.Records = []string{strings.Join(recordTxtOver255Char, "")}
+			}),
+			expectedRequest: testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
+				CreateRecordSetPayload(dns.CreateRecordSetPayload{
+					Name: utils.Ptr("example.com"),
+					Records: &[]dns.RecordPayload{
+						{
+							Content: utils.Ptr(
+								fmt.Sprintf("\"%s\"", strings.Join(recordTxtOver255Char, "\" \"")),
+							),
+						},
+					},
+					Type:    utils.Ptr(txtType),
+					Comment: utils.Ptr("comment"),
+					Ttl:     utils.Ptr(int64(3600)),
 				}),
 		},
 	}
