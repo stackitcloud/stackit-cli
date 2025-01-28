@@ -49,6 +49,7 @@ require (
 	al.essio.dev/pkg/shellescape v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v0.2.3 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 )
 

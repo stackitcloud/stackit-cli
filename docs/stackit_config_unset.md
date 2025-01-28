@@ -50,6 +50,7 @@ stackit config unset [flags]
       --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
       --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
       --secrets-manager-custom-endpoint                     Secrets Manager API base URL. If unset, uses the default base URL
+      --server-osupdate-custom-endpoint                     Server Update Management base URL. If unset, uses the default base URL
       --serverbackup-custom-endpoint                        Server Backup base URL. If unset, uses the default base URL
       --service-account-custom-endpoint                     Service Account API base URL. If unset, uses the default base URL
       --service-enablement-custom-endpoint                  Service Enablement API base URL. If unset, uses the default base URL
