@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.6.5
-	github.com/lmittmann/tint v1.0.6
+	github.com/lmittmann/tint v1.0.7
 	github.com/mattn/go-colorable v0.1.14
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
@@ -26,6 +26,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v0.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.21.1
@@ -49,7 +50,6 @@ require (
 	al.essio.dev/pkg/shellescape v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v0.2.3 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 )
 
