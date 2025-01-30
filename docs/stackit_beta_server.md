@@ -39,6 +39,7 @@ stackit beta server [flags]
 * [stackit beta server describe](./stackit_beta_server_describe.md)	 - Shows details of a server
 * [stackit beta server list](./stackit_beta_server_list.md)	 - Lists all servers of a project
 * [stackit beta server log](./stackit_beta_server_log.md)	 - Gets server console log
+* [stackit beta server machine-type](./stackit_beta_server_machine-type.md)	 - Provides functionality for server machine types available inside a project
 * [stackit beta server network-interface](./stackit_beta_server_network-interface.md)	 - Allows attaching/detaching network interfaces to servers
 * [stackit beta server os-update](./stackit_beta_server_os-update.md)	 - Provides functionality for managed server updates
 * [stackit beta server public-ip](./stackit_beta_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
