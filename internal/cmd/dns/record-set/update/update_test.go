@@ -86,10 +86,11 @@ func fixtureRequest(mods ...func(request *dns.ApiPartialUpdateRecordSetRequest))
 		},
 		Ttl: utils.Ptr(int64(3600)),
 	})
+	req := &request
 	for _, mod := range mods {
-		mod(&request)
+		mod(req)
 	}
-	return request
+	return *req
 }
 
 func TestParseInput(t *testing.T) {
@@ -344,19 +345,27 @@ func TestBuildRequest(t *testing.T) {
 				model.Type = utils.Ptr(txtType)
 				model.Records = utils.Ptr([]string{strings.Join(recordTxtOver255Char, "")})
 			}),
-			expectedRequest: testClient.PartialUpdateRecordSet(testCtx, testProjectId, testZoneId, testRecordSetId).
-				PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{
-					Name: utils.Ptr("example.com"),
-					Records: &[]dns.RecordPayload{
-						{
-							Content: utils.Ptr(
-								fmt.Sprintf("\"%s\"", strings.Join(recordTxtOver255Char, "\" \"")),
-							),
+			expectedRequest: func() dns.ApiPartialUpdateRecordSetRequest {
+				var content string
+				for idx, val := range recordTxtOver255Char {
+					content += fmt.Sprintf("%q", val)
+					if idx != len(recordTxtOver255Char)-1 {
+						content += " "
+					}
+				}
+
+				return testClient.PartialUpdateRecordSet(testCtx, testProjectId, testZoneId, testRecordSetId).
+					PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{
+						Name: utils.Ptr("example.com"),
+						Records: &[]dns.RecordPayload{
+							{
+								Content: utils.Ptr(content),
+							},
 						},
-					},
-					Comment: utils.Ptr("comment"),
-					Ttl:     utils.Ptr(int64(3600)),
-				}),
+						Comment: utils.Ptr("comment"),
+						Ttl:     utils.Ptr(int64(3600)),
+					})
+			}(),
 		},
 	}
 

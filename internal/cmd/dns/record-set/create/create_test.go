@@ -340,20 +340,28 @@ func TestBuildRequest(t *testing.T) {
 				model.Type = txtType
 				model.Records = []string{strings.Join(recordTxtOver255Char, "")}
 			}),
-			expectedRequest: testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
-				CreateRecordSetPayload(dns.CreateRecordSetPayload{
-					Name: utils.Ptr("example.com"),
-					Records: &[]dns.RecordPayload{
-						{
-							Content: utils.Ptr(
-								fmt.Sprintf("\"%s\"", strings.Join(recordTxtOver255Char, "\" \"")),
-							),
+			expectedRequest: func() dns.ApiCreateRecordSetRequest {
+				var content string
+				for idx, val := range recordTxtOver255Char {
+					content += fmt.Sprintf("%q", val)
+					if idx != len(recordTxtOver255Char)-1 {
+						content += " "
+					}
+				}
+
+				return testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
+					CreateRecordSetPayload(dns.CreateRecordSetPayload{
+						Name: utils.Ptr("example.com"),
+						Records: &[]dns.RecordPayload{
+							{
+								Content: utils.Ptr(content),
+							},
 						},
-					},
-					Type:    utils.Ptr(txtType),
-					Comment: utils.Ptr("comment"),
-					Ttl:     utils.Ptr(int64(3600)),
-				}),
+						Type:    utils.Ptr(txtType),
+						Comment: utils.Ptr("comment"),
+						Ttl:     utils.Ptr(int64(3600)),
+					})
+			}(),
 		},
 	}
 

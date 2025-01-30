@@ -3,8 +3,8 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
