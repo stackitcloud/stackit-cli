@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+	"math"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,6 +29,7 @@ const (
 	nameFlag    = "name"
 	recordFlag  = "record"
 	ttlFlag     = "ttl"
+	txtType     = "TXT"
 )
 
 type inputModel struct {
@@ -38,6 +40,7 @@ type inputModel struct {
 	Name        *string
 	Records     *[]string
 	TTL         *int64
+	Type        *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -75,6 +78,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
 			}
+
+			typeLabel, err := dnsUtils.GetRecordSetType(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get record set type: %v", err)
+			}
+			model.Type = typeLabel
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update record set %s of zone %s?", recordSetLabel, zoneLabel)
@@ -170,7 +179,23 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	if model.Records != nil {
 		records = utils.Ptr(make([]dns.RecordPayload, 0))
 		for _, r := range *model.Records {
-			records = utils.Ptr(append(*records, dns.RecordPayload{Content: utils.Ptr(r)}))
+			result := r
+			if len(r) > 255 && utils.PtrString(model.Type) == txtType {
+				result = ""
+				length := float64(len(r))
+				chunks := int(math.Ceil(length / 255))
+				for i := range chunks {
+					skip := 255 * i
+					if i == chunks-1 {
+						// Append the left record content
+						result += fmt.Sprintf("%q", r[0+skip:])
+					} else {
+						// Add 255 characters of the record data quoted to the result
+						result += fmt.Sprintf("%q ", r[0+skip:255+skip])
+					}
+				}
+			}
+			records = utils.Ptr(append(*records, dns.RecordPayload{Content: utils.Ptr(result)}))
 		}
 	}
 

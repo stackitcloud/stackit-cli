@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
@@ -26,4 +27,12 @@ func GetRecordSetName(ctx context.Context, apiClient DNSClient, projectId, zoneI
 		return "", fmt.Errorf("get DNS recordset: %w", err)
 	}
 	return *resp.Rrset.Name, nil
+}
+
+func GetRecordSetType(ctx context.Context, apiClient DNSClient, projectId, zoneId, recordSetId string) (*string, error) {
+	resp, err := apiClient.GetRecordSetExecute(ctx, projectId, zoneId, recordSetId)
+	if err != nil {
+		return utils.Ptr(""), fmt.Errorf("get DNS recordset: %w", err)
+	}
+	return resp.Rrset.Type, nil
 }

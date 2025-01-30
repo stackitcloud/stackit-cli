@@ -2,6 +2,8 @@ package update
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -23,6 +25,12 @@ var testClient = &dns.APIClient{}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 var testRecordSetId = uuid.NewString()
+
+var recordTxtOver255Char = []string{
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
+}
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -329,6 +337,26 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.PartialUpdateRecordSet(testCtx, testProjectId, testZoneId, testRecordSetId).
 				PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{}),
+		},
+		{
+			description: "update TXT record with > 255 characters",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Type = utils.Ptr(txtType)
+				model.Records = utils.Ptr([]string{strings.Join(recordTxtOver255Char, "")})
+			}),
+			expectedRequest: testClient.PartialUpdateRecordSet(testCtx, testProjectId, testZoneId, testRecordSetId).
+				PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{
+					Name: utils.Ptr("example.com"),
+					Records: &[]dns.RecordPayload{
+						{
+							Content: utils.Ptr(
+								fmt.Sprintf("\"%s\"", strings.Join(recordTxtOver255Char, "\" \"")),
+							),
+						},
+					},
+					Comment: utils.Ptr("comment"),
+					Ttl:     utils.Ptr(int64(3600)),
+				}),
 		},
 	}
 
