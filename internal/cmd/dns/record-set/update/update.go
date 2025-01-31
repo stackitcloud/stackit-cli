@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"math"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -84,6 +83,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get record set type: %v", err)
 			}
 			model.Type = typeLabel
+
+			if utils.PtrString(model.Type) == txtType {
+				err = parseTxtRecord(model.Records)
+				if err != nil {
+					return err
+				}
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update record set %s of zone %s?", recordSetLabel, zoneLabel)
@@ -174,28 +180,33 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+func parseTxtRecord(records *[]string) error {
+	if records == nil {
+		return nil
+	}
+	if len(*records) == 0 {
+		return nil
+	}
+
+	for idx := range *records {
+		var err error
+		// Based on RFC 1035 section 2.3.4, TXT Records are limited to 255 Characters.
+		// Longer strings need to be split into multiple records
+		(*records)[idx], err = dnsUtils.FormatTxtRecord((*records)[idx])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateRecordSetRequest {
 	var records *[]dns.RecordPayload = nil
 	if model.Records != nil {
 		records = utils.Ptr(make([]dns.RecordPayload, 0))
 		for _, r := range *model.Records {
-			result := r
-			if len(r) > 255 && utils.PtrString(model.Type) == txtType {
-				result = ""
-				length := float64(len(r))
-				chunks := int(math.Ceil(length / 255))
-				for i := range chunks {
-					skip := 255 * i
-					if i == chunks-1 {
-						// Append the left record content
-						result += fmt.Sprintf("%q", r[0+skip:])
-					} else {
-						// Add 255 characters of the record data quoted to the result
-						result += fmt.Sprintf("%q ", r[0+skip:255+skip])
-					}
-				}
-			}
-			records = utils.Ptr(append(*records, dns.RecordPayload{Content: utils.Ptr(result)}))
+			records = utils.Ptr(append(*records, dns.RecordPayload{Content: utils.Ptr(r)}))
 		}
 	}
 

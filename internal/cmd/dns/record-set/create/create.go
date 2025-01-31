@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,8 +17,6 @@ import (
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
 )
@@ -139,6 +137,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
 	}
 
+	if model.Type == txtType {
+		for idx := range model.Records {
+			// Based on RFC 1035 section 2.3.4, TXT Records are limited to 255 Characters
+			// Longer strings need to be split into multiple records
+			if len(model.Records[idx]) > 255 {
+				var err error
+				model.Records[idx], err = dnsUtils.FormatTxtRecord(model.Records[idx])
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
 	if p.IsVerbosityDebug() {
 		modelStr, err := print.BuildDebugStrFromInputModel(model)
 		if err != nil {
@@ -154,23 +166,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCreateRecordSetRequest {
 	records := make([]dns.RecordPayload, 0)
 	for _, r := range model.Records {
-		result := r
-		if len(r) > 255 && model.Type == txtType {
-			result = ""
-			length := float64(len(r))
-			chunks := int(math.Ceil(length / 255))
-			for i := range chunks {
-				skip := 255 * i
-				if i == chunks-1 {
-					// Append the left record content
-					result += fmt.Sprintf("%q", r[0+skip:])
-				} else {
-					// Add 255 characters of the record data quoted to the result
-					result += fmt.Sprintf("%q ", r[0+skip:255+skip])
-				}
-			}
-		}
-		records = append(records, dns.RecordPayload{Content: utils.Ptr(result)})
+		records = append(records, dns.RecordPayload{Content: utils.Ptr(r)})
 	}
 
 	req := apiClient.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)

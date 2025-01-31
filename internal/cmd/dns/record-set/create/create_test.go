@@ -84,7 +84,7 @@ func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.Ap
 }
 
 func TestParseInput(t *testing.T) {
-	tests := []struct {
+	var tests = []struct {
 		description      string
 		flagValues       map[string]string
 		recordFlagValues []string
@@ -244,8 +244,27 @@ func TestParseInput(t *testing.T) {
 				model.Records = append(model.Records, "1.2.3.4", "5.6.7.8")
 			}),
 		},
-	}
+		{
+			description: "TXT record with > 255 characters",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[typeFlag] = txtType
+				flagValues[recordFlag] = strings.Join(recordTxtOver255Char, "")
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				var content string
+				for idx, val := range recordTxtOver255Char {
+					content += fmt.Sprintf("%q", val)
+					if idx != len(recordTxtOver255Char)-1 {
+						content += " "
+					}
+				}
 
+				model.Records = []string{content}
+				model.Type = txtType
+			}),
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
@@ -333,35 +352,6 @@ func TestBuildRequest(t *testing.T) {
 					},
 					Type: utils.Ptr(defaultType),
 				}),
-		},
-		{
-			description: "add TXT record with > 255 characters",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Type = txtType
-				model.Records = []string{strings.Join(recordTxtOver255Char, "")}
-			}),
-			expectedRequest: func() dns.ApiCreateRecordSetRequest {
-				var content string
-				for idx, val := range recordTxtOver255Char {
-					content += fmt.Sprintf("%q", val)
-					if idx != len(recordTxtOver255Char)-1 {
-						content += " "
-					}
-				}
-
-				return testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
-					CreateRecordSetPayload(dns.CreateRecordSetPayload{
-						Name: utils.Ptr("example.com"),
-						Records: &[]dns.RecordPayload{
-							{
-								Content: utils.Ptr(content),
-							},
-						},
-						Type:    utils.Ptr(txtType),
-						Comment: utils.Ptr("comment"),
-						Ttl:     utils.Ptr(int64(3600)),
-					})
-			}(),
 		},
 	}
 
