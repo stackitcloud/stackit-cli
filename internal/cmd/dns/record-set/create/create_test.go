@@ -2,6 +2,8 @@ package create
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -22,6 +24,12 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &dns.APIClient{}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
+
+var recordTxtOver255Char = []string{
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
+	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -76,7 +84,7 @@ func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.Ap
 }
 
 func TestParseInput(t *testing.T) {
-	tests := []struct {
+	var tests = []struct {
 		description      string
 		flagValues       map[string]string
 		recordFlagValues []string
@@ -236,8 +244,27 @@ func TestParseInput(t *testing.T) {
 				model.Records = append(model.Records, "1.2.3.4", "5.6.7.8")
 			}),
 		},
-	}
+		{
+			description: "TXT record with > 255 characters",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[typeFlag] = txtType
+				flagValues[recordFlag] = strings.Join(recordTxtOver255Char, "")
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				var content string
+				for idx, val := range recordTxtOver255Char {
+					content += fmt.Sprintf("%q", val)
+					if idx != len(recordTxtOver255Char)-1 {
+						content += " "
+					}
+				}
 
+				model.Records = []string{content}
+				model.Type = txtType
+			}),
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()

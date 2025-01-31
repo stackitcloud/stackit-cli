@@ -28,6 +28,7 @@ const (
 	nameFlag    = "name"
 	recordFlag  = "record"
 	ttlFlag     = "ttl"
+	txtType     = "TXT"
 )
 
 type inputModel struct {
@@ -38,6 +39,7 @@ type inputModel struct {
 	Name        *string
 	Records     *[]string
 	TTL         *int64
+	Type        *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -74,6 +76,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
+			}
+
+			typeLabel, err := dnsUtils.GetRecordSetType(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get record set type: %v", err)
+			}
+			model.Type = typeLabel
+
+			if utils.PtrString(model.Type) == txtType {
+				err = parseTxtRecord(model.Records)
+				if err != nil {
+					return err
+				}
 			}
 
 			if !model.AssumeYes {
@@ -163,6 +178,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	return &model, nil
+}
+
+func parseTxtRecord(records *[]string) error {
+	if records == nil {
+		return nil
+	}
+	if len(*records) == 0 {
+		return nil
+	}
+
+	for idx := range *records {
+		var err error
+		// Based on RFC 1035 section 2.3.4, TXT Records are limited to 255 Characters.
+		// Longer strings need to be split into multiple records
+		(*records)[idx], err = dnsUtils.FormatTxtRecord((*records)[idx])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateRecordSetRequest {

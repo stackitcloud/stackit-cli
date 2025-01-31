@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +17,6 @@ import (
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
 )
@@ -31,6 +30,7 @@ const (
 	typeFlag    = "type"
 
 	defaultType = "A"
+	txtType     = "TXT"
 )
 
 type inputModel struct {
@@ -135,6 +135,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
 		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
 		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
+	}
+
+	if model.Type == txtType {
+		for idx := range model.Records {
+			// Based on RFC 1035 section 2.3.4, TXT Records are limited to 255 Characters
+			// Longer strings need to be split into multiple records
+			if len(model.Records[idx]) > 255 {
+				var err error
+				model.Records[idx], err = dnsUtils.FormatTxtRecord(model.Records[idx])
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
 	}
 
 	if p.IsVerbosityDebug() {
