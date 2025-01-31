@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/log"
+	machinetype "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/machine-type"
 	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/network-interface"
 	osUpdate "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/os-update"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/server/public-ip"
@@ -64,4 +65,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(rescue.NewCmd(p))
 	cmd.AddCommand(unrescue.NewCmd(p))
 	cmd.AddCommand(osUpdate.NewCmd(p))
+	cmd.AddCommand(machinetype.NewCmd(p))
 }

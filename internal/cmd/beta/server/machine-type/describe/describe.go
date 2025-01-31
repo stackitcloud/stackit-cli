@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 
@@ -22,28 +21,28 @@ import (
 )
 
 const (
-	volumePerformanceClassArg = "VOLUME_PERFORMANCE_CLASS"
+	machineTypeArg = "MACHINE_TYPE"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	VolumePerformanceClass string
+	MachineType string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("describe %s", volumePerformanceClassArg),
-		Short: "Shows details of a volume performance class",
-		Long:  "Shows details of a volume performance class.",
-		Args:  args.SingleArg(volumePerformanceClassArg, nil),
+		Use:   fmt.Sprintf("describe %s", machineTypeArg),
+		Short: "Shows details of a server machine type",
+		Long:  "Shows details of a server machine type.",
+		Args:  args.SingleArg(machineTypeArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Show details of a volume performance class with name "xxx"`,
-				"$ stackit beta volume performance-class describe xxx",
+				`Show details of a server machine type with name "xxx"`,
+				"$ stackit beta server machine-type describe xxx",
 			),
 			examples.NewExample(
-				`Show details of a volume performance class with name "xxx" in JSON format`,
-				"$ stackit beta volume performance-class describe xxx --output-format json",
+				`Show details of a server machine type with name "xxx" in JSON format`,
+				"$ stackit beta server machine-type describe xxx --output-format json",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read volume performance class: %w", err)
+				return fmt.Errorf("read server machine type: %w", err)
 			}
 
 			return outputResult(p, model.OutputFormat, resp)
@@ -73,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	volumePerformanceClass := inputArgs[0]
+	machineType := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -81,8 +80,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel:        globalFlags,
-		VolumePerformanceClass: volumePerformanceClass,
+		GlobalFlagModel: globalFlags,
+		MachineType:     machineType,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -97,47 +96,40 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumePerformanceClassRequest {
-	return apiClient.GetVolumePerformanceClass(ctx, model.ProjectId, model.VolumePerformanceClass)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetMachineTypeRequest {
+	return apiClient.GetMachineType(ctx, model.ProjectId, model.MachineType)
 }
 
-func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.VolumePerformanceClass) error {
+func outputResult(p *print.Printer, outputFormat string, machineType *iaas.MachineType) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(performanceClass, "", "  ")
+		details, err := json.MarshalIndent(machineType, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal volume performance class: %w", err)
+			return fmt.Errorf("marshal server machine type: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(performanceClass, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(machineType, yaml.IndentSequence(true))
 		if err != nil {
-			return fmt.Errorf("marshal volume performance class: %w", err)
+			return fmt.Errorf("marshal server machine type: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("NAME", *performanceClass.Name)
+		table.AddRow("NAME", utils.PtrString(machineType.Name))
 		table.AddSeparator()
-		table.AddRow("DESCRIPTION", utils.PtrString(performanceClass.Description))
+		table.AddRow("VCPUS", utils.PtrString(machineType.Vcpus))
 		table.AddSeparator()
-		table.AddRow("IOPS", utils.PtrString(performanceClass.Iops))
+		table.AddRow("RAM (in MB)", utils.PtrString(machineType.Ram))
 		table.AddSeparator()
-		table.AddRow("THROUGHPUT", utils.PtrString(performanceClass.Throughput))
+		table.AddRow("DISK SIZE (in GB)", utils.PtrString(machineType.Disk))
 		table.AddSeparator()
-
-		if performanceClass.Labels != nil && len(*performanceClass.Labels) > 0 {
-			labels := []string{}
-			for key, value := range *performanceClass.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
-			}
-			table.AddRow("LABELS", strings.Join(labels, "\n"))
-			table.AddSeparator()
-		}
+		table.AddRow("DESCRIPTION", utils.PtrString(machineType.Description))
+		table.AddSeparator()
 
 		err := table.Display(p)
 		if err != nil {
