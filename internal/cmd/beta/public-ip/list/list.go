@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -171,7 +172,11 @@ func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.Public
 			if publicIp.NetworkInterface != nil {
 				networkInterfaceId = *publicIp.GetNetworkInterface()
 			}
-			table.AddRow(*publicIp.Id, *publicIp.Ip, networkInterfaceId)
+			table.AddRow(
+				utils.PtrString(publicIp.Id),
+				utils.PtrString(publicIp.Ip),
+				networkInterfaceId,
+			)
 			table.AddSeparator()
 		}
 

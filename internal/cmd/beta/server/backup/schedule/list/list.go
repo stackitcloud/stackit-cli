@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -151,11 +152,26 @@ func outputResult(p *print.Printer, outputFormat string, schedules []serverbacku
 		for i := range schedules {
 			s := schedules[i]
 
+			backupName := ""
+			retentionPeriod := ""
 			ids := ""
-			if s.BackupProperties.VolumeIds != nil && len(*s.BackupProperties.VolumeIds) != 0 {
-				ids = strings.Join(*s.BackupProperties.VolumeIds, ",")
+			if s.BackupProperties != nil {
+				backupName = utils.PtrString(s.BackupProperties.Name)
+				retentionPeriod = utils.PtrString(s.BackupProperties.RetentionPeriod)
+
+				if s.BackupProperties.VolumeIds != nil && len(*s.BackupProperties.VolumeIds) != 0 {
+					ids = strings.Join(*s.BackupProperties.VolumeIds, ",")
+				}
 			}
-			table.AddRow(*s.Id, *s.Name, *s.Enabled, *s.Rrule, *s.BackupProperties.Name, *s.BackupProperties.RetentionPeriod, ids)
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Name),
+				utils.PtrString(s.Enabled),
+				utils.PtrString(s.Rrule),
+				backupName,
+				retentionPeriod,
+				ids,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

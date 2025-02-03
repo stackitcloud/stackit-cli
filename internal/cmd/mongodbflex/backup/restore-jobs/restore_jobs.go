@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -162,7 +163,13 @@ func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbfl
 		for i := range restoreJobs {
 			restoreJob := restoreJobs[i]
 
-			table.AddRow(*restoreJob.Id, *restoreJob.BackupID, *restoreJob.InstanceId, *restoreJob.Date, *restoreJob.Status)
+			table.AddRow(
+				utils.PtrString(restoreJob.Id),
+				utils.PtrString(restoreJob.BackupID),
+				utils.PtrString(restoreJob.InstanceId),
+				utils.PtrString(restoreJob.Date),
+				utils.PtrString(restoreJob.Status),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -156,7 +156,10 @@ func outputResult(p *print.Printer, model *inputModel, item *iaas.Keypair) error
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Created key pair %q.\nkey pair Fingerprint: %q\n", *item.Name, *item.Fingerprint)
+		p.Outputf("Created key pair %q.\nkey pair Fingerprint: %q\n",
+			utils.PtrString(item.Name),
+			utils.PtrString(item.Fingerprint),
+		)
 	}
 	return nil
 }

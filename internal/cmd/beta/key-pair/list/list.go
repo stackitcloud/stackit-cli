@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -162,7 +163,13 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 
-			table.AddRow(*keyPair.Name, strings.Join(labels, ", "), *keyPair.Fingerprint, *keyPair.CreatedAt, *keyPair.UpdatedAt)
+			table.AddRow(
+				utils.PtrString(keyPair.Name),
+				strings.Join(labels, ", "),
+				utils.PtrString(keyPair.Fingerprint),
+				utils.PtrString(keyPair.CreatedAt),
+				utils.PtrString(keyPair.UpdatedAt),
+			)
 		}
 
 		p.Outputln(table.Render())

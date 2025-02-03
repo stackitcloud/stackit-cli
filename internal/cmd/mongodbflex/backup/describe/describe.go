@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/inhies/go-bytesize"
@@ -15,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
+	mongoUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
@@ -60,7 +61,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := utils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -79,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
 
-			restoreJobState := utils.GetRestoreStatus(model.BackupId, restoreJobs)
+			restoreJobState := mongoUtils.GetRestoreStatus(model.BackupId, restoreJobs)
 			return outputResult(p, cmd, model.OutputFormat, restoreJobState, *resp.Item)
 		},
 	}
@@ -145,13 +146,17 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreSta
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *backup.Id)
+		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
-		table.AddRow("CREATED AT", *backup.StartTime)
+		table.AddRow("CREATED AT", utils.PtrString(backup.StartTime))
 		table.AddSeparator()
-		table.AddRow("EXPIRES AT", *backup.EndTime)
+		table.AddRow("EXPIRES AT", utils.PtrString(backup.EndTime))
 		table.AddSeparator()
-		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
+		backupSize := "n/a"
+		if backup.Size != nil {
+			backupSize = bytesize.New(float64(*backup.Size)).String()
+		}
+		table.AddRow("BACKUP SIZE", backupSize)
 		table.AddSeparator()
 		table.AddRow("RESTORE STATUS", restoreStatus)
 

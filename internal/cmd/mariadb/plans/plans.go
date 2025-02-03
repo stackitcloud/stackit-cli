@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -154,7 +155,13 @@ func outputResult(p *print.Printer, outputFormat string, plans []mariadb.Offerin
 			o := plans[i]
 			for j := range *o.Plans {
 				plan := (*o.Plans)[j]
-				table.AddRow(*o.Name, *o.Version, *plan.Id, *plan.Name, *plan.Description)
+				table.AddRow(
+					utils.PtrString(o.Name),
+					utils.PtrString(o.Version),
+					utils.PtrString(plan.Id),
+					utils.PtrString(plan.Name),
+					utils.PtrString(plan.Description),
+				)
 			}
 			table.AddSeparator()
 		}

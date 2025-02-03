@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -240,7 +241,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, securityGro
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s security group rule for security group %q in project %q.\nSecurity group rule ID: %s\n", operationState, securityGroupName, projectLabel, *securityGroupRule.Id)
+		p.Outputf("%s security group rule for security group %q in project %q.\nSecurity group rule ID: %s\n", operationState, securityGroupName, projectLabel, utils.PtrString(securityGroupRule.Id))
 		return nil
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -152,9 +153,9 @@ func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel 
 		return nil
 	default:
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", *user.Item.Username)
-		p.Outputf("New password: %s\n", *user.Item.Password)
-		p.Outputf("New URI: %s\n", *user.Item.Uri)
+		p.Outputf("Username: %s\n", utils.PtrString(user.Item.Username))
+		p.Outputf("New password: %s\n", utils.PtrString(user.Item.Password))
+		p.Outputf("New URI: %s\n", utils.PtrString(user.Item.Uri))
 		return nil
 	}
 }

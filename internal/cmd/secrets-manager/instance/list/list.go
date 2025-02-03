@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -153,7 +154,12 @@ func outputResult(p *print.Printer, outputFormat string, instances []secretsmana
 		table.SetHeader("ID", "NAME", "STATE", "SECRETS")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.Id, *instance.Name, *instance.State, *instance.SecretCount)
+			table.AddRow(
+				utils.PtrString(instance.Id),
+				utils.PtrString(instance.Name),
+				utils.PtrString(instance.State),
+				utils.PtrString(instance.SecretCount),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

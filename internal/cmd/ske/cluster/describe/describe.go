@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -121,11 +122,11 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		}
 
 		table := tables.NewTable()
-		table.AddRow("NAME", *cluster.Name)
+		table.AddRow("NAME", utils.PtrString(cluster.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *cluster.Status.Aggregated)
+		table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
 		table.AddSeparator()
-		table.AddRow("VERSION", *cluster.Kubernetes.Version)
+		table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
 		table.AddSeparator()
 		table.AddRow("ACL", acl)
 		err := table.Display(p)

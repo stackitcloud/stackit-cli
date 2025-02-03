@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"time"
 
 	"github.com/goccy/go-yaml"
@@ -161,9 +162,9 @@ func outputResult(p *print.Printer, model *inputModel, credentialsGroupLabel str
 			expireDate = *resp.Expires
 		}
 
-		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
-		p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
-		p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
+		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, utils.PtrString(resp.KeyId))
+		p.Outputf("Access Key ID: %s\n", utils.PtrString(resp.AccessKey))
+		p.Outputf("Secret Access Key: %s\n", utils.PtrString(resp.SecretAccessKey))
 		p.Outputf("Expire Date: %s\n", expireDate)
 
 		return nil

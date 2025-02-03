@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 
@@ -160,7 +161,11 @@ func outputResult(p *print.Printer, outputFormat string, configs []observability
 				}
 			}
 
-			table.AddRow(*c.JobName, targets, *c.ScrapeInterval)
+			table.AddRow(
+				utils.PtrString(c.JobName),
+				targets,
+				utils.PtrString(c.ScrapeInterval),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

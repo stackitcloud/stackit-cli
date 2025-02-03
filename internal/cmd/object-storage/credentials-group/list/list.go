@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -144,7 +145,11 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 		table.SetHeader("ID", "NAME", "URN")
 		for i := range credentialsGroups {
 			c := credentialsGroups[i]
-			table.AddRow(*c.CredentialsGroupId, *c.DisplayName, *c.Urn)
+			table.AddRow(
+				utils.PtrString(c.CredentialsGroupId),
+				utils.PtrString(c.DisplayName),
+				utils.PtrString(c.Urn),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -139,18 +140,20 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
-		table.AddRow("DAILY SNAPSHOT RETENTION (DAYS)", (*instance.Options)["dailySnapshotRetentionDays"])
-		table.AddSeparator()
-		table.AddRow("MONTHLY SNAPSHOT RETENTION (MONTHS)", (*instance.Options)["monthlySnapshotRetentionMonths"])
-		table.AddSeparator()
-		table.AddRow("POINT IN TIME WINDOW (HOURS)", (*instance.Options)["pointInTimeWindowHours"])
-		table.AddSeparator()
-		table.AddRow("SNAPSHOT RETENTION (DAYS)", (*instance.Options)["snapshotRetentionDays"])
-		table.AddSeparator()
-		table.AddRow("WEEKLY SNAPSHOT RETENTION (WEEKS)", (*instance.Options)["weeklySnapshotRetentionWeeks"])
-		table.AddSeparator()
+		if instance.Options != nil {
+			table.AddRow("DAILY SNAPSHOT RETENTION (DAYS)", (*instance.Options)["dailySnapshotRetentionDays"])
+			table.AddSeparator()
+			table.AddRow("MONTHLY SNAPSHOT RETENTION (MONTHS)", (*instance.Options)["monthlySnapshotRetentionMonths"])
+			table.AddSeparator()
+			table.AddRow("POINT IN TIME WINDOW (HOURS)", (*instance.Options)["pointInTimeWindowHours"])
+			table.AddSeparator()
+			table.AddRow("SNAPSHOT RETENTION (DAYS)", (*instance.Options)["snapshotRetentionDays"])
+			table.AddSeparator()
+			table.AddRow("WEEKLY SNAPSHOT RETENTION (WEEKS)", (*instance.Options)["weeklySnapshotRetentionWeeks"])
+			table.AddSeparator()
+		}
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

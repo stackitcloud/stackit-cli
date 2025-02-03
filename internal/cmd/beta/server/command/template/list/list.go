@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -143,7 +144,17 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
 		for i := range templates {
 			s := templates[i]
-			table.AddRow(*s.Name, strings.Join(*s.OsType, ","), *s.Title)
+
+			var osType string
+			if s.OsType != nil && len(*s.OsType) > 0 {
+				osType = strings.Join(*s.OsType, ",")
+			}
+
+			table.AddRow(
+				utils.PtrString(s.Name),
+				osType,
+				utils.PtrString(s.Title),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

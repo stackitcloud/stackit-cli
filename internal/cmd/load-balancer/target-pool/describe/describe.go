@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strconv"
 	"strings"
 
@@ -15,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
+	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
@@ -67,12 +68,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
 
-			targetPool := utils.FindLoadBalancerTargetPoolByName(*resp.TargetPools, model.TargetPoolName)
+			targetPool := lbUtils.FindLoadBalancerTargetPoolByName(*resp.TargetPools, model.TargetPoolName)
 			if targetPool == nil {
 				return fmt.Errorf("target pool not found")
 			}
 
-			listener := utils.FindLoadBalancerListenerByTargetPool(*resp.Listeners, *targetPool.Name)
+			listener := lbUtils.FindLoadBalancerListenerByTargetPool(*resp.Listeners, *targetPool.Name)
 
 			return outputResult(p, model.OutputFormat, *targetPool, listener)
 		},
@@ -183,7 +184,11 @@ func outputResultAsTable(p *print.Printer, targetPool loadbalancer.TargetPool, l
 
 	listenerStr := "-"
 	if listener != nil {
-		listenerStr = fmt.Sprintf("%s (Port:%d, Protocol: %s)", *listener.Name, *listener.Port, *listener.Protocol)
+		listenerStr = fmt.Sprintf("%s (Port:%s, Protocol: %s)",
+			utils.PtrString(listener.Name),
+			utils.PtrString(listener.Port),
+			utils.PtrString(listener.Protocol),
+		)
 	}
 
 	table := tables.NewTable()

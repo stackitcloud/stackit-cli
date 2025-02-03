@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -185,7 +186,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverupdate.Update
 
 		return nil
 	default:
-		p.Info("Updated server os-update schedule %d\n", *resp.Id)
+		p.Info("Updated server os-update schedule %s\n", utils.PtrString(resp.Id))
 		return nil
 	}
 }

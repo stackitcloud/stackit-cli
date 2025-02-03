@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -156,7 +157,12 @@ func outputRolesResult(p *print.Printer, outputFormat string, roles []authorizat
 			r := roles[i]
 			for j := range *r.Permissions {
 				p := (*r.Permissions)[j]
-				table.AddRow(*r.Name, *r.Description, *p.Name, *p.Description)
+				table.AddRow(
+					utils.PtrString(r.Name),
+					utils.PtrString(r.Description),
+					utils.PtrString(p.Name),
+					utils.PtrString(p.Description),
+				)
 			}
 			table.AddSeparator()
 		}

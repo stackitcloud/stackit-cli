@@ -231,7 +231,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *resourcemanager.Pro
 
 		return nil
 	default:
-		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", *model.ParentId, *resp.ProjectId)
+		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", utils.PtrString(model.ParentId), utils.PtrString(resp.ProjectId))
 		return nil
 	}
 }

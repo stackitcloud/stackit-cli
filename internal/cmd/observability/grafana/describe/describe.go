@@ -149,13 +149,13 @@ func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *obse
 		}
 
 		table := tables.NewTable()
-		table.AddRow("GRAFANA DASHBOARD", *instance.Instance.GrafanaUrl)
+		table.AddRow("GRAFANA DASHBOARD", utils.PtrString(instance.Instance.GrafanaUrl))
 		table.AddSeparator()
-		table.AddRow("PUBLIC READ ACCESS", *grafanaConfigs.PublicReadAccess)
+		table.AddRow("PUBLIC READ ACCESS", utils.PtrString(grafanaConfigs.PublicReadAccess))
 		table.AddSeparator()
-		table.AddRow("SINGLE SIGN-ON", *grafanaConfigs.UseStackitSso)
+		table.AddRow("SINGLE SIGN-ON", utils.PtrString(grafanaConfigs.UseStackitSso))
 		table.AddSeparator()
-		table.AddRow("INITIAL ADMIN USER (DEFAULT)", *instance.Instance.GrafanaAdminUser)
+		table.AddRow("INITIAL ADMIN USER (DEFAULT)", utils.PtrString(instance.Instance.GrafanaAdminUser))
 		table.AddSeparator()
 		table.AddRow("INITIAL ADMIN PASSWORD (DEFAULT)", initialAdminPassword)
 		err := table.Display(p)

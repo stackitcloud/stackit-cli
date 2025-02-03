@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -157,7 +158,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []redis.Cre
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(*c.Id)
+			table.AddRow(utils.PtrString(c.Id))
 		}
 		err := table.Display(p)
 		if err != nil {

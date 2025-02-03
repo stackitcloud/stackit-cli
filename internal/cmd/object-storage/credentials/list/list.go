@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
@@ -165,7 +166,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []objectsto
 			if c.Expires != nil {
 				expiresAt = *c.Expires
 			}
-			table.AddRow(*c.KeyId, *c.DisplayName, expiresAt)
+			table.AddRow(utils.PtrString(c.KeyId), utils.PtrString(c.DisplayName), expiresAt)
 		}
 		err := table.Display(p)
 		if err != nil {

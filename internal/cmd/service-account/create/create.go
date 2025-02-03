@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
@@ -137,7 +138,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, serv
 
 		return nil
 	default:
-		p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, *serviceAccount.Email)
+		p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, utils.PtrString(serviceAccount.Email))
 		return nil
 	}
 }

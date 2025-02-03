@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"time"
 
@@ -133,13 +134,17 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *backup.Id)
+		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
-		table.AddRow("CREATED AT", *backup.StartTime)
+		table.AddRow("CREATED AT", utils.PtrString(backup.StartTime))
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", backupExpireDate)
 		table.AddSeparator()
-		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
+		backupSize := "n/a"
+		if backup.Size != nil {
+			backupSize = bytesize.New(float64(*backup.Size)).String()
+		}
+		table.AddRow("BACKUP SIZE", backupSize)
 
 		err := table.Display(p)
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -130,9 +131,9 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 	default:
 		database := database.Database
 		table := tables.NewTable()
-		table.AddRow("ID", *database.Id)
+		table.AddRow("ID", utils.PtrString(database.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *database.Name)
+		table.AddRow("NAME", utils.PtrString(database.Name))
 		table.AddSeparator()
 		if database.Options != nil {
 			if database.Options.CompatibilityLevel != nil {

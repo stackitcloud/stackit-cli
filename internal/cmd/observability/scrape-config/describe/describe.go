@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -147,15 +148,15 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 		}
 
 		table := tables.NewTable()
-		table.AddRow("NAME", *config.JobName)
+		table.AddRow("NAME", utils.PtrString(config.JobName))
 		table.AddSeparator()
-		table.AddRow("METRICS PATH", *config.MetricsPath)
+		table.AddRow("METRICS PATH", utils.PtrString(config.MetricsPath))
 		table.AddSeparator()
-		table.AddRow("SCHEME", *config.Scheme)
+		table.AddRow("SCHEME", utils.PtrString(config.Scheme))
 		table.AddSeparator()
-		table.AddRow("SCRAPE INTERVAL", *config.ScrapeInterval)
+		table.AddRow("SCRAPE INTERVAL", utils.PtrString(config.ScrapeInterval))
 		table.AddSeparator()
-		table.AddRow("SCRAPE TIMEOUT", *config.ScrapeTimeout)
+		table.AddRow("SCRAPE TIMEOUT", utils.PtrString(config.ScrapeTimeout))
 		table.AddSeparator()
 		table.AddRow("SAML2", saml2Enabled)
 		table.AddSeparator()
@@ -164,9 +165,9 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 		} else {
 			table.AddRow("AUTHENTICATION", "Basic Auth")
 			table.AddSeparator()
-			table.AddRow("USERNAME", *config.BasicAuth.Username)
+			table.AddRow("USERNAME", utils.PtrString(config.BasicAuth.Username))
 			table.AddSeparator()
-			table.AddRow("PASSWORD", *config.BasicAuth.Password)
+			table.AddRow("PASSWORD", utils.PtrString(config.BasicAuth.Password))
 		}
 		table.AddSeparator()
 		for i, target := range targets {

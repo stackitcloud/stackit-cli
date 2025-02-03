@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 
@@ -150,7 +151,7 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
 			s := volumes[i]
-			table.AddRow(*s.ServerId, serverLabel, *s.VolumeId, volumeNames[i])
+			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeNames[i])
 		}
 		err := table.Display(p)
 		if err != nil {

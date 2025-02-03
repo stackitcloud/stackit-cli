@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -155,7 +156,11 @@ func outputResult(p *print.Printer, outputFormat string, instances []postgresfle
 		table.SetHeader("ID", "NAME", "STATUS")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.Id, *instance.Name, caser.String(*instance.Status))
+			table.AddRow(
+				utils.PtrString(instance.Id),
+				utils.PtrString(instance.Name),
+				caser.String(utils.PtrString(instance.Status)),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

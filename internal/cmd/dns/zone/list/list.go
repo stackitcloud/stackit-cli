@@ -17,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
@@ -260,7 +261,13 @@ func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error
 		table.SetHeader("ID", "NAME", "STATE", "TYPE", "DNS NAME", "RECORD COUNT")
 		for i := range zones {
 			z := zones[i]
-			table.AddRow(*z.Id, *z.Name, *z.State, *z.Type, *z.DnsName, *z.RecordCount)
+			table.AddRow(utils.PtrString(z.Id),
+				utils.PtrString(z.Name),
+				utils.PtrString(z.State),
+				utils.PtrString(z.Type),
+				utils.PtrString(z.DnsName),
+				utils.PtrString(z.RecordCount),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

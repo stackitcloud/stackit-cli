@@ -140,11 +140,11 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", *network.NetworkId)
+		table.AddRow("ID", utils.PtrString(network.NetworkId))
 		table.AddSeparator()
-		table.AddRow("NAME", *network.Name)
+		table.AddRow("NAME", utils.PtrString(network.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *network.State)
+		table.AddRow("STATE", utils.PtrString(network.State))
 		table.AddSeparator()
 
 		if network.PublicIp != nil {

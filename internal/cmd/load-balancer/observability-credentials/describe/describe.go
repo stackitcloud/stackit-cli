@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
@@ -113,12 +114,17 @@ func outputResult(p *print.Printer, outputFormat string, credentials *loadbalanc
 
 		return nil
 	default:
+		if credentials == nil || credentials.Credential == nil {
+			p.Info("No credentials found")
+			return nil
+		}
+
 		table := tables.NewTable()
-		table.AddRow("REFERENCE", *credentials.Credential.CredentialsRef)
+		table.AddRow("REFERENCE", utils.PtrString(credentials.Credential.CredentialsRef))
 		table.AddSeparator()
-		table.AddRow("DISPLAY NAME", *credentials.Credential.DisplayName)
+		table.AddRow("DISPLAY NAME", utils.PtrString(credentials.Credential.DisplayName))
 		table.AddSeparator()
-		table.AddRow("USERNAME", *credentials.Credential.Username)
+		table.AddRow("USERNAME", utils.PtrString(credentials.Credential.Username))
 		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {

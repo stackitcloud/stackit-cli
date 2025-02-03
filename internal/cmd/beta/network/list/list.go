@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -169,7 +170,14 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 				prefixes = strings.Join(*network.Prefixes, ", ")
 			}
 
-			table.AddRow(*network.NetworkId, *network.Name, *network.State, publicIp, prefixes, routed)
+			table.AddRow(
+				utils.PtrString(network.NetworkId),
+				utils.PtrString(network.Name),
+				utils.PtrString(network.State),
+				publicIp,
+				prefixes,
+				routed,
+			)
 			table.AddSeparator()
 		}
 

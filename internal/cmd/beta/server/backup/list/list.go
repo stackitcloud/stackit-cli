@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 
@@ -154,7 +155,16 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 			if s.LastRestoredAt != nil {
 				lastRestored = *s.LastRestoredAt
 			}
-			table.AddRow(*s.Id, *s.Name, *s.Size, *s.Status, *s.CreatedAt, *s.ExpireAt, lastRestored, len(*s.VolumeBackups))
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Name),
+				utils.PtrString(s.Size),
+				utils.PtrString(s.Status),
+				utils.PtrString(s.CreatedAt),
+				utils.PtrString(s.ExpireAt),
+				lastRestored,
+				len(*s.VolumeBackups),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

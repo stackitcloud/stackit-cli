@@ -160,11 +160,11 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", *networkArea.AreaId)
+		table.AddRow("ID", utils.PtrString(networkArea.AreaId))
 		table.AddSeparator()
-		table.AddRow("NAME", *networkArea.Name)
+		table.AddRow("NAME", utils.PtrString(networkArea.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *networkArea.State)
+		table.AddRow("STATE", utils.PtrString(networkArea.State))
 		table.AddSeparator()
 		if len(networkRanges) > 0 {
 			table.AddRow("NETWORK RANGES", strings.Join(networkRanges, ","))
@@ -174,31 +174,33 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 			table.AddRow(fmt.Sprintf("STATIC ROUTE %d", i+1), route)
 			table.AddSeparator()
 		}
-		if networkArea.Ipv4.TransferNetwork != nil {
-			table.AddRow("TRANSFER RANGE", *networkArea.Ipv4.TransferNetwork)
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4.DefaultNameservers != nil {
-			table.AddRow("DNS NAME SERVERS", strings.Join(*networkArea.Ipv4.DefaultNameservers, ","))
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4.DefaultPrefixLen != nil {
-			table.AddRow("DEFAULT PREFIX LENGTH", *networkArea.Ipv4.DefaultPrefixLen)
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4.MaxPrefixLen != nil {
-			table.AddRow("MAX PREFIX LENGTH", *networkArea.Ipv4.MaxPrefixLen)
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4.MinPrefixLen != nil {
-			table.AddRow("MIN PREFIX LENGTH", *networkArea.Ipv4.MinPrefixLen)
-			table.AddSeparator()
+		if networkArea.Ipv4 != nil {
+			if networkArea.Ipv4.TransferNetwork != nil {
+				table.AddRow("TRANSFER RANGE", *networkArea.Ipv4.TransferNetwork)
+				table.AddSeparator()
+			}
+			if networkArea.Ipv4.DefaultNameservers != nil && len(*networkArea.Ipv4.DefaultNameservers) > 0 {
+				table.AddRow("DNS NAME SERVERS", strings.Join(*networkArea.Ipv4.DefaultNameservers, ","))
+				table.AddSeparator()
+			}
+			if networkArea.Ipv4.DefaultPrefixLen != nil {
+				table.AddRow("DEFAULT PREFIX LENGTH", *networkArea.Ipv4.DefaultPrefixLen)
+				table.AddSeparator()
+			}
+			if networkArea.Ipv4.MaxPrefixLen != nil {
+				table.AddRow("MAX PREFIX LENGTH", *networkArea.Ipv4.MaxPrefixLen)
+				table.AddSeparator()
+			}
+			if networkArea.Ipv4.MinPrefixLen != nil {
+				table.AddRow("MIN PREFIX LENGTH", *networkArea.Ipv4.MinPrefixLen)
+				table.AddSeparator()
+			}
 		}
 		if len(attachedProjects) > 0 {
 			table.AddRow("ATTACHED PROJECTS IDS", strings.Join(attachedProjects, "\n"))
 			table.AddSeparator()
 		} else {
-			table.AddRow("# ATTACHED PROJECTS", *networkArea.ProjectCount)
+			table.AddRow("# ATTACHED PROJECTS", utils.PtrString(networkArea.ProjectCount))
 			table.AddSeparator()
 		}
 

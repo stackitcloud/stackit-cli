@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -274,7 +275,7 @@ func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, re
 	default:
 		var expiration string
 		if respKubeconfig != nil {
-			expiration = fmt.Sprintf(", with expiration date %v (UTC)", *respKubeconfig.ExpirationTimestamp)
+			expiration = fmt.Sprintf(", with expiration date %v (UTC)", utils.ConvertTimePToDateTimeString(respKubeconfig.ExpirationTimestamp))
 		}
 		p.Outputf("Updated kubeconfig file for cluster %s in %q%s\n", model.ClusterName, kubeconfigPath, expiration)
 

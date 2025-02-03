@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 
@@ -149,7 +150,13 @@ func outputResult(p *print.Printer, outputFormat string, schedules []serverupdat
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "MAINTENANCE WINDOW")
 		for i := range schedules {
 			s := schedules[i]
-			table.AddRow(*s.Id, *s.Name, *s.Enabled, *s.Rrule, *s.MaintenanceWindow)
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Name),
+				utils.PtrString(s.Enabled),
+				utils.PtrString(s.Rrule),
+				utils.PtrString(s.MaintenanceWindow),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

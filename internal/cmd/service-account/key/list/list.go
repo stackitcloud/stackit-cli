@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -166,7 +167,12 @@ func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.S
 			if k.ValidUntil != nil {
 				validUntil = k.ValidUntil.String()
 			}
-			table.AddRow(*k.Id, *k.Active, *k.CreatedAt, validUntil)
+			table.AddRow(
+				utils.PtrString(k.Id),
+				utils.PtrString(k.Active),
+				utils.PtrString(k.CreatedAt),
+				validUntil,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

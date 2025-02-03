@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -163,13 +164,13 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		return nil
 	default:
 		user := resp.Item
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-		p.Outputf("Username: %s\n", *user.Username)
-		p.Outputf("Password: %s\n", *user.Password)
-		p.Outputf("Roles: %v\n", *user.Roles)
-		p.Outputf("Host: %s\n", *user.Host)
-		p.Outputf("Port: %d\n", *user.Port)
-		p.Outputf("URI: %s\n", *user.Uri)
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
+		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
+		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
+		p.Outputf("Roles: %v\n", utils.PtrString(user.Roles))
+		p.Outputf("Host: %s\n", utils.PtrString(user.Host))
+		p.Outputf("Port: %s\n", utils.PtrString(user.Port))
+		p.Outputf("URI: %s\n", utils.PtrString(user.Uri))
 
 		return nil
 	}

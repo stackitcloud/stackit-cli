@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
@@ -202,7 +203,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.Backup
 
 		return nil
 	default:
-		p.Info("Updated server backup schedule %d\n", *resp.Id)
+		p.Info("Updated server backup schedule %s\n", utils.PtrString(resp.Id))
 		return nil
 	}
 }

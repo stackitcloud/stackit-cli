@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"time"
 
@@ -163,7 +164,16 @@ func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.
 			}
 			backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
-			table.AddRow(*backup.Id, *backup.StartTime, backupExpireDate, bytesize.New(float64(*backup.Size)))
+			backupSize := "n/a"
+			if backup.Size != nil {
+				backupSize = bytesize.New(float64(*backup.Size)).String()
+			}
+			table.AddRow(
+				utils.PtrString(backup.Id),
+				utils.PtrString(backup.StartTime),
+				backupExpireDate,
+				backupSize,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

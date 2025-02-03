@@ -156,11 +156,11 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 
 		return nil
 	default:
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *resp.Id)
-		p.Outputf("Username: %s\n", *resp.Username)
-		p.Outputf("Password: %s\n", *resp.Password)
-		p.Outputf("Description: %s\n", *resp.Description)
-		p.Outputf("Write Access: %t\n", *resp.Write)
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
+		p.Outputf("Username: %s\n", utils.PtrString(resp.Username))
+		p.Outputf("Password: %s\n", utils.PtrString(resp.Password))
+		p.Outputf("Description: %s\n", utils.PtrString(resp.Description))
+		p.Outputf("Write Access: %s\n", utils.PtrString(resp.Write))
 
 		return nil
 	}

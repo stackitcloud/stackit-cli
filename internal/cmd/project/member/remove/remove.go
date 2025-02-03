@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			p.Info("Removed the role %q from %s on project %q\n", *model.Role, model.Subject, projectLabel)
+			p.Info("Removed the role %q from %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
 			return nil
 		},
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 
@@ -149,7 +150,14 @@ func outputResult(p *print.Printer, outputFormat string, commands []runcommand.C
 		table.SetHeader("ID", "TEMPLATE NAME", "TEMPLATE TITLE", "STATUS", "STARTED_AT", "FINISHED_AT")
 		for i := range commands {
 			s := commands[i]
-			table.AddRow(*s.Id, *s.CommandTemplateName, *s.CommandTemplateTitle, *s.Status, *s.StartedAt, *s.FinishedAt)
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.CommandTemplateName),
+				utils.PtrString(s.CommandTemplateTitle),
+				utils.PtrString(s.Status),
+				utils.PtrString(s.StartedAt),
+				utils.PtrString(s.FinishedAt),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

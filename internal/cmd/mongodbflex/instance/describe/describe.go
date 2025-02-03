@@ -140,17 +140,23 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
-		table.AddSeparator()
+		if instance.HasFlavor() && instance.Flavor.HasDescription() {
+			table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
+			table.AddSeparator()
+		}
 		table.AddRow("TYPE", instanceType)
 		table.AddSeparator()
-		table.AddRow("REPLICAS", *instance.Replicas)
-		table.AddSeparator()
-		table.AddRow("CPU", *instance.Flavor.Cpu)
-		table.AddSeparator()
-		table.AddRow("RAM (GB)", *instance.Flavor.Memory)
-		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		if instance.HasReplicas() {
+			table.AddRow("REPLICAS", *instance.Replicas)
+			table.AddSeparator()
+		}
+		if instance.HasFlavor() {
+			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
+			table.AddSeparator()
+			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
+			table.AddSeparator()
+		}
+		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
 		err = table.Display(p)
 		if err != nil {

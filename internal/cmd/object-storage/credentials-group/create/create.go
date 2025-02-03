@@ -131,8 +131,11 @@ func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.Creat
 
 		return nil
 	default:
-		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n", *resp.CredentialsGroup.DisplayName, *resp.CredentialsGroup.CredentialsGroupId)
-		p.Outputf("URN: %s\n", *resp.CredentialsGroup.Urn)
+		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n",
+			utils.PtrString(resp.CredentialsGroup.DisplayName),
+			utils.PtrString(resp.CredentialsGroup.CredentialsGroupId),
+		)
+		p.Outputf("URN: %s\n", utils.PtrString(resp.CredentialsGroup.Urn))
 		return nil
 	}
 }

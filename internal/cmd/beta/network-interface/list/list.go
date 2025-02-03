@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -168,11 +169,13 @@ func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error 
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "STATUS", "TYPE")
 
 		for _, nic := range nics {
-			name := ""
-			if nic.Name != nil {
-				name = *nic.Name
-			}
-			table.AddRow(*nic.Id, name, *nic.NicSecurity, *nic.Status, *nic.Type)
+			table.AddRow(
+				utils.PtrString(nic.Id),
+				utils.PtrString(nic.Name),
+				utils.PtrString(nic.NicSecurity),
+				utils.PtrString(nic.Status),
+				utils.PtrString(nic.Type),
+			)
 			table.AddSeparator()
 		}
 

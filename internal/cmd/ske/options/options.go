@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 	"time"
 
@@ -241,7 +242,11 @@ func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, erro
 		if v.ExpirationDate != nil {
 			expirationDate = v.ExpirationDate.Format(time.RFC3339)
 		}
-		table.AddRow(*v.Version, *v.State, expirationDate, string(featureGate))
+		table.AddRow(
+			utils.PtrString(v.Version),
+			utils.PtrString(v.State),
+			expirationDate,
+			string(featureGate))
 	}
 	return table, nil
 }
@@ -268,7 +273,13 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 			if version.ExpirationDate != nil {
 				expirationDate = version.ExpirationDate.Format(time.RFC3339)
 			}
-			table.AddRow(*image.Name, *version.Version, *version.State, expirationDate, criNamesString)
+			table.AddRow(
+				utils.PtrString(image.Name),
+				utils.PtrString(version.Version),
+				utils.PtrString(version.State),
+				expirationDate,
+				criNamesString,
+			)
 		}
 	}
 	table.EnableAutoMergeOnColumns(1)
@@ -283,7 +294,11 @@ func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 	table.SetHeader("TYPE", "CPU", "MEMORY")
 	for i := range types {
 		t := types[i]
-		table.AddRow(*t.Name, *t.Cpu, *t.Memory)
+		table.AddRow(
+			utils.PtrString(t.Name),
+			utils.PtrString(t.Cpu),
+			utils.PtrString(t.Memory),
+		)
 	}
 	return table
 }
@@ -296,7 +311,7 @@ func buildVolumeTypesTable(resp *ske.ProviderOptions) tables.Table {
 	table.SetHeader("TYPE")
 	for i := range types {
 		z := types[i]
-		table.AddRow(*z.Name)
+		table.AddRow(utils.PtrString(z.Name))
 	}
 	return table
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
 
@@ -108,7 +109,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s load balancer with name %q \n", operationState, *model.Payload.Name)
+			p.Outputf("%s load balancer with name %q \n", operationState, utils.PtrString(model.Payload.Name))
 			return nil
 		},
 	}

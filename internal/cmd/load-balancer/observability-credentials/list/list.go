@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -14,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
+	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
@@ -92,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				credentials, err = utils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
+				credentials, err = lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
 				if err != nil {
 					return fmt.Errorf("filter credentials: %w", err)
 				}
@@ -189,7 +190,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []loadbalan
 		table.SetHeader("REFERENCE", "DISPLAY NAME", "USERNAME")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(*c.CredentialsRef, *c.DisplayName, *c.Username)
+			table.AddRow(utils.PtrString(c.CredentialsRef), utils.PtrString(c.DisplayName), utils.PtrString(c.Username))
 		}
 		err := table.Display(p)
 		if err != nil {
@@ -207,12 +208,12 @@ func getFilterOp(used, unused bool) (int, error) {
 	}
 
 	if !used && !unused {
-		return utils.OP_FILTER_NOP, nil
+		return lbUtils.OP_FILTER_NOP, nil
 	}
 
 	if used {
-		return utils.OP_FILTER_USED, nil
+		return lbUtils.OP_FILTER_USED, nil
 	}
 
-	return utils.OP_FILTER_UNUSED, nil
+	return lbUtils.OP_FILTER_UNUSED, nil
 }

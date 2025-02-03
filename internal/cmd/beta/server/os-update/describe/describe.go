@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -128,28 +129,25 @@ func outputResult(p *print.Printer, outputFormat string, update *serverupdate.Up
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *update.Id)
+		table.AddRow("ID", utils.PtrString(update.Id))
 		table.AddSeparator()
-		table.AddRow("STATUS", *update.Status)
+		table.AddRow("STATUS", utils.PtrString(update.Status))
 		table.AddSeparator()
+		installedUpdates := "n/a"
 		if update.InstalledUpdates != nil {
-			table.AddRow("INSTALLED UPDATES", *update.InstalledUpdates)
-		} else {
-			table.AddRow("INSTALLED UPDATES", "...")
+			installedUpdates = utils.PtrString(update.InstalledUpdates)
 		}
+		table.AddRow("INSTALLED UPDATES", installedUpdates)
 		table.AddSeparator()
+		failedUpdates := "n/a"
 		if update.FailedUpdates != nil {
-			table.AddRow("FAILED UPDATES", *update.FailedUpdates)
-		} else {
-			table.AddRow("FAILED UPDATES", "...")
+			failedUpdates = utils.PtrString(update.FailedUpdates)
 		}
-		table.AddRow("START DATE", *update.StartDate)
+		table.AddRow("FAILED UPDATES", failedUpdates)
+
+		table.AddRow("START DATE", utils.PtrString(update.StartDate))
 		table.AddSeparator()
-		if update.EndDate != nil {
-			table.AddRow("END DATE", *update.EndDate)
-		} else {
-			table.AddRow("END DATE", "...")
-		}
+		table.AddRow("END DATE", utils.PtrString(update.EndDate))
 		table.AddSeparator()
 
 		err := table.Display(p)

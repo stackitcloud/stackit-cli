@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -145,7 +146,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			return nil
 		}
 		table := tables.NewTable()
-		table.AddRow("KEY PAIR NAME", *keyPair.Name)
+		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
 
 		if *keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
@@ -157,17 +158,17 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			table.AddSeparator()
 		}
 
-		table.AddRow("FINGERPRINT", *keyPair.Fingerprint)
+		table.AddRow("FINGERPRINT", utils.PtrString(keyPair.Fingerprint))
 		table.AddSeparator()
 
 		truncatedPublicKey := (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
 		table.AddRow("PUBLIC KEY", truncatedPublicKey)
 		table.AddSeparator()
 
-		table.AddRow("CREATED AT", *keyPair.CreatedAt)
+		table.AddRow("CREATED AT", utils.PtrString(keyPair.CreatedAt))
 		table.AddSeparator()
 
-		table.AddRow("UPDATED AT", *keyPair.UpdatedAt)
+		table.AddRow("UPDATED AT", utils.PtrString(keyPair.UpdatedAt))
 		table.AddSeparator()
 
 		p.Outputln(table.Render())

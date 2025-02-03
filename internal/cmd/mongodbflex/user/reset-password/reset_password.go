@@ -153,9 +153,9 @@ func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel 
 		return nil
 	default:
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", *user.Username)
-		p.Outputf("New password: %s\n", *user.Password)
-		p.Outputf("New URI: %s\n", *user.Uri)
+		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
+		p.Outputf("New password: %s\n", utils.PtrString(user.Password))
+		p.Outputf("New URI: %s\n", utils.PtrString(user.Uri))
 		return nil
 	}
 }

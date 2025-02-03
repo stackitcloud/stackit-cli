@@ -138,15 +138,15 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *project.ProjectId)
+		table.AddRow("ID", utils.PtrString(project.ProjectId))
 		table.AddSeparator()
-		table.AddRow("NAME", *project.Name)
+		table.AddRow("NAME", utils.PtrString(project.Name))
 		table.AddSeparator()
-		table.AddRow("CREATION", *project.CreationTime)
+		table.AddRow("CREATION", utils.PtrString(project.CreationTime))
 		table.AddSeparator()
-		table.AddRow("STATE", *project.LifecycleState)
+		table.AddRow("STATE", utils.PtrString(project.LifecycleState))
 		table.AddSeparator()
-		table.AddRow("PARENT ID", *project.Parent.Id)
+		table.AddRow("PARENT ID", utils.PtrString(project.Parent.Id))
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

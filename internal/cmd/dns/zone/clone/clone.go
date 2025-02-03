@@ -182,7 +182,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered cloning of"
 		}
-		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, *resp.Zone.Id)
+		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Zone.Id))
 		return nil
 	}
 }

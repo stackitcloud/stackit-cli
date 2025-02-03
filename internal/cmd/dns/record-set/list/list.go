@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"math"
 	"strings"
 
@@ -276,7 +277,14 @@ func outputResult(p *print.Printer, outputFormat string, recordSets []dns.Record
 				recordData = append(recordData, *r.Content)
 			}
 			recordDataJoin := strings.Join(recordData, ", ")
-			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type, recordDataJoin)
+			table.AddRow(
+				utils.PtrString(rs.Id),
+				utils.PtrString(rs.Name),
+				utils.PtrString(rs.State),
+				utils.PtrString(rs.Ttl),
+				utils.PtrString(rs.Type),
+				recordDataJoin,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

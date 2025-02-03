@@ -134,14 +134,15 @@ func outputResult(p *print.Printer, outputFormat string, credentials *redis.Cred
 		table.AddRow("ID", *credentials.Id)
 		table.AddSeparator()
 		// The username field cannot be set by the user so we only display it if it's not returned empty
-		username := *credentials.Raw.Credentials.Username
-		if username != "" {
-			table.AddRow("USERNAME", *credentials.Raw.Credentials.Username)
+		if credentials.HasRaw() && credentials.Raw.Credentials != nil {
+			if username := credentials.Raw.Credentials.Username; username != nil && *username != "" {
+				table.AddRow("USERNAME", *username)
+				table.AddSeparator()
+			}
+			table.AddRow("PASSWORD", utils.PtrString(credentials.Raw.Credentials.Password))
 			table.AddSeparator()
+			table.AddRow("URI", utils.PtrString(credentials.Raw.Credentials.Uri))
 		}
-		table.AddRow("PASSWORD", *credentials.Raw.Credentials.Password)
-		table.AddSeparator()
-		table.AddRow("URI", *credentials.Raw.Credentials.Uri)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

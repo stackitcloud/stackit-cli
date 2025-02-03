@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -162,7 +163,7 @@ func outputResult(p *print.Printer, outputFormat, serverId string, serverNics []
 
 		for i := range serverNics {
 			nic := serverNics[i]
-			table.AddRow(*nic.Id, serverId)
+			table.AddRow(utils.PtrString(nic.Id), serverId)
 		}
 		table.EnableAutoMergeOnColumns(2)
 

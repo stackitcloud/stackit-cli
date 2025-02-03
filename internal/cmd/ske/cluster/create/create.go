@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -220,7 +221,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, *resp.Name)
+		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, utils.PtrString(resp.Name))
 		return nil
 	}
 }

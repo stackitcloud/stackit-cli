@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -162,7 +163,11 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) er
 		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
 
 		for _, route := range routes {
-			table.AddRow(*route.RouteId, *route.Nexthop, *route.Prefix)
+			table.AddRow(
+				utils.PtrString(route.RouteId),
+				utils.PtrString(route.Nexthop),
+				utils.PtrString(route.Prefix),
+			)
 		}
 
 		p.Outputln(table.Render())

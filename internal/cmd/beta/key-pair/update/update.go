@@ -137,7 +137,7 @@ func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) er
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Updated labels of key pair %q\n", *model.KeyPairName)
+		p.Outputf("Updated labels of key pair %q\n", utils.PtrString(model.KeyPairName))
 	}
 	return nil
 }

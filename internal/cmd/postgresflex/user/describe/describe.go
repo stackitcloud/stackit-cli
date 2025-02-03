@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -136,15 +137,15 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *user.Id)
+		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
-		table.AddRow("USERNAME", *user.Username)
+		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
-		table.AddRow("ROLES", *user.Roles)
+		table.AddRow("ROLES", utils.PtrString(user.Roles))
 		table.AddSeparator()
-		table.AddRow("HOST", *user.Host)
+		table.AddRow("HOST", utils.PtrString(user.Host))
 		table.AddSeparator()
-		table.AddRow("PORT", *user.Port)
+		table.AddRow("PORT", utils.PtrString(user.Port))
 
 		err := table.Display(p)
 		if err != nil {

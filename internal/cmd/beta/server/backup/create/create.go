@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
@@ -158,7 +159,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.Backup
 
 		return nil
 	default:
-		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", model.ServerId, *resp.Id)
+		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
 		return nil
 	}
 }

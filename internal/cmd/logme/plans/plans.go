@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -154,7 +155,13 @@ func outputResult(p *print.Printer, outputFormat string, plans []logme.Offering)
 			o := plans[i]
 			for j := range *o.Plans {
 				p := (*o.Plans)[j]
-				table.AddRow(*o.Name, *o.Version, *p.Id, *p.Name, *p.Description)
+				table.AddRow(
+					utils.PtrString(o.Name),
+					utils.PtrString(o.Version),
+					utils.PtrString(p.Id),
+					utils.PtrString(p.Name),
+					utils.PtrString(p.Description),
+				)
 			}
 			table.AddSeparator()
 		}

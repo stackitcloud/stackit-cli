@@ -245,7 +245,7 @@ func outputResult(p *print.Printer, model *inputModel, nic *iaas.NIC) error {
 
 		return nil
 	default:
-		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", model.ProjectId, *nic.Id)
+		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", model.ProjectId, utils.PtrString(nic.Id))
 		return nil
 	}
 }

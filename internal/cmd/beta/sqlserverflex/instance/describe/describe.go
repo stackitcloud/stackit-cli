@@ -117,29 +117,32 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 
 		return nil
 	default:
-		aclsArray := *instance.Acl.Items
-		acls := strings.Join(aclsArray, ",")
+		var acls string
+		if instance.Acl != nil && instance.Acl.HasItems() {
+			aclsArray := *instance.Acl.Items
+			acls = strings.Join(aclsArray, ",")
+		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", *instance.Id)
+		table.AddRow("ID", utils.PtrString(instance.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *instance.Name)
+		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("STATUS", *instance.Status)
+		table.AddRow("STATUS", utils.PtrString(instance.Status))
 		table.AddSeparator()
-		table.AddRow("STORAGE SIZE (GB)", *instance.Storage.Size)
+		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
 		table.AddSeparator()
-		table.AddRow("VERSION", *instance.Version)
+		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
+		table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
 		table.AddSeparator()
-		table.AddRow("CPU", *instance.Flavor.Cpu)
+		table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
 		table.AddSeparator()
-		table.AddRow("RAM (GB)", *instance.Flavor.Memory)
+		table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
 		table.AddSeparator()
 
 		err := table.Display(p)

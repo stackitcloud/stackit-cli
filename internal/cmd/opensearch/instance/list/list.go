@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -152,7 +153,12 @@ func outputResult(p *print.Printer, outputFormat string, instances []opensearch.
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
+			table.AddRow(
+				utils.PtrString(instance.InstanceId),
+				utils.PtrString(instance.Name),
+				utils.PtrString(instance.LastOperation.Type),
+				utils.PtrString(instance.LastOperation.State),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

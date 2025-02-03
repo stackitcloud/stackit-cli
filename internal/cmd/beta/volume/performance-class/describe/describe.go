@@ -121,7 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("NAME", *performanceClass.Name)
+		table.AddRow("NAME", utils.PtrString(performanceClass.Name))
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(performanceClass.Description))
 		table.AddSeparator()

@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -167,7 +168,7 @@ func outputResult(p *print.Printer, outputFormat string, performanceClasses []ia
 		table.SetHeader("Name", "Description")
 
 		for _, performanceClass := range performanceClasses {
-			table.AddRow(*performanceClass.Name, *performanceClass.Description)
+			table.AddRow(utils.PtrString(performanceClass.Name), utils.PtrString(performanceClass.Description))
 			table.AddSeparator()
 		}
 

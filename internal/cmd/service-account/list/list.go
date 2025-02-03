@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -142,7 +143,10 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 		table.SetHeader("ID", "EMAIL")
 		for i := range serviceAccounts {
 			account := serviceAccounts[i]
-			table.AddRow(*account.Id, *account.Email)
+			table.AddRow(
+				utils.PtrString(account.Id),
+				utils.PtrString(account.Email),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

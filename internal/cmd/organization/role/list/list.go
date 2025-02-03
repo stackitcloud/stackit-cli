@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
@@ -154,7 +155,12 @@ func outputRolesResult(p *print.Printer, outputFormat string, roles []authorizat
 			r := roles[i]
 			for j := range *r.Permissions {
 				p := (*r.Permissions)[j]
-				table.AddRow(*r.Name, *r.Description, *p.Name, *p.Description)
+				table.AddRow(
+					utils.PtrString(r.Name),
+					utils.PtrString(r.Description),
+					utils.PtrString(p.Name),
+					utils.PtrString(p.Description),
+				)
 			}
 			table.AddSeparator()
 		}

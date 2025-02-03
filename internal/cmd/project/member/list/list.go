@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"sort"
 
 	"github.com/goccy/go-yaml"
@@ -185,7 +186,7 @@ func outputResult(p *print.Printer, model *inputModel, members []authorization.M
 			if i > 0 && sortFn(i-1, i) {
 				table.AddSeparator()
 			}
-			table.AddRow(*m.Subject, *m.Role)
+			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
 		}
 
 		if model.SortBy == "subject" {

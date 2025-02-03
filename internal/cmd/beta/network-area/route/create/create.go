@@ -184,7 +184,7 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 
 		return nil
 	default:
-		p.Outputf("Created static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, *route.RouteId)
+		p.Outputf("Created static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.RouteId))
 		return nil
 	}
 }

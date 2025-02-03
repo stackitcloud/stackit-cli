@@ -119,15 +119,15 @@ func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Insta
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *instance.InstanceId)
+		table.AddRow("ID", utils.PtrString(instance.InstanceId))
 		table.AddSeparator()
-		table.AddRow("NAME", *instance.Name)
+		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("LAST OPERATION TYPE", *instance.LastOperation.Type)
+		table.AddRow("LAST OPERATION TYPE", utils.PtrString(instance.LastOperation.Type))
 		table.AddSeparator()
-		table.AddRow("LAST OPERATION STATE", *instance.LastOperation.State)
+		table.AddRow("LAST OPERATION STATE", utils.PtrString(instance.LastOperation.State))
 		table.AddSeparator()
-		table.AddRow("PLAN ID", *instance.PlanId)
+		table.AddRow("PLAN ID", utils.PtrString(instance.PlanId))
 		// Only show ACL if it's present and not empty
 		acl := (*instance.Parameters)[aclParameterKey]
 		aclStr, ok := acl.(string)

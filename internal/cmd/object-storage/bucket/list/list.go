@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -152,7 +153,12 @@ func outputResult(p *print.Printer, outputFormat string, buckets []objectstorage
 		table.SetHeader("NAME", "REGION", "URL (PATH STYLE)", "URL (VIRTUAL HOSTED STYLE)")
 		for i := range buckets {
 			bucket := buckets[i]
-			table.AddRow(*bucket.Name, *bucket.Region, *bucket.UrlPathStyle, *bucket.UrlVirtualHostedStyle)
+			table.AddRow(
+				utils.PtrString(bucket.Name),
+				utils.PtrString(bucket.Region),
+				utils.PtrString(bucket.UrlPathStyle),
+				utils.PtrString(bucket.UrlVirtualHostedStyle),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

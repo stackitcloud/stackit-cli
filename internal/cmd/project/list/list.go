@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"time"
 
 	"github.com/goccy/go-yaml"
@@ -242,7 +243,12 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
 			p := projects[i]
-			table.AddRow(*p.ProjectId, *p.Name, *p.LifecycleState, *p.Parent.Id)
+			table.AddRow(
+				utils.PtrString(p.ProjectId),
+				utils.PtrString(p.Name),
+				utils.PtrString(p.LifecycleState),
+				utils.PtrString(p.Parent.Id),
+			)
 		}
 
 		err := table.Display(p)

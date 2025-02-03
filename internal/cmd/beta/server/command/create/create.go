@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -156,7 +157,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *runcommand.NewComma
 
 		return nil
 	default:
-		p.Outputf("Created server command for server %s. Command ID: %d\n", model.ServerId, *resp.Id)
+		p.Outputf("Created server command for server %s. Command ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
 		return nil
 	}
 }

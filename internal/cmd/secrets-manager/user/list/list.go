@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -160,7 +161,12 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 		table.SetHeader("ID", "USERNAME", "DESCRIPTION", "WRITE ACCESS")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username, *user.Description, *user.Write)
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+				utils.PtrString(user.Description),
+				utils.PtrString(user.Write),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

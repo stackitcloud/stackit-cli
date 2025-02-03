@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/inhies/go-bytesize"
@@ -168,7 +169,16 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		for i := range backups {
 			backup := backups[i]
 			restoreStatus := mongodbflexUtils.GetRestoreStatus(*backup.Id, restoreJobs)
-			table.AddRow(*backup.Id, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)), restoreStatus)
+			backupSize := "n/a"
+			if backup.Size != nil {
+				backupSize = bytesize.New(float64(*backup.Size)).String()
+			}
+			table.AddRow(
+				utils.PtrString(backup.Id),
+				utils.PtrString(backup.StartTime),
+				utils.PtrString(backup.EndTime),
+				backupSize,
+				restoreStatus)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -159,7 +160,7 @@ func outputResult(p *print.Printer, outputFormat string, databases []sqlserverfl
 		table.SetHeader("ID", "NAME")
 		for i := range databases {
 			database := databases[i]
-			table.AddRow(*database.Id, *database.Name)
+			table.AddRow(utils.PtrString(database.Id), utils.PtrString(database.Name))
 		}
 		err := table.Display(p)
 		if err != nil {

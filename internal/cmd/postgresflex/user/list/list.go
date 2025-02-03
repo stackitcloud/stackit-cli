@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -160,7 +161,10 @@ func outputResult(p *print.Printer, outputFormat string, users []postgresflex.Li
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username)
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
@@ -160,9 +161,9 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 		networkId = *networks[0].NetworkId
 	}
 
-	externalAdress := "-"
+	externalAddress := "-"
 	if loadBalancer.ExternalAddress != nil {
-		externalAdress = *loadBalancer.ExternalAddress
+		externalAddress = *loadBalancer.ExternalAddress
 	}
 
 	errorDescriptions := []string{}
@@ -174,9 +175,9 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 
 	table := tables.NewTable()
 	table.SetTitle("Load Balancer")
-	table.AddRow("NAME", *loadBalancer.Name)
+	table.AddRow("NAME", utils.PtrString(loadBalancer.Name))
 	table.AddSeparator()
-	table.AddRow("STATE", *loadBalancer.Status)
+	table.AddRow("STATE", utils.PtrString(loadBalancer.Status))
 	table.AddSeparator()
 	if len(errorDescriptions) > 0 {
 		table.AddRow("ERROR DESCRIPTIONS", strings.Join(errorDescriptions, "\n"))
@@ -184,7 +185,7 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 	}
 	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
 	table.AddSeparator()
-	table.AddRow("ATTACHED PUBLIC IP", externalAdress)
+	table.AddRow("ATTACHED PUBLIC IP", externalAddress)
 	table.AddSeparator()
 	table.AddRow("ATTACHED NETWORK ID", networkId)
 	table.AddSeparator()
@@ -198,7 +199,12 @@ func buildListenersTable(listeners []loadbalancer.Listener) tables.Table {
 	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
 	for i := range listeners {
 		listener := listeners[i]
-		table.AddRow(*listener.Name, *listener.Port, *listener.Protocol, *listener.TargetPool)
+		table.AddRow(
+			utils.PtrString(listener.Name),
+			utils.PtrString(listener.Port),
+			utils.PtrString(listener.Protocol),
+			utils.PtrString(listener.TargetPool),
+		)
 	}
 	return table
 }
@@ -208,7 +214,7 @@ func buildTargetPoolsTable(targetPools []loadbalancer.TargetPool) tables.Table {
 	table.SetTitle("Target Pools")
 	table.SetHeader("NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
-		table.AddRow(*targetPool.Name, *targetPool.TargetPort, len(*targetPool.Targets))
+		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(*targetPool.Targets))
 	}
 	return table
 }
