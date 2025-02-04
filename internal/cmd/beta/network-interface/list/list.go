@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
@@ -77,7 +78,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				p.Info("No network interfaces found for network %d\n", model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, *model.NetworkId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get network name: %v", err)
+					networkLabel = *model.NetworkId
+				}
+				p.Info("No network interfaces found for network %q\n", networkLabel)
 				return nil
 			}
 
