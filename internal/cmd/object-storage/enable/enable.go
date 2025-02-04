@@ -99,6 +99,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiEnableServiceRequest {
-	req := apiClient.EnableService(ctx, model.ProjectId)
+	req := apiClient.EnableService(ctx, model.ProjectId, model.Region)
 	return req
 }

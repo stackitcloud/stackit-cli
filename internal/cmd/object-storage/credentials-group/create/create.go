@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateCredentialsGroupRequest {
-	req := apiClient.CreateCredentialsGroup(ctx, model.ProjectId)
+	req := apiClient.CreateCredentialsGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateCredentialsGroupPayload(objectstorage.CreateCredentialsGroupPayload{
 		DisplayName: utils.Ptr(model.CredentialsGroupName),
 	})

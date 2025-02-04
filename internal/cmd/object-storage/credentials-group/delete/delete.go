@@ -50,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
@@ -104,6 +104,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteCredentialsGroupRequest {
-	req := apiClient.DeleteCredentialsGroup(ctx, model.ProjectId, model.CredentialsGroupId)
+	req := apiClient.DeleteCredentialsGroup(ctx, model.ProjectId, model.GlobalFlagModel.Region, model.CredentialsGroupId)
 	return req
 }

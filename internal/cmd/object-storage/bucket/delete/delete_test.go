@@ -14,12 +14,14 @@ import (
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
+var regionFlag = globalflags.RegionFlag
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
+var testRegion = "eu01"
 var testBucketName = "my-bucket"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -35,6 +37,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
+		regionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		BucketName: testBucketName,
 	}
@@ -57,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiDeleteBucketRequest)) objectstorage.ApiDeleteBucketRequest {
-	request := testClient.DeleteBucket(testCtx, testProjectId, testBucketName)
+	request := testClient.DeleteBucket(testCtx, testProjectId, testRegion, testBucketName)
 	for _, mod := range mods {
 		mod(&request)
 	}

@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Deleting bucket")
-				_, err = wait.DeleteBucketWaitHandler(ctx, apiClient, model.ProjectId, model.BucketName).WaitWithContext(ctx)
+				_, err = wait.DeleteBucketWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for Object Storage bucket deletion: %w", err)
 				}
@@ -113,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteBucketRequest {
-	req := apiClient.DeleteBucket(ctx, model.ProjectId, model.BucketName)
+	req := apiClient.DeleteBucket(ctx, model.ProjectId, model.Region, model.BucketName)
 	return req
 }
