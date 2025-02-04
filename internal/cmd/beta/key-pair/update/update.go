@@ -123,7 +123,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) error {
-	switch model.OutputFormat {
+	if model == nil {
+		return fmt.Errorf("model is nil")
+	}
+	if keyPair == nil {
+		return fmt.Errorf("keyPair is nil")
+	}
+
+	var outputFormat string
+	if model.GlobalFlagModel != nil {
+		outputFormat = model.GlobalFlagModel.OutputFormat
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")
 		if err != nil {

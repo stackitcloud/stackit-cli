@@ -160,8 +160,10 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 			keyPair := keyPairs[idx]
 
 			var labels []string
-			for key, value := range *keyPair.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			if keyPair.Labels != nil {
+				for key, value := range *keyPair.Labels {
+					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+				}
 			}
 
 			table.AddRow(

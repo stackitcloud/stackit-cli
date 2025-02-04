@@ -186,3 +186,37 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		keyPairs     []iaas.Keypair
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				outputFormat: "",
+				keyPairs: []iaas.Keypair{
+					{},
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := print.NewPrinter()
+			p.Cmd = NewCmd(p)
+
+			if err := outputResult(p, tt.args.outputFormat, tt.args.keyPairs); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

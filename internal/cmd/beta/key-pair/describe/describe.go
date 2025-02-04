@@ -110,6 +110,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair *iaas.Keypair) error {
+	if keyPair == nil {
+		p.Outputln("No keypair found.")
+		return nil
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")
@@ -150,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
 
-		if *keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
+		if keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
 			var labels []string
 			for key, value := range *keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
@@ -162,7 +166,11 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		table.AddRow("FINGERPRINT", utils.PtrString(keyPair.Fingerprint))
 		table.AddSeparator()
 
-		truncatedPublicKey := (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
+		truncatedPublicKey := ""
+		if keyPair.PublicKey != nil {
+			truncatedPublicKey = (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
+		}
+
 		table.AddRow("PUBLIC KEY", truncatedPublicKey)
 		table.AddSeparator()
 
