@@ -99,9 +99,11 @@ func PtrStringDefault[T any](v *T, defaultValue string) string {
 	return fmt.Sprintf("%v", *v)
 }
 
-func PtrByteSizeDefault(size *int64, defaultString string) string {
+// PtrByteSizeDefault return the value of an in64 pointer to a string representation of bytesize. If the pointer is nil,
+// it returns the [defaultValue].
+func PtrByteSizeDefault(size *int64, defaultValue string) string {
 	if size == nil {
-		return defaultString
+		return defaultValue
 	}
 	return bytesize.New(float64(*size)).String()
 }
