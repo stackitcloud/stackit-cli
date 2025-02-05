@@ -141,18 +141,12 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating args: %v", err)
 			}
 
-			model, err := parseInput(p, cmd, tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
+			model := parseInput(p, cmd, tt.argValues)
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
-			diff := cmp.Diff(model, tt.expectedModel)
+			diff := cmp.Diff(&model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -191,8 +185,8 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		model   *inputModel
-		keyPair *iaas.Keypair
+		model   inputModel
+		keyPair iaas.Keypair
 	}
 	tests := []struct {
 		name    string
@@ -202,13 +196,13 @@ func Test_outputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "base",
 			args: args{
-				model:   &inputModel{},
-				keyPair: &iaas.Keypair{},
+				model:   inputModel{},
+				keyPair: iaas.Keypair{},
 			},
 			wantErr: false,
 		},
