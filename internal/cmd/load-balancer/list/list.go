@@ -154,10 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 		table.SetHeader("NAME", "STATE", "IP ADDRESS", "LISTENERS", "TARGET POOLS")
 		for i := range loadBalancers {
 			l := loadBalancers[i]
-			externalAdress := "-"
-			if l.ExternalAddress != nil {
-				externalAdress = *l.ExternalAddress
-			}
+			externalAdress := utils.PtrStringDefault(l.ExternalAddress, "-")
 			table.AddRow(
 				utils.PtrString(l.Name),
 				utils.PtrString(l.Status),

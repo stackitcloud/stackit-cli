@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -152,10 +151,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreSta
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", utils.PtrString(backup.EndTime))
 		table.AddSeparator()
-		backupSize := "n/a"
-		if backup.Size != nil {
-			backupSize = bytesize.New(float64(*backup.Size)).String()
-		}
+		backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
 		table.AddRow("BACKUP SIZE", backupSize)
 		table.AddSeparator()
 		table.AddRow("RESTORE STATUS", restoreStatus)

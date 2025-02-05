@@ -161,10 +161,7 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 		networkId = *networks[0].NetworkId
 	}
 
-	externalAddress := "-"
-	if loadBalancer.ExternalAddress != nil {
-		externalAddress = *loadBalancer.ExternalAddress
-	}
+	externalAddress := utils.PtrStringDefault(loadBalancer.ExternalAddress, "-")
 
 	errorDescriptions := []string{}
 	if loadBalancer.Errors != nil && len((*loadBalancer.Errors)) > 0 {

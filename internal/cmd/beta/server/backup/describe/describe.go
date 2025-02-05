@@ -142,10 +142,7 @@ func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Ba
 		table.AddRow("EXPIRES AT", utils.PtrString(backup.ExpireAt))
 		table.AddSeparator()
 
-		lastRestored := ""
-		if backup.LastRestoredAt != nil {
-			lastRestored = *backup.LastRestoredAt
-		}
+		lastRestored := utils.PtrStringDefault(backup.LastRestoredAt, "")
 		table.AddRow("LAST RESTORED AT", lastRestored)
 		table.AddSeparator()
 		table.AddRow("VOLUME BACKUPS", len(*backup.VolumeBackups))

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -145,7 +144,7 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 
 			var osType string
 			if s.OsType != nil && len(*s.OsType) > 0 {
-				osType = strings.Join(*s.OsType, ",")
+				osType = utils.JoinStringPtr(s.OsType, ",")
 			}
 
 			table.AddRow(

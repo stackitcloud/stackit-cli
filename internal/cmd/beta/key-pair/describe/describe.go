@@ -71,7 +71,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read key pair: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, model.PublicKey, resp)
+			if keypair := resp; keypair != nil {
+				return outputResult(p, model.OutputFormat, model.PublicKey, *keypair)
+			}
+			p.Outputln("No keypair found.")
+			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -109,11 +113,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetKeyPair(ctx, model.KeyPairName)
 }
 
-func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair *iaas.Keypair) error {
-	if keyPair == nil {
-		p.Outputln("No keypair found.")
-		return nil
-	}
+func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair iaas.Keypair) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")

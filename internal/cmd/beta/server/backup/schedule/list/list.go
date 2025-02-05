@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -157,9 +156,7 @@ func outputResult(p *print.Printer, outputFormat string, schedules []serverbacku
 				backupName = utils.PtrString(s.BackupProperties.Name)
 				retentionPeriod = utils.PtrString(s.BackupProperties.RetentionPeriod)
 
-				if s.BackupProperties.VolumeIds != nil && len(*s.BackupProperties.VolumeIds) != 0 {
-					ids = strings.Join(*s.BackupProperties.VolumeIds, ",")
-				}
+				ids = utils.JoinStringPtr(s.BackupProperties.VolumeIds, ",")
 			}
 			table.AddRow(
 				utils.PtrString(s.Id),

@@ -170,10 +170,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 
 		for _, securityGroupRule := range securityGroupRules {
-			etherType := ""
-			if securityGroupRule.Ethertype != nil {
-				etherType = *securityGroupRule.Ethertype
-			}
+			etherType := utils.PtrStringDefault(securityGroupRule.Ethertype, "")
 
 			protocolName := ""
 			if securityGroupRule.Protocol != nil {

@@ -160,10 +160,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []objectsto
 		for i := range credentials {
 			c := credentials[i]
 
-			expiresAt := "Never"
-			if c.Expires != nil {
-				expiresAt = *c.Expires
-			}
+			expiresAt := utils.PtrStringDefault(c.Expires, "Never")
 			table.AddRow(utils.PtrString(c.KeyId), utils.PtrString(c.DisplayName), expiresAt)
 		}
 		err := table.Display(p)

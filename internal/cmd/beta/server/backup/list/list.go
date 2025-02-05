@@ -149,10 +149,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 		for i := range backups {
 			s := backups[i]
 
-			lastRestored := ""
-			if s.LastRestoredAt != nil {
-				lastRestored = *s.LastRestoredAt
-			}
+			lastRestored := utils.PtrStringDefault(s.LastRestoredAt, "")
 			table.AddRow(
 				utils.PtrString(s.Id),
 				utils.PtrString(s.Name),

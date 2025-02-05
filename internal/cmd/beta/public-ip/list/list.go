@@ -168,10 +168,7 @@ func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.Public
 		table.SetHeader("ID", "IP ADDRESS", "USED BY")
 
 		for _, publicIp := range publicIps {
-			networkInterfaceId := ""
-			if publicIp.NetworkInterface != nil {
-				networkInterfaceId = *publicIp.GetNetworkInterface()
-			}
+			networkInterfaceId := utils.PtrStringDefault(publicIp.GetNetworkInterface(), "")
 			table.AddRow(
 				utils.PtrString(publicIp.Id),
 				utils.PtrString(publicIp.Ip),

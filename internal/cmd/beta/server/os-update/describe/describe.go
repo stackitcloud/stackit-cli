@@ -132,16 +132,10 @@ func outputResult(p *print.Printer, outputFormat string, update *serverupdate.Up
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(update.Status))
 		table.AddSeparator()
-		installedUpdates := "n/a"
-		if update.InstalledUpdates != nil {
-			installedUpdates = utils.PtrString(update.InstalledUpdates)
-		}
+		installedUpdates := utils.PtrStringDefault(update.InstalledUpdates, "n/a")
 		table.AddRow("INSTALLED UPDATES", installedUpdates)
 		table.AddSeparator()
-		failedUpdates := "n/a"
-		if update.FailedUpdates != nil {
-			failedUpdates = utils.PtrString(update.FailedUpdates)
-		}
+		failedUpdates := utils.PtrStringDefault(update.FailedUpdates, "n/a")
 		table.AddRow("FAILED UPDATES", failedUpdates)
 
 		table.AddRow("START DATE", utils.PtrString(update.StartDate))

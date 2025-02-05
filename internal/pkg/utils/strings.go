@@ -24,3 +24,12 @@ func JoinStringKeysPtr(m map[string]any, sep string) string {
 	}
 	return JoinStringKeys(m, sep)
 }
+
+// JoinStringPtr concatenates the strings of a string slice pointer, each separatore by the
+// [sep] string.
+func JoinStringPtr(vals *[]string, sep string) string {
+	if vals == nil || len(*vals) == 0 {
+		return ""
+	}
+	return strings.Join(*vals, sep)
+}

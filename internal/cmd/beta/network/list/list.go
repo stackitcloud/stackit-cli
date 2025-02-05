@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -165,10 +164,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 			if network.Routed != nil {
 				routed = *network.Routed
 			}
-			prefixes := ""
-			if network.Prefixes != nil && len(*network.Prefixes) > 0 {
-				prefixes = strings.Join(*network.Prefixes, ", ")
-			}
+			prefixes := utils.JoinStringPtr(network.Prefixes, ", ")
 
 			table.AddRow(
 				utils.PtrString(network.NetworkId),

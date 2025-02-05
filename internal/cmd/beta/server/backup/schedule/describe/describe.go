@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -144,11 +143,7 @@ func outputResult(p *print.Printer, outputFormat string, schedule *serverbackup.
 			table.AddRow("BACKUP RETENTION DAYS", *schedule.BackupProperties.RetentionPeriod)
 			table.AddSeparator()
 			ids := schedule.BackupProperties.VolumeIds
-			if ids == nil || len(*ids) == 0 {
-				table.AddRow("BACKUP VOLUME IDS", "")
-			} else {
-				table.AddRow("BACKUP VOLUME IDS", strings.Join(*ids, "\n"))
-			}
+			table.AddRow("BACKUP VOLUME IDS", utils.JoinStringPtr(ids, "\n"))
 		}
 		err := table.Display(p)
 		if err != nil {

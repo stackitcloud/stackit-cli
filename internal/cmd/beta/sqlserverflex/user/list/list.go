@@ -160,7 +160,10 @@ func outputResult(p *print.Printer, outputFormat string, users []sqlserverflex.I
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
 			user := users[i]
-			table.AddRow(utils.PtrString(user.Id), utils.PtrString(user.Username))
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

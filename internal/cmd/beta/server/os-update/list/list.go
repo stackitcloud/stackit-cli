@@ -151,10 +151,7 @@ func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.
 		for i := range updates {
 			s := updates[i]
 
-			endDate := "n/a"
-			if s.EndDate != nil {
-				endDate = *s.EndDate
-			}
+			endDate := utils.PtrStringDefault(s.EndDate, "n/a")
 
 			installed := "n/a"
 			if s.InstalledUpdates != nil {

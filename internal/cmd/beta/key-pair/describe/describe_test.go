@@ -191,7 +191,7 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat      string
 		showOnlyPublicKey bool
-		keyPair           *iaas.Keypair
+		keyPair           iaas.Keypair
 	}
 	tests := []struct {
 		name    string
@@ -199,20 +199,11 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "empty",
-			args: args{
-				outputFormat:      "",
-				showOnlyPublicKey: false,
-				keyPair:           nil,
-			},
-			wantErr: false,
-		},
-		{
 			name: "base",
 			args: args{
 				outputFormat:      "",
 				showOnlyPublicKey: false,
-				keyPair:           &iaas.Keypair{},
+				keyPair:           iaas.Keypair{},
 			},
 			wantErr: false,
 		},

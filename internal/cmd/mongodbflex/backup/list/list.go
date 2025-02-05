@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-	"github.com/inhies/go-bytesize"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -169,10 +168,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		for i := range backups {
 			backup := backups[i]
 			restoreStatus := mongodbflexUtils.GetRestoreStatus(*backup.Id, restoreJobs)
-			backupSize := "n/a"
-			if backup.Size != nil {
-				backupSize = bytesize.New(float64(*backup.Size)).String()
-			}
+			backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
 			table.AddRow(
 				utils.PtrString(backup.Id),
 				utils.PtrString(backup.StartTime),
