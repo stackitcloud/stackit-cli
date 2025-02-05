@@ -33,7 +33,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.9.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.23.0
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.26.0
 	golang.org/x/term v0.28.0
 	golang.org/x/text v0.21.0
 	k8s.io/apimachinery v0.31.3
