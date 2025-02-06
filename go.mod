@@ -82,7 +82,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.20.2
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.20.1
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v0.11.1
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.0.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.20.1
