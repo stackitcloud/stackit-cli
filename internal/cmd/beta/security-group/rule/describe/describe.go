@@ -132,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *securityGroupRule.Id)
+		table.AddRow("ID", utils.PtrString(securityGroupRule.Id))
 		table.AddSeparator()
 
 		if securityGroupRule.Protocol != nil {
@@ -147,7 +147,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 			}
 		}
 
-		table.AddRow("DIRECTION", *securityGroupRule.Direction)
+		table.AddRow("DIRECTION", utils.PtrString(securityGroupRule.Direction))
 		table.AddSeparator()
 
 		if securityGroupRule.PortRange != nil {

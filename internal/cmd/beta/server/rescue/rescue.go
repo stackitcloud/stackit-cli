@@ -93,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered rescue of"
 			}
-			p.Info("%s server %q. Image %q is used as temporary boot image\n", operationState, serverLabel, *model.ImageId)
+			p.Info("%s server %q. Image %q is used as temporary boot image\n", operationState, serverLabel, utils.PtrString(model.ImageId))
 
 			return nil
 		},

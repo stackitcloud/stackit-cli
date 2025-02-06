@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,8 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
 )
 
@@ -161,9 +161,9 @@ func outputResult(p *print.Printer, model *inputModel, token *serviceaccount.Acc
 
 		return nil
 	default:
-		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, *token.Id)
-		p.Outputf("Valid until: %s\n", *token.ValidUntil)
-		p.Outputf("Token: %s\n", *token.Token)
+		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, utils.PtrString(token.Id))
+		p.Outputf("Valid until: %s\n", utils.PtrString(token.ValidUntil))
+		p.Outputf("Token: %s\n", utils.PtrString(token.Token))
 		return nil
 	}
 }

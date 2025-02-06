@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -160,7 +160,10 @@ func outputResult(p *print.Printer, outputFormat string, users []postgresflex.Li
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username)
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

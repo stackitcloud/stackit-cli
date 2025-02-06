@@ -145,20 +145,21 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 
 		return nil
 	default:
-		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
 		// The username field cannot be set by the user, so we only display it if it's not returned empty
-		username := *resp.Raw.Credentials.Username
-		if username != "" {
-			p.Outputf("Username: %s\n", *resp.Raw.Credentials.Username)
+		if resp.HasRaw() && resp.Raw.Credentials != nil {
+			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
+				p.Outputf("Username: %s\n", *username)
+			}
+			if !model.ShowPassword {
+				p.Outputf("Password: <hidden>\n")
+			} else {
+				p.Outputf("Password: %s\n", utils.PtrString(resp.Raw.Credentials.Password))
+			}
+			p.Outputf("Host: %s\n", utils.PtrString(resp.Raw.Credentials.Host))
+			p.Outputf("Port: %s\n", utils.PtrString(resp.Raw.Credentials.Port))
 		}
-		if !model.ShowPassword {
-			p.Outputf("Password: <hidden>\n")
-		} else {
-			p.Outputf("Password: %s\n", *resp.Raw.Credentials.Password)
-		}
-		p.Outputf("Host: %s\n", *resp.Raw.Credentials.Host)
-		p.Outputf("Port: %d\n", *resp.Raw.Credentials.Port)
-		p.Outputf("URI: %s\n", *resp.Uri)
+		p.Outputf("URI: %s\n", utils.PtrString(resp.Uri))
 		return nil
 	}
 }

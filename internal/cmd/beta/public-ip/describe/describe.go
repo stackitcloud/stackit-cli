@@ -121,9 +121,9 @@ func outputResult(p *print.Printer, outputFormat string, publicIp *iaas.PublicIp
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *publicIp.Id)
+		table.AddRow("ID", utils.PtrString(publicIp.Id))
 		table.AddSeparator()
-		table.AddRow("IP ADDRESS", *publicIp.Ip)
+		table.AddRow("IP ADDRESS", utils.PtrString(publicIp.Ip))
 		table.AddSeparator()
 
 		if publicIp.NetworkInterface != nil {

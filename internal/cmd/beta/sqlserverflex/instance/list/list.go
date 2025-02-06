@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
@@ -152,7 +152,11 @@ func outputResult(p *print.Printer, outputFormat string, instances []sqlserverfl
 		table.SetHeader("ID", "NAME", "STATUS")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.Id, *instance.Name, *instance.Status)
+			table.AddRow(
+				utils.PtrString(instance.Id),
+				utils.PtrString(instance.Name),
+				utils.PtrString(instance.Status),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

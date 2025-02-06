@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
@@ -152,8 +153,8 @@ func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel 
 		return nil
 	default:
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", *user.Username)
-		p.Outputf("New password: %s\n", *user.Password)
+		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
+		p.Outputf("New password: %s\n", utils.PtrString(user.Password))
 		if user.Uri != nil && *user.Uri != "" {
 			p.Outputf("New URI: %s\n", *user.Uri)
 		}

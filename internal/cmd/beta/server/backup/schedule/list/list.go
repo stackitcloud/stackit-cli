@@ -4,10 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
-
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
@@ -151,11 +149,24 @@ func outputResult(p *print.Printer, outputFormat string, schedules []serverbacku
 		for i := range schedules {
 			s := schedules[i]
 
+			backupName := ""
+			retentionPeriod := ""
 			ids := ""
-			if s.BackupProperties.VolumeIds != nil && len(*s.BackupProperties.VolumeIds) != 0 {
-				ids = strings.Join(*s.BackupProperties.VolumeIds, ",")
+			if s.BackupProperties != nil {
+				backupName = utils.PtrString(s.BackupProperties.Name)
+				retentionPeriod = utils.PtrString(s.BackupProperties.RetentionPeriod)
+
+				ids = utils.JoinStringPtr(s.BackupProperties.VolumeIds, ",")
 			}
-			table.AddRow(*s.Id, *s.Name, *s.Enabled, *s.Rrule, *s.BackupProperties.Name, *s.BackupProperties.RetentionPeriod, ids)
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Name),
+				utils.PtrString(s.Enabled),
+				utils.PtrString(s.Rrule),
+				backupName,
+				retentionPeriod,
+				ids,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
@@ -185,7 +185,7 @@ func outputResult(p *print.Printer, model *inputModel, members []authorization.M
 			if i > 0 && sortFn(i-1, i) {
 				table.AddSeparator()
 			}
-			table.AddRow(*m.Subject, *m.Role)
+			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
 		}
 
 		if model.SortBy == "subject" {

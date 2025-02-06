@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,9 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -162,7 +162,11 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) er
 		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
 
 		for _, route := range routes {
-			table.AddRow(*route.RouteId, *route.Nexthop, *route.Prefix)
+			table.AddRow(
+				utils.PtrString(route.RouteId),
+				utils.PtrString(route.Nexthop),
+				utils.PtrString(route.Prefix),
+			)
 		}
 
 		p.Outputln(table.Render())

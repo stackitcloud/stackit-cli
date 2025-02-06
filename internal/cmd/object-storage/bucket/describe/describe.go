@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
@@ -116,13 +117,13 @@ func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.B
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("Name", *bucket.Name)
+		table.AddRow("Name", utils.PtrString(bucket.Name))
 		table.AddSeparator()
-		table.AddRow("Region", *bucket.Region)
+		table.AddRow("Region", utils.PtrString(bucket.Region))
 		table.AddSeparator()
-		table.AddRow("URL (Path Style)", *bucket.UrlPathStyle)
+		table.AddRow("URL (Path Style)", utils.PtrString(bucket.UrlPathStyle))
 		table.AddSeparator()
-		table.AddRow("URL (Virtual Hosted Style)", *bucket.UrlVirtualHostedStyle)
+		table.AddRow("URL (Virtual Hosted Style)", utils.PtrString(bucket.UrlVirtualHostedStyle))
 		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {

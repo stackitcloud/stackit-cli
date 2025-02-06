@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
 )
 
@@ -129,14 +129,16 @@ func outputResult(p *print.Printer, outputFormat string, commandTemplate *runcom
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("NAME", *commandTemplate.Name)
+		table.AddRow("NAME", utils.PtrString(commandTemplate.Name))
 		table.AddSeparator()
-		table.AddRow("TITLE", *commandTemplate.Title)
+		table.AddRow("TITLE", utils.PtrString(commandTemplate.Title))
 		table.AddSeparator()
-		table.AddRow("DESCRIPTION", *commandTemplate.Description)
+		table.AddRow("DESCRIPTION", utils.PtrString(commandTemplate.Description))
 		table.AddSeparator()
-		table.AddRow("OS TYPE", strings.Join(*commandTemplate.OsType, "\n"))
-		table.AddSeparator()
+		if commandTemplate.OsType != nil {
+			table.AddRow("OS TYPE", strings.Join(*commandTemplate.OsType, "\n"))
+			table.AddSeparator()
+		}
 		if commandTemplate.ParameterSchema != nil {
 			table.AddRow("PARAMS", *commandTemplate.ParameterSchema)
 		} else {

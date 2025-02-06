@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-	"github.com/inhies/go-bytesize"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -168,7 +168,13 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		for i := range backups {
 			backup := backups[i]
 			restoreStatus := mongodbflexUtils.GetRestoreStatus(*backup.Id, restoreJobs)
-			table.AddRow(*backup.Id, *backup.StartTime, *backup.EndTime, bytesize.New(float64(*backup.Size)), restoreStatus)
+			backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
+			table.AddRow(
+				utils.PtrString(backup.Id),
+				utils.PtrString(backup.StartTime),
+				utils.PtrString(backup.EndTime),
+				backupSize,
+				restoreStatus)
 		}
 		err := table.Display(p)
 		if err != nil {

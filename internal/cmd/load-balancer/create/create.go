@@ -6,20 +6,18 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
-
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/wait"
 )
 
@@ -108,7 +106,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s load balancer with name %q \n", operationState, *model.Payload.Name)
+			p.Outputf("%s load balancer with name %q \n", operationState, utils.PtrString(model.Payload.Name))
 			return nil
 		},
 	}

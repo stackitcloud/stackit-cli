@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,8 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
 
@@ -185,7 +185,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverupdate.Update
 
 		return nil
 	default:
-		p.Info("Updated server os-update schedule %d\n", *resp.Id)
+		p.Info("Updated server os-update schedule %s\n", utils.PtrString(resp.Id))
 		return nil
 	}
 }

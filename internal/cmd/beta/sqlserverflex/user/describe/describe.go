@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
@@ -137,9 +138,9 @@ func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.User
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *user.Id)
+		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
-		table.AddRow("USERNAME", *user.Username)
+		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		if user.Roles != nil && len(*user.Roles) != 0 {
 			table.AddSeparator()
 			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))

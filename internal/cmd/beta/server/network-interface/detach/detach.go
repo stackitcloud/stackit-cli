@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -106,7 +107,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("detach network interface: %w", err)
 			}
-			p.Info("Detached network interface %q from server %q\n", *model.NicId, serverLabel)
+			p.Info("Detached network interface %q from server %q\n", utils.PtrString(model.NicId), serverLabel)
 
 			return nil
 		},

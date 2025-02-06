@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create key pair: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.GlobalFlagModel.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -141,8 +141,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateKeyPairPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, item *iaas.Keypair) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, item *iaas.Keypair) error {
+	if item == nil {
+		return fmt.Errorf("no key pair found")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(item, "", "  ")
 		if err != nil {
@@ -156,7 +160,10 @@ func outputResult(p *print.Printer, model *inputModel, item *iaas.Keypair) error
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Created key pair %q.\nkey pair Fingerprint: %q\n", *item.Name, *item.Fingerprint)
+		p.Outputf("Created key pair %q.\nkey pair Fingerprint: %q\n",
+			utils.PtrString(item.Name),
+			utils.PtrString(item.Fingerprint),
+		)
 	}
 	return nil
 }

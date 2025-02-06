@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,8 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
@@ -220,7 +220,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, *resp.Name)
+		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, utils.PtrString(resp.Name))
 		return nil
 	}
 }

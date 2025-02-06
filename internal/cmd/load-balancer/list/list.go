@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
@@ -153,11 +154,14 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 		table.SetHeader("NAME", "STATE", "IP ADDRESS", "LISTENERS", "TARGET POOLS")
 		for i := range loadBalancers {
 			l := loadBalancers[i]
-			externalAdress := "-"
-			if l.ExternalAddress != nil {
-				externalAdress = *l.ExternalAddress
-			}
-			table.AddRow(*l.Name, *l.Status, externalAdress, len(*l.Listeners), len(*l.TargetPools))
+			externalAdress := utils.PtrStringDefault(l.ExternalAddress, "-")
+			table.AddRow(
+				utils.PtrString(l.Name),
+				utils.PtrString(l.Status),
+				externalAdress,
+				len(*l.Listeners),
+				len(*l.TargetPools),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

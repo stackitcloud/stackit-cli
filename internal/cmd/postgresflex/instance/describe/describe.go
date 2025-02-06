@@ -120,8 +120,11 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 
 		return nil
 	default:
-		aclsArray := *instance.Acl.Items
-		acls := strings.Join(aclsArray, ",")
+		acls := ""
+		if instance.HasAcl() && instance.Acl.HasItems() {
+			aclsArray := *instance.Acl.Items
+			acls = strings.Join(aclsArray, ",")
+		}
 
 		instanceType, err := postgresflexUtils.GetInstanceType(*instance.Replicas)
 		if err != nil {
@@ -130,29 +133,29 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", *instance.Id)
+		table.AddRow("ID", utils.PtrString(instance.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *instance.Name)
+		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("STATUS", cases.Title(language.English).String(*instance.Status))
+		table.AddRow("STATUS", cases.Title(language.English).String(utils.PtrString(instance.Status)))
 		table.AddSeparator()
-		table.AddRow("STORAGE SIZE (GB)", *instance.Storage.Size)
+		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
 		table.AddSeparator()
-		table.AddRow("VERSION", *instance.Version)
+		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
+		table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
 		table.AddSeparator()
 		table.AddRow("TYPE", instanceType)
 		table.AddSeparator()
-		table.AddRow("REPLICAS", *instance.Replicas)
+		table.AddRow("REPLICAS", utils.PtrString(instance.Replicas))
 		table.AddSeparator()
-		table.AddRow("CPU", *instance.Flavor.Cpu)
+		table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
 		table.AddSeparator()
-		table.AddRow("RAM (GB)", *instance.Flavor.Memory)
+		table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
 		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", *instance.BackupSchedule)
+		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
 		err = table.Display(p)
 		if err != nil {

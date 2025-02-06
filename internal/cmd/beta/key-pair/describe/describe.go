@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -69,7 +71,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read key pair: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, model.PublicKey, resp)
+			if keypair := resp; keypair != nil {
+				return outputResult(p, model.OutputFormat, model.PublicKey, *keypair)
+			}
+			p.Outputln("No keypair found.")
+			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -107,7 +113,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetKeyPair(ctx, model.KeyPairName)
 }
 
-func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair *iaas.Keypair) error {
+func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair iaas.Keypair) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")
@@ -145,10 +151,10 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			return nil
 		}
 		table := tables.NewTable()
-		table.AddRow("KEY PAIR NAME", *keyPair.Name)
+		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
 
-		if *keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
+		if keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
 			var labels []string
 			for key, value := range *keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
@@ -157,17 +163,21 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			table.AddSeparator()
 		}
 
-		table.AddRow("FINGERPRINT", *keyPair.Fingerprint)
+		table.AddRow("FINGERPRINT", utils.PtrString(keyPair.Fingerprint))
 		table.AddSeparator()
 
-		truncatedPublicKey := (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
+		truncatedPublicKey := ""
+		if keyPair.PublicKey != nil {
+			truncatedPublicKey = (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
+		}
+
 		table.AddRow("PUBLIC KEY", truncatedPublicKey)
 		table.AddSeparator()
 
-		table.AddRow("CREATED AT", *keyPair.CreatedAt)
+		table.AddRow("CREATED AT", utils.PtrString(keyPair.CreatedAt))
 		table.AddSeparator()
 
-		table.AddRow("UPDATED AT", *keyPair.UpdatedAt)
+		table.AddRow("UPDATED AT", utils.PtrString(keyPair.UpdatedAt))
 		table.AddSeparator()
 
 		p.Outputln(table.Render())

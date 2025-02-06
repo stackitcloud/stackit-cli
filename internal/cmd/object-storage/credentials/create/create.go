@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/goccy/go-yaml"
-	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
-
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,6 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
+	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
 )
 
@@ -161,9 +161,9 @@ func outputResult(p *print.Printer, model *inputModel, credentialsGroupLabel str
 			expireDate = *resp.Expires
 		}
 
-		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, *resp.KeyId)
-		p.Outputf("Access Key ID: %s\n", *resp.AccessKey)
-		p.Outputf("Secret Access Key: %s\n", *resp.SecretAccessKey)
+		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, utils.PtrString(resp.KeyId))
+		p.Outputf("Access Key ID: %s\n", utils.PtrString(resp.AccessKey))
+		p.Outputf("Secret Access Key: %s\n", utils.PtrString(resp.SecretAccessKey))
 		p.Outputf("Expire Date: %s\n", expireDate)
 
 		return nil

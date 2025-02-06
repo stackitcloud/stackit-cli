@@ -133,11 +133,11 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *route.RouteId)
+		table.AddRow("ID", utils.PtrString(route.RouteId))
 		table.AddSeparator()
-		table.AddRow("PREFIX", *route.Prefix)
+		table.AddRow("PREFIX", utils.PtrString(route.Prefix))
 		table.AddSeparator()
-		table.AddRow("NEXTHOP", *route.Nexthop)
+		table.AddRow("NEXTHOP", utils.PtrString(route.Nexthop))
 		if route.Labels != nil && len(*route.Labels) > 0 {
 			labels := []string{}
 			for key, value := range *route.Labels {

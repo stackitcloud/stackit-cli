@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
@@ -218,7 +219,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, *resp.Zone.Id)
+		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Zone.Id))
 		return nil
 	}
 }

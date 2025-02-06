@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,9 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -162,7 +162,7 @@ func outputResult(p *print.Printer, outputFormat, serverId string, serverNics []
 
 		for i := range serverNics {
 			nic := serverNics[i]
-			table.AddRow(*nic.Id, serverId)
+			table.AddRow(utils.PtrString(nic.Id), serverId)
 		}
 		table.EnableAutoMergeOnColumns(2)
 

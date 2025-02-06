@@ -43,10 +43,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
-			if err != nil {
-				return err
-			}
+			model := parseInput(p, cmd, args)
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(p)
@@ -63,13 +60,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, &model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update key pair: %w", err)
 			}
+			if resp == nil {
+				return fmt.Errorf("response is nil")
+			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -100,7 +100,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateKeyPairPayload(payload)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputModel {
 	keyPairName := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 
@@ -119,11 +119,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		}
 	}
 
-	return &model, nil
+	return model
 }
 
-func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, model inputModel, keyPair iaas.Keypair) error {
+	var outputFormat string
+	if model.GlobalFlagModel != nil {
+		outputFormat = model.GlobalFlagModel.OutputFormat
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyPair, "", "  ")
 		if err != nil {
@@ -137,7 +141,7 @@ func outputResult(p *print.Printer, model *inputModel, keyPair *iaas.Keypair) er
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Updated labels of key pair %q\n", *model.KeyPairName)
+		p.Outputf("Updated labels of key pair %q\n", utils.PtrString(model.KeyPairName))
 	}
 	return nil
 }

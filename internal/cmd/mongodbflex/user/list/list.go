@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
@@ -160,7 +161,10 @@ func outputResult(p *print.Printer, outputFormat string, users []mongodbflex.Lis
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username)
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

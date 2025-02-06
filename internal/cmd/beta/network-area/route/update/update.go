@@ -160,7 +160,7 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 
 		return nil
 	default:
-		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, *route.RouteId)
+		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.RouteId))
 		return nil
 	}
 }

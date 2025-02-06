@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
@@ -166,7 +167,12 @@ func outputResult(p *print.Printer, outputFormat string, tokensMetadata []servic
 		table.SetHeader("ID", "ACTIVE", "CREATED_AT", "VALID_UNTIL")
 		for i := range tokensMetadata {
 			t := tokensMetadata[i]
-			table.AddRow(*t.Id, *t.Active, *t.CreatedAt, *t.ValidUntil)
+			table.AddRow(
+				utils.PtrString(t.Id),
+				utils.PtrString(t.Active),
+				utils.PtrString(t.CreatedAt),
+				utils.PtrString(t.ValidUntil),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

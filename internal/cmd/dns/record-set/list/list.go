@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,8 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
@@ -276,7 +276,14 @@ func outputResult(p *print.Printer, outputFormat string, recordSets []dns.Record
 				recordData = append(recordData, *r.Content)
 			}
 			recordDataJoin := strings.Join(recordData, ", ")
-			table.AddRow(*rs.Id, *rs.Name, *rs.State, *rs.Ttl, *rs.Type, recordDataJoin)
+			table.AddRow(
+				utils.PtrString(rs.Id),
+				utils.PtrString(rs.Name),
+				utils.PtrString(rs.State),
+				utils.PtrString(rs.Ttl),
+				utils.PtrString(rs.Type),
+				recordDataJoin,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

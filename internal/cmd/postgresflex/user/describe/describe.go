@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -136,15 +136,15 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *user.Id)
+		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
-		table.AddRow("USERNAME", *user.Username)
+		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
-		table.AddRow("ROLES", *user.Roles)
+		table.AddRow("ROLES", utils.PtrString(user.Roles))
 		table.AddSeparator()
-		table.AddRow("HOST", *user.Host)
+		table.AddRow("HOST", utils.PtrString(user.Host))
 		table.AddSeparator()
-		table.AddRow("PORT", *user.Port)
+		table.AddRow("PORT", utils.PtrString(user.Port))
 
 		err := table.Display(p)
 		if err != nil {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -158,11 +160,19 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 			keyPair := keyPairs[idx]
 
 			var labels []string
-			for key, value := range *keyPair.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			if keyPair.Labels != nil {
+				for key, value := range *keyPair.Labels {
+					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+				}
 			}
 
-			table.AddRow(*keyPair.Name, strings.Join(labels, ", "), *keyPair.Fingerprint, *keyPair.CreatedAt, *keyPair.UpdatedAt)
+			table.AddRow(
+				utils.PtrString(keyPair.Name),
+				strings.Join(labels, ", "),
+				utils.PtrString(keyPair.Fingerprint),
+				utils.PtrString(keyPair.CreatedAt),
+				utils.PtrString(keyPair.UpdatedAt),
+			)
 		}
 
 		p.Outputln(table.Render())

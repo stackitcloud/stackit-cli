@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"time"
 
 	"github.com/goccy/go-yaml"
-	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -133,13 +132,15 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *backup.Id)
+		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
-		table.AddRow("CREATED AT", *backup.StartTime)
+		table.AddRow("CREATED AT", utils.PtrString(backup.StartTime))
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", backupExpireDate)
 		table.AddSeparator()
-		table.AddRow("BACKUP SIZE", bytesize.New(float64(*backup.Size)))
+
+		backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
+		table.AddRow("BACKUP SIZE", backupSize)
 
 		err := table.Display(p)
 		if err != nil {

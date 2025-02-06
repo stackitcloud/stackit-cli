@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,7 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	opensearchUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
 )
@@ -157,7 +158,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []opensearc
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(*c.Id)
+			table.AddRow(utils.PtrString(c.Id))
 		}
 		err := table.Display(p)
 		if err != nil {

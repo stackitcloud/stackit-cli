@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,7 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
 )
@@ -152,7 +153,11 @@ func outputResult(p *print.Printer, outputFormat string, plans []observability.P
 		table.SetHeader("ID", "PLAN NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
-			table.AddRow(*o.Id, *o.Name, *o.Description)
+			table.AddRow(
+				utils.PtrString(o.Id),
+				utils.PtrString(o.Name),
+				utils.PtrString(o.Description),
+			)
 			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1)

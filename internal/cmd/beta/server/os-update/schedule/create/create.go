@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
@@ -161,7 +162,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverupdate.Update
 
 		return nil
 	default:
-		p.Outputf("Created server os-update schedule for server %s. os-update Schedule ID: %d\n", model.ServerId, *resp.Id)
+		p.Outputf("Created server os-update schedule for server %s. os-update Schedule ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
 		return nil
 	}
 }

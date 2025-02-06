@@ -133,9 +133,9 @@ func outputResult(p *print.Printer, outputFormat string, user secretsmanager.Use
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *user.Id)
+		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
-		table.AddRow("USERNAME", *user.Username)
+		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
 		if user.Description != nil && *user.Description != "" {
 			table.AddRow("DESCRIPTION", *user.Description)
@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, outputFormat string, user secretsmanager.Use
 			table.AddRow("PASSWORD", *user.Password)
 			table.AddSeparator()
 		}
-		table.AddRow("WRITE ACCESS", *user.Write)
+		table.AddRow("WRITE ACCESS", utils.PtrString(user.Write))
 
 		err := table.Display(p)
 		if err != nil {

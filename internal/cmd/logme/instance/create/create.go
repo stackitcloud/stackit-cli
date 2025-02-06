@@ -274,7 +274,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, *resp.InstanceId)
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.InstanceId))
 		return nil
 	}
 }

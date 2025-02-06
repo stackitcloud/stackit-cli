@@ -217,7 +217,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, volu
 
 		return nil
 	default:
-		p.Outputf("Created volume for project %q.\nVolume ID: %s\n", projectLabel, *volume.Id)
+		p.Outputf("Created volume for project %q.\nVolume ID: %s\n", projectLabel, utils.PtrString(volume.Id))
 		return nil
 	}
 }

@@ -12,7 +12,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -57,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := utils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -82,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			networkRange, err := utils.GetNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
+			networkRange, err := iaasUtils.GetNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -156,7 +157,7 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 
 		return nil
 	default:
-		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, *networkRange.NetworkRangeId)
+		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.NetworkRangeId))
 		return nil
 	}
 }

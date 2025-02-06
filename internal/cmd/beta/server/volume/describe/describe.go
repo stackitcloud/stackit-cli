@@ -147,11 +147,11 @@ func outputResult(p *print.Printer, outputFormat, serverLabel, volumeLabel strin
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("SERVER ID", *volume.ServerId)
+		table.AddRow("SERVER ID", utils.PtrString(volume.ServerId))
 		table.AddSeparator()
 		table.AddRow("SERVER NAME", serverLabel)
 		table.AddSeparator()
-		table.AddRow("VOLUME ID", *volume.VolumeId)
+		table.AddRow("VOLUME ID", utils.PtrString(volume.VolumeId))
 		table.AddSeparator()
 		// check if name is set
 		if volumeLabel != "" {

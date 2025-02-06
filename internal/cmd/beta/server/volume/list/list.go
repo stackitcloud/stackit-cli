@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,9 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -150,7 +149,7 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
 			s := volumes[i]
-			table.AddRow(*s.ServerId, serverLabel, *s.VolumeId, volumeNames[i])
+			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeNames[i])
 		}
 		err := table.Display(p)
 		if err != nil {

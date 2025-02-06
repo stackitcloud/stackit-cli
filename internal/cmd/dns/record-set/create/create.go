@@ -203,7 +203,7 @@ func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *d
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, *resp.Rrset.Id)
+		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, utils.PtrString(resp.Rrset.Id))
 		return nil
 	}
 }

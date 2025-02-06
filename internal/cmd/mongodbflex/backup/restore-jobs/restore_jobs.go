@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
@@ -162,7 +162,13 @@ func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbfl
 		for i := range restoreJobs {
 			restoreJob := restoreJobs[i]
 
-			table.AddRow(*restoreJob.Id, *restoreJob.BackupID, *restoreJob.InstanceId, *restoreJob.Date, *restoreJob.Status)
+			table.AddRow(
+				utils.PtrString(restoreJob.Id),
+				utils.PtrString(restoreJob.BackupID),
+				utils.PtrString(restoreJob.InstanceId),
+				utils.PtrString(restoreJob.Date),
+				utils.PtrString(restoreJob.Status),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
 )
 
@@ -152,7 +152,12 @@ func outputResult(p *print.Printer, outputFormat string, instances []mariadb.Ins
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
 			instance := instances[i]
-			table.AddRow(*instance.InstanceId, *instance.Name, *instance.LastOperation.Type, *instance.LastOperation.State)
+			table.AddRow(
+				utils.PtrString(instance.InstanceId),
+				utils.PtrString(instance.Name),
+				utils.PtrString(instance.LastOperation.Type),
+				utils.PtrString(instance.LastOperation.State),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

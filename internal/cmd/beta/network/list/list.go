@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -16,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -164,12 +164,16 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 			if network.Routed != nil {
 				routed = *network.Routed
 			}
-			prefixes := ""
-			if network.Prefixes != nil && len(*network.Prefixes) > 0 {
-				prefixes = strings.Join(*network.Prefixes, ", ")
-			}
+			prefixes := utils.JoinStringPtr(network.Prefixes, ", ")
 
-			table.AddRow(*network.NetworkId, *network.Name, *network.State, publicIp, prefixes, routed)
+			table.AddRow(
+				utils.PtrString(network.NetworkId),
+				utils.PtrString(network.Name),
+				utils.PtrString(network.State),
+				publicIp,
+				prefixes,
+				routed,
+			)
 			table.AddSeparator()
 		}
 

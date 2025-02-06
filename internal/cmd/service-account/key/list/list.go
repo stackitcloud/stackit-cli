@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
 )
 
@@ -166,7 +166,12 @@ func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.S
 			if k.ValidUntil != nil {
 				validUntil = k.ValidUntil.String()
 			}
-			table.AddRow(*k.Id, *k.Active, *k.CreatedAt, validUntil)
+			table.AddRow(
+				utils.PtrString(k.Id),
+				utils.PtrString(k.Active),
+				utils.PtrString(k.CreatedAt),
+				validUntil,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
@@ -118,7 +119,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			p.Outputf("%s scrape configuration with name %q for Observability instance %q\n", operationState, *jobName, instanceLabel)
+			p.Outputf("%s scrape configuration with name %q for Observability instance %q\n", operationState, utils.PtrString(jobName), instanceLabel)
 			return nil
 		},
 	}

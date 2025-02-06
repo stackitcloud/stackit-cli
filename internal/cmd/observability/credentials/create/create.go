@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
 )
 
@@ -135,7 +136,9 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 			p.Outputf("Username: %s\n", username)
 		}
 
-		p.Outputf("Password: %s\n", *resp.Credentials.Password)
+		if resp.Credentials != nil {
+			p.Outputf("Password: %s\n", utils.PtrString(resp.Credentials.Password))
+		}
 		return nil
 	}
 }

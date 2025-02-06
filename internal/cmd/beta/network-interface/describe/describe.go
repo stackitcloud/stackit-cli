@@ -152,9 +152,9 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 			table.AddRow("IPV6", *nic.Ipv6)
 			table.AddSeparator()
 		}
-		table.AddRow("MAC", *nic.Mac)
+		table.AddRow("MAC", utils.PtrString(nic.Mac))
 		table.AddSeparator()
-		table.AddRow("NIC SECURITY", *nic.NicSecurity)
+		table.AddRow("NIC SECURITY", utils.PtrString(nic.NicSecurity))
 		if nic.AllowedAddresses != nil && len(*nic.AllowedAddresses) > 0 {
 			allowedAddresses := []string{}
 			for _, value := range *nic.AllowedAddresses {
@@ -172,9 +172,9 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 		}
 		table.AddSeparator()
-		table.AddRow("STATUS", *nic.Status)
+		table.AddRow("STATUS", utils.PtrString(nic.Status))
 		table.AddSeparator()
-		table.AddRow("TYPE", *nic.Type)
+		table.AddRow("TYPE", utils.PtrString(nic.Type))
 		if nic.SecurityGroups != nil && len(*nic.SecurityGroups) > 0 {
 			table.AddSeparator()
 			table.AddRow("SECURITY GROUPS", strings.Join(*nic.SecurityGroups, "\n"))

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/redis"
 )
 
@@ -157,7 +157,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []redis.Cre
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(*c.Id)
+			table.AddRow(utils.PtrString(c.Id))
 		}
 		err := table.Display(p)
 		if err != nil {

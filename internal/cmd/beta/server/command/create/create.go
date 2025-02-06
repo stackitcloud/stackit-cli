@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	runcommandUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/utils"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
 )
 
@@ -156,7 +156,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *runcommand.NewComma
 
 		return nil
 	default:
-		p.Outputf("Created server command for server %s. Command ID: %d\n", model.ServerId, *resp.Id)
+		p.Outputf("Created server command for server %s. Command ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
 		return nil
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,9 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -167,11 +167,14 @@ func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) 
 		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
 
 		for _, volume := range volumes {
-			serverId := ""
-			if volume.ServerId != nil {
-				serverId = *volume.ServerId
-			}
-			table.AddRow(*volume.Id, *volume.Name, *volume.Status, serverId, *volume.AvailabilityZone, *volume.Size)
+			table.AddRow(
+				utils.PtrString(volume.Id),
+				utils.PtrString(volume.Name),
+				utils.PtrString(volume.Status),
+				utils.PtrString(volume.ServerId),
+				utils.PtrString(volume.AvailabilityZone),
+				utils.PtrString(volume.Size),
+			)
 			table.AddSeparator()
 		}
 

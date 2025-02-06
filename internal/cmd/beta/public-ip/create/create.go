@@ -159,7 +159,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, publ
 
 		return nil
 	default:
-		p.Outputf("Created public IP for project %q.\nPublic IP ID: %s\n", projectLabel, *publicIp.Id)
+		p.Outputf("Created public IP for project %q.\nPublic IP ID: %s\n", projectLabel, utils.PtrString(publicIp.Id))
 		return nil
 	}
 }

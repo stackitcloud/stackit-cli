@@ -167,7 +167,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 
 		return nil
 	default:
-		p.Outputf("Added Load Balancer observability credentials on project %q. Credentials reference: %q\n", projectLabel, *resp.Credential.CredentialsRef)
+		p.Outputf("Added Load Balancer observability credentials on project %q. Credentials reference: %q\n", projectLabel, utils.PtrString(resp.Credential.CredentialsRef))
 		return nil
 	}
 }

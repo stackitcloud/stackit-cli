@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
@@ -146,7 +147,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []observabi
 		table.SetHeader("USERNAME")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(*c.Name)
+			table.AddRow(utils.PtrString(c.Name))
 		}
 		err := table.Display(p)
 		if err != nil {

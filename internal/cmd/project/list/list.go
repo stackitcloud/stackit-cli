@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -16,8 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
 )
 
@@ -242,7 +242,12 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
 			p := projects[i]
-			table.AddRow(*p.ProjectId, *p.Name, *p.LifecycleState, *p.Parent.Id)
+			table.AddRow(
+				utils.PtrString(p.ProjectId),
+				utils.PtrString(p.Name),
+				utils.PtrString(p.LifecycleState),
+				utils.PtrString(p.Parent.Id),
+			)
 		}
 
 		err := table.Display(p)

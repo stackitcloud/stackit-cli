@@ -353,7 +353,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, serv
 
 		return nil
 	default:
-		p.Outputf("Created server for project %q.\nServer ID: %s\n", projectLabel, *server.Id)
+		p.Outputf("Created server for project %q.\nServer ID: %s\n", projectLabel, utils.PtrString(server.Id))
 		return nil
 	}
 }

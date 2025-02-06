@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
 )
 
@@ -128,23 +128,23 @@ func outputResult(p *print.Printer, outputFormat string, command *runcommand.Com
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *command.Id)
+		table.AddRow("ID", utils.PtrString(command.Id))
 		table.AddSeparator()
-		table.AddRow("COMMAND TEMPLATE NAME", *command.CommandTemplateName)
+		table.AddRow("COMMAND TEMPLATE NAME", utils.PtrString(command.CommandTemplateName))
 		table.AddSeparator()
-		table.AddRow("COMMAND TEMPLATE TITLE", *command.CommandTemplateTitle)
+		table.AddRow("COMMAND TEMPLATE TITLE", utils.PtrString(command.CommandTemplateTitle))
 		table.AddSeparator()
-		table.AddRow("STATUS", *command.Status)
+		table.AddRow("STATUS", utils.PtrString(command.Status))
 		table.AddSeparator()
-		table.AddRow("STARTED AT", *command.StartedAt)
+		table.AddRow("STARTED AT", utils.PtrString(command.StartedAt))
 		table.AddSeparator()
-		table.AddRow("FINISHED AT", *command.FinishedAt)
+		table.AddRow("FINISHED AT", utils.PtrString(command.FinishedAt))
 		table.AddSeparator()
-		table.AddRow("EXIT CODE", *command.ExitCode)
+		table.AddRow("EXIT CODE", utils.PtrString(command.ExitCode))
 		table.AddSeparator()
-		table.AddRow("COMMAND SCRIPT", *command.Script)
+		table.AddRow("COMMAND SCRIPT", utils.PtrString(command.Script))
 		table.AddSeparator()
-		table.AddRow("COMMAND OUTPUT", *command.Output)
+		table.AddRow("COMMAND OUTPUT", utils.PtrString(command.Output))
 		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {

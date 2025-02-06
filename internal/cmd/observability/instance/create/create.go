@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
@@ -222,7 +223,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, *resp.InstanceId)
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.InstanceId))
 		return nil
 	}
 }

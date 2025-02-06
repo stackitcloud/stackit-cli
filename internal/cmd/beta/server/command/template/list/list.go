@@ -4,10 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
-
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
 )
 
@@ -143,7 +141,17 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
 		for i := range templates {
 			s := templates[i]
-			table.AddRow(*s.Name, strings.Join(*s.OsType, ","), *s.Title)
+
+			var osType string
+			if s.OsType != nil && len(*s.OsType) > 0 {
+				osType = utils.JoinStringPtr(s.OsType, ",")
+			}
+
+			table.AddRow(
+				utils.PtrString(s.Name),
+				osType,
+				utils.PtrString(s.Title),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

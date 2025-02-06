@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goccy/go-yaml"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
@@ -151,22 +151,26 @@ func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.
 		for i := range updates {
 			s := updates[i]
 
-			endDate := "..."
-			if s.EndDate != nil {
-				endDate = *s.EndDate
-			}
+			endDate := utils.PtrStringDefault(s.EndDate, "n/a")
 
-			installed := "..."
+			installed := "n/a"
 			if s.InstalledUpdates != nil {
 				installed = strconv.FormatInt(*s.InstalledUpdates, 10)
 			}
 
-			failed := "..."
+			failed := "n/a"
 			if s.FailedUpdates != nil {
 				failed = strconv.FormatInt(*s.FailedUpdates, 10)
 			}
 
-			table.AddRow(*s.Id, *s.Status, installed, failed, *s.StartDate, endDate)
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Status),
+				installed,
+				failed,
+				utils.PtrString(s.StartDate),
+				endDate,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

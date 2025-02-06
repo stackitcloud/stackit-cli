@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -13,8 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -179,7 +179,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.Lis
 	}
 	if storages != nil && model.FlavorId != nil {
 		options.Storages = &flavorStorages{
-			FlavorId: *model.FlavorId,
+			FlavorId: utils.PtrString(model.FlavorId),
 			Storages: storages,
 		}
 	}
@@ -231,7 +231,12 @@ func buildFlavorsTable(flavors []postgresflex.Flavor) tables.Table {
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
 	for i := range flavors {
 		f := flavors[i]
-		table.AddRow(*f.Id, *f.Cpu, *f.Memory, *f.Description)
+		table.AddRow(
+			utils.PtrString(f.Id),
+			utils.PtrString(f.Cpu),
+			utils.PtrString(f.Memory),
+			utils.PtrString(f.Description),
+		)
 	}
 	return table
 }
@@ -254,7 +259,11 @@ func buildStoragesTable(storagesResp postgresflex.ListStoragesResponse) tables.T
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
 	for i := range storages {
 		sc := storages[i]
-		table.AddRow(*storagesResp.StorageRange.Min, *storagesResp.StorageRange.Max, sc)
+		table.AddRow(
+			utils.PtrString(storagesResp.StorageRange.Min),
+			utils.PtrString(storagesResp.StorageRange.Max),
+			sc,
+		)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
 	return table

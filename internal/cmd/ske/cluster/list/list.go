@@ -17,6 +17,7 @@ import (
 	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -173,7 +174,13 @@ func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster)
 			if c.Extensions != nil && c.Extensions.Argus != nil && *c.Extensions.Argus.Enabled {
 				monitoring = "Enabled"
 			}
-			table.AddRow(*c.Name, *c.Status.Aggregated, *c.Kubernetes.Version, len(*c.Nodepools), monitoring)
+			table.AddRow(
+				utils.PtrString(c.Name),
+				utils.PtrString(c.Status.Aggregated),
+				utils.PtrString(c.Kubernetes.Version),
+				len(*c.Nodepools),
+				monitoring,
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

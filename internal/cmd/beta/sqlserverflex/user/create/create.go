@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
@@ -161,9 +162,9 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 
 		return nil
 	default:
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, *user.Id)
-		p.Outputf("Username: %s\n", *user.Username)
-		p.Outputf("Password: %s\n", *user.Password)
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
+		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
+		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
 		if user.Roles != nil && len(*user.Roles) != 0 {
 			p.Outputf("Roles: [%v]\n", strings.Join(*user.Roles, ", "))
 		}

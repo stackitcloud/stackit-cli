@@ -395,7 +395,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateRes
 
 		return nil
 	default:
-		p.Outputf("Created image %q with id %s\n", model.Name, *model.Id)
+		p.Outputf("Created image %q with id %s\n", model.Name, utils.PtrString(model.Id))
 		return nil
 	}
 }

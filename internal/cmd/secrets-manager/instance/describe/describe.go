@@ -135,17 +135,17 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *instance.Id)
+		table.AddRow("ID", utils.PtrString(instance.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *instance.Name)
+		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *instance.State)
+		table.AddRow("STATE", utils.PtrString(instance.State))
 		table.AddSeparator()
-		table.AddRow("SECRETS", *instance.SecretCount)
+		table.AddRow("SECRETS", utils.PtrString(instance.SecretCount))
 		table.AddSeparator()
-		table.AddRow("ENGINE", *instance.SecretsEngine)
+		table.AddRow("ENGINE", utils.PtrString(instance.SecretsEngine))
 		table.AddSeparator()
-		table.AddRow("CREATION DATE", *instance.CreationStartDate)
+		table.AddRow("CREATION DATE", utils.PtrString(instance.CreationStartDate))
 		table.AddSeparator()
 		// Only show ACL if it's present and not empty
 		if aclList != nil && aclList.Acls != nil && len(*aclList.Acls) > 0 {

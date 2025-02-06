@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
 
@@ -128,15 +128,15 @@ func outputResult(p *print.Printer, outputFormat string, schedule *serverupdate.
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("SCHEDULE ID", *schedule.Id)
+		table.AddRow("SCHEDULE ID", utils.PtrString(schedule.Id))
 		table.AddSeparator()
-		table.AddRow("SCHEDULE NAME", *schedule.Name)
+		table.AddRow("SCHEDULE NAME", utils.PtrString(schedule.Name))
 		table.AddSeparator()
-		table.AddRow("ENABLED", *schedule.Enabled)
+		table.AddRow("ENABLED", utils.PtrString(schedule.Enabled))
 		table.AddSeparator()
-		table.AddRow("RRULE", *schedule.Rrule)
+		table.AddRow("RRULE", utils.PtrString(schedule.Rrule))
 		table.AddSeparator()
-		table.AddRow("MAINTENANCE WINDOW", *schedule.MaintenanceWindow)
+		table.AddRow("MAINTENANCE WINDOW", utils.PtrString(schedule.MaintenanceWindow))
 		table.AddSeparator()
 
 		err := table.Display(p)

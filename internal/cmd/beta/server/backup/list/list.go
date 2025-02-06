@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
@@ -150,11 +149,17 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 		for i := range backups {
 			s := backups[i]
 
-			lastRestored := ""
-			if s.LastRestoredAt != nil {
-				lastRestored = *s.LastRestoredAt
-			}
-			table.AddRow(*s.Id, *s.Name, *s.Size, *s.Status, *s.CreatedAt, *s.ExpireAt, lastRestored, len(*s.VolumeBackups))
+			lastRestored := utils.PtrStringDefault(s.LastRestoredAt, "")
+			table.AddRow(
+				utils.PtrString(s.Id),
+				utils.PtrString(s.Name),
+				utils.PtrString(s.Size),
+				utils.PtrString(s.Status),
+				utils.PtrString(s.CreatedAt),
+				utils.PtrString(s.ExpireAt),
+				lastRestored,
+				len(*s.VolumeBackups),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

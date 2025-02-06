@@ -128,9 +128,9 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *networkRange.NetworkRangeId)
+		table.AddRow("ID", utils.PtrString(networkRange.NetworkRangeId))
 		table.AddSeparator()
-		table.AddRow("Network range", *networkRange.Prefix)
+		table.AddRow("Network range", utils.PtrString(networkRange.Prefix))
 
 		err := table.Display(p)
 		if err != nil {

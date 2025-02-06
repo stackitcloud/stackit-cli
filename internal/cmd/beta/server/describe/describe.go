@@ -129,19 +129,19 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 		table := tables.NewTable()
 		table.SetTitle("Server")
 
-		table.AddRow("ID", *server.Id)
+		table.AddRow("ID", utils.PtrString(server.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *server.Name)
+		table.AddRow("NAME", utils.PtrString(server.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *server.Status)
+		table.AddRow("STATE", utils.PtrString(server.Status))
 		table.AddSeparator()
-		table.AddRow("AVAILABILITY ZONE", *server.AvailabilityZone)
+		table.AddRow("AVAILABILITY ZONE", utils.PtrString(server.AvailabilityZone))
 		table.AddSeparator()
 		if server.BootVolume != nil && server.BootVolume.Id != nil {
 			table.AddRow("BOOT VOLUME", *server.BootVolume.Id)
 			table.AddSeparator()
 		}
-		table.AddRow("POWER STATUS", *server.PowerStatus)
+		table.AddRow("POWER STATUS", utils.PtrString(server.PowerStatus))
 		table.AddSeparator()
 
 		if server.AffinityGroup != nil {

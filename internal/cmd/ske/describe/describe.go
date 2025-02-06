@@ -6,17 +6,17 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
+	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
-
-	"github.com/spf13/cobra"
 )
 
 type inputModel struct {
@@ -82,7 +82,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiGetServiceStatusRequest {
-	req := apiClient.GetServiceStatus(ctx, model.ProjectId, utils.SKEServiceId)
+	req := apiClient.GetServiceStatus(ctx, model.ProjectId, skeUtils.SKEServiceId)
 	return req
 }
 
@@ -108,7 +108,7 @@ func outputResult(p *print.Printer, outputFormat string, project *serviceenablem
 		table := tables.NewTable()
 		table.AddRow("ID", projectId)
 		table.AddSeparator()
-		table.AddRow("STATE", *project.State)
+		table.AddRow("STATE", utils.PtrString(project.State))
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

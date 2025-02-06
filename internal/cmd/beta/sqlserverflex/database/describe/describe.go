@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,9 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -130,9 +130,9 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 	default:
 		database := database.Database
 		table := tables.NewTable()
-		table.AddRow("ID", *database.Id)
+		table.AddRow("ID", utils.PtrString(database.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *database.Name)
+		table.AddRow("NAME", utils.PtrString(database.Name))
 		table.AddSeparator()
 		if database.Options != nil {
 			if database.Options.CompatibilityLevel != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
 )
 
@@ -160,7 +160,12 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 		table.SetHeader("ID", "USERNAME", "DESCRIPTION", "WRITE ACCESS")
 		for i := range users {
 			user := users[i]
-			table.AddRow(*user.Id, *user.Username, *user.Description, *user.Write)
+			table.AddRow(
+				utils.PtrString(user.Id),
+				utils.PtrString(user.Username),
+				utils.PtrString(user.Description),
+				utils.PtrString(user.Write),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

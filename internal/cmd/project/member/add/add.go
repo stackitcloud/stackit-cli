@@ -84,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			p.Info("Added the role %q to %s on project %q\n", *model.Role, model.Subject, projectLabel)
+			p.Info("Added the role %q to %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
 			return nil
 		},
 	}

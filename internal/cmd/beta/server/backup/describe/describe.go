@@ -129,23 +129,20 @@ func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Ba
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *backup.Id)
+		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *backup.Name)
+		table.AddRow("NAME", utils.PtrString(backup.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE (GB)", *backup.Size)
+		table.AddRow("SIZE (GB)", utils.PtrString(backup.Size))
 		table.AddSeparator()
-		table.AddRow("STATUS", *backup.Status)
+		table.AddRow("STATUS", utils.PtrString(backup.Status))
 		table.AddSeparator()
-		table.AddRow("CREATED AT", *backup.CreatedAt)
+		table.AddRow("CREATED AT", utils.PtrString(backup.CreatedAt))
 		table.AddSeparator()
-		table.AddRow("EXPIRES AT", *backup.ExpireAt)
+		table.AddRow("EXPIRES AT", utils.PtrString(backup.ExpireAt))
 		table.AddSeparator()
 
-		lastRestored := ""
-		if backup.LastRestoredAt != nil {
-			lastRestored = *backup.LastRestoredAt
-		}
+		lastRestored := utils.PtrStringDefault(backup.LastRestoredAt, "")
 		table.AddRow("LAST RESTORED AT", lastRestored)
 		table.AddSeparator()
 		table.AddRow("VOLUME BACKUPS", len(*backup.VolumeBackups))

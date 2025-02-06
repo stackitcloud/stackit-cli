@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -88,4 +89,21 @@ func ConvertTimePToDateTimeString(t *time.Time) string {
 		return ""
 	}
 	return t.Format(time.DateTime)
+}
+
+// PtrStringDefault return the value of a pointer [v] as string. If the pointer is nil, it returns the [defaultValue].
+func PtrStringDefault[T any](v *T, defaultValue string) string {
+	if v == nil {
+		return defaultValue
+	}
+	return fmt.Sprintf("%v", *v)
+}
+
+// PtrByteSizeDefault return the value of an in64 pointer to a string representation of bytesize. If the pointer is nil,
+// it returns the [defaultValue].
+func PtrByteSizeDefault(size *int64, defaultValue string) string {
+	if size == nil {
+		return defaultValue
+	}
+	return bytesize.New(float64(*size)).String()
 }

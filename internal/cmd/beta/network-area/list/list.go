@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,9 +17,8 @@ import (
 	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -164,7 +164,20 @@ func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.Net
 		table.SetHeader("ID", "Name", "Status", "Network Ranges", "# Attached Projects")
 
 		for _, networkArea := range networkAreas {
-			table.AddRow(*networkArea.AreaId, *networkArea.Name, *networkArea.State, len(*networkArea.Ipv4.NetworkRanges), *networkArea.ProjectCount)
+			networkRanges := "n/a"
+			if ipv4 := networkArea.Ipv4; ipv4 != nil {
+				if netRange := ipv4.NetworkRanges; netRange != nil {
+					networkRanges = fmt.Sprint(len(*netRange))
+				}
+			}
+
+			table.AddRow(
+				utils.PtrString(networkArea.AreaId),
+				utils.PtrString(networkArea.Name),
+				utils.PtrString(networkArea.State),
+				networkRanges,
+				utils.PtrString(networkArea.ProjectCount),
+			)
 			table.AddSeparator()
 		}
 

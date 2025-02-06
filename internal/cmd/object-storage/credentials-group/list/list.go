@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
 )
 
@@ -144,7 +144,11 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 		table.SetHeader("ID", "NAME", "URN")
 		for i := range credentialsGroups {
 			c := credentialsGroups[i]
-			table.AddRow(*c.CredentialsGroupId, *c.DisplayName, *c.Urn)
+			table.AddRow(
+				utils.PtrString(c.CredentialsGroupId),
+				utils.PtrString(c.DisplayName),
+				utils.PtrString(c.Urn),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {

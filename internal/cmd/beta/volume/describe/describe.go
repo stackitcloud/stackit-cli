@@ -121,17 +121,17 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *volume.Id)
+		table.AddRow("ID", utils.PtrString(volume.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *volume.Name)
+		table.AddRow("NAME", utils.PtrString(volume.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", *volume.Status)
+		table.AddRow("STATE", utils.PtrString(volume.Status))
 		table.AddSeparator()
-		table.AddRow("VOLUME SIZE (GB)", *volume.Size)
+		table.AddRow("VOLUME SIZE (GB)", utils.PtrString(volume.Size))
 		table.AddSeparator()
-		table.AddRow("PERFORMANCE CLASS", *volume.PerformanceClass)
+		table.AddRow("PERFORMANCE CLASS", utils.PtrString(volume.PerformanceClass))
 		table.AddSeparator()
-		table.AddRow("AVAILABILITY ZONE", *volume.AvailabilityZone)
+		table.AddRow("AVAILABILITY ZONE", utils.PtrString(volume.AvailabilityZone))
 		table.AddSeparator()
 
 		if volume.Source != nil {

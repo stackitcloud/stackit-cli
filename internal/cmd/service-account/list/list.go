@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-
-	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
 )
 
@@ -142,7 +142,10 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 		table.SetHeader("ID", "EMAIL")
 		for i := range serviceAccounts {
 			account := serviceAccounts[i]
-			table.AddRow(*account.Id, *account.Email)
+			table.AddRow(
+				utils.PtrString(account.Id),
+				utils.PtrString(account.Email),
+			)
 		}
 		err := table.Display(p)
 		if err != nil {
