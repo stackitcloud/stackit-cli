@@ -122,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateBucketRequest {
-	req := apiClient.CreateBucket(ctx, model.ProjectId, model.GlobalFlagModel.Region, model.BucketName)
+	req := apiClient.CreateBucket(ctx, model.ProjectId, model.Region, model.BucketName)
 	return req
 }
 

@@ -104,6 +104,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteCredentialsGroupRequest {
-	req := apiClient.DeleteCredentialsGroup(ctx, model.ProjectId, model.GlobalFlagModel.Region, model.CredentialsGroupId)
+	req := apiClient.DeleteCredentialsGroup(ctx, model.ProjectId, model.Region, model.CredentialsGroupId)
 	return req
 }

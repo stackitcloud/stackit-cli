@@ -131,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiListAccessKeysRequest {
-	req := apiClient.ListAccessKeys(ctx, model.ProjectId, model.GlobalFlagModel.Region)
+	req := apiClient.ListAccessKeys(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	return req
 }

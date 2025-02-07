@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateAccessKeyRequest {
-	req := apiClient.CreateAccessKey(ctx, model.ProjectId, model.GlobalFlagModel.Region)
+	req := apiClient.CreateAccessKey(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
 		Expires: model.ExpireDate,
