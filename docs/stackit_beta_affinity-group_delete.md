@@ -1,10 +1,10 @@
 ## stackit beta affinity-group delete
 
-Delete affinity group
+Deletes an affinity group
 
 ### Synopsis
 
-Delete affinity group.
+Deletes an affinity group.
 
 ```
 stackit beta affinity-group delete AFFINITY_GROUP [flags]

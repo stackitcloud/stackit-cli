@@ -1,10 +1,10 @@
 ## stackit beta affinity-group create
 
-Create affinity groups
+Creates an affinity groups
 
 ### Synopsis
 
-Create affinity groups.
+Creates an affinity groups.
 
 ```
 stackit beta affinity-group create [flags]

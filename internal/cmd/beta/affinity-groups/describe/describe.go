@@ -30,8 +30,8 @@ const (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", affinityGroupId),
-		Short: "Describes affinity group",
-		Long:  `Describes affinity group by it's ID.`,
+		Short: "Show details of an affinity group",
+		Long:  `Show details of an affinity group.`,
 		Args:  args.SingleArg(affinityGroupId, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

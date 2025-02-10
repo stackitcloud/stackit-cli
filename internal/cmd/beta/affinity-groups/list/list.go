@@ -35,11 +35,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				"List all affinity groups",
+				"Lists all affinity groups",
 				"$ stackit beta affinity-group list",
 			),
 			examples.NewExample(
-				"List the first 5 affinity groups",
+				"Lists up to 10 affinity groups",
 				"$ stackit beta affinity-group list --limit=10",
 			),
 		),

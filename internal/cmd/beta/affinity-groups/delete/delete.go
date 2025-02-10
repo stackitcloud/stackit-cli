@@ -29,8 +29,8 @@ const (
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", affinityGroupIdArg),
-		Short: "Delete affinity group",
-		Long:  `Delete affinity group.`,
+		Short: "Deletes an affinity group",
+		Long:  `Deletes an affinity group.`,
 		Args:  args.SingleArg(affinityGroupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

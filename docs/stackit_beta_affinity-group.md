@@ -30,8 +30,8 @@ stackit beta affinity-group [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta affinity-group create](./stackit_beta_affinity-group_create.md)	 - Create affinity groups
-* [stackit beta affinity-group delete](./stackit_beta_affinity-group_delete.md)	 - Delete affinity group
-* [stackit beta affinity-group describe](./stackit_beta_affinity-group_describe.md)	 - Describes affinity group
+* [stackit beta affinity-group create](./stackit_beta_affinity-group_create.md)	 - Creates an affinity groups
+* [stackit beta affinity-group delete](./stackit_beta_affinity-group_delete.md)	 - Deletes an affinity group
+* [stackit beta affinity-group describe](./stackit_beta_affinity-group_describe.md)	 - Show details of an affinity group
 * [stackit beta affinity-group list](./stackit_beta_affinity-group_list.md)	 - Lists affinity groups
 

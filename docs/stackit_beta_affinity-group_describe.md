@@ -1,10 +1,10 @@
 ## stackit beta affinity-group describe
 
-Describes affinity group
+Show details of an affinity group
 
 ### Synopsis
 
-Describes affinity group by it's ID.
+Show details of an affinity group.
 
 ```
 stackit beta affinity-group describe AFFINITY_GROUP_ID [flags]

@@ -32,8 +32,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create affinity groups",
-		Long:  `Create affinity groups.`,
+		Short: "Creates an affinity groups",
+		Long:  `Creates an affinity groups.`,
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

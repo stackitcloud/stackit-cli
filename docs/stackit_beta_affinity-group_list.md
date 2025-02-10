@@ -13,10 +13,10 @@ stackit beta affinity-group list [flags]
 ### Examples
 
 ```
-  List all affinity groups
+  Lists all affinity groups
   $ stackit beta affinity-group list
 
-  List the first 5 affinity groups
+  Lists up to 10 affinity groups
   $ stackit beta affinity-group list --limit=10
 ```
 
