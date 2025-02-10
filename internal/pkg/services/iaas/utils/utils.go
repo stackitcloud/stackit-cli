@@ -18,6 +18,7 @@ type IaaSClient interface {
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
 	GetImageExecute(ctx context.Context, projectId string, imageId string) (*iaas.Image, error)
+	GetAffinityGroupExecute(ctx context.Context, projectId string, affinityGroupId string) (*iaas.AffinityGroup, error)
 }
 
 func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupRuleId, securityGroupId string) (string, error) {
@@ -123,6 +124,17 @@ func GetImageName(ctx context.Context, apiClient IaaSClient, projectId, imageId 
 	resp, err := apiClient.GetImageExecute(ctx, projectId, imageId)
 	if err != nil {
 		return "", fmt.Errorf("get image: %w", err)
+	}
+	if resp.Name == nil {
+		return "", nil
+	}
+	return *resp.Name, nil
+}
+
+func GetAffinityGroupName(ctx context.Context, apiClient IaaSClient, projectId, affinityGroupId string) (string, error) {
+	resp, err := apiClient.GetAffinityGroupExecute(ctx, projectId, affinityGroupId)
+	if err != nil {
+		return "", fmt.Errorf("get affinity group: %w", err)
 	}
 	if resp.Name == nil {
 		return "", nil

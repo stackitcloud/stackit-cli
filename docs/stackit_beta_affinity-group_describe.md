@@ -1,26 +1,26 @@
-## stackit beta quota list
+## stackit beta affinity-group describe
 
-Lists quotas
+Describes affinity group
 
 ### Synopsis
 
-Lists project quotas.
+Describes affinity group by it's ID.
 
 ```
-stackit beta quota list [flags]
+stackit beta affinity-group describe AFFINITY_GROUP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  List available quotas
-  $ stackit beta quota list
+  Get details about an affinity group with the ID "xxx"
+  $ stackit beta affinity-group describe xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta quota list"
+  -h, --help   Help for "stackit beta affinity-group describe"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta quota list [flags]
 
 ### SEE ALSO
 
-* [stackit beta quota](./stackit_beta_quota.md)	 - Manage server quotas
+* [stackit beta affinity-group](./stackit_beta_affinity-group.md)	 - Manage server affinity groups
 

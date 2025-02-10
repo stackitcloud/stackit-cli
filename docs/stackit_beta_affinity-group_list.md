@@ -1,26 +1,30 @@
-## stackit beta quota list
+## stackit beta affinity-group list
 
-Lists quotas
+Lists affinity groups
 
 ### Synopsis
 
-Lists project quotas.
+Lists affinity groups.
 
 ```
-stackit beta quota list [flags]
+stackit beta affinity-group list [flags]
 ```
 
 ### Examples
 
 ```
-  List available quotas
-  $ stackit beta quota list
+  List all affinity groups
+  $ stackit beta affinity-group list
+
+  List the first 5 affinity groups
+  $ stackit beta affinity-group list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta quota list"
+  -h, --help        Help for "stackit beta affinity-group list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +40,5 @@ stackit beta quota list [flags]
 
 ### SEE ALSO
 
-* [stackit beta quota](./stackit_beta_quota.md)	 - Manage server quotas
+* [stackit beta affinity-group](./stackit_beta_affinity-group.md)	 - Manage server affinity groups
 

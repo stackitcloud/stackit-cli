@@ -1,26 +1,26 @@
-## stackit beta quota list
+## stackit beta affinity-group delete
 
-Lists quotas
+Delete affinity group
 
 ### Synopsis
 
-Lists project quotas.
+Delete affinity group.
 
 ```
-stackit beta quota list [flags]
+stackit beta affinity-group delete AFFINITY_GROUP [flags]
 ```
 
 ### Examples
 
 ```
-  List available quotas
-  $ stackit beta quota list
+  Delete an affinity group with ID "xxx"
+  $ stackit beta affinity-group delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta quota list"
+  -h, --help   Help for "stackit beta affinity-group delete"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta quota list [flags]
 
 ### SEE ALSO
 
-* [stackit beta quota](./stackit_beta_quota.md)	 - Manage server quotas
+* [stackit beta affinity-group](./stackit_beta_affinity-group.md)	 - Manage server affinity groups
 

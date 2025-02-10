@@ -31,6 +31,15 @@ type IaaSClientMocked struct {
 	GetNetworkAreaRangeResp   *iaas.NetworkRange
 	GetImageFails             bool
 	GetImageResp              *iaas.Image
+	GetAffinityGroupsFails    bool
+	GetAffinityGroupResp      *iaas.AffinityGroup
+}
+
+func (m *IaaSClientMocked) GetAffinityGroupExecute(_ context.Context, _, _ string) (*iaas.AffinityGroup, error) {
+	if m.GetAffinityGroupsFails {
+		return nil, fmt.Errorf("could not get affinity groups")
+	}
+	return m.GetAffinityGroupResp, nil
 }
 
 func (m *IaaSClientMocked) GetSecurityGroupRuleExecute(_ context.Context, _, _, _ string) (*iaas.SecurityGroupRule, error) {
@@ -711,6 +720,51 @@ func TestGetImageName(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetImageName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetAffinityGroupName(t *testing.T) {
+	tests := []struct {
+		name         string
+		affinityResp *iaas.AffinityGroup
+		affinityErr  bool
+		want         string
+		wantErr      bool
+	}{
+		{
+			name:         "successful retrieval",
+			affinityResp: &iaas.AffinityGroup{Name: utils.Ptr("test-affinity")},
+			want:         "test-affinity",
+			wantErr:      false,
+		},
+		{
+			name:        "error on retrieval",
+			affinityErr: true,
+			wantErr:     true,
+		},
+		{
+			name:         "nil affinity group name",
+			affinityErr:  false,
+			affinityResp: &iaas.AffinityGroup{},
+			want:         "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			client := &IaaSClientMocked{
+				GetAffinityGroupsFails: tt.affinityErr,
+				GetAffinityGroupResp:   tt.affinityResp,
+			}
+			got, err := GetAffinityGroupName(ctx, client, "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetAffinityGroupName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetAffinityGroupName() = %v, want %v", got, tt.want)
 			}
 		})
 	}

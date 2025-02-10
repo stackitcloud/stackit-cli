@@ -41,6 +41,7 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit beta affinity-group](./stackit_beta_affinity-group.md)	 - Manage server affinity groups
 * [stackit beta image](./stackit_beta_image.md)	 - Manage server images
 * [stackit beta key-pair](./stackit_beta_key-pair.md)	 - Provides functionality for SSH key pairs
 * [stackit beta network](./stackit_beta_network.md)	 - Provides functionality for networks
