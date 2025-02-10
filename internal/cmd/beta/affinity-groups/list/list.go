@@ -130,7 +130,7 @@ func outputResult(p *print.Printer, model inputModel, items []iaas.AffinityGroup
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal affinity groups: %w", err)
 		}
