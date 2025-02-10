@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, model *inputModel, machineTypes *iaas.Machin
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(machineTypes, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(machineTypes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal machineTypes: %w", err)
 		}

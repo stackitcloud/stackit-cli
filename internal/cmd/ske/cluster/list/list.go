@@ -158,7 +158,7 @@ func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster)
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(clusters, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(clusters, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SKE cluster list: %w", err)
 		}

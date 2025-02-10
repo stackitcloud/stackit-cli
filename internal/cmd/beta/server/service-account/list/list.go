@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverName string, s
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal service accounts list: %w", err)
 		}

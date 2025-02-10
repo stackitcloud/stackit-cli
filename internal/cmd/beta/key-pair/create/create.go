@@ -154,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, item *iaas.Keypair) err
 		}
 		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal key pair: %w", err)
 		}

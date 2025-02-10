@@ -110,7 +110,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *redis.Instanc
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Redis instance: %w", err)
 		}

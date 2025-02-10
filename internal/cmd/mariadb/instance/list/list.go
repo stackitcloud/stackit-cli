@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, instances []mariadb.Ins
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instances, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(instances, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB instance list: %w", err)
 		}

@@ -120,7 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, schedule *serverbackup.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(schedule, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(schedule, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server backup schedule: %w", err)
 		}

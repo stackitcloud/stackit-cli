@@ -110,7 +110,7 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(config, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(config, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal scrape configuration: %w", err)
 		}

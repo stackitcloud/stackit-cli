@@ -150,7 +150,7 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) er
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(routes, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(routes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal static routes: %w", err)
 		}

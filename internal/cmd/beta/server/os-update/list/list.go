@@ -138,7 +138,7 @@ func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(updates, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(updates, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server os-update list: %w", err)
 		}

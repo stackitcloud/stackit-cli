@@ -138,7 +138,7 @@ func outputResult(p *print.Printer, outputFormat string, configs []observability
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(configs, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(configs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal scrape configurations list: %w", err)
 		}

@@ -151,7 +151,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, publ
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(publicIp, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(publicIp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal public IP: %w", err)
 		}

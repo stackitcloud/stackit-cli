@@ -119,7 +119,7 @@ func outputResult(p *print.Printer, model *inputModel, serverLabel string, serve
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serverUrl, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(serverUrl, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal url: %w", err)
 		}

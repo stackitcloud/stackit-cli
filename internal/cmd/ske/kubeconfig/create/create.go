@@ -262,9 +262,9 @@ func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, re
 		var err error
 		var details []byte
 		if respKubeconfig != nil {
-			details, err = yaml.MarshalWithOptions(respKubeconfig, yaml.IndentSequence(true))
+			details, err = yaml.MarshalWithOptions(respKubeconfig, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		} else if respLogin != nil {
-			details, err = yaml.MarshalWithOptions(respLogin, yaml.IndentSequence(true))
+			details, err = yaml.MarshalWithOptions(respLogin, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		}
 		if err != nil {
 			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)

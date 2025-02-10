@@ -149,7 +149,7 @@ func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal network range: %w", err)
 		}

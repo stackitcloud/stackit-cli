@@ -124,7 +124,7 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(recordSet, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(recordSet, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set: %w", err)
 		}

@@ -116,7 +116,7 @@ func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) erro
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}

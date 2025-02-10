@@ -169,7 +169,7 @@ func outputResult(p *print.Printer, model *inputModel, members []authorization.M
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(members, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(members, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal members: %w", err)
 		}

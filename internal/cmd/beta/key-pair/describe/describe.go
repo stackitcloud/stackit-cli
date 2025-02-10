@@ -131,12 +131,12 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if showOnlyPublicKey {
 			onlyPublicKey := map[string]string{
 				"publicKey": *keyPair.PublicKey,
 			}
-			details, err = yaml.MarshalWithOptions(onlyPublicKey, yaml.IndentSequence(true))
+			details, err = yaml.MarshalWithOptions(onlyPublicKey, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		}
 
 		if err != nil {

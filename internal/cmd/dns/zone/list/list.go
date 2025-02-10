@@ -249,7 +249,7 @@ func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(zones, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(zones, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal DNS zone list: %w", err)
 		}

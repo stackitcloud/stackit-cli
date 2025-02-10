@@ -129,7 +129,7 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(templates, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(templates, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server command template list: %w", err)
 		}

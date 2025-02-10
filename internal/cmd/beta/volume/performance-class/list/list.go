@@ -156,7 +156,7 @@ func outputResult(p *print.Printer, outputFormat string, performanceClasses []ia
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(performanceClasses, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(performanceClasses, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal volume performance class: %w", err)
 		}

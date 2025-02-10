@@ -147,7 +147,7 @@ func outputResult(p *print.Printer, outputFormat string, databases []sqlserverfl
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(databases, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(databases, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database list: %w", err)
 		}

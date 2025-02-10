@@ -110,7 +110,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *opensearch.In
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal OpenSearch instance: %w", err)
 		}

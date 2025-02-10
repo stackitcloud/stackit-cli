@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials []mariadb.C
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal MariaDB credentials list: %w", err)
 		}

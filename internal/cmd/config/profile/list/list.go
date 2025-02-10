@@ -100,7 +100,7 @@ func outputResult(p *print.Printer, outputFormat string, profiles []profileInfo)
 		p.Outputln(string(details))
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(profiles, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(profiles, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
 		}
