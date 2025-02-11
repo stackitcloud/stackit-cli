@@ -4,7 +4,7 @@ Lists quotas
 
 ### Synopsis
 
-Lists project quotas.
+Lists server quotas.
 
 ```
 stackit beta quota list [flags]
