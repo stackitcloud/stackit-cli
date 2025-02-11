@@ -136,7 +136,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Server Backup list: %w", err)
 		}

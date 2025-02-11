@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering)
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Redis plans: %w", err)
 		}

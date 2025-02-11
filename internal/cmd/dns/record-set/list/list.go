@@ -259,7 +259,7 @@ func outputResult(p *print.Printer, outputFormat string, recordSets []dns.Record
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(recordSets, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(recordSets, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal DNS record set list: %w", err)
 		}

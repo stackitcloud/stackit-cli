@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, buckets []objectstorage
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(buckets, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(buckets, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Object Storage bucket list: %w", err)
 		}

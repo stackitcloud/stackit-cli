@@ -120,7 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, commandTemplate *runcom
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(commandTemplate, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(commandTemplate, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server command template: %w", err)
 		}

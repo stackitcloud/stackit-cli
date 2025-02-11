@@ -135,7 +135,7 @@ func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *obse
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(grafanaConfigs, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(grafanaConfigs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Grafana configs: %w", err)
 		}

@@ -136,7 +136,7 @@ func outputResult(p *print.Printer, outputFormat string, commands []runcommand.C
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(commands, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(commands, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server command list: %w", err)
 		}

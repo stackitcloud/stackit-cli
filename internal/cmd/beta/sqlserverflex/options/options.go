@@ -287,7 +287,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 		p.Outputln(string(details))
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SQL Server Flex options: %w", err)
 		}

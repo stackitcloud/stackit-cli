@@ -120,7 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(database, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(database, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}

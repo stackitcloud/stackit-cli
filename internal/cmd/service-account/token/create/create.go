@@ -153,7 +153,7 @@ func outputResult(p *print.Printer, model *inputModel, token *serviceaccount.Acc
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(token, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(token, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal service account access token: %w", err)
 		}

@@ -108,7 +108,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *observability
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Observability instance: %w", err)
 		}

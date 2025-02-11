@@ -111,7 +111,7 @@ func outputResult(p *print.Printer, outputFormat string, machineType *iaas.Machi
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(machineType, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(machineType, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server machine type: %w", err)
 		}

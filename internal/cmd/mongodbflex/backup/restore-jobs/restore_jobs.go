@@ -149,7 +149,7 @@ func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbfl
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(restoreJobs, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(restoreJobs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex restore jobs list: %w", err)
 		}

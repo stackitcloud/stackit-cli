@@ -124,7 +124,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(route, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(route, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal static route: %w", err)
 		}

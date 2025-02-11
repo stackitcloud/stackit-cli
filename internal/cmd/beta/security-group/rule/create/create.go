@@ -229,7 +229,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, securityGro
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(securityGroupRule, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(securityGroupRule, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal security group rule: %w", err)
 		}

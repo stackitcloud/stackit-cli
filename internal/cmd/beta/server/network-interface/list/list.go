@@ -149,7 +149,7 @@ func outputResult(p *print.Printer, outputFormat, serverId string, serverNics []
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serverNics, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(serverNics, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server network interfaces: %w", err)
 		}

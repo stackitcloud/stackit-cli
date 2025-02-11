@@ -191,7 +191,7 @@ func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *d
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true))
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal DNS record-set: %w", err)
 		}
