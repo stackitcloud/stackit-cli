@@ -3,7 +3,8 @@ package beta
 import (
 	"fmt"
 
-	image "github.com/stackitcloud/stackit-cli/internal/cmd/beta/image"
+	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/beta/affinity-groups"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/image"
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/beta/key-pair"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
@@ -56,4 +57,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(keypair.NewCmd(p))
 	cmd.AddCommand(image.NewCmd(p))
 	cmd.AddCommand(quota.NewCmd(p))
+	cmd.AddCommand(affinityGroups.NewCmd(p))
 }
