@@ -44,7 +44,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	accessTokenValid := false
-	accessTokenExpired, err := tokenExpired(utf.accessToken)
+	accessTokenExpired, err := TokenExpired(utf.accessToken)
 	if err != nil {
 		return nil, fmt.Errorf("check if access token has expired: %w", err)
 	} else if !accessTokenExpired {
@@ -108,7 +108,7 @@ func reauthenticateUser(utf *userTokenFlow) error {
 	return nil
 }
 
-func tokenExpired(token string) (bool, error) {
+func TokenExpired(token string) (bool, error) {
 	// We can safely use ParseUnverified because we are not authenticating the user at this point.
 	// We're just checking the expiration time
 	tokenParsed, _, err := jwt.NewParser().ParseUnverified(token, &jwt.RegisteredClaims{})
