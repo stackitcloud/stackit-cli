@@ -60,7 +60,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateAccessKeyRequest {
-	req := apiClient.CreateAccessKey(ctx, model.ProjectId)
+	req := apiClient.CreateAccessKey(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
 		Expires: model.ExpireDate,

@@ -15,6 +15,7 @@ import (
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
+var regionFlag = globalflags.RegionFlag
 
 type testCtxKey struct{}
 
@@ -22,12 +23,14 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
 var testCredentialsGroupId = uuid.NewString()
+var testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:          testProjectId,
 		credentialsGroupIdFlag: testCredentialsGroupId,
 		limitFlag:              "10",
+		regionFlag:             testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,6 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		CredentialsGroupId: testCredentialsGroupId,
 		Limit:              utils.Ptr(int64(10)),
@@ -51,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiListAccessKeysRequest)) objectstorage.ApiListAccessKeysRequest {
-	request := testClient.ListAccessKeys(testCtx, testProjectId)
+	request := testClient.ListAccessKeys(testCtx, testProjectId, testRegion)
 	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)

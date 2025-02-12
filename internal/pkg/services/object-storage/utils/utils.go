@@ -10,13 +10,13 @@ import (
 )
 
 type ObjectStorageClient interface {
-	GetServiceStatusExecute(ctx context.Context, projectId string) (*objectstorage.ProjectStatus, error)
-	ListCredentialsGroupsExecute(ctx context.Context, projectId string) (*objectstorage.ListCredentialsGroupsResponse, error)
-	ListAccessKeys(ctx context.Context, projectId string) objectstorage.ApiListAccessKeysRequest
+	GetServiceStatusExecute(ctx context.Context, projectId, region string) (*objectstorage.ProjectStatus, error)
+	ListCredentialsGroupsExecute(ctx context.Context, projectId, region string) (*objectstorage.ListCredentialsGroupsResponse, error)
+	ListAccessKeys(ctx context.Context, projectId, region string) objectstorage.ApiListAccessKeysRequest
 }
 
-func ProjectEnabled(ctx context.Context, apiClient ObjectStorageClient, projectId string) (bool, error) {
-	_, err := apiClient.GetServiceStatusExecute(ctx, projectId)
+func ProjectEnabled(ctx context.Context, apiClient ObjectStorageClient, projectId, region string) (bool, error) {
+	_, err := apiClient.GetServiceStatusExecute(ctx, projectId, region)
 	if err != nil {
 		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
 		if !ok {
@@ -30,8 +30,8 @@ func ProjectEnabled(ctx context.Context, apiClient ObjectStorageClient, projectI
 	return true, nil
 }
 
-func GetCredentialsGroupName(ctx context.Context, apiClient ObjectStorageClient, projectId, credentialsGroupId string) (string, error) {
-	resp, err := apiClient.ListCredentialsGroupsExecute(ctx, projectId)
+func GetCredentialsGroupName(ctx context.Context, apiClient ObjectStorageClient, projectId, credentialsGroupId, region string) (string, error) {
+	resp, err := apiClient.ListCredentialsGroupsExecute(ctx, projectId, region)
 	if err != nil {
 		return "", fmt.Errorf("list Object Storage credentials groups: %w", err)
 	}
@@ -50,8 +50,8 @@ func GetCredentialsGroupName(ctx context.Context, apiClient ObjectStorageClient,
 	return "", fmt.Errorf("could not find Object Storage credentials group name")
 }
 
-func GetCredentialsName(ctx context.Context, apiClient ObjectStorageClient, projectId, credentialsGroupId, keyId string) (string, error) {
-	req := apiClient.ListAccessKeys(ctx, projectId)
+func GetCredentialsName(ctx context.Context, apiClient ObjectStorageClient, projectId, credentialsGroupId, keyId, region string) (string, error) {
+	req := apiClient.ListAccessKeys(ctx, projectId, region)
 	req = req.CredentialsGroup(credentialsGroupId)
 	resp, err := req.Execute()
 

@@ -16,6 +16,7 @@ import (
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
+var regionFlag = globalflags.RegionFlag
 
 type testCtxKey struct{}
 
@@ -24,12 +25,14 @@ var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
 var testCredentialsGroupId = uuid.NewString()
 var testExpirationDate = "2024-01-01T00:00:00Z"
+var testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:          testProjectId,
 		credentialsGroupIdFlag: testCredentialsGroupId,
 		expireDateFlag:         testExpirationDate,
+		regionFlag:             testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		ExpireDate:         utils.Ptr(testExpirationDate),
 		CredentialsGroupId: testCredentialsGroupId,
@@ -72,7 +76,7 @@ func fixturePayload(mods ...func(payload *objectstorage.CreateAccessKeyPayload))
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiCreateAccessKeyRequest)) objectstorage.ApiCreateAccessKeyRequest {
-	request := testClient.CreateAccessKey(testCtx, testProjectId)
+	request := testClient.CreateAccessKey(testCtx, testProjectId, testRegion)
 	request = request.CreateAccessKeyPayload(fixturePayload())
 	request = request.CredentialsGroup(testCredentialsGroupId)
 	for _, mod := range mods {

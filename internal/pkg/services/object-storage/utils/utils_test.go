@@ -20,6 +20,7 @@ var (
 	testProjectId          = uuid.NewString()
 	testCredentialsGroupId = uuid.NewString()
 	testCredentialsId      = "credentialsID" //nolint:gosec // linter false positive
+	testRegion             = "eu01"
 )
 
 const (
@@ -35,7 +36,7 @@ type objectStorageClientMocked struct {
 	listAccessKeysReq          objectstorage.ApiListAccessKeysRequest
 }
 
-func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _ string) (*objectstorage.ProjectStatus, error) {
+func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _, _ string) (*objectstorage.ProjectStatus, error) {
 	if m.getServiceStatusFails {
 		return nil, fmt.Errorf("could not get service status")
 	}
@@ -45,14 +46,14 @@ func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _
 	return &objectstorage.ProjectStatus{}, nil
 }
 
-func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Context, _ string) (*objectstorage.ListCredentialsGroupsResponse, error) {
+func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Context, _, _ string) (*objectstorage.ListCredentialsGroupsResponse, error) {
 	if m.listCredentialsGroupsFails {
 		return nil, fmt.Errorf("could not list credentials groups")
 	}
 	return m.listCredentialsGroupsResp, nil
 }
 
-func (m *objectStorageClientMocked) ListAccessKeys(_ context.Context, _ string) objectstorage.ApiListAccessKeysRequest {
+func (m *objectStorageClientMocked) ListAccessKeys(_ context.Context, _, _ string) objectstorage.ApiListAccessKeysRequest {
 	return m.listAccessKeysReq
 }
 
@@ -89,7 +90,7 @@ func TestProjectEnabled(t *testing.T) {
 				getServiceStatusFails: tt.getProjectFails,
 			}
 
-			output, err := ProjectEnabled(context.Background(), client, testProjectId)
+			output, err := ProjectEnabled(context.Background(), client, testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				fmt.Printf("failed on valid input: %v", err)
@@ -202,7 +203,7 @@ func TestGetCredentialsGroupName(t *testing.T) {
 				listCredentialsGroupsResp:  tt.listCredentialsGroupsResp,
 			}
 
-			output, err := GetCredentialsGroupName(context.Background(), client, testProjectId, testCredentialsGroupId)
+			output, err := GetCredentialsGroupName(context.Background(), client, testProjectId, testCredentialsGroupId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -341,7 +342,7 @@ func TestGetCredentialsName(t *testing.T) {
 				t.Fatalf("Failed to initialize client: %v", err)
 			}
 
-			output, err := GetCredentialsName(context.Background(), client, testProjectId, testCredentialsGroupId, testCredentialsId)
+			output, err := GetCredentialsName(context.Background(), client, testProjectId, testCredentialsGroupId, testCredentialsId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
