@@ -232,7 +232,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	})
 
-	p.Debug(print.DebugLevel, "opening browser for authentication")
+	p.Debug(print.DebugLevel, "opening browser for authentication: %s", authorizationURL)
 	p.Debug(print.DebugLevel, "using authentication server on %s", idpWellKnownConfig.Issuer)
 	p.Debug(print.DebugLevel, "using client ID %s for authentication ", idpClientID)
 
