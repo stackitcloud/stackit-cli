@@ -2,6 +2,7 @@ package auth
 
 import (
 	activateserviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/auth/activate-service-account"
+	getaccesstoken "github.com/stackitcloud/stackit-cli/internal/cmd/auth/get-access-token"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/login"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/logout"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -27,4 +28,5 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(login.NewCmd(p))
 	cmd.AddCommand(logout.NewCmd(p))
 	cmd.AddCommand(activateserviceaccount.NewCmd(p))
+	cmd.AddCommand(getaccesstoken.NewCmd(p))
 }

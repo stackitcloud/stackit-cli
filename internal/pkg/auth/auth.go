@@ -31,7 +31,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 		return nil, fmt.Errorf("authentication flow not set")
 	}
 
-	userSessionExpired, err := userSessionExpired()
+	userSessionExpired, err := UserSessionExpired()
 	if err != nil {
 		return nil, fmt.Errorf("check if user session expired: %w", err)
 	}
@@ -42,7 +42,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 		if userSessionExpired {
 			return nil, fmt.Errorf("session expired")
 		}
-		accessToken, err := getAccessToken()
+		accessToken, err := GetAccessToken()
 		if err != nil {
 			return nil, fmt.Errorf("get service account access token: %w", err)
 		}
@@ -73,7 +73,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	return authCfgOption, nil
 }
 
-func userSessionExpired() (bool, error) {
+func UserSessionExpired() (bool, error) {
 	sessionExpiresAtString, err := GetAuthField(SESSION_EXPIRES_AT_UNIX)
 	if err != nil {
 		return false, fmt.Errorf("get %s: %w", SESSION_EXPIRES_AT_UNIX, err)
@@ -87,7 +87,7 @@ func userSessionExpired() (bool, error) {
 	return now.After(sessionExpiresAt), nil
 }
 
-func getAccessToken() (string, error) {
+func GetAccessToken() (string, error) {
 	accessToken, err := GetAuthField(ACCESS_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("get %s: %w", ACCESS_TOKEN, err)

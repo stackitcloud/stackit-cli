@@ -32,6 +32,22 @@ You can authenticate as a user by running:
 or use a service account by running:
   $ stackit auth activate-service-account`
 
+	SESSION_EXPIRED = `Session is expired. Please log in again first.
+	
+You can authenticate as a user by running:
+$ stackit auth login
+
+or use a service account by running:
+$ stackit auth activate-service-account`
+
+	ACCESS_TOKEN_EXPIRED = `Access token is expired. Please log in again first.
+	
+You can authenticate as a user by running:
+$ stackit auth login
+
+or use a service account by running:
+$ stackit auth activate-service-account`
+
 	FAILED_SERVICE_ACCOUNT_ACTIVATION = `could not setup authentication based on the provided service account credentials. 
 Please double check if they are correctly configured.
 
@@ -228,6 +244,18 @@ type AuthError struct{}
 
 func (e *AuthError) Error() string {
 	return FAILED_AUTH
+}
+
+type SessionExpiredError struct{}
+
+func (e *SessionExpiredError) Error() string {
+	return SESSION_EXPIRED
+}
+
+type AccessTokenExpiredError struct{}
+
+func (e *AccessTokenExpiredError) Error() string {
+	return ACCESS_TOKEN_EXPIRED
 }
 
 type ActivateServiceAccountError struct{}
