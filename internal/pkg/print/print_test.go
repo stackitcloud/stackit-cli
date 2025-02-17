@@ -57,7 +57,8 @@ func TestOutputf(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
@@ -128,7 +129,8 @@ func TestOutputln(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
@@ -192,7 +194,8 @@ func TestPagerDisplay(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
@@ -291,7 +294,8 @@ func TestDebug(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
 			slog.SetDefault(logger)
 			p := &Printer{
@@ -354,7 +358,8 @@ func TestInfo(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
@@ -413,7 +418,8 @@ func TestWarn(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
@@ -472,7 +478,8 @@ func TestError(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
-			cmd.SetOutput(&buf)
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
