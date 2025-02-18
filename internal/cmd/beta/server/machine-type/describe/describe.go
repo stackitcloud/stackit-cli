@@ -101,6 +101,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineType *iaas.MachineType) error {
+	if machineType == nil {
+		return fmt.Errorf("api response for machine type is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(machineType, "", "  ")

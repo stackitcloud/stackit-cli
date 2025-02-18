@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -64,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server backup: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -109,7 +110,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Backup) error {
+func outputResult(p *print.Printer, outputFormat string, backup serverbackup.Backup) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
@@ -145,7 +146,11 @@ func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Ba
 		lastRestored := utils.PtrStringDefault(backup.LastRestoredAt, "")
 		table.AddRow("LAST RESTORED AT", lastRestored)
 		table.AddSeparator()
-		table.AddRow("VOLUME BACKUPS", len(*backup.VolumeBackups))
+		volBackups := ""
+		if backups := backup.VolumeBackups; backups != nil {
+			volBackups = strconv.Itoa(len(*backups))
+		}
+		table.AddRow("VOLUME BACKUPS", volBackups)
 		table.AddSeparator()
 
 		err := table.Display(p)

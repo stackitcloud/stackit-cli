@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server command: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -108,7 +108,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, command *runcommand.CommandDetails) error {
+func outputResult(p *print.Printer, outputFormat string, command runcommand.CommandDetails) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(command, "", "  ")

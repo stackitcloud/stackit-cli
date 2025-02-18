@@ -12,6 +12,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -60,8 +62,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else {
+					serverLabel = serverName
+				}
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a os-update for server %s?", model.ServerId)
+				prompt := fmt.Sprintf("Are you sure you want to create a os-update for server %s?", serverLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -78,7 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Server os-update: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,8 +136,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *serverupdate.Update) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverupdate.Update) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -142,7 +155,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverupdate.Update
 
 		return nil
 	default:
-		p.Outputf("Triggered creation of server os-update for server %s. Update ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
+		p.Outputf("Triggered creation of server os-update for server %s. Update ID: %s\n", serverLabel, utils.PtrString(resp.Id))
 		return nil
 	}
 }

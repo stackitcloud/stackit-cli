@@ -64,7 +64,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server backup schedule: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -109,7 +109,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, schedule *serverbackup.BackupSchedule) error {
+func outputResult(p *print.Printer, outputFormat string, schedule serverbackup.BackupSchedule) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(schedule, "", "  ")
@@ -138,9 +138,9 @@ func outputResult(p *print.Printer, outputFormat string, schedule *serverbackup.
 		table.AddRow("RRULE", utils.PtrString(schedule.Rrule))
 		table.AddSeparator()
 		if schedule.BackupProperties != nil {
-			table.AddRow("BACKUP NAME", *schedule.BackupProperties.Name)
+			table.AddRow("BACKUP NAME", utils.PtrString(schedule.BackupProperties.Name))
 			table.AddSeparator()
-			table.AddRow("BACKUP RETENTION DAYS", *schedule.BackupProperties.RetentionPeriod)
+			table.AddRow("BACKUP RETENTION DAYS", utils.PtrString(schedule.BackupProperties.RetentionPeriod))
 			table.AddSeparator()
 			ids := schedule.BackupProperties.VolumeIds
 			table.AddRow("BACKUP VOLUME IDS", utils.JoinStringPtr(ids, "\n"))

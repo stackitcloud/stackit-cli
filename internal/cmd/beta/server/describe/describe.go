@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -103,9 +103,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, server *iaas.Server) error {
-	outputFormat := model.OutputFormat
-
+func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) error {
+	if server == nil {
+		return fmt.Errorf("api response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(server, "", "  ")

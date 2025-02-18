@@ -85,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				*resp.Items = (*resp.Items)[:*model.Limit]
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 
@@ -132,9 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.ListMachineTypes(ctx, model.ProjectId)
 }
 
-func outputResult(p *print.Printer, model *inputModel, machineTypes *iaas.MachineTypeListResponse) error {
-	outputFormat := model.OutputFormat
-
+func outputResult(p *print.Printer, outputFormat string, machineTypes iaas.MachineTypeListResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(machineTypes, "", "  ")
@@ -157,8 +155,10 @@ func outputResult(p *print.Printer, model *inputModel, machineTypes *iaas.Machin
 		table.SetTitle("Machine-Types")
 
 		table.SetHeader("NAME", "DESCRIPTION")
-		for _, machineType := range *machineTypes.GetItems() {
-			table.AddRow(*machineType.Name, utils.PtrString(machineType.Description))
+		if items := machineTypes.GetItems(); items != nil && len(*items) > 0 {
+			for _, machineType := range *items {
+				table.AddRow(*machineType.Name, utils.PtrString(machineType.Description))
+			}
 		}
 
 		err := table.Display(p)

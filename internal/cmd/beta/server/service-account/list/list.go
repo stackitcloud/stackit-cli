@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			serviceAccounts := *resp.Items
 			if len(serviceAccounts) == 0 {
-				p.Info("No service accounts found for server %s\n", *model.ServerId)
+				p.Info("No service accounts found for server %s\n", serverName)
 				return nil
 			}
 

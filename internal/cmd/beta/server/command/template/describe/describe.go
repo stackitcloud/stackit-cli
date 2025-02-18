@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -64,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read server command template: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -109,7 +108,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, commandTemplate *runcommand.CommandTemplateSchema) error {
+func outputResult(p *print.Printer, outputFormat string, commandTemplate runcommand.CommandTemplateSchema) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(commandTemplate, "", "  ")
@@ -136,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat string, commandTemplate *runcom
 		table.AddRow("DESCRIPTION", utils.PtrString(commandTemplate.Description))
 		table.AddSeparator()
 		if commandTemplate.OsType != nil {
-			table.AddRow("OS TYPE", strings.Join(*commandTemplate.OsType, "\n"))
+			table.AddRow("OS TYPE", utils.JoinStringPtr(commandTemplate.OsType, "\n"))
 			table.AddSeparator()
 		}
 		if commandTemplate.ParameterSchema != nil {

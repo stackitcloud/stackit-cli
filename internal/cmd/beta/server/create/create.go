@@ -155,7 +155,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -334,8 +334,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateServerPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, server *iaas.Server) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, server *iaas.Server) error {
+	if server == nil {
+		return fmt.Errorf("server response is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(server, "", "  ")
 		if err != nil {

@@ -86,10 +86,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(lines) > int(*model.Length) {
 				// Truncate output and show most recent logs
 				start := len(lines) - int(*model.Length)
-				return outputResult(p, model, serverLabel, strings.Join(lines[start:], "\n"))
+				return outputResult(p, model.OutputFormat, serverLabel, strings.Join(lines[start:], "\n"))
 			}
 
-			return outputResult(p, model, serverLabel, log)
+			return outputResult(p, model.OutputFormat, serverLabel, log)
 		},
 	}
 	configureFlags(cmd)
@@ -138,9 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetServerLog(ctx, model.ProjectId, model.ServerId)
 }
 
-func outputResult(p *print.Printer, model *inputModel, serverLabel, log string) error {
-	outputFormat := model.OutputFormat
-
+func outputResult(p *print.Printer, outputFormat, serverLabel, log string) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(log, "", "  ")

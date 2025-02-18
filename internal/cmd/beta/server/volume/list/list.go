@@ -149,7 +149,11 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
 			s := volumes[i]
-			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeNames[i])
+			var volumeName string
+			if len(volumeNames)-1 > i {
+				volumeName = volumeNames[i]
+			}
+			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeName)
 		}
 		err := table.Display(p)
 		if err != nil {

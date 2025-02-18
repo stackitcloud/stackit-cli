@@ -61,11 +61,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server command templates: %w", err)
 			}
-			templates := *resp.Items
-			if len(templates) == 0 {
+			if templates := resp.Items; templates == nil || len(*templates) == 0 {
 				p.Info("No commands templates found\n")
 				return nil
 			}
+			templates := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(templates) > int(*model.Limit) {
