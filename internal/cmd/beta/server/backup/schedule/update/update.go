@@ -100,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update Server Backup Schedule: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -184,8 +184,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.BackupSchedule) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, resp serverbackup.BackupSchedule) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {

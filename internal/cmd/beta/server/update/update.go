@@ -84,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update server: %w", err)
 			}
 
-			return outputResult(p, model, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, serverLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -143,8 +143,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateServerPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, serverLabel string, server *iaas.Server) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, server *iaas.Server) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(server, "", "  ")
 		if err != nil {

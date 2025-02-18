@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("detach service account request: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, model.ServiceAccMail, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, model.ServiceAccMail, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -120,7 +120,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, service *iaas.ServiceAccountMailListResponse) error {
+func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, service iaas.ServiceAccountMailListResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(service, "", "  ")

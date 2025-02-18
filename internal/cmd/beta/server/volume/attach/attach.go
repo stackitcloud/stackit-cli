@@ -94,7 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("attach server volume: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, volumeLabel, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, volumeLabel, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -143,7 +143,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.AddVolumeToServerPayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, volumeLabel, serverLabel string, volume *iaas.VolumeAttachment) error {
+func outputResult(p *print.Printer, outputFormat, volumeLabel, serverLabel string, volume iaas.VolumeAttachment) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")

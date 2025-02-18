@@ -150,6 +150,10 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 			s := backups[i]
 
 			lastRestored := utils.PtrStringDefault(s.LastRestoredAt, "")
+			var volBackups int
+			if s.VolumeBackups != nil {
+				volBackups = len(*s.VolumeBackups)
+			}
 			table.AddRow(
 				utils.PtrString(s.Id),
 				utils.PtrString(s.Name),
@@ -158,7 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 				utils.PtrString(s.CreatedAt),
 				utils.PtrString(s.ExpireAt),
 				lastRestored,
-				len(*s.VolumeBackups),
+				volBackups,
 			)
 		}
 		err := table.Display(p)
