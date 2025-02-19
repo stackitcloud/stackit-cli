@@ -82,6 +82,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
+				if projectLabel == "" {
+					projectLabel = model.ProjectId
+				}
 				p.Info("No public IPs found for project %q\n", projectLabel)
 				return nil
 			}

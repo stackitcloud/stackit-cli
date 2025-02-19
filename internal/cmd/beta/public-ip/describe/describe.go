@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read public IP: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	return cmd
@@ -101,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetPublicIP(ctx, model.ProjectId, model.PublicIpId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, publicIp *iaas.PublicIp) error {
+func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(publicIp, "", "  ")

@@ -58,6 +58,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
 			}
+			if publicIpLabel == "" {
+				publicIpLabel = model.PublicIpId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete public IP %q? (This cannot be undone)", publicIpLabel)
@@ -74,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete public IP: %w", err)
 			}
 
-			p.Info("Deleted public IP %q\n", model.PublicIpId)
+			p.Info("Deleted public IP %q\n", publicIpLabel)
 			return nil
 		},
 	}

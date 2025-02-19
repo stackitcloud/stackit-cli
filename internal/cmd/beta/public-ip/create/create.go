@@ -68,6 +68,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
+			if projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a public IP for project %q?", projectLabel)
@@ -84,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create public IP: %w", err)
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, projectLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -140,8 +143,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreatePublicIPPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, publicIp *iaas.PublicIp) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, publicIp iaas.PublicIp) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(publicIp, "", "  ")
 		if err != nil {
