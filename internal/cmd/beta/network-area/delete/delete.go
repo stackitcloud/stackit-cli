@@ -63,6 +63,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.AreaId
 			}
+			if networkAreaLabel == "" {
+				networkAreaLabel = model.AreaId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete network area %q?", networkAreaLabel)

@@ -70,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe static route: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(p, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -113,7 +113,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat string, route iaas.Route) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(route, "", "  ")

@@ -88,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			return outputResult(p, model, networkAreaLabel, networkRange)
+			return outputResult(p, model.OutputFormat, networkAreaLabel, networkRange)
 		},
 	}
 	configureFlags(cmd)
@@ -138,8 +138,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateNetworkAreaRangePayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, networkRange iaas.NetworkRange) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRange iaas.NetworkRange) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkRange, "", "  ")
 		if err != nil {

@@ -61,9 +61,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
 			}
+			if networkAreaLabel == "" {
+				networkAreaLabel = *model.NetworkAreaId
+			}
 			networkRangeLabel, err := iaasUtils.GetNetworkRangePrefix(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId, model.NetworkRangeId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get network range prefix: %v", err)
+				networkRangeLabel = model.NetworkRangeId
+			}
+			if networkRangeLabel == "" {
 				networkRangeLabel = model.NetworkRangeId
 			}
 

@@ -61,6 +61,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
 			}
+			if networkAreaLabel == "" {
+				networkAreaLabel = *model.NetworkAreaId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete static route %q on STACKIT Network Area (SNA) %q?", model.RouteId, networkAreaLabel)

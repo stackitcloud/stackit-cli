@@ -80,6 +80,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get network area name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
 				}
+				if networkAreaLabel == "" {
+					networkAreaLabel = *model.NetworkAreaId
+				}
 				p.Info("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
 				return nil
 			}

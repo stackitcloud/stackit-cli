@@ -80,6 +80,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get organization name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
 				}
+				if networkAreaLabel == "" {
+					networkAreaLabel = *model.NetworkAreaId
+				}
 				p.Info("No network ranges found for SNA %q\n", networkAreaLabel)
 				return nil
 			}
