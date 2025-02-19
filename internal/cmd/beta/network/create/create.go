@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
 
@@ -98,6 +99,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
+			if projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a network for project %q?", projectLabel)
@@ -126,7 +130,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -234,8 +238,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateNetworkPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, network *iaas.Network) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, network *iaas.Network) error {
+	if network == nil {
+		return fmt.Errorf("network cannot be nil")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(network, "", "  ")
 		if err != nil {
@@ -254,10 +261,10 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, netw
 		return nil
 	default:
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, *network.NetworkId)
+		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, utils.PtrString(network.NetworkId))
 		return nil
 	}
 }

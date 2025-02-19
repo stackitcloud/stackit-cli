@@ -76,6 +76,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
+				if projectLabel == "" {
+					projectLabel = model.ProjectId
+				}
 				p.Info("No networks found for project %q\n", projectLabel)
 				return nil
 			}
@@ -155,10 +158,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED")
 
 		for _, network := range networks {
-			publicIp := ""
-			if network.PublicIp != nil {
-				publicIp = *network.PublicIp
-			}
+			publicIp := utils.PtrString(network.PublicIp)
 
 			routed := false
 			if network.Routed != nil {

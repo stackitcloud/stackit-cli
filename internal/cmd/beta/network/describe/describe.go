@@ -101,6 +101,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) error {
+	if network == nil {
+		return fmt.Errorf("network cannot be nil")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(network, "", "  ")
