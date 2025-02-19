@@ -69,6 +69,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			}
+			if serverLabel == "" {
+				serverLabel = *model.ServerId
+			}
 
 			// if the delete flag is provided a network interface is detached and deleted
 			if model.Delete != nil && *model.Delete {

@@ -68,6 +68,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			}
+			if serverLabel == "" {
+				serverLabel = *model.ServerId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to detach public IP %q from server %q?", publicIpLabel, serverLabel)

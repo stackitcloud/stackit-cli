@@ -13,6 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -65,7 +67,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			backups := *resp.Items
 			if len(backups) == 0 {
-				p.Info("No backups found for server %s\n", model.ServerId)
+				serverLabel := model.ServerId
+				// Get server name
+				if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+					serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+					if err != nil {
+						p.Debug(print.ErrorLevel, "get server name: %v", err)
+					} else if serverName != "" {
+						serverLabel = serverName
+					}
+				}
+				p.Info("No backups found for server %s\n", serverLabel)
 				return nil
 			}
 

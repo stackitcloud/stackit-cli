@@ -60,6 +60,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			}
+			if serverLabel == "" {
+				serverLabel = *model.ServerId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are your sure you want to detach service account %q from a server %q?", model.ServiceAccMail, serverLabel)

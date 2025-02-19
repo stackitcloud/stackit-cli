@@ -68,6 +68,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverName = *model.ServerId
 			}
+			if serverName == "" {
+				serverName = *model.ServerId
+			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)

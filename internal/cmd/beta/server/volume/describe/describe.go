@@ -69,10 +69,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
 			}
+			if volumeLabel == "" {
+				volumeLabel = model.VolumeId
+			}
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				serverLabel = *model.ServerId
+			}
+			if serverLabel == "" {
 				serverLabel = *model.ServerId
 			}
 

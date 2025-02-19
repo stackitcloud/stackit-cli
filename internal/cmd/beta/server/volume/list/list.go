@@ -61,6 +61,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			}
+			if serverLabel == "" {
+				serverLabel = *model.ServerId
+			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
@@ -70,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			volumes := *resp.Items
 			if len(volumes) == 0 {
-				p.Info("No volumes found for server %s\n", *model.ServerId)
+				p.Info("No volumes found for server %s\n", serverLabel)
 				return nil
 			}
 

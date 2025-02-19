@@ -78,6 +78,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			}
+			if serverLabel == "" {
+				serverLabel = *model.ServerId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to attach volume %q to server %q?", volumeLabel, serverLabel)
