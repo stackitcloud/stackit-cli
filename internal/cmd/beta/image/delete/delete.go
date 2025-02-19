@@ -57,6 +57,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get image name: %v", err)
 				imageName = model.ImageId
 			}
+			if imageName == "" {
+				imageName = model.ImageId
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete the image %q for %q?", imageName, projectLabel)

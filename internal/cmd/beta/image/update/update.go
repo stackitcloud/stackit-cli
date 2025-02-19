@@ -135,6 +135,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
 			}
+			if imageLabel == "" {
+				imageLabel = model.Id
+			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update the image %q?", imageLabel)

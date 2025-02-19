@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get image: %w", err)
 			}
 
-			if err := outputResult(p, model, image); err != nil {
+			if err := outputResult(p, model.OutputFormat, image); err != nil {
 				return err
 			}
 
@@ -95,8 +95,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *iaas.Image) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error {
+	if resp == nil {
+		return fmt.Errorf("image not found")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
