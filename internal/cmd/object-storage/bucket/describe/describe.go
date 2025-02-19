@@ -98,6 +98,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 }
 
 func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
+	if bucket == nil {
+		return fmt.Errorf("bucket is empty")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(bucket, "", "  ")

@@ -67,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -112,8 +112,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateCredentialsGroupResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, resp *objectstorage.CreateCredentialsGroupResponse) error {
+	if resp == nil || resp.CredentialsGroup == nil {
+		return fmt.Errorf("create createndials group response is empty")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {

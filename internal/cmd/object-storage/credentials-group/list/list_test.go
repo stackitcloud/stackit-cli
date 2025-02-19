@@ -187,3 +187,44 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat      string
+		credentialsGroups []objectstorage.CredentialsGroup
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "set empty credentials groups",
+			args: args{
+				credentialsGroups: []objectstorage.CredentialsGroup{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set empty credentials group",
+			args: args{
+				credentialsGroups: []objectstorage.CredentialsGroup{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.credentialsGroups); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
