@@ -306,7 +306,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "set empty nic",

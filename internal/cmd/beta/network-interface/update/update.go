@@ -219,6 +219,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NIC) error {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(nic, "", "  ")
