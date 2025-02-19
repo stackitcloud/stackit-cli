@@ -83,6 +83,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					p.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
 				}
+				if networkLabel == "" {
+					networkLabel = *model.NetworkId
+				}
 				p.Info("No network interfaces found for network %q\n", networkLabel)
 				return nil
 			}

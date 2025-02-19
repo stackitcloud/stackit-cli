@@ -117,6 +117,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(nic, "", "  ")
@@ -136,27 +139,27 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *nic.Id)
+		table.AddRow("ID", utils.PtrString(nic.Id))
 		table.AddSeparator()
-		table.AddRow("NETWORK ID", *nic.NetworkId)
+		table.AddRow("NETWORK ID", utils.PtrString(nic.NetworkId))
 		table.AddSeparator()
 		if nic.Name != nil {
-			table.AddRow("NAME", *nic.Name)
+			table.AddRow("NAME", utils.PtrString(nic.Name))
 			table.AddSeparator()
 		}
 		if nic.Ipv4 != nil {
-			table.AddRow("IPV4", *nic.Ipv4)
+			table.AddRow("IPV4", utils.PtrString(nic.Ipv4))
 			table.AddSeparator()
 		}
 		if nic.Ipv6 != nil {
-			table.AddRow("IPV6", *nic.Ipv6)
+			table.AddRow("IPV6", utils.PtrString(nic.Ipv6))
 			table.AddSeparator()
 		}
 		table.AddRow("MAC", utils.PtrString(nic.Mac))
 		table.AddSeparator()
 		table.AddRow("NIC SECURITY", utils.PtrString(nic.NicSecurity))
 		if nic.AllowedAddresses != nil && len(*nic.AllowedAddresses) > 0 {
-			allowedAddresses := []string{}
+			var allowedAddresses []string
 			for _, value := range *nic.AllowedAddresses {
 				allowedAddresses = append(allowedAddresses, *value.String)
 			}
@@ -164,7 +167,7 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 			table.AddRow("ALLOWED ADDRESSES", strings.Join(allowedAddresses, "\n"))
 		}
 		if nic.Labels != nil && len(*nic.Labels) > 0 {
-			labels := []string{}
+			var labels []string
 			for key, value := range *nic.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
