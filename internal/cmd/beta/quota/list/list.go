@@ -53,6 +53,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
+			if projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
 
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
@@ -106,6 +109,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList) error {
+	if quotas == nil {
+		return fmt.Errorf("quotas is nil")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(quotas, "", "  ")
