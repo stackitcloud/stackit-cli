@@ -64,14 +64,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
-			}
-			if volumeLabel == "" {
+			} else if volumeLabel == "" {
 				volumeLabel = model.VolumeId
 			}
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				serverLabel = *model.ServerId
+			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
 			}
 
@@ -90,7 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update server volume: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, volumeLabel, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, volumeLabel, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -139,7 +140,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateAttachedVolumePayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, volumeLabel, serverLabel string, volume *iaas.VolumeAttachment) error {
+func outputResult(p *print.Printer, outputFormat, volumeLabel, serverLabel string, volume iaas.VolumeAttachment) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")

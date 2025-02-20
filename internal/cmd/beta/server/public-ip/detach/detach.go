@@ -58,14 +58,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get public ip: %v", err)
 				publicIpLabel = model.PublicIpId
-			}
-			if publicIpLabel == "" {
+			} else if publicIpLabel == "" {
 				publicIpLabel = model.PublicIpId
 			}
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				serverLabel = *model.ServerId
+			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
 			}
 

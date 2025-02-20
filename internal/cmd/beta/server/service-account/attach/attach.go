@@ -59,6 +59,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
+			} else if serverLabel == "" {
+				serverLabel = *model.ServerId
 			}
 
 			if !model.AssumeYes {
@@ -76,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("attach service account to server: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, model.ServiceAccMail, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, model.ServiceAccMail, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -120,7 +122,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, serviceAccounts *iaas.ServiceAccountMailListResponse) error {
+func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, serviceAccounts iaas.ServiceAccountMailListResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccounts, "", "  ")

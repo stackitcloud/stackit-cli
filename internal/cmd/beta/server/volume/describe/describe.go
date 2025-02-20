@@ -68,11 +68,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
+			} else if volumeLabel == "" {
+				volumeLabel = model.VolumeId
 			}
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				serverLabel = *model.ServerId
+			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
 			}
 
@@ -83,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe server volume: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, serverLabel, volumeLabel, resp)
+			return outputResult(p, model.OutputFormat, serverLabel, volumeLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -127,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, serverLabel, volumeLabel string, volume *iaas.VolumeAttachment) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel, volumeLabel string, volume iaas.VolumeAttachment) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")
@@ -158,7 +162,7 @@ func outputResult(p *print.Printer, outputFormat, serverLabel, volumeLabel strin
 			table.AddRow("VOLUME NAME", volumeLabel)
 			table.AddSeparator()
 		}
-		table.AddRow("DELETE ON TERMINATION", *volume.DeleteOnTermination)
+		table.AddRow("DELETE ON TERMINATION", utils.PtrString(volume.DeleteOnTermination))
 		table.AddSeparator()
 
 		err := table.Display(p)

@@ -12,6 +12,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -73,8 +75,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
+				}
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Backup Schedule for server %s?", model.ServerId)
+				prompt := fmt.Sprintf("Are you sure you want to create a Backup Schedule for server %s?", serverLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -91,7 +104,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Server Backup Schedule: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -159,8 +172,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.BackupSchedule) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverbackup.BackupSchedule) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -178,7 +191,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *serverbackup.Backup
 
 		return nil
 	default:
-		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %s\n", model.ServerId, utils.PtrString(resp.Id))
+		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %s\n", serverLabel, utils.PtrString(resp.Id))
 		return nil
 	}
 }

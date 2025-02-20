@@ -60,6 +60,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
+			} else if serverLabel == "" {
+				serverLabel = *model.ServerId
 			}
 
 			// Call API
@@ -70,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			volumes := *resp.Items
 			if len(volumes) == 0 {
-				p.Info("No volumes found for server %s\n", *model.ServerId)
+				p.Info("No volumes found for server %s\n", serverLabel)
 				return nil
 			}
 
@@ -149,7 +151,11 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
 			s := volumes[i]
-			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeNames[i])
+			var volumeName string
+			if len(volumeNames)-1 > i {
+				volumeName = volumeNames[i]
+			}
+			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeName)
 		}
 		err := table.Display(p)
 		if err != nil {

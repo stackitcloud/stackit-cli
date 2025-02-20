@@ -10,6 +10,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
 
 	"github.com/spf13/cobra"
@@ -51,8 +53,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
+				}
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete server backup schedule %q? (This cannot be undone)", model.ScheduleId)
+				prompt := fmt.Sprintf("Are you sure you want to delete server backup schedule %q? (This cannot be undone)", serverLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

@@ -13,6 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -57,18 +59,28 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				if err != nil {
+					p.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
+				}
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list server commands: %w", err)
 			}
-			commands := *resp.Items
-			if len(commands) == 0 {
-				p.Info("No commands found for server %s\n", model.ServerId)
+			if commands := resp.Items; commands == nil || len(*commands) == 0 {
+				p.Info("No commands found for server %s\n", serverLabel)
 				return nil
 			}
-
+			commands := *resp.Items
 			// Truncate output
 			if model.Limit != nil && len(commands) > int(*model.Limit) {
 				commands = commands[:*model.Limit]

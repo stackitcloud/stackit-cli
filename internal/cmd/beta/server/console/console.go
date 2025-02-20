@@ -62,6 +62,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
+			} else if serverLabel == "" {
+				serverLabel = model.ServerId
 			}
 
 			// Call API
@@ -71,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("server console: %w", err)
 			}
 
-			return outputResult(p, model, serverLabel, resp)
+			return outputResult(p, model.OutputFormat, serverLabel, *resp)
 		},
 	}
 	return cmd
@@ -106,9 +108,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetServerConsole(ctx, model.ProjectId, model.ServerId)
 }
 
-func outputResult(p *print.Printer, model *inputModel, serverLabel string, serverUrl *iaas.ServerConsoleUrl) error {
-	outputFormat := model.OutputFormat
-
+func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl iaas.ServerConsoleUrl) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serverUrl, "", "  ")

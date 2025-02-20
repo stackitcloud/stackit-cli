@@ -65,8 +65,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
+			} else if serverLabel == "" {
+				serverLabel = model.ServerId
 			}
-
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to reboot server %q?", serverLabel)
 				err = p.PromptForConfirmation(prompt)
