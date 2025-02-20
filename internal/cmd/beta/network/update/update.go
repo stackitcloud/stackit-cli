@@ -85,6 +85,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get network name: %v", err)
 				networkLabel = model.NetworkId
+			} else if networkLabel == "" {
+				networkLabel = model.NetworkId
 			}
 
 			if !model.AssumeYes {
