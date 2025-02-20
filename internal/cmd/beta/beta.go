@@ -3,18 +3,7 @@ package beta
 import (
 	"fmt"
 
-	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/beta/affinity-groups"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/image"
-	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/beta/key-pair"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/network"
-	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-area"
-	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/beta/network-interface"
-	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/beta/public-ip"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/quota"
-	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/security-group"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/server"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -47,15 +36,4 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(sqlserverflex.NewCmd(p))
-	cmd.AddCommand(server.NewCmd(p))
-	cmd.AddCommand(networkArea.NewCmd(p))
-	cmd.AddCommand(network.NewCmd(p))
-	cmd.AddCommand(volume.NewCmd(p))
-	cmd.AddCommand(networkinterface.NewCmd(p))
-	cmd.AddCommand(publicip.NewCmd(p))
-	cmd.AddCommand(securitygroup.NewCmd(p))
-	cmd.AddCommand(keypair.NewCmd(p))
-	cmd.AddCommand(image.NewCmd(p))
-	cmd.AddCommand(quota.NewCmd(p))
-	cmd.AddCommand(affinityGroups.NewCmd(p))
 }
