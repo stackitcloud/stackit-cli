@@ -1,30 +1,19 @@
-## stackit beta
+## stackit key-pair
 
-Contains beta STACKIT CLI commands
+Provides functionality for SSH key pairs
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Provides functionality for SSH key pairs
 
 ```
-stackit beta [flags]
-```
-
-### Examples
-
-```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+stackit key-pair [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit key-pair"
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +30,9 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit key-pair create](./stackit_key-pair_create.md)	 - Creates a key pair
+* [stackit key-pair delete](./stackit_key-pair_delete.md)	 - Deletes a key pair
+* [stackit key-pair describe](./stackit_key-pair_describe.md)	 - Describes a key pair
+* [stackit key-pair list](./stackit_key-pair_list.md)	 - Lists all key pairs
+* [stackit key-pair update](./stackit_key-pair_update.md)	 - Updates a key pair
 

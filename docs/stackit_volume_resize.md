@@ -1,30 +1,27 @@
-## stackit beta
+## stackit volume resize
 
-Contains beta STACKIT CLI commands
+Resizes a volume
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Resizes a volume.
 
 ```
-stackit beta [flags]
+stackit volume resize VOLUME_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Resize volume with ID "xxx" with new size 10 GB
+  $ stackit volume resize xxx --size 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help       Help for "stackit volume resize"
+      --size int   Volume size (GB)
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit volume](./stackit_volume.md)	 - Provides functionality for volumes
 

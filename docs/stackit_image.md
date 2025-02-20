@@ -1,30 +1,19 @@
-## stackit beta
+## stackit image
 
-Contains beta STACKIT CLI commands
+Manage server images
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Manage the lifecycle of server images.
 
 ```
-stackit beta [flags]
-```
-
-### Examples
-
-```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+stackit image [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit image"
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +30,9 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit image create](./stackit_image_create.md)	 - Creates images
+* [stackit image delete](./stackit_image_delete.md)	 - Deletes an image
+* [stackit image describe](./stackit_image_describe.md)	 - Describes image
+* [stackit image list](./stackit_image_list.md)	 - Lists images
+* [stackit image update](./stackit_image_update.md)	 - Updates an image
 

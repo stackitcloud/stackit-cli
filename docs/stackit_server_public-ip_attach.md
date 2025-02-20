@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server public-ip attach
 
-Contains beta STACKIT CLI commands
+Attaches a public IP to a server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Attaches a public IP to a server.
 
 ```
-stackit beta [flags]
+stackit server public-ip attach PUBLIC_IP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Attach a public IP with ID "xxx" to a server with ID "yyy"
+  $ stackit server public-ip attach xxx --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help               Help for "stackit server public-ip attach"
+      --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server public-ip](./stackit_server_public-ip.md)	 - Allows attaching/detaching public IPs to servers
 

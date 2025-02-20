@@ -1,30 +1,27 @@
-## stackit beta
+## stackit network-interface delete
 
-Contains beta STACKIT CLI commands
+Deletes a network interface
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a network interface.
 
 ```
-stackit beta [flags]
+stackit network-interface delete NIC_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete network interface with nic id "xxx" and network ID "yyy"
+  $ stackit network-interface delete xxx --network-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                Help for "stackit network-interface delete"
+      --network-id string   Network ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit network-interface](./stackit_network-interface.md)	 - Provides functionality for network interfaces
 

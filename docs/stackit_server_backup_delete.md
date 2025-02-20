@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server backup delete
 
-Contains beta STACKIT CLI commands
+Deletes a Server Backup.
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a Server Backup. Operation always is async.
 
 ```
-stackit beta [flags]
+stackit server backup delete BACKUP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete a Server Backup with ID "xxx" for server "zzz"
+  $ stackit server backup delete xxx --server-id=zzz
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help               Help for "stackit server backup delete"
+  -s, --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server backup](./stackit_server_backup.md)	 - Provides functionality for server backups
 

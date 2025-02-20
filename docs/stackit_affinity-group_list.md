@@ -1,30 +1,30 @@
-## stackit beta
+## stackit affinity-group list
 
-Contains beta STACKIT CLI commands
+Lists affinity groups
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists affinity groups.
 
 ```
-stackit beta [flags]
+stackit affinity-group list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Lists all affinity groups
+  $ stackit affinity-group list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Lists up to 10 affinity groups
+  $ stackit affinity-group list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help        Help for "stackit affinity-group list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit affinity-group](./stackit_affinity-group.md)	 - Manage server affinity groups
 

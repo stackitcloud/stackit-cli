@@ -1,30 +1,28 @@
-## stackit beta
+## stackit public-ip delete
 
-Contains beta STACKIT CLI commands
+Deletes a Public IP
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a Public IP.
+If the public IP is still in use, the deletion will fail
+
 
 ```
-stackit beta [flags]
+stackit public-ip delete PUBLIC_IP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete public IP with ID "xxx"
+  $ stackit public-ip delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit public-ip delete"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +38,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit public-ip](./stackit_public-ip.md)	 - Provides functionality for public IPs
 

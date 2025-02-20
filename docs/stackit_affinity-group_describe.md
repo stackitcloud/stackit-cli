@@ -1,30 +1,26 @@
-## stackit beta
+## stackit affinity-group describe
 
-Contains beta STACKIT CLI commands
+Show details of an affinity group
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Show details of an affinity group.
 
 ```
-stackit beta [flags]
+stackit affinity-group describe AFFINITY_GROUP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Get details about an affinity group with the ID "xxx"
+  $ stackit affinity-group describe xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit affinity-group describe"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit affinity-group](./stackit_affinity-group.md)	 - Manage server affinity groups
 

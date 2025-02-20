@@ -1,30 +1,26 @@
-## stackit beta
+## stackit server stop
 
-Contains beta STACKIT CLI commands
+Stops an existing server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Stops an existing server.
 
 ```
-stackit beta [flags]
+stackit server stop SERVER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Stop an existing server with ID "xxx"
+  $ stackit server stop xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit server stop"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server](./stackit_server.md)	 - Provides functionality for servers
 

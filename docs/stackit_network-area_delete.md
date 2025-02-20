@@ -1,30 +1,29 @@
-## stackit beta
+## stackit network-area delete
 
-Contains beta STACKIT CLI commands
+Deletes a STACKIT Network Area (SNA)
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a STACKIT Network Area (SNA) in an organization.
+If the SNA is attached to any projects, the deletion will fail
+
 
 ```
-stackit beta [flags]
+stackit network-area delete AREA_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete network area with ID "xxx" in organization with ID "yyy"
+  $ stackit network-area delete xxx --organization-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                     Help for "stackit network-area delete"
+      --organization-id string   Organization ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +39,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit network-area](./stackit_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)
 

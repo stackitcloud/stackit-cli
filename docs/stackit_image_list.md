@@ -1,30 +1,34 @@
-## stackit beta
+## stackit image list
 
-Contains beta STACKIT CLI commands
+Lists images
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists images by their internal ID.
 
 ```
-stackit beta [flags]
+stackit image list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  List all images
+  $ stackit image list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List images with label
+  $ stackit image list --label-selector ARM64,dev
+
+  List the first 10 images
+  $ stackit image list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                    Help for "stackit image list"
+      --label-selector string   Filter by label
+      --limit int               Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +44,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit image](./stackit_image.md)	 - Manage server images
 

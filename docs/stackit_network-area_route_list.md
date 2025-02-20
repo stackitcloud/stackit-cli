@@ -1,0 +1,49 @@
+## stackit network-area route list
+
+Lists all static routes in a STACKIT Network Area (SNA)
+
+### Synopsis
+
+Lists all static routes in a STACKIT Network Area (SNA).
+
+```
+stackit network-area route list [flags]
+```
+
+### Examples
+
+```
+  Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
+  $ stackit network-area route list --network-area-id xxx --organization-id yyy
+
+  Lists all static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy" in JSON format
+  $ stackit network-area route list --network-area-id xxx --organization-id yyy --output-format json
+
+  Lists up to 10 static routes in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
+  $ stackit network-area route list --network-area-id xxx --organization-id yyy --limit 10
+```
+
+### Options
+
+```
+  -h, --help                     Help for "stackit network-area route list"
+      --limit int                Maximum number of entries to list
+      --network-area-id string   STACKIT Network Area ID
+      --organization-id string   Organization ID
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes             If set, skips all confirmation prompts
+      --async                  If set, runs the command asynchronously
+  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
+      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+```
+
+### SEE ALSO
+
+* [stackit network-area route](./stackit_network-area_route.md)	 - Provides functionality for static routes in STACKIT Network Areas
+

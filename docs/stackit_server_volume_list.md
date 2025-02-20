@@ -1,30 +1,30 @@
-## stackit beta
+## stackit server volume list
 
-Contains beta STACKIT CLI commands
+Lists all server volumes
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists all server volumes.
 
 ```
-stackit beta [flags]
+stackit server volume list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  List all volumes for a server with ID "xxx"
+  $ stackit server volume list --server-id xxx
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List all volumes for a server with ID "xxx" in JSON format
+  $ stackit server volumes list --server-id xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help               Help for "stackit server volume list"
+  -s, --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server volume](./stackit_server_volume.md)	 - Provides functionality for server volumes
 

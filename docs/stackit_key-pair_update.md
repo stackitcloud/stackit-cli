@@ -1,30 +1,27 @@
-## stackit beta
+## stackit key-pair update
 
-Contains beta STACKIT CLI commands
+Updates a key pair
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Updates a key pair.
 
 ```
-stackit beta [flags]
+stackit key-pair update KEY_PAIR_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Update the labels of a key pair with name "KEY_PAIR_NAME" with "key=value,key1=value1"
+  $ stackit key-pair update KEY_PAIR_NAME --labels key=value,key1=value1
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                    Help for "stackit key-pair update"
+      --labels stringToString   Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...' (default [])
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 
