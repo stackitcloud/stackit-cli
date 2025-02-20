@@ -68,8 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
-			}
-			if volumeLabel == "" {
+			} else if volumeLabel == "" {
 				volumeLabel = model.VolumeId
 			}
 
@@ -77,8 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
-			}
-			if serverLabel == "" {
+			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
 			}
 

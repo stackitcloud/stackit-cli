@@ -67,8 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverName = *model.ServerId
-			}
-			if serverName == "" {
+			} else if serverName == "" {
 				serverName = *model.ServerId
 			}
 

@@ -76,8 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get server name: %v", err)
 					serverLabel = *model.ServerId
-				}
-				if serverLabel == "" {
+				} else if serverLabel == "" {
 					serverLabel = *model.ServerId
 				}
 				p.Info("No attached network interfaces found for server %q\n", serverLabel)
