@@ -75,8 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
-				}
-				if projectLabel == "" {
+				} else if projectLabel == "" {
 					projectLabel = model.ProjectId
 				}
 				p.Info("No networks found for project %q\n", projectLabel)
