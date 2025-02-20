@@ -167,3 +167,44 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		roles        []authorization.Role
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "set empty roles slice",
+			args: args{
+				roles: []authorization.Role{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set empty role in roles slice",
+			args: args{
+				roles: []authorization.Role{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputRolesResult(p, tt.args.outputFormat, tt.args.roles); (err != nil) != tt.wantErr {
+				t.Errorf("outputRolesResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

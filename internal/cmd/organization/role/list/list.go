@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
@@ -153,16 +152,18 @@ func outputRolesResult(p *print.Printer, outputFormat string, roles []authorizat
 		table.SetHeader("ROLE NAME", "ROLE DESCRIPTION", "PERMISSION NAME", "PERMISSION DESCRIPTION")
 		for i := range roles {
 			r := roles[i]
-			for j := range *r.Permissions {
-				p := (*r.Permissions)[j]
-				table.AddRow(
-					utils.PtrString(r.Name),
-					utils.PtrString(r.Description),
-					utils.PtrString(p.Name),
-					utils.PtrString(p.Description),
-				)
+			if r.Permissions != nil {
+				for j := range *r.Permissions {
+					p := (*r.Permissions)[j]
+					table.AddRow(
+						utils.PtrString(r.Name),
+						utils.PtrString(r.Description),
+						utils.PtrString(p.Name),
+						utils.PtrString(p.Description),
+					)
+				}
+				table.AddSeparator()
 			}
-			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
 		err := table.Display(p)
