@@ -134,8 +134,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
-			}
-			if imageLabel == "" {
+			} else if imageLabel == "" {
 				imageLabel = model.Id
 			}
 
