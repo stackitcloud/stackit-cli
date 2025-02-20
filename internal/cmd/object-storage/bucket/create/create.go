@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, model.Async, model.BucketName, resp)
 		},
 	}
 	return cmd
@@ -126,8 +126,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.CreateBucketResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, bucketName string, resp *objectstorage.CreateBucketResponse) error {
+	if resp == nil {
+		return fmt.Errorf("create bucket response is empty")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -146,10 +150,10 @@ func outputResult(p *print.Printer, model *inputModel, resp *objectstorage.Creat
 		return nil
 	default:
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s bucket %q\n", operationState, model.BucketName)
+		p.Outputf("%s bucket %q\n", operationState, bucketName)
 		return nil
 	}
 }
