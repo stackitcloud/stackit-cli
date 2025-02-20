@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server resize
 
-Contains beta STACKIT CLI commands
+Resizes the server to the given machine type
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Resizes the server to the given machine type.
 
 ```
-stackit beta [flags]
+stackit server resize SERVER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Resize a server with ID "xxx" to machine type "yyy"
+  $ stackit server resize xxx --machine-type yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                  Help for "stackit server resize"
+      --machine-type string   Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server](./stackit_server.md)	 - Provides functionality for servers
 

@@ -1,30 +1,26 @@
-## stackit beta
+## stackit quota list
 
-Contains beta STACKIT CLI commands
+Lists quotas
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists project quotas.
 
 ```
-stackit beta [flags]
+stackit quota list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List available quotas
+  $ stackit quota list
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit quota list"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit quota](./stackit_quota.md)	 - Manage server quotas
 

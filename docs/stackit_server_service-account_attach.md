@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server service-account attach
 
-Contains beta STACKIT CLI commands
+Attach a service account to a server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Attach a service account to a server
 
 ```
-stackit beta [flags]
+stackit server service-account attach SERVICE_ACCOUNT_EMAIL [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"
+  $ stackit server service-account attach xxx@sa.stackit.cloud --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help               Help for "stackit server service-account attach"
+  -s, --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server service-account](./stackit_server_service-account.md)	 - Allows attaching/detaching service accounts to servers
 

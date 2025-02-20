@@ -1,30 +1,30 @@
-## stackit beta
+## stackit key-pair describe
 
-Contains beta STACKIT CLI commands
+Describes a key pair
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Describes a key pair.
 
 ```
-stackit beta [flags]
+stackit key-pair describe KEY_PAIR_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Get details about a key pair with name "KEY_PAIR_NAME"
+  $ stackit key-pair describe KEY_PAIR_NAME
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Get only the SSH public key of a key pair with name "KEY_PAIR_NAME"
+  $ stackit key-pair describe KEY_PAIR_NAME --public-key
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help         Help for "stackit key-pair describe"
+      --public-key   Show only the public key
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 

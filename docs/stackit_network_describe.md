@@ -1,30 +1,29 @@
-## stackit beta
+## stackit network describe
 
-Contains beta STACKIT CLI commands
+Shows details of a network
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Shows details of a network.
 
 ```
-stackit beta [flags]
+stackit network describe NETWORK_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Show details of a network with ID "xxx"
+  $ stackit network describe xxx
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Show details of a network with ID "xxx" in JSON format
+  $ stackit network describe xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit network describe"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +39,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit network](./stackit_network.md)	 - Provides functionality for networks
 

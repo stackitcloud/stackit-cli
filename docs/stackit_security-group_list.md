@@ -1,30 +1,30 @@
-## stackit beta
+## stackit security-group list
 
-Contains beta STACKIT CLI commands
+Lists security groups
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists security groups by its internal ID.
 
 ```
-stackit beta [flags]
+stackit security-group list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  List all groups
+  $ stackit security-group list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List groups with labels
+  $ stackit security-group list --label-selector label1=value1,label2=value2
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                    Help for "stackit security-group list"
+      --label-selector string   Filter by label
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit security-group](./stackit_security-group.md)	 - Manage security groups
 

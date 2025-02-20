@@ -1,30 +1,29 @@
-## stackit beta
+## stackit server console
 
-Contains beta STACKIT CLI commands
+Gets a URL for server remote console
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Gets a URL for server remote console.
 
 ```
-stackit beta [flags]
+stackit server console SERVER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Get a URL for the server remote console with server ID "xxx"
+  $ stackit server console xxx
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Get a URL for the server remote console with server ID "xxx" in JSON format
+  $ stackit server console xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit server console"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +39,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server](./stackit_server.md)	 - Provides functionality for servers
 

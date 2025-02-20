@@ -1,30 +1,28 @@
-## stackit beta
+## stackit server delete
 
-Contains beta STACKIT CLI commands
+Deletes a server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a server.
+If the server is still in use, the deletion will fail
+
 
 ```
-stackit beta [flags]
+stackit server delete SERVER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete server with ID "xxx"
+  $ stackit server delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit server delete"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +38,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server](./stackit_server.md)	 - Provides functionality for servers
 

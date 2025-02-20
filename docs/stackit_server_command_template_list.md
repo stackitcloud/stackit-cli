@@ -1,30 +1,30 @@
-## stackit beta
+## stackit server command template list
 
-Contains beta STACKIT CLI commands
+Lists all server command templates
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists all server command templates.
 
 ```
-stackit beta [flags]
+stackit server command template list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  List all command templates
+  $ stackit server command template list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List all commands templates in JSON format
+  $ stackit server command template list --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help        Help for "stackit server command template list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server command template](./stackit_server_command_template.md)	 - Provides functionality for Server Command Template
 

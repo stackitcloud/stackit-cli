@@ -1,30 +1,26 @@
-## stackit beta
+## stackit public-ip disassociate
 
-Contains beta STACKIT CLI commands
+Disassociates a Public IP from a network interface or a virtual IP
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Disassociates a Public IP from a network interface or a virtual IP.
 
 ```
-stackit beta [flags]
+stackit public-ip disassociate PUBLIC_IP_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Disassociate public IP with ID "xxx" from a resource (network interface or virtual IP)
+  $ stackit public-ip disassociate xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit public-ip disassociate"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit public-ip](./stackit_public-ip.md)	 - Provides functionality for public IPs
 

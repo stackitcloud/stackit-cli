@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server rescue
 
-Contains beta STACKIT CLI commands
+Rescues an existing server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Rescues an existing server.
 
 ```
-stackit beta [flags]
+stackit server rescue SERVER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Rescue an existing server with ID "xxx" using image with ID "yyy" as boot volume
+  $ stackit server rescue xxx --image-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help              Help for "stackit server rescue"
+      --image-id string   The image ID to be used for a temporary boot volume.
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server](./stackit_server.md)	 - Provides functionality for servers
 

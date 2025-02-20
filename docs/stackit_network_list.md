@@ -1,30 +1,33 @@
-## stackit beta
+## stackit network list
 
-Contains beta STACKIT CLI commands
+Lists all networks of a project
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists all network of a project.
 
 ```
-stackit beta [flags]
+stackit network list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Lists all networks
+  $ stackit network list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Lists all networks in JSON format
+  $ stackit network list --output-format json
+
+  Lists up to 10 networks
+  $ stackit network list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help        Help for "stackit network list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +43,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit network](./stackit_network.md)	 - Provides functionality for networks
 

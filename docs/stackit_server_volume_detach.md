@@ -1,30 +1,27 @@
-## stackit beta
+## stackit server volume detach
 
-Contains beta STACKIT CLI commands
+Detaches a volume from a server
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Detaches a volume from a server.
 
 ```
-stackit beta [flags]
+stackit server volume detach VOLUME_ID [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Detaches a volume with ID "xxx" from a server with ID "yyy"
+  $ stackit server volume detach xxx --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help               Help for "stackit server volume detach"
+      --server-id string   Server ID
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit server volume](./stackit_server_volume.md)	 - Provides functionality for server volumes
 

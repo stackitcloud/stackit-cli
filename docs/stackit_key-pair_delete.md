@@ -1,30 +1,26 @@
-## stackit beta
+## stackit key-pair delete
 
-Contains beta STACKIT CLI commands
+Deletes a key pair
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes a key pair.
 
 ```
-stackit beta [flags]
+stackit key-pair delete KEY_PAIR_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete key pair with name "KEY_PAIR_NAME"
+  $ stackit key-pair delete KEY_PAIR_NAME
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit key-pair delete"
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 

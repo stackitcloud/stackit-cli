@@ -1,30 +1,19 @@
-## stackit beta
+## stackit network
 
-Contains beta STACKIT CLI commands
+Provides functionality for networks
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Provides functionality for networks.
 
 ```
-stackit beta [flags]
-```
-
-### Examples
-
-```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+stackit network [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit network"
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +30,9 @@ stackit beta [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit network create](./stackit_network_create.md)	 - Creates a network
+* [stackit network delete](./stackit_network_delete.md)	 - Deletes a network
+* [stackit network describe](./stackit_network_describe.md)	 - Shows details of a network
+* [stackit network list](./stackit_network_list.md)	 - Lists all networks of a project
+* [stackit network update](./stackit_network_update.md)	 - Updates a network
 
