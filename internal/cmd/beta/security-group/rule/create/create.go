@@ -219,6 +219,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel, securityGroupName string, securityGroupRule *iaas.SecurityGroupRule) error {
+	if securityGroupRule == nil {
+		return fmt.Errorf("security group rule is empty")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(securityGroupRule, "", "  ")

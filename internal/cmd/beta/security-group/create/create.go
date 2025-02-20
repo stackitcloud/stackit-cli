@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create security group: %w", err)
 			}
 
-			if err := outputResult(p, model, group); err != nil {
+			if err := outputResult(p, model.OutputFormat, *model.Name, *group); err != nil {
 				return err
 			}
 
@@ -144,8 +144,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request.CreateSecurityGroupPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, name string, resp iaas.SecurityGroup) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -163,7 +163,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup)
 
 		return nil
 	default:
-		p.Outputf("Created security group %q\n", *model.Name)
+		p.Outputf("Created security group %q\n", name)
 		return nil
 	}
 }
