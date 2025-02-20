@@ -546,3 +546,39 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat           string
+		async                  bool
+		projectLabel           string
+		createInstanceResponse *mongodbflex.CreateInstanceResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "set empty create instance response",
+			args: args{
+				createInstanceResponse: &mongodbflex.CreateInstanceResponse{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.projectLabel, tt.args.createInstanceResponse); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

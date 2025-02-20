@@ -145,6 +145,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.Backup, restoreJobs *mongodbflex.ListRestoreJobsResponse) error {
+	if restoreJobs == nil {
+		return fmt.Errorf("restore jobs is empty")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backups, "", "  ")

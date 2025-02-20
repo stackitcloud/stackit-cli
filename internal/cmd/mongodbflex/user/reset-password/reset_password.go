@@ -87,7 +87,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("reset MongoDB Flex user password: %w", err)
 			}
 
-			return outputResult(p, model, userLabel, instanceLabel, user)
+			return outputResult(p, model.OutputFormat, userLabel, instanceLabel, user)
 		},
 	}
 
@@ -133,8 +133,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *mongodbflex.User) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *mongodbflex.User) error {
+	if user == nil {
+		return fmt.Errorf("user is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
 		if err != nil {

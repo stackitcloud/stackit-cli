@@ -104,6 +104,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
+	if instance == nil {
+		return fmt.Errorf("instance is nil")
+	}
+
 	output := struct {
 		BackupSchedule                 string `json:"backup_schedule"`
 		DailySnaphotRetentionDays      string `json:"daily_snapshot_retention_days"`
@@ -112,12 +116,14 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		SnapshotRetentionDays          string `json:"snapshot_retention_days"`
 		WeeklySnapshotRetentionWeeks   string `json:"weekly_snapshot_retention_weeks"`
 	}{
-		BackupSchedule:                 *instance.BackupSchedule,
-		DailySnaphotRetentionDays:      (*instance.Options)["dailySnapshotRetentionDays"],
-		MonthlySnapshotRetentionMonths: (*instance.Options)["monthlySnapshotRetentionDays"],
-		PointInTimeWindowHours:         (*instance.Options)["pointInTimeWindowHours"],
-		SnapshotRetentionDays:          (*instance.Options)["snapshotRetentionDays"],
-		WeeklySnapshotRetentionWeeks:   (*instance.Options)["weeklySnapshotRetentionWeeks"],
+		BackupSchedule: utils.PtrString(instance.BackupSchedule),
+	}
+	if instance.Options != nil {
+		output.DailySnaphotRetentionDays = (*instance.Options)["dailySnapshotRetentionDays"]
+		output.MonthlySnapshotRetentionMonths = (*instance.Options)["monthlySnapshotRetentionDays"]
+		output.PointInTimeWindowHours = (*instance.Options)["pointInTimeWindowHours"]
+		output.SnapshotRetentionDays = (*instance.Options)["snapshotRetentionDays"]
+		output.WeeklySnapshotRetentionWeeks = (*instance.Options)["weeklySnapshotRetentionWeeks"]
 	}
 
 	switch outputFormat {
@@ -139,20 +145,19 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
+		table.AddRow("BACKUP SCHEDULE (UTC)", output.BackupSchedule)
 		table.AddSeparator()
-		if instance.Options != nil {
-			table.AddRow("DAILY SNAPSHOT RETENTION (DAYS)", (*instance.Options)["dailySnapshotRetentionDays"])
-			table.AddSeparator()
-			table.AddRow("MONTHLY SNAPSHOT RETENTION (MONTHS)", (*instance.Options)["monthlySnapshotRetentionMonths"])
-			table.AddSeparator()
-			table.AddRow("POINT IN TIME WINDOW (HOURS)", (*instance.Options)["pointInTimeWindowHours"])
-			table.AddSeparator()
-			table.AddRow("SNAPSHOT RETENTION (DAYS)", (*instance.Options)["snapshotRetentionDays"])
-			table.AddSeparator()
-			table.AddRow("WEEKLY SNAPSHOT RETENTION (WEEKS)", (*instance.Options)["weeklySnapshotRetentionWeeks"])
-			table.AddSeparator()
-		}
+		table.AddRow("DAILY SNAPSHOT RETENTION (DAYS)", output.DailySnaphotRetentionDays)
+		table.AddSeparator()
+		table.AddRow("MONTHLY SNAPSHOT RETENTION (MONTHS)", output.MonthlySnapshotRetentionMonths)
+		table.AddSeparator()
+		table.AddRow("POINT IN TIME WINDOW (HOURS)", output.PointInTimeWindowHours)
+		table.AddSeparator()
+		table.AddRow("SNAPSHOT RETENTION (DAYS)", output.SnapshotRetentionDays)
+		table.AddSeparator()
+		table.AddRow("WEEKLY SNAPSHOT RETENTION (WEEKS)", output.WeeklySnapshotRetentionWeeks)
+		table.AddSeparator()
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

@@ -170,6 +170,10 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 }
 
 func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.ListFlavorsResponse, versions *mongodbflex.ListVersionsResponse, storages *mongodbflex.ListStoragesResponse) error {
+	if model == nil || model.GlobalFlagModel == nil {
+		return fmt.Errorf("model is nil")
+	}
+
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -206,6 +210,12 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
+	if model == nil {
+		return fmt.Errorf("model is nil")
+	} else if options == nil {
+		return fmt.Errorf("options is nil")
+	}
+
 	content := []tables.Table{}
 	if model.Flavors && len(*options.Flavors) != 0 {
 		content = append(content, buildFlavorsTable(*options.Flavors))
