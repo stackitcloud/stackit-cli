@@ -82,6 +82,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
@@ -99,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create network interface: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, model.ProjectId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -226,8 +228,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateNicPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, nic *iaas.NIC) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NIC) error {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(nic, "", "  ")
 		if err != nil {
@@ -245,7 +250,7 @@ func outputResult(p *print.Printer, model *inputModel, nic *iaas.NIC) error {
 
 		return nil
 	default:
-		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", model.ProjectId, utils.PtrString(nic.Id))
+		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", projectId, utils.PtrString(nic.Id))
 		return nil
 	}
 }

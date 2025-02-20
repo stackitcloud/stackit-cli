@@ -95,7 +95,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update network interface: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, model.ProjectId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -218,8 +218,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateNicPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, nic *iaas.NIC) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NIC) error {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(nic, "", "  ")
 		if err != nil {
@@ -237,7 +240,7 @@ func outputResult(p *print.Printer, model *inputModel, nic *iaas.NIC) error {
 
 		return nil
 	default:
-		p.Outputf("Updated network interface for project %q.\n", model.ProjectId)
+		p.Outputf("Updated network interface for project %q.\n", projectId)
 		return nil
 	}
 }
