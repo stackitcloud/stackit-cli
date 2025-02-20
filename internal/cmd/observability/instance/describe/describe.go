@@ -98,6 +98,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *observability.GetInstanceResponse) error {
+	if instance == nil {
+		return fmt.Errorf("instance is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")

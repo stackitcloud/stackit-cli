@@ -276,3 +276,58 @@ func TestBuildGetInstanceRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat  string
+		showPassword  bool
+		grafanaConfig *observability.GrafanaConfigs
+		instance      *observability.GetInstanceResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "set grafana configs but no instance",
+			args: args{
+				grafanaConfig: &observability.GrafanaConfigs{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "set instance but no grafana config",
+			args: args{
+				instance: &observability.GetInstanceResponse{
+					Instance: &observability.InstanceSensitiveData{},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "set instance and grafana configs",
+			args: args{
+				grafanaConfig: &observability.GrafanaConfigs{},
+				instance: &observability.GetInstanceResponse{
+					Instance: &observability.InstanceSensitiveData{},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.showPassword, tt.args.grafanaConfig, tt.args.instance); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

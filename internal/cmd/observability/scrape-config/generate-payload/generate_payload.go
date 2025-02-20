@@ -125,6 +125,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 }
 
 func outputCreateResult(p *print.Printer, filePath *string, payload *observability.CreateScrapeConfigPayload) error {
+	if payload == nil {
+		return fmt.Errorf("payload is nil")
+	}
+
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
@@ -143,6 +147,10 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *observabili
 }
 
 func outputUpdateResult(p *print.Printer, filePath *string, payload *observability.UpdateScrapeConfigPayload) error {
+	if payload == nil {
+		return fmt.Errorf("payload is nil")
+	}
+
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
