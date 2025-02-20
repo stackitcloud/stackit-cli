@@ -83,8 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get organization name: %v", err)
 					orgLabel = *model.OrganizationId
-				}
-				if orgLabel == "" {
+				} else if orgLabel == "" {
 					orgLabel = *model.OrganizationId
 				}
 			} else {
