@@ -57,6 +57,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
+			} else if publicIpLabel == "" {
+				publicIpLabel = model.PublicIpId
 			}
 
 			if !model.AssumeYes {
@@ -74,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete public IP: %w", err)
 			}
 
-			p.Info("Deleted public IP %q\n", model.PublicIpId)
+			p.Info("Deleted public IP %q\n", publicIpLabel)
 			return nil
 		},
 	}

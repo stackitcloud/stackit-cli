@@ -55,6 +55,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
+			} else if publicIpLabel == "" {
+				publicIpLabel = model.PublicIpId
 			}
 
 			if !model.AssumeYes {
