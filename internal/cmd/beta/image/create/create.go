@@ -377,7 +377,14 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 }
 
 func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateResponse) error {
-	switch model.OutputFormat {
+	if model == nil {
+		return fmt.Errorf("input model is nil")
+	}
+	var outputFormat string
+	if model.GlobalFlagModel != nil {
+		outputFormat = model.OutputFormat
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {

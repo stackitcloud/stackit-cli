@@ -56,6 +56,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get image name: %v", err)
 				imageName = model.ImageId
+			} else if imageName == "" {
+				imageName = model.ImageId
 			}
 
 			if !model.AssumeYes {
