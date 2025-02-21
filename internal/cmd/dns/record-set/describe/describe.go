@@ -114,6 +114,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSet) error {
+	if recordSet == nil {
+		return fmt.Errorf("record set response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(recordSet, "", "  ")
