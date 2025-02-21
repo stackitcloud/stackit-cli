@@ -202,6 +202,20 @@ func TestOutputResult(t *testing.T) {
 			args:    args{},
 			wantErr: false,
 		},
+		{
+			name: "empty network areas slice",
+			args: args{
+				networkAreas: []iaas.NetworkArea{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty network area in network areas slice",
+			args: args{
+				networkAreas: []iaas.NetworkArea{{}},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)

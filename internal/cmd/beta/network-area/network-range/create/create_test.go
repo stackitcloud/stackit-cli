@@ -232,6 +232,13 @@ func TestOutputResult(t *testing.T) {
 			args:    args{},
 			wantErr: false,
 		},
+		{
+			name: "empty network range",
+			args: args{
+				networkRange: iaas.NetworkRange{},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)

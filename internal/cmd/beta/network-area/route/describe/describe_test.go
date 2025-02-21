@@ -250,6 +250,13 @@ func TestOutputResult(t *testing.T) {
 			args:    args{},
 			wantErr: false,
 		},
+		{
+			name: "empty route",
+			args: args{
+				route: iaas.Route{},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)

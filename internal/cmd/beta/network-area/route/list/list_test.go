@@ -226,6 +226,20 @@ func TestOutputResult(t *testing.T) {
 			args:    args{},
 			wantErr: false,
 		},
+		{
+			name: "empty route slice",
+			args: args{
+				routes: []iaas.Route{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty route in routes slice",
+			args: args{
+				routes: []iaas.Route{{}},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)
