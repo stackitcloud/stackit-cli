@@ -144,6 +144,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.SingleUser) error {
+	if user == nil {
+		return fmt.Errorf("user response is empty")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")

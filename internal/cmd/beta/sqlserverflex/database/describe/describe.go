@@ -109,10 +109,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex.GetDatabaseResponse) error {
+func outputResult(p *print.Printer, outputFormat string, resp *sqlserverflex.GetDatabaseResponse) error {
+	if resp == nil || resp.Database == nil {
+		return fmt.Errorf("database response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(database, "", "  ")
+		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
@@ -120,7 +123,7 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(database, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SQLServer Flex database: %w", err)
 		}
@@ -128,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat string, database *sqlserverflex
 
 		return nil
 	default:
-		database := database.Database
+		database := resp.Database
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(database.Id))
 		table.AddSeparator()
