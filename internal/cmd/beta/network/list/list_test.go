@@ -21,11 +21,13 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 var testProjectId = uuid.NewString()
+var testLabelSelector = "foo=bar"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		limitFlag:     "10",
+		projectIdFlag:     testProjectId,
+		limitFlag:         "10",
+		labelSelectorFlag: testLabelSelector,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,7 +41,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
 		},
-		Limit: utils.Ptr(int64(10)),
+		Limit:         utils.Ptr(int64(10)),
+		LabelSelector: utils.Ptr(testLabelSelector),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworksRequest)) iaas.ApiListNetworksRequest {
 	request := testClient.ListNetworks(testCtx, testProjectId)
+	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -112,6 +116,16 @@ func TestParseInput(t *testing.T) {
 				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
+		},
+		{
+			description: "label selector empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[labelSelectorFlag] = ""
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(inputModel *inputModel) {
+				inputModel.LabelSelector = utils.Ptr("")
+			}),
 		},
 	}
 
