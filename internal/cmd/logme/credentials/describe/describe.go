@@ -112,6 +112,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 }
 
 func outputResult(p *print.Printer, outputFormat string, credentials *logme.CredentialsResponse) error {
+	if credentials == nil {
+		return fmt.Errorf("credentials is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
