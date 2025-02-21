@@ -196,6 +196,14 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 				table.AddSeparator()
 			}
 		}
+		if networkArea.Labels != nil && len(*networkArea.Labels) > 0 {
+			var labels []string
+			for key, value := range *networkArea.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			}
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
+			table.AddSeparator()
+		}
 		if len(attachedProjects) > 0 {
 			table.AddRow("ATTACHED PROJECTS IDS", strings.Join(attachedProjects, "\n"))
 			table.AddSeparator()

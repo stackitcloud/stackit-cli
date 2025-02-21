@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		defaultPrefixLengthFlag: "24",
 		maxPrefixLengthFlag:     "24",
 		minPrefixLengthFlag:     "24",
+		labelFlag:               "key=value",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -59,6 +60,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		DefaultPrefixLength: utils.Ptr(int64(24)),
 		MaxPrefixLength:     utils.Ptr(int64(24)),
 		MinPrefixLength:     utils.Ptr(int64(24)),
+		Labels: utils.Ptr(map[string]string{
+			"key": "value",
+		}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -78,6 +82,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkAreaReques
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkAreaPayload)) iaas.PartialUpdateNetworkAreaPayload {
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name: utils.Ptr("example-network-area-name"),
+		Labels: utils.Ptr(map[string]interface{}{
+			"key": "value",
+		}),
 		AddressFamily: &iaas.UpdateAreaAddressFamily{
 			Ipv4: &iaas.UpdateAreaIPv4{
 				DefaultNameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
@@ -182,6 +189,17 @@ func TestParseInput(t *testing.T) {
 				flagValues[areaIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
+		},
+		{
+			description: "labels missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, labelFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = nil
+			}),
+			isValid: true,
 		},
 	}
 

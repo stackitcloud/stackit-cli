@@ -24,12 +24,14 @@ import (
 const (
 	limitFlag          = "limit"
 	organizationIdFlag = "organization-id"
+	labelSelectorFlag  = "label-selector"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit          *int64
 	OrganizationId *string
+	LabelSelector  *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -50,6 +52,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Lists up to 10 network areas of organization "xxx"`,
 				"$ stackit beta network-area list --organization-id xxx --limit 10",
+			),
+			examples.NewExample(
+				`Lists all network areas of organization "xxx" which contains the label yyy`,
+				"$ stackit beta network-area list --organization-id xxx --label-selector yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -104,6 +110,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
+	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
@@ -123,6 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
 		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -138,7 +146,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreasRequest {
-	return apiClient.ListNetworkAreas(ctx, *model.OrganizationId)
+	req := apiClient.ListNetworkAreas(ctx, *model.OrganizationId)
+	if model.LabelSelector != nil {
+		req = req.LabelSelector(*model.LabelSelector)
+	}
+	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.NetworkArea) error {

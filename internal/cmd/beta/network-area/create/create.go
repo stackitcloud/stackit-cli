@@ -29,6 +29,7 @@ const (
 	defaultPrefixLengthFlag = "default-prefix-length"
 	maxPrefixLengthFlag     = "max-prefix-length"
 	minPrefixLengthFlag     = "min-prefix-length"
+	labelFlag               = "labels"
 )
 
 type inputModel struct {
@@ -41,6 +42,7 @@ type inputModel struct {
 	DefaultPrefixLength *int64
 	MaxPrefixLength     *int64
 	MinPrefixLength     *int64
+	Labels              *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -61,6 +63,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a network area with name "network-area-3" in organization with ID "xxx" with network ranges, transfer network and additional options`,
 				`$ stackit beta network-area create --name network-area-3 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --default-prefix-length 25 --max-prefix-length 29 --min-prefix-length 24`,
+			),
+			examples.NewExample(
+				`Create a network area with name "network-area-1" in organization with ID "xxx" with network ranges and a transfer network and labels "key=value,key1=value1"`,
+				`$ stackit beta network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --labels key=value,key1=value1`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -119,6 +125,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(defaultPrefixLengthFlag, 0, "The default prefix length for networks in the network area")
 	cmd.Flags().Int64(maxPrefixLengthFlag, 0, "The maximum prefix length for networks in the network area")
 	cmd.Flags().Int64(minPrefixLengthFlag, 0, "The minimum prefix length for networks in the network area")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...'")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag, organizationIdFlag, networkRangesFlag, transferNetworkFlag)
 	cobra.CheckErr(err)
@@ -137,6 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, defaultPrefixLengthFlag),
 		MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, maxPrefixLengthFlag),
 		MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, minPrefixLengthFlag),
+		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -161,8 +169,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
+	var labelsMap *map[string]interface{}
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+
 	payload := iaas.CreateNetworkAreaPayload{
-		Name: model.Name,
+		Name:   model.Name,
+		Labels: labelsMap,
 		AddressFamily: &iaas.CreateAreaAddressFamily{
 			Ipv4: &iaas.CreateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,
