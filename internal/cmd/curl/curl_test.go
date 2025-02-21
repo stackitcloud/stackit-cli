@@ -5,16 +5,16 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var testURL = "https://some-service.api.stackit.cloud/v1/foo?bar=baz"
@@ -37,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		dataFlag:                   "data",
 		includeResponseHeadersFlag: "true",
 		failOnHTTPErrorFlag:        "true",
-		outputFileFlag:             "path/to/output.txt",
+		outputFileFlag:             "./output.txt",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Data:                   utils.Ptr("data"),
 		IncludeResponseHeaders: true,
 		FailOnHTTPError:        true,
-		OutputFile:             utils.Ptr("path/to/output.txt"),
+		OutputFile:             utils.Ptr("./output.txt"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -399,6 +399,48 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResponse(t *testing.T) {
+	type args struct {
+		model *inputModel
+		resp  *http.Response
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "http response as argument",
+			args: args{
+				model: fixtureInputModel(),
+				resp:  &http.Response{Body: http.NoBody},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResponse(p, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResponse() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.args.model != nil {
+				if _, err := os.Stat(*tt.args.model.OutputFile); err == nil {
+					if err := os.Remove(*tt.args.model.OutputFile); err != nil {
+						t.Errorf("remove output file error = %v", err)
+					}
+				}
 			}
 		})
 	}
