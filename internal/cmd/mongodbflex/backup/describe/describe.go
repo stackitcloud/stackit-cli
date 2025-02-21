@@ -80,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			restoreJobState := mongoUtils.GetRestoreStatus(model.BackupId, restoreJobs)
-			return outputResult(p, cmd, model.OutputFormat, restoreJobState, *resp.Item)
+			return outputResult(p, model.OutputFormat, restoreJobState, *resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -125,14 +125,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat, restoreStatus string, backup mongodbflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup mongodbflex.Backup) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backup, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:

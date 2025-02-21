@@ -207,3 +207,53 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		backups      []mongodbflex.Backup
+		restoreJobs  *mongodbflex.ListRestoreJobsResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "set empty backups",
+			args: args{
+				backups: []mongodbflex.Backup{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "set restore jobs",
+			args: args{
+				restoreJobs: &mongodbflex.ListRestoreJobsResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set restore jobs and empty backups",
+			args: args{
+				backups:     []mongodbflex.Backup{},
+				restoreJobs: &mongodbflex.ListRestoreJobsResponse{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.backups, tt.args.restoreJobs); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

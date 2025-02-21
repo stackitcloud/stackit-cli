@@ -322,3 +322,145 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		inputModel *inputModel
+		flavors    *mongodbflex.ListFlavorsResponse
+		versions   *mongodbflex.ListVersionsResponse
+		storages   *mongodbflex.ListStoragesResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "missing model",
+			args: args{
+				flavors:  &mongodbflex.ListFlavorsResponse{},
+				versions: &mongodbflex.ListVersionsResponse{},
+				storages: &mongodbflex.ListStoragesResponse{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty model",
+			args: args{
+				inputModel: &inputModel{},
+				flavors:    &mongodbflex.ListFlavorsResponse{},
+				versions:   &mongodbflex.ListVersionsResponse{},
+				storages:   &mongodbflex.ListStoragesResponse{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ok",
+			args: args{
+				inputModel: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				flavors:  &mongodbflex.ListFlavorsResponse{},
+				versions: &mongodbflex.ListVersionsResponse{},
+				storages: &mongodbflex.ListStoragesResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing flavors",
+			args: args{
+				inputModel: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				versions: &mongodbflex.ListVersionsResponse{},
+				storages: &mongodbflex.ListStoragesResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing versions",
+			args: args{
+				inputModel: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				flavors:  &mongodbflex.ListFlavorsResponse{},
+				storages: &mongodbflex.ListStoragesResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing storages",
+			args: args{
+				inputModel: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				flavors:  &mongodbflex.ListFlavorsResponse{},
+				versions: &mongodbflex.ListVersionsResponse{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.inputModel, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestOutputResultAsTable(t *testing.T) {
+	type args struct {
+		model   *inputModel
+		options *options
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "missing input model",
+			args: args{
+				options: &options{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing options",
+			args: args{
+				model: &inputModel{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty input model and empty options",
+			args: args{
+				model:   &inputModel{},
+				options: &options{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResultAsTable(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
+				t.Errorf("outputResultAsTable() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

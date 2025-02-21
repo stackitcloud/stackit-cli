@@ -100,6 +100,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
+	if instance == nil {
+		return fmt.Errorf("instance is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")
@@ -118,28 +122,35 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 
 		return nil
 	default:
-		aclsArray := *instance.Acl.Items
-		acls := strings.Join(aclsArray, ",")
-
-		instanceType, err := mongodbflexUtils.GetInstanceType(*instance.Replicas)
-		if err != nil {
-			// Should never happen
-			instanceType = ""
+		var instanceType string
+		if instance.HasReplicas() {
+			var err error
+			instanceType, err = mongodbflexUtils.GetInstanceType(*instance.Replicas)
+			if err != nil {
+				// Should never happen
+				instanceType = ""
+			}
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", *instance.Id)
+		table.AddRow("ID", utils.PtrString(instance.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", *instance.Name)
+		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("STATUS", *instance.Status)
+		table.AddRow("STATUS", utils.PtrString(instance.Status))
 		table.AddSeparator()
-		table.AddRow("STORAGE SIZE (GB)", *instance.Storage.Size)
+		if instance.HasStorage() {
+			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
+			table.AddSeparator()
+		}
+		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
-		table.AddRow("VERSION", *instance.Version)
-		table.AddSeparator()
-		table.AddRow("ACL", acls)
-		table.AddSeparator()
+		if instance.HasAcl() {
+			aclsArray := *instance.Acl.Items
+			acls := strings.Join(aclsArray, ",")
+			table.AddRow("ACL", acls)
+			table.AddSeparator()
+		}
 		if instance.HasFlavor() && instance.Flavor.HasDescription() {
 			table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
 			table.AddSeparator()
@@ -158,7 +169,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		}
 		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
-		err = table.Display(p)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

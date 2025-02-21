@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,8 +19,6 @@ import (
 	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/wait"
 )
@@ -133,7 +132,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -273,8 +272,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *mongodbflex.CreateInstanceResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, resp *mongodbflex.CreateInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("create instance response is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -293,7 +296,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		return nil
 	default:
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
