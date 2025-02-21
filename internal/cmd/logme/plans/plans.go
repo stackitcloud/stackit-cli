@@ -152,17 +152,19 @@ func outputResult(p *print.Printer, outputFormat string, plans []logme.Offering)
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
-			for j := range *o.Plans {
-				p := (*o.Plans)[j]
-				table.AddRow(
-					utils.PtrString(o.Name),
-					utils.PtrString(o.Version),
-					utils.PtrString(p.Id),
-					utils.PtrString(p.Name),
-					utils.PtrString(p.Description),
-				)
+			if o.Plans != nil {
+				for j := range *o.Plans {
+					p := (*o.Plans)[j]
+					table.AddRow(
+						utils.PtrString(o.Name),
+						utils.PtrString(o.Version),
+						utils.PtrString(p.Id),
+						utils.PtrString(p.Name),
+						utils.PtrString(p.Description),
+					)
+				}
+				table.AddSeparator()
 			}
-			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
 		err := table.Display(p)

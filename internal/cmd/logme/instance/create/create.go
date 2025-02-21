@@ -125,7 +125,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -251,8 +251,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient)
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *logme.CreateInstanceResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, resp *logme.CreateInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("response is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -271,7 +275,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		return nil
 	default:
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.InstanceId))
