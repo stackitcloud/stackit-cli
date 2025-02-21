@@ -99,6 +99,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalancer.LoadBalancer) error {
+	if loadBalancer == nil {
+		return fmt.Errorf("loadbalancer response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(loadBalancer, "", "  ")

@@ -159,8 +159,8 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 				utils.PtrString(l.Name),
 				utils.PtrString(l.Status),
 				externalAdress,
-				len(*l.Listeners),
-				len(*l.TargetPools),
+				len(utils.PtrString(l.Listeners)),
+				len(utils.PtrString(l.TargetPools)),
 			)
 		}
 		err := table.Display(p)

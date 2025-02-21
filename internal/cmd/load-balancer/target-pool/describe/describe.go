@@ -120,6 +120,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, targetPool loadbalancer.TargetPool, listener *loadbalancer.Listener) error {
+	if listener == nil {
+		return fmt.Errorf("listener response is empty")
+	}
 	output := struct {
 		*loadbalancer.TargetPool
 		Listener *loadbalancer.Listener `json:"attached_listener"`
@@ -191,9 +194,9 @@ func outputResultAsTable(p *print.Printer, targetPool loadbalancer.TargetPool, l
 	}
 
 	table := tables.NewTable()
-	table.AddRow("NAME", *targetPool.Name)
+	table.AddRow("NAME", utils.PtrString(targetPool.Name))
 	table.AddSeparator()
-	table.AddRow("TARGET PORT", *targetPool.TargetPort)
+	table.AddRow("TARGET PORT", utils.PtrString(targetPool.TargetPort))
 	table.AddSeparator()
 	table.AddRow("ATTACHED LISTENER", listenerStr)
 	table.AddSeparator()

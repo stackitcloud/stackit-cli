@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	lbUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
@@ -265,6 +264,40 @@ func TestGetFilterOp(t *testing.T) {
 			}
 			if filterOp != tt.expectedFilterOp {
 				t.Fatalf("Data does not match: %d", filterOp)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		credentials  []loadbalancer.CredentialsResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "empty credentials response in loadbalancers slice",
+			args: args{
+				credentials: []loadbalancer.CredentialsResponse{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.credentials); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
