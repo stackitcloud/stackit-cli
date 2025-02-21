@@ -30,6 +30,7 @@ const (
 	ipv6GatewayFlag        = "ipv6-gateway"
 	noIpv4GatewayFlag      = "no-ipv4-gateway"
 	noIpv6GatewayFlag      = "no-ipv6-gateway"
+	labelFlag              = "labels"
 )
 
 type inputModel struct {
@@ -42,6 +43,7 @@ type inputModel struct {
 	IPv6Gateway        *string
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
+	Labels             *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -136,6 +138,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -156,6 +159,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
+		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -173,6 +177,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkRequest {
 	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.NetworkId)
 	addressFamily := &iaas.UpdateNetworkAddressFamily{}
+
+	var labelsMap *map[string]interface{}
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
 
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		addressFamily.Ipv6 = &iaas.UpdateNetworkIPv6Body{
@@ -199,7 +212,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
-		Name: model.Name,
+		Name:   model.Name,
+		Labels: labelsMap,
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

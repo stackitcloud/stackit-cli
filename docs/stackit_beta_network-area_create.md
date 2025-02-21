@@ -21,6 +21,9 @@ stackit beta network-area create [flags]
 
   Create a network area with name "network-area-3" in organization with ID "xxx" with network ranges, transfer network and additional options
   $ stackit beta network-area create --name network-area-3 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --default-prefix-length 25 --max-prefix-length 29 --min-prefix-length 24
+
+  Create a network area with name "network-area-1" in organization with ID "xxx" with network ranges and a transfer network and labels "key=value,key1=value1"
+  $ stackit beta network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --labels key=value,key1=value1
 ```
 
 ### Options
@@ -29,6 +32,7 @@ stackit beta network-area create [flags]
       --default-prefix-length int   The default prefix length for networks in the network area
       --dns-name-servers strings    List of DNS name server IPs
   -h, --help                        Help for "stackit beta network-area create"
+      --labels stringToString       Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --max-prefix-length int       The maximum prefix length for networks in the network area
       --min-prefix-length int       The minimum prefix length for networks in the network area
   -n, --name string                 Network area name

@@ -35,6 +35,7 @@ const (
 	nonRoutedFlag          = "non-routed"
 	noIpv4GatewayFlag      = "no-ipv4-gateway"
 	noIpv6GatewayFlag      = "no-ipv6-gateway"
+	labelFlag              = "labels"
 )
 
 type inputModel struct {
@@ -51,6 +52,7 @@ type inputModel struct {
 	NonRouted          bool
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
+	Labels             *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -71,6 +73,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Create a network with name "network-1" and no gateway`,
 				`$ stackit beta network create --name network-1 --no-ipv4-gateway`,
+			),
+			examples.NewExample(
+				`Create a network with name "network-1" and labels "key=value,key1=value1"`,
+				`$ stackit beta network create --name network-1 --labels key=value,key1=value1`,
 			),
 			examples.NewExample(
 				`Create an IPv4 network with name "network-1" with DNS name servers, a prefix and a gateway`,
@@ -149,6 +155,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(nonRoutedFlag, false, "If set to true, the network is not routed and therefore not accessible from other networks")
 	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...'")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
@@ -174,6 +181,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		NonRouted:          flags.FlagToBoolValue(p, cmd, nonRoutedFlag),
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
+		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -220,6 +228,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
+	var labelsMap *map[string]interface{}
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+
 	routed := true
 	if model.NonRouted {
 		routed = false
@@ -227,6 +244,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateNetworkPayload{
 		Name:   model.Name,
+		Labels: labelsMap,
 		Routed: &routed,
 	}
 
