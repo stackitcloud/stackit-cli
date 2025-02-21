@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create MariaDB credentials: %w", err)
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, model.OutputFormat, model.ShowPassword, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,11 +123,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *mariadb.CredentialsResponse) error {
-	if !model.ShowPassword {
+func outputResult(p *print.Printer, outputFormat string, showPassword bool, instanceLabel string, resp *mariadb.CredentialsResponse) error {
+	if resp == nil {
+		return fmt.Errorf("response is nil")
+	}
+
+	if !showPassword && resp.HasRaw() && resp.Raw.Credentials != nil {
 		resp.Raw.Credentials.Password = utils.Ptr("hidden")
 	}
-	switch model.OutputFormat {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -151,7 +155,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
 				p.Outputf("Username: %s\n", *username)
 			}
-			if !model.ShowPassword {
+			if !showPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
 				p.Outputf("Password: %s\n", utils.PtrString(resp.Raw.Credentials.Password))

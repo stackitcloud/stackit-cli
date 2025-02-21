@@ -112,6 +112,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.API
 }
 
 func outputResult(p *print.Printer, outputFormat string, credentials *mariadb.CredentialsResponse) error {
+	if credentials == nil {
+		return fmt.Errorf("credentials is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
@@ -131,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials *mariadb.Cr
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *credentials.Id)
+		table.AddRow("ID", utils.PtrString(credentials.Id))
 		table.AddSeparator()
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if credentials.HasRaw() && credentials.Raw.Credentials != nil {
