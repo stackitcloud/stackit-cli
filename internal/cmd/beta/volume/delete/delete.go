@@ -56,10 +56,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeId)
+			volumeLabel := model.VolumeId
+			volumeName, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get volume name: %v", err)
-				volumeLabel = model.VolumeId
+			} else if volumeName != "" {
+				volumeLabel = volumeName
 			}
 
 			if !model.AssumeYes {
