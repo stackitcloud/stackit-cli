@@ -89,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(p, model, members)
+			return outputResult(p, model.OutputFormat, *model, members)
 		},
 	}
 	configureFlags(cmd)
@@ -145,20 +145,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, members []authorization.Member) error {
+func outputResult(p *print.Printer, outputFormat string, model inputModel, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
-			return *members[i].Subject < *members[j].Subject
+			return utils.PtrString(members[i].Subject) < utils.PtrString(members[j].Subject)
 		case "role":
-			return *members[i].Role < *members[j].Role
+			return utils.PtrString(members[i].Role) < utils.PtrString(members[j].Role)
 		default:
 			return false
 		}
 	}
 	sort.SliceStable(members, sortFn)
 
-	switch model.OutputFormat {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")
