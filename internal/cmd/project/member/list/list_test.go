@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
@@ -205,6 +204,46 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		model        inputModel
+		members      []authorization.Member
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"base", args{"", inputModel{
+			Subject: utils.Ptr("subject"),
+			Limit:   nil,
+			SortBy:  "",
+		}, nil}, false},
+		{"complete", args{"", inputModel{
+			Subject: utils.Ptr("subject"),
+			Limit:   nil,
+			SortBy:  "",
+		},
+			[]authorization.Member{
+				{Role: utils.Ptr("role1"), Subject: utils.Ptr("subject1")},
+				{Role: utils.Ptr("role2"), Subject: utils.Ptr("subject2")},
+				{Role: utils.Ptr("role3"), Subject: utils.Ptr("subject3")},
+			}},
+			false},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.model, tt.args.members); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
