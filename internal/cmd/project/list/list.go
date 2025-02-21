@@ -242,11 +242,16 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
 			p := projects[i]
+
+			var parentId *string
+			if p.Parent != nil {
+				parentId = p.Parent.Id
+			}
 			table.AddRow(
 				utils.PtrString(p.ProjectId),
 				utils.PtrString(p.Name),
 				utils.PtrString(p.LifecycleState),
-				utils.PtrString(p.Parent.Id),
+				utils.PtrString(parentId),
 			)
 		}
 
