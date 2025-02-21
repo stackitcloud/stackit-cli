@@ -17,7 +17,7 @@ stackit curl URL [flags]
   $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones
 
   Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, write complete response (headers and body) to file "./output.txt"
-  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -include --output ./output.txt
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones --include --output ./output.txt
 
   Create a new DNS zone for project with ID xxx via POST request to https://dns.api.stackit.cloud/v1/projects/xxx/zones with payload from file "./payload.json"
   $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST --data @./payload.json

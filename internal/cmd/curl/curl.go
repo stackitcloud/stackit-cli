@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, write complete response (headers and body) to file "./output.txt"`,
-				"$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -include --output ./output.txt",
+				"$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones --include --output ./output.txt",
 			),
 			examples.NewExample(
 				`Create a new DNS zone for project with ID xxx via POST request to https://dns.api.stackit.cloud/v1/projects/xxx/zones with payload from file "./payload.json"`,
@@ -198,6 +198,9 @@ func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) 
 }
 
 func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) error {
+	if resp == nil {
+		return fmt.Errorf("http response is empty")
+	}
 	output := make([]byte, 0)
 	if model.IncludeResponseHeaders {
 		respHeader, err := httputil.DumpResponse(resp, false)
@@ -215,7 +218,7 @@ func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) er
 	if model.OutputFile == nil {
 		p.Outputln(string(output))
 	} else {
-		err = os.WriteFile(*model.OutputFile, output, 0o600)
+		err = os.WriteFile(utils.PtrString(model.OutputFile), output, 0o600)
 		if err != nil {
 			return fmt.Errorf("write output to file: %w", err)
 		}
