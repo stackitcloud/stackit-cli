@@ -22,6 +22,9 @@ stackit beta network create [flags]
   Create a network with name "network-1" and no gateway
   $ stackit beta network create --name network-1 --no-ipv4-gateway
 
+  Create a network with name "network-1" and labels "key=value,key1=value1"
+  $ stackit beta network create --name network-1 --labels key=value,key1=value1
+
   Create an IPv4 network with name "network-1" with DNS name servers, a prefix and a gateway
   $ stackit beta network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix "10.1.2.0/24" --ipv4-gateway "10.1.2.3"
 
@@ -41,6 +44,7 @@ stackit beta network create [flags]
       --ipv6-gateway string             The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --ipv6-prefix string              The IPv6 prefix of the network (CIDR)
       --ipv6-prefix-length int          The prefix length of the IPv6 network
+      --labels stringToString           Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...' (default [])
   -n, --name string                     Network name
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway

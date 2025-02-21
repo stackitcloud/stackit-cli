@@ -21,12 +21,16 @@ stackit beta network-area list [flags]
 
   Lists up to 10 network areas of organization "xxx"
   $ stackit beta network-area list --organization-id xxx --limit 10
+
+  Lists all network areas of organization "xxx" which contains the label yyy
+  $ stackit beta network-area list --organization-id xxx --label-selector yyy
 ```
 
 ### Options
 
 ```
   -h, --help                     Help for "stackit beta network-area list"
+      --label-selector string    Filter by label
       --limit int                Maximum number of entries to list
       --organization-id string   Organization ID
 ```
