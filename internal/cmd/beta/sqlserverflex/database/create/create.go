@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			s.Stop()
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, model.DatabaseName, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -132,8 +132,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.CreateDatabaseResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, databaseName string, resp *sqlserverflex.CreateDatabaseResponse) error {
+	if resp == nil {
+		return fmt.Errorf("sqlserverflex response is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -151,7 +154,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *sqlserverflex.Creat
 
 		return nil
 	default:
-		p.Outputf("Created database %q\n", model.DatabaseName)
+		p.Outputf("Created database %q\n", databaseName)
 		return nil
 	}
 }

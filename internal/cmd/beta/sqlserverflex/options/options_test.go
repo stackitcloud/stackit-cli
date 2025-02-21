@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
@@ -498,6 +497,53 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			}
 			if tt.expectListStoragesCalled != client.listStoragesCalled {
 				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, client.listStoragesCalled)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		model             *inputModel
+		flavors           *sqlserverflex.ListFlavorsResponse
+		versions          *sqlserverflex.ListVersionsResponse
+		storages          *sqlserverflex.ListStoragesResponse
+		userRoles         *sqlserverflex.ListRolesResponse
+		dbCollations      *sqlserverflex.ListCollationsResponse
+		dbCompatibilities *sqlserverflex.ListCompatibilityResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "empty - only model",
+			args: args{
+				model: fixtureInputModelAllFalse(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "all input set",
+			args: args{
+				model:             fixtureInputModelAllTrue(),
+				flavors:           &sqlserverflex.ListFlavorsResponse{Flavors: &[]sqlserverflex.InstanceFlavorEntry{}},
+				versions:          &sqlserverflex.ListVersionsResponse{Versions: &[]string{}},
+				storages:          &sqlserverflex.ListStoragesResponse{StorageClasses: &[]string{}},
+				userRoles:         &sqlserverflex.ListRolesResponse{Roles: &[]string{}},
+				dbCollations:      &sqlserverflex.ListCollationsResponse{Collations: &[]sqlserverflex.MssqlDatabaseCollation{}},
+				dbCompatibilities: &sqlserverflex.ListCompatibilityResponse{Compatibilities: &[]sqlserverflex.MssqlDatabaseCompatibility{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.model, tt.args.flavors, tt.args.versions, tt.args.storages, tt.args.userRoles, tt.args.dbCollations, tt.args.dbCompatibilities); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
