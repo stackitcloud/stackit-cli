@@ -100,6 +100,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 }
 
 func outputResult(p *print.Printer, outputFormat string, config *observability.Job) error {
+	if config == nil {
+		return fmt.Errorf(`config is nil`)
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(config, "", "  ")
@@ -127,23 +131,25 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 		}
 
 		var targets []string
-		for _, target := range *config.StaticConfigs {
-			targetLabels := []string{}
-			targetLabelStr := "N/A"
-			if target.Labels != nil {
-				// make map prettier
-				for k, v := range *target.Labels {
-					targetLabels = append(targetLabels, fmt.Sprintf("%s:%s", k, v))
+		if config.StaticConfigs != nil {
+			for _, target := range *config.StaticConfigs {
+				targetLabels := []string{}
+				targetLabelStr := "N/A"
+				if target.Labels != nil {
+					// make map prettier
+					for k, v := range *target.Labels {
+						targetLabels = append(targetLabels, fmt.Sprintf("%s:%s", k, v))
+					}
+					if targetLabels != nil {
+						targetLabelStr = strings.Join(targetLabels, ",")
+					}
 				}
-				if targetLabels != nil {
-					targetLabelStr = strings.Join(targetLabels, ",")
+				targetUrlsStr := "N/A"
+				if target.Targets != nil {
+					targetUrlsStr = strings.Join(*target.Targets, ",")
 				}
+				targets = append(targets, fmt.Sprintf("labels: %s\nurls: %s", targetLabelStr, targetUrlsStr))
 			}
-			targetUrlsStr := "N/A"
-			if target.Targets != nil {
-				targetUrlsStr = strings.Join(*target.Targets, ",")
-			}
-			targets = append(targets, fmt.Sprintf("labels: %s\nurls: %s", targetLabelStr, targetUrlsStr))
 		}
 
 		table := tables.NewTable()

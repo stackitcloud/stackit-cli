@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create credentials for Observability instance: %w", err)
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, model.OutputFormat, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -110,8 +110,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *observability.CreateCredentialsResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, resp *observability.CreateCredentialsResponse) error {
+	if resp == nil {
+		return fmt.Errorf("response is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -130,13 +134,14 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		return nil
 	default:
 		p.Outputf("Created credentials for instance %q.\n\n", instanceLabel)
-		// The username field cannot be set by the user, so we only display it if it's not returned empty
-		username := *resp.Credentials.Username
-		if username != "" {
-			p.Outputf("Username: %s\n", username)
-		}
 
 		if resp.Credentials != nil {
+			// The username field cannot be set by the user, so we only display it if it's not returned empty
+			username := *resp.Credentials.Username
+			if username != "" {
+				p.Outputf("Username: %s\n", username)
+			}
+
 			p.Outputf("Password: %s\n", utils.PtrString(resp.Credentials.Password))
 		}
 		return nil

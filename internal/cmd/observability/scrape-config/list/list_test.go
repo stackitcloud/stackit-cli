@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -204,6 +205,47 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		configs      []observability.Job
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "empty configs slice",
+			args: args{
+				configs: []observability.Job{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty config in configs slice",
+			args: args{
+				configs: []observability.Job{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.configs); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

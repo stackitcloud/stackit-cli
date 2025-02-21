@@ -77,7 +77,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get instance: %w", err)
 			}
 
-			return outputResult(p, model, grafanaConfigsResp, instanceResp)
+			return outputResult(p, model.OutputFormat, model.ShowPassword, grafanaConfigsResp, instanceResp)
 		},
 	}
 	configureFlags(cmd)
@@ -124,8 +124,14 @@ func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *
 	return req
 }
 
-func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *observability.GrafanaConfigs, instance *observability.GetInstanceResponse) error {
-	switch inputModel.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, showPassword bool, grafanaConfigs *observability.GrafanaConfigs, instance *observability.GetInstanceResponse) error {
+	if instance == nil || instance.Instance == nil {
+		return fmt.Errorf("instance or instance content is nil")
+	} else if grafanaConfigs == nil {
+		return fmt.Errorf("grafanaConfigs is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(grafanaConfigs, "", "  ")
 		if err != nil {
@@ -143,8 +149,8 @@ func outputResult(p *print.Printer, inputModel *inputModel, grafanaConfigs *obse
 
 		return nil
 	default:
-		initialAdminPassword := *instance.Instance.GrafanaAdminPassword
-		if !inputModel.ShowPassword {
+		initialAdminPassword := utils.PtrString(instance.Instance.GrafanaAdminPassword)
+		if !showPassword {
 			initialAdminPassword = "<hidden>"
 		}
 
