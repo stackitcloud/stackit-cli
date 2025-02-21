@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
 )
 
@@ -153,15 +152,17 @@ func outputResult(p *print.Printer, outputFormat string, plans []opensearch.Offe
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
-			for j := range *o.Plans {
-				plan := (*o.Plans)[j]
-				table.AddRow(
-					utils.PtrString(o.Name),
-					utils.PtrString(o.Version),
-					utils.PtrString(plan.Id),
-					utils.PtrString(plan.Name),
-					utils.PtrString(plan.Description),
-				)
+			if o.Plans != nil {
+				for j := range *o.Plans {
+					plan := (*o.Plans)[j]
+					table.AddRow(
+						utils.PtrString(o.Name),
+						utils.PtrString(o.Version),
+						utils.PtrString(plan.Id),
+						utils.PtrString(plan.Name),
+						utils.PtrString(plan.Description),
+					)
+				}
 			}
 			table.AddSeparator()
 		}
