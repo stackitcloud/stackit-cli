@@ -246,3 +246,38 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		orgLabel     string
+		networkArea  *iaas.NetworkArea
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "set empty network area",
+			args: args{
+				networkArea: &iaas.NetworkArea{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.orgLabel, tt.args.networkArea); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

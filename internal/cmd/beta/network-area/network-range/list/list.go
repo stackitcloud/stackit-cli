@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/cobra"
@@ -78,6 +79,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get organization name: %v", err)
+					networkAreaLabel = *model.NetworkAreaId
+				} else if networkAreaLabel == "" {
 					networkAreaLabel = *model.NetworkAreaId
 				}
 				p.Info("No network ranges found for SNA %q\n", networkAreaLabel)
@@ -162,7 +165,7 @@ func outputResult(p *print.Printer, outputFormat string, networkRanges []iaas.Ne
 		table.SetHeader("ID", "Network Range")
 
 		for _, networkRange := range networkRanges {
-			table.AddRow(*networkRange.NetworkRangeId, *networkRange.Prefix)
+			table.AddRow(utils.PtrString(networkRange.NetworkRangeId), utils.PtrString(networkRange.Prefix))
 		}
 
 		p.Outputln(table.Render())

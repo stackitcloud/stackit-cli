@@ -127,6 +127,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.NetworkArea, attachedProjects []string) error {
+	if networkArea == nil {
+		return fmt.Errorf("network area is nil")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkArea, "", "  ")
@@ -146,16 +149,19 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		return nil
 	default:
 		var routes []string
-		if networkArea.Ipv4.Routes != nil {
-			for _, route := range *networkArea.Ipv4.Routes {
-				routes = append(routes, fmt.Sprintf("next hop: %s\nprefix: %s", *route.Nexthop, *route.Prefix))
-			}
-		}
-
 		var networkRanges []string
-		if networkArea.Ipv4.NetworkRanges != nil {
-			for _, networkRange := range *networkArea.Ipv4.NetworkRanges {
-				networkRanges = append(networkRanges, *networkRange.Prefix)
+
+		if networkArea.Ipv4 != nil {
+			if networkArea.Ipv4.Routes != nil {
+				for _, route := range *networkArea.Ipv4.Routes {
+					routes = append(routes, fmt.Sprintf("next hop: %s\nprefix: %s", *route.Nexthop, *route.Prefix))
+				}
+			}
+
+			if networkArea.Ipv4.NetworkRanges != nil {
+				for _, networkRange := range *networkArea.Ipv4.NetworkRanges {
+					networkRanges = append(networkRanges, *networkRange.Prefix)
+				}
 			}
 		}
 

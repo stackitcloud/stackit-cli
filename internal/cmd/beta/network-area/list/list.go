@@ -80,6 +80,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					if err != nil {
 						p.Debug(print.ErrorLevel, "get organization name: %v", err)
 						orgLabel = *model.OrganizationId
+					} else if orgLabel == "" {
+						orgLabel = *model.OrganizationId
 					}
 				} else {
 					p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)

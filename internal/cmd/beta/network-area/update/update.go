@@ -75,6 +75,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get organization name: %v", err)
 					orgLabel = *model.OrganizationId
+				} else if orgLabel == "" {
+					orgLabel = *model.OrganizationId
 				}
 			} else {
 				p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
@@ -95,7 +97,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update network area: %w", err)
 			}
 
-			return outputResult(p, model, orgLabel, resp)
+			return outputResult(p, model.OutputFormat, orgLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -160,8 +162,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.PartialUpdateNetworkAreaPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, networkArea *iaas.NetworkArea) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, networkArea iaas.NetworkArea) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(networkArea, "", "  ")
 		if err != nil {

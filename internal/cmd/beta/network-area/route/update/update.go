@@ -69,6 +69,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
+			} else if networkAreaLabel == "" {
+				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			// Call API
@@ -78,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create static route: %w", err)
 			}
 
-			return outputResult(p, model, networkAreaLabel, *resp)
+			return outputResult(p, model.OutputFormat, networkAreaLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -141,8 +143,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, networkAreaLabel string, route iaas.Route) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route iaas.Route) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(route, "", "  ")
 		if err != nil {
