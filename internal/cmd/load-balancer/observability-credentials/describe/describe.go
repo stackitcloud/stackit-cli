@@ -115,8 +115,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials *loadbalanc
 		return nil
 	default:
 		if credentials == nil || credentials.Credential == nil {
-			p.Info("No credentials found")
-			return nil
+			return fmt.Errorf("credentials response is empty")
 		}
 
 		table := tables.NewTable()

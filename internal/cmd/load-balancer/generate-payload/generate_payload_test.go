@@ -4,14 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
@@ -306,6 +304,74 @@ func TestModifyListeners(t *testing.T) {
 			diff := cmp.Diff(output, tt.expected)
 			if diff != "" {
 				t.Errorf("expected output to be %+v, got %+v", tt.expected, output)
+			}
+		})
+	}
+}
+
+func TestOutputCreateResult(t *testing.T) {
+	type args struct {
+		filePath *string
+		payload  *loadbalancer.CreateLoadBalancerPayload
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "only loadbalancer payload as argument",
+			args: args{
+				payload: &loadbalancer.CreateLoadBalancerPayload{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputCreateResult(p, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
+				t.Errorf("outputCreateResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestOutputUpdateResult(t *testing.T) {
+	type args struct {
+		filePath *string
+		payload  *loadbalancer.UpdateLoadBalancerPayload
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "only loadbalancer payload as argument",
+			args: args{
+				payload: &loadbalancer.UpdateLoadBalancerPayload{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputUpdateResult(p, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
+				t.Errorf("outputUpdateResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

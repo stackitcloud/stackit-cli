@@ -213,13 +213,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputCreateResult(p *print.Printer, filePath *string, payload *loadbalancer.CreateLoadBalancerPayload) error {
+	if payload == nil {
+		return fmt.Errorf("loadbalancer payload is empty")
+	}
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal create load balancer payload: %w", err)
 	}
 
 	if filePath != nil {
-		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(utils.PtrString(filePath), string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write create load balancer payload to the file: %w", err)
 		}
@@ -231,13 +234,16 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *loadbalance
 }
 
 func outputUpdateResult(p *print.Printer, filePath *string, payload *loadbalancer.UpdateLoadBalancerPayload) error {
+	if payload == nil {
+		return fmt.Errorf("loadbalancer payload is empty")
+	}
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal update load balancer payload: %w", err)
 	}
 
 	if filePath != nil {
-		err = fileutils.WriteToFile(*filePath, string(payloadBytes))
+		err = fileutils.WriteToFile(utils.PtrString(filePath), string(payloadBytes))
 		if err != nil {
 			return fmt.Errorf("write update load balancer payload to the file: %w", err)
 		}

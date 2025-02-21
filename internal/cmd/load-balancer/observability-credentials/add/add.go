@@ -91,7 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("add Load Balancer observability credentials: %w", err)
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -144,12 +144,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *loadbalancer.CreateCredentialsResponse) error {
-	if resp.Credential == nil {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *loadbalancer.CreateCredentialsResponse) error {
+	if resp == nil || resp.Credential == nil {
 		return fmt.Errorf("nil observability credentials response")
 	}
 
-	switch model.OutputFormat {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
