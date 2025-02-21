@@ -4,12 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -212,6 +211,59 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		instance     *postgresflex.Instance
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, true},
+		{"standard", args{
+			outputFormat: "",
+			instance:     &postgresflex.Instance{},
+		}, false},
+		{"complete", args{
+			outputFormat: "",
+			instance: &postgresflex.Instance{
+				Acl: &postgresflex.ACL{
+					Items: &[]string{},
+				},
+				BackupSchedule: new(string),
+				Flavor: &postgresflex.Flavor{
+					Cpu:         new(int64),
+					Description: new(string),
+					Id:          new(string),
+					Memory:      new(int64),
+				},
+				Id:       new(string),
+				Name:     new(string),
+				Options:  &map[string]string{},
+				Replicas: new(int64),
+				Status:   new(string),
+				Storage: &postgresflex.Storage{
+					Class: new(string),
+					Size:  new(int64),
+				},
+				Version: new(string),
+			},
+		}, false},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.instance); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

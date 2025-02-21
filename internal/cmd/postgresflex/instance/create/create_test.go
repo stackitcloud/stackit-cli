@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -517,6 +516,41 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		async        bool
+		projectLabel string
+		instanceId   string
+		resp         *postgresflex.CreateInstanceResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, true},
+		{"standard", args{
+			outputFormat: "",
+			async:        false,
+			projectLabel: "label",
+			instanceId:   "4711",
+			resp:         &postgresflex.CreateInstanceResponse{Id: utils.Ptr("id")},
+		},
+			false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.projectLabel, tt.args.instanceId, tt.args.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
