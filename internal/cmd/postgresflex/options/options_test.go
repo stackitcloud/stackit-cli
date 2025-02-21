@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -318,6 +317,57 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			}
 			if tt.expectListStoragesCalled != client.listStoragesCalled {
 				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, client.listStoragesCalled)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		model        inputModel
+		flavors      *postgresflex.ListFlavorsResponse
+		versions     *postgresflex.ListVersionsResponse
+		storages     *postgresflex.ListStoragesResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"standard", args{
+			outputFormat: "",
+			model:        inputModel{},
+			flavors:      &postgresflex.ListFlavorsResponse{},
+			versions:     &postgresflex.ListVersionsResponse{},
+			storages:     &postgresflex.ListStoragesResponse{},
+		}, false},
+		{
+			"complete",
+			args{
+				outputFormat: "",
+				model:        inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}, Flavors: false, Versions: false, Storages: false, FlavorId: new(string)},
+				flavors: &postgresflex.ListFlavorsResponse{
+					Flavors: &[]postgresflex.Flavor{},
+				},
+				versions: &postgresflex.ListVersionsResponse{
+					Versions: &[]string{},
+				},
+				storages: &postgresflex.ListStoragesResponse{
+					StorageClasses: &[]string{},
+					StorageRange:   &postgresflex.StorageRange{},
+				},
+			},
+			false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.model, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

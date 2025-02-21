@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("reset PostgreSQL Flex user password: %w", err)
 			}
 
-			return outputResult(p, model, userLabel, instanceLabel, user)
+			return outputResult(p, model.OutputFormat, userLabel, instanceLabel, user)
 		},
 	}
 
@@ -132,8 +132,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel string, user *postgresflex.ResetUserResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *postgresflex.ResetUserResponse) error {
+	if user == nil {
+		return fmt.Errorf("no response passed")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")
 		if err != nil {
@@ -152,9 +155,11 @@ func outputResult(p *print.Printer, model *inputModel, userLabel, instanceLabel 
 		return nil
 	default:
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", utils.PtrString(user.Item.Username))
-		p.Outputf("New password: %s\n", utils.PtrString(user.Item.Password))
-		p.Outputf("New URI: %s\n", utils.PtrString(user.Item.Uri))
+		if item := user.Item; item != nil {
+			p.Outputf("Username: %s\n", utils.PtrString(item.Username))
+			p.Outputf("New password: %s\n", utils.PtrString(item.Password))
+			p.Outputf("New URI: %s\n", utils.PtrString(item.Uri))
+		}
 		return nil
 	}
 }

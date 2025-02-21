@@ -3,13 +3,14 @@ package list
 import (
 	"context"
 	"testing"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -201,6 +202,52 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		backups      []postgresflex.Backup
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"standard", args{outputFormat: "", backups: []postgresflex.Backup{}}, false},
+		{"complete", args{outputFormat: "", backups: []postgresflex.Backup{
+			{
+				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
+				Id:        utils.Ptr("id"),
+				Labels:    &[]string{"foo", "bar", "baz"},
+				Name:      utils.Ptr("name"),
+				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
+				Size:      utils.Ptr(int64(42)),
+				StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+			},
+			{
+				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
+				Id:        utils.Ptr("id"),
+				Labels:    &[]string{"foo", "bar", "baz"},
+				Name:      utils.Ptr("name"),
+				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
+				Size:      utils.Ptr(int64(42)),
+				StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+			},
+		},
+		}, false},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.backups); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

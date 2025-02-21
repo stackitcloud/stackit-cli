@@ -27,6 +27,15 @@ func PtrString[T any](t *T) string {
 	return ""
 }
 
+// PtrValue returns the dereferenced value if the pointer is not nil. Otherwise
+// the types zero element is returned
+func PtrValue[T any](t *T) (r T) {
+	if t != nil {
+		return *t
+	}
+	return r
+}
+
 // Int64Ptr returns a pointer to an int64
 // Needed because the Ptr function only returns pointer to int
 func Int64Ptr(i int64) *int64 {

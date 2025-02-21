@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -102,6 +101,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
+	if instance == nil {
+		return fmt.Errorf("no response passed")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")
@@ -122,11 +124,10 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 	default:
 		acls := ""
 		if instance.HasAcl() && instance.Acl.HasItems() {
-			aclsArray := *instance.Acl.Items
-			acls = strings.Join(aclsArray, ",")
+			acls = utils.JoinStringPtr(instance.Acl.Items, ",")
 		}
 
-		instanceType, err := postgresflexUtils.GetInstanceType(*instance.Replicas)
+		instanceType, err := postgresflexUtils.GetInstanceType(utils.PtrValue(instance.Replicas))
 		if err != nil {
 			// Should never happen
 			instanceType = ""
@@ -139,21 +140,27 @@ func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.
 		table.AddSeparator()
 		table.AddRow("STATUS", cases.Title(language.English).String(utils.PtrString(instance.Status)))
 		table.AddSeparator()
-		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
+		if instance.Storage != nil {
+			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
+		}
 		table.AddSeparator()
 		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
+		if instance.Flavor != nil {
+			table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
+		}
 		table.AddSeparator()
 		table.AddRow("TYPE", instanceType)
 		table.AddSeparator()
 		table.AddRow("REPLICAS", utils.PtrString(instance.Replicas))
 		table.AddSeparator()
-		table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
-		table.AddSeparator()
-		table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
+		if instance.Flavor != nil {
+			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
+			table.AddSeparator()
+			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
+		}
 		table.AddSeparator()
 		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
