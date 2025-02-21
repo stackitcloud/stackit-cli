@@ -1,7 +1,5 @@
 package list
 
-// TODO: hier sind wir
-
 import (
 	"context"
 	"testing"
