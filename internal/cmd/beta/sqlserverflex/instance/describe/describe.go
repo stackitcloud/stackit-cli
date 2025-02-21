@@ -99,6 +99,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex.Instance) error {
+	if instance == nil {
+		return fmt.Errorf("instance response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")
@@ -130,21 +133,24 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(instance.Status))
 		table.AddSeparator()
-		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
-		table.AddSeparator()
+		if instance.Storage != nil {
+			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
+			table.AddSeparator()
+		}
 		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
 		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
-		table.AddSeparator()
-		table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
-		table.AddSeparator()
-		table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
-		table.AddSeparator()
-
+		if instance.Flavor != nil {
+			table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
+			table.AddSeparator()
+			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
+			table.AddSeparator()
+			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
+			table.AddSeparator()
+		}
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
