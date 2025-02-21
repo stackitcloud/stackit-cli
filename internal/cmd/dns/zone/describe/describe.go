@@ -99,6 +99,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
+	if zone == nil {
+		return fmt.Errorf("zone response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(zone, "", "  ")

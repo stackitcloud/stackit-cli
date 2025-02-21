@@ -197,6 +197,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *dns.ZoneResponse) error {
+	if resp == nil {
+		return fmt.Errorf("dns zone response is empty")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
