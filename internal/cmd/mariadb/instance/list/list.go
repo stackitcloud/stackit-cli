@@ -152,11 +152,18 @@ func outputResult(p *print.Printer, outputFormat string, instances []mariadb.Ins
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
 			instance := instances[i]
+
+			lastOperationType, lastOperationState := "", ""
+			if instance.LastOperation != nil {
+				lastOperationType = utils.PtrString(instance.LastOperation.Type)
+				lastOperationState = utils.PtrString(instance.LastOperation.State)
+			}
+
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
 				utils.PtrString(instance.Name),
-				utils.PtrString(instance.LastOperation.Type),
-				utils.PtrString(instance.LastOperation.State),
+				lastOperationType,
+				lastOperationState,
 			)
 		}
 		err := table.Display(p)
