@@ -57,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get security group: %w", err)
 			}
 
-			if err := outputResult(p, model, group); err != nil {
+			if err := outputResult(p, model.OutputFormat, group); err != nil {
 				return err
 			}
 
@@ -96,8 +96,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *iaas.SecurityGroup) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGroup) error {
+	if resp == nil {
+		return fmt.Errorf("security group response is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
