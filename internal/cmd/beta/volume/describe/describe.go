@@ -102,6 +102,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) error {
+	if volume == nil {
+		return fmt.Errorf("volume response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")

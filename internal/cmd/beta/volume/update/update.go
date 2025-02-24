@@ -90,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update volume: %w", err)
 			}
 
-			return outputResult(p, model, volumeLabel, resp)
+			return outputResult(p, model.OutputFormat, volumeLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -152,8 +152,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.UpdateVolumePayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, volumeLabel string, volume *iaas.Volume) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, volumeLabel string, volume *iaas.Volume) error {
+	if volume == nil {
+		return fmt.Errorf("volume response is empty")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(volume, "", "  ")
 		if err != nil {
