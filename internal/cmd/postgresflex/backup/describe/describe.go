@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(p, cmd, model.OutputFormat, *resp.Item)
+			return outputResult(p, model.OutputFormat, *resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -106,8 +106,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, backup postgresflex.Backup) error {
-	backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
+func outputResult(p *print.Printer, outputFormat string, backup postgresflex.Backup) error {
+	if backup.StartTime == nil || *backup.StartTime == "" {
+		return fmt.Errorf("start time not defined")
+	}
+	backupStartTime, err := time.Parse(time.RFC3339, utils.PtrString(backup.StartTime))
 	if err != nil {
 		return fmt.Errorf("parse backup start time: %w", err)
 	}
@@ -119,7 +122,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, bac
 		if err != nil {
 			return fmt.Errorf("marshal backup for PostgreSQL Flex backup: %w", err)
 		}
-		cmd.Println(string(details))
+		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
