@@ -21,13 +21,17 @@ stackit beta network list [flags]
 
   Lists up to 10 networks
   $ stackit beta network list --limit 10
+
+  Lists all networks which contains the label xxx
+  $ tackit beta network list --label-selector xxx
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit beta network list"
-      --limit int   Maximum number of entries to list
+  -h, --help                    Help for "stackit beta network list"
+      --label-selector string   Filter by label
+      --limit int               Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands

@@ -30,6 +30,7 @@ const (
 	defaultPrefixLengthFlag = "default-prefix-length"
 	maxPrefixLengthFlag     = "max-prefix-length"
 	minPrefixLengthFlag     = "min-prefix-length"
+	labelFlag               = "labels"
 )
 
 type inputModel struct {
@@ -41,6 +42,7 @@ type inputModel struct {
 	DefaultPrefixLength *int64
 	MaxPrefixLength     *int64
 	MinPrefixLength     *int64
+	Labels              *map[string]string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -111,6 +113,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(defaultPrefixLengthFlag, 0, "The default prefix length for networks in the network area")
 	cmd.Flags().Int64(maxPrefixLengthFlag, 0, "The maximum prefix length for networks in the network area")
 	cmd.Flags().Int64(minPrefixLengthFlag, 0, "The minimum prefix length for networks in the network area")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...'")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
@@ -130,6 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, defaultPrefixLengthFlag),
 		MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, maxPrefixLengthFlag),
 		MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, minPrefixLengthFlag),
+		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -147,8 +151,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkAreaRequest {
 	req := apiClient.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 
+	var labelsMap *map[string]interface{}
+	if model.Labels != nil && len(*model.Labels) > 0 {
+		// convert map[string]string to map[string]interface{}
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range *model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+
 	payload := iaas.PartialUpdateNetworkAreaPayload{
-		Name: model.Name,
+		Name:   model.Name,
+		Labels: labelsMap,
 		AddressFamily: &iaas.UpdateAreaAddressFamily{
 			Ipv4: &iaas.UpdateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,

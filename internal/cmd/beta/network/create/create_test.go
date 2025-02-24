@@ -36,6 +36,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		ipv6PrefixFlag:         "2001:4860:4860::8888",
 		ipv6GatewayFlag:        "2001:4860:4860::8888",
 		nonRoutedFlag:          "false",
+		labelFlag:              "key=value",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -59,6 +60,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
 		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
 		NonRouted:          false,
+		Labels: utils.Ptr(map[string]string{
+			"key": "value",
+		}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -91,6 +95,9 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.Creat
 	payload := iaas.CreateNetworkPayload{
 		Name:   utils.Ptr("example-network-name"),
 		Routed: utils.Ptr(true),
+		Labels: utils.Ptr(map[string]interface{}{
+			"key": "value",
+		}),
 		AddressFamily: &iaas.CreateNetworkAddressFamily{
 			Ipv4: &iaas.CreateNetworkIPv4Body{
 				Nameservers:  utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
@@ -235,6 +242,16 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.NonRouted = true
 			}),
+		},
+		{
+			description: "labels missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, labelFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = nil
+			}),
+			isValid: true,
 		},
 	}
 

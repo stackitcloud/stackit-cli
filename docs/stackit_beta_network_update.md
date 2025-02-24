@@ -34,6 +34,7 @@ stackit beta network update NETWORK_ID [flags]
       --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --ipv6-dns-name-servers strings   List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks
       --ipv6-gateway string             The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
+      --labels stringToString           Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...' (default [])
   -n, --name string                     Network name
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway

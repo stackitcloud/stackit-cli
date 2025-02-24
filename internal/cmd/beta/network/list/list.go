@@ -22,12 +22,14 @@ import (
 )
 
 const (
-	limitFlag = "limit"
+	limitFlag         = "limit"
+	labelSelectorFlag = "label-selector"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Limit *int64
+	Limit         *int64
+	LabelSelector *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -48,6 +50,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`Lists up to 10 networks`,
 				"$ stackit beta network list --limit 10",
+			),
+			examples.NewExample(
+				`Lists all networks which contains the label xxx`,
+				"$ tackit beta network list --label-selector xxx",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -97,6 +103,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -116,6 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
+		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -131,7 +139,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworksRequest {
-	return apiClient.ListNetworks(ctx, model.ProjectId)
+	req := apiClient.ListNetworks(ctx, model.ProjectId)
+	if model.LabelSelector != nil {
+		req = req.LabelSelector(*model.LabelSelector)
+	}
+	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network) error {

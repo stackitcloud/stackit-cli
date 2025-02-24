@@ -42,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		ipv4GatewayFlag:        "10.1.2.3",
 		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
 		ipv6GatewayFlag:        "2001:4860:4860::8888",
+		labelFlag:              "key=value",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -61,6 +62,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IPv4Gateway:        utils.Ptr("10.1.2.3"),
 		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
+		Labels: utils.Ptr(map[string]string{
+			"key": "value",
+		}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -80,6 +84,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) 
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaas.PartialUpdateNetworkPayload {
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name: utils.Ptr("example-network-name"),
+		Labels: utils.Ptr(map[string]interface{}{
+			"key": "value",
+		}),
 		AddressFamily: &iaas.UpdateNetworkAddressFamily{
 			Ipv4: &iaas.UpdateNetworkIPv4Body{
 				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
@@ -217,6 +224,17 @@ func TestParseInput(t *testing.T) {
 				model.NoIPv6Gateway = true
 				model.IPv6Gateway = nil
 			}),
+		},
+		{
+			description: "labels missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, labelFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = nil
+			}),
+			isValid: true,
 		},
 	}
 
