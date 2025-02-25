@@ -74,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create service account: %w", err)
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(p, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -119,8 +119,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, serviceAccount *serviceaccount.ServiceAccount) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, serviceAccount *serviceaccount.ServiceAccount) error {
+	if serviceAccount == nil {
+		return fmt.Errorf("service account is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(serviceAccount, "", "  ")
 		if err != nil {
