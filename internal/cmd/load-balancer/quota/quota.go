@@ -86,6 +86,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.GetQuotaResponse) error {
+	if quota == nil {
+		return fmt.Errorf("quota response is empty")
+	}
 	switch outputFormat {
 	case print.PrettyOutputFormat:
 
