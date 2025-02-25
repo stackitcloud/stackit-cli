@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get SQLServer Flex user: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, *resp.Item)
+			return outputResult(p, model.OutputFormat, resp.Item)
 		},
 	}
 
@@ -118,7 +118,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user sqlserverflex.UserResponseUser) error {
+func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.UserResponseUser) error {
+	if user == nil {
+		return fmt.Errorf("user response is empty")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(user, "", "  ")

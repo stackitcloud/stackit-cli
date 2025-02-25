@@ -262,6 +262,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *sqlserverflex.CreateInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("sqlserverflex response is empty")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
