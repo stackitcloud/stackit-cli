@@ -111,6 +111,12 @@ func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *sec
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *secretsmanager.Instance, aclList *secretsmanager.ListACLsResponse) error {
+	if instance == nil {
+		return fmt.Errorf("instance is nil")
+	} else if aclList == nil {
+		return fmt.Errorf("aclList is nil")
+	}
+
 	output := struct {
 		*secretsmanager.Instance
 		*secretsmanager.ListACLsResponse
@@ -148,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 		table.AddRow("CREATION DATE", utils.PtrString(instance.CreationStartDate))
 		table.AddSeparator()
 		// Only show ACL if it's present and not empty
-		if aclList != nil && aclList.Acls != nil && len(*aclList.Acls) > 0 {
+		if aclList.Acls != nil && len(*aclList.Acls) > 0 {
 			var cidrs []string
 
 			for _, acl := range *aclList.Acls {
