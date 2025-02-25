@@ -87,6 +87,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenab
 }
 
 func outputResult(p *print.Printer, outputFormat string, project *serviceenablement.ServiceStatus, projectId string) error {
+	if project == nil {
+		return fmt.Errorf("project is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(project, "", "  ")
@@ -108,7 +112,9 @@ func outputResult(p *print.Printer, outputFormat string, project *serviceenablem
 		table := tables.NewTable()
 		table.AddRow("ID", projectId)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(project.State))
+		if project.HasState() {
+			table.AddRow("STATE", utils.PtrString(project.State))
+		}
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

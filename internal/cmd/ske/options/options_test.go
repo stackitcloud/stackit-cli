@@ -186,3 +186,97 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		model   *inputModel
+		options *ske.ProviderOptions
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "missing model",
+			args: args{
+				options: &ske.ProviderOptions{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing options",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing global flags in model",
+			args: args{
+				model:   &inputModel{},
+				options: &ske.ProviderOptions{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "set model and options",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				options: &ske.ProviderOptions{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestOutputResultAsTable(t *testing.T) {
+	type args struct {
+		options *ske.ProviderOptions
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "empty options",
+			args: args{
+				options: &ske.ProviderOptions{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResultAsTable(p, tt.args.options); (err != nil) != tt.wantErr {
+				t.Errorf("outputResultAsTable() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

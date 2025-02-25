@@ -289,3 +289,47 @@ func TestBuildRequestCreate(t *testing.T) {
 		})
 	}
 }
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat   string
+		clusterName    string
+		kubeconfigPath string
+		respKubeconfig *ske.Kubeconfig
+		respLogin      *ske.LoginKubeconfig
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "missing kubeconfig",
+			args: args{
+				respLogin: &ske.LoginKubeconfig{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing login",
+			args: args{
+				respKubeconfig: &ske.Kubeconfig{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.clusterName, tt.args.kubeconfigPath, tt.args.respKubeconfig, tt.args.respLogin); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

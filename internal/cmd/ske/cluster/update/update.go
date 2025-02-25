@@ -105,7 +105,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(p, model.OutputFormat, model.Async, model.ClusterName, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -159,10 +159,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *ske.Cluster) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, clusterName string, cluster *ske.Cluster) error {
+	if cluster == nil {
+		return fmt.Errorf("cluster is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
+		details, err := json.MarshalIndent(cluster, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal SKE cluster: %w", err)
 		}
@@ -170,7 +174,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *ske.Cluster) error 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(cluster, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal SKE cluster: %w", err)
 		}
@@ -179,10 +183,10 @@ func outputResult(p *print.Printer, model *inputModel, resp *ske.Cluster) error 
 		return nil
 	default:
 		operationState := "Updated"
-		if model.Async {
+		if async {
 			operationState = "Triggered update of"
 		}
-		p.Info("%s cluster %q\n", operationState, model.ClusterName)
+		p.Info("%s cluster %q\n", operationState, clusterName)
 		return nil
 	}
 }

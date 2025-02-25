@@ -208,3 +208,45 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		filePath *string
+		payload  *ske.CreateOrUpdateClusterPayload
+	}
+	filePathDummy := "/dummy.txt"
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "missing payload",
+			args: args{
+				filePath: &filePathDummy,
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing file path",
+			args: args{
+				payload: &ske.CreateOrUpdateClusterPayload{},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

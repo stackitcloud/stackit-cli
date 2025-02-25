@@ -134,6 +134,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 }
 
 func outputResult(p *print.Printer, filePath *string, payload *ske.CreateOrUpdateClusterPayload) error {
+	if payload == nil {
+		return fmt.Errorf("payload is nil")
+	}
+
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)

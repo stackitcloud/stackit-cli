@@ -97,6 +97,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) error {
+	if cluster == nil {
+		return fmt.Errorf("cluster is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(cluster, "", "  ")
@@ -123,10 +127,14 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		table := tables.NewTable()
 		table.AddRow("NAME", utils.PtrString(cluster.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
-		table.AddSeparator()
-		table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
-		table.AddSeparator()
+		if cluster.HasStatus() {
+			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
+			table.AddSeparator()
+		}
+		if cluster.Kubernetes != nil {
+			table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
+			table.AddSeparator()
+		}
 		table.AddRow("ACL", acl)
 		err := table.Display(p)
 		if err != nil {
