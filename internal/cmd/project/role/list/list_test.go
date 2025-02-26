@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
@@ -168,6 +167,40 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputRolesResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		roles        []authorization.Role
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"standard", args{"", nil}, false},
+		{"complete", args{"", []authorization.Role{
+			{
+				Description: utils.Ptr("description"),
+				Id:          utils.Ptr("id"),
+				Name:        utils.Ptr("name"),
+				Permissions: &[]authorization.Permission{
+					{Description: utils.Ptr("description"), Name: utils.Ptr("name")},
+				},
+			},
+		}}, false},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputRolesResult(p, tt.args.outputFormat, tt.args.roles); (err != nil) != tt.wantErr {
+				t.Errorf("outputRolesResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
