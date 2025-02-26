@@ -86,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Secrets Manager user: %w", err)
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, model.OutputFormat, instanceLabel, resp)
 		},
 	}
 
@@ -137,10 +137,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *secretsmanager.User) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *secretsmanager.User) error {
+	if user == nil {
+		return fmt.Errorf("user is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
+		details, err := json.MarshalIndent(user, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user: %w", err)
 		}
@@ -148,7 +152,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal Secrets Manager user: %w", err)
 		}
@@ -156,11 +160,11 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 
 		return nil
 	default:
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
-		p.Outputf("Username: %s\n", utils.PtrString(resp.Username))
-		p.Outputf("Password: %s\n", utils.PtrString(resp.Password))
-		p.Outputf("Description: %s\n", utils.PtrString(resp.Description))
-		p.Outputf("Write Access: %s\n", utils.PtrString(resp.Write))
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
+		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
+		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
+		p.Outputf("Description: %s\n", utils.PtrString(user.Description))
+		p.Outputf("Write Access: %s\n", utils.PtrString(user.Write))
 
 		return nil
 	}

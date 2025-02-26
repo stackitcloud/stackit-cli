@@ -203,3 +203,44 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		users        []secretsmanager.User
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "empty users slice",
+			args: args{
+				users: []secretsmanager.User{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty user in users slice",
+			args: args{
+				users: []secretsmanager.User{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.users); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
