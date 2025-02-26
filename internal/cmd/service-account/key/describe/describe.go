@@ -115,6 +115,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, key *serviceaccount.GetServiceAccountKeyResponse) error {
+	if key == nil {
+		return fmt.Errorf("key is nil")
+	}
+
 	marshaledKey, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal service account key: %w", err)

@@ -78,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create access token: %w", err)
 			}
 
-			return outputResult(p, model, token)
+			return outputResult(p, model.OutputFormat, model.ServiceAccountEmail, token)
 		},
 	}
 
@@ -142,8 +142,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, token *serviceaccount.AccessToken) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, serviceAccountEmail string, token *serviceaccount.AccessToken) error {
+	if token == nil {
+		return fmt.Errorf("token is nil")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(token, "", "  ")
 		if err != nil {
@@ -161,7 +165,7 @@ func outputResult(p *print.Printer, model *inputModel, token *serviceaccount.Acc
 
 		return nil
 	default:
-		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", model.ServiceAccountEmail, utils.PtrString(token.Id))
+		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", serviceAccountEmail, utils.PtrString(token.Id))
 		p.Outputf("Valid until: %s\n", utils.PtrString(token.ValidUntil))
 		p.Outputf("Token: %s\n", utils.PtrString(token.Token))
 		return nil
