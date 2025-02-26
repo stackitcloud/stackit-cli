@@ -159,7 +159,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				p.Outputf("\nSet kubectl context to %s with: kubectl config use-context %s\n", model.ClusterName, model.ClusterName)
 			}
 
-			return outputResult(p, model, kubeconfigPath, respKubeconfig, respLogin)
+			return outputResult(p, model.OutputFormat, model.ClusterName, kubeconfigPath, respKubeconfig, respLogin)
 		},
 	}
 	configureFlags(cmd)
@@ -242,8 +242,8 @@ func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.AP
 	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.ClusterName), nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig) error {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		var err error
 		var details []byte
@@ -277,7 +277,7 @@ func outputResult(p *print.Printer, model *inputModel, kubeconfigPath string, re
 		if respKubeconfig != nil {
 			expiration = fmt.Sprintf(", with expiration date %v (UTC)", utils.ConvertTimePToDateTimeString(respKubeconfig.ExpirationTimestamp))
 		}
-		p.Outputf("Updated kubeconfig file for cluster %s in %q%s\n", model.ClusterName, kubeconfigPath, expiration)
+		p.Outputf("Updated kubeconfig file for cluster %s in %q%s\n", clusterName, kubeconfigPath, expiration)
 
 		return nil
 	}

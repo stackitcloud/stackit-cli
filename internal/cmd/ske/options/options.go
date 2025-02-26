@@ -136,6 +136,12 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProv
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
+	if model == nil || model.GlobalFlagModel == nil {
+		return fmt.Errorf("model is nil")
+	} else if options == nil {
+		return fmt.Errorf("options is nil")
+	}
+
 	// filter output based on the flags
 	if !model.AvailabilityZones {
 		options.AvailabilityZones = nil
@@ -179,6 +185,10 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 }
 
 func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
+	if options == nil {
+		return fmt.Errorf("options is nil")
+	}
+
 	content := []tables.Table{}
 	if options.AvailabilityZones != nil && len(*options.AvailabilityZones) != 0 {
 		content = append(content, buildAvailabilityZonesTable(options))

@@ -174,11 +174,22 @@ func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster)
 			if c.Extensions != nil && c.Extensions.Argus != nil && *c.Extensions.Argus.Enabled {
 				monitoring = "Enabled"
 			}
+			statusAggregated, kubernetesVersion := "", ""
+			if c.HasStatus() {
+				statusAggregated = utils.PtrString(c.Status.Aggregated)
+			}
+			if c.Kubernetes != nil {
+				kubernetesVersion = utils.PtrString(c.Kubernetes.Version)
+			}
+			countNodepools := 0
+			if c.Nodepools != nil {
+				countNodepools = len(*c.Nodepools)
+			}
 			table.AddRow(
 				utils.PtrString(c.Name),
-				utils.PtrString(c.Status.Aggregated),
-				utils.PtrString(c.Kubernetes.Version),
-				len(*c.Nodepools),
+				statusAggregated,
+				kubernetesVersion,
+				countNodepools,
 				monitoring,
 			)
 		}
