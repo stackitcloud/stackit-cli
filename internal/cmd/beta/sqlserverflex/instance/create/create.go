@@ -24,6 +24,17 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/wait"
 )
 
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexClient = &sqlserverflex.APIClient{}
+)
+
+type sqlServerFlexClient interface {
+	CreateInstance(ctx context.Context, projectId string, region string) sqlserverflex.ApiCreateInstanceRequest
+	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
+}
+
 const (
 	instanceNameFlag   = "name"
 	aclFlag            = "acl"
@@ -114,7 +125,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Creating instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SQLServer Flex instance creation: %w", err)
 				}
@@ -195,19 +206,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-type sqlServerFlexClient interface {
-	CreateInstance(ctx context.Context, projectId string) sqlserverflex.ApiCreateInstanceRequest
-	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
-}
-
 func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFlexClient) (sqlserverflex.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
@@ -229,7 +234,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId)
+	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex storages: %w", err)
 	}

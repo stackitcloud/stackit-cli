@@ -14,10 +14,15 @@ const (
 	ServiceCmd = "beta sqlserverflex"
 )
 
+// enforce implementation of interfaces
+var (
+	_ SQLServerFlexClient = &sqlserverflex.APIClient{}
+)
+
 type SQLServerFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*sqlserverflex.GetInstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*sqlserverflex.GetUserResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListVersionsResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string, region string) (*sqlserverflex.GetInstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, instanceId, userId string, region string) (*sqlserverflex.GetUserResponse, error)
 }
 
 func ValidateFlavorId(flavorId string, flavors *[]sqlserverflex.InstanceFlavorEntry) error {
@@ -85,16 +90,16 @@ func LoadFlavorId(cpu, ram int64, flavors *[]sqlserverflex.InstanceFlavorEntry) 
 	}
 }
 
-func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
+func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, region string) (string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId, region)
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
 }
 
-func GetUserName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, userId string) (string, error) {
-	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
+func GetUserName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, userId, region string) (string, error) {
+	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId, region)
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex user: %w", err)
 	}

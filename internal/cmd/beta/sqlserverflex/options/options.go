@@ -18,6 +18,20 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexOptionsClient = &sqlserverflex.APIClient{}
+)
+
+type sqlServerFlexOptionsClient interface {
+	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListVersionsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
+	ListRolesExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListRolesResponse, error)
+	ListCollationsExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListCollationsResponse, error)
+	ListCompatibilityExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListCompatibilityResponse, error)
+}
+
 const (
 	flavorsFlag           = "flavors"
 	versionsFlag          = "versions"
@@ -187,15 +201,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-type sqlServerFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
-	ListRolesExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListRolesResponse, error)
-	ListCollationsExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListCollationsResponse, error)
-	ListCompatibilityExecute(ctx context.Context, projectId string, instanceId string) (*sqlserverflex.ListCompatibilityResponse, error)
-}
-
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlServerFlexOptionsClient) error {
 	var flavors *sqlserverflex.ListFlavorsResponse
 	var versions *sqlserverflex.ListVersionsResponse
@@ -206,37 +211,37 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId)
+		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId)
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex storages: %w", err)
 		}
 	}
 	if model.UserRoles {
-		userRoles, err = apiClient.ListRolesExecute(ctx, model.ProjectId, *model.InstanceId)
+		userRoles, err = apiClient.ListRolesExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex user roles: %w", err)
 		}
 	}
 	if model.DBCollations {
-		dbCollations, err = apiClient.ListCollationsExecute(ctx, model.ProjectId, *model.InstanceId)
+		dbCollations, err = apiClient.ListCollationsExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB collations: %w", err)
 		}
 	}
 	if model.DBCompatibilities {
-		dbCompatibilities, err = apiClient.ListCompatibilityExecute(ctx, model.ProjectId, *model.InstanceId)
+		dbCompatibilities, err = apiClient.ListCompatibilityExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB compatibilities: %w", err)
 		}

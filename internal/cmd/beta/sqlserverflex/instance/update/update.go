@@ -23,6 +23,18 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/wait"
 )
 
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexClient = &sqlserverflex.APIClient{}
+)
+
+type sqlServerFlexClient interface {
+	PartialUpdateInstance(ctx context.Context, projectId, instanceId string, region string) sqlserverflex.ApiPartialUpdateInstanceRequest
+	GetInstanceExecute(ctx context.Context, projectId, instanceId string, region string) (*sqlserverflex.GetInstanceResponse, error)
+	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
+}
+
 const (
 	instanceIdArg = "INSTANCE_ID"
 
@@ -76,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -105,7 +117,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Updating instance")
-				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SQLServer Flex instance update: %w", err)
 				}
@@ -182,20 +194,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type sqlServerFlexClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) sqlserverflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*sqlserverflex.GetInstanceResponse, error)
-	ListFlavorsExecute(ctx context.Context, projectId string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*sqlserverflex.ListStoragesResponse, error)
-}
-
 func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFlexClient) (sqlserverflex.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
@@ -204,7 +209,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		ram := model.RAM
 		cpu := model.CPU
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
+			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				return req, fmt.Errorf("get SQLServer Flex instance: %w", err)
 			}
