@@ -57,13 +57,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
+			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -126,6 +126,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteUserRequest {
-	req := apiClient.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+	req := apiClient.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	return req
 }
