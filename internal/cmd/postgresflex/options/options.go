@@ -166,10 +166,10 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 		}
 	}
 
-	return outputResult(p, model, flavors, versions, storages)
+	return outputResult(p, model.OutputFormat, *model, flavors, versions, storages)
 }
 
-func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
+func outputResult(p *print.Printer, outputFormat string, model inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
@@ -184,7 +184,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.Lis
 		}
 	}
 
-	switch model.OutputFormat {
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
@@ -205,7 +205,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *postgresflex.Lis
 	}
 }
 
-func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
+func outputResultAsTable(p *print.Printer, model inputModel, options *options) error {
 	content := []tables.Table{}
 	if model.Flavors && len(*options.Flavors) != 0 {
 		content = append(content, buildFlavorsTable(*options.Flavors))
