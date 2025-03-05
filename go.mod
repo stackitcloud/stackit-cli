@@ -21,16 +21,16 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.18.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.0.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.6.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v0.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.0.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.22.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v0.10.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.0.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.23.0
 	golang.org/x/oauth2 v0.26.0
