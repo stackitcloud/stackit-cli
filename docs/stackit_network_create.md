@@ -23,7 +23,7 @@ stackit network create [flags]
   $ stackit network create --name network-1 --no-ipv4-gateway
 
   Create a network with name "network-1" and labels "key=value,key1=value1"
-  $ stackit beta network create --name network-1 --labels key=value,key1=value1
+  $ stackit network create --name network-1 --labels key=value,key1=value1
 
   Create an IPv4 network with name "network-1" with DNS name servers, a prefix and a gateway
   $ stackit network create --name network-1  --ipv4-dns-name-servers "1.1.1.1,8.8.8.8,9.9.9.9" --ipv4-prefix "10.1.2.0/24" --ipv4-gateway "10.1.2.3"

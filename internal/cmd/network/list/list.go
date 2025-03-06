@@ -53,7 +53,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Lists all networks which contains the label xxx`,
-				"$ tackit beta network list --label-selector xxx",
+				"$ stackit network list --label-selector xxx",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

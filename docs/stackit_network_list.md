@@ -23,7 +23,7 @@ stackit network list [flags]
   $ stackit network list --limit 10
 
   Lists all networks which contains the label xxx
-  $ tackit  network list --label-selector xxx
+  $ stackit network list --label-selector xxx
 ```
 
 ### Options

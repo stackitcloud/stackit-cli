@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create a network with name "network-1" and labels "key=value,key1=value1"`,
-				`$ stackit beta network create --name network-1 --labels key=value,key1=value1`,
+				`$ stackit network create --name network-1 --labels key=value,key1=value1`,
 			),
 			examples.NewExample(
 				`Create an IPv4 network with name "network-1" with DNS name servers, a prefix and a gateway`,

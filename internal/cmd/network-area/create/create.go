@@ -66,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create a network area with name "network-area-1" in organization with ID "xxx" with network ranges and a transfer network and labels "key=value,key1=value1"`,
-				`$ stackit beta network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --labels key=value,key1=value1`,
+				`$ stackit network-area create --name network-area-1 --organization-id xxx --network-ranges "1.1.1.0/24,192.123.1.0/24" --transfer-network "192.160.0.0/24" --labels key=value,key1=value1`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

@@ -14,13 +14,13 @@ stackit volume update VOLUME_ID [flags]
 
 ```
   Update volume with ID "xxx" with new name "volume-1-new"
-  $ stackit beta volume update xxx --name volume-1-new
+  $ stackit volume update xxx --name volume-1-new
 
   Update volume with ID "xxx" with new name "volume-1-new" and new description "volume-1-desc-new"
-  $ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new
+  $ stackit volume update xxx --name volume-1-new --description volume-1-desc-new
 
   Update volume with ID "xxx" with new name "volume-1-new", new description "volume-1-desc-new" and label(s)
-  $ stackit beta volume update xxx --name volume-1-new --description volume-1-desc-new --labels key=value,foo=bar
+  $ stackit volume update xxx --name volume-1-new --description volume-1-desc-new --labels key=value,foo=bar
 ```
 
 ### Options
