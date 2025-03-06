@@ -6,26 +6,37 @@ import (
 	"strings"
 	"time"
 
+	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/image"
+	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/key-pair"
 	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/network"
+	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/network-area"
+	networkinterface "github.com/stackitcloud/stackit-cli/internal/cmd/network-interface"
 	objectstorage "github.com/stackitcloud/stackit-cli/internal/cmd/object-storage"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project"
+	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/public-ip"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/quota"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
+	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/volume"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -164,6 +175,17 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(secretsmanager.NewCmd(p))
 	cmd.AddCommand(serviceaccount.NewCmd(p))
 	cmd.AddCommand(ske.NewCmd(p))
+	cmd.AddCommand(server.NewCmd(p))
+	cmd.AddCommand(networkArea.NewCmd(p))
+	cmd.AddCommand(network.NewCmd(p))
+	cmd.AddCommand(volume.NewCmd(p))
+	cmd.AddCommand(networkinterface.NewCmd(p))
+	cmd.AddCommand(publicip.NewCmd(p))
+	cmd.AddCommand(securitygroup.NewCmd(p))
+	cmd.AddCommand(keypair.NewCmd(p))
+	cmd.AddCommand(image.NewCmd(p))
+	cmd.AddCommand(quota.NewCmd(p))
+	cmd.AddCommand(affinityGroups.NewCmd(p))
 }
 
 // traverseCommands calls f for c and all of its children.
