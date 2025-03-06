@@ -78,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create RabbitMQ credentials: %w", err)
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, *model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -122,8 +122,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *rabbitmq.CredentialsResponse) error {
+func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp *rabbitmq.CredentialsResponse) error {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global flags available")
+	}
+	if resp == nil {
+		return fmt.Errorf("no response available")
+	}
+
 	if !model.ShowPassword {
+		if resp.Raw == nil {
+			resp.Raw = &rabbitmq.RawCredentials{Credentials: &rabbitmq.Credentials{}}
+		} else if resp.Raw.Credentials == nil {
+			resp.Raw.Credentials = &rabbitmq.Credentials{}
+		}
 		resp.Raw.Credentials.Password = utils.Ptr("hidden")
 	}
 	switch model.OutputFormat {

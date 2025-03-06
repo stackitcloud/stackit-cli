@@ -152,11 +152,20 @@ func outputResult(p *print.Printer, outputFormat string, instances []rabbitmq.In
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
 			instance := instances[i]
+			var (
+				opType, opState string
+			)
+			if lastOperation := instance.LastOperation; lastOperation != nil {
+				opType = utils.PtrString(lastOperation.Type)
+				opState = utils.PtrString(lastOperation.State)
+			} else {
+				opType, opState = "n/a", "n/a"
+			}
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
 				utils.PtrString(instance.Name),
-				utils.PtrString(instance.LastOperation.Type),
-				utils.PtrString(instance.LastOperation.State),
+				opType,
+				opState,
 			)
 		}
 		err := table.Display(p)
