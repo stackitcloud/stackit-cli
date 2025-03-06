@@ -119,6 +119,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 }
 
 func outputResult(p *print.Printer, outputFormat string, project *resourcemanager.GetProjectResponse) error {
+	if project == nil {
+		return fmt.Errorf("response not set")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(project, "", "  ")
@@ -146,7 +149,9 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 		table.AddSeparator()
 		table.AddRow("STATE", utils.PtrString(project.LifecycleState))
 		table.AddSeparator()
-		table.AddRow("PARENT ID", utils.PtrString(project.Parent.Id))
+		if project.Parent != nil {
+			table.AddRow("PARENT ID", utils.PtrString(project.Parent.Id))
+		}
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
