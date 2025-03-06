@@ -232,6 +232,11 @@ func Test_outputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "nil instance",
+			args:    args{},
+			wantErr: true,
+		},
+		{
 			name: "empty parameters",
 			args: args{
 				outputFormat: "",

@@ -164,8 +164,8 @@ func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offeri
 						utils.PtrString(plan.Description),
 					)
 				}
+				table.AddSeparator()
 			}
-			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
 		err := table.Display(p)

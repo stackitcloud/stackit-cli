@@ -261,6 +261,13 @@ func Test_outputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "empty",
+			args: args{
+				outputFormat: "",
+			},
+			wantErr: true,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)

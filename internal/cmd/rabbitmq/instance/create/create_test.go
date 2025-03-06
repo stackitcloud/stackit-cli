@@ -501,9 +501,23 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}},
+			name: "empty",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				resp: &rabbitmq.CreateInstanceResponse{},
+			},
 			wantErr: false,
+		},
+		{
+			name: "empty",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+			},
+			wantErr: true,
 		},
 	}
 	p := print.NewPrinter()

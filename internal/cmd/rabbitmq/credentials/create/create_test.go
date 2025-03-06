@@ -223,6 +223,16 @@ func Test_outputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "nil response",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				instanceLabel: "",
+			},
+			wantErr: true,
+		},
+		{
 			name: "no flags",
 			args: args{
 				model:         inputModel{},
