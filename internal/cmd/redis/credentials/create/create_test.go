@@ -216,6 +216,11 @@ func Test_outputResult(t *testing.T) {
 			args:    args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}, resp: &redis.CredentialsResponse{}},
 			wantErr: false,
 		},
+		{
+			name:    "nil response",
+			args:    args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}},
+			wantErr: true,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)

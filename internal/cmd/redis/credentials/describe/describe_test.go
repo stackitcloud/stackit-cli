@@ -260,6 +260,11 @@ func Test_outputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:    "nil response",
+			args:    args{},
+			wantErr: true,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)
