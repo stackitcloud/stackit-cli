@@ -153,17 +153,19 @@ func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offeri
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
 			o := plans[i]
-			for j := range *o.Plans {
-				plan := (*o.Plans)[j]
-				table.AddRow(
-					utils.PtrString(o.Name),
-					utils.PtrString(o.Version),
-					utils.PtrString(plan.Id),
-					utils.PtrString(plan.Name),
-					utils.PtrString(plan.Description),
-				)
+			if o.Plans != nil {
+				for j := range *o.Plans {
+					plan := (*o.Plans)[j]
+					table.AddRow(
+						utils.PtrString(o.Name),
+						utils.PtrString(o.Version),
+						utils.PtrString(plan.Id),
+						utils.PtrString(plan.Name),
+						utils.PtrString(plan.Description),
+					)
+				}
+				table.AddSeparator()
 			}
-			table.AddSeparator()
 		}
 		table.EnableAutoMergeOnColumns(1, 2)
 		err := table.Display(p)

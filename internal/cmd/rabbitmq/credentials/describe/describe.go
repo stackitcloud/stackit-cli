@@ -112,6 +112,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 }
 
 func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.CredentialsResponse) error {
+	if credentials == nil {
+		return fmt.Errorf("no response passed")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
@@ -131,7 +134,7 @@ func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.C
 		return nil
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", *credentials.Id)
+		table.AddRow("ID", utils.PtrString(credentials.Id))
 		table.AddSeparator()
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if credentials.HasRaw() && credentials.Raw.Credentials != nil {

@@ -257,6 +257,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *rabbitmq.CreateInstanceResponse) error {
+	if model == nil {
+		return fmt.Errorf("no model passed")
+	}
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no globalflags passed")
+	}
+	if resp == nil {
+		return fmt.Errorf("no response passed")
+	}
+
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")

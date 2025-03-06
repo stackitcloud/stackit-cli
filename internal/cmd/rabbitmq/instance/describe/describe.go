@@ -100,6 +100,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Instance) error {
+	if instance == nil {
+		return fmt.Errorf("no instance passed")
+	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instance, "", "  ")
@@ -123,18 +126,22 @@ func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Inst
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("LAST OPERATION TYPE", utils.PtrString(instance.LastOperation.Type))
-		table.AddSeparator()
-		table.AddRow("LAST OPERATION STATE", utils.PtrString(instance.LastOperation.State))
-		table.AddSeparator()
+		if lastOperation := instance.LastOperation; lastOperation != nil {
+			table.AddRow("LAST OPERATION TYPE", utils.PtrString(lastOperation.Type))
+			table.AddSeparator()
+			table.AddRow("LAST OPERATION STATE", utils.PtrString(lastOperation.State))
+			table.AddSeparator()
+		}
 		table.AddRow("PLAN ID", utils.PtrString(instance.PlanId))
 		// Only show ACL if it's present and not empty
-		acl := (*instance.Parameters)[aclParameterKey]
-		aclStr, ok := acl.(string)
-		if ok {
-			if aclStr != "" {
-				table.AddSeparator()
-				table.AddRow("ACL", aclStr)
+		if parameters := instance.Parameters; parameters != nil {
+			acl := (*instance.Parameters)[aclParameterKey]
+			aclStr, ok := acl.(string)
+			if ok {
+				if aclStr != "" {
+					table.AddSeparator()
+					table.AddRow("ACL", aclStr)
+				}
 			}
 		}
 		err := table.Display(p)
