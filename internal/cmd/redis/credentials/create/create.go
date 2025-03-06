@@ -79,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Redis credentials: %w", err)
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, *model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,8 +123,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *redis.CredentialsResponse) error {
+func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp *redis.CredentialsResponse) error {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global flags defined")
+	}
+	if resp == nil {
+		return fmt.Errorf("no response defined")
+	}
 	if !model.ShowPassword {
+		if resp.Raw == nil {
+			resp.Raw = &redis.RawCredentials{}
+		}
+		if resp.Raw.Credentials == nil {
+			resp.Raw.Credentials = &redis.Credentials{}
+		}
 		resp.Raw.Credentials.Password = utils.Ptr("hidden")
 	}
 
@@ -146,11 +158,11 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 
 		return nil
 	default:
-		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, *resp.Id)
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
 		// The username field cannot be set by the user, so we only display it if it's not returned empty
 		if resp.HasRaw() && resp.Raw.Credentials != nil {
 			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
-				p.Outputf("Username: %s\n", *username)
+				p.Outputf("Username: %s\n", utils.PtrString(username))
 			}
 			if !model.ShowPassword {
 				p.Outputf("Password: <hidden>\n")
