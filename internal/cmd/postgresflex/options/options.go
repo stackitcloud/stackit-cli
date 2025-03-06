@@ -166,13 +166,16 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 		}
 	}
 
-	return outputResult(p, model.OutputFormat, *model, flavors, versions, storages)
+	return outputResult(p, *model, flavors, versions, storages)
 }
 
-func outputResult(p *print.Printer, outputFormat string, model inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
+func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
 	options := &options{}
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
+	}
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global model defined")
 	}
 	if versions != nil {
 		options.Versions = versions.Versions
@@ -184,7 +187,7 @@ func outputResult(p *print.Printer, outputFormat string, model inputModel, flavo
 		}
 	}
 
-	switch outputFormat {
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {

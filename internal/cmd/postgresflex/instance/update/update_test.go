@@ -593,7 +593,6 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
-		model         *inputModel
 		instanceLabel string
 		resp          *postgresflex.PartialUpdateInstanceResponse
 	}
@@ -603,29 +602,14 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty model", args{}, true},
-		{"empty response", args{outputFormat: "", model: &inputModel{}}, true},
+		{"empty response", args{outputFormat: ""}, true},
 		{"standard", args{
 			outputFormat:  "",
-			model:         &inputModel{},
 			instanceLabel: "test",
 			resp:          &postgresflex.PartialUpdateInstanceResponse{},
 		}, false},
 		{"complet", args{
-			outputFormat: "",
-			model: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{},
-				InstanceId:      testInstanceId,
-				InstanceName:    new(string),
-				ACL:             &[]string{},
-				BackupSchedule:  new(string),
-				FlavorId:        new(string),
-				CPU:             new(int64),
-				RAM:             new(int64),
-				StorageClass:    new(string),
-				StorageSize:     new(int64),
-				Version:         new(string),
-				Type:            new(string),
-			},
+			outputFormat:  "",
 			instanceLabel: "test",
 			resp: &postgresflex.PartialUpdateInstanceResponse{
 				Item: &postgresflex.Instance{},
@@ -637,7 +621,7 @@ func Test_outputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, true, tt.args.model, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, true, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

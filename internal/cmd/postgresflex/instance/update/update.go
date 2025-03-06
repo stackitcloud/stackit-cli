@@ -118,7 +118,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model.OutputFormat, model.Async, model, instanceLabel, resp)
+			return outputResult(p, model.OutputFormat, model.Async, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -307,10 +307,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	return req, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, async bool, model *inputModel, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
-	if model == nil {
-		return fmt.Errorf("no model passsed")
-	}
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("no response passed")
 	}

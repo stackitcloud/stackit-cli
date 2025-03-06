@@ -324,30 +324,27 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		model        inputModel
-		flavors      *postgresflex.ListFlavorsResponse
-		versions     *postgresflex.ListVersionsResponse
-		storages     *postgresflex.ListStoragesResponse
+		model    inputModel
+		flavors  *postgresflex.ListFlavorsResponse
+		versions *postgresflex.ListVersionsResponse
+		storages *postgresflex.ListStoragesResponse
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
+		{"empty", args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}}, false},
 		{"standard", args{
-			outputFormat: "",
-			model:        inputModel{},
-			flavors:      &postgresflex.ListFlavorsResponse{},
-			versions:     &postgresflex.ListVersionsResponse{},
-			storages:     &postgresflex.ListStoragesResponse{},
+			model:    inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+			flavors:  &postgresflex.ListFlavorsResponse{},
+			versions: &postgresflex.ListVersionsResponse{},
+			storages: &postgresflex.ListStoragesResponse{},
 		}, false},
 		{
 			"complete",
 			args{
-				outputFormat: "",
-				model:        inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}, Flavors: false, Versions: false, Storages: false, FlavorId: new(string)},
+				model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}, Flavors: false, Versions: false, Storages: false, FlavorId: new(string)},
 				flavors: &postgresflex.ListFlavorsResponse{
 					Flavors: &[]postgresflex.Flavor{},
 				},
@@ -366,7 +363,7 @@ func Test_outputResult(t *testing.T) {
 	p.Cmd = NewCmd(p)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.model, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.model, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
