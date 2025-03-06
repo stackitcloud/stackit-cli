@@ -152,11 +152,17 @@ func outputResult(p *print.Printer, outputFormat string, instances []redis.Insta
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
 			instance := instances[i]
+			var (
+				lastOperationType, lastOperationState string
+			)
+			if lastOperation := instance.LastOperation; lastOperation != nil {
+				lastOperationType, lastOperationState = utils.PtrString(lastOperation.Type), utils.PtrString(lastOperation.State)
+			}
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
 				utils.PtrString(instance.Name),
-				utils.PtrString(instance.LastOperation.Type),
-				utils.PtrString(instance.LastOperation.State),
+				lastOperationType,
+				lastOperationState,
 			)
 		}
 		err := table.Display(p)

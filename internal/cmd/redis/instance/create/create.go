@@ -252,6 +252,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient)
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *redis.CreateInstanceResponse) error {
+	if model == nil {
+		return fmt.Errorf("no model passed")
+	}
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global flags passed")
+	}
+	if resp == nil {
+		return fmt.Errorf("no response defined")
+	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")

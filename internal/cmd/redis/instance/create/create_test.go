@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/redis"
 )
 
@@ -459,6 +458,49 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		model        *inputModel
+		projectLabel string
+		instanceId   string
+		resp         *redis.CreateInstanceResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				model:        &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+				projectLabel: "",
+				instanceId:   testMonitoringInstanceId,
+				resp:         &redis.CreateInstanceResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil response",
+			args: args{
+				model:        &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+				projectLabel: "",
+				instanceId:   testMonitoringInstanceId,
+			},
+			wantErr: true,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.model, tt.args.projectLabel, tt.args.instanceId, tt.args.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
