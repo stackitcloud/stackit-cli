@@ -89,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, *model, members)
+			return outputResult(p, *model, members)
 		},
 	}
 	configureFlags(cmd)
@@ -145,7 +145,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, model inputModel, members []authorization.Member) error {
+func outputResult(p *print.Printer, model inputModel, members []authorization.Member) error {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("globalflags are empty")
+	}
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -158,7 +161,7 @@ func outputResult(p *print.Printer, outputFormat string, model inputModel, membe
 	}
 	sort.SliceStable(members, sortFn)
 
-	switch outputFormat {
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		// Show details
 		details, err := json.MarshalIndent(members, "", "  ")

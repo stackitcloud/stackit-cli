@@ -211,25 +211,26 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		model        inputModel
-		members      []authorization.Member
+		model   inputModel
+		members []authorization.Member
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"base", args{"", inputModel{
-			Subject: utils.Ptr("subject"),
-			Limit:   nil,
-			SortBy:  "",
+		{"empty", args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}}, false},
+		{"base", args{inputModel{
+			GlobalFlagModel: &globalflags.GlobalFlagModel{},
+			Subject:         utils.Ptr("subject"),
+			Limit:           nil,
+			SortBy:          "",
 		}, nil}, false},
-		{"complete", args{"", inputModel{
-			Subject: utils.Ptr("subject"),
-			Limit:   nil,
-			SortBy:  "",
+		{"complete", args{inputModel{
+			GlobalFlagModel: &globalflags.GlobalFlagModel{},
+			Subject:         utils.Ptr("subject"),
+			Limit:           nil,
+			SortBy:          "",
 		},
 			[]authorization.Member{
 				{Role: utils.Ptr("role1"), Subject: utils.Ptr("subject1")},
@@ -242,7 +243,7 @@ func Test_outputResult(t *testing.T) {
 	p.Cmd = NewCmd(p)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.model, tt.args.members); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.model, tt.args.members); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -361,24 +361,23 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		model        inputModel
-		resp         *resourcemanager.Project
+		model inputModel
+		resp  *resourcemanager.Project
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"base", args{"", inputModel{}, &resourcemanager.Project{}}, false},
+		{"empty", args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}}, true},
+		{"base", args{inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}, &resourcemanager.Project{}}, false},
 	}
 
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(p)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

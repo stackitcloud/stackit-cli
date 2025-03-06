@@ -95,7 +95,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create project: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, *model, resp)
+			return outputResult(p, *model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -212,11 +212,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 	return req, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, model inputModel, resp *resourcemanager.Project) error {
+func outputResult(p *print.Printer, model inputModel, resp *resourcemanager.Project) error {
 	if resp == nil {
 		return fmt.Errorf("response is empty")
 	}
-	switch outputFormat {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("globalflags are empty")
+	}
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
