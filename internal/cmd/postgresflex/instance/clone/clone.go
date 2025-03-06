@@ -108,7 +108,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, instanceLabel, instanceId, resp)
+			return outputResult(p, model.OutputFormat, model.Async, instanceLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -205,8 +205,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel, instanceId string, resp *postgresflex.CloneInstanceResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel, instanceId string, resp *postgresflex.CloneInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("response not set")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -225,7 +228,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel, instanceId
 		return nil
 	default:
 		operationState := "Cloned"
-		if model.Async {
+		if async {
 			operationState = "Triggered cloning of"
 		}
 		p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)

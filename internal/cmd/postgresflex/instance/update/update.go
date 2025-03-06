@@ -118,7 +118,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, instanceLabel, resp)
+			return outputResult(p, model.OutputFormat, model.Async, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -307,8 +307,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("no response passed")
+	}
+
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -327,7 +331,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		return nil
 	default:
 		operationState := "Updated"
-		if model.Async {
+		if async {
 			operationState = "Triggered update of"
 		}
 		p.Info("%s instance %q\n", operationState, instanceLabel)
