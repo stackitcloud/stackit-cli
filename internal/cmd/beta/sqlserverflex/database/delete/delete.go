@@ -116,6 +116,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteDatabaseRequest {
-	req := apiClient.DeleteDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName)
+	req := apiClient.DeleteDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName, model.Region)
 	return req
 }

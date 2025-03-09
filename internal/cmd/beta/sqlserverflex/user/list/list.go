@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get SQLServer Flex users: %w", err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
+				instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = *model.InstanceId
@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }
 
