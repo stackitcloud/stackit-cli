@@ -9,17 +9,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/zalando/go-keyring"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/google/uuid"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	"github.com/zalando/go-keyring"
 )
 
 type testCtxKey struct{}
@@ -491,6 +490,56 @@ func TestFetchProjects(t *testing.T) {
 			}
 			if len(projects) != tt.expectedNumItems {
 				t.Fatalf("Expected %d projects, got %d", tt.totalItems, len(projects))
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		projects     []resourcemanager.Project
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"base", args{"", []resourcemanager.Project{{}}}, false},
+		{"complete", args{"", []resourcemanager.Project{
+			{
+				ContainerId:    utils.Ptr("container-id1"),
+				CreationTime:   utils.Ptr(time.Now()),
+				Labels:         &map[string]string{"foo": "bar"},
+				LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_CREATING),
+				Name:           utils.Ptr("some name"),
+				Parent: &resourcemanager.Parent{
+					Id: utils.Ptr("parent-id"),
+				},
+				ProjectId: utils.Ptr("project-id1"),
+			},
+			{
+				ContainerId:    utils.Ptr("container-id2"),
+				CreationTime:   utils.Ptr(time.Now()),
+				Labels:         &map[string]string{"foo": "bar"},
+				LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_CREATING),
+				Name:           utils.Ptr("some name"),
+				Parent: &resourcemanager.Parent{
+					Id: utils.Ptr("parent-id"),
+				},
+				ProjectId: utils.Ptr("project-id2"),
+			},
+		}}, false},
+	}
+
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projects); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
