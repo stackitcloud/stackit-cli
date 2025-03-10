@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
@@ -586,6 +585,44 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat  string
+		instanceLabel string
+		resp          *postgresflex.PartialUpdateInstanceResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty model", args{}, true},
+		{"empty response", args{outputFormat: ""}, true},
+		{"standard", args{
+			outputFormat:  "",
+			instanceLabel: "test",
+			resp:          &postgresflex.PartialUpdateInstanceResponse{},
+		}, false},
+		{"complet", args{
+			outputFormat:  "",
+			instanceLabel: "test",
+			resp: &postgresflex.PartialUpdateInstanceResponse{
+				Item: &postgresflex.Instance{},
+			},
+		}, false},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(p)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, true, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

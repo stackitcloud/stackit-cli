@@ -157,7 +157,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.
 		for i := range backups {
 			backup := backups[i]
 
-			backupStartTime, err := time.Parse(time.RFC3339, *backup.StartTime)
+			backupStartTime, err := time.Parse(time.RFC3339, utils.PtrString(backup.StartTime))
 			if err != nil {
 				return fmt.Errorf("parse backup start time: %w", err)
 			}

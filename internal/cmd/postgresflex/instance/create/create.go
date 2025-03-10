@@ -133,7 +133,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, instanceId, resp)
+			return outputResult(p, model.OutputFormat, model.Async, projectLabel, instanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -273,8 +273,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *postgresflex.CreateInstanceResponse) error {
-	switch model.OutputFormat {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel, instanceId string, resp *postgresflex.CreateInstanceResponse) error {
+	if resp == nil {
+		return fmt.Errorf("no response passed")
+	}
+	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -293,7 +296,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId 
 		return nil
 	default:
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
