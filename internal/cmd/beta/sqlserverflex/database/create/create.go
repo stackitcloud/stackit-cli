@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateDatabaseRequest {
-	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId, model.Region)
 	payload := sqlserverflex.CreateDatabasePayload{
 		Name: &model.DatabaseName,
 		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{

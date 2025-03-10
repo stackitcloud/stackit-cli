@@ -18,6 +18,11 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testInstanceId = uuid.NewString()
 
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexOptionsClient = &sqlServerFlexClientMocked{}
+)
+
 type sqlServerFlexClientMocked struct {
 	listFlavorsFails           bool
 	listVersionsFails          bool
@@ -34,7 +39,7 @@ type sqlServerFlexClientMocked struct {
 	listDBCompatibilitiesCalled bool
 }
 
-func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	c.listFlavorsCalled = true
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
@@ -44,7 +49,7 @@ func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ stri
 	}), nil
 }
 
-func (c *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListVersionsResponse, error) {
 	c.listVersionsCalled = true
 	if c.listVersionsFails {
 		return nil, fmt.Errorf("list versions failed")
@@ -54,7 +59,7 @@ func (c *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _ str
 	}), nil
 }
 
-func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	c.listStoragesCalled = true
 	if c.listStoragesFails {
 		return nil, fmt.Errorf("list storages failed")
@@ -68,7 +73,7 @@ func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ 
 	}), nil
 }
 
-func (c *sqlServerFlexClientMocked) ListRolesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListRolesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListRolesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListRolesResponse, error) {
 	c.listUserRolesCalled = true
 	if c.listUserRolesFails {
 		return nil, fmt.Errorf("list roles failed")
@@ -78,7 +83,7 @@ func (c *sqlServerFlexClientMocked) ListRolesExecute(_ context.Context, _, _ str
 	}), nil
 }
 
-func (c *sqlServerFlexClientMocked) ListCollationsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListCollationsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListCollationsExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListCollationsResponse, error) {
 	c.listDBCollationsCalled = true
 	if c.listDBCollationsFails {
 		return nil, fmt.Errorf("list collations failed")
@@ -88,7 +93,7 @@ func (c *sqlServerFlexClientMocked) ListCollationsExecute(_ context.Context, _, 
 	}), nil
 }
 
-func (c *sqlServerFlexClientMocked) ListCompatibilityExecute(_ context.Context, _, _ string) (*sqlserverflex.ListCompatibilityResponse, error) {
+func (c *sqlServerFlexClientMocked) ListCompatibilityExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListCompatibilityResponse, error) {
 	c.listDBCompatibilitiesCalled = true
 	if c.listDBCompatibilitiesFails {
 		return nil, fmt.Errorf("list compatibilities failed")

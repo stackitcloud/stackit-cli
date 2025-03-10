@@ -14,12 +14,16 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
+var testRegion = "eu01"
+
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexClient = &sqlServerFlexClientMocked{}
+)
 
 type sqlServerFlexClientMocked struct {
 	listFlavorsFails  bool
@@ -30,25 +34,25 @@ type sqlServerFlexClientMocked struct {
 	getInstanceResp   *sqlserverflex.GetInstanceResponse
 }
 
-func (c *sqlServerFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) sqlserverflex.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
+func (c *sqlServerFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) sqlserverflex.ApiPartialUpdateInstanceRequest {
+	return testClient.PartialUpdateInstance(ctx, projectId, instanceId, region)
 }
 
-func (c *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
+func (c *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -71,7 +75,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -81,12 +86,13 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 
 func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		flavorIdFlag:       testFlavorId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0 * * *",
-		versionFlag:        "5.0",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		flavorIdFlag:              testFlavorId,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0 * * *",
+		versionFlag:               "5.0",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -98,6 +104,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -112,6 +119,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:     testInstanceId,
@@ -128,7 +136,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiPartialUpdateInstanceRequest)) sqlserverflex.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
@@ -196,7 +204,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -204,7 +212,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -212,7 +220,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -368,7 +376,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -389,7 +397,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
