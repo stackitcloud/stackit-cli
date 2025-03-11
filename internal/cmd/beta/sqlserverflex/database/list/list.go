@@ -132,7 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiListDatabasesRequest {
-	req := apiClient.ListDatabases(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.ListDatabases(ctx, model.ProjectId, model.InstanceId, model.Region)
 	return req
 }
 

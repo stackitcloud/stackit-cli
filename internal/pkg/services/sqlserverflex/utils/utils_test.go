@@ -16,11 +16,15 @@ var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testUserId     = uuid.NewString()
+
+	// enforce implementation of interfaces
+	_ SQLServerFlexClient = &sqlServerFlexClientMocked{}
 )
 
 const (
 	testInstanceName = "instance"
 	testUserName     = "user"
+	testRegion       = "eu01"
 )
 
 type sqlServerFlexClientMocked struct {
@@ -34,28 +38,28 @@ type sqlServerFlexClientMocked struct {
 	listRestoreJobsResp  *sqlserverflex.ListRestoreJobsResponse
 }
 
-func (m *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*sqlserverflex.ListVersionsResponse, error) {
+func (m *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListVersionsResponse, error) {
 	if m.listVersionsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
 }
 
-func (m *sqlServerFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListRestoreJobsResponse, error) {
+func (m *sqlServerFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListRestoreJobsResponse, error) {
 	if m.listRestoreJobsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listRestoreJobsResp, nil
 }
 
-func (m *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
+func (m *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
 	return m.getInstanceResp, nil
 }
 
-func (m *sqlServerFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetUserResponse, error) {
+func (m *sqlServerFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*sqlserverflex.GetUserResponse, error) {
 	if m.getUserFails {
 		return nil, fmt.Errorf("could not get user")
 	}
@@ -405,7 +409,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -455,7 +459,7 @@ func TestGetUserName(t *testing.T) {
 				getUserResp:  tt.getUserResp,
 			}
 
-			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId)
+			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

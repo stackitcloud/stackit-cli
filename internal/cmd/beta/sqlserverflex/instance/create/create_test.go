@@ -14,12 +14,16 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sqlserverflex.APIClient{}
+var testRegion = "eu01"
+
+// enforce implementation of interfaces
+var (
+	_ sqlServerFlexClient = &sqlServerFlexClientMocked{}
+)
 
 type sqlServerFlexClientMocked struct {
 	listFlavorsFails  bool
@@ -28,18 +32,18 @@ type sqlServerFlexClientMocked struct {
 	listStoragesResp  *sqlserverflex.ListStoragesResponse
 }
 
-func (c *sqlServerFlexClientMocked) CreateInstance(ctx context.Context, projectId string) sqlserverflex.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
+func (c *sqlServerFlexClientMocked) CreateInstance(ctx context.Context, projectId, region string) sqlserverflex.ApiCreateInstanceRequest {
+	return testClient.CreateInstance(ctx, projectId, region)
 }
 
-func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
+func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
+func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -51,16 +55,17 @@ var testFlavorId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0/6 * * *",
-		flavorIdFlag:       testFlavorId,
-		storageClassFlag:   "storage-class", // Non-default
-		storageSizeFlag:    "10",
-		versionFlag:        "6.0",
-		editionFlag:        "developer",
-		retentionDaysFlag:  "32",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0/6 * * *",
+		flavorIdFlag:              testFlavorId,
+		storageClassFlag:          "storage-class", // Non-default
+		storageSizeFlag:           "10",
+		versionFlag:               "6.0",
+		editionFlag:               "developer",
+		retentionDaysFlag:         "32",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -72,6 +77,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName:   utils.Ptr("example-name"),
@@ -91,7 +97,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateInstanceRequest)) sqlserverflex.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -157,21 +163,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
