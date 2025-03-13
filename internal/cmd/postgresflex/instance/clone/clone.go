@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -101,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Cloning instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for PostgreSQL Flex instance cloning: %w", err)
 				}
@@ -162,17 +162,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 type PostgreSQLFlexClient interface {
-	CloneInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiCloneInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
+	CloneInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiCloneInstanceRequest
+	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiCloneInstanceRequest, error) {
-	req := apiClient.CloneInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.CloneInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var storages *postgresflex.ListStoragesResponse
 	if model.StorageClass != nil || model.StorageSize != nil {
-		currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
+		currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.Region, model.InstanceId)
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 		}
@@ -180,7 +180,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		currentInstanceStorageClass := currentInstance.Item.Storage.Class
 		currentInstanceStorageSize := currentInstance.Item.Storage.Size
 
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId)
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *validationFlavorId)
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}

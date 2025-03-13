@@ -104,7 +104,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Fill in version, if needed
 			if model.Version == nil {
-				version, err := postgresflexUtils.GetLatestPostgreSQLVersion(ctx, apiClient, model.ProjectId)
+				version, err := postgresflexUtils.GetLatestPostgreSQLVersion(ctx, apiClient, model.ProjectId, model.Region)
 				if err != nil {
 					return fmt.Errorf("get latest PostgreSQL version: %w", err)
 				}
@@ -126,7 +126,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Creating instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for PostgreSQL Flex instance creation: %w", err)
 				}
@@ -208,18 +208,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 type PostgreSQLFlexClient interface {
-	CreateInstance(ctx context.Context, projectId string) postgresflex.ApiCreateInstanceRequest
-	ListFlavorsExecute(ctx context.Context, projectId string) (*postgresflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
+	CreateInstance(ctx context.Context, projectId, region string) postgresflex.ApiCreateInstanceRequest
+	ListFlavorsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 	}
@@ -241,7 +241,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId)
+	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *flavorId)
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 	}

@@ -96,7 +96,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 

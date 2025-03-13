@@ -19,9 +19,9 @@ var instanceTypeToReplicas = map[string]int64{
 }
 
 type PostgresFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListVersionsResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
+	GetUserExecute(ctx context.Context, projectId, region, instanceId, userId string) (*postgresflex.GetUserResponse, error)
 }
 
 func AvailableInstanceTypes() []string {
@@ -119,8 +119,8 @@ func LoadFlavorId(cpu, ram int64, flavors *[]postgresflex.Flavor) (*string, erro
 	}
 }
 
-func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId string) (string, error) {
-	resp, err := apiClient.ListVersionsExecute(ctx, projectId)
+func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId, region string) (string, error) {
+	resp, err := apiClient.ListVersionsExecute(ctx, projectId, region)
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL versions: %w", err)
 	}
@@ -141,24 +141,24 @@ func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClien
 	return latestVersion, nil
 }
 
-func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
+func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId string) (string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, projectId, region, instanceId)
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
 	return *resp.Item.Name, nil
 }
 
-func GetInstanceStatus(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
+func GetInstanceStatus(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId string) (string, error) {
+	resp, err := apiClient.GetInstanceExecute(ctx, projectId, region, instanceId)
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
 	return *resp.Item.Status, nil
 }
 
-func GetUserName(ctx context.Context, apiClient PostgresFlexClient, projectId, instanceId, userId string) (string, error) {
-	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId)
+func GetUserName(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId, userId string) (string, error) {
+	resp, err := apiClient.GetUserExecute(ctx, projectId, region, instanceId, userId)
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex user: %w", err)
 	}

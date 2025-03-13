@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get PostgreSQL Flex users: %w", err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
+				instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, *model.InstanceId)
 				if err != nil {
 					p.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = *model.InstanceId
@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.ListUsers(ctx, model.ProjectId, model.Region, *model.InstanceId)
 	return req
 }
 

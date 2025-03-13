@@ -14,12 +14,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
+var testRegion = "eu01"
 
 type postgresFlexClientMocked struct {
 	listFlavorsFails  bool
@@ -30,25 +29,25 @@ type postgresFlexClientMocked struct {
 	getInstanceResp   *postgresflex.InstanceResponse
 }
 
-func (c *postgresFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
+func (c *postgresFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiPartialUpdateInstanceRequest {
+	return testClient.PartialUpdateInstance(ctx, projectId, region, instanceId)
 }
 
-func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*postgresflex.ListFlavorsResponse, error) {
+func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*postgresflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -71,7 +70,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -81,15 +81,16 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 
 func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		flavorIdFlag:       testFlavorId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0 * * *",
-		storageClassFlag:   "class",
-		storageSizeFlag:    "10",
-		versionFlag:        "5.0",
-		typeFlag:           "Single",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		flavorIdFlag:              testFlavorId,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0 * * *",
+		storageClassFlag:          "class",
+		storageSizeFlag:           "10",
+		versionFlag:               "5.0",
+		typeFlag:                  "Single",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -101,6 +102,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -115,6 +117,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:     testInstanceId,
@@ -134,7 +137,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateInstanceRequest)) postgresflex.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
@@ -202,7 +205,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -210,7 +213,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -218,7 +221,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -374,7 +377,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -395,7 +398,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -420,7 +423,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 					Storage: &postgresflex.Storage{
 						Class: utils.Ptr("class"),
@@ -448,7 +451,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 					Storage: &postgresflex.Storage{
 						Class: utils.Ptr("class"),

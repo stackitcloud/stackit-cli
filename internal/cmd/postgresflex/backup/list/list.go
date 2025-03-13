@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, *model.InstanceId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.ListBackups(ctx, model.ProjectId, model.Region, *model.InstanceId)
 	return req
 }
 

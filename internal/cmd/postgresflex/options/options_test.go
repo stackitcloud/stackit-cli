@@ -26,7 +26,7 @@ type postgresFlexClientMocked struct {
 	listStoragesCalled bool
 }
 
-func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*postgresflex.ListFlavorsResponse, error) {
+func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*postgresflex.ListFlavorsResponse, error) {
 	c.listFlavorsCalled = true
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
@@ -36,7 +36,7 @@ func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _ strin
 	}), nil
 }
 
-func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
+func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
 	c.listVersionsCalled = true
 	if c.listVersionsFails {
 		return nil, fmt.Errorf("list versions failed")
@@ -46,7 +46,7 @@ func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ stri
 	}), nil
 }
 
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
 	c.listStoragesCalled = true
 	if c.listStoragesFails {
 		return nil, fmt.Errorf("list storages failed")

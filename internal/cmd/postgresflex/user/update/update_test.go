@@ -14,8 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -23,6 +21,7 @@ var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testUserId = "12345"
+var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -36,9 +35,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		instanceIdFlag: testInstanceId,
-		roleFlag:       "login",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceIdFlag:            testInstanceId,
+		roleFlag:                  "login",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -63,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateUserRequest)) postgresflex.ApiPartialUpdateUserRequest {
-	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
+	request := testClient.PartialUpdateUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	request = request.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
 		Roles: utils.Ptr([]string{"login"}),
 	})
@@ -105,7 +106,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -113,7 +114,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -121,7 +122,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
