@@ -72,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Disabling SKE")
-				_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
+				_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.Region, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SKE disabling: %w", err)
 				}
@@ -112,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId, utils.SKEServiceId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiDisableServiceRegionalRequest {
+	req := apiClient.DisableServiceRegional(ctx, model.Region, model.ProjectId, utils.SKEServiceId)
 	return req
 }
