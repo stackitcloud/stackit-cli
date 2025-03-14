@@ -14,11 +14,11 @@ const (
 )
 
 type ServiceEnablementClient interface {
-	GetServiceStatusExecute(ctx context.Context, projectId string, serviceId string) (*serviceenablement.ServiceStatus, error)
+	GetServiceStatusRegionalExecute(ctx context.Context, region, projectId, serviceId string) (*serviceenablement.ServiceStatus, error)
 }
 
-func ProjectEnabled(ctx context.Context, apiClient ServiceEnablementClient, projectId string) (bool, error) {
-	project, err := apiClient.GetServiceStatusExecute(ctx, projectId, SKEServiceId)
+func ProjectEnabled(ctx context.Context, apiClient ServiceEnablementClient, projectId, region string) (bool, error) {
+	project, err := apiClient.GetServiceStatusRegionalExecute(ctx, region, projectId, SKEServiceId)
 	if err != nil {
 		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
 		if !ok {

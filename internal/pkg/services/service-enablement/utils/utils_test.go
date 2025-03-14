@@ -15,6 +15,7 @@ import (
 
 var (
 	testProjectId = uuid.NewString()
+	testRegion    = "eu01"
 )
 
 type serviceEnableClientMocked struct {
@@ -23,7 +24,7 @@ type serviceEnableClientMocked struct {
 	getServiceStatusResp  *serviceenablement.ServiceStatus
 }
 
-func (m *serviceEnableClientMocked) GetServiceStatusExecute(_ context.Context, _, _ string) (*serviceenablement.ServiceStatus, error) {
+func (m *serviceEnableClientMocked) GetServiceStatusRegionalExecute(_ context.Context, _, _, _ string) (*serviceenablement.ServiceStatus, error) {
 	if m.getServiceStatusFails {
 		return nil, fmt.Errorf("could not get service status")
 	}
@@ -87,7 +88,7 @@ func TestProjectEnabled(t *testing.T) {
 				getServiceStatusResp:  tt.getProjectResp,
 			}
 
-			output, err := ProjectEnabled(context.Background(), client, testProjectId)
+			output, err := ProjectEnabled(context.Background(), client, testRegion, testProjectId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

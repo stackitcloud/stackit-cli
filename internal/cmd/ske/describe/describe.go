@@ -81,8 +81,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiGetServiceStatusRequest {
-	req := apiClient.GetServiceStatus(ctx, model.ProjectId, skeUtils.SKEServiceId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiGetServiceStatusRegionalRequest {
+	req := apiClient.GetServiceStatusRegional(ctx, model.Region, model.ProjectId, skeUtils.SKEServiceId)
 	return req
 }
 
