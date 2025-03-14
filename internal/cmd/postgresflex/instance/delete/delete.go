@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -94,7 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if !model.Async {
 					s := spinner.New(p)
 					s.Start("Deleting instance")
-					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 					if err != nil {
 						return fmt.Errorf("wait for PostgreSQL Flex instance deletion: %w", err)
 					}
@@ -114,7 +114,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if !model.Async {
 					s := spinner.New(p)
 					s.Start("Forcing deletion of instance")
-					_, err = wait.ForceDeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+					_, err = wait.ForceDeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 					if err != nil {
 						return fmt.Errorf("wait for PostgreSQL Flex instance force deletion: %w", err)
 					}
@@ -171,23 +171,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildDeleteRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiDeleteInstanceRequest {
-	req := apiClient.DeleteInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
 func buildForceDeleteRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiForceDeleteInstanceRequest {
-	req := apiClient.ForceDeleteInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.ForceDeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
 type PostgreSQLFlexClient interface {
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*postgresflex.InstanceResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string) (*postgresflex.GetUserResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListVersionsResponse, error)
+	GetUserExecute(ctx context.Context, projectId, region, instanceId, userId string) (*postgresflex.GetUserResponse, error)
 }
 
 func getNextOperations(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (toDelete, toForceDelete bool, err error) {
-	instanceStatus, err := postgresflexUtils.GetInstanceStatus(ctx, apiClient, model.ProjectId, model.InstanceId)
+	instanceStatus, err := postgresflexUtils.GetInstanceStatus(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 	if err != nil {
 		return false, false, fmt.Errorf("get PostgreSQL Flex instance status: %w", err)
 	}

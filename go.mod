@@ -21,7 +21,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v0.18.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.0

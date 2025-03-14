@@ -112,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+	req := apiClient.GetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 

@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 

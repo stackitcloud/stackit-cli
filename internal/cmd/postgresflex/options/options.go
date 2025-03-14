@@ -136,9 +136,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 type postgresFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId string) (*postgresflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId string) (*postgresflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*postgresflex.ListStoragesResponse, error)
+	ListFlavorsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListFlavorsResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListVersionsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
 }
 
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient postgresFlexOptionsClient) error {
@@ -148,19 +148,19 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId)
+		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId)
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *model.FlavorId)
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}

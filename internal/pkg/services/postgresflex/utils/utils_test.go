@@ -22,6 +22,7 @@ const (
 	testInstanceName = "instance"
 	testUserName     = "user"
 	testStatus       = "running"
+	testRegion       = "eu01"
 )
 
 type postgresFlexClientMocked struct {
@@ -33,21 +34,21 @@ type postgresFlexClientMocked struct {
 	getUserResp       *postgresflex.GetUserResponse
 }
 
-func (m *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
+func (m *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
 	if m.listVersionsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
 }
 
-func (m *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+func (m *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
 	return m.getInstanceResp, nil
 }
 
-func (m *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*postgresflex.GetUserResponse, error) {
+func (m *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*postgresflex.GetUserResponse, error) {
 	if m.getUserFails {
 		return nil, fmt.Errorf("could not get user")
 	}
@@ -402,7 +403,7 @@ func TestGetLatestPostgreSQLVersion(t *testing.T) {
 				listVersionsResp:  tt.listVersionsResp,
 			}
 
-			output, err := GetLatestPostgreSQLVersion(context.Background(), client, testProjectId)
+			output, err := GetLatestPostgreSQLVersion(context.Background(), client, testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -452,7 +453,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), client, testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -502,7 +503,7 @@ func TestGetInstanceStatus(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceStatus(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceStatus(context.Background(), client, testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -552,7 +553,7 @@ func TestGetUserName(t *testing.T) {
 				getUserResp:  tt.getUserResp,
 			}
 
-			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId)
+			output, err := GetUserName(context.Background(), client, testProjectId, testRegion, testInstanceId, testUserId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

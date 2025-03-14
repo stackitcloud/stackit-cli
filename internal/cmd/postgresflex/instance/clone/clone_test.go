@@ -15,8 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -29,18 +27,18 @@ type postgresFlexClientMocked struct {
 	getInstanceResp   *postgresflex.InstanceResponse
 }
 
-func (c *postgresFlexClientMocked) CloneInstance(ctx context.Context, projectId, instanceId string) postgresflex.ApiCloneInstanceRequest {
-	return testClient.CloneInstance(ctx, projectId, instanceId)
+func (c *postgresFlexClientMocked) CloneInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiCloneInstanceRequest {
+	return testClient.CloneInstance(ctx, projectId, region, instanceId)
 }
 
-func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
 	if c.listStoragesFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
@@ -53,6 +51,7 @@ var testRecoveryTimestamp = "2024-03-08T09:28:00+00:00"
 var testFlavorId = uuid.NewString()
 var testStorageClass = "premium-perf4-stackit"
 var testStorageSize = int64(10)
+var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -66,8 +65,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:         testProjectId,
-		recoveryTimestampFlag: testRecoveryTimestamp,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		recoveryTimestampFlag:     testRecoveryTimestamp,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -77,10 +77,11 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 
 func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:         testProjectId,
-		recoveryTimestampFlag: testRecoveryTimestamp,
-		storageClassFlag:      "class",
-		storageSizeFlag:       "10",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		recoveryTimestampFlag:     testRecoveryTimestamp,
+		storageClassFlag:          "class",
+		storageSizeFlag:           "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -98,6 +99,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:   testInstanceId,
@@ -119,6 +121,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:   testInstanceId,
@@ -133,7 +136,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiCloneInstanceRequest)) postgresflex.ApiCloneInstanceRequest {
-	request := testClient.CloneInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CloneInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -230,7 +233,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -238,7 +241,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -246,7 +249,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -397,7 +400,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					Class:     utils.Ptr("class"),
 					Timestamp: utils.Ptr(recoveryTimestampString),
@@ -428,7 +431,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					Class:     utils.Ptr("class"),
 					Size:      utils.Ptr(int64(10)),

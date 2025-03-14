@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.InstanceId, model.BackupId)
+	req := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.InstanceId, model.BackupId)
 	return req
 }
 

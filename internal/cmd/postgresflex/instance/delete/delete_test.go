@@ -16,32 +16,31 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
+var testRegion = "eu01"
 
 type postgresFlexClientMocked struct {
 	getInstanceFails bool
 	getInstanceResp  *postgresflex.InstanceResponse
 }
 
-func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*postgresflex.InstanceResponse, error) {
+func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*postgresflex.ListVersionsResponse, error) {
+func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
 	// Not used in testing
 	return nil, nil
 }
-func (c *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*postgresflex.GetUserResponse, error) {
+func (c *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*postgresflex.GetUserResponse, error) {
 	// Not used in testing
 	return nil, nil
 }
@@ -58,7 +57,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -70,6 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -81,7 +82,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
-	request := testClient.DeleteInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -89,7 +90,7 @@ func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRe
 }
 
 func fixtureForceDeleteRequest(mods ...func(request *postgresflex.ApiForceDeleteInstanceRequest)) postgresflex.ApiForceDeleteInstanceRequest {
-	request := testClient.ForceDeleteInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.ForceDeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -133,7 +134,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -141,7 +142,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -149,7 +150,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

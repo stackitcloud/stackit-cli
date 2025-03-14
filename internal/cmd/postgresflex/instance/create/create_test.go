@@ -14,12 +14,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
+var testRegion = "eu01"
 
 type postgresFlexClientMocked struct {
 	listFlavorsFails  bool
@@ -28,18 +27,18 @@ type postgresFlexClientMocked struct {
 	listStoragesResp  *postgresflex.ListStoragesResponse
 }
 
-func (c *postgresFlexClientMocked) CreateInstance(ctx context.Context, projectId string) postgresflex.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
+func (c *postgresFlexClientMocked) CreateInstance(ctx context.Context, projectId, region string) postgresflex.ApiCreateInstanceRequest {
+	return testClient.CreateInstance(ctx, projectId, region)
 }
 
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*postgresflex.ListStoragesResponse, error) {
+func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*postgresflex.ListFlavorsResponse, error) {
+func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*postgresflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -51,15 +50,16 @@ var testFlavorId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0 * * *",
-		flavorIdFlag:       testFlavorId,
-		storageClassFlag:   "premium-perf4-stackit", // Non-default
-		storageSizeFlag:    "10",
-		versionFlag:        "6.0",
-		typeFlag:           "Replica",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0 * * *",
+		flavorIdFlag:              testFlavorId,
+		storageClassFlag:          "premium-perf4-stackit", // Non-default
+		storageSizeFlag:           "10",
+		versionFlag:               "6.0",
+		typeFlag:                  "Replica",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -71,6 +71,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName:   utils.Ptr("example-name"),
@@ -89,7 +90,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiCreateInstanceRequest)) postgresflex.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -164,21 +165,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

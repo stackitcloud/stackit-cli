@@ -56,13 +56,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId)
+			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiPartialUpdateUserRequest {
-	req := apiClient.PartialUpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+	req := apiClient.PartialUpdateUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	req = req.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
 		Roles: model.Roles,
 	})
