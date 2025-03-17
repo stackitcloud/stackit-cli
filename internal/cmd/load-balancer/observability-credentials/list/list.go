@@ -92,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				credentials, err = lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, filterOp)
+				credentials, err = lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Region, filterOp)
 				if err != nil {
 					return fmt.Errorf("filter credentials: %w", err)
 				}
@@ -162,7 +162,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId)
+	req := apiClient.ListCredentials(ctx, model.ProjectId, model.Region)
 	return req
 }
 

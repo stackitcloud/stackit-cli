@@ -124,9 +124,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient utils.LoadBalancerClient) (loadbalancer.ApiUpdateTargetPoolRequest, error) {
-	req := apiClient.UpdateTargetPool(ctx, model.ProjectId, model.LBName, model.TargetPoolName)
+	req := apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, model.LBName, model.TargetPoolName)
 
-	targetPool, err := utils.GetLoadBalancerTargetPool(ctx, apiClient, model.ProjectId, model.LBName, model.TargetPoolName)
+	targetPool, err := utils.GetLoadBalancerTargetPool(ctx, apiClient, model.ProjectId, model.Region, model.LBName, model.TargetPoolName)
 	if err != nil {
 		return req, fmt.Errorf("get load balancer target pool: %w", err)
 	}

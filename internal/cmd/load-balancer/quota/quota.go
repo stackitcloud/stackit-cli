@@ -81,7 +81,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetQuotaRequest {
-	req := apiClient.GetQuota(ctx, model.ProjectId)
+	req := apiClient.GetQuota(ctx, model.ProjectId, model.Region)
 	return req
 }
 

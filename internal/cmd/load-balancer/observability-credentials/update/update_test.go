@@ -15,32 +15,34 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion         = "eu02"
+	testCredentialsRef = "credentials-test"
+)
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &loadbalancer.APIClient{}
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &loadbalancer.APIClient{}
+	testProjectId = uuid.NewString()
+)
 
 type loadBalancerClientMocked struct {
 	getCredentialsError    bool
 	getCredentialsResponse *loadbalancer.GetCredentialsResponse
 }
 
-func (c *loadBalancerClientMocked) UpdateCredentials(ctx context.Context, projectId, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest {
-	return testClient.UpdateCredentials(ctx, projectId, credentialsRef)
+func (c *loadBalancerClientMocked) UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest {
+	return testClient.UpdateCredentials(ctx, projectId, region, credentialsRef)
 }
 
-func (c *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
+func (c *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
 	if c.getCredentialsError {
 		return nil, fmt.Errorf("get credentials failed")
 	}
 	return c.getCredentialsResponse, nil
 }
-
-var testProjectId = uuid.NewString()
-
-const testCredentialsRef = "credentials-test"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -54,10 +56,11 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:   testProjectId,
-		displayNameFlag: "name",
-		usernameFlag:    "username",
-		passwordFlag:    "pwd",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		displayNameFlag:           "name",
+		usernameFlag:              "username",
+		passwordFlag:              "pwd",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -69,6 +72,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		DisplayName:    utils.Ptr("name"),
@@ -83,7 +87,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsRequest)) loadbalancer.ApiUpdateCredentialsRequest {
-	request := testClient.UpdateCredentials(testCtx, testProjectId, testCredentialsRef)
+	request := testClient.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	request = request.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
 		DisplayName: utils.Ptr("name"),
 		Username:    utils.Ptr("username"),
@@ -145,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -153,7 +157,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -161,7 +165,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

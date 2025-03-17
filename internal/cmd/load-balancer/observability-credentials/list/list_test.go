@@ -14,7 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu02"
+)
 
 type testCtxKey struct{}
 
@@ -24,8 +26,9 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		limitFlag:     "10",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,6 +40,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Limit: utils.Ptr(int64(10)),
@@ -48,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId)
+	request := testClient.ListCredentials(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -76,21 +80,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
