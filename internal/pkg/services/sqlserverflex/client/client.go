@@ -21,8 +21,7 @@ func ConfigureClient(p *print.Printer) (*sqlserverflex.APIClient, error) {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
-	region := viper.GetString(config.RegionKey)
-	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
+	cfgOptions = append(cfgOptions, authCfgOption)
 
 	customEndpoint := viper.GetString(config.SQLServerFlexCustomEndpointKey)
 
