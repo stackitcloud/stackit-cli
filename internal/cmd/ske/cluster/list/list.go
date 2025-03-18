@@ -69,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Check if SKE is enabled for this project
-			enabled, err := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId)
+			enabled, err := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
 			if err != nil {
 				return err
 			}
