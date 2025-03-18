@@ -20,7 +20,8 @@ The STACKIT CLI allows you to manage your STACKIT services and resources as well
 - Databases such as PostgreSQL Flex, MongoDB Flex and SQLServer Flex
 
 This CLI is in a BETA state. More services and functionality will be supported soon.
-Your feedback is appreciated!
+Your feedback is appreciated! 
+Feel free to open [GitHub issues](https://github.com/stackitcloud/stackit-cli) to provide feature requests and bug reports.
 
 <a name="warning-new-stackit-idp"></a>
 
@@ -34,6 +35,10 @@ Your feedback is appreciated!
 ## Installation
 
 Please refer to our [installation guide](./INSTALLATION.md) for instructions on how to install and get started using the STACKIT CLI.
+
+## Documentation
+
+There is some [documentation](./docs/stackit.md) available in the markdown format inside the `docs` directory of the repository.
 
 ## Usage
 
