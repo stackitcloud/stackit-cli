@@ -203,6 +203,13 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "empty loadbalancers slice",
+			args: args{
+				loadBalancers: []loadbalancer.LoadBalancer{},
+			},
+			wantErr: false,
+		},
+		{
 			name: "empty loadbalancer in loadbalancers slice",
 			args: args{
 				loadBalancers: []loadbalancer.LoadBalancer{{}},
