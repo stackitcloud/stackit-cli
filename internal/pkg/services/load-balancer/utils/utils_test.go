@@ -19,6 +19,7 @@ var (
 )
 
 const (
+	testRegion                 = "eu02"
 	testCredentialsRef         = "credentials-ref"
 	testCredentialsDisplayName = "credentials-name"
 	testLoadBalancerName       = "my-load-balancer"
@@ -33,28 +34,28 @@ type loadBalancerClientMocked struct {
 	listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
 }
 
-func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
+func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
 	if m.getCredentialsFails {
 		return nil, fmt.Errorf("could not get credentials")
 	}
 	return m.getCredentialsResp, nil
 }
 
-func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _ string) (*loadbalancer.LoadBalancer, error) {
+func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _, _ string) (*loadbalancer.LoadBalancer, error) {
 	if m.getLoadBalancerFails {
 		return nil, fmt.Errorf("could not get load balancer")
 	}
 	return m.getLoadBalancerResp, nil
 }
 
-func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
+func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
 	if m.listLoadBalancersFails {
 		return nil, fmt.Errorf("could not list load balancers")
 	}
 	return m.listLoadBalancersResp, nil
 }
 
-func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
+func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
 	return loadbalancer.ApiUpdateTargetPoolRequest{}
 }
 
@@ -190,7 +191,7 @@ func TestGetCredentialsDisplayName(t *testing.T) {
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsDisplayName(context.Background(), client, testProjectId, testCredentialsRef)
+			output, err := GetCredentialsDisplayName(context.Background(), client, testProjectId, testRegion, testCredentialsRef)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -270,7 +271,7 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 				getLoadBalancerResp:  tt.getLoadBalancerResp,
 			}
 
-			output, err := GetLoadBalancerTargetPool(context.Background(), client, testProjectId, testLoadBalancerName, tt.targetPoolName)
+			output, err := GetLoadBalancerTargetPool(context.Background(), client, testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -824,7 +825,7 @@ func TestGetTargetName(t *testing.T) {
 				getLoadBalancerResp: tt.getLoadBalancerResp,
 			}
 
-			output, err := GetTargetName(context.Background(), client, testProjectId, testLoadBalancerName, tt.targetPoolName, tt.targetIp)
+			output, err := GetTargetName(context.Background(), client, testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName, tt.targetIp)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -962,7 +963,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 			}
 
-			output, err := GetUsedObsCredentials(testCtx, client, tt.allCredentials, testProjectId)
+			output, err := GetUsedObsCredentials(testCtx, client, tt.allCredentials, testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -1139,7 +1140,7 @@ func TestFilterCredentials(t *testing.T) {
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 				listLoadBalancersFails: tt.listLoadBalancersFails,
 			}
-			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, tt.filterOp)
+			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, testRegion, tt.filterOp)
 			if err != nil {
 				if !tt.isValid {
 					return

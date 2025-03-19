@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			credentialsLabel, err := loadbalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.CredentialsRef)
+			credentialsLabel, err := loadbalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get observability credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
@@ -110,6 +110,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiDeleteCredentialsRequest {
-	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.CredentialsRef)
+	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 	return req
 }

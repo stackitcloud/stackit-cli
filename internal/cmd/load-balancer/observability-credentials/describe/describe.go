@@ -91,7 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetCredentialsRequest {
-	req := apiClient.GetCredentials(ctx, model.ProjectId, model.CredentialsRef)
+	req := apiClient.GetCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 	return req
 }
 

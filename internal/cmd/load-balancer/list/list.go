@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiListLoadBalancersRequest {
-	req := apiClient.ListLoadBalancers(ctx, model.ProjectId)
+	req := apiClient.ListLoadBalancers(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -154,13 +154,21 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 		table.SetHeader("NAME", "STATE", "IP ADDRESS", "LISTENERS", "TARGET POOLS")
 		for i := range loadBalancers {
 			l := loadBalancers[i]
-			externalAdress := utils.PtrStringDefault(l.ExternalAddress, "-")
+			var numListeners, numTargetPools int
+			if l.Listeners != nil {
+				numListeners = len(*l.Listeners)
+			}
+			if l.TargetPools != nil {
+				numTargetPools = len(*l.TargetPools)
+			}
+
+			externalAddress := utils.PtrStringDefault(l.ExternalAddress, "-")
 			table.AddRow(
 				utils.PtrString(l.Name),
 				utils.PtrString(l.Status),
-				externalAdress,
-				len(utils.PtrString(l.Listeners)),
-				len(utils.PtrString(l.TargetPools)),
+				externalAddress,
+				numListeners,
+				numTargetPools,
 			)
 		}
 		err := table.Display(p)

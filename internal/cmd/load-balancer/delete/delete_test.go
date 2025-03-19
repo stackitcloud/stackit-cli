@@ -13,7 +13,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu02"
+)
 
 type testCtxKey struct{}
 
@@ -34,7 +36,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -46,6 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		LoadBalancerName: testLoadBalancerName,
@@ -57,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiDeleteLoadBalancerRequest)) loadbalancer.ApiDeleteLoadBalancerRequest {
-	request := testClient.DeleteLoadBalancer(testCtx, testProjectId, testLoadBalancerName)
+	request := testClient.DeleteLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -101,7 +105,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -109,7 +113,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -117,7 +121,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

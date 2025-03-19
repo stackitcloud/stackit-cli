@@ -27,6 +27,16 @@ const (
 	credentialsRefArg = "CREDENTIALS_REF" //nolint:gosec // linter false positive
 )
 
+// enforce implementation of interfaces
+var (
+	_ loadBalancerClient = &loadbalancer.APIClient{}
+)
+
+type loadBalancerClient interface {
+	UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest
+	GetCredentialsExecute(ctx context.Context, projectId, region, credentialsRef string) (*loadbalancer.GetCredentialsResponse, error)
+}
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	CredentialsRef string
@@ -68,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.CredentialsRef)
+			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
@@ -137,15 +147,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}, nil
 }
 
-type loadBalancerClient interface {
-	UpdateCredentials(ctx context.Context, instanceId, projectId string) loadbalancer.ApiUpdateCredentialsRequest
-	GetCredentialsExecute(ctx context.Context, instanceId, projectId string) (*loadbalancer.GetCredentialsResponse, error)
-}
-
 func buildRequest(ctx context.Context, model *inputModel, apiClient loadBalancerClient) (loadbalancer.ApiUpdateCredentialsRequest, error) {
-	req := apiClient.UpdateCredentials(ctx, model.ProjectId, model.CredentialsRef)
+	req := apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 
-	currentCredentials, err := apiClient.GetCredentialsExecute(ctx, model.ProjectId, model.CredentialsRef)
+	currentCredentials, err := apiClient.GetCredentialsExecute(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 	if err != nil {
 		return req, fmt.Errorf("get Load Balancer observability credentials: %w", err)
 	}

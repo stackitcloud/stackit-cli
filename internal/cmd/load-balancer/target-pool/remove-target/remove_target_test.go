@@ -15,8 +15,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var (
@@ -26,9 +24,9 @@ var (
 )
 
 const (
+	testRegion         = "eu02"
 	testLBName         = "my-load-balancer"
 	testTargetPoolName = "target-pool-1"
-	testTargetName     = "my-target"
 	testIP             = "1.2.3.4"
 )
 
@@ -39,25 +37,25 @@ type loadBalancerClientMocked struct {
 	getLoadBalancerResp  *loadbalancer.LoadBalancer
 }
 
-func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
+func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
 	if m.getCredentialsFails {
 		return nil, fmt.Errorf("could not get credentials")
 	}
 	return m.getCredentialsResp, nil
 }
 
-func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _ string) (*loadbalancer.LoadBalancer, error) {
+func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _, _ string) (*loadbalancer.LoadBalancer, error) {
 	if m.getLoadBalancerFails {
 		return nil, fmt.Errorf("could not get load balancer")
 	}
 	return m.getLoadBalancerResp, nil
 }
 
-func (m *loadBalancerClientMocked) UpdateTargetPool(ctx context.Context, projectId, loadBalancerName, targetPoolName string) loadbalancer.ApiUpdateTargetPoolRequest {
-	return testClient.UpdateTargetPool(ctx, projectId, loadBalancerName, targetPoolName)
+func (m *loadBalancerClientMocked) UpdateTargetPool(ctx context.Context, projectId, region, loadBalancerName, targetPoolName string) loadbalancer.ApiUpdateTargetPoolRequest {
+	return testClient.UpdateTargetPool(ctx, projectId, region, loadBalancerName, targetPoolName)
 }
 
-func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
+func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
 	return nil, nil
 }
 
@@ -73,9 +71,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		lbNameFlag:         testLBName,
-		targetPoolNameFlag: testTargetPoolName,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		lbNameFlag:                testLBName,
+		targetPoolNameFlag:        testTargetPoolName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -87,6 +86,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		LBName:         testLBName,
@@ -169,7 +169,7 @@ func fixturePayload(mods ...func(payload *loadbalancer.UpdateTargetPoolPayload))
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateTargetPoolRequest)) loadbalancer.ApiUpdateTargetPoolRequest {
-	request := testClient.UpdateTargetPool(testCtx, testProjectId, testLBName, testTargetPoolName)
+	request := testClient.UpdateTargetPool(testCtx, testProjectId, testRegion, testLBName, testTargetPoolName)
 	request = request.UpdateTargetPoolPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -202,7 +202,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -210,7 +210,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -218,7 +218,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

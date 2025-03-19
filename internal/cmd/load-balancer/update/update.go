@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiUpdateLoadBalancerRequest {
-	req := apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.LoadBalancerName)
+	req := apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
 
 	req = req.UpdateLoadBalancerPayload(model.Payload)
 	return req

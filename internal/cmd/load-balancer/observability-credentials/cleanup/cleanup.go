@@ -59,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			var credentials []loadbalancer.CredentialsResponse
 			if resp.Credentials != nil && len(*resp.Credentials) > 0 {
-				credentials, err = utils.FilterCredentials(ctx, apiClient, *resp.Credentials, model.ProjectId, utils.OP_FILTER_UNUSED)
+				credentials, err = utils.FilterCredentials(ctx, apiClient, *resp.Credentials, model.ProjectId, model.Region, utils.OP_FILTER_UNUSED)
 				if err != nil {
 					return fmt.Errorf("filter Load Balancer observability credentials: %w", err)
 				}
@@ -130,11 +130,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildDeleteCredentialRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient, credentialsRef string) loadbalancer.ApiDeleteCredentialsRequest {
-	req := apiClient.DeleteCredentials(ctx, model.ProjectId, credentialsRef)
+	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.Region, credentialsRef)
 	return req
 }
 
 func buildListCredentialsRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId)
+	req := apiClient.ListCredentials(ctx, model.ProjectId, model.Region)
 	return req
 }

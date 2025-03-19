@@ -95,7 +95,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("Creating load balancer")
-				_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, *model.Payload.Name).WaitWithContext(ctx)
+				_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *model.Payload.Name).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for load balancer creation: %w", err)
 				}
@@ -155,7 +155,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiCreateLoadBalancerRequest {
-	req := apiClient.CreateLoadBalancer(ctx, model.ProjectId)
+	req := apiClient.CreateLoadBalancer(ctx, model.ProjectId, model.Region)
 	req = req.CreateLoadBalancerPayload(*model.Payload)
 	req = req.XRequestID(xRequestId)
 	return req

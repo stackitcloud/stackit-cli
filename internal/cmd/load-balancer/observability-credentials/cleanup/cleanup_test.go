@@ -13,9 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const testCredentialsRef = "credentials-1"
-
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion         = "eu02"
+	testCredentialsRef = "credentials-1"
+)
 
 type testCtxKey struct{}
 
@@ -25,7 +26,8 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -37,6 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 	}
@@ -47,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDeleteCredentialsRequest)) loadbalancer.ApiDeleteCredentialsRequest {
-	request := testClient.DeleteCredentials(testCtx, testProjectId, testCredentialsRef)
+	request := testClient.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -55,7 +58,7 @@ func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDelete
 }
 
 func fixtureListCredentialsRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId)
+	request := testClient.ListCredentials(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -90,21 +93,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
