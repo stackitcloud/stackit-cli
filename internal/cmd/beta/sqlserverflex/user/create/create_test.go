@@ -92,10 +92,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, rolesFlag)
 			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = nil
-			}),
+			isValid: false,
 		},
 		{
 			description: "no values",
