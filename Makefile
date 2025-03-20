@@ -33,6 +33,12 @@ test:
 	@echo ">> Running tests for the CLI application"
 	@go test ./... -count=1
 
+# Test coverage
+coverage:
+	@echo ">> Creating test coverage report for the CLI application"
+	@go test ./... -coverprofile=coverage.out || true
+	@go tool cover -html=coverage.out -o coverage.html
+
 # Generate docs
 generate-docs:
 	@echo ">> Generating docs..."
