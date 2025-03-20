@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.APIClient) runcommand.ApiGetCommandTemplateRequest {
-	req := apiClient.GetCommandTemplate(ctx, model.ProjectId, model.ServerId, model.CommandTemplateName)
+	req := apiClient.GetCommandTemplate(ctx, model.ProjectId, model.ServerId, model.CommandTemplateName, model.Region)
 	return req
 }
 

@@ -141,8 +141,8 @@ github.com/stackitcloud/stackit-sdk-go/services/redis v0.21.0 h1:UDIRWwiZ2/2ukmn
 github.com/stackitcloud/stackit-sdk-go/services/redis v0.21.0/go.mod h1:ErMQspxm7+XmtOsEM6lTD73oALPq3lUC5s+JQkm6Y/s=
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.13.0 h1:fPCdQOsdPB1QqwcgytrROk+h5va49CAnp5YSCIrKZWY=
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.13.0/go.mod h1:Hs8RwANfF2ZKqOowPBqMQqLoRHcMobiKAihWWirAdEU=
-github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.3.0 h1:S1DFVy2wwSiAFgNPpB527Q/YDQpSaduIFOMX988sZOE=
-github.com/stackitcloud/stackit-sdk-go/services/runcommand v0.3.0/go.mod h1:1bANbviG6h5XaD3bBnC3v+eDWf5LBYLtLEF/ih+U4kA=
+github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.0.0 h1:tKUyddNszcif4j2yL6lJd4tDAykcU3shMkAPoM9EzV8=
+github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.0.0/go.mod h1:5n31cpeYcz2DSax4ygpZICEHDoHCTbWHrNGNYWwlRA8=
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.0 h1:PwfpDFGUUJ8+Go5hJf+/hA5CHfY+DPS1cqIUYH+zWtE=
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.0/go.mod h1:Hb21FmYP95q0fzOb9jk4/9CIxTsHzrSYDQZh6e82XUg=
 github.com/stackitcloud/stackit-sdk-go/services/serverbackup v0.6.0 h1:cESGAkm0ftADRBfdbiyx3pp/KVQ8JgmUQdRzpwG61wE=
