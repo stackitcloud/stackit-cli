@@ -127,6 +127,7 @@ func initConfig(configPath string) {
 	// This hack is required to allow creating the config file with `viper.WriteConfig`
 	// see https://github.com/spf13/viper/issues/851#issuecomment-789393451
 	viper.SetConfigFile(configFilePath)
+	viper.SetConfigType(configFileExtension)
 
 	f, err := os.Open(configFilePath)
 	if !os.IsNotExist(err) {
