@@ -146,7 +146,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) (serverupdate.ApiCreateUpdateScheduleRequest, error) {
-	req := apiClient.CreateUpdateSchedule(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.CreateUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
 	req = req.CreateUpdateSchedulePayload(serverupdate.CreateUpdateSchedulePayload{
 		Enabled:           &model.Enabled,
 		Name:              &model.ScheduleName,
