@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"strings"
@@ -115,4 +116,11 @@ func PtrByteSizeDefault(size *int64, defaultValue string) string {
 		return defaultValue
 	}
 	return bytesize.New(float64(*size)).String()
+}
+
+// Base64Encode encodes a []byte to a base64 representation as string
+func Base64Encode(message []byte) string {
+	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))
+	base64.StdEncoding.Encode(b, message)
+	return string(b)
 }

@@ -2,7 +2,6 @@ package auth
 
 import (
 	_ "embed"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"golang.org/x/oauth2"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -218,7 +218,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		input := InputValues{
 			Email: email,
-			Logo:  base64Encode(logoSvgContent),
+			Logo:  utils.Base64Encode(logoSvgContent),
 		}
 
 		// ParseFS expects paths using forward slashes, even on Windows
@@ -258,13 +258,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 
 	return nil
-}
-
-// base64Encode encodes a []byte to a base64 representation as string
-func base64Encode(message []byte) string {
-	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))
-	base64.StdEncoding.Encode(b, message)
-	return string(b)
 }
 
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
