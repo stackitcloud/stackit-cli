@@ -1,7 +1,8 @@
 package auth
 
 import (
-	"embed"
+	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -26,12 +26,7 @@ const (
 	defaultWellKnownConfig = "https://accounts.stackit.cloud/.well-known/openid-configuration"
 	defaultCLIClientID     = "stackit-cli-0000-0000-000000000001"
 
-	loginSuccessPath        = "/login-successful"
-	stackitLandingPage      = "https://www.stackit.de"
-	htmlTemplatesPath       = "templates"
-	loginSuccessfulHTMLFile = "login-successful.html"
-	logoPath                = "/stackit_nav_logo_light.svg"
-	logoSVGFilePath         = "stackit_nav_logo_light.svg"
+	loginSuccessPath = "/login-successful"
 
 	// The IDP doesn't support wildcards for the port,
 	// so we configure a range of ports from 8000 to 8020
@@ -39,11 +34,15 @@ const (
 	configuredPortRange = 20
 )
 
-//go:embed templates/*
-var htmlContent embed.FS
+//go:embed templates/login-successful.html
+var htmlTemplateContent string
 
-type User struct {
+//go:embed templates/stackit_nav_logo_light.svg
+var logoSvgContent []byte
+
+type InputValues struct {
 	Email string
+	Logo  string
 }
 
 type apiClient interface {
@@ -210,39 +209,28 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, _ *http.Request) {
+		defer cleanup(server)
+
 		email, err := GetAuthField(USER_EMAIL)
 		if err != nil {
 			errServer = fmt.Errorf("read user email: %w", err)
 		}
 
-		user := User{
+		input := InputValues{
 			Email: email,
+			Logo:  base64Encode(logoSvgContent),
 		}
 
 		// ParseFS expects paths using forward slashes, even on Windows
 		// See: https://github.com/golang/go/issues/44305#issuecomment-780111748
-		htmlTemplate, err := template.ParseFS(htmlContent, path.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
+		htmlTemplate, err := template.New("loginSuccess").Parse(htmlTemplateContent)
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
 
-		err = htmlTemplate.Execute(w, user)
+		err = htmlTemplate.Execute(w, input)
 		if err != nil {
 			errServer = fmt.Errorf("render page: %w", err)
-		}
-	})
-
-	mux.HandleFunc(logoPath, func(w http.ResponseWriter, _ *http.Request) {
-		defer cleanup(server)
-
-		img, err := htmlContent.ReadFile(path.Join(htmlTemplatesPath, logoSVGFilePath))
-		if err != nil {
-			errServer = fmt.Errorf("read logo file: %w", err)
-		}
-		w.Header().Set("Content-Type", "image/svg+xml")
-		_, err = w.Write(img)
-		if err != nil {
-			return
 		}
 	})
 
@@ -270,6 +258,13 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 
 	return nil
+}
+
+// base64Encode encodes a []byte to a base64 representation as string
+func base64Encode(message []byte) string {
+	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))
+	base64.StdEncoding.Encode(b, message)
+	return string(b)
 }
 
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
