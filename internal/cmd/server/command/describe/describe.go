@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.APIClient) runcommand.ApiGetCommandRequest {
-	req := apiClient.GetCommand(ctx, model.ProjectId, model.ServerId, model.CommandId)
+	req := apiClient.GetCommand(ctx, model.ProjectId, model.Region, model.ServerId, model.CommandId)
 	return req
 }
 
