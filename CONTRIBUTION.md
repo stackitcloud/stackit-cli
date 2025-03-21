@@ -31,6 +31,7 @@ These commands can be executed from the project root:
 - `make lint`: lint the code
 - `make generate-docs`: generate Markdown documentation for every command
 - `make test`: run unit tests
+- `make coverage`: create unit test coverage report (output file: `coverage.html`)
 
 ### Repository structure
 
