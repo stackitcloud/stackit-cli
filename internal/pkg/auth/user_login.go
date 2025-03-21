@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"embed"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,12 +11,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"golang.org/x/oauth2"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -26,10 +26,7 @@ const (
 	defaultWellKnownConfig = "https://accounts.stackit.cloud/.well-known/openid-configuration"
 	defaultCLIClientID     = "stackit-cli-0000-0000-000000000001"
 
-	loginSuccessPath        = "/login-successful"
-	stackitLandingPage      = "https://www.stackit.de"
-	htmlTemplatesPath       = "templates"
-	loginSuccessfulHTMLFile = "login-successful.html"
+	loginSuccessPath = "/login-successful"
 
 	// The IDP doesn't support wildcards for the port,
 	// so we configure a range of ports from 8000 to 8020
@@ -37,11 +34,15 @@ const (
 	configuredPortRange = 20
 )
 
-//go:embed templates/*
-var htmlContent embed.FS
+//go:embed templates/login-successful.html
+var htmlTemplateContent string
 
-type User struct {
+//go:embed templates/stackit_nav_logo_light.svg
+var logoSvgContent []byte
+
+type InputValues struct {
 	Email string
+	Logo  string
 }
 
 type apiClient interface {
@@ -215,18 +216,19 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 			errServer = fmt.Errorf("read user email: %w", err)
 		}
 
-		user := User{
+		input := InputValues{
 			Email: email,
+			Logo:  utils.Base64Encode(logoSvgContent),
 		}
 
 		// ParseFS expects paths using forward slashes, even on Windows
 		// See: https://github.com/golang/go/issues/44305#issuecomment-780111748
-		htmlTemplate, err := template.ParseFS(htmlContent, path.Join(htmlTemplatesPath, loginSuccessfulHTMLFile))
+		htmlTemplate, err := template.New("loginSuccess").Parse(htmlTemplateContent)
 		if err != nil {
 			errServer = fmt.Errorf("parse html file: %w", err)
 		}
 
-		err = htmlTemplate.Execute(w, user)
+		err = htmlTemplate.Execute(w, input)
 		if err != nil {
 			errServer = fmt.Errorf("render page: %w", err)
 		}
