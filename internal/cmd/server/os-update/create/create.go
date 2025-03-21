@@ -128,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) (serverupdate.ApiCreateUpdateRequest, error) {
-	req := apiClient.CreateUpdate(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.CreateUpdate(ctx, model.ProjectId, model.ServerId, model.Region)
 	payload := serverupdate.CreateUpdatePayload{
 		MaintenanceWindow: &model.MaintenanceWindow,
 	}

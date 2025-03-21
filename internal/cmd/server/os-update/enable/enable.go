@@ -118,8 +118,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiEnableServiceRequest {
-	payload := serverupdate.EnableServicePayload{}
-	req := apiClient.EnableService(ctx, model.ProjectId, model.ServerId).EnableServicePayload(payload)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiEnableServiceResourceRequest {
+	payload := serverupdate.EnableServiceResourcePayload{}
+	req := apiClient.EnableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region).EnableServiceResourcePayload(payload)
 	return req
 }

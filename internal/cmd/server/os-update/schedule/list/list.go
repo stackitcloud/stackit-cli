@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiListUpdateSchedulesRequest {
-	req := apiClient.ListUpdateSchedules(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.ListUpdateSchedules(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 
