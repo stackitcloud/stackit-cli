@@ -30,6 +30,8 @@ const (
 	stackitLandingPage      = "https://www.stackit.de"
 	htmlTemplatesPath       = "templates"
 	loginSuccessfulHTMLFile = "login-successful.html"
+	logoPath                = "/stackit_nav_logo_light.svg"
+	logoSVGFilePath         = "stackit_nav_logo_light.svg"
 
 	// The IDP doesn't support wildcards for the port,
 	// so we configure a range of ports from 8000 to 8020
@@ -208,7 +210,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, _ *http.Request) {
-		defer cleanup(server)
 
 		email, err := GetAuthField(USER_EMAIL)
 		if err != nil {
@@ -229,6 +230,20 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		err = htmlTemplate.Execute(w, user)
 		if err != nil {
 			errServer = fmt.Errorf("render page: %w", err)
+		}
+	})
+
+	mux.HandleFunc(logoPath, func(w http.ResponseWriter, _ *http.Request) {
+		defer cleanup(server)
+
+		img, err := htmlContent.ReadFile(path.Join(htmlTemplatesPath, logoSVGFilePath))
+		if err != nil {
+			errServer = fmt.Errorf("read logo file: %w", err)
+		}
+		w.Header().Set("Content-Type", "image/svg+xml")
+		_, err = w.Write(img)
+		if err != nil {
+			return
 		}
 	})
 
