@@ -210,7 +210,6 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	})
 
 	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, _ *http.Request) {
-
 		email, err := GetAuthField(USER_EMAIL)
 		if err != nil {
 			errServer = fmt.Errorf("read user email: %w", err)
