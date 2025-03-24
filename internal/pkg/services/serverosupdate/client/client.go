@@ -12,7 +12,6 @@ import (
 )
 
 func ConfigureClient(p *print.Printer) (*serverupdate.APIClient, error) {
-	var err error
 	var apiClient *serverupdate.APIClient
 	var cfgOptions []sdkConfig.ConfigurationOption
 
@@ -27,7 +26,7 @@ func ConfigureClient(p *print.Printer) (*serverupdate.APIClient, error) {
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	} else {
-		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01"))
+		cfgOptions = append(cfgOptions, authCfgOption)
 	}
 
 	if p.IsVerbosityDebug() {
