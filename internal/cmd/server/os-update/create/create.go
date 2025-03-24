@@ -43,10 +43,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Server os-update with name "myupdate"`,
-				`$ stackit server os-update create --server-id xxx --name=myupdate`),
+				`$ stackit server os-update create --server-id xxx`),
 			examples.NewExample(
 				`Create a Server os-update with name "myupdate" and maintenance window for 13 o'clock.`,
-				`$ stackit server os-update create --server-id xxx --name=mybupdate --maintenance-window=13`),
+				`$ stackit server os-update create --server-id xxx --maintenance-window=13`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
