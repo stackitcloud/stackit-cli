@@ -155,8 +155,8 @@ func outputResult(p *print.Printer, outputFormat string, machineTypes iaas.Machi
 		table.SetTitle("Machine-Types")
 
 		table.SetHeader("NAME", "DESCRIPTION")
-		if items := machineTypes.GetItems(); items != nil && len(*items) > 0 {
-			for _, machineType := range *items {
+		if items := machineTypes.GetItems(); len(items) > 0 {
+			for _, machineType := range items {
 				table.AddRow(*machineType.Name, utils.PtrString(machineType.Description))
 			}
 		}

@@ -141,7 +141,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
 			}
-			if err := uploadAsync(ctx, p, model, file, *url); err != nil {
+			if err := uploadAsync(ctx, p, model, file, url); err != nil {
 				return err
 			}
 

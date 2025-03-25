@@ -82,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("server log: %w", err)
 			}
 
-			log := *resp.GetOutput()
+			log := resp.GetOutput()
 			lines := strings.Split(log, "\n")
 
 			if len(lines) > int(*model.Length) {

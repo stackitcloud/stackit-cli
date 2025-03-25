@@ -127,11 +127,11 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl 
 
 		return nil
 	default:
-		if serverUrl.GetUrl() == nil {
+		if _, ok := serverUrl.GetUrlOk(); !ok {
 			return fmt.Errorf("server url is nil")
 		}
 		// unescape url in order to get rid of e.g. %40
-		unescapedURL, err := url.PathUnescape(*serverUrl.GetUrl())
+		unescapedURL, err := url.PathUnescape(serverUrl.GetUrl())
 		if err != nil {
 			return fmt.Errorf("unescape url: %w", err)
 		}

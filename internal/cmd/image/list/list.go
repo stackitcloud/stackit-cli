@@ -80,13 +80,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list images: %w", err)
 			}
 
-			if items := response.GetItems(); items == nil || len(*items) == 0 {
+			if items := response.GetItems(); len(items) == 0 {
 				p.Info("No images found for project %q", projectLabel)
 			} else {
-				if model.Limit != nil && len(*items) > int(*model.Limit) {
-					*items = (*items)[:*model.Limit]
+				if model.Limit != nil && len(items) > int(*model.Limit) {
+					items = (items)[:*model.Limit]
 				}
-				if err := outputResult(p, model.OutputFormat, *items); err != nil {
+				if err := outputResult(p, model.OutputFormat, items); err != nil {
 					return fmt.Errorf("output images: %w", err)
 				}
 			}
