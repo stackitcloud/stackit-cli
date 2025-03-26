@@ -12,3 +12,7 @@ dist/
 # Go workspace file
 go.work
 go.work.sum
+
+# Test coverage reports
+coverage.out
+coverage.html
