@@ -289,6 +289,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
+	var userData *[]byte
+	if model.UserData != nil {
+		userData = utils.Ptr([]byte(*model.UserData))
+	}
+
 	payload := iaas.CreateServerPayload{
 		Name:             model.Name,
 		MachineType:      model.MachineType,
@@ -299,7 +304,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		KeypairName:         model.KeypairName,
 		SecurityGroups:      model.SecurityGroups,
 		ServiceAccountMails: model.ServiceAccountMails,
-		UserData:            model.UserData,
+		UserData:            userData,
 		Volumes:             model.Volumes,
 		Labels:              labelsMap,
 	}

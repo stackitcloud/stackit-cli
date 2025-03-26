@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
 
 	"github.com/google/go-cmp/cmp"
@@ -218,7 +217,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set response with credentials",
 			args: args{
 				resp: &observability.CreateCredentialsResponse{
-					Credentials: observability.NewCredentials(utils.Ptr("dummy-pw"), utils.Ptr("dummy-user")),
+					Credentials: observability.NewCredentials("dummy-pw", "dummy-user"),
 				},
 			},
 			wantErr: false,

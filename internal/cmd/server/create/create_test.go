@@ -120,7 +120,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		KeypairName:         utils.Ptr("test-keypair-name"),
 		SecurityGroups:      utils.Ptr([]string{"test-security-groups"}),
 		ServiceAccountMails: utils.Ptr([]string{"test-service-account"}),
-		UserData:            utils.Ptr("test-user-data"),
+		UserData:            utils.Ptr([]byte("test-user-data")),
 		Volumes:             utils.Ptr([]string{testVolumeId}),
 		BootVolume: &iaas.CreateServerPayloadBootVolume{
 			PerformanceClass:    utils.Ptr("test-perf-class"),
