@@ -68,7 +68,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			currentSchedule, err := apiClient.GetUpdateScheduleExecute(ctx, model.ProjectId, model.ServerId, model.ScheduleId)
+			currentSchedule, err := apiClient.GetUpdateScheduleExecute(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get current server os-update schedule: %v", err)
 				return err
@@ -142,7 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient, old serverupdate.UpdateSchedule) (serverupdate.ApiUpdateUpdateScheduleRequest, error) {
-	req := apiClient.UpdateUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId)
+	req := apiClient.UpdateUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
 
 	if model.MaintenanceWindow != nil {
 		old.MaintenanceWindow = model.MaintenanceWindow

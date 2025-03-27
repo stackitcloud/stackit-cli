@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId, model.ServerId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiDisableServiceResourceRequest {
+	req := apiClient.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
