@@ -154,7 +154,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupScheduleRequest, error) {
-	req := apiClient.CreateBackupSchedule(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.CreateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
 	backupProperties := serverbackup.BackupProperties{
 		Name:            &model.BackupName,
 		RetentionPeriod: &model.BackupRetentionPeriod,

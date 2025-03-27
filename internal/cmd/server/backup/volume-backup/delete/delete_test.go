@@ -13,8 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -23,6 +21,7 @@ var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testBackupId = uuid.NewString()
 var testVolumeId = uuid.NewString()
+var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -36,9 +35,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		serverIdFlag:  testServerId,
-		backupIdFlag:  testBackupId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		serverIdFlag:              testServerId,
+		backupIdFlag:              testBackupId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ServerId: testServerId,
@@ -63,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverbackup.ApiDeleteVolumeBackupRequest)) serverbackup.ApiDeleteVolumeBackupRequest {
-	request := testClient.DeleteVolumeBackup(testCtx, testProjectId, testServerId, testBackupId, testVolumeId)
+	request := testClient.DeleteVolumeBackup(testCtx, testProjectId, testServerId, testRegion, testBackupId, testVolumeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -107,7 +108,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -115,7 +116,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -123,7 +124,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

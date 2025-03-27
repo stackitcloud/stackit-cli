@@ -14,6 +14,7 @@ import (
 var (
 	testProjectId = uuid.NewString()
 	testServerId  = uuid.NewString()
+	testRegion    = "eu01"
 )
 
 type serverbackupClientMocked struct {
@@ -23,14 +24,14 @@ type serverbackupClientMocked struct {
 	listBackupsResp          *serverbackup.GetBackupsListResponse
 }
 
-func (m *serverbackupClientMocked) ListBackupSchedulesExecute(_ context.Context, _, _ string) (*serverbackup.GetBackupSchedulesResponse, error) {
+func (m *serverbackupClientMocked) ListBackupSchedulesExecute(_ context.Context, _, _, _ string) (*serverbackup.GetBackupSchedulesResponse, error) {
 	if m.listBackupSchedulesFails {
 		return nil, fmt.Errorf("could not list backup schedules")
 	}
 	return m.listBackupSchedulesResp, nil
 }
 
-func (m *serverbackupClientMocked) ListBackupsExecute(_ context.Context, _, _ string) (*serverbackup.GetBackupsListResponse, error) {
+func (m *serverbackupClientMocked) ListBackupsExecute(_ context.Context, _, _, _ string) (*serverbackup.GetBackupsListResponse, error) {
 	if m.listBackupsFails {
 		return nil, fmt.Errorf("could not list backups")
 	}
@@ -126,7 +127,7 @@ func TestCanDisableBackupService(t *testing.T) {
 				listBackupSchedulesResp:  tt.listBackupSchedules,
 			}
 
-			output, err := CanDisableBackupService(context.Background(), client, testProjectId, testServerId)
+			output, err := CanDisableBackupService(context.Background(), client, testProjectId, testServerId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

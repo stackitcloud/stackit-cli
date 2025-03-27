@@ -117,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiRestoreVolumeBackupRequest {
-	req := apiClient.RestoreVolumeBackup(ctx, model.ProjectId, model.ServerId, model.BackupId, model.VolumeBackupId)
+	req := apiClient.RestoreVolumeBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId, model.VolumeBackupId)
 	payload := serverbackup.RestoreVolumeBackupPayload{
 		RestoreVolumeId: &model.RestoreVolumeId,
 	}

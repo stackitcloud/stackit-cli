@@ -106,7 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.ServerId, model.BackupId)
+	req := apiClient.GetBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
 	return req
 }
 

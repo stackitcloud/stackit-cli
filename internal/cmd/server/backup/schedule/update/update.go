@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			currentBackupSchedule, err := apiClient.GetBackupScheduleExecute(ctx, model.ProjectId, model.ServerId, model.BackupScheduleId)
+			currentBackupSchedule, err := apiClient.GetBackupScheduleExecute(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 			if err != nil {
 				p.Debug(print.ErrorLevel, "get current server backup schedule: %v", err)
 				return err
@@ -154,7 +154,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient, old serverbackup.BackupSchedule) (serverbackup.ApiUpdateBackupScheduleRequest, error) {
-	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.BackupScheduleId)
+	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 
 	if model.BackupName != nil {
 		old.BackupProperties.Name = model.BackupName

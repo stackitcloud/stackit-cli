@@ -121,6 +121,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDeleteBackupScheduleRequest {
-	req := apiClient.DeleteBackupSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId)
+	req := apiClient.DeleteBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.ScheduleId)
 	return req
 }
