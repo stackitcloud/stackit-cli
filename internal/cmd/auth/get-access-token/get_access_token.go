@@ -42,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return &cliErr.AccessTokenExpiredError{}
 			}
 
-			p.Info("%s\n", accessToken)
+			p.Outputf("%s\n", accessToken)
 			return nil
 		},
 	}
