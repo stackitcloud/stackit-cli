@@ -122,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiRestoreBackupRequest {
-	req := apiClient.RestoreBackup(ctx, model.ProjectId, model.ServerId, model.BackupId)
+	req := apiClient.RestoreBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
 	payload := serverbackup.RestoreBackupPayload{
 		StartServerAfterRestore: &model.StartServerAfterRestore,
 		VolumeIds:               &model.BackupVolumeIds,

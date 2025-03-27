@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
-			canDisable, err := serverbackupUtils.CanDisableBackupService(ctx, apiClient, model.ProjectId, model.ServerId)
+			canDisable, err := serverbackupUtils.CanDisableBackupService(ctx, apiClient, model.ProjectId, model.ServerId, model.Region)
 			if err != nil {
 				return err
 			}
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId, model.ServerId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDisableServiceResourceRequest {
+	req := apiClient.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }

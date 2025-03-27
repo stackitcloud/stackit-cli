@@ -113,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDeleteVolumeBackupRequest {
-	req := apiClient.DeleteVolumeBackup(ctx, model.ProjectId, model.ServerId, model.BackupId, model.VolumeId)
+	req := apiClient.DeleteVolumeBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId, model.VolumeId)
 	return req
 }

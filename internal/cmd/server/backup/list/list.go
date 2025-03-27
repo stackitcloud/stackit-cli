@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.ListBackups(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 

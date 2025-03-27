@@ -140,7 +140,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupRequest, error) {
-	req := apiClient.CreateBackup(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.CreateBackup(ctx, model.ProjectId, model.ServerId, model.Region)
 	payload := serverbackup.CreateBackupPayload{
 		Name:            &model.BackupName,
 		RetentionPeriod: &model.BackupRetentionPeriod,

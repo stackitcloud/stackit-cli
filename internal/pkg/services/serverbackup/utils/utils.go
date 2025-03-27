@@ -8,12 +8,12 @@ import (
 )
 
 type ServerBackupClient interface {
-	ListBackupSchedulesExecute(ctx context.Context, projectId, serverId string) (*serverbackup.GetBackupSchedulesResponse, error)
-	ListBackupsExecute(ctx context.Context, projectId, serverId string) (*serverbackup.GetBackupsListResponse, error)
+	ListBackupSchedulesExecute(ctx context.Context, projectId, serverId, region string) (*serverbackup.GetBackupSchedulesResponse, error)
+	ListBackupsExecute(ctx context.Context, projectId, serverId, region string) (*serverbackup.GetBackupsListResponse, error)
 }
 
-func CanDisableBackupService(ctx context.Context, client ServerBackupClient, projectId, serverId string) (bool, error) {
-	schedules, err := client.ListBackupSchedulesExecute(ctx, projectId, serverId)
+func CanDisableBackupService(ctx context.Context, client ServerBackupClient, projectId, serverId, region string) (bool, error) {
+	schedules, err := client.ListBackupSchedulesExecute(ctx, projectId, serverId, region)
 	if err != nil {
 		return false, fmt.Errorf("list backup schedules: %w", err)
 	}
@@ -21,7 +21,7 @@ func CanDisableBackupService(ctx context.Context, client ServerBackupClient, pro
 		return false, nil
 	}
 
-	backups, err := client.ListBackupsExecute(ctx, projectId, serverId)
+	backups, err := client.ListBackupsExecute(ctx, projectId, serverId, region)
 	if err != nil {
 		return false, fmt.Errorf("list backups: %w", err)
 	}

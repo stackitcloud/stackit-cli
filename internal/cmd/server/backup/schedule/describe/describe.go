@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiGetBackupScheduleRequest {
-	req := apiClient.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.BackupScheduleId)
+	req := apiClient.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 	return req
 }
 
