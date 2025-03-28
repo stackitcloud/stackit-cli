@@ -26,7 +26,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.0.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.0.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.6.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/ske v0.22.1
@@ -80,7 +80,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.1.1
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.21.1
 	github.com/subosito/gotenv v1.6.0 // indirect

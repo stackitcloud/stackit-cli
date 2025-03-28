@@ -129,8 +129,8 @@ github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.18.1 h1:n6xMTHrLV
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.18.1/go.mod h1:R+fHrtGfy+zx+d5s31cBh09P3TG58dyytb83gB7ldi0=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.1.1 h1:yyN3Q4i+5bmUVySPbQC7sSKG6sK21V8AxMjvhfJe2r0=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.1.1/go.mod h1:c5/LHxZZ7qZYOboR01qOw1Mqq5v/VNyONw7WPHctNeY=
-github.com/stackitcloud/stackit-sdk-go/services/observability v0.3.1 h1:V6vvH++exqeqzD7TtzLc86ZRFrbcmxlaQqBJewiUXrE=
-github.com/stackitcloud/stackit-sdk-go/services/observability v0.3.1/go.mod h1:/GFUX/OiR2/SsWh3Vsu7UnY6QLJzsbHwrcxiRBxmYOA=
+github.com/stackitcloud/stackit-sdk-go/services/observability v0.4.0 h1:CPa/SRuX1Gl810K0SearSFyH0k/xKF9JHUV+4j+Tcn4=
+github.com/stackitcloud/stackit-sdk-go/services/observability v0.4.0/go.mod h1:/go4bZ76dxGfkvl48EYUmPZ41c+64Yrf/26RodfcFyw=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.1 h1:Bag2KZMwHJhlz2iy5Sy4ANTwPSR/ArGXcF13tbC3O+M=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.1/go.mod h1:F1WyCyjAuzq3YI+YPJxj4AXrmpWXtxjFxGhwo9RIYy4=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.0.2 h1:S6uamk6ecVy8K3jE2mgU50h14GoGE0LRVmiK3TvgfTc=
@@ -147,8 +147,8 @@ github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.2 h1:SZoWUD
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.11.2/go.mod h1:PrD0nNG94Dd5D9pu7HJ0bAg8ccDz6/7KaIts7K9p7as=
 github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.0.1 h1:qujhShugc1290NQlPoNqsembqzot8aTToAdSsJg5WrM=
 github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.0.1/go.mod h1:e1fsQL24gTPXcMWptuslNscawmXv/PLUAFuw+sOofbc=
-github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.0 h1:a8logPoRcMCgwa9rCtuzWF6DLiuCIdJgcacZKThFsks=
-github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.0/go.mod h1:zDdYYQVHGlju9cnMISX/Ty73Yh/qYcZGcJSOYWRZCbw=
+github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.1 h1:oYOKoID+PMTb9qX5LyXmr7qk3VNv1qxDhZBxUZcokvM=
+github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.0.1/go.mod h1:AoQFbTh8pejhIRyvpX8Jm2FHHwen8My85OYA910FIy0=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.6.1 h1:VKgxgjsbaUVMCnntq+MLQ/c1Emn5crVr11B3gJnyHN4=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.6.1/go.mod h1:vn6xmMRxYgEoBhYEy6i2SY2qbeDKjs4IVNdnQHcQpBc=
 github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.0.1 h1:7yY68QuntatwRG6ri65FlfeewACChLVbLp67wHCS8Go=
