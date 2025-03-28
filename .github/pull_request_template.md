@@ -9,7 +9,9 @@ relates to #1234
 
 ## Checklist
 
+- [ ] Issue was linked above
 - [ ] Code format was applied: `make fmt`
 - [ ] Docs are up-to-date: `make generate-docs`
-- [x] No linter issues: `make lint` (will be checked by CI) 
+- [ ] Unit tests got implemented or updated
 - [x] Unit tests are passing: `make test` (will be checked by CI)
+- [x] No linter issues: `make lint` (will be checked by CI) 
