@@ -11,6 +11,7 @@ relates to #1234
 
 - [ ] Issue was linked above
 - [ ] Code format was applied: `make fmt`
+- [ ] Examples were added / adjusted (see e.g. [here](https://github.com/stackitcloud/stackit-cli/blob/ef291d1683ca5b0d719ec0a26ecb999a32685117/internal/cmd/ske/cluster/create/create.go#L49-L63))
 - [ ] Docs are up-to-date: `make generate-docs`
 - [ ] Unit tests got implemented or updated
 - [x] Unit tests are passing: `make test` (will be checked by CI)
