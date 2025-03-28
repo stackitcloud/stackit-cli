@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stackitcloud/stackit-sdk-go/core v0.16.2
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.6.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.13.1
