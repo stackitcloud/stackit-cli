@@ -68,6 +68,28 @@ sudo apt-get install stackit
 
 > If you can't install the `stackit` package due to an expired key, please go back to step `1` to import the latest public key.
 
+#### Nix / NixOS
+
+The STACKIT CLI is available as a [Nix package](https://search.nixos.org/packages?channel=unstable&show=stackit-cli), and can be used via:
+
+```shell
+nix-shell -p stackit-cli
+```
+
+#### Eget
+
+The STACKIT CLI binaries are available via our [GitHub releases](https://github.com/stackitcloud/stackit-cli/releases), you can install them from there using [Eget](https://github.com/zyedidia/eget).
+
+```toml
+# ~/.eget.toml
+["stackitcloud/stackit-cli"]
+asset_filters=["stackit-cli_", "_linux_amd64.tar.gz"]
+```
+
+```shell
+eget stackitcloud/stackit-cli
+```
+
 #### Any distribution
 
 Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
