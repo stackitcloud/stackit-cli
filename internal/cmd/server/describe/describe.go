@@ -141,6 +141,8 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 		if server.BootVolume != nil && server.BootVolume.Id != nil {
 			table.AddRow("BOOT VOLUME", *server.BootVolume.Id)
 			table.AddSeparator()
+			table.AddRow("DELETE ON TERMINATION", utils.PtrString(server.BootVolume.DeleteOnTermination))
+			table.AddSeparator()
 		}
 		table.AddRow("POWER STATUS", utils.PtrString(server.PowerStatus))
 		table.AddSeparator()
