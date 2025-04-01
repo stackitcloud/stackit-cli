@@ -2,10 +2,16 @@ package delete
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -212,5 +218,73 @@ func TestBuildRequest(t *testing.T) {
 				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
+	}
+}
+
+func TestS3API(t *testing.T) {
+	ctx := context.Background()
+	client := s3.New(s3.Options{
+		AppID:                        "stackit",
+		BaseEndpoint:                 utils.Ptr("https://object.storage.eu01.onstackit.cloud"),
+		ClientLogMode:                5,
+		ContinueHeaderThresholdBytes: 0,
+		Credentials: aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+			return aws.Credentials{
+				AccessKeyID:     "GTVECKOU1GSVR393LIN0",
+				SecretAccessKey: "mAtH/sP7SWYXSexbzKr/CILpBkWOPypUHIddlDkr",
+			}, nil
+		}),
+		Region: "eu01",
+	})
+	buckets, err := client.ListBuckets(ctx, nil)
+	if err != nil {
+		t.Fatalf("cannot list buckets: %v", err)
+	}
+	for _, bucket := range buckets.Buckets {
+		log.Printf("%s", *bucket.Name)
+		list, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+			Bucket:            bucket.Name,
+			ContinuationToken: utils.Ptr("foobarbaz"),
+			MaxKeys:           utils.Ptr[int32](50),
+		})
+		if err != nil {
+			log.Fatalf("cannot list bucket: %v", err)
+		}
+		i := 0
+		for {
+			for _, obj := range list.Contents {
+				var builder strings.Builder
+				builder.WriteString(fmt.Sprintf("%03d: ", i))
+				if val := obj.Key; val != nil {
+					builder.WriteString(fmt.Sprintf("key=%s ", *val))
+				}
+				if val := obj.ETag; val != nil {
+					builder.WriteString(fmt.Sprintf("etag=%s ", *val))
+				}
+				if val := obj.Size; val != nil {
+					builder.WriteString(fmt.Sprintf("size=%d ", *val))
+				}
+				if val := obj.Owner; val != nil && val.DisplayName != nil {
+					builder.WriteString(fmt.Sprintf("size=%d ", val.DisplayName))
+				}
+				if val := obj.LastModified; val != nil {
+					builder.WriteString(fmt.Sprintf("last modified=%s ", val))
+				}
+				t.Log(builder.String())
+				i++
+			}
+
+			if !*list.IsTruncated {
+				break
+			}
+			list, err = client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+				Bucket:            bucket.Name,
+				ContinuationToken: list.NextContinuationToken,
+				MaxKeys:           utils.Ptr[int32](100),
+			})
+			if err != nil {
+				log.Fatalf("cannot continue paging: %v", err)
+			}
+		}
 	}
 }
