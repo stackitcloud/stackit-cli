@@ -76,7 +76,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values`,
 				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4`),
 			examples.NewExample(
-				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values`,
+				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values.
+  The flavor ID can be retrieved by running "$ stackit beta sqlserverflex options --flavors"`,
 				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx`),
 			examples.NewExample(
 				`Create a SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
