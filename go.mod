@@ -2,8 +2,6 @@ module github.com/stackitcloud/stackit-cli
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.17.1
