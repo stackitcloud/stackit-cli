@@ -13,6 +13,8 @@ $ stackit auth activate-service-account
 
 You can also configure the service account credentials directly in the CLI. To get help and to get a list of the available options run the command with the `-h` flag.
 
+**_Note:_** There is an optional flag `--only-print-access-token` which can be used to only obtain the access token which prevents writing the credentials to the keyring or into `cli-auth-storage.txt` ([File Location](./README.md#configuration)). This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands by default.
+
 ### Overview
 
 If you don't have a service account, create one in the [STACKIT Portal](https://portal.stackit.cloud/) and assign the necessary permissions to it, e.g. `owner`. There are two ways to authenticate:

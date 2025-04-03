@@ -20,6 +20,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		serviceAccountTokenFlag:   "token",
 		serviceAccountKeyPathFlag: "sa_key",
 		privateKeyPathFlag:        "private_key",
+		onlyPrintAccessTokenFlag:  "true",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -32,6 +33,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServiceAccountToken:   "token",
 		ServiceAccountKeyPath: "sa_key",
 		PrivateKeyPath:        "private_key",
+		OnlyPrintAccessToken:  true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -87,6 +89,18 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "default value OnlyPrintAccessToken",
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					delete(flagValues, "only-print-access-token")
+				},
+			),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.OnlyPrintAccessToken = false
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -121,7 +135,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestStoreFlags(t *testing.T) {
+func TestStoreCustomEndpointFlags(t *testing.T) {
 	tests := []struct {
 		description         string
 		model               *inputModel
@@ -154,7 +168,7 @@ func TestStoreFlags(t *testing.T) {
 			viper.Reset()
 			viper.Set(config.TokenCustomEndpointKey, tt.tokenCustomEndpoint)
 
-			tokenCustomEndpoint, err := storeFlags()
+			err := storeCustomEndpoint(tt.tokenCustomEndpoint)
 			if !tt.isValid {
 				if err == nil {
 					t.Fatalf("did not fail on invalid input")
@@ -169,8 +183,8 @@ func TestStoreFlags(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to get value of auth field: %v", err)
 			}
-			if value != tokenCustomEndpoint {
-				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint, value)
+			if value != tt.tokenCustomEndpoint {
+				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.TOKEN_CUSTOM_ENDPOINT, tt.tokenCustomEndpoint, value)
 			}
 		})
 	}
