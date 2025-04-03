@@ -1,6 +1,8 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.23
+go 1.23.0
+
+toolchain go1.24.2
 
 require (
 	github.com/fatih/color v1.18.0
@@ -20,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v0.18.1
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.1
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.20.2
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.0.2
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.0.0
@@ -77,12 +79,12 @@ require (
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.0.1
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.21.1
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.21.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.21.2
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.1.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.21.1
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.21.1
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.21.2
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.21.2
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
