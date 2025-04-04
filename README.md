@@ -23,15 +23,6 @@ This CLI is in a BETA state. More services and functionality will be supported s
 Your feedback is appreciated! 
 Feel free to open [GitHub issues](https://github.com/stackitcloud/stackit-cli) to provide feature requests and bug reports.
 
-<a name="warning-new-stackit-idp"></a>
-
-> [!WARNING]
-> On August 26 2024, The STACKIT Argus service was renamed to STACKIT Observability.
->
-> This means that there is a new command group `observability`, which offers the same functionality as the deprecated `argus` command.
->
-> Please make sure to **update your STACKIT CLI to the latest version after August 26 2024** to ensure that you start using `observability` command.
-
 ## Installation
 
 Please refer to our [installation guide](./INSTALLATION.md) for instructions on how to install and get started using the STACKIT CLI.
