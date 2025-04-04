@@ -25,6 +25,7 @@ const (
 	keyringService     = "stackit-cli"
 	textFileFolderName = "stackit"
 	textFileName       = "cli-auth-storage.txt"
+	envAccessTokenName = "STACKIT_ACCESS_TOKEN"
 )
 
 const (

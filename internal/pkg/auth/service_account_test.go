@@ -153,7 +153,7 @@ func TestAuthenticateServiceAccount(t *testing.T) {
 			}
 
 			p := print.NewPrinter()
-			email, err := AuthenticateServiceAccount(p, flow)
+			email, _, err := AuthenticateServiceAccount(p, flow, false)
 
 			if !tt.isValid {
 				if err == nil {

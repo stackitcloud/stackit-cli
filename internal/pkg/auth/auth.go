@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -22,7 +23,15 @@ type tokenClaims struct {
 // It returns the configuration option that can be used to create an authenticated SDK client.
 //
 // If the user was logged in and the user session expired, reauthorizeUserRoutine is called to reauthenticate the user again.
+// If the environment variable STACKIT_ACCESS_TOKEN is set this token is used instead.
 func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print.Printer, _ bool) error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
+	// Get access token from env and use this if present
+	accessToken := os.Getenv(envAccessTokenName)
+	if accessToken != "" {
+		authCfgOption = sdkConfig.WithToken(accessToken)
+		return authCfgOption, nil
+	}
+
 	flow, err := GetAuthFlow()
 	if err != nil {
 		return nil, fmt.Errorf("get authentication flow: %w", err)

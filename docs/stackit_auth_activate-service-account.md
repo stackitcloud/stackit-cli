@@ -23,12 +23,16 @@ stackit auth activate-service-account [flags]
 
   Activate service account authentication in the STACKIT CLI using the service account token
   $ stackit auth activate-service-account --service-account-token my-service-account-token
+
+  Only print the corresponding access token by using the service account token. This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands.
+  $ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token
 ```
 
 ### Options
 
 ```
   -h, --help                              Help for "stackit auth activate-service-account"
+      --only-print-access-token           If this is set to true the credentials are not stored in either the keyring or a file
       --private-key-path string           RSA private key path. It takes precedence over the private key included in the service account key, if present
       --service-account-key-path string   Service account key path
       --service-account-token string      Service account long-lived access token
