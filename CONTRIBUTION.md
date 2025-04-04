@@ -19,7 +19,7 @@ Your contribution is welcome! Thank you for your interest in contributing to the
 
 Prerequisites:
 
-- [`Go`](https://go.dev/doc/install) 1.22+
+- [`Go`](https://go.dev/doc/install) 1.24+
 - [`yamllint`](https://yamllint.readthedocs.io/en/stable/quickstart.html)
 
 ### Useful Make commands
