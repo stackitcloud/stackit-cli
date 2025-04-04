@@ -15,12 +15,11 @@ import (
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "observability",
-		Aliases: []string{"argus"},
-		Short:   "Provides functionality for Observability",
-		Long:    "Provides functionality for Observability.",
-		Args:    args.NoArgs,
-		Run:     utils.CmdHelp,
+		Use:   "observability",
+		Short: "Provides functionality for Observability",
+		Long:  "Provides functionality for Observability.",
+		Args:  args.NoArgs,
+		Run:   utils.CmdHelp,
 	}
 	addSubcommands(cmd, p)
 	return cmd
