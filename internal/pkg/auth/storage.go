@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"os"
 	"path/filepath"
 
@@ -23,7 +22,6 @@ type AuthFlow string
 
 const (
 	keyringService     = "stackit-cli"
-	textFileFolderName = "stackit"
 	textFileName       = "cli-auth-storage.txt"
 	envAccessTokenName = "STACKIT_ACCESS_TOKEN"
 )
@@ -340,6 +338,29 @@ func GetProfileEmail(profile string) string {
 		}
 	}
 	return email
+}
+
+// GetAuthEmail returns the email of the authenticated account.
+// If the environment variable STACKIT_ACCESS_TOKEN is set, the email of this token will be returned.
+func GetAuthEmail() (string, error) {
+	// If STACKIT_ACCESS_TOKEN is set, get the mail from the token
+	if accessToken := os.Getenv(envAccessTokenName); accessToken != "" {
+		email, err := getEmailFromToken(accessToken)
+		if err != nil {
+			return "", fmt.Errorf("error getting email from token: %w", err)
+		}
+		return email, nil
+	}
+
+	profile, err := config.GetProfile()
+	if err != nil {
+		return "", fmt.Errorf("error getting profile: %w", err)
+	}
+	email := GetProfileEmail(profile)
+	if email == "" {
+		return "", fmt.Errorf("error getting profile email. email is empty")
+	}
+	return email, nil
 }
 
 func LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix string) error {
