@@ -167,7 +167,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 	}
 
 	if model.ParentId == nil && model.ProjectIdLike == nil && model.Member == nil {
-		email, err := auth.GetAuthField(auth.USER_EMAIL)
+		email, err := auth.GetAuthEmail()
 		if err != nil {
 			return req, fmt.Errorf("get email of authenticated user: %w", err)
 		}

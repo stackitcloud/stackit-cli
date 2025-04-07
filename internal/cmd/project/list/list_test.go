@@ -259,7 +259,12 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	keyring.MockInit()
-	err := auth.SetAuthField(auth.USER_EMAIL, "test@test.com")
+	err := auth.SetAuthFlow(auth.AUTH_FLOW_USER_TOKEN)
+	if err != nil {
+		t.Fatalf("Failed to set auth flow: %v", err)
+	}
+
+	err = auth.SetAuthField(auth.USER_EMAIL, "test@test.com")
 	if err != nil {
 		t.Fatalf("Failed to set auth user email: %v", err)
 	}
