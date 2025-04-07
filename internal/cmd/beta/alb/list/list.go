@@ -75,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list load balancerse: %w", err)
 			}
 
-			if items := response.LoadBalancers; items != nil && len(*items) == 0 {
+			if items := response.LoadBalancers; items == nil || len(*items) == 0 {
 				p.Info("No load balancers found for project %q", projectLabel)
 			} else {
 				if model.Limit != nil && len(*items) > int(*model.Limit) {
