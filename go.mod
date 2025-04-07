@@ -16,6 +16,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.1
 	github.com/stackitcloud/stackit-sdk-go/core v0.17.1
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.6.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.22.0
@@ -52,7 +53,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/alb v0.2.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 )
 
