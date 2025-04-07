@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -36,4 +37,5 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 	cmd.AddCommand(sqlserverflex.NewCmd(p))
+	cmd.AddCommand(alb.NewCmd(p))
 }
