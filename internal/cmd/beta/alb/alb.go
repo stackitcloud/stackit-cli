@@ -2,6 +2,7 @@ package alb
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/create"
+	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/list"
@@ -34,6 +35,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 		template.NewCmd(p),
 		create.NewCmd(p),
 		update.NewCmd(p),
+		keypair.NewCmd(p),
 		describe.NewCmd(p),
 		delete.NewCmd(p),
 		pool.NewCmd(p),
