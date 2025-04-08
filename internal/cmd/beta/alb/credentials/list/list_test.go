@@ -196,7 +196,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		keyPairs     []alb.CredentialsResponse
+		response     []alb.CredentialsResponse
 	}
 	tests := []struct {
 		name    string
@@ -207,7 +207,7 @@ func Test_outputResult(t *testing.T) {
 			name: "empty",
 			args: args{
 				outputFormat: "",
-				keyPairs: []alb.CredentialsResponse{
+				response: []alb.CredentialsResponse{
 					{},
 				},
 			},
@@ -220,7 +220,7 @@ func Test_outputResult(t *testing.T) {
 			p := print.NewPrinter()
 			p.Cmd = NewCmd(p)
 
-			if err := outputResult(p, tt.args.outputFormat, tt.args.keyPairs); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.response); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

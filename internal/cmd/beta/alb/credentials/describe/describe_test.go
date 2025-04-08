@@ -195,7 +195,7 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat      string
 		showOnlyPublicKey bool
-		keyPair           alb.CredentialsResponse
+		response          alb.CredentialsResponse
 	}
 	tests := []struct {
 		name    string
@@ -207,7 +207,7 @@ func Test_outputResult(t *testing.T) {
 			args: args{
 				outputFormat:      "",
 				showOnlyPublicKey: false,
-				keyPair:           alb.CredentialsResponse{},
+				response:          alb.CredentialsResponse{},
 			},
 			wantErr: false,
 		},
@@ -216,7 +216,7 @@ func Test_outputResult(t *testing.T) {
 	p.Cmd = NewCmd(p)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.keyPair); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.response); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
