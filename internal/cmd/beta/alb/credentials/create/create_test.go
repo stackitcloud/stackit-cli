@@ -18,8 +18,6 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &alb.APIClient{}
 
-const passwordFlag = "password"
-
 var (
 	testProjectId   = uuid.NewString()
 	testRegion      = "eu01"

@@ -110,12 +110,10 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "label selector empty",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(inputModel *inputModel) {
-			}),
+			description:   "label selector empty",
+			flagValues:    fixtureFlagValues(),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
 		},
 	}
 

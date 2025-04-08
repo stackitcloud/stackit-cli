@@ -149,7 +149,6 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.Credentials
 		table.SetHeader("CREDENTIAL REF", "DISPLAYNAME", "USERNAME", "REGION")
 
 		for _, item := range items {
-
 			table.AddRow(
 				utils.PtrString(item.CredentialsRef),
 				utils.PtrString(item.DisplayName),

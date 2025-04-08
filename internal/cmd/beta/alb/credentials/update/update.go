@@ -1,6 +1,7 @@
 package update
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,13 +21,13 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
 
-const passwordEnv = "ALB_CREDENTIALS_PASSWORD"
+const passwordEnv = "ALB_CREDENTIALS_PASSWORD" //nolint:gosec // false alert, this are not valid credentials
 
 const (
 	usernameFlag     = "username"
 	displaynameFlag  = "displayname"
 	passwordFlag     = "password"
-	credentialRefArg = "CREDENTIAL_REF_ARG"
+	credentialRefArg = "CREDENTIAL_REF_ARG" //nolint:gosec // false alert, this are not valid credentials
 )
 
 type inputModel struct {
@@ -99,7 +100,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "the username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "the displayname for the credentials")
 	cmd.Flags().BoolP(passwordFlag, "w", false, "change the password for the credentials")
-
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient, readPassword func() (string, error)) (req alb.ApiUpdateCredentialsRequest, err error) {
@@ -138,14 +138,13 @@ func readPassword() (string, error) {
 		return "", fmt.Errorf("cannot read password: %w", err)
 	}
 	fmt.Println()
-	if string(password) != string(confirmation) {
+	if bytes.Equal(password, confirmation) {
 		return "", fmt.Errorf("the password and the confirmation do not match")
 	}
 
 	return string(password), nil
 }
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputModel {
-
 	model := inputModel{
 		GlobalFlagModel: globalflags.Parse(p, cmd),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
