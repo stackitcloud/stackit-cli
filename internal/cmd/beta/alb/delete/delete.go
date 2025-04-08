@@ -63,7 +63,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(_ *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

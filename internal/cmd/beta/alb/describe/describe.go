@@ -61,17 +61,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if loadbalancer := resp; loadbalancer != nil {
-				return outputResult(p, model.OutputFormat, *loadbalancer)
+				return outputResult(p, model.OutputFormat, loadbalancer)
 			}
 			p.Outputln("No load balancer found.")
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
-}
-
-func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -99,7 +95,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.Name)
 }
 
-func outputResult(p *print.Printer, outputFormat string, response alb.LoadBalancer) error {
+func outputResult(p *print.Printer, outputFormat string, response *alb.LoadBalancer) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(response, "", "  ")

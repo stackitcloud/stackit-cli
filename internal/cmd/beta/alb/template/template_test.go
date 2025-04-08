@@ -1,7 +1,6 @@
 package template
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -9,17 +8,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
 
-type testCtxKey struct{}
-
 var (
-	testCtx             = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient          = &alb.APIClient{}
-	testProjectId       = uuid.NewString()
-	testRegion          = "eu01"
-	testLimit     int64 = 10
+	testProjectId = uuid.NewString()
+	testRegion    = "eu01"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -41,14 +34,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		mod(model)
 	}
 	return model
-}
-
-func fixtureRequest(mods ...func(request *alb.ApiListLoadBalancersRequest)) alb.ApiListLoadBalancersRequest {
-	request := testClient.ListLoadBalancers(context.Background(), testProjectId, testRegion)
-	for _, mod := range mods {
-		mod(&request)
-	}
-	return request
 }
 
 func TestParseInput(t *testing.T) {

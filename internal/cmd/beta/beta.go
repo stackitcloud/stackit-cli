@@ -3,8 +3,8 @@ package beta
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"

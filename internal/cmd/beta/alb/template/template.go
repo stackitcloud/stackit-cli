@@ -71,7 +71,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			} else {
 				return fmt.Errorf("invalid format %q defined. Must be 'json' or 'yaml'", *model.Format)
 			}
-			io.Copy(os.Stdout, reader)
+			if _, err := io.Copy(os.Stdout, reader); err != nil {
+				return fmt.Errorf("cannot write output: %w", err)
+			}
 
 			_, _ = ctx, model
 

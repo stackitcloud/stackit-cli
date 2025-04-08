@@ -195,7 +195,7 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat      string
 		showOnlyPublicKey bool
-		response          alb.LoadBalancer
+		response          *alb.LoadBalancer
 	}
 	tests := []struct {
 		name    string
@@ -207,7 +207,7 @@ func Test_outputResult(t *testing.T) {
 			args: args{
 				outputFormat:      "",
 				showOnlyPublicKey: false,
-				response:          alb.LoadBalancer{},
+				response:          &alb.LoadBalancer{},
 			},
 			wantErr: false,
 		},

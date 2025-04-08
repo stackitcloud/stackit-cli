@@ -138,7 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return req.UpdateLoadBalancerPayload(payload), nil
 }
 
-func readPayload(ctx context.Context, model *inputModel) (payload alb.UpdateLoadBalancerPayload, err error) {
+func readPayload(_ context.Context, model *inputModel) (payload alb.UpdateLoadBalancerPayload, err error) {
 	if model.Configuration == nil {
 		return payload, fmt.Errorf("no configuration file defined")
 	}
@@ -146,7 +146,7 @@ func readPayload(ctx context.Context, model *inputModel) (payload alb.UpdateLoad
 	if err != nil {
 		return payload, fmt.Errorf("cannot open configuration file %q: %w", *model.Configuration, err)
 	}
-	defer file.Close()
+	defer file.Close() // nolint:errcheck // at this point close errors are not relevant anymore
 
 	if strings.HasSuffix(*model.Configuration, ".yaml") {
 		decoder := yaml.NewDecoder(bufio.NewReader(file), yaml.UseJSONUnmarshaler())
@@ -159,7 +159,7 @@ func readPayload(ctx context.Context, model *inputModel) (payload alb.UpdateLoad
 			return payload, fmt.Errorf("cannot deserialize json configuration from %q: %w", *model.Configuration, err)
 		}
 	} else {
-		return payload, fmt.Errorf("cannot determine configuration fileformat of %q by extension. Must be '.json' or '.yaml'", err)
+		return payload, fmt.Errorf("cannot determine configuration fileformat of %q by extension. Must be '.json' or '.yaml'", *model.Configuration)
 	}
 
 	return payload, nil
