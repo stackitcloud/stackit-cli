@@ -199,7 +199,7 @@ func TestBuildRequest(t *testing.T) {
 				Configuration: &testConfig,
 			},
 			expectedRequest: testClient.
-				CreateLoadBalancer(context.Background(), testProjectId, testRegion).
+				CreateLoadBalancer(testCtx, testProjectId, testRegion).
 				CreateLoadBalancerPayload(fixturePayload()),
 		},
 	}
@@ -214,7 +214,6 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(alb.ApiCreateLoadBalancerRequest{}, "ctx"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -240,7 +239,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "only zone response as argument",
+			name: "empty response as argument",
 			args: args{
 				model: fixtureInputModel(),
 				resp:  &alb.LoadBalancer{},

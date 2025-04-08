@@ -85,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(p)
-				s.Start("Creating zone")
+				s.Start("Creating loadbalancer")
 				_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for loadbalancer creation: %w", err)
@@ -135,8 +135,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	if err != nil {
 		return req, err
 	}
-	req = req.CreateLoadBalancerPayload(payload)
-	return req, nil
+	return req.CreateLoadBalancerPayload(payload), nil
 }
 
 func readPayload(ctx context.Context, model *inputModel) (payload alb.CreateLoadBalancerPayload, err error) {
