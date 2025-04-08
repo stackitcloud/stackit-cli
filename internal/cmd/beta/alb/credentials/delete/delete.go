@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	credentialRefArg = "CREDENTIAL_REF"
+	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, this are not valid credentials
 )
 
 type inputModel struct {

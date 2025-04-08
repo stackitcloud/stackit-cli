@@ -98,9 +98,9 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description:   "no flags",
-			argValues:     fixtureArgValues(),
-			flagValues:    map[string]string{
+			description: "no flags",
+			argValues:   fixtureArgValues(),
+			flagValues: map[string]string{
 				globalflags.ProjectIdFlag: testProjectId,
 				globalflags.RegionFlag:    testRegion,
 			},

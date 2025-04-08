@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	credentialRefArg = "CREDENTIAL_REF_ARG"
+	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, this are not valid credentials
 )
 
 type inputModel struct {
@@ -67,11 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
-}
-
-func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

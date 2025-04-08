@@ -1,6 +1,7 @@
 package create
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -110,7 +111,7 @@ func readPassword() (string, error) {
 		return "", fmt.Errorf("cannot read password: %w", err)
 	}
 	fmt.Println()
-	if string(password) != string(confirmation) {
+	if bytes.Equal(password, confirmation) {
 		return "", fmt.Errorf("the password and the confirmation do not match")
 	}
 
