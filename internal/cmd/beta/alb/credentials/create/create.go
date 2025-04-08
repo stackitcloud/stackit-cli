@@ -42,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a new credential, the password is requested interactively or read from ENV variable `+passwordEnv,
-				"$ stackit key-pair create --username some.user --displayname master-creds",
+				"$ stackit beta alb credential create --username some.user --displayname master-creds",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
