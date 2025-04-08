@@ -173,13 +173,15 @@ func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "NIC SECURITY", "STATUS", "TYPE")
+		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
 
 		for _, nic := range nics {
 			table.AddRow(
 				utils.PtrString(nic.Id),
 				utils.PtrString(nic.Name),
 				utils.PtrString(nic.NicSecurity),
+				utils.PtrString(nic.Device),
+				utils.PtrString(nic.Ipv4),
 				utils.PtrString(nic.Status),
 				utils.PtrString(nic.Type),
 			)
