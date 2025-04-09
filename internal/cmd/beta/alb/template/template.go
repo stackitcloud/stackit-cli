@@ -19,30 +19,36 @@ import (
 
 const (
 	formatFlag = "format"
+	typeFlag   = "type"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Format *string
+	Type   *string
 }
 
-//go:embed template.json
-var template string
+var (
+	//go:embed template-alb.json
+	templateAlb string
+	//go:embed template-pool.json
+	templatePool string
+)
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "template",
-		Short: "create an alb template",
-		Long:  "creates a json or yaml template file for creating/updating an application loadbalancer.",
+		Short: "creates configuration templates to use for resource creation",
+		Long:  "creates a json or yaml template file for creating/updating an application loadbalancer or target pool.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Creat a yaml template`,
-				`$ stackit beta alb template --format=yaml`,
+				`Create a yaml template`,
+				`$ stackit beta alb template --format=yaml --type alb`,
 			),
 			examples.NewExample(
-				`Creat a json template`,
-				`$ stackit beta alb template --format=json`,
+				`Create a json template`,
+				`$ stackit beta alb template --format=json --type pool`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -51,10 +57,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			var (
+				template string
+				target   any
+			)
+			if model.Type != nil && *model.Type == "pool" {
+				template = templatePool
+				target = alb.CreateLoadBalancerPayload{}
+			} else {
+				template = templateAlb
+				target = alb.UpdateTargetPoolPayload{}
+			}
+
 			if model.Format == nil || *model.Format == "json" {
 				p.Outputln(template)
 			} else if *model.Format == "yaml" {
-				var target alb.CreateLoadBalancerPayload
 				if err := json.Unmarshal([]byte(template), &target); err != nil {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
@@ -75,7 +92,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().VarP(flags.EnumFlag(true, "json", "json", "yaml"), formatFlag, "f", "Defines the output format (yaml or json), default is json")
+	cmd.Flags().VarP(flags.EnumFlag(true, "json", "json", "yaml"), formatFlag, "f", "Defines the output format ('yaml' or 'json'), default is 'json'")
+	cmd.Flags().VarP(flags.EnumFlag(true, "alb", "alb", "pool"), typeFlag, "t", "Defines the output type ('alb' or 'pool'), default is 'alb'")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -87,6 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Format:          flags.FlagToStringPointer(p, cmd, formatFlag),
+		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
 	}
 
 	if p.IsVerbosityDebug() {
