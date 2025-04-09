@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, this are not valid credentials
+	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, these are not valid credentials
 )
 
 type inputModel struct {
@@ -26,13 +26,13 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialRefArg),
-		Short: "Deletes a credential",
-		Long:  "Deletes a credential.",
+		Short: "Deletes credentials",
+		Long:  "Deletes credentials.",
 		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete credential with name "CREDENTIAL_REF"`,
-				"$ stackit beta alb credentials delete CREDENTIAL_REF",
+				`Delete credential with name "credential-12345"`,
+				"$ stackit beta alb credentials delete credential-12345",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -49,7 +49,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credential %q?", model.CredentialsRef)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials %q?", model.CredentialsRef)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err

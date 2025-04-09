@@ -21,13 +21,13 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
 
-const passwordEnv = "ALB_CREDENTIALS_PASSWORD" //nolint:gosec // false alert, this are not valid credentials
+const passwordEnv = "ALB_CREDENTIALS_PASSWORD" //nolint:gosec // false alert, these are not valid credentials
 
 const (
 	usernameFlag     = "username"
 	displaynameFlag  = "displayname"
 	passwordFlag     = "password"
-	credentialRefArg = "CREDENTIAL_REF_ARG" //nolint:gosec // false alert, this are not valid credentials
+	credentialRefArg = "CREDENTIAL_REF_ARG" //nolint:gosec // false alert, these are not valid credentials
 )
 
 type inputModel struct {
@@ -41,8 +41,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", credentialRefArg),
-		Short: "Update a credential",
-		Long:  "Update a credential.",
+		Short: "Update credentials",
+		Long:  "Update credentials.",
 		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
