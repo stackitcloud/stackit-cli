@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, this are not valid credentials
+	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, these are not valid credentials
 )
 
 type inputModel struct {
@@ -31,12 +31,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialRefArg),
-		Short: "Describes a credential",
-		Long:  "Describes a credential.",
+		Short: "Describes credentials",
+		Long:  "Describes credentials.",
 		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details about a credential with name "credential-12345"`,
+				`Get details about credentials with name "credential-12345"`,
 				"$ stackit beta alb credential describe credential-12345",
 			),
 		),
@@ -57,7 +57,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("read credential: %w", err)
+				return fmt.Errorf("read credentials: %w", err)
 			}
 
 			if credential := resp; credential != nil && credential.Credential != nil {
@@ -101,7 +101,7 @@ func outputResult(p *print.Printer, outputFormat string, response alb.Credential
 		details, err := json.MarshalIndent(response, "", "  ")
 
 		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
+			return fmt.Errorf("marshal credentials: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -110,7 +110,7 @@ func outputResult(p *print.Printer, outputFormat string, response alb.Credential
 		details, err := yaml.MarshalWithOptions(response, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 
 		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
+			return fmt.Errorf("marshal credentials: %w", err)
 		}
 		p.Outputln(string(details))
 
