@@ -1,12 +1,9 @@
 package template
 
 import (
-	"bytes"
-	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -30,7 +27,7 @@ type inputModel struct {
 }
 
 //go:embed template.json
-var template []byte
+var template string
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -49,33 +46,25 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			ctx := context.Background()
 			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
 
-			var reader io.Reader
 			if model.Format == nil || *model.Format == "json" {
-				reader = bytes.NewReader(template)
+				p.Outputln(template)
 			} else if *model.Format == "yaml" {
 				var target alb.CreateLoadBalancerPayload
-				if err := json.Unmarshal(template, &target); err != nil {
+				if err := json.Unmarshal([]byte(template), &target); err != nil {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
-				data, err := yaml.Marshal(&target)
-				if err != nil {
+				encoder := yaml.NewEncoder(os.Stdout, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+				if encoder.Encode(target); err != nil {
 					return fmt.Errorf("cannot marshal template to yaml: %w", err)
 				}
-				reader = bytes.NewReader(data)
 			} else {
 				return fmt.Errorf("invalid format %q defined. Must be 'json' or 'yaml'", *model.Format)
 			}
-			if _, err := io.Copy(os.Stdout, reader); err != nil {
-				return fmt.Errorf("cannot write output: %w", err)
-			}
-
-			_, _ = ctx, model
 
 			return nil
 		},
