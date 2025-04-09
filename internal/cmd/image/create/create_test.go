@@ -105,7 +105,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			RescueBus:              &testRescueBus,
 			RescueDevice:           &testRescueDevice,
 			SecureBoot:             &testSecureBoot,
-			Uefi:                   &testUefi,
+			Uefi:                   testUefi,
 			VideoModel:             &testVideoModel,
 			VirtioScsi:             &testVirtioScsi,
 		},
@@ -247,6 +247,16 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "uefi flag is set to false",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[uefiFlag] = strconv.FormatBool(false)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Config.Uefi = false
+			}),
+		},
+		{
 			description: "no rescue device and no bus is valid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, rescueBusFlag)
@@ -347,7 +357,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "uefi flag",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Config.Uefi = utils.Ptr(false)
+				model.Config.Uefi = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
 				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {

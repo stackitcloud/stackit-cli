@@ -42,7 +42,7 @@ stackit image create [flags]
       --rescue-bus string        Sets the device bus when the image is used as a rescue image.
       --rescue-device string     Sets the device when the image is used as a rescue image.
       --secure-boot              Enables Secure Boot.
-      --uefi                     Enables UEFI boot.
+      --uefi                     Enables UEFI boot. (default true)
       --video-model string       Sets Graphic device model.
       --virtio-scsi              Enables the use of VirtIO SCSI to provide block device access. By default instances use VirtIO Block.
 ```

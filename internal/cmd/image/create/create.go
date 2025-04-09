@@ -62,7 +62,7 @@ type imageConfig struct {
 	RescueBus              *string
 	RescueDevice           *string
 	SecureBoot             *bool
-	Uefi                   *bool
+	Uefi                   bool
 	VideoModel             *string
 	VirtioScsi             *bool
 }
@@ -270,7 +270,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(rescueBusFlag, "", "Sets the device bus when the image is used as a rescue image.")
 	cmd.Flags().String(rescueDeviceFlag, "", "Sets the device when the image is used as a rescue image.")
 	cmd.Flags().Bool(secureBootFlag, false, "Enables Secure Boot.")
-	cmd.Flags().Bool(uefiFlag, false, "Enables UEFI boot.")
+	cmd.Flags().Bool(uefiFlag, true, "Enables UEFI boot.")
 	cmd.Flags().String(videoModelFlag, "", "Sets Graphic device model.")
 	cmd.Flags().Bool(virtioScsiFlag, false, "Enables the use of VirtIO SCSI to provide block device access. By default instances use VirtIO Block.")
 
@@ -311,7 +311,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 			RescueBus:              flags.FlagToStringPointer(p, cmd, rescueBusFlag),
 			RescueDevice:           flags.FlagToStringPointer(p, cmd, rescueDeviceFlag),
 			SecureBoot:             flags.FlagToBoolPointer(p, cmd, secureBootFlag),
-			Uefi:                   flags.FlagToBoolPointer(p, cmd, uefiFlag),
+			Uefi:                   flags.FlagToBoolValue(p, cmd, uefiFlag),
 			VideoModel:             flags.FlagToStringPointer(p, cmd, videoModelFlag),
 			VirtioScsi:             flags.FlagToBoolPointer(p, cmd, virtioScsiFlag),
 		},
@@ -367,7 +367,7 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 			RescueBus:              iaas.NewNullableString(model.Config.RescueBus),
 			RescueDevice:           iaas.NewNullableString(model.Config.RescueDevice),
 			SecureBoot:             model.Config.SecureBoot,
-			Uefi:                   model.Config.Uefi,
+			Uefi:                   utils.Ptr(model.Config.Uefi),
 			VideoModel:             iaas.NewNullableString(model.Config.VideoModel),
 			VirtioScsi:             model.Config.VirtioScsi,
 		}
