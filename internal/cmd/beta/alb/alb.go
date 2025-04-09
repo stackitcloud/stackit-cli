@@ -5,6 +5,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/pool"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/template"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -35,5 +36,6 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 		update.NewCmd(p),
 		describe.NewCmd(p),
 		delete.NewCmd(p),
+		pool.NewCmd(p),
 	)
 }

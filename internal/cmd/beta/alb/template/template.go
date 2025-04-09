@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
 				encoder := yaml.NewEncoder(os.Stdout, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-				if encoder.Encode(target); err != nil {
+				if err := encoder.Encode(target); err != nil {
 					return fmt.Errorf("cannot marshal template to yaml: %w", err)
 				}
 			} else {

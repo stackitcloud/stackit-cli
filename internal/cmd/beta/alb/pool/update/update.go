@@ -17,33 +17,35 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb/wait"
 )
 
 const (
 	configurationFlag = "configuration"
+	albNameFlag       = "name"
+	poolNameFlag      = "pool"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Configuration *string
+	AlbName       *string
+	Poolname      *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Updates an application loadbalancer",
-		Long:  "Updates an application loadbalancer.",
+		Short: "Updates an application target pool",
+		Long:  "Updates an application target pool.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Update an application loadbalancer from a configuration file`,
-				"$ stackit beta alb update --configuration my-loadbalancer.json"),
+				`Update an application target pool from a configuration file`,
+				"$ stackit beta alb update --configuration my-target pool.json"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -65,7 +67,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update an application loadbalancer for project %q?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to update an application target pool for project %q?", projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -79,18 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update application loadbalancer: %w", err)
-			}
-
-			// Wait for async operation, if async mode not enabled
-			if !model.Async {
-				s := spinner.New(p)
-				s.Start("updating loadbalancer")
-				_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).WaitWithContext(ctx)
-				if err != nil {
-					return fmt.Errorf("wait for loadbalancer update: %w", err)
-				}
-				s.Stop()
+				return fmt.Errorf("update application target pool: %w", err)
 			}
 
 			return outputResult(p, model, projectLabel, resp)
@@ -102,7 +93,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(configurationFlag, "c", "", "filename of the input configuration file")
-	err := flags.MarkFlagsRequired(cmd, configurationFlag)
+	cmd.Flags().StringP(albNameFlag, "n", "", "name of the target pool name to update")
+	cmd.Flags().StringP(poolNameFlag, "t", "", "name of the target pool to update")
+	err := flags.MarkFlagsRequired(cmd, configurationFlag, albNameFlag, poolNameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -115,6 +108,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Configuration:   flags.FlagToStringPointer(p, cmd, configurationFlag),
+		AlbName:         flags.FlagToStringPointer(p, cmd, albNameFlag),
+		Poolname:        flags.FlagToStringPointer(p, cmd, poolNameFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -129,16 +124,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiUpdateLoadBalancerRequest, err error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiUpdateTargetPoolRequest, err error) {
 	payload, err := readPayload(ctx, model)
 	if err != nil {
 		return req, err
 	}
-	req = apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, *payload.Name)
-	return req.UpdateLoadBalancerPayload(payload), nil
+	req = apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *model.Poolname)
+	return req.UpdateTargetPoolPayload(payload), nil
 }
 
-func readPayload(_ context.Context, model *inputModel) (payload alb.UpdateLoadBalancerPayload, err error) {
+func readPayload(_ context.Context, model *inputModel) (payload alb.UpdateTargetPoolPayload, err error) {
 	if model.Configuration == nil {
 		return payload, fmt.Errorf("no configuration file defined")
 	}
@@ -165,15 +160,15 @@ func readPayload(_ context.Context, model *inputModel) (payload alb.UpdateLoadBa
 	return payload, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *alb.LoadBalancer) error {
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *alb.TargetPool) error {
 	if resp == nil {
-		return fmt.Errorf("update loadbalancer response is empty")
+		return fmt.Errorf("update target pool response is empty")
 	}
 	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal loadbalancer: %w", err)
+			return fmt.Errorf("marshal target pool: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -181,7 +176,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal loadbalancer: %w", err)
+			return fmt.Errorf("marshal target pool: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -191,7 +186,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s application loadbalancer for %q. Name: %s\n", operationState, projectLabel, utils.PtrString(resp.Name))
+		p.Outputf("%s application target pool for %q. Name: %s\n", operationState, projectLabel, utils.PtrString(resp.Name))
 		return nil
 	}
 }
