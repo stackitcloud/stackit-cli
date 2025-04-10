@@ -34,7 +34,6 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Username       *string
 	Displayname    *string
-	Password       *bool
 	CredentialsRef *string
 }
 
@@ -68,6 +67,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
+			req, err := buildRequest(ctx, &model, apiClient, readPassword)
+			if err != nil {
+				return err
+			}
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update credential %q?", *model.CredentialsRef)
 				err = p.PromptForConfirmation(prompt)
@@ -77,10 +80,6 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, &model, apiClient, readPassword)
-			if err != nil {
-				return err
-			}
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update credential: %w", err)
@@ -99,24 +98,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "the username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "the displayname for the credentials")
-	cmd.Flags().BoolP(passwordFlag, "w", false, "change the password for the credentials")
+	cobra.CheckErr(flags.MarkFlagsRequired(cmd, displaynameFlag, usernameFlag, displaynameFlag))
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient, readPassword func() (string, error)) (req alb.ApiUpdateCredentialsRequest, err error) {
 	req = apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, *model.CredentialsRef)
 
 	var password *string
-	if model.Password != nil && *model.Password {
-		p, err := readPassword()
-		if err != nil {
-			return req, err
-		}
-		password = &p
+	p, err := readPassword()
+	if err != nil {
+		return req, err
 	}
+	password = &p
 	payload := alb.UpdateCredentialsPayload{
 		DisplayName: model.Displayname,
 		Password:    password,
 		Username:    model.Username,
+	}
+
+	if model.Displayname == nil && model.Username == nil {
+		return req, fmt.Errorf("no attribute to change passed")
 	}
 
 	return req.UpdateCredentialsPayload(payload), nil
@@ -138,7 +139,7 @@ func readPassword() (string, error) {
 		return "", fmt.Errorf("cannot read password: %w", err)
 	}
 	fmt.Println()
-	if bytes.Equal(password, confirmation) {
+	if !bytes.Equal(password, confirmation) {
 		return "", fmt.Errorf("the password and the confirmation do not match")
 	}
 
@@ -149,7 +150,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 		GlobalFlagModel: globalflags.Parse(p, cmd),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
-		Password:        flags.FlagToBoolPointer(p, cmd, passwordFlag),
 		CredentialsRef:  &inputArgs[0],
 	}
 
