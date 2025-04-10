@@ -111,7 +111,7 @@ func readPassword() (string, error) {
 		return "", fmt.Errorf("cannot read password: %w", err)
 	}
 	fmt.Println()
-	if bytes.Equal(password, confirmation) {
+	if !bytes.Equal(password, confirmation) {
 		return "", fmt.Errorf("the password and the confirmation do not match")
 	}
 
@@ -169,8 +169,8 @@ func outputResult(p *print.Printer, outputFormat string, item *alb.CreateCredent
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Created credential %q",
-			utils.PtrString(item.Credential),
+		p.Outputf("Created credential %s\n",
+			utils.PtrString(item.Credential.CredentialsRef),
 		)
 	}
 	return nil
