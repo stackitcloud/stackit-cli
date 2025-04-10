@@ -28,7 +28,6 @@ stackit beta alb credentials update CREDENTIAL_REF_ARG [flags]
 ```
   -d, --displayname string   the displayname for the credentials
   -h, --help                 Help for "stackit beta alb credentials update"
-  -w, --password             change the password for the credentials
   -u, --username string      the username for the credentials
 ```
 
