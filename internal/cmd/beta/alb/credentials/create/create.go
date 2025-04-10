@@ -169,9 +169,11 @@ func outputResult(p *print.Printer, outputFormat string, item *alb.CreateCredent
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Created credential %s\n",
-			utils.PtrString(item.Credential.CredentialsRef),
-		)
+		if item.Credential != nil {
+			p.Outputf("Created credential %s\n",
+				utils.PtrString(item.Credential.CredentialsRef),
+			)
+		}
 	}
 	return nil
 }

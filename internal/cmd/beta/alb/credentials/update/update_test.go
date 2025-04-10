@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -34,7 +33,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		usernameFlag:              testUsername,
 		displaynameFlag:           testDisplayname,
-		passwordFlag:              "true",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,7 +50,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) inputModel {
 		Username:       &testUsername,
 		Displayname:    &testDisplayname,
 		CredentialsRef: &testCredentialRef,
-		Password:       utils.Ptr(true),
 	}
 	for _, mod := range mods {
 		mod(&model)
@@ -103,52 +100,23 @@ func TestParseInput(t *testing.T) {
 				globalflags.ProjectIdFlag: testProjectId,
 				globalflags.RegionFlag:    testRegion,
 			},
-			isValid: true,
+			isValid: false,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Username = nil
-				model.Password = nil
 				model.Displayname = nil
 			}),
 		},
 		{
+			description: "required values",
 			args:        []string{testCredentialRef},
-			description: "only username",
 			flagValues: map[string]string{
 				globalflags.ProjectIdFlag: testProjectId,
 				globalflags.RegionFlag:    testRegion,
 				usernameFlag:              testUsername,
-			},
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Displayname = nil
-				model.Password = nil
-			}),
-			isValid: true,
-		}, {
-			description: "only displayname",
-			args:        []string{testCredentialRef},
-			flagValues: map[string]string{
-				globalflags.ProjectIdFlag: testProjectId,
-				globalflags.RegionFlag:    testRegion,
 				displaynameFlag:           testDisplayname,
 			},
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-				model.Password = nil
-			}),
-			isValid: true,
-		}, {
-			description: "only password",
-			args:        []string{testCredentialRef},
-			flagValues: map[string]string{
-				globalflags.ProjectIdFlag: testProjectId,
-				globalflags.RegionFlag:    testRegion,
-				passwordFlag:              "true",
-			},
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-				model.Displayname = nil
-			}),
-			isValid: true,
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
 		},
 	}
 

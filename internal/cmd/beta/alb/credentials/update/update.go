@@ -26,7 +26,6 @@ const passwordEnv = "ALB_CREDENTIALS_PASSWORD" //nolint:gosec // false alert, th
 const (
 	usernameFlag     = "username"
 	displaynameFlag  = "displayname"
-	passwordFlag     = "password"
 	credentialRefArg = "CREDENTIAL_REF_ARG" //nolint:gosec // false alert, these are not valid credentials
 )
 
