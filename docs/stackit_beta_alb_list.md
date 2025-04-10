@@ -1,30 +1,30 @@
-## stackit beta
+## stackit beta alb list
 
-Contains beta STACKIT CLI commands
+Lists albs
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Lists application load balancers.
 
 ```
-stackit beta [flags]
+stackit beta alb list [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  List all load balancers
+  $ stackit beta alb list
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  List the first 10 application load balancers
+  $ stackit beta alb list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help        Help for "stackit beta alb list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -40,7 +40,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

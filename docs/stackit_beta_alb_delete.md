@@ -1,30 +1,26 @@
-## stackit beta
+## stackit beta alb delete
 
-Contains beta STACKIT CLI commands
+Deletes an application loadbalancer
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Deletes an application loadbalancer.
 
 ```
-stackit beta [flags]
+stackit beta alb delete LOADBALANCER_NAME_ARG [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Delete an application loadbalancer with name "my-load-balancer"
+  $ stackit beta alb delete my-load-balancer
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit beta alb delete"
 ```
 
 ### Options inherited from parent commands
@@ -40,7 +36,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 
