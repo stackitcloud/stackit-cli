@@ -161,7 +161,6 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalance
 				utils.PtrString(item.Region),
 				utils.PtrString(item.Status),
 				utils.PtrString(item.Version),
-				utils.PtrString(item.ExternalAddress),
 			)
 		}
 		err := table.Display(p)

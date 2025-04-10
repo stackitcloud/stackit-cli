@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -132,6 +133,14 @@ func outputResult(p *print.Printer, outputFormat string, response *alb.LoadBalan
 		table.AddRow("STATUS", utils.PtrString(response.Status))
 		table.AddSeparator()
 		table.AddRow("VERSION", utils.PtrString(response.Version))
+		if response.Errors != nil {
+			table.AddSeparator()
+			var builder strings.Builder
+			for _, err := range *response.Errors {
+				builder.WriteString(fmt.Sprintf("[%s] %s\n", utils.PtrString(err.Type), utils.PtrString(err.Description)))
+			}
+			table.AddRow("ERRORS", builder.String())
+		}
 
 		p.Outputln(table.Render())
 	}
