@@ -37,8 +37,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates credentials",
-		Long:  "Creates credentials.",
+		Short: "Creates a credential",
+		Long:  "Creates a credential.",
 		Args:  cobra.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -65,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Are your sure you want to create credentials?"
+				prompt := "Are your sure you want to create a credential?"
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -76,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create credentials: %w", err)
+				return fmt.Errorf("create credential: %w", err)
 			}
 
 			return outputResult(p, model.GlobalFlagModel.OutputFormat, resp)
