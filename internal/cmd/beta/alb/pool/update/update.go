@@ -26,14 +26,12 @@ import (
 const (
 	configurationFlag = "configuration"
 	albNameFlag       = "name"
-	poolNameFlag      = "pool"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Configuration *string
 	AlbName       *string
-	Poolname      *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -44,8 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Update an application target pool from a configuration file`,
-				"$ stackit beta alb update --configuration my-target pool.json"),
+				`Update an application target pool from a configuration file (the name of the pool is read from the file)`,
+				"$ stackit beta alb update --configuration my-target-pool.json --name my-load-balancer"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -94,8 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(configurationFlag, "c", "", "filename of the input configuration file")
 	cmd.Flags().StringP(albNameFlag, "n", "", "name of the target pool name to update")
-	cmd.Flags().StringP(poolNameFlag, "t", "", "name of the target pool to update")
-	err := flags.MarkFlagsRequired(cmd, configurationFlag, albNameFlag, poolNameFlag)
+	err := flags.MarkFlagsRequired(cmd, configurationFlag, albNameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -109,7 +106,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		Configuration:   flags.FlagToStringPointer(p, cmd, configurationFlag),
 		AlbName:         flags.FlagToStringPointer(p, cmd, albNameFlag),
-		Poolname:        flags.FlagToStringPointer(p, cmd, poolNameFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -129,7 +125,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	if err != nil {
 		return req, err
 	}
-	req = apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *model.Poolname)
+	if payload.Name == nil {
+		return req, fmt.Errorf("update target pool: no poolname provided")
+	}
+	req = apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *payload.Name)
 	return req.UpdateTargetPoolPayload(payload), nil
 }
 

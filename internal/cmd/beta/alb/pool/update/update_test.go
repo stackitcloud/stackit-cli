@@ -29,7 +29,7 @@ var (
 	testProjectId    = uuid.NewString()
 	testRegion       = "eu01"
 	testLoadBalancer = "my-load-balancer"
-	testPool         = "my-target"
+	testPool         = "my-target-pool"
 	testConfig       = "testdata/testconfig.json"
 )
 
@@ -39,7 +39,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		configurationFlag:      testConfig,
 		globalflags.RegionFlag: testRegion,
 		albNameFlag:            testLoadBalancer,
-		poolNameFlag:           testPool,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -56,7 +55,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		Configuration: utils.Ptr(testConfig),
 		AlbName:       &testLoadBalancer,
-		Poolname:      &testPool,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -107,7 +105,6 @@ func TestParseInput(t *testing.T) {
 				projectIdFlag:     testProjectId,
 				configurationFlag: testConfig,
 				albNameFlag:       testLoadBalancer,
-				poolNameFlag:      testPool,
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -117,7 +114,6 @@ func TestParseInput(t *testing.T) {
 				},
 				Configuration: &testConfig,
 				AlbName:       &testLoadBalancer,
-				Poolname:      &testPool,
 			},
 		},
 		{
@@ -210,7 +206,6 @@ func TestBuildRequest(t *testing.T) {
 				},
 				Configuration: &testConfig,
 				AlbName:       &testLoadBalancer,
-				Poolname:      &testPool,
 			},
 			expectedRequest: testClient.
 				UpdateTargetPool(testCtx, testProjectId, testRegion, testLoadBalancer, testPool).
