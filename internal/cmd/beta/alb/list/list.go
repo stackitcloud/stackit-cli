@@ -154,13 +154,18 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalance
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION")
+		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION", "ERRORS")
 		for _, item := range items {
+			var errNo int
+			if item.Errors != nil {
+				errNo = len(*item.Errors)
+			}
 			table.AddRow(utils.PtrString(item.Name),
 				utils.PtrString(item.ExternalAddress),
 				utils.PtrString(item.Region),
 				utils.PtrString(item.Status),
 				utils.PtrString(item.Version),
+				errNo,
 			)
 		}
 		err := table.Display(p)
