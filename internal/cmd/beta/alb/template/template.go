@@ -29,9 +29,9 @@ type inputModel struct {
 }
 
 var (
-	//go:embed template-alb.json
+	//go:embed template-alb.yaml
 	templateAlb string
-	//go:embed template-pool.json
+	//go:embed template-pool.yaml
 	templatePool string
 )
 
@@ -69,13 +69,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				target = alb.UpdateTargetPoolPayload{}
 			}
 
-			if model.Format == nil || *model.Format == "json" {
+			if model.Format == nil || *model.Format == "yaml" {
 				p.Outputln(template)
-			} else if *model.Format == "yaml" {
-				if err := json.Unmarshal([]byte(template), &target); err != nil {
+			} else if *model.Format == "json" {
+				if err := yaml.Unmarshal([]byte(template), &target); err != nil {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
-				encoder := yaml.NewEncoder(os.Stdout, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+				encoder := json.NewEncoder(os.Stdout)
 				if err := encoder.Encode(target); err != nil {
 					return fmt.Errorf("cannot marshal template to yaml: %w", err)
 				}
