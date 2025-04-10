@@ -32,6 +32,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Configuration *string
+	Version       *string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
@@ -72,6 +73,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}
 
+			// for updates of an existing ALB the current version must be passed to the request
+			model.Version, err = getCurrentAlbVersion(ctx, apiClient, model)
+			if err != nil {
+				return err
+			}
 			// Call API
 			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
@@ -86,7 +92,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(p)
 				s.Start("updating loadbalancer")
-				_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).WaitWithContext(ctx)
+				_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).
+					WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for loadbalancer update: %w", err)
 				}
@@ -129,11 +136,34 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
+func getCurrentAlbVersion(ctx context.Context, apiClient *alb.APIClient, model *inputModel) (*string, error) {
+	// use the configuration file to find the name of the loadbalancer
+	updatePayload, err := readPayload(ctx, model)
+	if err != nil {
+		return nil, err
+	}
+	if updatePayload.Name == nil {
+		return nil, fmt.Errorf("no name found in configuration")
+	}
+	if err != nil {
+		return nil, err
+	}
+	resp, err := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, *updatePayload.Name).Execute()
+	if err != nil {
+		return nil, err
+	}
+	return resp.Version, nil
+}
+
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiUpdateLoadBalancerRequest, err error) {
 	payload, err := readPayload(ctx, model)
 	if err != nil {
 		return req, err
 	}
+	if payload.Name == nil {
+		return req, fmt.Errorf("no name found in loadbalancer configuration")
+	}
+	payload.Version = model.Version
 	req = apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, *payload.Name)
 	return req.UpdateLoadBalancerPayload(payload), nil
 }
