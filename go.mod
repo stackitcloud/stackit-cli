@@ -52,6 +52,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.2.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 )
 

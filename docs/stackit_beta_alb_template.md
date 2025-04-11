@@ -1,30 +1,31 @@
-## stackit beta
+## stackit beta alb template
 
-Contains beta STACKIT CLI commands
+creates configuration templates to use for resource creation
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+creates a json or yaml template file for creating/updating an application loadbalancer or target pool.
 
 ```
-stackit beta [flags]
+stackit beta alb template [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
+  Create a yaml template
+  $ stackit beta alb template --format=yaml --type alb
 
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Create a json template
+  $ stackit beta alb template --format=json --type pool
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -f, --format string   Defines the output format ('yaml' or 'json'), default is 'json' (default "json")
+  -h, --help            Help for "stackit beta alb template"
+  -t, --type string     Defines the output type ('alb' or 'pool'), default is 'alb' (default "alb")
 ```
 
 ### Options inherited from parent commands
@@ -40,7 +41,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

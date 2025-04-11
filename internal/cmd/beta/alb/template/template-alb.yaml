@@ -1,0 +1,91 @@
+name: my-load-balancer
+# public ip, must be removed when ephemeral address option is true
+externalAddress: 123.123.123.123
+
+# public listening interfaces of the loadbalancer
+listeners:
+  - displayName: listener1
+    # for plain http the https block must be removed
+    # http: {}
+    https:
+      certificateConfig:
+        certificateIds:
+          - cert-1
+          - cert-2
+          - cert-3
+    port: 443
+    # protocal may be PROTOCOL_HTTPS or PROTOCOL_HTTP
+    protocol: PROTOCOL_HTTPS
+    rules:
+      # fqdn of the virtual host of the load balancer
+      - host: front.facing.host
+        http:
+          subRules:
+            - cookiePersistence:
+                name: cookie1
+                ttl: 120s
+              headers:
+                - name: testheader1
+                  exactMatch: X-test-header1
+                - name: testheader2
+                  exactMatch: X-test-header2
+                - name: testheader3
+                  exactMatch: X-test-header3
+              pathPrefix: /foo
+              queryParameters:
+                - name: query-param
+                  exactMatch: q
+                - name: region
+                  exactMatch: region
+              targetPool: my-target-pool
+              webSocket: false
+networks:
+  - networkId: 00000000-0000-0000-0000-000000000000
+    role: ROLE_LISTENERS_AND_TARGETS
+  - networkId: 00000000-0000-0000-0000-000000000001
+    role: ROLE_LISTENERS_AND_TARGETS
+options:
+  accessControl:
+    # which host may access the loadbalancer in prefix notation
+    allowedSourceRanges:
+      - 10.100.42.0/24
+  ephemeralAddress: true
+  privateNetworkOnly: true
+
+  # Enable observability features. Appropriate credentials must be made
+  # available using the credentials endpoint
+  # observability:
+  #   logs:
+  #     credentialsRef: my-credentials
+  #     pushUrl: https://my.observability.host/<observability-instance-id>/loki/api/v1/push
+  #   metrics:
+  #     credentialsRef: my-credentials
+  #     pushUrl: https://my.observability.host/<observability-instance-id>/<argus-instance-id>/api/v1/receive
+
+planId: p10
+
+# definition of the backend servers
+targetPools:
+  - name: my-target-pool
+    activeHealthCheck:
+      healthyThreshold: 3
+      httpHealthChecks:
+        okStatuses:
+          - "200"
+        path: /health
+      interval: 10s
+      intervalJitter: 3s
+      timeout: 5s
+      unhealthyThreshold: 1
+    targetPort: 5732
+    targets:
+      # configuration of the backend servers
+      - displayName: my-target1
+        ip: 192.11.2.5
+    # if the backend servers must be accessed via TLS the following block
+    # allows defining the TLS configuration
+    # tlsConfig:
+    #   # A PEM and base64 encoded certificate
+    #   customCa: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlEbkRDQ0EwS2dBd0lCQWdJUkFNUmhrL3pZWkh5UUVDRjQwd3JrTHMwd0NnWUlLb1pJemowRUF3SXdPekVMDQpNQWtHQTFVRUJoTUNWVk14SGpBY0JnTlZCQW9URlVkdmIyZHNaU0JVY25WemRDQlRaWEoyYVdObGN6RU1NQW9HDQpBMVVFQXhNRFYwVXlNQjRYRFRJMU1ETXlNREV4TWpFeU0xb1hEVEkxTURZeE1qRXhNakV5TWxvd0ZqRVVNQklHDQpBMVVFQXd3TEtpNW5iMjluYkdVdVpHVXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CQndOQ0FBUUtNUldLDQpyZTV2RUtkVkNVam9oSlJxSitZdnJ6Mmg2RlpwTGo4SkpHTUlEajh1VlNzY0MvNG9jOURtRDI1c0ZhWnhlUytRDQozcVpGU1FkamxLTGdaRTdPbzRJQ1NqQ0NBa1l3RGdZRFZSMFBBUUgvQkFRREFnZUFNQk1HQTFVZEpRUU1NQW9HDQpDQ3NHQVFVRkJ3TUJNQXdHQTFVZEV3RUIvd1FDTUFBd0hRWURWUjBPQkJZRUZHQVY3ekQvT0Nvd1RrTmhjNGN0DQpEM2lpZ0FnTE1COEdBMVVkSXdRWU1CYUFGSFcreEhldWlmWkVOMzNQc1dnZkhScnIzRFJaTUZnR0NDc0dBUVVGDQpCd0VCQkV3d1NqQWhCZ2dyQmdFRkJRY3dBWVlWYUhSMGNEb3ZMMjh1Y0d0cExtZHZiMmN2ZDJVeU1DVUdDQ3NHDQpBUVVGQnpBQ2hobG9kSFJ3T2k4dmFTNXdhMmt1WjI5dlp5OTNaVEl1WTNKME1DRUdBMVVkRVFRYU1CaUNDeW91DQpaMjl2WjJ4bExtUmxnZ2xuYjI5bmJHVXVaR1V3RXdZRFZSMGdCQXd3Q2pBSUJnWm5nUXdCQWdFd05nWURWUjBmDQpCQzh3TFRBcm9DbWdKNFlsYUhSMGNEb3ZMMk11Y0d0cExtZHZiMmN2ZDJVeUwyUlVUVE10TUdod1YyWkZMbU55DQpiRENDQVFVR0Npc0dBUVFCMW5rQ0JBSUVnZllFZ2ZNQThRQjNBRTUxb3lkY21oRERPRnRzMU44L1V1c2Q4T0NPDQpHNDFwd0xINlpMRmltam5mQUFBQmxiT0FTK29BQUFRREFFZ3dSZ0loQU1YWWVmZDZyNWZWUXpKRHRWQmNjcjdsDQpDZ3RyQi84NHY0MnRyMU1HbXFSRUFpRUE5RHRMNFpGK1RPN2Q1bWprUTNjc2NCUWwxY2xXMmp1eHlKTXVTeDFMDQp5TzRBZGdEZ2tyUDhEQjNJNTJnMkg5NWh1WlpOQ2xKNEdZcHkxbkxFc0UybGJXOVVCQUFBQVpXemdFendBQUFFDQpBd0JITUVVQ0lHNElvTjRHYW03RGgzeVR4MlF2aTA0dS9HRy9IRExTK2V0K21ycVdJQ1l5QWlFQWhHdkNjaFF2DQpCdFVHMDd0bHAvRzRrdkZ3eG01YklSUzJ5ZzBYNU5Obkl4b3dDZ1lJS29aSXpqMEVBd0lEU0FBd1JRSWhBTnpXDQptQU1Jbjl2dmQyN1Q0UVNBR0FkS2xUdDlncnNxa1dtbUxCcUM3Z1NqQWlBbzBjREZYbGFJZ3FqV0tFM043VmdPDQpqYWthT1lZcnZmdnVqT0pmTUxwNzlBPT0NCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0NCg==
+    #   enabled: true
+    #   skipCertificateValidation: false
