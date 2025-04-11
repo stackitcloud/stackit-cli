@@ -8,7 +8,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 
 	"github.com/spf13/cobra"
@@ -16,24 +15,24 @@ import (
 )
 
 const (
-	loadbalancerNameArg = "LOADBALANCER_NAME_ARG"
+	credentialRefArg = "CREDENTIAL_REF" // nolint:gosec // false alert, these are not valid credentials
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name string
+	CredentialsRef string
 }
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", loadbalancerNameArg),
-		Short: "Deletes an application loadbalancer",
-		Long:  "Deletes an application loadbalancer.",
-		Args:  args.SingleArg(loadbalancerNameArg, nil),
+		Use:   fmt.Sprintf("delete %s", credentialRefArg),
+		Short: "Deletes credentials",
+		Long:  "Deletes credentials.",
+		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an application loadbalancer with name "my-load-balancer"`,
-				"$ stackit beta alb delete my-load-balancer",
+				`Delete credential with name "credential-12345"`,
+				"$ stackit beta alb credentials delete credential-12345",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -49,14 +48,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
-			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the credentials %q for project %q?", model.Name, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete credentials %q?", model.CredentialsRef)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -67,27 +60,25 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete loadbalancer: %w", err)
+				return fmt.Errorf("delete credential: %w", err)
 			}
 
-			p.Outputln("Load balancer deleted.")
+			p.Info("Deleted credential %q\n", model.CredentialsRef)
+
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
 }
 
-func configureFlags(_ *cobra.Command) {
-}
-
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	credentialRef := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 
-	loadbalancerName := inputArgs[0]
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            loadbalancerName,
+		CredentialsRef:  credentialRef,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -102,6 +93,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) alb.ApiDeleteLoadBalancerRequest {
-	return apiClient.DeleteLoadBalancer(ctx, model.ProjectId, model.Region, model.Name)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) alb.ApiDeleteCredentialsRequest {
+	return apiClient.DeleteCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 }
