@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 
 	"github.com/spf13/cobra"
@@ -46,6 +47,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			apiClient, err := client.ConfigureClient(p)
 			if err != nil {
 				return err
+			}
+
+			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			if err != nil {
+				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to delete the application loadbalancer %q for project %q?", model.Name, projectLabel)
+				err = p.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Call API
