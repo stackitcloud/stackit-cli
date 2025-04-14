@@ -1,0 +1,23 @@
+activeHealthCheck:
+  healthyThreshold: 1
+  httpHealthChecks:
+    okStatuses:
+      - "200"
+    path: /health
+  interval: 3s
+  intervalJitter: 3s
+  timeout: 3s
+  unhealthyThreshold: 1
+name: my-target-pool
+targetPort: 4000
+targets:
+  - displayName: my-target
+    ip: 10.0.1.155
+    # if the backend servers must be accessed via TLS the following block
+    # allows defining the TLS configuration
+    # tlsConfig:
+    #   # A PEM and base64 encoded certificate
+    #   customCa: LS0...
+    #   enabled: true
+    #   skipCertificateValidation: false
+

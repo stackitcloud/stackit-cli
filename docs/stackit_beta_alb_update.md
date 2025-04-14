@@ -1,30 +1,27 @@
-## stackit beta
+## stackit beta alb update
 
-Contains beta STACKIT CLI commands
+Updates an application loadbalancer
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Updates an application loadbalancer.
 
 ```
-stackit beta [flags]
+stackit beta alb update [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Update an application loadbalancer from a configuration file
+  $ stackit beta alb update --configuration my-loadbalancer.json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -c, --configuration string   Filename of the input configuration file
+  -h, --help                   Help for "stackit beta alb update"
 ```
 
 ### Options inherited from parent commands
@@ -40,7 +37,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

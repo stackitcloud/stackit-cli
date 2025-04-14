@@ -1,0 +1,91 @@
+name: my-load-balancer
+# public ip, must be removed when ephemeral address option is true
+externalAddress: 123.123.123.123
+
+# public listening interfaces of the loadbalancer
+listeners:
+  - displayName: listener1
+    # for plain http the https block must be removed
+    # http: {}
+    https:
+      certificateConfig:
+        certificateIds:
+          - cert-1
+          - cert-2
+          - cert-3
+    port: 443
+    # protocal may be PROTOCOL_HTTPS or PROTOCOL_HTTP
+    protocol: PROTOCOL_HTTPS
+    rules:
+      # fqdn of the virtual host of the load balancer
+      - host: front.facing.host
+        http:
+          subRules:
+            - cookiePersistence:
+                name: cookie1
+                ttl: 120s
+              headers:
+                - name: testheader1
+                  exactMatch: X-test-header1
+                - name: testheader2
+                  exactMatch: X-test-header2
+                - name: testheader3
+                  exactMatch: X-test-header3
+              pathPrefix: /foo
+              queryParameters:
+                - name: query-param
+                  exactMatch: q
+                - name: region
+                  exactMatch: region
+              targetPool: my-target-pool
+              webSocket: false
+networks:
+  - networkId: 00000000-0000-0000-0000-000000000000
+    role: ROLE_LISTENERS_AND_TARGETS
+  - networkId: 00000000-0000-0000-0000-000000000001
+    role: ROLE_LISTENERS_AND_TARGETS
+options:
+  accessControl:
+    # which host may access the loadbalancer in prefix notation
+    allowedSourceRanges:
+      - 10.100.42.0/24
+  ephemeralAddress: true
+  privateNetworkOnly: true
+
+  # Enable observability features. Appropriate credentials must be made
+  # available using the credentials endpoint
+  # observability:
+  #   logs:
+  #     credentialsRef: my-credentials
+  #     pushUrl: https://my.observability.host/<observability-instance-id>/loki/api/v1/push
+  #   metrics:
+  #     credentialsRef: my-credentials
+  #     pushUrl: https://my.observability.host/<observability-instance-id>/<argus-instance-id>/api/v1/receive
+
+planId: p10
+
+# definition of the backend servers
+targetPools:
+  - name: my-target-pool
+    activeHealthCheck:
+      healthyThreshold: 3
+      httpHealthChecks:
+        okStatuses:
+          - "200"
+        path: /health
+      interval: 10s
+      intervalJitter: 3s
+      timeout: 5s
+      unhealthyThreshold: 1
+    targetPort: 5732
+    targets:
+      # configuration of the backend servers
+      - displayName: my-target1
+        ip: 192.11.2.5
+    # if the backend servers must be accessed via TLS the following block
+    # allows defining the TLS configuration
+    # tlsConfig:
+    #   # A PEM and base64 encoded certificate
+    #   customCa: LS0t...
+    #   enabled: true
+    #   skipCertificateValidation: false

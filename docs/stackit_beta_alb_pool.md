@@ -1,30 +1,19 @@
-## stackit beta
+## stackit beta alb pool
 
-Contains beta STACKIT CLI commands
+Manages target pools for application loadbalancers
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Manage the lifecycle of target pools for application loadbalancers.
 
 ```
-stackit beta [flags]
-```
-
-### Examples
-
-```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+stackit beta alb pool [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help   Help for "stackit beta alb pool"
 ```
 
 ### Options inherited from parent commands
@@ -40,7 +29,6 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit beta alb pool update](./stackit_beta_alb_pool_update.md)	 - Updates an application target pool
 
