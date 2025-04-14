@@ -2,6 +2,7 @@ package utils
 
 import (
 	"strings"
+	"unicode/utf8"
 )
 
 // JoinStringKeys concatenates the string keys of a map, each separatore by the
@@ -32,4 +33,26 @@ func JoinStringPtr(vals *[]string, sep string) string {
 		return ""
 	}
 	return strings.Join(*vals, sep)
+}
+
+// Truncate trims the passed string (if it is not nil). If the input string is
+// longer than the given length, it is truncated to _maxLen_ and a ellipsis (…)
+// is attached. Therefore the resulting string has at most length _maxLen-1_
+func Truncate(s *string, maxLen int) string {
+	if s == nil {
+		return ""
+	}
+
+	if utf8.RuneCountInString(*s) > maxLen {
+		var builder strings.Builder
+		for i, r := range *s {
+			if i >= maxLen {
+				break
+			}
+			builder.WriteRune(r)
+		}
+		builder.WriteRune('…')
+		return builder.String()
+	}
+	return *s
 }
