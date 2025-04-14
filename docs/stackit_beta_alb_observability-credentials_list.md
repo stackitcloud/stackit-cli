@@ -1,4 +1,4 @@
-## stackit beta alb credentials list
+## stackit beta alb observability-credentials list
 
 Lists all credentials
 
@@ -7,26 +7,26 @@ Lists all credentials
 Lists all credentials.
 
 ```
-stackit beta alb credentials list [flags]
+stackit beta alb observability-credentials list [flags]
 ```
 
 ### Examples
 
 ```
   Lists all credentials
-  $ stackit beta alb credential list
+  $ stackit beta alb observability-credentials list
 
   Lists all credentials in JSON format
-  $ stackit beta alb credential list --output-format json
+  $ stackit beta alb observability-credentials list --output-format json
 
   Lists up to 10 credentials
-  $ stackit beta alb credential list --limit 10
+  $ stackit beta alb observability-credentials list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit beta alb credentials list"
+  -h, --help        Help for "stackit beta alb observability-credentials list"
       --limit int   Number of credentials to list
 ```
 
@@ -43,5 +43,5 @@ stackit beta alb credentials list [flags]
 
 ### SEE ALSO
 
-* [stackit beta alb credentials](./stackit_beta_alb_credentials.md)	 - Provides functionality for application loadbalancer credentials
+* [stackit beta alb observability-credentials](./stackit_beta_alb_observability-credentials.md)	 - Provides functionality for application loadbalancer credentials
 

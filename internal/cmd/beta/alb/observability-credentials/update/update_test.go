@@ -33,6 +33,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		usernameFlag:              testUsername,
 		displaynameFlag:           testDisplayname,
+		passwordFlag:              testPassword,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,6 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) inputModel {
 		Username:       &testUsername,
 		Displayname:    &testDisplayname,
 		CredentialsRef: &testCredentialRef,
+		Password:       &testPassword,
 	}
 	for _, mod := range mods {
 		mod(&model)
@@ -114,6 +116,7 @@ func TestParseInput(t *testing.T) {
 				globalflags.RegionFlag:    testRegion,
 				usernameFlag:              testUsername,
 				displaynameFlag:           testDisplayname,
+				passwordFlag:              testPassword,
 			},
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
@@ -175,9 +178,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, &tt.model, testClient, func() (string, error) {
-				return testPassword, nil
-			})
+			request, err := buildRequest(testCtx, &tt.model, testClient)
 			if err != nil {
 				t.Fatalf("cannot build request: %v", err)
 			}

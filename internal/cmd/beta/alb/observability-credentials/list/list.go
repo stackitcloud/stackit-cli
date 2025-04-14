@@ -39,15 +39,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Lists all credentials`,
-				"$ stackit beta alb credential list",
+				"$ stackit beta alb observability-credentials list",
 			),
 			examples.NewExample(
 				`Lists all credentials in JSON format`,
-				"$ stackit beta alb credential list --output-format json",
+				"$ stackit beta alb observability-credentials list --output-format json",
 			),
 			examples.NewExample(
 				`Lists up to 10 credentials`,
-				"$ stackit beta alb credential list --limit 10",
+				"$ stackit beta alb observability-credentials list --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

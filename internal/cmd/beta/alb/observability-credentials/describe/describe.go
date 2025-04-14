@@ -31,13 +31,13 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialRefArg),
-		Short: "Describes credentials",
-		Long:  "Describes credentials.",
+		Short: "Describes observability credentials for the Application Load Balancer",
+		Long:  "Describes observability credentials for the Application Load Balancer.",
 		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details about credentials with name "credential-12345"`,
-				"$ stackit beta alb credential describe credential-12345",
+				"$ stackit beta alb observability-credentials describe credential-12345",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

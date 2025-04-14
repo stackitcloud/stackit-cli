@@ -2,10 +2,10 @@ package alb
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/list"
+	observabilitycredentials "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/observability-credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/plans"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/pool"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/quotas"
@@ -37,7 +37,7 @@ func addSubcommands(cmd *cobra.Command, p *print.Printer) {
 		template.NewCmd(p),
 		create.NewCmd(p),
 		update.NewCmd(p),
-		credentials.NewCmd(p),
+		observabilitycredentials.NewCmd(p),
 		describe.NewCmd(p),
 		delete.NewCmd(p),
 		pool.NewCmd(p),

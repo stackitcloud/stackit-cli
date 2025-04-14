@@ -1,26 +1,26 @@
-## stackit beta alb credentials describe
+## stackit beta alb observability-credentials delete
 
-Describes credentials
+Deletes credentials
 
 ### Synopsis
 
-Describes credentials.
+Deletes credentials.
 
 ```
-stackit beta alb credentials describe CREDENTIAL_REF [flags]
+stackit beta alb observability-credentials delete CREDENTIAL_REF [flags]
 ```
 
 ### Examples
 
 ```
-  Get details about credentials with name "credential-12345"
-  $ stackit beta alb credential describe credential-12345
+  Delete credential with name "credential-12345"
+  $ stackit beta alb observability-credentials delete credential-12345
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta alb credentials describe"
+  -h, --help   Help for "stackit beta alb observability-credentials delete"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta alb credentials describe CREDENTIAL_REF [flags]
 
 ### SEE ALSO
 
-* [stackit beta alb credentials](./stackit_beta_alb_credentials.md)	 - Provides functionality for application loadbalancer credentials
+* [stackit beta alb observability-credentials](./stackit_beta_alb_observability-credentials.md)	 - Provides functionality for application loadbalancer credentials
 

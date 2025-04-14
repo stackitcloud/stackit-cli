@@ -1,4 +1,4 @@
-package create
+package add
 
 import (
 	"context"
@@ -32,6 +32,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		usernameFlag:              testUsername,
 		displaynameFlag:           testDisplayname,
+		passwordFlag:              testPassword,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -124,7 +125,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd, testPassword)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return

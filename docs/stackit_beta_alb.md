@@ -31,10 +31,10 @@ stackit beta alb [flags]
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta alb create](./stackit_beta_alb_create.md)	 - Creates an application loadbalancer
-* [stackit beta alb credentials](./stackit_beta_alb_credentials.md)	 - Provides functionality for application loadbalancer credentials
 * [stackit beta alb delete](./stackit_beta_alb_delete.md)	 - Deletes an application loadbalancer
 * [stackit beta alb describe](./stackit_beta_alb_describe.md)	 - Describes an application loadbalancer
 * [stackit beta alb list](./stackit_beta_alb_list.md)	 - Lists albs
+* [stackit beta alb observability-credentials](./stackit_beta_alb_observability-credentials.md)	 - Provides functionality for application loadbalancer credentials
 * [stackit beta alb plans](./stackit_beta_alb_plans.md)	 - Lists the application load balancer plans
 * [stackit beta alb pool](./stackit_beta_alb_pool.md)	 - Manages target pools for application loadbalancers
 * [stackit beta alb quotas](./stackit_beta_alb_quotas.md)	 - Shows the application load balancer quotas

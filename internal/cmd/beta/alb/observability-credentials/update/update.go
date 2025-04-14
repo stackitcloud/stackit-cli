@@ -1,11 +1,9 @@
 package update
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,18 +13,16 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"golang.org/x/term"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
 
-const passwordEnv = "ALB_CREDENTIALS_PASSWORD" //nolint:gosec // false alert, these are not valid credentials
-
 const (
 	usernameFlag     = "username"
 	displaynameFlag  = "displayname"
+	passwordFlag     = "password"
 	credentialRefArg = "CREDENTIAL_REF_ARG" //nolint:gosec // false alert, these are not valid credentials
 )
 
@@ -34,6 +30,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Username       *string
 	Displayname    *string
+	Password       *string
 	CredentialsRef *string
 }
 
@@ -45,17 +42,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.SingleArg(credentialRefArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the username`,
-				"$ stackit beta alb credentials update --username test-cred2 credentials-12345",
-			),
-			examples.NewExample(
-				`Update the displayname`,
-				"$ stackit beta alb credentials update --displayname new-name credentials-12345",
-			),
-			examples.NewExample(
-				`Update the password (is retrieved interactively or from ENV variable )`,
-				"$ stackit beta alb credentials update --password credentials-12345",
-			),
+				`Update the password of observability credentials of Application Load Balancer with credentials reference "credentials-xxx", by providing the path to a file with the new password as flag`,
+				"$ stackit beta alb observability-credentials update credentials-xxx --username user1 --displayname user1 --password @./new-password.txt"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -67,7 +55,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			req, err := buildRequest(ctx, &model, apiClient, readPassword)
+			req, err := buildRequest(ctx, &model, apiClient)
 			if err != nil {
 				return err
 			}
@@ -101,23 +89,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(usernameFlag, "u", "", "the username for the credentials")
-	cmd.Flags().StringP(displaynameFlag, "d", "", "the displayname for the credentials")
-	cobra.CheckErr(flags.MarkFlagsRequired(cmd, displaynameFlag, usernameFlag, displaynameFlag))
+	cmd.Flags().StringP(usernameFlag, "u", "", "Username for the credentials")
+	cmd.Flags().StringP(displaynameFlag, "d", "", "Displayname for the credentials")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
+
+	cobra.CheckErr(flags.MarkFlagsRequired(cmd, displaynameFlag, usernameFlag))
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient, readPassword func() (string, error)) (req alb.ApiUpdateCredentialsRequest, err error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiUpdateCredentialsRequest, err error) {
 	req = apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, *model.CredentialsRef)
 
-	var password *string
-	p, err := readPassword()
-	if err != nil {
-		return req, err
-	}
-	password = &p
 	payload := alb.UpdateCredentialsPayload{
 		DisplayName: model.Displayname,
-		Password:    password,
+		Password:    model.Password,
 		Username:    model.Username,
 	}
 
@@ -127,35 +111,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 
 	return req.UpdateCredentialsPayload(payload), nil
 }
-func readPassword() (string, error) {
-	if password, found := os.LookupEnv(passwordEnv); found {
-		return password, nil
-	}
 
-	fmt.Printf("please provide the password: ")
-	password, err := term.ReadPassword(int(os.Stdout.Fd()))
-	if err != nil {
-		return "", fmt.Errorf("cannot read password: %w", err)
-	}
-	fmt.Println()
-	fmt.Printf("please confirm the password: ")
-	confirmation, err := term.ReadPassword(int(os.Stdout.Fd()))
-	if err != nil {
-		return "", fmt.Errorf("cannot read password: %w", err)
-	}
-	fmt.Println()
-	if !bytes.Equal(password, confirmation) {
-		return "", fmt.Errorf("the password and the confirmation do not match")
-	}
-
-	return string(password), nil
-}
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputModel {
 	model := inputModel{
 		GlobalFlagModel: globalflags.Parse(p, cmd),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
 		CredentialsRef:  &inputArgs[0],
+		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -192,7 +155,7 @@ func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCreden
 		}
 		p.Outputln(string(details))
 	default:
-		p.Outputf("Updated labels of credential %q\n", utils.PtrString(model.CredentialsRef))
+		p.Outputf("Updated credential %q\n", utils.PtrString(model.CredentialsRef))
 	}
 	return nil
 }

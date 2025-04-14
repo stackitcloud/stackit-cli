@@ -1,11 +1,9 @@
-package create
+package add
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -13,18 +11,16 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"golang.org/x/term"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
 
-const passwordEnv = "ALB_CREDENTIALS_PASSWORD"
-
 const (
 	usernameFlag    = "username"
 	displaynameFlag = "displayname"
+	passwordFlag    = "password"
 )
 
 type inputModel struct {
@@ -36,24 +32,25 @@ type inputModel struct {
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates a credential",
-		Long:  "Creates a credential.",
+		Use:   "add",
+		Short: "Adds observability credentials to an application load balancer",
+		Long:  "Adds observability credentials (username and password) to an application load balancer.  The credentials can be for Observability or another monitoring tool.",
 		Args:  cobra.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new credential, the password is requested interactively or read from ENV variable `+passwordEnv,
-				"$ stackit beta alb credential create --username some.user --displayname master-creds",
-			),
+				`Add observability credentials to an application load balancer with username "xxx" and display name "yyy". The password is entered using the terminal`,
+				"$ stackit beta alb observability-credentials add --username xxx --display-name yyy"),
+			examples.NewExample(
+				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
+				"$ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
+			examples.NewExample(
+				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the password via an environment variable`,
+				"$ ALB_CREDENTIALS_PASSWORD stackit beta alb observability-credentials add --username xxx --display-name yyy"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			password, err := readPassword()
-			if err != nil {
-				return err
-			}
-			model, err := parseInput(p, cmd, password)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				return err
 			}
@@ -65,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Are your sure you want to create a credential?"
+				prompt := "Are your sure you want to add credentials?"
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -76,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create credential: %w", err)
+				return fmt.Errorf("add credential: %w", err)
 			}
 
 			return outputResult(p, model.GlobalFlagModel.OutputFormat, resp)
@@ -89,43 +86,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "the username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "the displayname for the credentials")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
 
-	cobra.CheckErr(cmd.MarkFlagRequired(usernameFlag))
-	cobra.CheckErr(cmd.MarkFlagRequired(displaynameFlag))
+	cobra.CheckErr(flags.MarkFlagsRequired(cmd, usernameFlag, displaynameFlag))
 }
 
-func readPassword() (string, error) {
-	if password, found := os.LookupEnv(passwordEnv); found {
-		return password, nil
-	}
-
-	fmt.Printf("please provide the password: ")
-	password, err := term.ReadPassword(int(os.Stdout.Fd()))
-	if err != nil {
-		return "", fmt.Errorf("cannot read password: %w", err)
-	}
-	fmt.Println()
-	fmt.Printf("please confirm the password: ")
-	confirmation, err := term.ReadPassword(int(os.Stdout.Fd()))
-	if err != nil {
-		return "", fmt.Errorf("cannot read password: %w", err)
-	}
-	fmt.Println()
-	if !bytes.Equal(password, confirmation) {
-		return "", fmt.Errorf("the password and the confirmation do not match")
-	}
-
-	return string(password), nil
-}
-
-func parseInput(p *print.Printer, cmd *cobra.Command, password string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
-		Password:        &password,
+		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
 	}
 
 	if p.IsVerbosityDebug() {

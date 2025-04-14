@@ -32,7 +32,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete credential with name "credential-12345"`,
-				"$ stackit beta alb credentials delete credential-12345",
+				"$ stackit beta alb observability-credentials delete credential-12345",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
