@@ -1,10 +1,10 @@
 ## stackit beta alb quotas
 
-Gets the quotas
+Shows the application load balancer quotas
 
 ### Synopsis
 
-Gets the current quotes for the application loadbalancers.
+Shows the application load balancer quotas for the application load balancers.
 
 ```
 stackit beta alb quotas [flags]
@@ -13,7 +13,7 @@ stackit beta alb quotas [flags]
 ### Examples
 
 ```
-  List all application loadbalancer quotas
+  List all application load balancer quotas
   $ stackit beta alb quotas
 ```
 

@@ -35,9 +35,9 @@ stackit beta alb [flags]
 * [stackit beta alb delete](./stackit_beta_alb_delete.md)	 - Deletes an application loadbalancer
 * [stackit beta alb describe](./stackit_beta_alb_describe.md)	 - Describes an application loadbalancer
 * [stackit beta alb list](./stackit_beta_alb_list.md)	 - Lists albs
-* [stackit beta alb plans](./stackit_beta_alb_plans.md)	 - Lists the alb plans
+* [stackit beta alb plans](./stackit_beta_alb_plans.md)	 - Lists the application load balancer plans
 * [stackit beta alb pool](./stackit_beta_alb_pool.md)	 - Manages target pools for application loadbalancers
-* [stackit beta alb quotas](./stackit_beta_alb_quotas.md)	 - Gets the quotas
+* [stackit beta alb quotas](./stackit_beta_alb_quotas.md)	 - Shows the application load balancer quotas
 * [stackit beta alb template](./stackit_beta_alb_template.md)	 - creates configuration templates to use for resource creation
 * [stackit beta alb update](./stackit_beta_alb_update.md)	 - Updates an application loadbalancer
 

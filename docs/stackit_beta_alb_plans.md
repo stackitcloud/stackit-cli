@@ -1,10 +1,10 @@
 ## stackit beta alb plans
 
-Lists the alb plans
+Lists the application load balancer plans
 
 ### Synopsis
 
-Lists the available application loadbalancer plans.
+Lists the available application load balancer plans.
 
 ```
 stackit beta alb plans [flags]
@@ -13,7 +13,7 @@ stackit beta alb plans [flags]
 ### Examples
 
 ```
-  List all application loadbalancer plans
+  List all application load balancer plans
   $ stackit beta alb plans
 ```
 

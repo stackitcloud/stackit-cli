@@ -26,12 +26,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
-		Short: "Lists the alb plans",
-		Long:  "Lists the available application loadbalancer plans.",
+		Short: "Lists the application load balancer plans",
+		Long:  "Lists the available application load balancer plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all application loadbalancer plans`,
+				`List all application load balancer plans`,
 				`$ stackit beta alb plans`,
 			),
 		),

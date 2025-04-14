@@ -25,12 +25,12 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "quotas",
-		Short: "Gets the quotas",
-		Long:  "Gets the current quotes for the application loadbalancers.",
+		Short: "Shows the application load balancer quotas",
+		Long:  "Shows the application load balancer quotas for the application load balancers.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all application loadbalancer quotas`,
+				`List all application load balancer quotas`,
 				`$ stackit beta alb quotas`,
 			),
 		),
