@@ -13,23 +13,17 @@ stackit beta alb observability-credentials add [flags]
 ### Examples
 
 ```
-  Add observability credentials to an application load balancer with username "xxx" and display name "yyy". The password is entered using the terminal
-  $ stackit beta alb observability-credentials add --username xxx --display-name yyy
-
   Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag
   $ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy
-
-  Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the password via an environment variable
-  $ ALB_CREDENTIALS_PASSWORD stackit beta alb observability-credentials add --username xxx --display-name yyy
 ```
 
 ### Options
 
 ```
-  -d, --displayname string   the displayname for the credentials
+  -d, --displayname string   Displayname for the credentials
   -h, --help                 Help for "stackit beta alb observability-credentials add"
       --password string      Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).
-  -u, --username string      the username for the credentials
+  -u, --username string      Username for the credentials
 ```
 
 ### Options inherited from parent commands

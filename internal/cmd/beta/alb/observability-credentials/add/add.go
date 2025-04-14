@@ -38,14 +38,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Add observability credentials to an application load balancer with username "xxx" and display name "yyy". The password is entered using the terminal`,
-				"$ stackit beta alb observability-credentials add --username xxx --display-name yyy"),
-			examples.NewExample(
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
 				"$ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
-			examples.NewExample(
-				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the password via an environment variable`,
-				"$ ALB_CREDENTIALS_PASSWORD stackit beta alb observability-credentials add --username xxx --display-name yyy"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -84,8 +78,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(usernameFlag, "u", "", "the username for the credentials")
-	cmd.Flags().StringP(displaynameFlag, "d", "", "the displayname for the credentials")
+	cmd.Flags().StringP(usernameFlag, "u", "", "Username for the credentials")
+	cmd.Flags().StringP(displaynameFlag, "d", "", "Displayname for the credentials")
 	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
 
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, usernameFlag, displaynameFlag))

@@ -56,7 +56,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the credentials %q for project %q?", model.Name, projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete the application loadbalancer %q for project %q?", model.Name, projectLabel)
 				err = p.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
