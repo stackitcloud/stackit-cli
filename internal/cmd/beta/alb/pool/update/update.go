@@ -90,8 +90,8 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(configurationFlag, "c", "", "filename of the input configuration file")
-	cmd.Flags().StringP(albNameFlag, "n", "", "name of the target pool name to update")
+	cmd.Flags().StringP(configurationFlag, "c", "", "Filename of the input configuration file")
+	cmd.Flags().StringP(albNameFlag, "n", "", "Name of the target pool name to update")
 	err := flags.MarkFlagsRequired(cmd, configurationFlag, albNameFlag)
 	cobra.CheckErr(err)
 }

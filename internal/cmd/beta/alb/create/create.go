@@ -101,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(configurationFlag, "c", "", "filename of the input configuration file")
+	cmd.Flags().StringP(configurationFlag, "c", "", "Filename of the input configuration file")
 	err := flags.MarkFlagsRequired(cmd, configurationFlag)
 	cobra.CheckErr(err)
 }

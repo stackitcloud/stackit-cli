@@ -4,7 +4,7 @@ Describes an application loadbalancer
 
 ### Synopsis
 
-Describes an application loadbalancer.
+Describes an application alb.
 
 ```
 stackit beta alb describe LOADBALANCER_NAME_ARG [flags]

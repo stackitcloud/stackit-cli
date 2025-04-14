@@ -20,7 +20,7 @@ stackit beta alb update [flags]
 ### Options
 
 ```
-  -c, --configuration string   filename of the input configuration file
+  -c, --configuration string   Filename of the input configuration file
   -h, --help                   Help for "stackit beta alb update"
 ```
 

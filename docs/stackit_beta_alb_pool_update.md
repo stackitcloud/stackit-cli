@@ -20,9 +20,9 @@ stackit beta alb pool update [flags]
 ### Options
 
 ```
-  -c, --configuration string   filename of the input configuration file
+  -c, --configuration string   Filename of the input configuration file
   -h, --help                   Help for "stackit beta alb pool update"
-  -n, --name string            name of the target pool name to update
+  -n, --name string            Name of the target pool name to update
 ```
 
 ### Options inherited from parent commands

@@ -33,7 +33,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", loadbalancerNameArg),
 		Short: "Describes an application loadbalancer",
-		Long:  "Describes an application loadbalancer.",
+		Long:  "Describes an application alb.",
 		Args:  args.SingleArg(loadbalancerNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -117,33 +117,104 @@ func outputResult(p *print.Printer, outputFormat string, response *alb.LoadBalan
 
 		return nil
 	default:
-		table := tables.NewTable()
-		table.AddRow("EXTERNAL ADDRESS", utils.PtrString(response.ExternalAddress))
-		table.AddSeparator()
-		var numErrors int
-		if response.Errors != nil {
-			numErrors = len(*response.Errors)
+		if err := outputResultAsTable(p, response); err != nil {
+			return err
 		}
-		table.AddRow("NUMBER OF ERRORS", numErrors)
-		table.AddSeparator()
-		table.AddRow("PLAN ID", utils.PtrString(response.PlanId))
-		table.AddSeparator()
-		table.AddRow("REGION", utils.PtrString(response.Region))
-		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(response.Status))
-		table.AddSeparator()
-		table.AddRow("VERSION", utils.PtrString(response.Version))
-		if response.Errors != nil {
-			table.AddSeparator()
-			var builder strings.Builder
-			for _, err := range *response.Errors {
-				builder.WriteString(fmt.Sprintf("[%s] %s\n", utils.PtrString(err.Type), utils.PtrString(err.Description)))
-			}
-			table.AddRow("ERRORS", builder.String())
-		}
-
-		p.Outputln(table.Render())
 	}
 
 	return nil
+}
+
+func outputResultAsTable(p *print.Printer, loadbalancer *alb.LoadBalancer) error {
+	content := []tables.Table{}
+
+	content = append(content, buildLoadBalancerTable(loadbalancer))
+
+	if loadbalancer.Listeners != nil {
+		content = append(content, buildListenersTable(*loadbalancer.Listeners))
+	}
+
+	if loadbalancer.TargetPools != nil {
+		content = append(content, buildTargetPoolsTable(*loadbalancer.TargetPools))
+	}
+
+	err := tables.DisplayTables(p, content)
+	if err != nil {
+		return fmt.Errorf("display output: %w", err)
+	}
+
+	return nil
+}
+
+func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
+	acl := []string{}
+	privateAccessOnly := false
+	if loadbalancer.Options != nil {
+		if loadbalancer.Options.AccessControl != nil && loadbalancer.Options.AccessControl.AllowedSourceRanges != nil {
+			acl = *loadbalancer.Options.AccessControl.AllowedSourceRanges
+		}
+
+		if loadbalancer.Options.PrivateNetworkOnly != nil {
+			privateAccessOnly = *loadbalancer.Options.PrivateNetworkOnly
+		}
+	}
+
+	networkId := "-"
+	if loadbalancer.Networks != nil && len(*loadbalancer.Networks) > 0 {
+		networks := *loadbalancer.Networks
+		networkId = *networks[0].NetworkId
+	}
+
+	externalAddress := utils.PtrStringDefault(loadbalancer.ExternalAddress, "-")
+
+	errorDescriptions := []string{}
+	if loadbalancer.Errors != nil && len((*loadbalancer.Errors)) > 0 {
+		for _, err := range *loadbalancer.Errors {
+			errorDescriptions = append(errorDescriptions, *err.Description)
+		}
+	}
+
+	table := tables.NewTable()
+	table.SetTitle("Load Balancer")
+	table.AddRow("NAME", utils.PtrString(loadbalancer.Name))
+	table.AddSeparator()
+	table.AddRow("STATE", utils.PtrString(loadbalancer.Status))
+	table.AddSeparator()
+	if len(errorDescriptions) > 0 {
+		table.AddRow("ERROR DESCRIPTIONS", strings.Join(errorDescriptions, "\n"))
+		table.AddSeparator()
+	}
+	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
+	table.AddSeparator()
+	table.AddRow("ATTACHED PUBLIC IP", externalAddress)
+	table.AddSeparator()
+	table.AddRow("ATTACHED NETWORK ID", networkId)
+	table.AddSeparator()
+	table.AddRow("ACL", acl)
+	return table
+}
+
+func buildListenersTable(listeners []alb.Listener) tables.Table {
+	table := tables.NewTable()
+	table.SetTitle("Listeners")
+	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
+	for i := range listeners {
+		listener := listeners[i]
+		table.AddRow(
+			utils.PtrString(listener.Name),
+			utils.PtrString(listener.Port),
+			utils.PtrString(listener.Protocol),
+		)
+	}
+	return table
+}
+
+func buildTargetPoolsTable(targetPools []alb.TargetPool) tables.Table {
+	table := tables.NewTable()
+	table.SetTitle("Target Pools")
+	table.SetHeader("NAME", "PORT", "TARGETS")
+	for _, targetPool := range targetPools {
+		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(*targetPool.Targets))
+	}
+	return table
 }

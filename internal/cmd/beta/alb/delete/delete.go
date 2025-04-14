@@ -70,15 +70,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete loadbalancer: %w", err)
 			}
 
-			p.Outputln("Load balancer deleted.")
+			p.Outputf("Load balancer %q deleted.", model.Name)
 			return nil
 		},
 	}
-	configureFlags(cmd)
 	return cmd
-}
-
-func configureFlags(_ *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
