@@ -189,7 +189,8 @@ func (p *Printer) PagerDisplay(content string) error {
 	// -S: disables line wrapping
 	// -w: highlight the first line after moving one full page down
 	// -R: interprets ANSI color and style sequences
-	pagerCmd := exec.Command("less", "-F", "-S", "-w", "-R")
+	// -K: exits if an interrupt character is typed
+	pagerCmd := exec.Command("less", "-F", "-S", "-w", "-R", "-K")
 
 	pager, pagerExists := os.LookupEnv("PAGER")
 	if pagerExists && pager != "nil" && pager != "" {
