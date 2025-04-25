@@ -63,7 +63,7 @@ jobs:
       - name: Install Aptly version 1.5.0
         run: brew install aptly.rb
       - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v2
+        uses: samuelmeuli/action-snapcraft@v3
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
