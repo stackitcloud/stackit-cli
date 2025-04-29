@@ -173,7 +173,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 		}
 		req = req.Member(email)
 	}
-	req = req.Limit(float32(model.PageSize))
+
+	req = req.Limit(float32(*model.Limit))
 	req = req.Offset(float32(offset))
 	return req, nil
 }
