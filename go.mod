@@ -77,6 +77,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.0.2
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.22.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.22.1
