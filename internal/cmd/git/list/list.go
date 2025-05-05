@@ -27,7 +27,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all instances of STACKIT Git.",
-		Long:  "Lists all instances of STACKIT Git current the current project.",
+		Long:  "Lists all instances of STACKIT Git for the current project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

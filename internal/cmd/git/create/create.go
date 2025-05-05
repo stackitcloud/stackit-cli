@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates stackit git instance",
-		Long:  "Create an stackit git instance by name.",
+		Short: "Creates STACKIT Git instance",
+		Long:  "Create an STACKIT Git instance by name.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
