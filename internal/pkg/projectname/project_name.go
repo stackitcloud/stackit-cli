@@ -19,7 +19,7 @@ import (
 // Returns the project name associated to the project ID set in config
 //
 // Uses the one stored in config if it's valid, otherwise gets it from the API
-func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (string, error) {
+func GetProjectName(ctx context.Context, p *print.Printer, cliVersion string, cmd *cobra.Command) (string, error) {
 	// If we can use the project name from config, return it
 	if useProjectNameFromConfig(p, cmd) {
 		return viper.GetString(config.ProjectNameKey), nil
@@ -30,7 +30,7 @@ func GetProjectName(ctx context.Context, p *print.Printer, cmd *cobra.Command) (
 		return "", fmt.Errorf("found empty project ID and name")
 	}
 
-	apiClient, err := client.ConfigureClient(p)
+	apiClient, err := client.ConfigureClient(p, cliVersion)
 	if err != nil {
 		return "", fmt.Errorf("configure resource manager client: %w", err)
 	}

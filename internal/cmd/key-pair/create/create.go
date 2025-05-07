@@ -63,7 +63,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}

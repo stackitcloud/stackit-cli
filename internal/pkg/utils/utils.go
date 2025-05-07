@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 )
 
 // Ptr Returns the pointer to any type T
@@ -123,4 +124,8 @@ func Base64Encode(message []byte) string {
 	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))
 	base64.StdEncoding.Encode(b, message)
 	return string(b)
+}
+
+func UserAgentConfigOption(cliVersion string) sdkConfig.ConfigurationOption {
+	return sdkConfig.WithUserAgent(fmt.Sprintf("stackit-cli/%s", cliVersion))
 }
