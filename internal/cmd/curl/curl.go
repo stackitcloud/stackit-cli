@@ -2,6 +2,7 @@ package curl
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -170,11 +171,29 @@ func getBearerToken(p *print.Printer) (string, error) {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return "", &errors.AuthError{}
 	}
-	token, err := auth.GetAuthField(auth.ACCESS_TOKEN)
+
+	userSessionExpired, err := auth.UserSessionExpired()
 	if err != nil {
-		return "", fmt.Errorf("get access token: %w", err)
+		return "", err
 	}
-	return token, nil
+	if userSessionExpired {
+		return "", &errors.SessionExpiredError{}
+	}
+
+	accessToken, err := auth.GetAccessToken()
+	if err != nil {
+		return "", err
+	}
+
+	accessTokenExpired, err := auth.TokenExpired(accessToken)
+	if err != nil {
+		return "", err
+	}
+	if accessTokenExpired {
+		return "", &errors.AccessTokenExpiredError{}
+	}
+
+	return accessToken, nil
 }
 
 func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) {
@@ -213,6 +232,22 @@ func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) er
 	if err != nil {
 		return fmt.Errorf("read response body: %w", err)
 	}
+
+	if strings.Contains(strings.ToLower(string(respBody)), "jwt is expired") {
+		return &errors.SessionExpiredError{}
+	}
+
+	if strings.Contains(strings.ToLower(string(respBody)), "jwt is missing") {
+		return &errors.AuthError{}
+	}
+
+	var prettyJSON bytes.Buffer
+	if json.Valid(respBody) {
+		if err := json.Indent(&prettyJSON, respBody, "", "  "); err == nil {
+			respBody = prettyJSON.Bytes()
+		} // if indenting fails, fall back to original body
+	}
+
 	output = append(output, respBody...)
 
 	if model.OutputFile == nil {

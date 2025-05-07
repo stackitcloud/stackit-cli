@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -426,6 +428,22 @@ func TestOutputResponse(t *testing.T) {
 				resp:  &http.Response{Body: http.NoBody},
 			},
 			wantErr: false,
+		},
+		{
+			name: "expired jwt curl",
+			args: args{
+				model: fixtureInputModel(),
+				resp:  &http.Response{Body: io.NopCloser(strings.NewReader("Jwt is expired"))},
+			},
+			wantErr: true,
+		},
+		{
+			name: "mssing jwt curl",
+			args: args{
+				model: fixtureInputModel(),
+				resp:  &http.Response{Body: io.NopCloser(strings.NewReader("Jwt is missing"))},
+			},
+			wantErr: true,
 		},
 	}
 	p := print.NewPrinter()
