@@ -42,7 +42,7 @@ func TestGetProjectName(t *testing.T) {
 			p := print.NewPrinter()
 			cmd := &cobra.Command{}
 
-			projectName, err := GetProjectName(context.Background(), p, cmd)
+			projectName, err := GetProjectName(context.Background(), p, "0.0.0-dummy", cmd)
 			if err != nil {
 				if tt.isValid {
 					t.Fatalf("unexpected error: %v", err)

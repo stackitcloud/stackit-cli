@@ -59,7 +59,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -72,7 +72,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId

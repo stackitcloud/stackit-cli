@@ -1,6 +1,8 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -11,18 +13,18 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
 )
 
-func ConfigureClient(p *print.Printer) (*postgresflex.APIClient, error) {
-	var err error
-	var apiClient *postgresflex.APIClient
-	var cfgOptions []sdkConfig.ConfigurationOption
-
+func ConfigureClient(p *print.Printer, cliVersion string) (*postgresflex.APIClient, error) {
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
 	region := viper.GetString(config.RegionKey)
-	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
+	cfgOptions := []sdkConfig.ConfigurationOption{
+		sdkConfig.WithUserAgent(fmt.Sprintf("stackit-cli/%s", cliVersion)),
+		sdkConfig.WithRegion(region),
+		authCfgOption,
+	}
 
 	customEndpoint := viper.GetString(config.PostgresFlexCustomEndpointKey)
 
@@ -36,7 +38,7 @@ func ConfigureClient(p *print.Printer) (*postgresflex.APIClient, error) {
 		)
 	}
 
-	apiClient, err = postgresflex.NewAPIClient(cfgOptions...)
+	apiClient, err := postgresflex.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}

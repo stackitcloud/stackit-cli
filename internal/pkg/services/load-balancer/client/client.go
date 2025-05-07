@@ -1,6 +1,8 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -11,23 +13,20 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
-func ConfigureClient(p *print.Printer) (*loadbalancer.APIClient, error) {
-	var err error
-	var apiClient *loadbalancer.APIClient
-	var cfgOptions []sdkConfig.ConfigurationOption
-
+func ConfigureClient(p *print.Printer, cliVersion string) (*loadbalancer.APIClient, error) {
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
-	cfgOptions = append(cfgOptions, authCfgOption)
+	cfgOptions := []sdkConfig.ConfigurationOption{
+		sdkConfig.WithUserAgent(fmt.Sprintf("stackit-cli/%s", cliVersion)),
+		authCfgOption,
+	}
 
 	customEndpoint := viper.GetString(config.LoadBalancerCustomEndpointKey)
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
-	} else {
-		cfgOptions = append(cfgOptions, authCfgOption)
 	}
 
 	if p.IsVerbosityDebug() {
@@ -36,7 +35,7 @@ func ConfigureClient(p *print.Printer) (*loadbalancer.APIClient, error) {
 		)
 	}
 
-	apiClient, err = loadbalancer.NewAPIClient(cfgOptions...)
+	apiClient, err := loadbalancer.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}

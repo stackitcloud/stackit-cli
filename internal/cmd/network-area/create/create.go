@@ -78,13 +78,13 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			var orgLabel string
-			rmApiClient, err := rmClient.ConfigureClient(params.Printer)
+			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
 				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
 				if err != nil {

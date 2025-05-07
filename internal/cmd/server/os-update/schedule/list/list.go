@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -14,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -55,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -70,7 +71,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if len(schedules) == 0 {
 				serverLabel := model.ServerId
 				// Get server name
-				if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer); err == nil {
+				if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
 					serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
 					if err != nil {
 						params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
