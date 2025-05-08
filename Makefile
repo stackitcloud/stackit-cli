@@ -9,6 +9,7 @@ build:
 
 fmt:
 	@gofmt -s -w .
+	@go tool goimports -w .
 
 # Lint
 lint-golangci-lint:
