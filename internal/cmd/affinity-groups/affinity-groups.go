@@ -6,12 +6,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "affinity-group",
 		Short: "Manage server affinity groups",
@@ -19,15 +19,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(
-		create.NewCmd(p),
-		delete.NewCmd(p),
-		describe.NewCmd(p),
-		list.NewCmd(p),
+		create.NewCmd(params),
+		delete.NewCmd(params),
+		describe.NewCmd(params),
+		list.NewCmd(params),
 	)
 }

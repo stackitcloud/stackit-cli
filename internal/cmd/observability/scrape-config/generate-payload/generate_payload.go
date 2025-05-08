@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
@@ -31,7 +32,7 @@ type inputModel struct {
 	FilePath   *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate-payload",
 		Short: "Generates a payload to create/update scrape configurations for an Observability instance ",
@@ -61,20 +62,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			if model.JobName == nil {
 				createPayload := observabilityUtils.DefaultCreateScrapeConfigPayload
-				return outputCreateResult(p, model.FilePath, &createPayload)
+				return outputCreateResult(params.Printer, model.FilePath, &createPayload)
 			}
 
 			req := buildRequest(ctx, model, apiClient)
@@ -88,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("map update scrape config payloads: %w", err)
 			}
 
-			return outputUpdateResult(p, model.FilePath, payload)
+			return outputUpdateResult(params.Printer, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)

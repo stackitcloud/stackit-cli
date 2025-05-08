@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -26,7 +27,7 @@ type inputModel struct {
 	PublicIpId string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("disassociate %s", publicIpIdArg),
 		Short: "Disassociates a Public IP from a network interface or a virtual IP",
@@ -40,20 +41,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			publicIpLabel, associatedResourceId, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get public IP: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
 			} else if publicIpLabel == "" {
 				publicIpLabel = model.PublicIpId
@@ -61,7 +62,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to disassociate public IP %q from the associated resource %q?", publicIpLabel, associatedResourceId)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -74,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("disassociate public IP: %w", err)
 			}
 
-			p.Outputf("Disassociated public IP %q from the associated resource %q.\n", publicIpLabel, associatedResourceId)
+			params.Printer.Outputf("Disassociated public IP %q from the associated resource %q.\n", publicIpLabel, associatedResourceId)
 			return nil
 		},
 	}

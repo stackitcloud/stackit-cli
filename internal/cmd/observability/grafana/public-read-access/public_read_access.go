@@ -5,14 +5,14 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/grafana/public-read-access/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/grafana/public-read-access/enable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "public-read-access",
 		Short: "Enable or disable public read access for Grafana in Observability instances",
@@ -23,11 +23,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(enable.NewCmd(p))
-	cmd.AddCommand(disable.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(enable.NewCmd(params))
+	cmd.AddCommand(disable.NewCmd(params))
 }

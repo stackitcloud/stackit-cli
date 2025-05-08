@@ -6,14 +6,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/plans"
 	scrapeconfig "github.com/stackitcloud/stackit-cli/internal/cmd/observability/scrape-config"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "observability",
 		Short: "Provides functionality for Observability",
@@ -21,14 +21,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(grafana.NewCmd(p))
-	cmd.AddCommand(instance.NewCmd(p))
-	cmd.AddCommand(credentials.NewCmd(p))
-	cmd.AddCommand(scrapeconfig.NewCmd(p))
-	cmd.AddCommand(plans.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(grafana.NewCmd(params))
+	cmd.AddCommand(instance.NewCmd(params))
+	cmd.AddCommand(credentials.NewCmd(params))
+	cmd.AddCommand(scrapeconfig.NewCmd(params))
+	cmd.AddCommand(plans.NewCmd(params))
 }

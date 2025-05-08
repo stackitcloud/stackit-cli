@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -28,7 +29,7 @@ type inputModel struct {
 	CredentialRef string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialRefArg),
 		Short: "Describes observability credentials for the Application Load Balancer",
@@ -42,13 +43,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -61,9 +62,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if credential := resp; credential != nil && credential.Credential != nil {
-				return outputResult(p, model.OutputFormat, *credential.Credential)
+				return outputResult(params.Printer, model.OutputFormat, *credential.Credential)
 			}
-			p.Outputln("No credentials found.")
+			params.Printer.Outputln("No credentials found.")
 			return nil
 		},
 	}

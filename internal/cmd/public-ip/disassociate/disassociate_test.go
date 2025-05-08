@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/google/go-cmp/cmp"
@@ -138,7 +139,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(p)
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)

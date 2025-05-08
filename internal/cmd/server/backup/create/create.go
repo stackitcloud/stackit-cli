@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -39,7 +40,7 @@ type inputModel struct {
 	BackupVolumeIds       []string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Server Backup.",
@@ -56,23 +57,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			serverLabel := model.ServerId
 			// Get server name
-			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer); err == nil {
 				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get server name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				} else if serverName != "" {
 					serverLabel = serverName
 				}
@@ -80,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -96,7 +97,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Server Backup: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, serverLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)

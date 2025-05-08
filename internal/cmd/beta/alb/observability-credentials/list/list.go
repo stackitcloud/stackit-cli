@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials",
@@ -52,13 +53,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -71,7 +72,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if resp.Credentials == nil || len(*resp.Credentials) == 0 {
-				p.Info("No credentials found\n")
+				params.Printer.Info("No credentials found\n")
 				return nil
 			}
 
@@ -80,7 +81,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
 	"k8s.io/client-go/rest"
 
@@ -34,7 +35,7 @@ const (
 	refreshBeforeDuration = 15 * time.Minute // 15 min
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login plugin for kubernetes clients",
@@ -74,7 +75,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -82,33 +83,33 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
 
 			if cachedKubeconfig == nil {
-				return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
 			}
 
 			certPem, _ := pem.Decode(cachedKubeconfig.CertData)
 			if certPem == nil {
 				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
 			}
 
 			certificate, err := x509.ParseCertificate(certPem.Bytes)
 			if err != nil {
 				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
 			}
 
 			// cert is expired, request new
 			if time.Now().After(certificate.NotAfter.UTC()) {
 				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
 			}
 			// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
 			if time.Now().Add(refreshBeforeDuration).After(certificate.NotAfter.UTC()) {
-				return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, true, cachedKubeconfig)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, true, cachedKubeconfig)
 			}
 
 			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
-			if err := output(p, clusterConfig.cacheKey, cachedKubeconfig); err != nil {
+			if err := output(params.Printer, clusterConfig.cacheKey, cachedKubeconfig); err != nil {
 				return err
 			}
 			return nil

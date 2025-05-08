@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +35,7 @@ type inputModel struct {
 	Timestamp        string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restore",
 		Short: "Restores a MongoDB Flex instance from a backup",
@@ -58,26 +59,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := mongodbUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get instance name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to restore MongoDB Flex instance %q?", instanceLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -99,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 
 				if !model.Async {
-					s := spinner.New(p)
+					s := spinner.New(params.Printer)
 					s.Start("Restoring instance")
 					_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId).WaitWithContext(ctx)
 					if err != nil {
@@ -108,7 +109,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					s.Stop()
 				}
 
-				p.Outputf("Restored instance %q with backup %q\n", model.InstanceId, model.BackupId)
+				params.Printer.Outputf("Restored instance %q with backup %q\n", model.InstanceId, model.BackupId)
 				return nil
 			}
 
@@ -120,7 +121,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Cloning instance")
 				_, err = wait.CloneInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -129,7 +130,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			p.Outputf("Cloned instance %q from backup with timestamp %q\n", model.InstanceId, model.Timestamp)
+			params.Printer.Outputf("Cloned instance %q from backup with timestamp %q\n", model.InstanceId, model.Timestamp)
 			return nil
 		},
 	}

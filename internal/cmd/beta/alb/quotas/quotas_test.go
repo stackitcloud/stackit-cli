@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
@@ -95,7 +96,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(p)
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Errorf("cannot configure global flags: %v", err)
 			}
@@ -192,7 +193,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(p)
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.response); (err != nil) != tt.wantErr {

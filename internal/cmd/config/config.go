@@ -7,14 +7,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/unset"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "Provides functionality for CLI configuration options",
@@ -28,13 +28,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(list.NewCmd(p))
-	cmd.AddCommand(set.NewCmd(p))
-	cmd.AddCommand(unset.NewCmd(p))
-	cmd.AddCommand(profile.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(set.NewCmd(params))
+	cmd.AddCommand(unset.NewCmd(params))
+	cmd.AddCommand(profile.NewCmd(params))
 }

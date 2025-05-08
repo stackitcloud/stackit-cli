@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -33,7 +34,7 @@ type inputModel struct {
 	PublicKey           *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a service account key",
@@ -56,13 +57,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -73,7 +74,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
 				}
 				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -86,13 +87,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			p.Info("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
+			params.Printer.Info("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
 
 			key, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
-			p.Outputln(string(key))
+			params.Printer.Outputln(string(key))
 			return nil
 		},
 	}

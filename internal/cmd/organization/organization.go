@@ -5,14 +5,14 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization/member"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization/role"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "organization",
 		Short: "Manages organizations",
@@ -23,11 +23,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(member.NewCmd(p))
-	cmd.AddCommand(role.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(member.NewCmd(params))
+	cmd.AddCommand(role.NewCmd(params))
 }

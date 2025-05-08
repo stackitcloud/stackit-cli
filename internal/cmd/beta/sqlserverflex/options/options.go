@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -87,7 +88,7 @@ type instanceDBCompatibilities struct {
 	DBCompatibilities []sqlserverflex.MssqlDatabaseCompatibility `json:"dbCompatibilities"`
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists SQL Server Flex options",
@@ -109,19 +110,19 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, p, model, apiClient)
+			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient)
 			if err != nil {
 				return fmt.Errorf("get SQL Server Flex options: %w", err)
 			}

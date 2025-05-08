@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -32,7 +33,7 @@ type inputModel struct {
 	Roles      *[]string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", userIdArg),
 		Short: "Updates a PostgreSQL Flex user",
@@ -45,32 +46,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get instance name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get user name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update user %q of instance %q?", userLabel, instanceLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -83,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update PostgreSQL Flex user: %w", err)
 			}
 
-			p.Info("Updated user %q of instance %q\n", userLabel, instanceLabel)
+			params.Printer.Info("Updated user %q of instance %q\n", userLabel, instanceLabel)
 			return nil
 		},
 	}

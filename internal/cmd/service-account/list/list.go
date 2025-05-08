@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all service accounts",
@@ -42,13 +43,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -61,12 +62,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			serviceAccounts := *resp.Items
 			if len(serviceAccounts) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, cmd)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get project name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No service accounts found for project %q\n", projectLabel)
+				params.Printer.Info("No service accounts found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -75,7 +76,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				serviceAccounts = serviceAccounts[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, serviceAccounts)
+			return outputResult(params.Printer, model.OutputFormat, serviceAccounts)
 		},
 	}
 
