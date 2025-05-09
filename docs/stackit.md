@@ -33,6 +33,7 @@ stackit [flags]
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
+* [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
 * [stackit image](./stackit_image.md)	 - Manage server images
 * [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
