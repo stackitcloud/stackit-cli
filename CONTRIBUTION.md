@@ -74,7 +74,7 @@ type inputModel struct {
 }
 
 // "bar" command constructor
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bar",
 		Short: "Short description of the command (is shown in the help of parent command)",
@@ -88,13 +88,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p, cmd)
+			apiClient, err := client.ConfigureClient(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
@@ -106,17 +106,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("(...): %w", err)
 			}
 
-         projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
-				if err != nil {
-					projectLabel = model.ProjectId
-				}
+            projectLabel, err := projectname.GetProjectName(ctx, params.Printer, cmd)
+			if err != nil {
+				projectLabel = model.ProjectId
+			}
 
-         // Check API response "resp" and output accordingly
-         if resp.Item == nil {
-            p.Info("(...)", projectLabel)
-				return nil
-         }
-			return outputResult(p, cmd, model.OutputFormat, instances)
+            // Check API response "resp" and output accordingly
+            if resp.Item == nil {
+               params.Printer.Info("(...)", projectLabel)
+		   		return nil
+            }
+			return outputResult(params.Printer, cmd, model.OutputFormat, instances)
 		},
 	}
 
@@ -130,7 +130,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 // Parse user input (arguments and/or flags)
-func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
    myArg := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
@@ -140,9 +140,9 @@ func parseInput(cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-      MyArg            myArg,
+        MyArg:           myArg,
 		MyFlag:          flags.FlagToStringPointer(cmd, myFlag),
-	}, nil
+	}
 
 	// Write the input model to the debug logs
 	if p.IsVerbosityDebug() {
