@@ -9,18 +9,12 @@ build:
 
 fmt:
 	@gofmt -s -w .
-
-# Setup and tool initialization tasks
-project-help:
-	@$(SCRIPTS_BASE)/project.sh help
-
-project-tools:
-	@$(SCRIPTS_BASE)/project.sh tools
+	@go tool goimports -w .
 
 # Lint
 lint-golangci-lint:
 	@echo ">> Linting with golangci-lint"
-	@golangci-lint run ${GOLANG_CI_ARGS}
+	@go tool golangci-lint run ${GOLANG_CI_ARGS}
 
 lint-yamllint:
 	@echo ">> Linting with yamllint"

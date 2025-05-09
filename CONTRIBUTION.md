@@ -26,7 +26,6 @@ Prerequisites:
 
 These commands can be executed from the project root:
 
-- `make project-tools`: install the required dependencies
 - `make build`: compile the CLI and save the binary under _./bin/stackit_
 - `make lint`: lint the code
 - `make generate-docs`: generate Markdown documentation for every command
