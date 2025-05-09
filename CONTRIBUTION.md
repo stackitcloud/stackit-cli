@@ -68,9 +68,9 @@ const (
 
 // Struct to model user input (arguments and/or flags)
 type inputModel struct {
-	*globalflags.GlobalFlagModel
-	MyArg string
-	MyFlag *string
+    *globalflags.GlobalFlagModel
+    MyArg string
+    MyFlag *string
 }
 
 // "bar" command constructor
@@ -131,7 +131,7 @@ func configureFlags(cmd *cobra.Command) {
 
 // Parse user input (arguments and/or flags)
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-   myArg := inputArgs[0]
+    myArg := inputArgs[0]
 
 	globalFlags := globalflags.Parse(cmd)
 	if globalFlags.ProjectId == "" {
@@ -139,9 +139,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
+        GlobalFlagModel: globalFlags,
         MyArg:           myArg,
-		MyFlag:          flags.FlagToStringPointer(cmd, myFlag),
+        MyFlag:          flags.FlagToStringPointer(cmd, myFlag),
 	}
 
 	// Write the input model to the debug logs
