@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -45,7 +46,7 @@ type inputModel struct {
 	OutputFile             *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("curl %s", urlArg),
 		Short: "Executes an authenticated HTTP request to an endpoint",
@@ -70,12 +71,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Args: args.SingleArg(urlArg, utils.ValidateURLDomain),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
-			bearerToken, err := getBearerToken(p)
+			bearerToken, err := getBearerToken(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -99,7 +100,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 			}()
 
-			err = outputResponse(p, model, resp)
+			err = outputResponse(params.Printer, model, resp)
 			if err != nil {
 				return err
 			}

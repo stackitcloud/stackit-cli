@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -27,7 +28,7 @@ type inputModel struct {
 	CredentialsId      string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
 		Short: "Deletes credentials of an Object Storage credentials group",
@@ -40,32 +41,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get credentials group name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
 			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.CredentialsId, model.Region)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get credentials name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get credentials name: %v", err)
 				credentialsLabel = model.CredentialsId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete credentials %q of credentials group  %q? (This cannot be undone)", credentialsLabel, credentialsGroupLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -78,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete Object Storage credentials: %w", err)
 			}
 
-			p.Info("Deleted credentials %q of credentials group %q\n", credentialsLabel, credentialsGroupLabel)
+			params.Printer.Info("Deleted credentials %q of credentials group %q\n", credentialsLabel, credentialsGroupLabel)
 			return nil
 		},
 	}

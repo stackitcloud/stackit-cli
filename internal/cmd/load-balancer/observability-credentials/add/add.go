@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +35,7 @@ type inputModel struct {
 	Password    *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Adds observability credentials to Load Balancer",
@@ -50,26 +51,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			// Prompt for password if not passed in as a flag
 			if model.Password == nil {
-				pwd, err := p.PromptForPassword("Enter user password: ")
+				pwd, err := params.Printer.PromptForPassword("Enter user password: ")
 				if err != nil {
 					return fmt.Errorf("prompt for password: %w", err)
 				}
@@ -78,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -91,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("add Load Balancer observability credentials: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)

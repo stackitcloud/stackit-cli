@@ -3,6 +3,7 @@ package unset
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -12,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unset the current active CLI configuration profile",
@@ -27,20 +28,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config profile unset"),
 		),
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := config.UnsetProfile(p)
+			err := config.UnsetProfile(params.Printer)
 			if err != nil {
 				return fmt.Errorf("unset profile: %w", err)
 			}
 
-			p.Info("Profile unset successfully. The default profile will be used.\n")
+			params.Printer.Info("Profile unset successfully. The default profile will be used.\n")
 
 			flow, err := auth.GetAuthFlow()
 			if err != nil {
-				p.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
-				p.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
+				params.Printer.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
+				params.Printer.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
 				return nil
 			}
-			p.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
+			params.Printer.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 
 			return nil
 		},

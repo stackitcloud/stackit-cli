@@ -8,11 +8,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/observability-credentials/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/observability-credentials/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/observability-credentials/update"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "observability-credentials",
 		Short: "Provides functionality for application loadbalancer credentials",
@@ -20,14 +20,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(add.NewCmd(p))
-	cmd.AddCommand(delete.NewCmd(p))
-	cmd.AddCommand(describe.NewCmd(p))
-	cmd.AddCommand(list.NewCmd(p))
-	cmd.AddCommand(update.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(add.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
 }

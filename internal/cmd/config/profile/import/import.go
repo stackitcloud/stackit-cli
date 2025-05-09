@@ -2,6 +2,7 @@ package importProfile
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -24,7 +25,7 @@ type inputModel struct {
 	NoSet       bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Imports a CLI configuration profile",
@@ -41,17 +42,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
-			err = config.ImportProfile(p, model.ProfileName, model.Config, !model.NoSet)
+			err = config.ImportProfile(params.Printer, model.ProfileName, model.Config, !model.NoSet)
 			if err != nil {
 				return err
 			}
 
-			p.Info("Successfully imported profile %q\n", model.ProfileName)
+			params.Printer.Info("Successfully imported profile %q\n", model.ProfileName)
 
 			return nil
 		},

@@ -1,19 +1,19 @@
 package volume
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume/attach"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume/detach"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "volume",
 		Short: "Provides functionality for server volumes",
@@ -21,14 +21,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(attach.NewCmd(p))
-	cmd.AddCommand(detach.NewCmd(p))
-	cmd.AddCommand(update.NewCmd(p))
-	cmd.AddCommand(list.NewCmd(p))
-	cmd.AddCommand(describe.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(attach.NewCmd(params))
+	cmd.AddCommand(detach.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
 }

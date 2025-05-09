@@ -5,14 +5,14 @@ import (
 	getaccesstoken "github.com/stackitcloud/stackit-cli/internal/cmd/auth/get-access-token"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/login"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth/logout"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Authenticates the STACKIT CLI",
@@ -20,13 +20,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(login.NewCmd(p))
-	cmd.AddCommand(logout.NewCmd(p))
-	cmd.AddCommand(activateserviceaccount.NewCmd(p))
-	cmd.AddCommand(getaccesstoken.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(login.NewCmd(params))
+	cmd.AddCommand(logout.NewCmd(params))
+	cmd.AddCommand(activateserviceaccount.NewCmd(params))
+	cmd.AddCommand(getaccesstoken.NewCmd(params))
 }

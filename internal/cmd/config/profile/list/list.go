@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -20,7 +21,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all CLI configuration profiles",
@@ -35,7 +36,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config profile list --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			model := parseInput(p, cmd)
+			model := parseInput(params.Printer, cmd)
 
 			profiles, err := config.ListProfiles()
 			if err != nil {
@@ -49,7 +50,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			outputProfiles := buildOutput(profiles, activeProfile)
 
-			return outputResult(p, model.OutputFormat, outputProfiles)
+			return outputResult(params.Printer, model.OutputFormat, outputProfiles)
 		},
 	}
 	return cmd

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -53,7 +54,7 @@ type inputModel struct {
 	ProjectIdSet bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
@@ -76,13 +77,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			if model.SessionTimeLimit != nil {
-				p.Warn("Authenticate again to apply changes to session time limit\n")
+				params.Printer.Warn("Authenticate again to apply changes to session time limit\n")
 				viper.Set(config.SessionTimeLimitKey, *model.SessionTimeLimit)
 			}
 

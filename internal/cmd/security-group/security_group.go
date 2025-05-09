@@ -1,6 +1,7 @@
 package security_group
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/security-group/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/security-group/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/security-group/describe"
@@ -8,14 +9,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/security-group/rule"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/security-group/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "security-group",
 		Short: "Manage security groups",
@@ -23,17 +23,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(
-		rule.NewCmd(p),
-		create.NewCmd(p),
-		delete.NewCmd(p),
-		describe.NewCmd(p),
-		list.NewCmd(p),
-		update.NewCmd(p),
+		rule.NewCmd(params),
+		create.NewCmd(params),
+		delete.NewCmd(params),
+		describe.NewCmd(params),
+		list.NewCmd(params),
+		update.NewCmd(params),
 	)
 }

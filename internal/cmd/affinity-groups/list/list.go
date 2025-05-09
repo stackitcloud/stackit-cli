@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -27,7 +28,7 @@ type inputModel struct {
 
 const limitFlag = "limit"
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists affinity groups",
@@ -45,13 +46,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -67,10 +68,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if model.Limit != nil && len(*items) > int(*model.Limit) {
 					*items = (*items)[:*model.Limit]
 				}
-				return outputResult(p, *model, *items)
+				return outputResult(params.Printer, *model, *items)
 			}
 
-			p.Outputln("No affinity groups found")
+			params.Printer.Outputln("No affinity groups found")
 			return nil
 		},
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Name string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", loadbalancerNameArg),
 		Short: "Describes an application loadbalancer",
@@ -43,13 +44,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -62,9 +63,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if loadbalancer := resp; loadbalancer != nil {
-				return outputResult(p, model.OutputFormat, loadbalancer)
+				return outputResult(params.Printer, model.OutputFormat, loadbalancer)
 			}
-			p.Outputln("No load balancer found.")
+			params.Printer.Outputln("No load balancer found.")
 			return nil
 		},
 	}

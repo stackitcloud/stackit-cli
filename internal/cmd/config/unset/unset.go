@@ -3,6 +3,7 @@ package unset
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -88,7 +89,7 @@ type inputModel struct {
 	TokenCustomEndpoint             bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
@@ -106,7 +107,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config unset --dns-custom-endpoint"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			model := parseInput(p, cmd)
+			model := parseInput(params.Printer, cmd)
 
 			if model.Async {
 				viper.Set(config.AsyncKey, config.AsyncDefault)

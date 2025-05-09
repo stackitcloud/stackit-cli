@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -32,7 +33,7 @@ type inputModel struct {
 	Limit    *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all server commands",
@@ -48,23 +49,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
 			serverLabel := model.ServerId
 			// Get server name
-			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer); err == nil {
 				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get server name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				} else if serverName != "" {
 					serverLabel = serverName
 				}
@@ -77,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("list server commands: %w", err)
 			}
 			if commands := resp.Items; commands == nil || len(*commands) == 0 {
-				p.Info("No commands found for server %s\n", serverLabel)
+				params.Printer.Info("No commands found for server %s\n", serverLabel)
 				return nil
 			}
 			commands := *resp.Items
@@ -85,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Limit != nil && len(commands) > int(*model.Limit) {
 				commands = commands[:*model.Limit]
 			}
-			return outputResult(p, model.OutputFormat, commands)
+			return outputResult(params.Printer, model.OutputFormat, commands)
 		},
 	}
 	configureFlags(cmd)

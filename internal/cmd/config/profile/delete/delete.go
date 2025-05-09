@@ -3,6 +3,7 @@ package delete
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -23,7 +24,7 @@ type inputModel struct {
 	Profile string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", profileArg),
 		Short: "Delete a CLI configuration profile",
@@ -38,7 +39,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config profile delete my-profile"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -60,18 +61,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get profile: %w", err)
 			}
 			if activeProfile == model.Profile {
-				p.Warn("The profile you are trying to delete is the active profile. The default profile will be set to active.\n")
+				params.Printer.Warn("The profile you are trying to delete is the active profile. The default profile will be set to active.\n")
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete profile %q? (This cannot be undone)", model.Profile)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
 			}
 
-			err = config.DeleteProfile(p, model.Profile)
+			err = config.DeleteProfile(params.Printer, model.Profile)
 			if err != nil {
 				return fmt.Errorf("delete profile: %w", err)
 			}
@@ -81,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete profile authentication: %w", err)
 			}
 
-			p.Info("Successfully deleted profile %q\n", model.Profile)
+			params.Printer.Info("Successfully deleted profile %q\n", model.Profile)
 
 			return nil
 		},

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -35,7 +36,7 @@ type inputModel struct {
 	PublicKey   bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", keyPairNameArg),
 		Short: "Describes a key pair",
@@ -53,13 +54,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
@@ -72,9 +73,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if keypair := resp; keypair != nil {
-				return outputResult(p, model.OutputFormat, model.PublicKey, *keypair)
+				return outputResult(params.Printer, model.OutputFormat, model.PublicKey, *keypair)
 			}
-			p.Outputln("No keypair found.")
+			params.Printer.Outputln("No keypair found.")
 			return nil
 		},
 	}
