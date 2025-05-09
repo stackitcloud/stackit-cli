@@ -15,12 +15,16 @@ stackit git list [flags]
 ```
   List all STACKIT Git instances
   $ stackit git instance list
+
+  Lists up to 10 STACKIT Git instances
+  $ stackit git instance list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit git list"
+  -h, --help        Help for "stackit git list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands

@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/git"
 )
 
@@ -17,6 +19,10 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &git.APIClient{}
 var testProjectId = uuid.NewString()
+
+const (
+	testLimit = 10
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -85,6 +91,30 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "with limit flag",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["limit"] = strconv.Itoa(testLimit)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = utils.Ptr(int64(testLimit))
+			}),
+		},
+		{
+			description: "with limit flag == 0",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["limit"] = strconv.Itoa(0)
+			}),
+			isValid: false,
+		},
+		{
+			description: "with limit flag < 0",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["limit"] = strconv.Itoa(-1)
 			}),
 			isValid: false,
 		},

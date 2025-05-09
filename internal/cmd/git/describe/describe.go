@@ -29,7 +29,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Describes STACKIT Git instance",
-		Long:  "Describes an STACKIT Git instance by its internal ID.",
+		Long:  "Describes a STACKIT Git instance by its internal ID.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(`Describe instance "xxx"`, `$ stackit git describe xxx`),
@@ -116,15 +116,30 @@ func outputResult(p *print.Printer, outputFormat string, resp *git.Instance) err
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "URL", "VERSION", "STATE", "CREATED")
-		table.AddRow(
-			utils.PtrString(resp.Id),
-			utils.PtrString(resp.Name),
-			utils.PtrString(resp.Url),
-			utils.PtrString(resp.Version),
-			utils.PtrString(resp.State),
-			utils.PtrString(resp.Created),
-		)
+		if id := resp.Id; id != nil {
+			table.AddRow("ID", *id)
+			table.AddSeparator()
+		}
+		if name := resp.Name; name != nil {
+			table.AddRow("NAME", *name)
+			table.AddSeparator()
+		}
+		if url := resp.Url; url != nil {
+			table.AddRow("URL", *url)
+			table.AddSeparator()
+		}
+		if version := resp.Version; version != nil {
+			table.AddRow("VERSION", *version)
+			table.AddSeparator()
+		}
+		if state := resp.State; state != nil {
+			table.AddRow("STATE", *state)
+			table.AddSeparator()
+		}
+		if created := resp.Created; created != nil {
+			table.AddRow("CREATED", *created)
+			table.AddSeparator()
+		}
 
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)

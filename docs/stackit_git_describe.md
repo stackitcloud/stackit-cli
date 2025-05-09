@@ -4,7 +4,7 @@ Describes STACKIT Git instance
 
 ### Synopsis
 
-Describes an STACKIT Git instance by its internal ID.
+Describes a STACKIT Git instance by its internal ID.
 
 ```
 stackit git describe INSTANCE_ID [flags]

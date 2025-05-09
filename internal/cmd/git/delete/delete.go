@@ -30,10 +30,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
 		Short: "Deletes STACKIT Git instance",
-		Long:  "Deletes an STACKIT Git instance by its internal ID.",
+		Long:  "Deletes a STACKIT Git instance by its internal ID.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`Delete an instance with ID "xxx"`, `$ stackit git delete xxx`),
+			examples.NewExample(`Delete a instance with ID "xxx"`, `$ stackit git delete xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

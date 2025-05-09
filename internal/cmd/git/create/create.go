@@ -34,11 +34,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates STACKIT Git instance",
-		Long:  "Create an STACKIT Git instance by name.",
+		Long:  "Create a STACKIT Git instance by name.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create an instance with name 'my-new-instance'`,
+				`Create a instance with name 'my-new-instance'`,
 				`$ stackit git create --name my-new-instance`,
 			),
 		),

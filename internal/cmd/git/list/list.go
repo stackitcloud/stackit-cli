@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
@@ -21,7 +22,10 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit *int64
 }
+
+const limitFlag = "limit"
 
 func NewCmd(p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -33,6 +37,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			examples.NewExample(
 				`List all STACKIT Git instances`,
 				"$ stackit git instance list"),
+			examples.NewExample(
+				"Lists up to 10 STACKIT Git instances",
+				"$ stackit git instance list --limit=10",
+			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -62,13 +70,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				}
 				p.Info("No instances found for project %q\n", projectLabel)
 				return nil
+			} else if model.Limit != nil && len(instances) > int(*model.Limit) {
+				instances = (instances)[:*model.Limit]
 			}
-
 			return outputResult(p, model.OutputFormat, instances)
 		},
 	}
-
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -77,8 +90,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		Limit:           limit,
 	}
 
 	if p.IsVerbosityDebug() {

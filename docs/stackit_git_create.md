@@ -4,7 +4,7 @@ Creates STACKIT Git instance
 
 ### Synopsis
 
-Create an STACKIT Git instance by name.
+Create a STACKIT Git instance by name.
 
 ```
 stackit git create [flags]
@@ -13,7 +13,7 @@ stackit git create [flags]
 ### Examples
 
 ```
-  Create an instance with name 'my-new-instance'
+  Create a instance with name 'my-new-instance'
   $ stackit git create --name my-new-instance
 ```
 

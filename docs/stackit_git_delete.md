@@ -4,7 +4,7 @@ Deletes STACKIT Git instance
 
 ### Synopsis
 
-Deletes an STACKIT Git instance by its internal ID.
+Deletes a STACKIT Git instance by its internal ID.
 
 ```
 stackit git delete INSTANCE_ID [flags]
@@ -13,7 +13,7 @@ stackit git delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete an instance with ID "xxx"
+  Delete a instance with ID "xxx"
   $ stackit git delete xxx
 ```
 
