@@ -1,24 +1,29 @@
 package client
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/foo"
 	// (...)
 )
 
-func ConfigureClient(cmd *cobra.Command) (*foo.APIClient, error) {
-	var err error
-	var apiClient foo.APIClient
-	var cfgOptions []sdkConfig.ConfigurationOption
-
-	authCfgOption, err := auth.AuthenticationConfig(cmd, auth.AuthorizeUser)
+func ConfigureClient(p *print.Printer, cliVersion string) (*foo.APIClient, error) {
+	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		return nil, &errors.AuthError{}
 	}
-	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion("eu01")) // Configuring region is needed if "foo" is a regional API
+
+	region := viper.GetString(config.RegionKey)
+	cfgOptions := []sdkConfig.ConfigurationOption{
+		utils.UserAgentConfigOption(cliVersion),
+		sdkConfig.WithRegion(region), // Configuring region is needed if "foo" is a regional API
+		authCfgOption,
+	}
 
 	customEndpoint := viper.GetString(config.fooCustomEndpointKey)
 
@@ -26,8 +31,15 @@ func ConfigureClient(cmd *cobra.Command) (*foo.APIClient, error) {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	}
 
-	apiClient, err = foo.NewAPIClient(cfgOptions...)
+	if p.IsVerbosityDebug() {
+		cfgOptions = append(cfgOptions,
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
+		)
+	}
+
+	apiClient, err := foo.NewAPIClient(cfgOptions...)
 	if err != nil {
+		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}
 	}
 
