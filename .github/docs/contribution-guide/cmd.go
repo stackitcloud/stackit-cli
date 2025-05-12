@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
@@ -54,7 +55,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer, cmd)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -66,7 +67,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("(...): %w", err)
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				projectLabel = model.ProjectId
 			}
@@ -86,14 +87,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 // Configure command flags (type, default value, and description)
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(myFlag, "defaultValue", "My flag description")
+	cmd.Flags().StringP(someFlag, "shorthand", "defaultValue", "My flag description")
 }
 
 // Parse user input (arguments and/or flags)
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	myArg := inputArgs[0]
 
-	globalFlags := globalflags.Parse(cmd)
+	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -101,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		MyArg:           myArg,
-		MyFlag:          flags.FlagToStringPointer(cmd, myFlag),
+		MyFlag:          flags.FlagToStringPointer(p, cmd, someFlag),
 	}
 
 	// Write the input model to the debug logs
@@ -119,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 // Build request to the API
 func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClient) foo.ApiListInstancesRequest {
-	req := apiClient.GetBar(ctx, model.ProjectId, model.MyArg, someParam)
+	req := apiClient.GetBar(ctx, model.ProjectId, model.MyArg, someArg)
 	return req
 }
 
@@ -147,7 +148,7 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, res
 			resource := resources[i]
 			table.AddRow(*resource.ResourceId, *resource.Name, *resource.State)
 		}
-		err := table.Display(cmd)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

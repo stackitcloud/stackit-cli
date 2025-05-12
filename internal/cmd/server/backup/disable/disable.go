@@ -48,14 +48,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			serverLabel := model.ServerId
 			// Get server name
-			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer); err == nil {
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
 				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)

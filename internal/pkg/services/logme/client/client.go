@@ -5,24 +5,25 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/logme"
 )
 
-func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
-	var err error
-	var apiClient *logme.APIClient
-	var cfgOptions []sdkConfig.ConfigurationOption
-
+func ConfigureClient(p *print.Printer, cliVersion string) (*logme.APIClient, error) {
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
 	region := viper.GetString(config.RegionKey)
-	cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
+	cfgOptions := []sdkConfig.ConfigurationOption{
+		utils.UserAgentConfigOption(cliVersion),
+		sdkConfig.WithRegion(region),
+		authCfgOption,
+	}
 
 	customEndpoint := viper.GetString(config.LogMeCustomEndpointKey)
 
@@ -36,7 +37,7 @@ func ConfigureClient(p *print.Printer) (*logme.APIClient, error) {
 		)
 	}
 
-	apiClient, err = logme.NewAPIClient(cfgOptions...)
+	apiClient, err := logme.NewAPIClient(cfgOptions...)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "create new API client: %v", err)
 		return nil, &errors.AuthError{}
