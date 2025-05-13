@@ -118,6 +118,8 @@ func TokenExpired(token string) (bool, error) {
 	expirationTimestampNumeric, err := tokenParsed.Claims.GetExpirationTime()
 	if err != nil {
 		return false, fmt.Errorf("get expiration timestamp from access token: %w", err)
+	} else if expirationTimestampNumeric == nil {
+		return false, nil
 	}
 	expirationTimestamp := expirationTimestampNumeric.Time
 	now := time.Now()
