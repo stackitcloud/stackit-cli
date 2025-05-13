@@ -5,14 +5,14 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/grafana/single-sign-on/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/grafana/single-sign-on/enable"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "single-sign-on",
 		Aliases: []string{"sso"},
@@ -24,11 +24,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(enable.NewCmd(p))
-	cmd.AddCommand(disable.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(enable.NewCmd(params))
+	cmd.AddCommand(disable.NewCmd(params))
 }

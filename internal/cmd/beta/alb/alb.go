@@ -11,15 +11,15 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/quotas"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/template"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "alb",
 		Short: "Manages application loadbalancers",
@@ -27,21 +27,21 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(
-		list.NewCmd(p),
-		template.NewCmd(p),
-		create.NewCmd(p),
-		update.NewCmd(p),
-		observabilitycredentials.NewCmd(p),
-		describe.NewCmd(p),
-		delete.NewCmd(p),
-		pool.NewCmd(p),
-		plans.NewCmd(p),
-		quotas.NewCmd(p),
+		list.NewCmd(params),
+		template.NewCmd(params),
+		create.NewCmd(params),
+		update.NewCmd(params),
+		observabilitycredentials.NewCmd(params),
+		describe.NewCmd(params),
+		delete.NewCmd(params),
+		pool.NewCmd(params),
+		plans.NewCmd(params),
+		quotas.NewCmd(params),
 	)
 }

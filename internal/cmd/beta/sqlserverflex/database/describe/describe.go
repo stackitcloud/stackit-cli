@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +32,7 @@ type inputModel struct {
 	InstanceId   string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", databaseNameArg),
 		Short: "Shows details of an SQLServer Flex database",
@@ -47,12 +48,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -64,7 +65,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("read SQLServer Flex database: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)

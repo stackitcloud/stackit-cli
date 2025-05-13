@@ -9,6 +9,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -37,7 +38,7 @@ type inputModel struct {
 	VolumeTypes        bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists SKE provider options",
@@ -59,13 +60,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -77,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get SKE provider options: %w", err)
 			}
 
-			return outputResult(p, model, resp)
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 	configureFlags(cmd)

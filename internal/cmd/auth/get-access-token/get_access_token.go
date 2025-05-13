@@ -2,14 +2,14 @@ package getaccesstoken
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-access-token",
 		Short: "Prints a short-lived access token.",
@@ -42,7 +42,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return &cliErr.AccessTokenExpiredError{}
 			}
 
-			p.Outputf("%s\n", accessToken)
+			params.Printer.Outputf("%s\n", accessToken)
 			return nil
 		},
 	}

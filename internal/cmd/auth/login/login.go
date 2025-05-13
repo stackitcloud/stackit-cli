@@ -3,15 +3,15 @@ package login
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Logs in to the STACKIT CLI",
@@ -25,12 +25,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit auth login"),
 		),
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := auth.AuthorizeUser(p, false)
+			err := auth.AuthorizeUser(params.Printer, false)
 			if err != nil {
 				return fmt.Errorf("authorization failed: %w", err)
 			}
 
-			p.Outputln("Successfully logged into STACKIT CLI.\n")
+			params.Printer.Outputln("Successfully logged into STACKIT CLI.\n")
 
 			return nil
 		},

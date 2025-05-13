@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +30,7 @@ type inputModel struct {
 	SecurityGroupId     *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", securityGroupRuleIdArg),
 		Short: "Deletes a security group rule",
@@ -46,32 +47,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, *model.SecurityGroupId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get security group name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = *model.SecurityGroupId
 			}
 
 			securityGroupRuleLabel, err := iaasUtils.GetSecurityGroupRuleName(ctx, apiClient, model.ProjectId, model.SecurityGroupRuleId, *model.SecurityGroupId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get security group rule name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get security group rule name: %v", err)
 				securityGroupRuleLabel = model.SecurityGroupRuleId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete security group rule %q from security group %q?", securityGroupRuleLabel, securityGroupLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -84,7 +85,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("delete security group rule: %w", err)
 			}
 
-			p.Info("Deleted security group rule %q from security group %q\n", securityGroupRuleLabel, securityGroupLabel)
+			params.Printer.Info("Deleted security group rule %q from security group %q\n", securityGroupRuleLabel, securityGroupLabel)
 			return nil
 		},
 	}

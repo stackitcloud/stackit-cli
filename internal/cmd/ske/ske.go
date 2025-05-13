@@ -1,6 +1,7 @@
 package ske
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/describe"
@@ -9,13 +10,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/kubeconfig"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ske",
 		Short: "Provides functionality for SKE",
@@ -23,16 +23,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(describe.NewCmd(p))
-	cmd.AddCommand(enable.NewCmd(p))
-	cmd.AddCommand(kubeconfig.NewCmd(p))
-	cmd.AddCommand(disable.NewCmd(p))
-	cmd.AddCommand(cluster.NewCmd(p))
-	cmd.AddCommand(credentials.NewCmd(p))
-	cmd.AddCommand(options.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(enable.NewCmd(params))
+	cmd.AddCommand(kubeconfig.NewCmd(params))
+	cmd.AddCommand(disable.NewCmd(params))
+	cmd.AddCommand(cluster.NewCmd(params))
+	cmd.AddCommand(credentials.NewCmd(params))
+	cmd.AddCommand(options.NewCmd(params))
 }

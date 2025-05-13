@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -26,7 +28,7 @@ type inputModel struct {
 
 const instanceIdArg = "INSTANCE_ID"
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
 		Short: "Deletes STACKIT Git instance",
@@ -37,26 +39,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer)
 			if err != nil {
 				return err
 			}
 
-			projectName, err := projectname.GetProjectName(ctx, p, cmd)
+			projectName, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectName = model.ProjectId
 			}
 
 			instanceName, err := gitUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get stackit git intance name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get stackit git intance name: %v", err)
 				instanceName = model.InstanceId
 			} else if instanceName == "" {
 				instanceName = model.InstanceId
@@ -64,7 +66,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete the stackit git instance %q for %q?", instanceName, projectName)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -80,7 +82,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Deleting stackit git instance")
 				_, err = wait.DeleteGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
 				if err != nil {
@@ -93,7 +95,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s stackit git instance %s \n", operationState, model.InstanceId)
+			params.Printer.Info("%s stackit git instance %s \n", operationState, model.InstanceId)
 
 			return nil
 		},

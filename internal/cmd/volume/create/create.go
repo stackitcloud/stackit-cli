@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -45,7 +46,7 @@ type inputModel struct {
 	SourceType       *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a volume",
@@ -71,26 +72,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a volume for project %q?", projectLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -106,7 +107,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Creating volume")
 				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, volumeId).WaitWithContext(ctx)
 				if err != nil {
@@ -115,7 +116,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, projectLabel, resp)
+			return outputResult(params.Printer, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)

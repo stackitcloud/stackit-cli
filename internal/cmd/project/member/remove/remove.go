@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -35,7 +36,7 @@ type inputModel struct {
 	Force   bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("remove %s", subjectArg),
 		Short: "Removes a member from a project",
@@ -55,20 +56,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
@@ -77,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if model.Force {
 					prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
 				}
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -90,7 +91,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			p.Info("Removed the role %q from %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
+			params.Printer.Info("Removed the role %q from %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
 			return nil
 		},
 	}

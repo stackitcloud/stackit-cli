@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/viper"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -32,7 +33,7 @@ type inputModel struct {
 	OnlyPrintAccessToken  bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "activate-service-account",
 		Short: "Authenticates using a service account",
@@ -58,7 +59,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			model := parseInput(p, cmd)
+			model := parseInput(params.Printer, cmd)
 
 			tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
 			if !model.OnlyPrintAccessToken {
@@ -78,12 +79,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			// Initializes the authentication flow
 			rt, err := sdkAuth.SetupAuth(cfg)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "setup auth: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "setup auth: %v", err)
 				return &cliErr.ActivateServiceAccountError{}
 			}
 
 			// Authenticates the service account and stores credentials
-			email, accessToken, err := auth.AuthenticateServiceAccount(p, rt, model.OnlyPrintAccessToken)
+			email, accessToken, err := auth.AuthenticateServiceAccount(params.Printer, rt, model.OnlyPrintAccessToken)
 			if err != nil {
 				var activateServiceAccountError *cliErr.ActivateServiceAccountError
 				if !errors.As(err, &activateServiceAccountError) {
@@ -94,9 +95,9 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if model.OnlyPrintAccessToken {
 				// Only output is the access token
-				p.Outputf("%s\n", accessToken)
+				params.Printer.Outputf("%s\n", accessToken)
 			} else {
-				p.Outputf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
+				params.Printer.Outputf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 			}
 			return nil
 		},

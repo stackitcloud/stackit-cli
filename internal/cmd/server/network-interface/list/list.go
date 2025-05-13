@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +32,7 @@ type inputModel struct {
 	Limit    *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all attached network interfaces of a server",
@@ -53,13 +54,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -74,12 +75,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get server name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 					serverLabel = *model.ServerId
 				} else if serverLabel == "" {
 					serverLabel = *model.ServerId
 				}
-				p.Info("No attached network interfaces found for server %q\n", serverLabel)
+				params.Printer.Info("No attached network interfaces found for server %q\n", serverLabel)
 				return nil
 			}
 
@@ -89,7 +90,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, *model.ServerId, items)
+			return outputResult(params.Printer, model.OutputFormat, *model.ServerId, items)
 		},
 	}
 	configureFlags(cmd)

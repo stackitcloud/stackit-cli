@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -30,7 +31,7 @@ type inputModel struct {
 	ServerId *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all attached service accounts for a server",
@@ -52,20 +53,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			serverName, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverName = *model.ServerId
 			} else if serverName == "" {
 				serverName = *model.ServerId
@@ -79,7 +80,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			serviceAccounts := *resp.Items
 			if len(serviceAccounts) == 0 {
-				p.Info("No service accounts found for server %s\n", serverName)
+				params.Printer.Info("No service accounts found for server %s\n", serverName)
 				return nil
 			}
 
@@ -87,7 +88,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				serviceAccounts = serviceAccounts[:int(*model.Limit)]
 			}
 
-			return outputResult(p, model.OutputFormat, *model.ServerId, serverName, serviceAccounts)
+			return outputResult(params.Printer, model.OutputFormat, *model.ServerId, serverName, serviceAccounts)
 		},
 	}
 	configureFlags(cmd)

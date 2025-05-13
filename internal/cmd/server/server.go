@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/backup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/command"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/console"
@@ -25,13 +26,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/volume"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "server",
 		Short: "Provides functionality for servers",
@@ -39,31 +39,31 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(backup.NewCmd(p))
-	cmd.AddCommand(command.NewCmd(p))
-	cmd.AddCommand(create.NewCmd(p))
-	cmd.AddCommand(delete.NewCmd(p))
-	cmd.AddCommand(describe.NewCmd(p))
-	cmd.AddCommand(list.NewCmd(p))
-	cmd.AddCommand(publicip.NewCmd(p))
-	cmd.AddCommand(serviceaccount.NewCmd(p))
-	cmd.AddCommand(update.NewCmd(p))
-	cmd.AddCommand(volume.NewCmd(p))
-	cmd.AddCommand(networkinterface.NewCmd(p))
-	cmd.AddCommand(console.NewCmd(p))
-	cmd.AddCommand(log.NewCmd(p))
-	cmd.AddCommand(start.NewCmd(p))
-	cmd.AddCommand(stop.NewCmd(p))
-	cmd.AddCommand(reboot.NewCmd(p))
-	cmd.AddCommand(deallocate.NewCmd(p))
-	cmd.AddCommand(resize.NewCmd(p))
-	cmd.AddCommand(rescue.NewCmd(p))
-	cmd.AddCommand(unrescue.NewCmd(p))
-	cmd.AddCommand(osUpdate.NewCmd(p))
-	cmd.AddCommand(machinetype.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(backup.NewCmd(params))
+	cmd.AddCommand(command.NewCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(publicip.NewCmd(params))
+	cmd.AddCommand(serviceaccount.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
+	cmd.AddCommand(volume.NewCmd(params))
+	cmd.AddCommand(networkinterface.NewCmd(params))
+	cmd.AddCommand(console.NewCmd(params))
+	cmd.AddCommand(log.NewCmd(params))
+	cmd.AddCommand(start.NewCmd(params))
+	cmd.AddCommand(stop.NewCmd(params))
+	cmd.AddCommand(reboot.NewCmd(params))
+	cmd.AddCommand(deallocate.NewCmd(params))
+	cmd.AddCommand(resize.NewCmd(params))
+	cmd.AddCommand(rescue.NewCmd(params))
+	cmd.AddCommand(unrescue.NewCmd(params))
+	cmd.AddCommand(osUpdate.NewCmd(params))
+	cmd.AddCommand(machinetype.NewCmd(params))
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -32,7 +33,7 @@ type inputModel struct {
 	RecordSetId string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", recordSetIdArg),
 		Short: "Deletes a DNS record set",
@@ -45,32 +46,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get zone name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
 			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get record set name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete record set %s of zone %s? (This cannot be undone)", recordSetLabel, zoneLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -88,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Deleting record set")
 				_, err = wait.DeleteRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 				if err != nil {
@@ -101,7 +102,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
+			params.Printer.Info("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
 			return nil
 		},
 	}

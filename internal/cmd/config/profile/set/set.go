@@ -3,6 +3,7 @@ package set
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -23,7 +24,7 @@ type inputModel struct {
 	Profile string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("set %s", profileArg),
 		Short: "Set a CLI configuration profile",
@@ -40,7 +41,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit config profile set my-profile"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -53,20 +54,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return &errors.SetInexistentProfile{Profile: model.Profile}
 			}
 
-			err = config.SetProfile(p, model.Profile)
+			err = config.SetProfile(params.Printer, model.Profile)
 			if err != nil {
 				return fmt.Errorf("set profile: %w", err)
 			}
 
-			p.Info("Successfully set active profile to %q\n", model.Profile)
+			params.Printer.Info("Successfully set active profile to %q\n", model.Profile)
 
 			flow, err := auth.GetAuthFlow()
 			if err != nil {
-				p.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
-				p.Warn("The active profile %q is not authenticated, please login using the 'stackit auth login' command.\n", model.Profile)
+				params.Printer.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
+				params.Printer.Warn("The active profile %q is not authenticated, please login using the 'stackit auth login' command.\n", model.Profile)
 				return nil
 			}
-			p.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
+			params.Printer.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 
 			return nil
 		},

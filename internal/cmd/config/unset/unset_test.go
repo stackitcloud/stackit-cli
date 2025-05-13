@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/google/go-cmp/cmp"
@@ -291,7 +293,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(p)
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 
 			for flag, value := range tt.flagValues {
 				stringBool := fmt.Sprintf("%v", value)

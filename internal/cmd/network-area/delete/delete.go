@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -30,7 +31,7 @@ type inputModel struct {
 	AreaId         string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", areaIdArg),
 		Short: "Deletes a STACKIT Network Area (SNA)",
@@ -47,20 +48,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, model.AreaId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get network area name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.AreaId
 			} else if networkAreaLabel == "" {
 				networkAreaLabel = model.AreaId
@@ -68,7 +69,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete network area %q?", networkAreaLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -83,7 +84,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Deleting network area")
 				_, err = wait.DeleteNetworkAreaWaitHandler(ctx, apiClient, *model.OrganizationId, model.AreaId).WaitWithContext(ctx)
 				if err != nil {
@@ -96,7 +97,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Info("%s STACKIT Network Area %q\n", operationState, networkAreaLabel)
+			params.Printer.Info("%s STACKIT Network Area %q\n", operationState, networkAreaLabel)
 			return nil
 		},
 	}

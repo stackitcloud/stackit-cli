@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +30,7 @@ type inputModel struct {
 	ServerId *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all server volumes",
@@ -45,20 +46,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
@@ -72,7 +73,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			volumes := *resp.Items
 			if len(volumes) == 0 {
-				p.Info("No volumes found for server %s\n", serverLabel)
+				params.Printer.Info("No volumes found for server %s\n", serverLabel)
 				return nil
 			}
 
@@ -81,12 +82,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			for i := range volumes {
 				volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, *volumes[i].VolumeId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get volume name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				}
 				volumeNames = append(volumeNames, volumeLabel)
 			}
 
-			return outputResult(p, model.OutputFormat, serverLabel, volumeNames, volumes)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, volumeNames, volumes)
 		},
 	}
 	configureFlags(cmd)

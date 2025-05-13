@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -35,7 +36,7 @@ type inputModel struct {
 	DeleteOnTermination *bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", volumeIdArg),
 		Short: "Updates an attached volume of a server",
@@ -49,20 +50,20 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get volume name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
 			} else if volumeLabel == "" {
 				volumeLabel = model.VolumeId
@@ -70,7 +71,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get server name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = *model.ServerId
@@ -78,7 +79,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update attached volume %q of server %q?", volumeLabel, serverLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -91,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update server volume: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, volumeLabel, serverLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, volumeLabel, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)

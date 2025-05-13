@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -43,7 +44,7 @@ type inputModel struct {
 	Type    string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a DNS record set",
@@ -56,26 +57,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get zone name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a record set for zone %s?", zoneLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -91,7 +92,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p)
+				s := spinner.New(params.Printer)
 				s.Start("Creating record set")
 				_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
 				if err != nil {
@@ -100,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p, model, zoneLabel, resp)
+			return outputResult(params.Printer, model, zoneLabel, resp)
 		},
 	}
 	configureFlags(cmd)

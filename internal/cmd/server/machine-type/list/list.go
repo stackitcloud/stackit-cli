@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +31,7 @@ const (
 	limitFlag = "limit"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get list of all machine types available in a project",
@@ -52,13 +53,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -71,12 +72,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get project name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No machine-types found for project %q\n", projectLabel)
+				params.Printer.Info("No machine-types found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -85,7 +86,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				*resp.Items = (*resp.Items)[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, *resp)
 		},
 	}
 

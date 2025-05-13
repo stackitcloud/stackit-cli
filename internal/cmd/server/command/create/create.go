@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 
+	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/client"
 	runcommandUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/runcommand/utils"
@@ -35,7 +37,7 @@ type inputModel struct {
 	Params              *map[string]string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a Server Command",
@@ -52,23 +54,23 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			serverLabel := model.ServerId
 			// Get server name
-			if iaasApiClient, err := iaasClient.ConfigureClient(p); err == nil {
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
 				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get server name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				} else if serverName != "" {
 					serverLabel = serverName
 				}
@@ -76,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a Command for server %s?", serverLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -92,7 +94,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create Server Command: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, serverLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, *resp)
 		},
 	}
 	configureFlags(cmd)

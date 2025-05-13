@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -25,7 +26,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists the current CLI configuration values",
@@ -50,14 +51,14 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			configData := viper.AllSettings()
 
-			model := parseInput(p, cmd)
+			model := parseInput(params.Printer, cmd)
 
 			activeProfile, err := config.GetProfile()
 			if err != nil {
 				return fmt.Errorf("get profile: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, configData, activeProfile)
+			return outputResult(params.Printer, model.OutputFormat, configData, activeProfile)
 		},
 	}
 	return cmd

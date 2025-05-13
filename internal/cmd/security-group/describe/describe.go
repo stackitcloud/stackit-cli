@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -27,7 +28,7 @@ type inputModel struct {
 
 const groupIdArg = "GROUP_ID"
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", groupIdArg),
 		Short: "Describes security groups",
@@ -38,13 +39,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -57,7 +58,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("get security group: %w", err)
 			}
 
-			if err := outputResult(p, model.OutputFormat, group); err != nil {
+			if err := outputResult(params.Printer, model.OutputFormat, group); err != nil {
 				return err
 			}
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -32,7 +33,7 @@ type inputModel struct {
 	NetworkRange   *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a network range in a STACKIT Network Area (SNA)",
@@ -46,13 +47,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -60,13 +61,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			// Get network area label
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get network area name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a network range for STACKIT Network Area (SNA) %q?", networkAreaLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -88,7 +89,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return err
 			}
 
-			return outputResult(p, model.OutputFormat, networkAreaLabel, networkRange)
+			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, networkRange)
 		},
 	}
 	configureFlags(cmd)
