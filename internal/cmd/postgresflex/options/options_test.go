@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -16,6 +17,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testProjectId = uuid.NewString()
 
 type postgresFlexClientMocked struct {
 	listFlavorsFails  bool
@@ -63,10 +65,11 @@ func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, 
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		flavorsFlag:  "true",
-		versionsFlag: "true",
-		storagesFlag: "true",
-		flavorIdFlag: "2.4",
+		globalflags.ProjectIdFlag: testProjectId,
+		flavorsFlag:               "true",
+		versionsFlag:              "true",
+		storagesFlag:              "true",
+		flavorIdFlag:              "2.4",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -76,10 +79,13 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
-		Flavors:         false,
-		Versions:        false,
-		Storages:        false,
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		Flavors:  false,
+		Versions: false,
+		Storages: false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -89,11 +95,14 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
-		Flavors:         true,
-		Versions:        true,
-		Storages:        true,
-		FlavorId:        utils.Ptr("2.4"),
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		Flavors:  true,
+		Versions: true,
+		Storages: true,
+		FlavorId: utils.Ptr("2.4"),
 	}
 	for _, mod := range mods {
 		mod(model)

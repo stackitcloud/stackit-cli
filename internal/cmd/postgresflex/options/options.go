@@ -10,6 +10,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -99,6 +100,9 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &cliErr.ProjectIdError{}
+	}
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
 	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)
 	storages := flags.FlagToBoolValue(p, cmd, storagesFlag)
