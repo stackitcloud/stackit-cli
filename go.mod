@@ -19,6 +19,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.6.3
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.13.3
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.3.3
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.22.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.21.2

@@ -14,6 +14,7 @@ import (
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/image"
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/key-pair"
 	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
@@ -191,6 +192,7 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(image.NewCmd(params))
 	cmd.AddCommand(quota.NewCmd(params))
 	cmd.AddCommand(affinityGroups.NewCmd(params))
+	cmd.AddCommand(git.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
