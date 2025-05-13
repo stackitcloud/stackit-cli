@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -48,7 +49,7 @@ type inputModel struct {
 	BackupVolumeIds       []string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", scheduleIdArg),
 		Short: "Updates a Server Backup Schedule",
@@ -65,26 +66,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			currentBackupSchedule, err := apiClient.GetBackupScheduleExecute(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get current server backup schedule: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get current server backup schedule: %v", err)
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update Server Backup Schedule %q?", model.BackupScheduleId)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -100,7 +101,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update Server Backup Schedule: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
@@ -115,7 +117,10 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 	err := configureFlags(cmd)
 	cobra.CheckErr(err)
 
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, &params.CmdParams{
+		Printer:    p,
+		CliVersion: version,
+	})
 
 	// Cobra creates the help flag with "help for <command>" as the description
 	// We want to override that message by capitalizing the first letter to match the other flag descriptions
@@ -155,39 +160,39 @@ func configureFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(auth.NewCmd(p))
-	cmd.AddCommand(configCmd.NewCmd(p))
-	cmd.AddCommand(beta.NewCmd(p))
-	cmd.AddCommand(curl.NewCmd(p))
-	cmd.AddCommand(dns.NewCmd(p))
-	cmd.AddCommand(loadbalancer.NewCmd(p))
-	cmd.AddCommand(logme.NewCmd(p))
-	cmd.AddCommand(mariadb.NewCmd(p))
-	cmd.AddCommand(mongodbflex.NewCmd(p))
-	cmd.AddCommand(objectstorage.NewCmd(p))
-	cmd.AddCommand(observability.NewCmd(p))
-	cmd.AddCommand(opensearch.NewCmd(p))
-	cmd.AddCommand(organization.NewCmd(p))
-	cmd.AddCommand(postgresflex.NewCmd(p))
-	cmd.AddCommand(project.NewCmd(p))
-	cmd.AddCommand(rabbitmq.NewCmd(p))
-	cmd.AddCommand(redis.NewCmd(p))
-	cmd.AddCommand(secretsmanager.NewCmd(p))
-	cmd.AddCommand(serviceaccount.NewCmd(p))
-	cmd.AddCommand(ske.NewCmd(p))
-	cmd.AddCommand(server.NewCmd(p))
-	cmd.AddCommand(networkArea.NewCmd(p))
-	cmd.AddCommand(network.NewCmd(p))
-	cmd.AddCommand(volume.NewCmd(p))
-	cmd.AddCommand(networkinterface.NewCmd(p))
-	cmd.AddCommand(publicip.NewCmd(p))
-	cmd.AddCommand(securitygroup.NewCmd(p))
-	cmd.AddCommand(keypair.NewCmd(p))
-	cmd.AddCommand(image.NewCmd(p))
-	cmd.AddCommand(quota.NewCmd(p))
-	cmd.AddCommand(affinityGroups.NewCmd(p))
-	cmd.AddCommand(git.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(auth.NewCmd(params))
+	cmd.AddCommand(configCmd.NewCmd(params))
+	cmd.AddCommand(beta.NewCmd(params))
+	cmd.AddCommand(curl.NewCmd(params))
+	cmd.AddCommand(dns.NewCmd(params))
+	cmd.AddCommand(loadbalancer.NewCmd(params))
+	cmd.AddCommand(logme.NewCmd(params))
+	cmd.AddCommand(mariadb.NewCmd(params))
+	cmd.AddCommand(mongodbflex.NewCmd(params))
+	cmd.AddCommand(objectstorage.NewCmd(params))
+	cmd.AddCommand(observability.NewCmd(params))
+	cmd.AddCommand(opensearch.NewCmd(params))
+	cmd.AddCommand(organization.NewCmd(params))
+	cmd.AddCommand(postgresflex.NewCmd(params))
+	cmd.AddCommand(project.NewCmd(params))
+	cmd.AddCommand(rabbitmq.NewCmd(params))
+	cmd.AddCommand(redis.NewCmd(params))
+	cmd.AddCommand(secretsmanager.NewCmd(params))
+	cmd.AddCommand(serviceaccount.NewCmd(params))
+	cmd.AddCommand(ske.NewCmd(params))
+	cmd.AddCommand(server.NewCmd(params))
+	cmd.AddCommand(networkArea.NewCmd(params))
+	cmd.AddCommand(network.NewCmd(params))
+	cmd.AddCommand(volume.NewCmd(params))
+	cmd.AddCommand(networkinterface.NewCmd(params))
+	cmd.AddCommand(publicip.NewCmd(params))
+	cmd.AddCommand(securitygroup.NewCmd(params))
+	cmd.AddCommand(keypair.NewCmd(params))
+	cmd.AddCommand(image.NewCmd(params))
+	cmd.AddCommand(quota.NewCmd(params))
+	cmd.AddCommand(affinityGroups.NewCmd(params))
+	cmd.AddCommand(git.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.

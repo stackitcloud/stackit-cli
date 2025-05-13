@@ -5,15 +5,15 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "beta",
 		Short: "Contains beta STACKIT CLI commands",
@@ -31,11 +31,11 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				"$ stackit beta MY_COMMAND"),
 		),
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(sqlserverflex.NewCmd(p))
-	cmd.AddCommand(alb.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(sqlserverflex.NewCmd(params))
+	cmd.AddCommand(alb.NewCmd(params))
 }

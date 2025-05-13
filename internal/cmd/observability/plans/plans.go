@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +31,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all Observability service plans",
@@ -49,13 +50,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -68,12 +69,12 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			}
 			plans := *resp.Plans
 			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get project name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No plans found for project %q\n", projectLabel)
+				params.Printer.Info("No plans found for project %q\n", projectLabel)
 				return nil
 			}
 
@@ -82,7 +83,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, plans)
+			return outputResult(params.Printer, model.OutputFormat, plans)
 		},
 	}
 

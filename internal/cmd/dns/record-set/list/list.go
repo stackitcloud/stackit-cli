@@ -9,6 +9,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -50,7 +51,7 @@ type inputModel struct {
 	PageSize    int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists DNS record sets",
@@ -75,13 +76,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -94,13 +95,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if len(recordSets) == 0 {
 				zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get zone name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 					zoneLabel = model.ZoneId
 				}
-				p.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
+				params.Printer.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
 				return nil
 			}
-			return outputResult(p, model.OutputFormat, recordSets)
+			return outputResult(params.Printer, model.OutputFormat, recordSets)
 		},
 	}
 

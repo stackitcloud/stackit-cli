@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -43,7 +44,7 @@ type inputModel struct {
 	MaintenanceWindow *int64
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", scheduleIdArg),
 		Short: "Updates a Server os-update Schedule",
@@ -57,26 +58,26 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			currentSchedule, err := apiClient.GetUpdateScheduleExecute(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get current server os-update schedule: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get current server os-update schedule: %v", err)
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update Server os-update Schedule %q?", model.ScheduleId)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -92,7 +93,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update Server os-update Schedule: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, *resp)
 		},
 	}
 	configureFlags(cmd)

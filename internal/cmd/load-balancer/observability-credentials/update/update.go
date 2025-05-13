@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -45,7 +46,7 @@ type inputModel struct {
 	Password       *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", credentialsRefArg),
 		Short: "Updates observability credentials for Load Balancer",
@@ -61,32 +62,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get credentials display name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
 			}
 
 			// Prompt for password if not passed in as a flag
 			if model.Password == nil {
-				pwd, err := p.PromptForPassword("Enter new password: ")
+				pwd, err := params.Printer.PromptForPassword("Enter new password: ")
 				if err != nil {
 					return fmt.Errorf("prompt for password: %w", err)
 				}
@@ -95,7 +96,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -112,7 +113,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("update Load Balancer observability credentials: %w", err)
 			}
 
-			p.Info("Updated observability credentials %q for Load Balancer on project %q\n", credentialsLabel, projectLabel)
+			params.Printer.Info("Updated observability credentials %q for Load Balancer on project %q\n", credentialsLabel, projectLabel)
 			return nil
 		},
 	}

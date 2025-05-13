@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -26,7 +27,7 @@ const (
 	affinityGroupIdArg = "AFFINITY_GROUP"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", affinityGroupIdArg),
 		Short: "Deletes an affinity group",
@@ -40,32 +41,32 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get project name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
 
 			affinityGroupLabel, err := iaasUtils.GetAffinityGroupName(ctx, apiClient, model.ProjectId, model.AffinityGroupId)
 			if err != nil {
-				p.Debug(print.ErrorLevel, "get affinity group name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get affinity group name: %v", err)
 				affinityGroupLabel = model.AffinityGroupId
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete affinity group %q?", affinityGroupLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -77,7 +78,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("delete affinity group: %w", err)
 			}
-			p.Info("Deleted affinity group %q for %q\n", affinityGroupLabel, projectLabel)
+			params.Printer.Info("Deleted affinity group %q for %q\n", affinityGroupLabel, projectLabel)
 
 			return nil
 		},

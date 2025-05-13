@@ -5,14 +5,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "git",
 		Short: "Provides functionality for STACKIT Git",
@@ -20,15 +20,15 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(
-		list.NewCmd(p),
-		describe.NewCmd(p),
-		create.NewCmd(p),
-		delete.NewCmd(p),
+		list.NewCmd(params),
+		describe.NewCmd(params),
+		create.NewCmd(params),
+		delete.NewCmd(params),
 	)
 }

@@ -1,6 +1,7 @@
 package backup
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/backup/create"
 	del "github.com/stackitcloud/stackit-cli/internal/cmd/server/backup/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/backup/describe"
@@ -11,13 +12,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/backup/schedule"
 	volumebackup "github.com/stackitcloud/stackit-cli/internal/cmd/server/backup/volume-backup"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
 		Short: "Provides functionality for server backups",
@@ -25,18 +25,18 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	addSubcommands(cmd, p)
+	addSubcommands(cmd, params)
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, p *print.Printer) {
-	cmd.AddCommand(enable.NewCmd(p))
-	cmd.AddCommand(disable.NewCmd(p))
-	cmd.AddCommand(describe.NewCmd(p))
-	cmd.AddCommand(list.NewCmd(p))
-	cmd.AddCommand(schedule.NewCmd(p))
-	cmd.AddCommand(create.NewCmd(p))
-	cmd.AddCommand(restore.NewCmd(p))
-	cmd.AddCommand(del.NewCmd(p))
-	cmd.AddCommand(volumebackup.NewCmd(p))
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(enable.NewCmd(params))
+	cmd.AddCommand(disable.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(schedule.NewCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(restore.NewCmd(params))
+	cmd.AddCommand(del.NewCmd(params))
+	cmd.AddCommand(volumebackup.NewCmd(params))
 }

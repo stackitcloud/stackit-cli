@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -29,7 +30,7 @@ type inputModel struct {
 	KeyPairName *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", keyPairNameArg),
 		Short: "Updates a key pair",
@@ -43,17 +44,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model := parseInput(p, cmd, args)
+			model := parseInput(params.Printer, cmd, args)
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeyPairName)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return fmt.Errorf("update key pair: %w", err)
 				}
@@ -69,7 +70,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("response is nil")
 			}
 
-			return outputResult(p, model, *resp)
+			return outputResult(params.Printer, model, *resp)
 		},
 	}
 	configureFlags(cmd)

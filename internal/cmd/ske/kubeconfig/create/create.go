@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -40,7 +41,7 @@ type inputModel struct {
 	Overwrite      bool
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", clusterNameArg),
 		Short: "Creates or update a kubeconfig for an SKE cluster",
@@ -77,13 +78,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -95,7 +96,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				} else {
 					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \nIf it the kubeconfig file doesn't exists, it will create a new one.", model.ClusterName)
 				}
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -156,10 +157,10 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("write kubeconfig file: %w", err)
 				}
-				p.Outputf("\nSet kubectl context to %s with: kubectl config use-context %s\n", model.ClusterName, model.ClusterName)
+				params.Printer.Outputf("\nSet kubectl context to %s with: kubectl config use-context %s\n", model.ClusterName, model.ClusterName)
 			}
 
-			return outputResult(p, model.OutputFormat, model.ClusterName, kubeconfigPath, respKubeconfig, respLogin)
+			return outputResult(params.Printer, model.OutputFormat, model.ClusterName, kubeconfigPath, respKubeconfig, respLogin)
 		},
 	}
 	configureFlags(cmd)

@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"reflect"
 	"testing"
+
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -104,6 +107,44 @@ func TestValidateURLDomain(t *testing.T) {
 			}
 			if !tt.isValid && err == nil {
 				t.Errorf("expected URL to be invalid, got no error")
+			}
+		})
+	}
+}
+
+func TestUserAgentConfigOption(t *testing.T) {
+	type args struct {
+		providerVersion string
+	}
+	tests := []struct {
+		name string
+		args args
+		want sdkConfig.ConfigurationOption
+	}{
+		{
+			name: "TestUserAgentConfigOption",
+			args: args{
+				providerVersion: "1.0.0",
+			},
+			want: sdkConfig.WithUserAgent("stackit-cli/1.0.0"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clientConfigActual := sdkConfig.Configuration{}
+			err := tt.want(&clientConfigActual)
+			if err != nil {
+				t.Errorf("error configuring client: %v", err)
+			}
+
+			clientConfigExpected := sdkConfig.Configuration{}
+			err = UserAgentConfigOption(tt.args.providerVersion)(&clientConfigExpected)
+			if err != nil {
+				t.Errorf("error configuring client: %v", err)
+			}
+
+			if !reflect.DeepEqual(clientConfigActual, clientConfigExpected) {
+				t.Errorf("UserAgentConfigOption() = %v, want %v", clientConfigActual, clientConfigExpected)
 			}
 		})
 	}

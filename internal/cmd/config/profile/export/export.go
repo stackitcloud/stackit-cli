@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -28,7 +29,7 @@ type inputModel struct {
 	FilePath    string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("export %s", profileNameArg),
 		Short: "Exports a CLI configuration profile",
@@ -45,17 +46,17 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		Args: args.SingleArg(profileNameArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(p, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
-			err = config.ExportProfile(p, model.ProfileName, model.FilePath)
+			err = config.ExportProfile(params.Printer, model.ProfileName, model.FilePath)
 			if err != nil {
 				return fmt.Errorf("could not export profile: %w", err)
 			}
 
-			p.Info("Exported profile %q to %q\n", model.ProfileName, model.FilePath)
+			params.Printer.Info("Exported profile %q to %q\n", model.ProfileName, model.FilePath)
 
 			return nil
 		},

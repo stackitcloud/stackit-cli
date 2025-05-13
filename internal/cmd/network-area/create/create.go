@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -45,7 +46,7 @@ type inputModel struct {
 	Labels              *map[string]string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a STACKIT Network Area (SNA)",
@@ -71,34 +72,34 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			var orgLabel string
-			rmApiClient, err := rmClient.ConfigureClient(p)
+			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
 				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get organization name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
 					orgLabel = *model.OrganizationId
 				} else if orgLabel == "" {
 					orgLabel = *model.OrganizationId
 				}
 			} else {
-				p.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 			}
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to create a network area for organization %q?", orgLabel)
-				err = p.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
@@ -111,7 +112,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				return fmt.Errorf("create network area: %w", err)
 			}
 
-			return outputResult(p, model.OutputFormat, orgLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, orgLabel, resp)
 		},
 	}
 	configureFlags(cmd)

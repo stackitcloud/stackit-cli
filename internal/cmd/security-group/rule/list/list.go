@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +35,7 @@ type inputModel struct {
 	SecurityGroupId *string
 }
 
-func NewCmd(p *print.Printer) *cobra.Command {
+func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all security group rules in a security group of a project",
@@ -56,13 +57,13 @@ func NewCmd(p *print.Printer) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -77,16 +78,16 @@ func NewCmd(p *print.Printer) *cobra.Command {
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, *model.SecurityGroupId)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get security group name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 					securityGroupLabel = *model.SecurityGroupId
 				}
 
-				projectLabel, err := projectname.GetProjectName(ctx, p, cmd)
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
-					p.Debug(print.ErrorLevel, "get project name: %v", err)
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Info("No rules found in security group %q for project %q\n", securityGroupLabel, projectLabel)
+				params.Printer.Info("No rules found in security group %q for project %q\n", securityGroupLabel, projectLabel)
 				return nil
 			}
 
@@ -96,7 +97,7 @@ func NewCmd(p *print.Printer) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(p, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)
