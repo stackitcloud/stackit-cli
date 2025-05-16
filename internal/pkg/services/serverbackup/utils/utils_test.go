@@ -88,7 +88,7 @@ func TestCanDisableBackupService(t *testing.T) {
 						LastRestoredAt: utils.Ptr("test timestamp"),
 						Name:           utils.Ptr("test name"),
 						Size:           utils.Ptr(int64(5)),
-						Status:         utils.Ptr("test status"),
+						Status:         serverbackup.BACKUPSTATUS_BACKING_UP.Ptr(),
 						VolumeBackups:  nil,
 					},
 				},

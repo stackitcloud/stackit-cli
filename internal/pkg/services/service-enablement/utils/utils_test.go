@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/wait"
 )
 
 var (
@@ -45,7 +42,7 @@ func TestProjectEnabled(t *testing.T) {
 	}{
 		{
 			description:    "project enabled",
-			getProjectResp: &serviceenablement.ServiceStatus{State: utils.Ptr(wait.ServiceStateEnabled)},
+			getProjectResp: &serviceenablement.ServiceStatus{State: serviceenablement.SERVICESTATUSSTATE_ENABLED.Ptr()},
 			isValid:        true,
 			expectedOutput: true,
 		},
@@ -57,19 +54,19 @@ func TestProjectEnabled(t *testing.T) {
 		},
 		{
 			description:    "project disabled 1",
-			getProjectResp: &serviceenablement.ServiceStatus{State: utils.Ptr(wait.ServiceStateEnabling)},
+			getProjectResp: &serviceenablement.ServiceStatus{State: serviceenablement.SERVICESTATUSSTATE_ENABLING.Ptr()},
 			isValid:        true,
 			expectedOutput: false,
 		},
 		{
 			description:    "project disabled 2",
-			getProjectResp: &serviceenablement.ServiceStatus{State: utils.Ptr(wait.ServiceStateDisabled)},
+			getProjectResp: &serviceenablement.ServiceStatus{State: serviceenablement.SERVICESTATUSSTATE_DISABLING.Ptr()},
 			isValid:        true,
 			expectedOutput: false,
 		},
 		{
 			description:    "project disabled 3",
-			getProjectResp: &serviceenablement.ServiceStatus{State: utils.Ptr(wait.ServiceStateDisabling)},
+			getProjectResp: &serviceenablement.ServiceStatus{State: serviceenablement.SERVICESTATUSSTATE_DISABLING.Ptr()},
 			isValid:        true,
 			expectedOutput: false,
 		},

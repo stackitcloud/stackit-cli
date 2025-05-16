@@ -31,7 +31,7 @@ var (
 	DefaultCreateScrapeConfigPayload = observability.CreateScrapeConfigPayload{
 		JobName:        utils.Ptr("default-name"),
 		MetricsPath:    utils.Ptr("/metrics"),
-		Scheme:         utils.Ptr("https"),
+		Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS.Ptr(),
 		ScrapeInterval: utils.Ptr("5m"),
 		ScrapeTimeout:  utils.Ptr("2m"),
 		StaticConfigs:  utils.Ptr(defaultStaticConfigs),
@@ -106,7 +106,7 @@ func MapToUpdateScrapeConfigPayload(resp *observability.GetScrapeConfigResponse)
 		MetricsRelabelConfigs: metricsRelabelConfigs,
 		Params:                params,
 		SampleLimit:           utils.ConvertInt64PToFloat64P(data.SampleLimit),
-		Scheme:                data.Scheme,
+		Scheme:                observability.UpdateScrapeConfigPayloadGetSchemeAttributeType(data.Scheme),
 		ScrapeInterval:        data.ScrapeInterval,
 		ScrapeTimeout:         data.ScrapeTimeout,
 		StaticConfigs:         staticConfigs,
@@ -127,7 +127,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs *[]observability.MetricsRelab
 	var mappedConfigs []observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
 	for _, config := range *metricsRelabelConfigs {
 		mappedConfig := observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
-			Action:       config.Action,
+			Action:       observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInnerGetActionAttributeType(config.Action),
 			Modulus:      utils.ConvertInt64PToFloat64P(config.Modulus),
 			Regex:        config.Regex,
 			Replacement:  config.Replacement,

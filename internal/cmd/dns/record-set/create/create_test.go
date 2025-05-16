@@ -75,7 +75,7 @@ func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.Ap
 			{Content: utils.Ptr("1.1.1.1")},
 		},
 		Ttl:  utils.Ptr(int64(3600)),
-		Type: utils.Ptr("SOA"),
+		Type: dns.CREATERECORDSETPAYLOADTYPE_SOA.Ptr(),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -247,7 +247,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "TXT record with > 255 characters",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[typeFlag] = txtType
+				flagValues[typeFlag] = string(txtType)
 				flagValues[recordFlag] = strings.Join(recordTxtOver255Char, "")
 			}),
 			isValid: true,

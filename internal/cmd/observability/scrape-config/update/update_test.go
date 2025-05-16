@@ -34,7 +34,7 @@ var testPayload = observability.UpdateScrapeConfigPayload{
 	MetricsPath:     utils.Ptr("/metrics"),
 	MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 		{
-			Action:       utils.Ptr("replace"),
+			Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 			Modulus:      utils.Ptr(1.0),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),

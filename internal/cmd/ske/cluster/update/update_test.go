@@ -47,7 +47,7 @@ var testPayload = ske.CreateOrUpdateClusterPayload{
 				Size: utils.Ptr(int64(40)),
 			},
 			AvailabilityZones: &[]string{"eu01-3"},
-			Cri:               &ske.CRI{Name: utils.Ptr("cri")},
+			Cri:               &ske.CRI{Name: ske.CRINAME_DOCKER.Ptr()},
 		},
 	},
 	Extensions: &ske.Extension{
@@ -100,7 +100,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"maximum": 2,
 				"maxSurge": 1,
 				"volume": { "type": "storage_premium_perf0", "size": 40 },
-				"cri": { "name": "cri" },
+				"cri": { "name": "docker" },
 				"availabilityZones": ["eu01-3"]
 			  }
 			],

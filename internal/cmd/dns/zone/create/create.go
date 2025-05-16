@@ -46,7 +46,7 @@ type inputModel struct {
 	DefaultTTL    *int64
 	Primaries     *[]string
 	Acl           *string
-	Type          *string
+	Type          *dns.CreateZonePayloadTypes
 	RetryTime     *int64
 	RefreshTime   *int64
 	NegativeCache *int64
@@ -124,12 +124,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	var typeFlagOptions []string
+	for _, val := range dns.AllowedCreateZonePayloadTypesEnumValues {
+		typeFlagOptions = append(typeFlagOptions, string(val))
+	}
+
 	cmd.Flags().String(nameFlag, "", "User given name of the zone")
 	cmd.Flags().String(dnsNameFlag, "", "Fully qualified domain name of the DNS zone")
 	cmd.Flags().Int64(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().String(typeFlag, "", "Zone type")
+	cmd.Flags().Var(flags.EnumFlag(false, "", append(typeFlagOptions, "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", typeFlagOptions))
 	cmd.Flags().Int64(retryTimeFlag, 0, "Retry time")
 	cmd.Flags().Int64(refreshTimeFlag, 0, "Refresh time")
 	cmd.Flags().Int64(negativeCacheFlag, 0, "Negative cache")
@@ -148,6 +153,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	var zoneType *dns.CreateZonePayloadTypes
+	if zoneTypeString := flags.FlagToStringPointer(p, cmd, typeFlag); zoneTypeString != nil && *zoneTypeString != "" {
+		zoneType = dns.CreateZonePayloadTypes(*zoneTypeString).Ptr()
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
@@ -155,7 +165,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		DefaultTTL:      flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag),
 		Primaries:       flags.FlagToStringSlicePointer(p, cmd, primaryFlag),
 		Acl:             flags.FlagToStringPointer(p, cmd, aclFlag),
-		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
+		Type:            zoneType,
 		RetryTime:       flags.FlagToInt64Pointer(p, cmd, retryTimeFlag),
 		RefreshTime:     flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag),
 		NegativeCache:   flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag),
