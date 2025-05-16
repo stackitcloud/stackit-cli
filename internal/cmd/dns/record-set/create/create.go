@@ -30,8 +30,8 @@ const (
 	ttlFlag     = "ttl"
 	typeFlag    = "type"
 
-	defaultType = "A"
-	txtType     = "TXT"
+	defaultType = dns.CREATERECORDSETPAYLOADTYPE_A
+	txtType     = dns.CREATERECORDSETPAYLOADTYPE_TXT
 )
 
 type inputModel struct {
@@ -41,7 +41,7 @@ type inputModel struct {
 	Name    *string
 	Records []string
 	TTL     *int64
-	Type    string
+	Type    dns.CreateRecordSetPayloadTypes
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -109,14 +109,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := []string{"A", "AAAA", "SOA", "CNAME", "NS", "MX", "TXT", "SRV", "PTR", "ALIAS", "DNAME", "CAA"}
+	var typeFlagOptions []string
+	for _, val := range dns.AllowedCreateRecordSetPayloadTypesEnumValues {
+		typeFlagOptions = append(typeFlagOptions, string(val))
+	}
 
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().String(commentFlag, "", "User comment")
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
 	cmd.Flags().Int64(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set")
-	cmd.Flags().Var(flags.EnumFlag(false, defaultType, typeFlagOptions...), typeFlag, fmt.Sprintf("Record type, one of %q", typeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, string(defaultType), typeFlagOptions...), typeFlag, fmt.Sprintf("Record type, one of %q", typeFlagOptions))
 
 	err := flags.MarkFlagsRequired(cmd, zoneIdFlag, nameFlag, recordFlag)
 	cobra.CheckErr(err)
@@ -128,6 +131,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
+	recordType := flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
@@ -135,7 +140,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
 		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
-		Type:            flags.FlagWithDefaultToStringValue(p, cmd, typeFlag),
+		Type:            dns.CreateRecordSetPayloadTypes(recordType),
 	}
 
 	if model.Type == txtType {

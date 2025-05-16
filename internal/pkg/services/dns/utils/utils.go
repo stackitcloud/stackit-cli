@@ -35,7 +35,7 @@ func GetRecordSetType(ctx context.Context, apiClient DNSClient, projectId, zoneI
 	if err != nil {
 		return utils.Ptr(""), fmt.Errorf("get DNS recordset: %w", err)
 	}
-	return resp.Rrset.Type, nil
+	return (*string)(resp.Rrset.Type), nil
 }
 
 func FormatTxtRecord(input string) (string, error) {

@@ -275,7 +275,7 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 			criNames := make([]string, 0)
 			for i := range *version.Cri {
 				cri := (*version.Cri)[i]
-				criNames = append(criNames, *cri.Name)
+				criNames = append(criNames, string(*cri.Name))
 			}
 			criNamesString := strings.Join(criNames, ", ")
 
