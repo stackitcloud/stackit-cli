@@ -241,7 +241,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.22.2
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.1.3
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.5.2
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.22.2
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.22.2
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
