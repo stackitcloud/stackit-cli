@@ -36,7 +36,7 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		{
 			DisplayName: utils.Ptr(""),
 			Port:        utils.Ptr(int64(0)),
-			Protocol:    utils.Ptr(""),
+			Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 			ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 				{
 					Name: utils.Ptr(""),
@@ -55,7 +55,7 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 	Networks: &[]loadbalancer.Network{
 		{
 			NetworkId: utils.Ptr(""),
-			Role:      utils.Ptr(""),
+			Role:      loadbalancer.NetworkRole("").Ptr(),
 		},
 	},
 	Options: &loadbalancer.LoadBalancerOptions{

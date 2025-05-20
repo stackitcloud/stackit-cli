@@ -48,7 +48,7 @@ func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigR
 			MetricsPath:     utils.Ptr("/metrics"),
 			MetricsRelabelConfigs: &[]observability.MetricsRelabelConfig{
 				{
-					Action:       utils.Ptr("replace"),
+					Action:       observability.METRICSRELABELCONFIGACTION_REPLACE.Ptr(),
 					Modulus:      &number,
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
@@ -62,7 +62,7 @@ func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigR
 				"key2": {},
 			},
 			SampleLimit:    &number,
-			Scheme:         utils.Ptr("scheme"),
+			Scheme:         observability.JOBSCHEME_HTTP.Ptr(),
 			ScrapeInterval: utils.Ptr("interval"),
 			ScrapeTimeout:  utils.Ptr("timeout"),
 			StaticConfigs: &[]observability.StaticConfigs{
@@ -99,7 +99,7 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeCo
 		MetricsPath:     utils.Ptr("/metrics"),
 		MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 			{
-				Action:       utils.Ptr("replace"),
+				Action:       utils.Ptr(observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInnerAction("replace")),
 				Modulus:      utils.Ptr(1.0),
 				Regex:        utils.Ptr("regex"),
 				Replacement:  utils.Ptr("replacement"),
@@ -113,7 +113,7 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeCo
 			"key2": []string{},
 		},
 		SampleLimit:    utils.Ptr(1.0),
-		Scheme:         utils.Ptr("scheme"),
+		Scheme:         observability.UPDATESCRAPECONFIGPAYLOADSCHEME_HTTP.Ptr(),
 		ScrapeInterval: utils.Ptr("interval"),
 		ScrapeTimeout:  utils.Ptr("timeout"),
 		StaticConfigs: &[]observability.UpdateScrapeConfigPayloadStaticConfigsInner{
@@ -432,7 +432,7 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 			description: "base case",
 			config: &[]observability.MetricsRelabelConfig{
 				{
-					Action:       utils.Ptr("replace"),
+					Action:       observability.METRICSRELABELCONFIGACTION_REPLACE.Ptr(),
 					Modulus:      utils.Int64Ptr(1),
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
@@ -443,7 +443,7 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 			},
 			expected: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 				{
-					Action:       utils.Ptr("replace"),
+					Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 					Modulus:      utils.Float64Ptr(1.0),
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),

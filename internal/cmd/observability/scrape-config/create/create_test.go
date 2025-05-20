@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -34,7 +35,7 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 	JobName:         utils.Ptr("default-name"),
 	MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 		{
-			Action:       utils.Ptr("replace"),
+			Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 			Modulus:      utils.Ptr(1.0),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),
@@ -48,7 +49,7 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 		"key2": []interface{}{},
 	},
 	SampleLimit:    utils.Ptr(1.0),
-	Scheme:         utils.Ptr("scheme"),
+	Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS.Ptr(),
 	ScrapeInterval: utils.Ptr("interval"),
 	ScrapeTimeout:  utils.Ptr("timeout"),
 	StaticConfigs: &[]observability.CreateScrapeConfigPayloadStaticConfigsInner{
@@ -69,7 +70,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		payloadFlag: `{
+		payloadFlag: fmt.Sprintf(`{
 			"jobName": "default-name",
 			"basicAuth": {
 				"username": "username",
@@ -95,7 +96,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"key2": []
 			},
 			"sampleLimit": 1.0,
-			"scheme": "scheme",
+			"scheme": "%s",
 			"scrapeInterval": "interval",
 			"scrapeTimeout": "timeout",
 			"staticConfigs": [
@@ -110,7 +111,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 			"tlsConfig": {
 				"insecureSkipVerify": true
 			}	
-		  }`,
+		  }`, observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS),
 	}
 	for _, mod := range mods {
 		mod(flagValues)

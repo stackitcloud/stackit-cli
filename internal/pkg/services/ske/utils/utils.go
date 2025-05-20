@@ -17,7 +17,7 @@ import (
 
 const (
 	defaultNodepoolAvailabilityZone = "eu01-3"
-	defaultNodepoolCRI              = "containerd"
+	defaultNodepoolCRI              = ske.CRINAME_CONTAINERD
 	defaultNodepoolMachineType      = "b1.2"
 	defaultNodepoolMachineImageName = "flatcar"
 	defaultNodepoolMaxSurge         = 1

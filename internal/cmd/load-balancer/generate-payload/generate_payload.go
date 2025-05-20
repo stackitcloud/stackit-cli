@@ -35,7 +35,7 @@ var (
 	defaultPayloadListener = &loadbalancer.Listener{
 		DisplayName: utils.Ptr(""),
 		Port:        utils.Ptr(int64(0)),
-		Protocol:    utils.Ptr(""),
+		Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 		ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 			{
 				Name: utils.Ptr(""),
@@ -52,7 +52,7 @@ var (
 
 	defaultPayloadNetwork = &loadbalancer.Network{
 		NetworkId: utils.Ptr(""),
-		Role:      utils.Ptr(""),
+		Role:      loadbalancer.NetworkRole("").Ptr(),
 	}
 
 	defaultPayloadTargetPool = &loadbalancer.TargetPool{

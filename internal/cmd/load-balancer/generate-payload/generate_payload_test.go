@@ -226,7 +226,7 @@ func TestModifyListeners(t *testing.T) {
 					{
 						DisplayName: utils.Ptr(""),
 						Port:        utils.Ptr(int64(0)),
-						Protocol:    utils.Ptr(""),
+						Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 						Name:        utils.Ptr(""),
 						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 							{
@@ -244,7 +244,7 @@ func TestModifyListeners(t *testing.T) {
 					{
 						DisplayName: utils.Ptr(""),
 						Port:        utils.Ptr(int64(0)),
-						Protocol:    utils.Ptr(""),
+						Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 						Name:        utils.Ptr(""),
 						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 							{
@@ -265,7 +265,7 @@ func TestModifyListeners(t *testing.T) {
 				{
 					DisplayName: utils.Ptr(""),
 					Port:        utils.Ptr(int64(0)),
-					Protocol:    utils.Ptr(""),
+					Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 					Name:        nil,
 					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 						{
@@ -283,7 +283,7 @@ func TestModifyListeners(t *testing.T) {
 				{
 					DisplayName: utils.Ptr(""),
 					Port:        utils.Ptr(int64(0)),
-					Protocol:    utils.Ptr(""),
+					Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 					Name:        nil,
 					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
 						{

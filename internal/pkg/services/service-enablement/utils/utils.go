@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/wait"
 )
 
 const (
@@ -29,5 +28,5 @@ func ProjectEnabled(ctx context.Context, apiClient ServiceEnablementClient, proj
 		}
 		return false, err
 	}
-	return *project.State == wait.ServiceStateEnabled, nil
+	return *project.State == serviceenablement.SERVICESTATUSSTATE_ENABLED, nil
 }
