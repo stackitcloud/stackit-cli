@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -81,7 +82,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag: testProjectId,
-		payloadFlag: `{
+		payloadFlag: fmt.Sprintf(`{
 			"name": "cli-jp",
 			"kubernetes": {
 			  "version": "1.25.15"
@@ -100,7 +101,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"maximum": 2,
 				"maxSurge": 1,
 				"volume": { "type": "storage_premium_perf0", "size": 40 },
-				"cri": { "name": "docker" },
+				"cri": { "name": "%s" },
 				"availabilityZones": ["eu01-3"]
 			  }
 			],
@@ -115,7 +116,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				  "start": "0000-01-01T03:00:00+02:00"
 				}
 			  }
-		  }`,
+		  }`, ske.CRINAME_DOCKER),
 	}
 	for _, mod := range mods {
 		mod(flagValues)

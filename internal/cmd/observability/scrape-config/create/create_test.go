@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -69,7 +70,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		projectIdFlag:  testProjectId,
 		instanceIdFlag: testInstanceId,
-		payloadFlag: `{
+		payloadFlag: fmt.Sprintf(`{
 			"jobName": "default-name",
 			"basicAuth": {
 				"username": "username",
@@ -95,7 +96,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"key2": []
 			},
 			"sampleLimit": 1.0,
-			"scheme": "https",
+			"scheme": "%s",
 			"scrapeInterval": "interval",
 			"scrapeTimeout": "timeout",
 			"staticConfigs": [
@@ -110,7 +111,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 			"tlsConfig": {
 				"insecureSkipVerify": true
 			}	
-		  }`,
+		  }`, observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
