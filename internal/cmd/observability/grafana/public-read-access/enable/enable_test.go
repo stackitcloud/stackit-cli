@@ -262,7 +262,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			expectedRequest: fixtureRequest(func(request *observability.ApiUpdateGrafanaConfigsRequest) {
-				*request = request.UpdateGrafanaConfigsPayload(*fixturePayload(func(payload *observability.UpdateGrafanaConfigsPayload) {
+				*request = (*request).UpdateGrafanaConfigsPayload(*fixturePayload(func(payload *observability.UpdateGrafanaConfigsPayload) {
 					payload.GenericOauth = nil
 				}))
 			}),

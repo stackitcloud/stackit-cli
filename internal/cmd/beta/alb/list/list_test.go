@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -49,7 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiListLoadBalancersRequest)) alb.ApiListLoadBalancersRequest {
-	request := testClient.ListLoadBalancers(context.Background(), testProjectId, testRegion)
+	request := testClient.ListLoadBalancers(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,7 +160,6 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(alb.ApiListLoadBalancersRequest{}, "ctx"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
