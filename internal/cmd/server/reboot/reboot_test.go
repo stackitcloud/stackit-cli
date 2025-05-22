@@ -199,7 +199,7 @@ func TestBuildRequest(t *testing.T) {
 				model.HardReboot = true
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiRebootServerRequest) {
-				*request = request.Action("hard")
+				*request = (*request).Action("hard")
 			}),
 		},
 	}
