@@ -15,9 +15,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
 )
 
 const (
@@ -79,7 +81,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			// TODO: necessary? utils for each service seperately?
+			// TODO: why not necessary here? utils for each service seperately?
 			// Check if the project is enabled before trying to create
 			// enabled, err := utils.ProjectEnabled(ctx, apiClient, model.ProjectId)
 			// if err != nil {
@@ -98,21 +100,21 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("create volume backup: %w", err)
 			}
 
-			// TODO: How to check source-name exists?
+			// TODO: How to check if "source-name" exists?
 			// Get source label (use ID if name not available)
 			// sourceLabel := model.SourceID
 
 			// TODO: SDK needs to be updated/released to support this async operation
 			// Wait for async operation, if async mode not enabled
-			// if !model.Async {
-			// 	s := spinner.New(params.Printer)
-			// 	s.Start("Creating backup")
-			// 	_, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.SourceID).WaitWithContext(ctx)
-			// 	if err != nil {
-			// 		return fmt.Errorf("wait for volume backup creation: %w", err)
-			// 	}
-			// 	s.Stop()
-			// }
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Creating backup")
+				_, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.SourceID).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for volume backup creation: %w", err)
+				}
+				s.Stop()
+			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, model.SourceID, projectLabel, resp)
 		},
@@ -178,8 +180,8 @@ func buildRequest(model *inputModel, apiClient *iaas.APIClient, ctx context.Cont
 	return req
 }
 
-// TODO: create(volume)BackupResponse needs to be created?
-func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel, projectLabel string, resp *iaas.CreateVolumeBackupResponse) error {
+// TODO: create(volume)BackupResponse or createBackupResponse needs to be created
+func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel, projectLabel string, resp *iaas.Backup) error {
 	if resp == nil {
 		return fmt.Errorf("create backup response is empty")
 	}
@@ -203,9 +205,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel
 
 	default:
 		if async {
-			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Backup.Id)
+			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
 		} else {
-			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Backup.Id)
+			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
 		}
 		return nil
 	}
