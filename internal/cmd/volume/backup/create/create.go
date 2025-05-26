@@ -81,18 +81,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			// TODO: why not necessary here? utils for each service seperately?
-			// Check if the project is enabled before trying to create
-			// enabled, err := utils.ProjectEnabled(ctx, apiClient, model.ProjectId)
-			// if err != nil {
-			// 	return fmt.Errorf("check if IaaS is enabled: %w", err)
-			// }
-			// if !enabled {
-			// 	return &errors.ServiceDisabledError{
-			// 		Service: "iaas",
-			// 	}
-			// }
-
 			// Call API
 			req := buildRequest(model, apiClient, ctx)
 			resp, err := req.Execute()
@@ -150,14 +138,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, fmt.Errorf("source-type must be either 'volume' or 'snapshot'")
 	}
 
-	name := flags.FlagToStringValue(p, cmd, nameFlag)
+	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
+	if labels == nil {
+		labels = &map[string]string{}
+	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		SourceID:        sourceID,
 		SourceType:      sourceType,
-		Name:            &name,
+		Name:            name,
 		Labels:          *labels,
 	}
 
