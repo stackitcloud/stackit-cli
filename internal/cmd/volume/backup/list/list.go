@@ -40,16 +40,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all volume backups`,
+				`List all backups`,
 				"$ stackit volume backup list"),
 			examples.NewExample(
-				`List all volume backups in JSON format`,
+				`List all backups in JSON format`,
 				"$ stackit volume backup list --output-format json"),
 			examples.NewExample(
-				`List up to 10 volume backups`,
+				`List up to 10 backups`,
 				"$ stackit volume backup list --limit 10"),
 			examples.NewExample(
-				`List volume backups with specific labels`,
+				`List backups with specific labels`,
 				"$ stackit volume backup list --label-selector key1=value1,key2=value2"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -69,7 +69,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get volume backups: %w", err)
+				return fmt.Errorf("get backups: %w", err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
@@ -97,7 +97,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().String(labelSelectorFlag, "", "Filter backups by labels (comma-separated key=value pairs)")
+	cmd.Flags().String(labelSelectorFlag, "", "Filter backups by labels")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -153,7 +153,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(backups, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal volume backup list: %w", err)
+			return fmt.Errorf("marshal backup list: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -161,7 +161,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal volume backup list: %w", err)
+			return fmt.Errorf("marshal backup list: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -173,23 +173,17 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 		for i := range backups {
 			backup := backups[i]
 
-			// Format labels as a string
-			labelsStr := ""
-			if backup.Labels != nil {
-				labelsStr = utils.FormatLabelsAsString(*backup.Labels)
-			}
-
 			table.AddRow(
 				utils.PtrString(backup.Id),
 				utils.PtrString(backup.Name),
-				utils.FormatSize(backup.Size),
+				utils.PtrByteSizeDefault((*int64)(backup.Size), ""),
 				utils.PtrString(backup.Status),
 				utils.PtrString(backup.SnapshotId),
 				utils.PtrString(backup.VolumeId),
 				utils.PtrString(backup.AvailabilityZone),
-				labelsStr,
-				utils.FormatTimestamp(backup.CreatedAt),
-				utils.FormatTimestamp(backup.UpdatedAt),
+				utils.PtrStringDefault(backup.Labels, ""),
+				utils.ConvertTimePToDateTimeString(backup.CreatedAt),
+				utils.ConvertTimePToDateTimeString(backup.UpdatedAt),
 			)
 		}
 
