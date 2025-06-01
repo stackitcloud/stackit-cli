@@ -73,8 +73,26 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			// Get source name for label (use ID if name not available)
+			sourceLabel := model.SourceID
+			if model.SourceType == "volume" {
+				volume, err := apiClient.GetVolume(ctx, model.ProjectId, model.SourceID).Execute()
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
+				} else if volume != nil && volume.Name != nil {
+					sourceLabel = *volume.Name
+				}
+			} else if model.SourceType == "snapshot" {
+				snapshot, err := apiClient.GetSnapshot(ctx, model.ProjectId, model.SourceID).Execute()
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
+				} else if snapshot != nil && snapshot.Name != nil {
+					sourceLabel = *snapshot.Name
+				}
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create backup from %s? (This cannot be undone)", model.SourceID)
+				prompt := fmt.Sprintf("Are you sure you want to create backup from %s? (This cannot be undone)", sourceLabel)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -88,21 +106,23 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("create volume backup: %w", err)
 			}
 
-			// TODO: How to check if "source-name" exists?
-			// Get source label (use ID if name not available)
-			// sourceLabel := model.SourceID
-
+			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating backup")
-				_, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.SourceID).WaitWithContext(ctx)
+				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, *resp.Id).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for volume backup creation: %w", err)
+					return fmt.Errorf("wait for backup creation: %w", err)
 				}
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, model.SourceID, projectLabel, resp)
+			if model.Async {
+				params.Printer.Info("Triggered backup of %q in %q. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
+			} else {
+				params.Printer.Info("Created backup of %q in %q. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
+			}
+			return nil
 		},
 	}
 
