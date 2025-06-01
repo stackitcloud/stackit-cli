@@ -92,8 +92,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Get source label (use ID if name not available)
 			// sourceLabel := model.SourceID
 
-			// TODO: SDK needs to be updated/released to support this async operation
-			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating backup")
