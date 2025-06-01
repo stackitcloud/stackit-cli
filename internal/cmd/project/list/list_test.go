@@ -67,7 +67,7 @@ func fixtureRequest(mods ...func(request *resourcemanager.ApiListProjectsRequest
 
 	testCreationTimeAfter, err := time.Parse(creationTimeAfterFormat, testCreationTimeAfter)
 	if err != nil {
-		return resourcemanager.ApiListProjectsRequest{}
+		return resourcemanager.ListProjectsRequest{}
 	}
 	request = request.CreationTimeStart(testCreationTimeAfter)
 	request = request.Member("member")

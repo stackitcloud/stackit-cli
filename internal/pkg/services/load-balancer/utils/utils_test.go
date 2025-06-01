@@ -56,7 +56,7 @@ func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _
 }
 
 func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
-	return loadbalancer.ApiUpdateTargetPoolRequest{}
+	return loadbalancer.UpdateTargetPoolRequest{}
 }
 
 func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {

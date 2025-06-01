@@ -241,7 +241,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = utils.Ptr(map[string]string{"key": "value"})
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
-				*request = request.CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
+				*request = (*request).CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
 					(*payload.Ipv4)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
 				}))
 			}),

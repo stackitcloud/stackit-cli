@@ -268,7 +268,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateSecurityGroupRequest) {
-				*request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
+				*request = (*request).UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      nil,
 					Name:        &testName,

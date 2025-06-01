@@ -184,7 +184,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Name = "new-name"
 			}),
 			expectedRequest: fixtureRequest(func(request *git.ApiCreateInstanceRequest) {
-				*request = request.CreateInstancePayload(fixtureCreatePayload(func(payload *git.CreateInstancePayload) {
+				*request = (*request).CreateInstancePayload(fixtureCreatePayload(func(payload *git.CreateInstancePayload) {
 					payload.Name = utils.Ptr("new-name")
 				}))
 			}),
