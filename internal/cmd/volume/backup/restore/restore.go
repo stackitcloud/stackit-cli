@@ -1,0 +1,149 @@
+package restore
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+)
+
+const (
+	backupIdArg = "BACKUP_ID"
+)
+
+type inputModel struct {
+	*globalflags.GlobalFlagModel
+	BackupId string
+}
+
+func NewCmd(params *params.CmdParams) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   fmt.Sprintf("restore %s", backupIdArg),
+		Short: "Restores a backup",
+		Long:  "Restores a backup by its ID.",
+		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
+		Example: examples.Build(
+			examples.NewExample(
+				`Restore a backup`,
+				"$ stackit volume backup restore xxx-xxx-xxx"),
+			examples.NewExample(
+				`Restore a backup and wait for restore to be completed`,
+				"$ stackit volume backup restore xxx-xxx-xxx --async=false"),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return err
+			}
+
+			// Get backup details for labels
+			backup, err := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId).Execute()
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get backup details: %v", err)
+			}
+			backupLabel := model.BackupId
+			if backup != nil && backup.Name != nil {
+				backupLabel = *backup.Name
+			}
+
+			// Get source details for labels
+			var sourceLabel string
+			if backup != nil && backup.VolumeId != nil {
+				volume, err := apiClient.GetVolume(ctx, model.ProjectId, *backup.VolumeId).Execute()
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get volume details: %v", err)
+					sourceLabel = *backup.VolumeId
+				} else if volume.Name != nil {
+					sourceLabel = *volume.Name
+				} else {
+					sourceLabel = *backup.VolumeId
+				}
+			}
+
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to restore %q with backup %q? (This cannot be undone)", sourceLabel, backupLabel)
+				err = params.Printer.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("restore backup: %w", err)
+			}
+
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Restoring backup")
+				_, err = wait.RestoreBackupWaitHandler(ctx, apiClient, model.ProjectId, model.BackupId).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for backup restore: %w", err)
+				}
+				s.Stop()
+			}
+
+			projectLabel := model.ProjectId
+
+			if model.Async {
+				params.Printer.Info("Triggered restore of %q with %q in %q\n", sourceLabel, backupLabel, projectLabel)
+			} else {
+				params.Printer.Info("Restored %q with %q in %q\n", sourceLabel, backupLabel, projectLabel)
+			}
+			return nil
+		},
+	}
+	return cmd
+}
+
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	backupId := inputArgs[0]
+
+	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &errors.ProjectIdError{}
+	}
+
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+		BackupId:        backupId,
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRestoreBackupRequest {
+	req := apiClient.RestoreBackup(ctx, model.ProjectId, model.BackupId)
+	return req
+}
