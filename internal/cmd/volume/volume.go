@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/list"
 	performanceclass "github.com/stackitcloud/stackit-cli/internal/cmd/volume/performance-class"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/resize"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/snapshot"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -35,4 +36,5 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(resize.NewCmd(params))
 	cmd.AddCommand(performanceclass.NewCmd(params))
+	cmd.AddCommand(snapshot.NewCmd(params))
 }
