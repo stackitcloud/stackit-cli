@@ -182,14 +182,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-// TODO: Enough?
 func buildRequest(model *inputModel, apiClient *iaas.APIClient, ctx context.Context) iaas.ApiCreateBackupRequest {
-	// TODO: doc says if createeBackup func provides snapshot-id but isnt in the func-signature?
 	req := apiClient.CreateBackup(ctx, model.ProjectId)
 	return req
 }
 
-// TODO: create(volume)BackupResponse or createBackupResponse needs to be created
 func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel, projectLabel string, resp *iaas.Backup) error {
 	if resp == nil {
 		return fmt.Errorf("create backup response is empty")
