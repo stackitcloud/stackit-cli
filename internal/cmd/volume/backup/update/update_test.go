@@ -14,8 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var (
@@ -39,9 +37,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		nameFlag:      testName,
-		labelsFlag:    "key1=value1",
+		globalflags.ProjectIdFlag: testProjectId,
+		nameFlag:                  testName,
+		labelsFlag:                "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)

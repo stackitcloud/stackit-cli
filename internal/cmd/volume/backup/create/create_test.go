@@ -14,8 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var (
@@ -29,11 +27,11 @@ var (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		sourceIdFlag:   testSourceId,
-		sourceTypeFlag: "volume",
-		nameFlag:       testName,
-		labelsFlag:     "key1=value1",
+		globalflags.ProjectIdFlag: testProjectId,
+		sourceIdFlag:              testSourceId,
+		sourceTypeFlag:            "volume",
+		nameFlag:                  testName,
+		labelsFlag:                "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -108,14 +106,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
