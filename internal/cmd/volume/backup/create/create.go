@@ -54,7 +54,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a backup with labels`,
 				"$ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2 --project-id xxx"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
@@ -100,7 +100,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(model, apiClient, ctx)
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create volume backup: %w", err)
@@ -182,7 +182,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(model *inputModel, apiClient *iaas.APIClient, ctx context.Context) iaas.ApiCreateBackupRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
 	req := apiClient.CreateBackup(ctx, model.ProjectId)
 	return req
 }
