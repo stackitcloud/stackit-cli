@@ -45,10 +45,10 @@ builds:
           '
 
 archives:
-  - format: tar.gz
+  - formats: [ 'tar.gz' ]
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [ 'zip' ]
 
 release:
   # If set to auto, the GitHub release will be marked as "Pre-release"
@@ -66,7 +66,7 @@ changelog:
 nfpms:
   - id: linux-packages
     # IDs of the builds for which to create packages for
-    builds:
+    ids:
       - linux-builds
     package_name: stackit
     vendor: STACKIT
@@ -114,7 +114,7 @@ brews:
 
 snapcrafts:
   # IDs of the builds for which to create packages for
-  - builds:
+  - ids:
       - linux-builds
     # The name of the snap
     name: stackit
