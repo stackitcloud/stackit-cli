@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -122,18 +123,29 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "VOLUME ID", "LABELS", "CREATED AT", "UPDATED AT")
+		table.AddRow("ID", utils.PtrString(snapshot.Id))
+		table.AddSeparator()
+		table.AddRow("NAME", utils.PtrString(snapshot.Name))
+		table.AddSeparator()
+		table.AddRow("SIZE", utils.PtrByteSizeDefault((*int64)(snapshot.Size), ""))
+		table.AddSeparator()
+		table.AddRow("STATUS", utils.PtrString(snapshot.Status))
+		table.AddSeparator()
+		table.AddRow("VOLUME ID", utils.PtrString(snapshot.VolumeId))
+		table.AddSeparator()
 
-		table.AddRow(
-			utils.PtrString(snapshot.Id),
-			utils.PtrString(snapshot.Name),
-			utils.PtrByteSizeDefault((*int64)(snapshot.Size), ""),
-			utils.PtrString(snapshot.Status),
-			utils.PtrString(snapshot.VolumeId),
-			utils.PtrStringDefault(snapshot.Labels, ""),
-			utils.ConvertTimePToDateTimeString(snapshot.CreatedAt),
-			utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt),
-		)
+		if snapshot.Labels != nil && len(*snapshot.Labels) > 0 {
+			labels := []string{}
+			for key, value := range *snapshot.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			}
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
+			table.AddSeparator()
+		}
+
+		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(snapshot.CreatedAt))
+		table.AddSeparator()
+		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt))
 
 		err := table.Display(p)
 		if err != nil {
