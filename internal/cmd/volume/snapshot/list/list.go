@@ -177,12 +177,10 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 				utils.ConvertTimePToDateTimeString(snapshot.CreatedAt),
 				utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt),
 			)
-		}
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
+			table.AddSeparator()
 		}
 
+		p.Outputln(table.Render())
 		return nil
 	}
 }
