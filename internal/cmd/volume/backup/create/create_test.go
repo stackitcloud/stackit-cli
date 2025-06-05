@@ -17,12 +17,13 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
-	testProjectId = uuid.NewString()
-	testSourceId  = uuid.NewString()
-	testName      = "my-backup"
-	testLabels    = map[string]string{"key1": "value1"}
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &iaas.APIClient{}
+	testProjectId  = uuid.NewString()
+	testSourceId   = uuid.NewString()
+	testName       = "my-backup"
+	testLabels     = map[string]string{"key1": "value1"}
+	testSourceType = "volume"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -58,6 +59,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateBackupRequest)) iaas.ApiCreateBackupRequest {
 	request := testClient.CreateBackup(testCtx, testProjectId)
+
+	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
+	createPayload.Name = &testName
+	createPayload.Labels = &map[string]interface{}{
+		"key1": "value1",
+	}
+	createPayload.Source = &iaas.BackupSource{
+		Id:   &testSourceId,
+		Type: &testSourceType,
+	}
+
+	request = request.CreateBackupPayload(*createPayload)
 	for _, mod := range mods {
 		mod(&request)
 	}

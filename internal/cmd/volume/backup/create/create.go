@@ -118,12 +118,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			if model.Async {
-				params.Printer.Info("Triggered backup of %q in %q. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
-			} else {
-				params.Printer.Info("Created backup of %q in %q. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
-			}
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, model.Async, sourceLabel, projectLabel, resp)
 		},
 	}
 
@@ -203,8 +198,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Type: &model.SourceType,
 	}
 
-	req = req.CreateBackupPayload(*createPayload)
-	return req
+	return req.CreateBackupPayload(*createPayload)
 }
 
 func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel, projectLabel string, resp *iaas.Backup) error {
