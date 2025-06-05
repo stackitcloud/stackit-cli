@@ -185,13 +185,10 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 				utils.ConvertTimePToDateTimeString(backup.CreatedAt),
 				utils.ConvertTimePToDateTimeString(backup.UpdatedAt),
 			)
+			table.AddSeparator()
 		}
 
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
-
+		p.Outputln(table.Render())
 		return nil
 	}
 }
