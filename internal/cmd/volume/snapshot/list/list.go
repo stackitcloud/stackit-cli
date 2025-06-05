@@ -18,6 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -67,6 +68,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list snapshots: %w", err)
+			}
+
+			// Check if response is empty
+			if resp.Items == nil || len(*resp.Items) == 0 {
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+					projectLabel = model.ProjectId
+				}
+				params.Printer.Info("No snapshots found for project %q\n", projectLabel)
+				return nil
 			}
 
 			// Filter results by label selector
