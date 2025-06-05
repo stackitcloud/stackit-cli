@@ -123,46 +123,25 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 
 	default:
 		table := tables.NewTable()
-		table.AddRow(
-			"ID",
-			utils.PtrString(backup.Id),
-		)
-		table.AddRow(
-			"NAME",
-			utils.PtrString(backup.Name),
-		)
-		table.AddRow(
-			"SIZE",
-			utils.PtrByteSizeDefault((*int64)(backup.Size), ""),
-		)
-		table.AddRow(
-			"STATUS",
-			utils.PtrString(backup.Status),
-		)
-		table.AddRow(
-			"SNAPSHOT ID",
-			utils.PtrString(backup.SnapshotId),
-		)
-		table.AddRow(
-			"VOLUME ID",
-			utils.PtrString(backup.VolumeId),
-		)
-		table.AddRow(
-			"AVAILABILITY ZONE",
-			utils.PtrString(backup.AvailabilityZone),
-		)
-		table.AddRow(
-			"LABELS",
-			utils.PtrStringDefault(backup.Labels, ""),
-		)
-		table.AddRow(
-			"CREATED AT",
-			utils.ConvertTimePToDateTimeString(backup.CreatedAt),
-		)
-		table.AddRow(
-			"UPDATED AT",
-			utils.ConvertTimePToDateTimeString(backup.UpdatedAt),
-		)
+		table.AddRow("ID", utils.PtrString(backup.Id))
+		table.AddSeparator()
+		table.AddRow("NAME", utils.PtrString(backup.Name))
+		table.AddSeparator()
+		table.AddRow("SIZE", utils.PtrByteSizeDefault((*int64)(backup.Size), ""))
+		table.AddSeparator()
+		table.AddRow("STATUS", utils.PtrString(backup.Status))
+		table.AddSeparator()
+		table.AddRow("SNAPSHOT ID", utils.PtrString(backup.SnapshotId))
+		table.AddSeparator()
+		table.AddRow("VOLUME ID", utils.PtrString(backup.VolumeId))
+		table.AddSeparator()
+		table.AddRow("AVAILABILITY ZONE", utils.PtrString(backup.AvailabilityZone))
+		table.AddSeparator()
+		table.AddRow("LABELS", utils.PtrStringDefault(backup.Labels, ""))
+		table.AddSeparator()
+		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(backup.CreatedAt))
+		table.AddSeparator()
+		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(backup.UpdatedAt))
 
 		err := table.Display(p)
 		if err != nil {
