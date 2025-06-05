@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -184,6 +185,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
 	req := apiClient.CreateBackup(ctx, model.ProjectId)
+
+	// Convert map[string]string to map[string]interface{}
+	var labelsMap *map[string]interface{}
+	if len(model.Labels) > 0 {
+		labelsMap = utils.Ptr(map[string]interface{}{})
+		for k, v := range model.Labels {
+			(*labelsMap)[k] = v
+		}
+	}
+
+	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
+	createPayload.Name = model.Name
+	createPayload.Labels = labelsMap
+	createPayload.Source = &iaas.BackupSource{
+		Id:   &model.SourceID,
+		Type: &model.SourceType,
+	}
+
+	req = req.CreateBackupPayload(*createPayload)
 	return req
 }
 
