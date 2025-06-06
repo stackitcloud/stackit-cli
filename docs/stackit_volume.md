@@ -30,6 +30,7 @@ stackit volume [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit volume backup](./stackit_volume_backup.md)	 - Provides functionality for volume backups
 * [stackit volume create](./stackit_volume_create.md)	 - Creates a volume
 * [stackit volume delete](./stackit_volume_delete.md)	 - Deletes a volume
 * [stackit volume describe](./stackit_volume_describe.md)	 - Shows details of a volume
