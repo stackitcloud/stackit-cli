@@ -36,11 +36,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a backup`,
-				"$ stackit volume backup delete xxx-xxx-xxx"),
-			examples.NewExample(
-				`Delete a backup and wait for deletion to be completed`,
-				"$ stackit volume backup delete xxx-xxx-xxx --async=false"),
+				`Delete a backup with ID "xxx"`, "$ stackit volume backup delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

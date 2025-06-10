@@ -37,11 +37,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a backup`,
-				"$ stackit volume backup describe xxx-xxx-xxx"),
+				`Get details of a backup with ID "xxx"`,
+				"$ stackit volume backup describe xxx"),
 			examples.NewExample(
-				`Get details of a backup in JSON format`,
-				"$ stackit volume backup describe xxx-xxx-xxx --output-format json"),
+				`Get details of a backup with ID "xxx" in JSON format`,
+				"$ stackit volume backup describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

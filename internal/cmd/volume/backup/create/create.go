@@ -47,13 +47,13 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a backup from a volume`,
-				"$ stackit volume backup create --source-id xxx --source-type volume --project-id xxx"),
+				"$ stackit volume backup create --source-id xxx --source-type volume"),
 			examples.NewExample(
 				`Create a backup from a snapshot with a name`,
-				"$ stackit volume backup create --source-id xxx --source-type snapshot --name my-backup --project-id xxx"),
+				"$ stackit volume backup create --source-id xxx --source-type snapshot --name my-backup"),
 			examples.NewExample(
 				`Create a backup with labels`,
-				"$ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2 --project-id xxx"),
+				"$ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
