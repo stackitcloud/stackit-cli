@@ -225,9 +225,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel
 
 	default:
 		if async {
-			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
+			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		} else {
-			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, *resp.Id)
+			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		}
 		return nil
 	}
