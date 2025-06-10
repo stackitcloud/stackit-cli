@@ -13,11 +13,11 @@ stackit volume snapshot describe SNAPSHOT_ID [flags]
 ### Examples
 
 ```
-  Get details of a snapshot
-  $ stackit volume snapshot describe xxx-xxx-xxx
+  Get details of a snapshot with ID "xxx"
+  $ stackit volume snapshot describe xxx
 
-  Get details of a snapshot in JSON format
-  $ stackit volume snapshot describe xxx-xxx-xxx --output-format json
+  Get details of a snapshot with ID "xxx" in JSON format
+  $ stackit volume snapshot describe xxx --output-format json
 ```
 
 ### Options
