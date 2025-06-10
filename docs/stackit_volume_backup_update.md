@@ -13,11 +13,11 @@ stackit volume backup update BACKUP_ID [flags]
 ### Examples
 
 ```
-  Update a backup name
-  $ stackit volume backup update xxx-xxx-xxx --name new-name
+  Update the name of a backup with ID "xxx"
+  $ stackit volume backup update xxx --name new-name
 
-  Update backup labels
-  $ stackit volume backup update xxx-xxx-xxx --labels key1=value1,key2=value2
+  Update the labels of a backup with ID "xxx"
+  $ stackit volume backup update xxx --labels key1=value1,key2=value2
 ```
 
 ### Options

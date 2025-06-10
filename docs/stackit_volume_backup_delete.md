@@ -13,11 +13,8 @@ stackit volume backup delete BACKUP_ID [flags]
 ### Examples
 
 ```
-  Delete a backup
-  $ stackit volume backup delete xxx-xxx-xxx
-
-  Delete a backup and wait for deletion to be completed
-  $ stackit volume backup delete xxx-xxx-xxx --async=false
+  Delete a backup with ID "xxx"
+  $ stackit volume backup delete xxx
 ```
 
 ### Options
