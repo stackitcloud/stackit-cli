@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -127,7 +128,7 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(backup.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE", utils.PtrByteSizeDefault((*int64)(backup.Size), ""))
+		table.AddRow("SIZE", utils.PtrByteSizeDefault(backup.Size, ""))
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(backup.Status))
 		table.AddSeparator()
@@ -137,8 +138,16 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		table.AddSeparator()
 		table.AddRow("AVAILABILITY ZONE", utils.PtrString(backup.AvailabilityZone))
 		table.AddSeparator()
-		table.AddRow("LABELS", utils.PtrStringDefault(backup.Labels, ""))
-		table.AddSeparator()
+
+		if backup.Labels != nil && len(*backup.Labels) > 0 {
+			var labels []string
+			for key, value := range *backup.Labels {
+				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			}
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
+			table.AddSeparator()
+		}
+
 		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(backup.CreatedAt))
 		table.AddSeparator()
 		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(backup.UpdatedAt))

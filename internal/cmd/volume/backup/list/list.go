@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -171,15 +172,24 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "SNAPSHOT ID", "VOLUME ID", "AVAILABILITY ZONE", "LABELS", "CREATED AT", "UPDATED AT")
 
 		for _, backup := range backups {
+			var labelsString string
+			if backup.Labels != nil {
+				var labels []string
+				for key, value := range *backup.Labels {
+					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+				}
+				labelsString = strings.Join(labels, ", ")
+			}
+
 			table.AddRow(
 				utils.PtrString(backup.Id),
 				utils.PtrString(backup.Name),
-				utils.PtrByteSizeDefault((*int64)(backup.Size), ""),
+				utils.PtrByteSizeDefault(backup.Size, ""),
 				utils.PtrString(backup.Status),
 				utils.PtrString(backup.SnapshotId),
 				utils.PtrString(backup.VolumeId),
 				utils.PtrString(backup.AvailabilityZone),
-				utils.PtrStringDefault(backup.Labels, ""),
+				labelsString,
 				utils.ConvertTimePToDateTimeString(backup.CreatedAt),
 				utils.ConvertTimePToDateTimeString(backup.UpdatedAt),
 			)
