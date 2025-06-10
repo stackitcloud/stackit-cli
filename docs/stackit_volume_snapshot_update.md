@@ -13,11 +13,11 @@ stackit volume snapshot update SNAPSHOT_ID [flags]
 ### Examples
 
 ```
-  Update a snapshot name
-  $ stackit volume snapshot update xxx-xxx-xxx --name my-new-name
+  Update a snapshot name with ID "xxx"
+  $ stackit volume snapshot update xxx --name my-new-name
 
-  Update a snapshot labels
-  $ stackit volume snapshot update xxx-xxx-xxx --labels key1=value1,key2=value2
+  Update a snapshot labels with ID "xxx"
+  $ stackit volume snapshot update xxx --labels key1=value1,key2=value2
 ```
 
 ### Options

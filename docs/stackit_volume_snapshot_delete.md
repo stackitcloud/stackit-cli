@@ -13,11 +13,8 @@ stackit volume snapshot delete SNAPSHOT_ID [flags]
 ### Examples
 
 ```
-  Delete a snapshot
-  $ stackit volume snapshot delete xxx-xxx-xxx
-
-  Delete a snapshot and wait for deletion to be completed
-  $ stackit volume snapshot delete xxx-xxx-xxx --async=false
+  Delete a snapshot with ID "xxx"
+  $ stackit volume snapshot delete xxx
 ```
 
 ### Options

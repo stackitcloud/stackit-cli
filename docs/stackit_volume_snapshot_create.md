@@ -13,14 +13,14 @@ stackit volume snapshot create [flags]
 ### Examples
 
 ```
-  Create a snapshot from a volume
-  $ stackit volume snapshot create --volume-id xxx --project-id xxx
+  Create a snapshot from a volume with ID "xxx"
+  $ stackit volume snapshot create --volume-id xxx
 
-  Create a snapshot with a name
-  $ stackit volume snapshot create --volume-id xxx --name my-snapshot --project-id xxx
+  Create a snapshot from a volume with ID "xxx" and name "my-snapshot"
+  $ stackit volume snapshot create --volume-id xxx --name my-snapshot
 
-  Create a snapshot with labels
-  $ stackit volume snapshot create --volume-id xxx --labels key1=value1,key2=value2 --project-id xxx
+  Create a snapshot from a volume with ID "xxx" and labels
+  $ stackit volume snapshot create --volume-id xxx --labels key1=value1,key2=value2
 ```
 
 ### Options
