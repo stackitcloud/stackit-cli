@@ -41,11 +41,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update a backup name`,
-				"$ stackit volume backup update xxx-xxx-xxx --name new-name"),
+				`Update the name of a backup with ID "xxx"`,
+				"$ stackit volume backup update xxx --name new-name"),
 			examples.NewExample(
-				`Update backup labels`,
-				"$ stackit volume backup update xxx-xxx-xxx --labels key1=value1,key2=value2"),
+				`Update the labels of a backup with ID "xxx"`,
+				"$ stackit volume backup update xxx --labels key1=value1,key2=value2"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
