@@ -36,11 +36,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Restore a backup`,
-				"$ stackit volume backup restore xxx-xxx-xxx"),
-			examples.NewExample(
-				`Restore a backup and wait for restore to be completed`,
-				"$ stackit volume backup restore xxx-xxx-xxx --async=false"),
+				`Restore a backup with ID "xxx"`, "$ stackit volume backup restore xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
