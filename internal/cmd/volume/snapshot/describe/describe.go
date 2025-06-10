@@ -38,11 +38,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(snapshotIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a snapshot`,
-				"$ stackit volume snapshot describe xxx-xxx-xxx"),
+				`Get details of a snapshot with ID "xxx"`,
+				"$ stackit volume snapshot describe xxx"),
 			examples.NewExample(
-				`Get details of a snapshot in JSON format`,
-				"$ stackit volume snapshot describe xxx-xxx-xxx --output-format json"),
+				`Get details of a snapshot with ID "xxx" in JSON format`,
+				"$ stackit volume snapshot describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -127,7 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(snapshot.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE", utils.PtrByteSizeDefault((*int64)(snapshot.Size), ""))
+		table.AddRow("SIZE", utils.PtrByteSizeDefault(snapshot.Size, ""))
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(snapshot.Status))
 		table.AddSeparator()
