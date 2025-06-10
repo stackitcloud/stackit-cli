@@ -30,6 +30,8 @@ const (
 	labelsFlag     = "labels"
 )
 
+var sourceTypeFlagOptions = []string{"volume", "snapshot"}
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	SourceID   string
@@ -128,7 +130,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sourceIdFlag, "", "ID of the source from which a backup should be created")
-	cmd.Flags().String(sourceTypeFlag, "", "Source type of the backup (volume or snapshot)")
+	cmd.Flags().Var(flags.EnumFlag(false, "", sourceTypeFlagOptions...), sourceTypeFlag, fmt.Sprintf("Source type of the backup, one of %q", sourceTypeFlagOptions))
 	cmd.Flags().String(nameFlag, "", "Name of the backup")
 	cmd.Flags().StringToString(labelsFlag, nil, "Key-value string pairs as labels")
 
@@ -148,9 +150,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	sourceType := flags.FlagToStringValue(p, cmd, sourceTypeFlag)
-	if sourceType != "volume" && sourceType != "snapshot" {
-		return nil, fmt.Errorf("source-type must be either 'volume' or 'snapshot'")
-	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
