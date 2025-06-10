@@ -240,6 +240,13 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "backup is nil",
+			args: args{
+				backup: nil,
+			},
+			wantErr: true,
+		},
+		{
 			name: "minimal backup",
 			args: args{
 				backup: &iaas.Backup{
