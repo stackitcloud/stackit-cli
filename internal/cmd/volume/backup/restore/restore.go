@@ -68,14 +68,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Get source details for labels
 			var sourceLabel string
 			if backup != nil && backup.VolumeId != nil {
+				sourceLabel = *backup.VolumeId
 				volume, err := apiClient.GetVolume(ctx, model.ProjectId, *backup.VolumeId).Execute()
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume details: %v", err)
-					sourceLabel = *backup.VolumeId
 				} else if volume.Name != nil {
 					sourceLabel = *volume.Name
-				} else {
-					sourceLabel = *backup.VolumeId
 				}
 			}
 
