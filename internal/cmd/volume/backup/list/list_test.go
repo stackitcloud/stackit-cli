@@ -213,6 +213,13 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "empty slice",
+			args: args{
+				backups: []iaas.Backup{},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
