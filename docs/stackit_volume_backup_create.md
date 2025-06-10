@@ -14,13 +14,13 @@ stackit volume backup create [flags]
 
 ```
   Create a backup from a volume
-  $ stackit volume backup create --source-id xxx --source-type volume --project-id xxx
+  $ stackit volume backup create --source-id xxx --source-type volume
 
   Create a backup from a snapshot with a name
-  $ stackit volume backup create --source-id xxx --source-type snapshot --name my-backup --project-id xxx
+  $ stackit volume backup create --source-id xxx --source-type snapshot --name my-backup
 
   Create a backup with labels
-  $ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2 --project-id xxx
+  $ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2
 ```
 
 ### Options

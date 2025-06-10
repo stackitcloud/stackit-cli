@@ -13,11 +13,8 @@ stackit volume backup restore BACKUP_ID [flags]
 ### Examples
 
 ```
-  Restore a backup
-  $ stackit volume backup restore xxx-xxx-xxx
-
-  Restore a backup and wait for restore to be completed
-  $ stackit volume backup restore xxx-xxx-xxx --async=false
+  Restore a backup with ID "xxx"
+  $ stackit volume backup restore xxx
 ```
 
 ### Options

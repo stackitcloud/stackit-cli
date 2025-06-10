@@ -13,11 +13,11 @@ stackit volume backup describe BACKUP_ID [flags]
 ### Examples
 
 ```
-  Get details of a backup
-  $ stackit volume backup describe xxx-xxx-xxx
+  Get details of a backup with ID "xxx"
+  $ stackit volume backup describe xxx
 
-  Get details of a backup in JSON format
-  $ stackit volume backup describe xxx-xxx-xxx --output-format json
+  Get details of a backup with ID "xxx" in JSON format
+  $ stackit volume backup describe xxx --output-format json
 ```
 
 ### Options
