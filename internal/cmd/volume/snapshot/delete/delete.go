@@ -36,11 +36,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(snapshotIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a snapshot`,
-				"$ stackit volume snapshot delete xxx-xxx-xxx"),
-			examples.NewExample(
-				`Delete a snapshot and wait for deletion to be completed`,
-				"$ stackit volume snapshot delete xxx-xxx-xxx --async=false"),
+				`Delete a snapshot with ID "xxx"`,
+				"$ stackit volume snapshot delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
