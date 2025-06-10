@@ -222,7 +222,7 @@ func outputResultAsTable(p *print.Printer, model inputModel, options *options) e
 	if model.Versions && len(*options.Versions) != 0 {
 		content = append(content, buildVersionsTable(*options.Versions))
 	}
-	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) == 0 {
+	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) > 0 {
 		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
 
