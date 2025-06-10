@@ -170,9 +170,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "SNAPSHOT ID", "VOLUME ID", "AVAILABILITY ZONE", "LABELS", "CREATED AT", "UPDATED AT")
 
-		for i := range backups {
-			backup := backups[i]
-
+		for _, backup := range backups {
 			table.AddRow(
 				utils.PtrString(backup.Id),
 				utils.PtrString(backup.Name),
