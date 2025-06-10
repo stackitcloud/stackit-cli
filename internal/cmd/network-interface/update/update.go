@@ -199,19 +199,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNicRequest {
 	req := apiClient.UpdateNic(ctx, model.ProjectId, *model.NetworkId, model.NicId)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		convertedMap := make(map[string]interface{}, len(*model.Labels))
-		for k, v := range *model.Labels {
-			convertedMap[k] = v
-		}
-		labelsMap = &convertedMap
-	}
-
 	payload := iaas.UpdateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
-		Labels:           labelsMap,
+		Labels:           utils.ConvertStringMapToInterfaceMap(*model.Labels),
 		Name:             model.Name,
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,

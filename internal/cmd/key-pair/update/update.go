@@ -87,16 +87,8 @@ func configureFlags(cmd *cobra.Command) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateKeyPairRequest {
 	req := apiClient.UpdateKeyPair(ctx, *model.KeyPairName)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
 	payload := iaas.UpdateKeyPairPayload{
-		Labels: labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
 	}
 	return req.UpdateKeyPairPayload(payload)
 }

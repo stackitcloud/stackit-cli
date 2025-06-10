@@ -153,18 +153,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkAreaRequest {
 	req := apiClient.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name:   model.Name,
-		Labels: labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
 		AddressFamily: &iaas.UpdateAreaAddressFamily{
 			Ipv4: &iaas.UpdateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,

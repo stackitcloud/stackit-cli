@@ -340,18 +340,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload {
-	var labelsMap *map[string]any
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
 	payload := iaas.CreateImagePayload{
 		DiskFormat:  &model.DiskFormat,
 		Name:        &model.Name,
-		Labels:      labelsMap,
+		Labels:      utils.ConvertStringMapToInterfaceMap(*model.Labels),
 		MinDiskSize: model.MinDiskSize,
 		MinRam:      model.MinRam,
 		Protected:   model.Protected,

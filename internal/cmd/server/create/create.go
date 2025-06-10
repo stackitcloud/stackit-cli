@@ -281,14 +281,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateServerRequest {
 	req := apiClient.CreateServer(ctx, model.ProjectId)
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
 
 	var userData *[]byte
 	if model.UserData != nil {
@@ -307,7 +299,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		ServiceAccountMails: model.ServiceAccountMails,
 		UserData:            userData,
 		Volumes:             model.Volumes,
-		Labels:              labelsMap,
+		Labels:              utils.ConvertStringMapToInterfaceMap(*model.Labels),
 	}
 
 	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {
