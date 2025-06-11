@@ -155,7 +155,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 		AddressFamily: &iaas.UpdateAreaAddressFamily{
 			Ipv4: &iaas.UpdateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,

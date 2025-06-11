@@ -211,7 +211,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		AllowedAddresses: model.AllowedAddresses,
 		Ipv4:             model.Ipv4,
 		Ipv6:             model.Ipv6,
-		Labels:           utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Name:             model.Name,
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,

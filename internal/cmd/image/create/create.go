@@ -343,7 +343,7 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 	payload := iaas.CreateImagePayload{
 		DiskFormat:  &model.DiskFormat,
 		Name:        &model.Name,
-		Labels:      utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
 		MinDiskSize: model.MinDiskSize,
 		MinRam:      model.MinRam,
 		Protected:   model.Protected,

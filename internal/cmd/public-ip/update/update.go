@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.PublicIpId)
 
 	payload := iaas.UpdatePublicIPPayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	return req.UpdatePublicIPPayload(payload)

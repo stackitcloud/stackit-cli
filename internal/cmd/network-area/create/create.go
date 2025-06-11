@@ -174,7 +174,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateNetworkAreaPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 		AddressFamily: &iaas.CreateAreaAddressFamily{
 			Ipv4: &iaas.CreateAreaIPv4{
 				DefaultNameservers: model.DnsNameServers,

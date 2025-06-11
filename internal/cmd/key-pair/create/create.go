@@ -126,7 +126,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateKeyPairPayload{
 		Name:      model.Name,
-		Labels:    utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:    utils.ConvertStringMapToInterfaceMap(model.Labels),
 		PublicKey: model.PublicKey,
 	}
 

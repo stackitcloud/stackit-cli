@@ -246,7 +246,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	// Config *ImageConfig `json:"config,omitempty"`
 	payload.DiskFormat = model.DiskFormat
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(*model.Labels)
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(model.Labels)
 	payload.MinDiskSize = model.MinDiskSize
 	payload.MinRam = model.MinRam
 	payload.Name = model.Name

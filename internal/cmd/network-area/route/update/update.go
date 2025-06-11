@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.RouteId)
 
 	payload := iaas.UpdateNetworkAreaRoutePayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 	req = req.UpdateNetworkAreaRoutePayload(payload)
 

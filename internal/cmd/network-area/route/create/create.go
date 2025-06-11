@@ -152,7 +152,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			{
 				Prefix:  model.Prefix,
 				Nexthop: model.Nexthop,
-				Labels:  utils.ConvertStringMapToInterfaceMap(*model.Labels),
+				Labels:  utils.ConvertStringMapToInterfaceMap(model.Labels),
 			},
 		},
 	}

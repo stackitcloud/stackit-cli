@@ -205,7 +205,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

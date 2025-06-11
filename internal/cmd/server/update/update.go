@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.UpdateServerPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	return req.UpdateServerPayload(payload)

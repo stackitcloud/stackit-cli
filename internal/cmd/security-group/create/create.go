@@ -129,7 +129,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateSecurityGroupPayload{
 		Description: model.Description,
-		Labels:      utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Name:        model.Name,
 		Stateful:    model.Stateful,
 	}

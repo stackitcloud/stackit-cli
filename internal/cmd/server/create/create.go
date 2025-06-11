@@ -299,7 +299,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		ServiceAccountMails: model.ServiceAccountMails,
 		UserData:            userData,
 		Volumes:             model.Volumes,
-		Labels:              utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:              utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {

@@ -128,7 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreatePublicIPPayload{
 		NetworkInterface: iaas.NewNullableString(model.AssociatedResourceId),
-		Labels:           utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	return req.CreatePublicIPPayload(payload)

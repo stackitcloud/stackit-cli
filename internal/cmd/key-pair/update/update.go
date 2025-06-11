@@ -88,7 +88,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.UpdateKeyPair(ctx, *model.KeyPairName)
 
 	payload := iaas.UpdateKeyPairPayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 	return req.UpdateKeyPairPayload(payload)
 }

@@ -201,7 +201,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.UpdateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
-		Labels:           utils.ConvertStringMapToInterfaceMap(*model.Labels),
+		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Name:             model.Name,
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,
