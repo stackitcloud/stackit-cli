@@ -4,24 +4,27 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 type testCtxKey struct{}
+
+const (
+	testName = "test-snapshot"
+)
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient    = &iaas.APIClient{}
 	testProjectId = uuid.NewString()
 	testVolumeId  = uuid.NewString()
-	testName      = "test-snapshot"
 	testLabels    = map[string]string{"key1": "value1"}
 )
 
@@ -45,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		VolumeID: testVolumeId,
-		Name:     &testName,
+		Name:     utils.Ptr(testName),
 		Labels:   testLabels,
 	}
 	for _, mod := range mods {
@@ -58,7 +61,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateSnapshotRequest)) iaas.A
 	request := testClient.CreateSnapshot(testCtx, testProjectId)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
 	payload.VolumeId = &testVolumeId
-	payload.Name = &testName
+	payload.Name = utils.Ptr(testName)
 
 	// Convert test labels to map[string]interface{}
 	labelsMap := map[string]interface{}{}
