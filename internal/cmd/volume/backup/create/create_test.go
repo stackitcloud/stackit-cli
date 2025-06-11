@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -16,21 +17,24 @@ import (
 
 type testCtxKey struct{}
 
-var (
-	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &iaas.APIClient{}
-	testProjectId  = uuid.NewString()
-	testSourceId   = uuid.NewString()
+const (
 	testName       = "my-backup"
-	testLabels     = map[string]string{"key1": "value1"}
 	testSourceType = "volume"
+)
+
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &iaas.APIClient{}
+	testProjectId = uuid.NewString()
+	testSourceId  = uuid.NewString()
+	testLabels    = map[string]string{"key1": "value1"}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		sourceIdFlag:              testSourceId,
-		sourceTypeFlag:            "volume",
+		sourceTypeFlag:            testSourceType,
 		nameFlag:                  testName,
 		labelsFlag:                "key1=value1",
 	}
@@ -47,8 +51,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		SourceID:   testSourceId,
-		SourceType: "volume",
-		Name:       &testName,
+		SourceType: testSourceType,
+		Name:       utils.Ptr(testName),
 		Labels:     testLabels,
 	}
 	for _, mod := range mods {
@@ -61,13 +65,13 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateBackupRequest)) iaas.Api
 	request := testClient.CreateBackup(testCtx, testProjectId)
 
 	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
-	createPayload.Name = &testName
+	createPayload.Name = utils.Ptr(testName)
 	createPayload.Labels = &map[string]interface{}{
 		"key1": "value1",
 	}
 	createPayload.Source = &iaas.BackupSource{
 		Id:   &testSourceId,
-		Type: &testSourceType,
+		Type: utils.Ptr(testSourceType),
 	}
 
 	request = request.CreateBackupPayload(*createPayload)
