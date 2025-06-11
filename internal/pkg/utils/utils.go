@@ -132,8 +132,9 @@ func UserAgentConfigOption(cliVersion string) sdkConfig.ConfigurationOption {
 
 // ConvertStringMapToInterfaceMap converts a map[string]string to a pointer to map[string]interface{}.
 // Returns nil if the input map is empty.
+//
+//nolint:gocritic
 func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{} {
-	//nolint:gocritic
 	if m == nil || len(*m) == 0 {
 		return nil
 	}

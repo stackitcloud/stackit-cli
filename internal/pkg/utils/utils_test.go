@@ -149,3 +149,102 @@ func TestUserAgentConfigOption(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertStringMapToInterfaceMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *map[string]string
+		expected *map[string]interface{}
+	}{
+		{
+			name:     "nil input",
+			input:    nil,
+			expected: nil,
+		},
+		{
+			name:     "empty map",
+			input:    &map[string]string{},
+			expected: nil,
+		},
+		{
+			name: "single key-value pair",
+			input: &map[string]string{
+				"key1": "value1",
+			},
+			expected: &map[string]interface{}{
+				"key1": "value1",
+			},
+		},
+		{
+			name: "multiple key-value pairs",
+			input: &map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+			},
+			expected: &map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+			},
+		},
+		{
+			name: "special characters in values",
+			input: &map[string]string{
+				"key1": "value with spaces",
+				"key2": "value,with,commas",
+				"key3": "value\nwith\nnewlines",
+			},
+			expected: &map[string]interface{}{
+				"key1": "value with spaces",
+				"key2": "value,with,commas",
+				"key3": "value\nwith\nnewlines",
+			},
+		},
+		{
+			name: "empty values",
+			input: &map[string]string{
+				"key1": "",
+				"key2": "value2",
+			},
+			expected: &map[string]interface{}{
+				"key1": "",
+				"key2": "value2",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ConvertStringMapToInterfaceMap(tt.input)
+
+			// Check if both are nil
+			if result == nil && tt.expected == nil {
+				return
+			}
+
+			// Check if one is nil and other isn't
+			if (result == nil && tt.expected != nil) || (result != nil && tt.expected == nil) {
+				t.Errorf("ConvertStringMapToInterfaceMap() = %v, want %v", result, tt.expected)
+				return
+			}
+
+			// Compare maps
+			if len(*result) != len(*tt.expected) {
+				t.Errorf("ConvertStringMapToInterfaceMap() map length = %d, want %d", len(*result), len(*tt.expected))
+				return
+			}
+
+			for k, v := range *result {
+				expectedVal, ok := (*tt.expected)[k]
+				if !ok {
+					t.Errorf("ConvertStringMapToInterfaceMap() unexpected key %s in result", k)
+					continue
+				}
+				if v != expectedVal {
+					t.Errorf("ConvertStringMapToInterfaceMap() value for key %s = %v, want %v", k, v, expectedVal)
+				}
+			}
+		})
+	}
+}
