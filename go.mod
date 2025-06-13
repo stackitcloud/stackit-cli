@@ -16,7 +16,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.1
 	github.com/stackitcloud/stackit-sdk-go/core v0.17.2
-	github.com/stackitcloud/stackit-sdk-go/services/alb v0.4.1
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.5.1
@@ -236,7 +236,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.24.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.24.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.2.0
