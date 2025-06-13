@@ -243,17 +243,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateImageRequest {
 	request := apiClient.UpdateImage(ctx, model.ProjectId, model.Id)
 	payload := iaas.NewUpdateImagePayload()
-	var labelsMap *map[string]any
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
+
 	// Config *ImageConfig `json:"config,omitempty"`
 	payload.DiskFormat = model.DiskFormat
-	payload.Labels = labelsMap
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(model.Labels)
 	payload.MinDiskSize = model.MinDiskSize
 	payload.MinRam = model.MinRam
 	payload.Name = model.Name

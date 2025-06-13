@@ -135,15 +135,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	request := apiClient.UpdateSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
 	payload := iaas.NewUpdateSecurityGroupPayload()
 	payload.Description = model.Description
-	var labelsMap *map[string]any
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-	payload.Labels = labelsMap
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(model.Labels)
 	payload.Name = model.Name
 	request = request.UpdateSecurityGroupPayload(*payload)
 

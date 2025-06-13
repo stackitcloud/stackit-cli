@@ -179,15 +179,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.NetworkId)
 	addressFamily := &iaas.UpdateNetworkAddressFamily{}
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		addressFamily.Ipv6 = &iaas.UpdateNetworkIPv6Body{
 			Nameservers: model.IPv6DnsNameServers,
@@ -214,7 +205,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name:   model.Name,
-		Labels: labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {

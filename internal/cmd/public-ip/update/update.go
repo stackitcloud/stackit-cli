@@ -130,17 +130,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdatePublicIPRequest {
 	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.PublicIpId)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	payload := iaas.UpdatePublicIPPayload{
-		Labels: labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 
 	return req.UpdatePublicIPPayload(payload)

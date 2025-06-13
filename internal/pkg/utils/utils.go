@@ -129,3 +129,18 @@ func Base64Encode(message []byte) string {
 func UserAgentConfigOption(cliVersion string) sdkConfig.ConfigurationOption {
 	return sdkConfig.WithUserAgent(fmt.Sprintf("stackit-cli/%s", cliVersion))
 }
+
+// ConvertStringMapToInterfaceMap converts a map[string]string to a pointer to map[string]interface{}.
+// Returns nil if the input map is empty.
+//
+//nolint:gocritic // Linter wants to have a non-pointer type for the map, but this would mean a nil check has to be done before every usage of this func.
+func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{} {
+	if m == nil || len(*m) == 0 {
+		return nil
+	}
+	result := make(map[string]interface{}, len(*m))
+	for k, v := range *m {
+		result[k] = v
+	}
+	return &result
+}

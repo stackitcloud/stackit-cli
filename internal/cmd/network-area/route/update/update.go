@@ -130,14 +130,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRouteRequest {
 	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.RouteId)
 
-	// convert map[string]string to map[string]interface{}
-	labelsMap := make(map[string]interface{})
-	for k, v := range *model.Labels {
-		labelsMap[k] = v
-	}
-
 	payload := iaas.UpdateNetworkAreaRoutePayload{
-		Labels: &labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 	}
 	req = req.UpdateNetworkAreaRoutePayload(payload)
 

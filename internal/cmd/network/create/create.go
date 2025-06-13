@@ -229,15 +229,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	routed := true
 	if model.NonRouted {
 		routed = false
@@ -245,7 +236,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateNetworkPayload{
 		Name:   model.Name,
-		Labels: labelsMap,
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Routed: &routed,
 	}
 

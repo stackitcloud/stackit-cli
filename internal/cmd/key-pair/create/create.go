@@ -124,18 +124,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateKeyPairRequest {
 	req := apiClient.CreateKeyPair(ctx)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	payload := iaas.CreateKeyPairPayload{
 		Name:      model.Name,
-		Labels:    labelsMap,
+		Labels:    utils.ConvertStringMapToInterfaceMap(model.Labels),
 		PublicKey: model.PublicKey,
 	}
 

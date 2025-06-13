@@ -147,21 +147,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRouteRequest {
 	req := apiClient.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId)
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	payload := iaas.CreateNetworkAreaRoutePayload{
 		Ipv4: &[]iaas.Route{
 			{
 				Prefix:  model.Prefix,
 				Nexthop: model.Nexthop,
-				Labels:  labelsMap,
+				Labels:  utils.ConvertStringMapToInterfaceMap(model.Labels),
 			},
 		},
 	}
