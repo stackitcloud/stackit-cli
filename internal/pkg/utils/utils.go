@@ -133,7 +133,7 @@ func UserAgentConfigOption(cliVersion string) sdkConfig.ConfigurationOption {
 // ConvertStringMapToInterfaceMap converts a map[string]string to a pointer to map[string]interface{}.
 // Returns nil if the input map is empty.
 //
-//nolint:gocritic
+//nolint:gocritic // Linter wants to have a non-pointer type for the map, but this would mean a nil check has to be done before every usage of this func.
 func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{} {
 	if m == nil || len(*m) == 0 {
 		return nil
