@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -79,7 +80,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			if model.ShowAttachedProjects {
 				projects, err = iaasUtils.ListAttachedProjects(ctx, apiClient, *model.OrganizationId, model.AreaId)
-				if err != nil {
+				if err != nil && errors.Is(err, iaasUtils.ErrItemsNil) {
+					projects = []string{}
+				} else if err != nil {
 					return fmt.Errorf("get attached projects: %w", err)
 				}
 			}

@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -80,8 +80,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 					networkAreaLabel = *model.NetworkAreaId
-				} else if networkAreaLabel == "" {
-					networkAreaLabel = *model.NetworkAreaId
 				}
 				params.Printer.Info("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
 				return nil
@@ -113,7 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
-		return nil, &errors.FlagValidationError{
+		return nil, &cliErr.FlagValidationError{
 			Flag:    limitFlag,
 			Details: "must be greater than 0",
 		}

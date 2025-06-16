@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -135,8 +135,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
-			} else if imageLabel == "" {
-				imageLabel = model.Id
 			}
 
 			if !model.AssumeYes {
@@ -194,7 +192,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	model := inputModel{

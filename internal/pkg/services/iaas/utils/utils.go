@@ -2,9 +2,16 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+var (
+	ErrResponseNil = errors.New("response is nil")
+	ErrNameNil     = errors.New("name is nil")
+	ErrItemsNil    = errors.New("items is nil")
 )
 
 type IaaSClient interface {
@@ -34,6 +41,10 @@ func GetSecurityGroupName(ctx context.Context, apiClient IaaSClient, projectId, 
 	resp, err := apiClient.GetSecurityGroupExecute(ctx, projectId, securityGroupId)
 	if err != nil {
 		return "", fmt.Errorf("get security group: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }
@@ -62,6 +73,10 @@ func GetVolumeName(ctx context.Context, apiClient IaaSClient, projectId, volumeI
 	resp, err := apiClient.GetVolumeExecute(ctx, projectId, volumeId)
 	if err != nil {
 		return "", fmt.Errorf("get volume: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }
@@ -70,6 +85,10 @@ func GetNetworkName(ctx context.Context, apiClient IaaSClient, projectId, networ
 	resp, err := apiClient.GetNetworkExecute(ctx, projectId, networkId)
 	if err != nil {
 		return "", fmt.Errorf("get network: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }
@@ -78,6 +97,10 @@ func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationI
 	resp, err := apiClient.GetNetworkAreaExecute(ctx, organizationId, areaId)
 	if err != nil {
 		return "", fmt.Errorf("get network area: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }
@@ -86,6 +109,10 @@ func ListAttachedProjects(ctx context.Context, apiClient IaaSClient, organizatio
 	resp, err := apiClient.ListNetworkAreaProjectsExecute(ctx, organizationId, areaId)
 	if err != nil {
 		return nil, fmt.Errorf("list network area attached projects: %w", err)
+	} else if resp == nil {
+		return nil, ErrResponseNil
+	} else if resp.Items == nil {
+		return nil, ErrItemsNil
 	}
 	return *resp.Items, nil
 }
@@ -124,9 +151,10 @@ func GetImageName(ctx context.Context, apiClient IaaSClient, projectId, imageId 
 	resp, err := apiClient.GetImageExecute(ctx, projectId, imageId)
 	if err != nil {
 		return "", fmt.Errorf("get image: %w", err)
-	}
-	if resp.Name == nil {
-		return "", nil
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }
@@ -135,9 +163,10 @@ func GetAffinityGroupName(ctx context.Context, apiClient IaaSClient, projectId, 
 	resp, err := apiClient.GetAffinityGroupExecute(ctx, projectId, affinityGroupId)
 	if err != nil {
 		return "", fmt.Errorf("get affinity group: %w", err)
-	}
-	if resp.Name == nil {
-		return "", nil
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }

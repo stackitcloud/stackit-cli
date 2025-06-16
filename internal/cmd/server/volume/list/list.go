@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -83,6 +83,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, *volumes[i].VolumeId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
+					volumeLabel = ""
 				}
 				volumeNames = append(volumeNames, volumeLabel)
 			}
@@ -104,7 +105,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	model := inputModel{

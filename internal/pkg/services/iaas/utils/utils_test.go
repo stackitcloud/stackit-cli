@@ -186,6 +186,26 @@ func TestGetSecurityGroupName(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "response is nil",
+			args: args{
+				getInstanceResp:  nil,
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "name in response is nil",
+			args: args{
+				getInstanceResp: &iaas.SecurityGroup{
+					Name: nil,
+				},
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -330,6 +350,26 @@ func TestGetVolumeName(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "response is nil",
+			args: args{
+				getInstanceResp:  nil,
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "name in response is nil",
+			args: args{
+				getInstanceResp: &iaas.Volume{
+					Name: nil,
+				},
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -376,6 +416,26 @@ func TestGetNetworkName(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "response is nil",
+			args: args{
+				getInstanceResp:  nil,
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "name in response is nil",
+			args: args{
+				getInstanceResp: &iaas.Network{
+					Name: nil,
+				},
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -421,6 +481,27 @@ func TestGetNetworkAreaName(t *testing.T) {
 				getInstanceFails: true,
 			},
 			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "response is nil",
+			args: args{
+				getInstanceResp:  nil,
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "name in response is nil",
+			args: args{
+				getInstanceResp: &iaas.NetworkArea{
+					Name: nil,
+				},
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
 		},
 	}
 	for _, tt := range tests {
@@ -701,10 +782,18 @@ func TestGetImageName(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			name:      "nil name",
+			name:      "response is nil",
 			imageErr:  false,
-			imageResp: &iaas.Image{},
+			imageResp: nil,
 			want:      "",
+			wantErr:   true,
+		},
+		{
+			name:      "name in response is nil",
+			imageErr:  false,
+			imageResp: &iaas.Image{Name: nil},
+			want:      "",
+			wantErr:   true,
 		},
 	}
 	for _, tt := range tests {
@@ -745,10 +834,22 @@ func TestGetAffinityGroupName(t *testing.T) {
 			wantErr:     true,
 		},
 		{
-			name:         "nil affinity group name",
-			affinityErr:  false,
-			affinityResp: &iaas.AffinityGroup{},
-			want:         "",
+			name:        "response is nil",
+			affinityErr: false,
+			affinityResp: &iaas.AffinityGroup{
+				Name: nil,
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:        "affinity group name in response is nil",
+			affinityErr: false,
+			affinityResp: &iaas.AffinityGroup{
+				Name: nil,
+			},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
