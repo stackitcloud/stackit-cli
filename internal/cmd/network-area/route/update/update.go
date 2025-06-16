@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -70,8 +70,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
-			} else if networkAreaLabel == "" {
-				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			// Call API
@@ -104,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
 
 	if labels == nil {
-		return nil, &errors.EmptyUpdateError{}
+		return nil, &cliErr.EmptyUpdateError{}
 	}
 
 	model := inputModel{

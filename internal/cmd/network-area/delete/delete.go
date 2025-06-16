@@ -63,8 +63,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.AreaId
-			} else if networkAreaLabel == "" {
-				networkAreaLabel = model.AreaId
 			}
 
 			if !model.AssumeYes {
