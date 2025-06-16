@@ -1,6 +1,11 @@
 name: CI
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   main:
@@ -26,8 +31,15 @@ jobs:
       - name: Test
         run: make test
 
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: coverage.out
+
   config:
     name: Check GoReleaser config
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
