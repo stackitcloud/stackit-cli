@@ -2,10 +2,6 @@ module github.com/stackitcloud/stackit-cli
 
 go 1.24
 
-replace (
-	github.com/stackitcloud/stackit-sdk-go/services/iaas => /Users/bfuertsch/work/StackIT/stackit-sdk-go/services/iaas
-)
-
 require (
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.18.0
