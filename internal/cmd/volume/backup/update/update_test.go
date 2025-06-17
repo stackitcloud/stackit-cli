@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -68,12 +69,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.Api
 	payload := iaas.NewUpdateBackupPayloadWithDefaults()
 	payload.Name = &testName
 
-	// Convert test labels to map[string]interface{}
-	labelsMap := map[string]interface{}{}
-	for k, v := range testLabels {
-		labelsMap[k] = v
-	}
-	payload.Labels = &labelsMap
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
 
 	request = request.UpdateBackupPayload(*payload)
 	for _, mod := range mods {

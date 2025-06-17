@@ -63,12 +63,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateSnapshotRequest)) iaas.A
 	payload.VolumeId = &testVolumeId
 	payload.Name = utils.Ptr(testName)
 
-	// Convert test labels to map[string]interface{}
-	labelsMap := map[string]interface{}{}
-	for k, v := range testLabels {
-		labelsMap[k] = v
-	}
-	payload.Labels = &labelsMap
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
 
 	request = request.CreateSnapshotPayload(*payload)
 	for _, mod := range mods {

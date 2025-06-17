@@ -171,15 +171,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
 	payload.VolumeId = &model.VolumeID
 	payload.Name = model.Name
-
-	// Convert labels to map[string]interface{}
-	if len(model.Labels) > 0 {
-		labelsMap := map[string]interface{}{}
-		for k, v := range model.Labels {
-			labelsMap[k] = v
-		}
-		payload.Labels = &labelsMap
-	}
+	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels))
 
 	req = req.CreateSnapshotPayload(*payload)
 	return req
