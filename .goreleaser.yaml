@@ -32,17 +32,22 @@ builds:
       - amd64
     hooks:
       post:
-        - |
-          sh -c '
-          codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
-          codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
-          ls -l "dist/macos_{{.Target}}"
-          hdiutil create -volname "STACKIT-CLI" -srcfolder "dist/macos-builds_{{.Target}}/{{.Name}}" -ov -format UDZO "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          xcrun notarytool submit --keychain-profile "stackit-cli" --wait --progress dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
-          xcrun stapler staple "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
-          '
+        - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
+          output: true
+        - cmd: codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
+          output: true
+        - cmd: ls -l "dist/macos_{{.Target}}"
+          output: true
+        - cmd: hdiutil create -volname "STACKIT-CLI" -srcfolder "dist/macos-builds_{{.Target}}/{{.Name}}" -ov -format UDZO "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          output: true
+        - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          output: true
+        - cmd: xcrun notarytool submit --keychain-profile "stackit-cli" --wait --progress dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+          output: true
+        - cmd: xcrun stapler staple "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+          output: true
+        - cmd: spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+          output: true
 
 archives:
   - formats: [ 'tar.gz' ]
