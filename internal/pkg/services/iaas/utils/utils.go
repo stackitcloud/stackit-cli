@@ -27,6 +27,7 @@ type IaaSClient interface {
 	GetImageExecute(ctx context.Context, projectId string, imageId string) (*iaas.Image, error)
 	GetAffinityGroupExecute(ctx context.Context, projectId string, affinityGroupId string) (*iaas.AffinityGroup, error)
 	GetSnapshotExecute(ctx context.Context, projectId, snapshotId string) (*iaas.Snapshot, error)
+	GetBackupExecute(ctx context.Context, projectId, backupId string) (*iaas.Backup, error)
 }
 
 func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupRuleId, securityGroupId string) (string, error) {
@@ -178,4 +179,15 @@ func GetSnapshotName(ctx context.Context, apiClient IaaSClient, projectId, snaps
 		return "", fmt.Errorf("get snapshot: %w", err)
 	}
 	return *resp.Name, nil
+}
+
+func GetBackupName(ctx context.Context, apiClient IaaSClient, projectId, backupId string) (string, error) {
+	resp, err := apiClient.GetBackupExecute(ctx, projectId, backupId)
+	if err != nil {
+		return backupId, fmt.Errorf("get backup: %w", err)
+	}
+	if resp != nil && resp.Name != nil {
+		return *resp.Name, nil
+	}
+	return backupId, nil
 }

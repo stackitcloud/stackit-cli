@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasutils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -54,6 +55,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
+			// Configure API client
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return err
+			}
+
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
+			}
+
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to update backup %q? (This cannot be undone)", model.BackupId)
 				err = params.Printer.PromptForConfirmation(prompt)
@@ -62,23 +74,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
-			if err != nil {
-				return err
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update backup: %w", err)
-			}
-
-			// Get backup label (use ID if name not available)
-			backupLabel := model.BackupId
-			if resp.Name != nil {
-				backupLabel = *resp.Name
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, backupLabel, resp)

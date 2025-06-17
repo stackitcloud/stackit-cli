@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	iaasutils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
 )
@@ -51,13 +52,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backup, err := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId).Execute()
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
-			}
-			backupLabel := model.BackupId
-			if backup != nil && backup.Name != nil {
-				backupLabel = *backup.Name
 			}
 
 			if !model.AssumeYes {
