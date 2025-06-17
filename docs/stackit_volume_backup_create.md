@@ -30,7 +30,7 @@ stackit volume backup create [flags]
       --labels stringToString   Key-value string pairs as labels (default [])
       --name string             Name of the backup
       --source-id string        ID of the source from which a backup should be created
-      --source-type string      Source type of the backup (volume or snapshot)
+      --source-type string      Source type of the backup, one of ["volume" "snapshot"]
 ```
 
 ### Options inherited from parent commands
