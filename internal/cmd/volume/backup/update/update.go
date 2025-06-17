@@ -54,6 +54,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
+			if !model.AssumeYes {
+				prompt := fmt.Sprintf("Are you sure you want to update backup %q? (This cannot be undone)", model.BackupId)
+				err = params.Printer.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
+				}
+			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
