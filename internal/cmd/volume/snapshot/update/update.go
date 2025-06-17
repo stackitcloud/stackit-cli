@@ -82,7 +82,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("update snapshot: %w", err)
 			}
 
-			params.Printer.Info("Updated snapshot %q\n", snapshotLabel)
+			params.Printer.Outputf("Updated snapshot %q\n", snapshotLabel)
 			return nil
 		},
 	}
