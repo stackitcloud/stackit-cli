@@ -25,7 +25,7 @@ lint: lint-golangci-lint lint-yamllint
 # Test
 test:
 	@echo ">> Running tests for the CLI application"
-	@go test ./... -count=1
+	@go test ./... -count=1 -coverprofile=coverage.out
 
 # Test coverage
 coverage:
