@@ -84,9 +84,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if model.Async {
-				params.Printer.Info("Triggered deletion of backup %q\n", backupLabel)
+				params.Printer.Outputf("Triggered deletion of backup %q\n", backupLabel)
 			} else {
-				params.Printer.Info("Deleted backup %q\n", backupLabel)
+				params.Printer.Outputf("Deleted backup %q\n", backupLabel)
 			}
 			return nil
 		},

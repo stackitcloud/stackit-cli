@@ -97,9 +97,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if model.Async {
-				params.Printer.Info("Triggered restore of %q with %q in %q\n", sourceLabel, backupLabel, model.ProjectId)
+				params.Printer.Outputf("Triggered restore of %q with %q in %q\n", sourceLabel, backupLabel, model.ProjectId)
 			} else {
-				params.Printer.Info("Restored %q with %q in %q\n", sourceLabel, backupLabel, model.ProjectId)
+				params.Printer.Outputf("Restored %q with %q in %q\n", sourceLabel, backupLabel, model.ProjectId)
 			}
 			return nil
 		},
