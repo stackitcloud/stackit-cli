@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasutils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -79,18 +80,18 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Get source name for label (use ID if name not available)
 			sourceLabel := model.SourceID
 			if model.SourceType == "volume" {
-				volume, err := apiClient.GetVolume(ctx, model.ProjectId, model.SourceID).Execute()
+				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
-				} else if volume != nil && volume.Name != nil {
-					sourceLabel = *volume.Name
+				} else if name != "" {
+					sourceLabel = name
 				}
 			} else if model.SourceType == "snapshot" {
-				snapshot, err := apiClient.GetSnapshot(ctx, model.ProjectId, model.SourceID).Execute()
+				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
-				} else if snapshot != nil && snapshot.Name != nil {
-					sourceLabel = *snapshot.Name
+				} else if name != "" {
+					sourceLabel = name
 				}
 			}
 

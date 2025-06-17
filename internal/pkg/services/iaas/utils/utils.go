@@ -26,6 +26,7 @@ type IaaSClient interface {
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, networkRangeId string) (*iaas.NetworkRange, error)
 	GetImageExecute(ctx context.Context, projectId string, imageId string) (*iaas.Image, error)
 	GetAffinityGroupExecute(ctx context.Context, projectId string, affinityGroupId string) (*iaas.AffinityGroup, error)
+	GetSnapshotExecute(ctx context.Context, projectId, snapshotId string) (*iaas.Snapshot, error)
 }
 
 func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, securityGroupRuleId, securityGroupId string) (string, error) {
@@ -167,6 +168,14 @@ func GetAffinityGroupName(ctx context.Context, apiClient IaaSClient, projectId, 
 		return "", ErrResponseNil
 	} else if resp.Name == nil {
 		return "", ErrNameNil
+	}
+	return *resp.Name, nil
+}
+
+func GetSnapshotName(ctx context.Context, apiClient IaaSClient, projectId, snapshotId string) (string, error) {
+	resp, err := apiClient.GetSnapshotExecute(ctx, projectId, snapshotId)
+	if err != nil {
+		return "", fmt.Errorf("get snapshot: %w", err)
 	}
 	return *resp.Name, nil
 }
