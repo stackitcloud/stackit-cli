@@ -22,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.5.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.23.0
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.2.1
