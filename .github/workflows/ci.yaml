@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+env:
+  CODE_COVERAGE_FILE_NAME: "coverage.out" # must be the same as in Makefile
+  CODE_COVERAGE_ARTIFACT_NAME: "code-coverage"
+
 jobs:
   main:
     name: CI
@@ -34,8 +38,8 @@ jobs:
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage
-          path: coverage.out
+          name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}
+          path: ${{ env.CODE_COVERAGE_FILE_NAME }}
 
   config:
     name: Check GoReleaser config
@@ -62,4 +66,5 @@ jobs:
     steps:
       - uses: fgrosse/go-coverage-report@v1.1.1
         with:
-          coverage-file-name: "coverage.out"
+          coverage-artifact-name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}
+          coverage-file-name: ${{ env.CODE_COVERAGE_FILE_NAME }}
