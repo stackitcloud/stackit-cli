@@ -33,6 +33,10 @@ type IaaSClientMocked struct {
 	GetImageResp              *iaas.Image
 	GetAffinityGroupsFails    bool
 	GetAffinityGroupResp      *iaas.AffinityGroup
+	GetBackupFails            bool
+	GetBackupResp             *iaas.Backup
+	GetSnapshotFails          bool
+	GetSnapshotResp           *iaas.Snapshot
 }
 
 func (m *IaaSClientMocked) GetAffinityGroupExecute(_ context.Context, _, _ string) (*iaas.AffinityGroup, error) {
@@ -112,6 +116,19 @@ func (m *IaaSClientMocked) GetImageExecute(_ context.Context, _, _ string) (*iaa
 	return m.GetImageResp, nil
 }
 
+func (m *IaaSClientMocked) GetBackupExecute(_ context.Context, _, _ string) (*iaas.Backup, error) {
+	if m.GetBackupFails {
+		return nil, fmt.Errorf("could not get backup")
+	}
+	return m.GetBackupResp, nil
+}
+
+func (m *IaaSClientMocked) GetSnapshotExecute(_ context.Context, _, _ string) (*iaas.Snapshot, error) {
+	if m.GetSnapshotFails {
+		return nil, fmt.Errorf("could not get snapshot")
+	}
+	return m.GetSnapshotResp, nil
+}
 func TestGetSecurityGroupRuleName(t *testing.T) {
 	type args struct {
 		getInstanceFails bool
