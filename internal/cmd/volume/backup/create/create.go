@@ -181,24 +181,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
 	req := apiClient.CreateBackup(ctx, model.ProjectId)
 
-	// Convert map[string]string to map[string]interface{}
-	var labelsMap *map[string]interface{}
-	if len(model.Labels) > 0 {
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range model.Labels {
-			(*labelsMap)[k] = v
-		}
+	payload := iaas.CreateBackupPayload{
+		Name:   model.Name,
+		Labels: utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels)),
+		Source: &iaas.BackupSource{
+			Id:   &model.SourceID,
+			Type: &model.SourceType,
+		},
 	}
 
-	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
-	createPayload.Name = model.Name
-	createPayload.Labels = labelsMap
-	createPayload.Source = &iaas.BackupSource{
-		Id:   &model.SourceID,
-		Type: &model.SourceType,
-	}
-
-	return req.CreateBackupPayload(*createPayload)
+	return req.CreateBackupPayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel, projectLabel string, resp *iaas.Backup) error {

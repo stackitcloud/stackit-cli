@@ -174,20 +174,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Type: model.SourceType,
 	}
 
-	var labelsMap *map[string]interface{}
-	if model.Labels != nil && len(*model.Labels) > 0 {
-		// convert map[string]string to map[string]interface{}
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range *model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-
 	payload := iaas.CreateVolumePayload{
 		AvailabilityZone: model.AvailabilityZone,
 		Name:             model.Name,
 		Description:      model.Description,
-		Labels:           labelsMap,
+		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
 		PerformanceClass: model.PerformanceClass,
 		Size:             model.Size,
 	}

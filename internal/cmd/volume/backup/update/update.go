@@ -130,22 +130,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateBackupRequest {
 	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.BackupId)
 
-	updatePayload := iaas.NewUpdateBackupPayloadWithDefaults()
-	if model.Name != nil {
-		updatePayload.Name = model.Name
+	payload := iaas.UpdateBackupPayload{
+		Name:   model.Name,
+		Labels: utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels)),
 	}
 
-	// Convert map[string]string to map[string]interface{}
-	var labelsMap *map[string]interface{}
-	if len(model.Labels) > 0 {
-		labelsMap = utils.Ptr(map[string]interface{}{})
-		for k, v := range model.Labels {
-			(*labelsMap)[k] = v
-		}
-	}
-	updatePayload.Labels = labelsMap
-
-	req = req.UpdateBackupPayload(*updatePayload)
+	req = req.UpdateBackupPayload(payload)
 	return req
 }
 
