@@ -48,6 +48,8 @@ jobs:
           security create-keychain -p  "${{ secrets.TEMP_KEYCHAIN }}" $KEYCHAIN_PATH
           security default-keychain -s $KEYCHAIN_PATH
           security unlock-keychain -p "${{ secrets.TEMP_KEYCHAIN }}" $KEYCHAIN_PATH
+          # the keychain gets locked automatically after 300s, so we have to extend this interval to e.g. 900 seconds
+          security set-keychain-settings -lut 900
           security import ./ApplicationID.p12 -P "${{ secrets.APPLICATION_ID }}" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
           echo -n $AUTHKEY_BASE64 | base64 -d -o ./AuthKey.p8
