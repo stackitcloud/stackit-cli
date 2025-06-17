@@ -2,6 +2,7 @@ package volume
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/backup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/describe"
@@ -37,4 +38,5 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(resize.NewCmd(params))
 	cmd.AddCommand(performanceclass.NewCmd(params))
 	cmd.AddCommand(snapshot.NewCmd(params))
+	cmd.AddCommand(backup.NewCmd(params))
 }
