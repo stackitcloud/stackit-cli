@@ -106,9 +106,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if model.Async {
-				params.Printer.Info("Triggered snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
+				params.Printer.Outputf("Triggered snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
 			} else {
-				params.Printer.Info("Created snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
+				params.Printer.Outputf("Created snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
 			}
 			return nil
 		},

@@ -88,9 +88,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if model.Async {
-				params.Printer.Info("Triggered deletion of snapshot %q\n", snapshotLabel)
+				params.Printer.Outputf("Triggered deletion of snapshot %q\n", snapshotLabel)
 			} else {
-				params.Printer.Info("Deleted snapshot %q\n", snapshotLabel)
+				params.Printer.Outputf("Deleted snapshot %q\n", snapshotLabel)
 			}
 			return nil
 		},
