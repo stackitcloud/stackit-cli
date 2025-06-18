@@ -32,6 +32,7 @@ builds:
       - amd64
     hooks:
       post:
+        # Signing
         - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
           output: true
         - cmd: codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
@@ -46,12 +47,29 @@ builds:
           output: true
         - cmd: spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
           output: true
+        # Completion files
+        - cmd: mkdir -p dist/macos-builds_{{.Target}}/completions
+        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion zsh > ./dist/macos-builds_{{.Target}}/completions/stackit.zsh'
+        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion bash > ./dist/macos-builds_{{.Target}}/completions/stackit.bash'
+        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion fish > ./dist/macos-builds_{{.Target}}/completions/stackit.fish'
 
 archives:
-  - formats: [ 'tar.gz' ]
+  - ids:
+      - linux-builds
+      - windows-builds
+    formats: [ 'tar.gz' ]
     format_overrides:
       - goos: windows
         formats: [ 'zip' ]
+  - id: macos-archives
+    ids:
+      - macos-builds
+    formats: [ 'tar.gz' ]
+    files:
+      - src: ./dist/macos-builds_{{.Target}}/completions/*
+        dst: completions
+      - LICENSE.md
+      - README.md
 
 release:
   # If set to auto, the GitHub release will be marked as "Pre-release"
@@ -96,8 +114,11 @@ signs:
         "${artifact}",
       ]
 
-brews:
+homebrew_casks:
   - name: stackit
+    directory: Casks
+    conflicts:
+      - formula: stackit
     repository:
       owner: stackitcloud
       name: homebrew-tap
@@ -106,14 +127,14 @@ brews:
       email: noreply@stackit.de
     homepage: "https://github.com/stackitcloud/stackit-cli"
     description: "A command-line interface to manage STACKIT resources.\nThis CLI is in a beta state. More services and functionality will be supported soon."
-    directory: Formula
     license: "Apache-2.0"
     # If set to auto, the release will not be uploaded to the homebrew tap repo
     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
     skip_upload: auto
-    install: |
-      bin.install "stackit"
-      generate_completions_from_executable(bin/"stackit", "completion")
+    completions:
+      zsh: ./completions/stackit.zsh
+      bash: ./completions/stackit.bash
+      fish: ./completions/stackit.fish
 
 snapcrafts:
   # IDs of the builds for which to create packages for
