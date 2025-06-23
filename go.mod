@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stackitcloud/stackit-sdk-go/core v0.17.2
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.7.0
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.5.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.24.0
