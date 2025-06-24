@@ -134,9 +134,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	volumeID := flags.FlagToStringValue(p, cmd, volumeIdFlag)
-	if volumeID == "" {
-		return nil, fmt.Errorf("volume-id is required")
-	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
