@@ -182,7 +182,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 			table.AddRow(
 				utils.PtrString(snapshot.Id),
 				utils.PtrString(snapshot.Name),
-				utils.PtrByteSizeDefault(snapshot.Size, ""),
+				utils.PtrGigaByteSizeDefault(snapshot.Size, "n/a"),
 				utils.PtrString(snapshot.Status),
 				utils.PtrString(snapshot.VolumeId),
 				labelsString,

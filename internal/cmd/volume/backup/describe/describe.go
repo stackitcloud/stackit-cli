@@ -128,7 +128,7 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(backup.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE", utils.PtrByteSizeDefault(backup.Size, ""))
+		table.AddRow("SIZE", utils.PtrGigaByteSizeDefault(backup.Size, "n/a"))
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(backup.Status))
 		table.AddSeparator()

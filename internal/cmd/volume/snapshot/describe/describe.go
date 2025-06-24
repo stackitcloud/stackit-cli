@@ -127,7 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(snapshot.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE", utils.PtrByteSizeDefault(snapshot.Size, ""))
+		table.AddRow("SIZE", utils.PtrGigaByteSizeDefault(snapshot.Size, "n/a"))
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(snapshot.Status))
 		table.AddSeparator()

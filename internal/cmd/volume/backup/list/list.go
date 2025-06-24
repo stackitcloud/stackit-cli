@@ -184,7 +184,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) 
 			table.AddRow(
 				utils.PtrString(backup.Id),
 				utils.PtrString(backup.Name),
-				utils.PtrByteSizeDefault(backup.Size, ""),
+				utils.PtrGigaByteSizeDefault(backup.Size, "n/a"),
 				utils.PtrString(backup.Status),
 				utils.PtrString(backup.SnapshotId),
 				utils.PtrString(backup.VolumeId),
