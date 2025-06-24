@@ -119,7 +119,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(volumeIdFlag, "", "ID of the volume from which a snapshot should be created")
+	cmd.Flags().Var(flags.UUIDFlag(), volumeIdFlag, "Volume ID")
 	cmd.Flags().String(nameFlag, "", "Name of the snapshot")
 	cmd.Flags().StringToString(labelsFlag, nil, "Key-value string pairs as labels")
 
@@ -136,9 +136,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	volumeID := flags.FlagToStringValue(p, cmd, volumeIdFlag)
 	if volumeID == "" {
 		return nil, fmt.Errorf("volume-id is required")
-	}
-	if err := utils.ValidateUUID(volumeID); err != nil {
-		return nil, fmt.Errorf("volume-id must be a valid UUID")
 	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
