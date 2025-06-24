@@ -29,7 +29,7 @@ stackit volume snapshot create [flags]
   -h, --help                    Help for "stackit volume snapshot create"
       --labels stringToString   Key-value string pairs as labels (default [])
       --name string             Name of the snapshot
-      --volume-id string        ID of the volume from which a snapshot should be created
+      --volume-id string        Volume ID
 ```
 
 ### Options inherited from parent commands
