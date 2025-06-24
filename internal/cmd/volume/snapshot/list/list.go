@@ -82,22 +82,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return nil
 			}
 
-			// Filter results by label selector
 			snapshots := *resp.Items
-			if model.LabelSelector != nil {
-				filtered := []iaas.Snapshot{}
-				for _, s := range snapshots {
-					if s.Labels != nil {
-						for k, v := range *s.Labels {
-							if fmt.Sprintf("%s=%s", k, v) == *model.LabelSelector {
-								filtered = append(filtered, s)
-								break
-							}
-						}
-					}
-				}
-				snapshots = filtered
-			}
 
 			// Apply limit if specified
 			if model.Limit != nil && int(*model.Limit) < len(snapshots) {
@@ -125,7 +110,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
-		return nil, fmt.Errorf("limit must be greater than 0")
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
 	}
 
 	labelSelector := flags.FlagToStringPointer(p, cmd, labelSelectorFlag)
@@ -149,7 +137,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsRequest {
-	return apiClient.ListSnapshots(ctx, model.ProjectId)
+	req := apiClient.ListSnapshots(ctx, model.ProjectId)
+	if model.LabelSelector != nil {
+		req.LabelSelector(*model.LabelSelector)
+	}
+	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapshot) error {

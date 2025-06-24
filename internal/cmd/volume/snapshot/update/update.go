@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -59,12 +60,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get snapshot name for label
-			snapshotLabel := model.SnapshotId
-			snapshot, err := apiClient.GetSnapshot(ctx, model.ProjectId, model.SnapshotId).Execute()
+			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
-			} else if snapshot != nil && snapshot.Name != nil {
-				snapshotLabel = *snapshot.Name
+				snapshotLabel = model.SnapshotId
 			}
 
 			if !model.AssumeYes {
