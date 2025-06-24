@@ -118,7 +118,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), volumeIdFlag, "Volume ID")
+	cmd.Flags().Var(flags.UUIDFlag(), volumeIdFlag, "ID of the volume from which a snapshot should be created")
 	cmd.Flags().String(nameFlag, "", "Name of the snapshot")
 	cmd.Flags().StringToString(labelsFlag, nil, "Key-value string pairs as labels")
 

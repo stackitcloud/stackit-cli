@@ -139,7 +139,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsRequest {
 	req := apiClient.ListSnapshots(ctx, model.ProjectId)
 	if model.LabelSelector != nil {
-		req.LabelSelector(*model.LabelSelector)
+		req = req.LabelSelector(*model.LabelSelector)
 	}
 	return req
 }

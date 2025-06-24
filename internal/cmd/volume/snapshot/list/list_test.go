@@ -52,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureRequest(mods ...func(request *iaas.ApiListSnapshotsRequest)) iaas.ApiListSnapshotsRequest {
 	request := testClient.ListSnapshots(testCtx, testProjectId)
+	request = request.LabelSelector("key1=value1")
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -173,6 +174,15 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "without label selector",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.LabelSelector = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiListSnapshotsRequest) {
+				*request = testClient.ListSnapshots(testCtx, testProjectId)
+			}),
 		},
 	}
 
