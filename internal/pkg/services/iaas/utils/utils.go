@@ -177,6 +177,10 @@ func GetSnapshotName(ctx context.Context, apiClient IaaSClient, projectId, snaps
 	resp, err := apiClient.GetSnapshotExecute(ctx, projectId, snapshotId)
 	if err != nil {
 		return "", fmt.Errorf("get snapshot: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
 	}
 	return *resp.Name, nil
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -71,12 +72,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get volume name for label
-			volumeLabel := model.VolumeID
-			volume, err := apiClient.GetVolume(ctx, model.ProjectId, model.VolumeID).Execute()
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
-			} else if volume != nil && volume.Name != nil {
-				volumeLabel = *volume.Name
+				volumeLabel = model.VolumeID
 			}
 
 			if !model.AssumeYes {
@@ -105,11 +104,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
+			operationState := "Created"
 			if model.Async {
-				params.Printer.Outputf("Triggered snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
-			} else {
-				params.Printer.Outputf("Created snapshot of %q in %q. Snapshot ID: %s\n", volumeLabel, projectLabel, utils.PtrString(resp.Id))
+				operationState = "Triggered creation of"
 			}
+			params.Printer.Outputf("%s snapshot of %q in %q. Snapshot ID: %s\n", operationState, volumeLabel, projectLabel, utils.PtrString(resp.Id))
 			return nil
 		},
 	}
