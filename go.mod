@@ -17,21 +17,21 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stackitcloud/stackit-sdk-go/core v0.17.2
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.7.0
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.16.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.5.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.24.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.6.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.16.0
-	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.12.0
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.8.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.0
+	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/ske v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v0.27.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.2.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.25.0
@@ -237,10 +237,10 @@ require (
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.24.1
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.24.1
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.7.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.24.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.24.1
 	github.com/subosito/gotenv v1.6.0 // indirect
