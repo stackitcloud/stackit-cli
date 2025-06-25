@@ -119,6 +119,15 @@ func PtrByteSizeDefault(size *int64, defaultValue string) string {
 	return bytesize.New(float64(*size)).String()
 }
 
+// PtrGigaByteSizeDefault return the value of an int64 pointer to a string representation of gigabytes. If the pointer is nil,
+// it returns the [defaultValue].
+func PtrGigaByteSizeDefault(size *int64, defaultValue string) string {
+	if size == nil {
+		return defaultValue
+	}
+	return (bytesize.New(float64(*size)) * bytesize.GB).String()
+}
+
 // Base64Encode encodes a []byte to a base64 representation as string
 func Base64Encode(message []byte) string {
 	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))

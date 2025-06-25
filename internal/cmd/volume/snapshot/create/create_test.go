@@ -1,44 +1,37 @@
-package update
+package create
 
 import (
 	"context"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 type testCtxKey struct{}
 
+const (
+	testName = "test-snapshot"
+)
+
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient    = &iaas.APIClient{}
 	testProjectId = uuid.NewString()
-	testBackupId  = uuid.NewString()
-	testName      = "test-backup"
+	testVolumeId  = uuid.NewString()
 	testLabels    = map[string]string{"key1": "value1"}
 )
-
-func fixtureArgValues(mods ...func(argValues []string)) []string {
-	argValues := []string{
-		testBackupId,
-	}
-	for _, mod := range mods {
-		mod(argValues)
-	}
-	return argValues
-}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		volumeIdFlag:              testVolumeId,
 		nameFlag:                  testName,
 		labelsFlag:                "key1=value1",
 	}
@@ -54,8 +47,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		BackupId: testBackupId,
-		Name:     &testName,
+		VolumeID: testVolumeId,
+		Name:     utils.Ptr(testName),
 		Labels:   testLabels,
 	}
 	for _, mod := range mods {
@@ -64,14 +57,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.ApiUpdateBackupRequest {
-	request := testClient.UpdateBackup(testCtx, testProjectId, testBackupId)
-	payload := iaas.NewUpdateBackupPayloadWithDefaults()
-	payload.Name = &testName
+func fixtureRequest(mods ...func(request *iaas.ApiCreateSnapshotRequest)) iaas.ApiCreateSnapshotRequest {
+	request := testClient.CreateSnapshot(testCtx, testProjectId)
+	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
+	payload.VolumeId = &testVolumeId
+	payload.Name = utils.Ptr(testName)
 
 	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
 
-	request = request.UpdateBackupPayload(*payload)
+	request = request.CreateSnapshotPayload(*payload)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -81,35 +75,60 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.Api
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
-		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
-			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "no values",
-			argValues:   []string{},
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			description: "no volume id",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, volumeIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			description: "no flag values",
-			argValues:   fixtureArgValues(),
-			flagValues:  map[string]string{},
-			isValid:     false,
+			description: "project id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "volume id invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[volumeIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "only required flags",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, nameFlag)
+				delete(flagValues, labelsFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Name = nil
+				model.Labels = make(map[string]string)
+			}),
 		},
 	}
 
@@ -132,15 +151,15 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateArgs(tt.argValues)
+			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
-				t.Fatalf("error validating args: %v", err)
+				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd, tt.argValues)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -163,7 +182,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiUpdateBackupRequest
+		expectedRequest iaas.ApiCreateSnapshotRequest
 	}{
 		{
 			description:     "base",

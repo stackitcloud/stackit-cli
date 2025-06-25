@@ -1,4 +1,4 @@
-package update
+package list
 
 import (
 	"context"
@@ -21,26 +21,13 @@ var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient    = &iaas.APIClient{}
 	testProjectId = uuid.NewString()
-	testBackupId  = uuid.NewString()
-	testName      = "test-backup"
-	testLabels    = map[string]string{"key1": "value1"}
 )
-
-func fixtureArgValues(mods ...func(argValues []string)) []string {
-	argValues := []string{
-		testBackupId,
-	}
-	for _, mod := range mods {
-		mod(argValues)
-	}
-	return argValues
-}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
+		limitFlag:                 "10",
+		labelSelectorFlag:         "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -54,9 +41,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		BackupId: testBackupId,
-		Name:     &testName,
-		Labels:   testLabels,
+		Limit:         utils.Ptr(int64(10)),
+		LabelSelector: utils.Ptr("key1=value1"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -64,14 +50,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.ApiUpdateBackupRequest {
-	request := testClient.UpdateBackup(testCtx, testProjectId, testBackupId)
-	payload := iaas.NewUpdateBackupPayloadWithDefaults()
-	payload.Name = &testName
-
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
-
-	request = request.UpdateBackupPayload(*payload)
+func fixtureRequest(mods ...func(request *iaas.ApiListSnapshotsRequest)) iaas.ApiListSnapshotsRequest {
+	request := testClient.ListSnapshots(testCtx, testProjectId)
+	request = request.LabelSelector("key1=value1")
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -81,35 +62,67 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.Api
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
-		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
-			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "no values",
-			argValues:   []string{},
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			description: "project id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			description: "no flag values",
-			argValues:   fixtureArgValues(),
-			flagValues:  map[string]string{},
-			isValid:     false,
+			description: "project id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
+		{
+			description: "only required flags",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, limitFlag)
+				delete(flagValues, labelSelectorFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+				model.LabelSelector = nil
+			}),
 		},
 	}
 
@@ -132,15 +145,7 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating args: %v", err)
-			}
-
-			model, err := parseInput(p, cmd, tt.argValues)
+			model, err := parseInput(p, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -163,12 +168,21 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiUpdateBackupRequest
+		expectedRequest iaas.ApiListSnapshotsRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "without label selector",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.LabelSelector = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiListSnapshotsRequest) {
+				*request = testClient.ListSnapshots(testCtx, testProjectId)
+			}),
 		},
 	}
 
@@ -182,6 +196,54 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		snapshots    []iaas.Snapshot
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "empty snapshot in slice",
+			args: args{
+				snapshots: []iaas.Snapshot{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "snapshots as argument",
+			args: args{
+				snapshots: []iaas.Snapshot{
+					{
+						Id: utils.Ptr("snapshot-1"),
+					},
+					{
+						Id: utils.Ptr("snapshot-2"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.snapshots); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
