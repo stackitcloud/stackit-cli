@@ -20,7 +20,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.6.0
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.1.0
