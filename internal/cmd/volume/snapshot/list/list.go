@@ -15,10 +15,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -36,22 +37,19 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all backups",
-		Long:  "Lists all backups in a project.",
+		Short: "Lists all snapshots",
+		Long:  "Lists all snapshots in a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all backups`,
-				"$ stackit volume backup list"),
+				`List all snapshots`,
+				"$ stackit volume snapshot list"),
 			examples.NewExample(
-				`List all backups in JSON format`,
-				"$ stackit volume backup list --output-format json"),
+				`List snapshots with a limit of 10`,
+				"$ stackit volume snapshot list --limit 10"),
 			examples.NewExample(
-				`List up to 10 backups`,
-				"$ stackit volume backup list --limit 10"),
-			examples.NewExample(
-				`List backups with specific labels`,
-				"$ stackit volume backup list --label-selector key1=value1,key2=value2"),
+				`List snapshots filtered by label`,
+				"$ stackit volume snapshot list --label-selector key1=value1"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -70,25 +68,28 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get backups: %w", err)
+				return fmt.Errorf("list snapshots: %w", err)
 			}
+
+			// Check if response is empty
 			if resp.Items == nil || len(*resp.Items) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				params.Printer.Info("No backups found for project %s\n", projectLabel)
+				params.Printer.Info("No snapshots found for project %q\n", projectLabel)
 				return nil
 			}
-			backups := *resp.Items
 
-			// Truncate output
-			if model.Limit != nil && len(backups) > int(*model.Limit) {
-				backups = backups[:*model.Limit]
+			snapshots := *resp.Items
+
+			// Apply limit if specified
+			if model.Limit != nil && int(*model.Limit) < len(snapshots) {
+				snapshots = snapshots[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backups)
+			return outputResult(params.Printer, model.OutputFormat, snapshots)
 		},
 	}
 
@@ -98,7 +99,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().String(labelSelectorFlag, "", "Filter backups by labels")
+	cmd.Flags().String(labelSelectorFlag, "", "Filter snapshots by labels")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
@@ -135,63 +136,58 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId)
-
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsRequest {
+	req := apiClient.ListSnapshots(ctx, model.ProjectId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
-
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) error {
-	if backups == nil {
-		return fmt.Errorf("backups is empty")
+func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapshot) error {
+	if snapshots == nil {
+		return fmt.Errorf("list snapshots response is empty")
 	}
 
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backups, "", "  ")
+		details, err := json.MarshalIndent(snapshots, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup list: %w", err)
+			return fmt.Errorf("marshal snapshots: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(snapshots, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal backup list: %w", err)
+			return fmt.Errorf("marshal snapshots: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "SNAPSHOT ID", "VOLUME ID", "AVAILABILITY ZONE", "LABELS", "CREATED AT", "UPDATED AT")
+		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "VOLUME ID", "LABELS", "CREATED AT", "UPDATED AT")
 
-		for _, backup := range backups {
+		for _, snapshot := range snapshots {
 			var labelsString string
-			if backup.Labels != nil {
+			if snapshot.Labels != nil {
 				var labels []string
-				for key, value := range *backup.Labels {
+				for key, value := range *snapshot.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
-				labelsString = strings.Join(labels, ", ")
+				labelsString = strings.Join(labels, "\n")
 			}
-
 			table.AddRow(
-				utils.PtrString(backup.Id),
-				utils.PtrString(backup.Name),
-				utils.PtrGigaByteSizeDefault(backup.Size, "n/a"),
-				utils.PtrString(backup.Status),
-				utils.PtrString(backup.SnapshotId),
-				utils.PtrString(backup.VolumeId),
-				utils.PtrString(backup.AvailabilityZone),
+				utils.PtrString(snapshot.Id),
+				utils.PtrString(snapshot.Name),
+				utils.PtrGigaByteSizeDefault(snapshot.Size, "n/a"),
+				utils.PtrString(snapshot.Status),
+				utils.PtrString(snapshot.VolumeId),
 				labelsString,
-				utils.ConvertTimePToDateTimeString(backup.CreatedAt),
-				utils.ConvertTimePToDateTimeString(backup.UpdatedAt),
+				utils.ConvertTimePToDateTimeString(snapshot.CreatedAt),
+				utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt),
 			)
 			table.AddSeparator()
 		}
