@@ -94,7 +94,7 @@ eget stackitcloud/stackit-cli
 
 The STACKIT CLI is available as [RPM Package](https://github.com/stackitcloud/stackit-cli/releases) and can be installed via dnf, yum and zypper package manager.
 
-Just download the rpm package from the release page and run the install command like the following:
+Just download the rpm package from the [release page](https://github.com/stackitcloud/stackit-cli/releases) and run the install command like the following:
 
 ```shell
 dnf install stackitcli.rpm
