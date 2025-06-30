@@ -22,27 +22,27 @@ import (
 )
 
 const (
-	backupIdArg = "BACKUP_ID"
+	snapshotIdArg = "SNAPSHOT_ID"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	BackupId string
+	SnapshotId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("describe %s", backupIdArg),
-		Short: "Describes a backup",
-		Long:  "Describes a backup by its ID.",
-		Args:  args.SingleArg(backupIdArg, utils.ValidateUUID),
+		Use:   fmt.Sprintf("describe %s", snapshotIdArg),
+		Short: "Describes a snapshot",
+		Long:  "Describes a snapshot by its ID.",
+		Args:  args.SingleArg(snapshotIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of a backup with ID "xxx"`,
-				"$ stackit volume backup describe xxx"),
+				`Get details of a snapshot with ID "xxx"`,
+				"$ stackit volume snapshot describe xxx"),
 			examples.NewExample(
-				`Get details of a backup with ID "xxx" in JSON format`,
-				"$ stackit volume backup describe xxx --output-format json"),
+				`Get details of a snapshot with ID "xxx" in JSON format`,
+				"$ stackit volume snapshot describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -59,19 +59,19 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			backup, err := req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get backup details: %w", err)
+				return fmt.Errorf("get snapshot details: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backup)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	return cmd
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	backupId := inputArgs[0]
+	snapshotId := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -80,7 +80,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		BackupId:        backupId,
+		SnapshotId:      snapshotId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -95,62 +95,57 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId)
-	return req
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSnapshotRequest {
+	return apiClient.GetSnapshot(ctx, model.ProjectId, model.SnapshotId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) error {
-	if backup == nil {
-		return fmt.Errorf("backup response is empty")
+func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot) error {
+	if snapshot == nil {
+		return fmt.Errorf("get snapshot response is empty")
 	}
 
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backup, "", "  ")
+		details, err := json.MarshalIndent(snapshot, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
+			return fmt.Errorf("marshal snapshot: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backup, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(snapshot, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
+			return fmt.Errorf("marshal snapshot: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	default:
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(backup.Id))
+		table.AddRow("ID", utils.PtrString(snapshot.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(backup.Name))
+		table.AddRow("NAME", utils.PtrString(snapshot.Name))
 		table.AddSeparator()
-		table.AddRow("SIZE", utils.PtrGigaByteSizeDefault(backup.Size, "n/a"))
+		table.AddRow("SIZE", utils.PtrGigaByteSizeDefault(snapshot.Size, "n/a"))
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(backup.Status))
+		table.AddRow("STATUS", utils.PtrString(snapshot.Status))
 		table.AddSeparator()
-		table.AddRow("SNAPSHOT ID", utils.PtrString(backup.SnapshotId))
-		table.AddSeparator()
-		table.AddRow("VOLUME ID", utils.PtrString(backup.VolumeId))
-		table.AddSeparator()
-		table.AddRow("AVAILABILITY ZONE", utils.PtrString(backup.AvailabilityZone))
+		table.AddRow("VOLUME ID", utils.PtrString(snapshot.VolumeId))
 		table.AddSeparator()
 
-		if backup.Labels != nil && len(*backup.Labels) > 0 {
-			var labels []string
-			for key, value := range *backup.Labels {
+		if snapshot.Labels != nil && len(*snapshot.Labels) > 0 {
+			labels := []string{}
+			for key, value := range *snapshot.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
 
-		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(backup.CreatedAt))
+		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(snapshot.CreatedAt))
 		table.AddSeparator()
-		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(backup.UpdatedAt))
+		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt))
 
 		err := table.Display(p)
 		if err != nil {

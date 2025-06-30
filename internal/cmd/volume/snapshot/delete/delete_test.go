@@ -1,4 +1,4 @@
-package update
+package delete
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -18,17 +17,15 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
-	testProjectId = uuid.NewString()
-	testBackupId  = uuid.NewString()
-	testName      = "test-backup"
-	testLabels    = map[string]string{"key1": "value1"}
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &iaas.APIClient{}
+	testProjectId  = uuid.NewString()
+	testSnapshotId = uuid.NewString()
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testBackupId,
+		testSnapshotId,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -39,8 +36,6 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -54,9 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		BackupId: testBackupId,
-		Name:     &testName,
-		Labels:   testLabels,
+		SnapshotId: testSnapshotId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -64,14 +57,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.ApiUpdateBackupRequest {
-	request := testClient.UpdateBackup(testCtx, testProjectId, testBackupId)
-	payload := iaas.NewUpdateBackupPayloadWithDefaults()
-	payload.Name = &testName
-
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
-
-	request = request.UpdateBackupPayload(*payload)
+func fixtureRequest(mods ...func(request *iaas.ApiDeleteSnapshotRequest)) iaas.ApiDeleteSnapshotRequest {
+	request := testClient.DeleteSnapshot(testCtx, testProjectId, testSnapshotId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -109,6 +96,28 @@ func TestParseInput(t *testing.T) {
 			description: "no flag values",
 			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "project id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "snapshot id invalid",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
 	}
@@ -163,7 +172,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiUpdateBackupRequest
+		expectedRequest iaas.ApiDeleteSnapshotRequest
 	}{
 		{
 			description:     "base",

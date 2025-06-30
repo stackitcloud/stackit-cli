@@ -37,5 +37,6 @@ stackit volume [flags]
 * [stackit volume list](./stackit_volume_list.md)	 - Lists all volumes of a project
 * [stackit volume performance-class](./stackit_volume_performance-class.md)	 - Provides functionality for volume performance classes available inside a project
 * [stackit volume resize](./stackit_volume_resize.md)	 - Resizes a volume
+* [stackit volume snapshot](./stackit_volume_snapshot.md)	 - Provides functionality for snapshots
 * [stackit volume update](./stackit_volume_update.md)	 - Updates a volume
 
