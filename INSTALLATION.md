@@ -90,6 +90,18 @@ asset_filters=["stackit-cli_", "_linux_amd64.tar.gz"]
 eget stackitcloud/stackit-cli
 ```
 
+#### RPM package via dnf, yum and zypper
+
+The STACKIT CLI is available as [RPM Package](https://github.com/stackitcloud/stackit-cli/releases) and can be installed via dnf, yum and zypper package manager.
+
+Just download the rpm package from the release page and run the install command like the following:
+
+```shell
+dnf install stackitcli.rpm
+yum install stackitcli.rpm
+zypper install stackitcli.rpm
+```
+
 #### Any distribution
 
 Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
