@@ -141,6 +141,10 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			table.AddSeparator()
 		}
 		if config := resp.Config; config != nil {
+			if architecture := config.Architecture; architecture != nil {
+				table.AddRow("ARCHITECTURE", *architecture)
+				table.AddSeparator()
+			}
 			if os := config.OperatingSystem; os != nil {
 				table.AddRow("OPERATING SYSTEM", *os)
 				table.AddSeparator()

@@ -31,6 +31,7 @@ const (
 	localFilePathFlag       = "local-file-path"
 	noProgressIndicatorFlag = "no-progress"
 
+	architectureFlag           = "architecture"
 	bootMenuFlag               = "boot-menu"
 	cdromBusFlag               = "cdrom-bus"
 	diskBusFlag                = "disk-bus"
@@ -53,6 +54,7 @@ const (
 )
 
 type imageConfig struct {
+	Architecture           *string
 	BootMenu               *bool
 	CdromBus               *string
 	DiskBus                *string
@@ -261,6 +263,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(localFilePathFlag, "", "The path to the local disk image file.")
 	cmd.Flags().Bool(noProgressIndicatorFlag, false, "Show no progress indicator for upload.")
 
+	cmd.Flags().String(architectureFlag, "", "Sets the CPU architecture. By default x86 is used.")
 	cmd.Flags().Bool(bootMenuFlag, false, "Enables the BIOS bootmenu.")
 	cmd.Flags().String(cdromBusFlag, "", "Sets CDROM bus controller type.")
 	cmd.Flags().String(diskBusFlag, "", "Sets Disk bus controller type.")
@@ -302,6 +305,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 		NoProgressIndicator: flags.FlagToBoolPointer(p, cmd, noProgressIndicatorFlag),
 		Config: &imageConfig{
+			Architecture:           flags.FlagToStringPointer(p, cmd, architectureFlag),
 			BootMenu:               flags.FlagToBoolPointer(p, cmd, bootMenuFlag),
 			CdromBus:               flags.FlagToStringPointer(p, cmd, cdromBusFlag),
 			DiskBus:                flags.FlagToStringPointer(p, cmd, diskBusFlag),
@@ -348,21 +352,47 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 		MinRam:      model.MinRam,
 		Protected:   model.Protected,
 	}
-	if model.Config != nil {
-		payload.Config = &iaas.ImageConfig{
-			BootMenu:               model.Config.BootMenu,
-			CdromBus:               iaas.NewNullableString(model.Config.CdromBus),
-			DiskBus:                iaas.NewNullableString(model.Config.DiskBus),
-			NicModel:               iaas.NewNullableString(model.Config.NicModel),
-			OperatingSystem:        model.Config.OperatingSystem,
-			OperatingSystemDistro:  iaas.NewNullableString(model.Config.OperatingSystemDistro),
-			OperatingSystemVersion: iaas.NewNullableString(model.Config.OperatingSystemVersion),
-			RescueBus:              iaas.NewNullableString(model.Config.RescueBus),
-			RescueDevice:           iaas.NewNullableString(model.Config.RescueDevice),
-			SecureBoot:             model.Config.SecureBoot,
-			Uefi:                   utils.Ptr(model.Config.Uefi),
-			VideoModel:             iaas.NewNullableString(model.Config.VideoModel),
-			VirtioScsi:             model.Config.VirtioScsi,
+	if config := model.Config; config != nil {
+		payload.Config = &iaas.ImageConfig{}
+		payload.Config.Uefi = utils.Ptr(config.Uefi)
+		if config.Architecture != nil {
+			payload.Config.Architecture = model.Config.Architecture
+		}
+		if config.BootMenu != nil {
+			payload.Config.BootMenu = model.Config.BootMenu
+		}
+		if config.CdromBus != nil {
+			payload.Config.CdromBus = iaas.NewNullableString(model.Config.CdromBus)
+		}
+		if config.DiskBus != nil {
+			payload.Config.DiskBus = iaas.NewNullableString(config.DiskBus)
+		}
+		if config.NicModel != nil {
+			payload.Config.NicModel = iaas.NewNullableString(config.NicModel)
+		}
+		if config.OperatingSystem != nil {
+			payload.Config.OperatingSystem = config.OperatingSystem
+		}
+		if config.OperatingSystemDistro != nil {
+			payload.Config.OperatingSystemDistro = iaas.NewNullableString(config.OperatingSystemDistro)
+		}
+		if config.OperatingSystemVersion != nil {
+			payload.Config.OperatingSystemVersion = iaas.NewNullableString(config.OperatingSystemVersion)
+		}
+		if config.RescueBus != nil {
+			payload.Config.RescueBus = iaas.NewNullableString(config.RescueBus)
+		}
+		if config.RescueDevice != nil {
+			payload.Config.RescueDevice = iaas.NewNullableString(config.RescueDevice)
+		}
+		if config.SecureBoot != nil {
+			payload.Config.SecureBoot = config.SecureBoot
+		}
+		if config.VideoModel != nil {
+			payload.Config.VideoModel = iaas.NewNullableString(config.VideoModel)
+		}
+		if config.VirtioScsi != nil {
+			payload.Config.VirtioScsi = config.VirtioScsi
 		}
 	}
 

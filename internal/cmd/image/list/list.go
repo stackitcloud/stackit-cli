@@ -165,14 +165,18 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "OS", "DISTRIBUTION", "VERSION", "LABELS")
+		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "LABELS")
 		for _, item := range items {
 			var (
-				os      string = "n/a"
-				distro  string = "n/a"
-				version string = "n/a"
+				architecture string = "n/a"
+				os           string = "n/a"
+				distro       string = "n/a"
+				version      string = "n/a"
 			)
 			if cfg := item.Config; cfg != nil {
+				if v := cfg.Architecture; v != nil {
+					architecture = *v
+				}
 				if v := cfg.OperatingSystem; v != nil {
 					os = *v
 				}
@@ -186,6 +190,7 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 			table.AddRow(utils.PtrString(item.Id),
 				utils.PtrString(item.Name),
 				os,
+				architecture,
 				distro,
 				version,
 				utils.JoinStringKeysPtr(*item.Labels, ","))
