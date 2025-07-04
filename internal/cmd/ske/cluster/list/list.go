@@ -144,7 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiListClustersRequest {
-	req := apiClient.ListClusters(ctx, model.ProjectId)
+	req := apiClient.ListClusters(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -172,7 +172,7 @@ func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster)
 		for i := range clusters {
 			c := clusters[i]
 			monitoring := "Disabled"
-			if c.Extensions != nil && c.Extensions.Argus != nil && *c.Extensions.Argus.Enabled {
+			if c.Extensions != nil && c.Extensions.Observability != nil && *c.Extensions.Observability.Enabled {
 				monitoring = "Enabled"
 			}
 			statusAggregated, kubernetesVersion := "", ""

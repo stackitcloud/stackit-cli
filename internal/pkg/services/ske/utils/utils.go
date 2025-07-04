@@ -32,12 +32,12 @@ const (
 )
 
 type SKEClient interface {
-	ListClustersExecute(ctx context.Context, projectId string) (*ske.ListClustersResponse, error)
-	ListProviderOptionsExecute(ctx context.Context) (*ske.ProviderOptions, error)
+	ListClustersExecute(ctx context.Context, projectId, region string) (*ske.ListClustersResponse, error)
+	ListProviderOptionsExecute(ctx context.Context, region string) (*ske.ProviderOptions, error)
 }
 
-func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, clusterName string) (bool, error) {
-	clusters, err := apiClient.ListClustersExecute(ctx, projectId)
+func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, region, clusterName string) (bool, error) {
+	clusters, err := apiClient.ListClustersExecute(ctx, projectId, region)
 	if err != nil {
 		return false, fmt.Errorf("list SKE clusters: %w", err)
 	}
@@ -49,8 +49,8 @@ func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, clusterN
 	return false, nil
 }
 
-func GetDefaultPayload(ctx context.Context, apiClient SKEClient) (*ske.CreateOrUpdateClusterPayload, error) {
-	resp, err := apiClient.ListProviderOptionsExecute(ctx)
+func GetDefaultPayload(ctx context.Context, apiClient SKEClient, region string) (*ske.CreateOrUpdateClusterPayload, error) {
+	resp, err := apiClient.ListProviderOptionsExecute(ctx, region)
 	if err != nil {
 		return nil, fmt.Errorf("get SKE provider options: %w", err)
 	}

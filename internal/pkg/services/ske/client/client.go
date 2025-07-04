@@ -27,8 +27,7 @@ func ConfigureClient(p *print.Printer, cliVersion string) (*ske.APIClient, error
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	} else {
-		region := viper.GetString(config.RegionKey)
-		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
+		cfgOptions = append(cfgOptions, authCfgOption)
 	}
 
 	if p.IsVerbosityDebug() {

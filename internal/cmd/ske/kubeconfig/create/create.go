@@ -228,7 +228,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequestCreate(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiCreateKubeconfigRequest, error) {
-	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName)
 
 	payload := ske.CreateKubeconfigPayload{}
 
@@ -240,7 +240,7 @@ func buildRequestCreate(ctx context.Context, model *inputModel, apiClient *ske.A
 }
 
 func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiGetLoginKubeconfigRequest, error) {
-	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.ClusterName), nil
+	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName), nil
 }
 
 func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig) error {

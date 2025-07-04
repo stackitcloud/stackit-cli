@@ -87,7 +87,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Completing credentials rotation")
-				_, err = wait.CompleteCredentialsRotationWaitHandler(ctx, apiClient, model.ProjectId, model.ClusterName).WaitWithContext(ctx)
+				_, err = wait.CompleteCredentialsRotationWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for completing SKE credentials rotation %w", err)
 				}
@@ -132,6 +132,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiCompleteCredentialsRotationRequest {
-	req := apiClient.CompleteCredentialsRotation(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.CompleteCredentialsRotation(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }

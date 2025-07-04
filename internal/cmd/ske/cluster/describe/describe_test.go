@@ -23,6 +23,8 @@ var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
 var testClusterName = "cluster"
 
+const testRegion = "eu01"
+
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
 		testClusterName,
@@ -35,7 +37,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ClusterName: testClusterName,
@@ -58,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiGetClusterRequest)) ske.ApiGetClusterRequest {
-	request := testClient.GetCluster(testCtx, testProjectId, testClusterName)
+	request := testClient.GetCluster(testCtx, testProjectId, testRegion, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}

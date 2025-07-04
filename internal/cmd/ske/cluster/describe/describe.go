@@ -93,7 +93,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.GetCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }
 

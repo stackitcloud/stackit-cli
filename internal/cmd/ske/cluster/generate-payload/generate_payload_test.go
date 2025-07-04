@@ -28,11 +28,14 @@ const (
 	testFilePath    = "example-file"
 )
 
+const testRegion = "eu01"
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:   testProjectId,
-		clusterNameFlag: testClusterName,
-		filePathFlag:    testFilePath,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		clusterNameFlag:           testClusterName,
+		filePathFlag:              testFilePath,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,6 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ClusterName: utils.Ptr(testClusterName),
@@ -56,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiGetClusterRequest)) ske.ApiGetClusterRequest {
-	request := testClient.GetCluster(testCtx, testProjectId, testClusterName)
+	request := testClient.GetCluster(testCtx, testProjectId, testRegion, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}
