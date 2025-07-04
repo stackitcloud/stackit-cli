@@ -23,6 +23,7 @@ stackit image create [flags]
 ### Options
 
 ```
+      --architecture string      Sets the CPU architecture. By default x86 is used.
       --boot-menu                Enables the BIOS bootmenu.
       --cdrom-bus string         Sets CDROM bus controller type.
       --disk-bus string          Sets Disk bus controller type.
