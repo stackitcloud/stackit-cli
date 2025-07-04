@@ -39,6 +39,7 @@ var (
 	testOperatingSystemVersion       = "test-distro-version"
 	testRescueBus                    = "test-rescue-bus"
 	testRescueDevice                 = "test-rescue-device"
+	testArchitecture                 = "arm64"
 	testBootmenu                     = true
 	testSecureBoot                   = true
 	testUefi                         = true
@@ -54,6 +55,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameFlag:                   testName,
 		diskFormatFlag:             testDiskFormat,
 		localFilePathFlag:          testLocalImagePath,
+		architectureFlag:           testArchitecture,
 		bootMenuFlag:               strconv.FormatBool(testBootmenu),
 		cdromBusFlag:               testCdRomBus,
 		diskBusFlag:                testDiskBus,
@@ -96,6 +98,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		LocalFilePath:   testLocalImagePath,
 		Labels:          utils.Ptr(parseLabels(testLabels)),
 		Config: &imageConfig{
+			Architecture:           &testArchitecture,
 			BootMenu:               &testBootmenu,
 			CdromBus:               &testCdRomBus,
 			DiskBus:                &testDiskBus,
@@ -123,6 +126,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureCreatePayload(mods ...func(payload *iaas.CreateImagePayload)) (payload iaas.CreateImagePayload) {
 	payload = iaas.CreateImagePayload{
 		Config: &iaas.ImageConfig{
+			Architecture:           &testArchitecture,
 			BootMenu:               &testBootmenu,
 			CdromBus:               iaas.NewNullableString(&testCdRomBus),
 			DiskBus:                iaas.NewNullableString(&testDiskBus),

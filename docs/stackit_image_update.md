@@ -23,6 +23,7 @@ stackit image update IMAGE_ID [flags]
 ### Options
 
 ```
+      --architecture string     Sets the CPU architecture.
       --boot-menu               Enables the BIOS bootmenu.
       --cdrom-bus string        Sets CDROM bus controller type.
       --disk-bus string         Sets Disk bus controller type.
