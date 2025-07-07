@@ -1,8 +1,10 @@
 package git
 
 import (
-	flavor "github.com/stackitcloud/stackit-cli/internal/cmd/git/flavor"
-	instance "github.com/stackitcloud/stackit-cli/internal/cmd/git/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/create"
+	delete2 "github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -12,7 +14,7 @@ import (
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "git",
+		Use:   "instance",
 		Short: "Provides functionality for STACKIT Git",
 		Long:  "Provides functionality for STACKIT Git.",
 		Args:  args.NoArgs,
@@ -24,7 +26,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(
-		instance.NewCmd(params),
-		flavor.NewCmd(params),
+		list.NewCmd(params),
+		describe.NewCmd(params),
+		create.NewCmd(params),
+		delete2.NewCmd(params),
 	)
 }
