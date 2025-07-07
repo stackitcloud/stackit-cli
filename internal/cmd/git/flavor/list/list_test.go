@@ -198,7 +198,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		instances    []git.Flavor
+		flavors      []git.Flavor
 	}
 	tests := []struct {
 		name    string
@@ -211,16 +211,16 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "set empty instances slice",
+			name: "set empty flavors slice",
 			args: args{
-				instances: []git.Flavor{},
+				flavors: []git.Flavor{},
 			},
 			wantErr: false,
 		},
 		{
-			name: "set empty instances in instances slice",
+			name: "set empty flavors in flavors slice",
 			args: args{
-				instances: []git.Flavor{{}},
+				flavors: []git.Flavor{{}},
 			},
 			wantErr: false,
 		},
@@ -229,7 +229,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.instances); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.flavors); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
