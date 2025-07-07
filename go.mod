@@ -19,7 +19,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.6.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.0
@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.0
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.1
