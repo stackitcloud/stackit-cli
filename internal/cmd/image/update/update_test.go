@@ -298,6 +298,20 @@ func TestParseInput(t *testing.T) {
 				model.Config.RescueDevice = nil
 			}),
 		},
+		{
+			description: "update only name",
+			flagValues: map[string]string{
+				projectIdFlag: testProjectId,
+				nameFlag:      "foo",
+			},
+			args:    testImageId,
+			isValid: true,
+			expectedModel: &inputModel{
+				Name:            utils.Ptr("foo"),
+				GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
+				Id:              testImageId[0],
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -397,6 +411,17 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
 				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Config.CdromBus.Set(utils.Ptr("something else"))
+				}))
+			}),
+		},
+		{
+			description: "no config set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Config = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
+				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+					payload.Config = nil
 				}))
 			}),
 		},
