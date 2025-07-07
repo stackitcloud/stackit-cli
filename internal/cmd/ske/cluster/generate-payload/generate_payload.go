@@ -70,7 +70,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			var payload *ske.CreateOrUpdateClusterPayload
 			if model.ClusterName == nil {
-				payload, err = skeUtils.GetDefaultPayload(ctx, apiClient)
+				payload, err = skeUtils.GetDefaultPayload(ctx, apiClient, model.Region)
 				if err != nil {
 					return err
 				}
@@ -130,7 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.ProjectId, *model.ClusterName)
+	req := apiClient.GetCluster(ctx, model.ProjectId, model.Region, *model.ClusterName)
 	return req
 }
 

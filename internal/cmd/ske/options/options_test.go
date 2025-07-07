@@ -18,6 +18,8 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &ske.APIClient{}
 
+const testRegion = "eu01"
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		availabilityZonesFlag:  "false",
@@ -25,6 +27,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		machineImagesFlag:      "false",
 		machineTypesFlag:       "false",
 		volumeTypesFlag:        "false",
+		globalflags.RegionFlag: testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -34,7 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
+		GlobalFlagModel:    &globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  false,
 		KubernetesVersions: false,
 		MachineImages:      false,
@@ -49,7 +52,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
+		GlobalFlagModel:    &globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  true,
 		KubernetesVersions: true,
 		MachineImages:      true,
@@ -76,10 +79,12 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModelAllTrue(),
 		},
 		{
-			description:   "no values",
-			flagValues:    map[string]string{},
-			isValid:       true,
-			expectedModel: fixtureInputModelAllTrue(),
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     true,
+			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
+				model.Region = ""
+			}),
 		},
 		{
 			description: "some values 1",
@@ -90,6 +95,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
 				model.AvailabilityZones = true
+				model.Region = ""
 			}),
 		},
 		{
@@ -103,6 +109,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
 				model.KubernetesVersions = true
 				model.MachineTypes = true
+				model.Region = ""
 			}),
 		},
 		{
@@ -111,8 +118,10 @@ func TestParseInput(t *testing.T) {
 				kubernetesVersionsFlag: "false",
 				machineTypesFlag:       "false",
 			},
-			isValid:       true,
-			expectedModel: fixtureInputModelAllTrue(),
+			isValid: true,
+			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
+				model.Region = ""
+			}),
 		},
 	}
 
@@ -169,13 +178,13 @@ func TestBuildRequest(t *testing.T) {
 	}{
 		{
 			description:     "base",
-			expectedRequest: testClient.ListProviderOptions(testCtx),
+			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, testClient)
+			request := buildRequest(testCtx, testClient, fixtureInputModelAllTrue())
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

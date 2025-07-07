@@ -26,6 +26,8 @@ var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
 var testClusterName = "cluster"
 
+const testRegion = "eu01"
+
 var testPayload = ske.CreateOrUpdateClusterPayload{
 	Kubernetes: &ske.Kubernetes{
 		Version: utils.Ptr("1.25.15"),
@@ -81,7 +83,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 		payloadFlag: fmt.Sprintf(`{
 			"name": "cli-jp",
 			"kubernetes": {
@@ -128,6 +131,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ClusterName: testClusterName,
@@ -140,7 +144,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiCreateOrUpdateClusterRequest)) ske.ApiCreateOrUpdateClusterRequest {
-	request := testClient.CreateOrUpdateCluster(testCtx, testProjectId, fixtureInputModel().ClusterName)
+	request := testClient.CreateOrUpdateCluster(testCtx, testProjectId, testRegion, fixtureInputModel().ClusterName)
 	request = request.CreateOrUpdateClusterPayload(testPayload)
 	for _, mod := range mods {
 		mod(&request)

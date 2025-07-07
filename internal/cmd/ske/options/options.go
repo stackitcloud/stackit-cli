@@ -72,7 +72,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, apiClient)
+			req := buildRequest(ctx, apiClient, model)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get SKE provider options: %w", err)
@@ -131,8 +131,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, apiClient *ske.APIClient) ske.ApiListProviderOptionsRequest {
-	req := apiClient.ListProviderOptions(ctx)
+func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiListProviderOptionsRequest {
+	req := apiClient.ListProviderOptions(ctx, model.Region)
 	return req
 }
 

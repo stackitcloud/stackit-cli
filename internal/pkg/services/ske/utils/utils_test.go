@@ -70,14 +70,16 @@ type skeClientMocked struct {
 	listProviderOptionsResp  *ske.ProviderOptions
 }
 
-func (m *skeClientMocked) ListClustersExecute(_ context.Context, _ string) (*ske.ListClustersResponse, error) {
+const testRegion = "eu01"
+
+func (m *skeClientMocked) ListClustersExecute(_ context.Context, _, _ string) (*ske.ListClustersResponse, error) {
 	if m.listClustersFails {
 		return nil, fmt.Errorf("could not list clusters")
 	}
 	return m.listClustersResp, nil
 }
 
-func (m *skeClientMocked) ListProviderOptionsExecute(_ context.Context) (*ske.ProviderOptions, error) {
+func (m *skeClientMocked) ListProviderOptionsExecute(_ context.Context, _ string) (*ske.ProviderOptions, error) {
 	if m.listProviderOptionsFails {
 		return nil, fmt.Errorf("could not list provider options")
 	}
@@ -124,7 +126,7 @@ func TestClusterExists(t *testing.T) {
 				listClustersResp:  tt.getClustersResp,
 			}
 
-			exists, err := ClusterExists(context.Background(), client, testProjectId, testClusterName)
+			exists, err := ClusterExists(context.Background(), client, testProjectId, testRegion, testClusterName)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -400,7 +402,7 @@ func TestGetDefaultPayload(t *testing.T) {
 				listProviderOptionsResp:  tt.listProviderOptionsResp,
 			}
 
-			output, err := GetDefaultPayload(context.Background(), client)
+			output, err := GetDefaultPayload(context.Background(), client, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

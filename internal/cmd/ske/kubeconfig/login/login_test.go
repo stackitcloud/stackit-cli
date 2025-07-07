@@ -22,11 +22,14 @@ var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
 var testClusterName = "cluster"
 
+const testRegion = "eu01"
+
 func fixtureClusterConfig(mods ...func(clusterConfig *clusterConfig)) *clusterConfig {
 	clusterConfig := &clusterConfig{
 		STACKITProjectID: testProjectId,
 		ClusterName:      testClusterName,
 		cacheKey:         "",
+		Region:           testRegion,
 	}
 	for _, mod := range mods {
 		mod(clusterConfig)
@@ -35,7 +38,7 @@ func fixtureClusterConfig(mods ...func(clusterConfig *clusterConfig)) *clusterCo
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiCreateKubeconfigRequest)) ske.ApiCreateKubeconfigRequest {
-	request := testClient.CreateKubeconfig(testCtx, testProjectId, testClusterName)
+	request := testClient.CreateKubeconfig(testCtx, testProjectId, testRegion, testClusterName)
 	request = request.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{})
 	for _, mod := range mods {
 		mod(&request)

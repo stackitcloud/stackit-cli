@@ -79,7 +79,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Check if cluster exists
-			exists, err := skeUtils.ClusterExists(ctx, apiClient, model.ProjectId, model.ClusterName)
+			exists, err := skeUtils.ClusterExists(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName)
 			if err != nil {
 				return err
 			}
@@ -99,7 +99,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Updating cluster")
-				_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.ProjectId, name).WaitWithContext(ctx)
+				_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient, model.ProjectId, model.Region, name).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster update: %w", err)
 				}
@@ -154,7 +154,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiCreateOrUpdateClusterRequest {
-	req := apiClient.CreateOrUpdateCluster(ctx, model.ProjectId, model.ClusterName)
+	req := apiClient.CreateOrUpdateCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
 
 	req = req.CreateOrUpdateClusterPayload(model.Payload)
 	return req

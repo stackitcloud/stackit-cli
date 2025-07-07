@@ -14,6 +14,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"k8s.io/client-go/rest"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -55,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ kubectl cluster-info",
 				"$ kubectl get pods"),
 		),
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			if err := cache.Init(); err != nil {
@@ -69,7 +70,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 					"See `stackit ske kubeconfig login --help` for detailed usage instructions.")
 			}
 
-			clusterConfig, err := parseClusterConfig()
+			clusterConfig, err := parseClusterConfig(params.Printer, cmd)
 			if err != nil {
 				return fmt.Errorf("parseClusterConfig: %w", err)
 			}
@@ -123,9 +124,10 @@ type clusterConfig struct {
 	ClusterName      string `json:"clusterName"`
 
 	cacheKey string
+	Region   string
 }
 
-func parseClusterConfig() (*clusterConfig, error) {
+func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, error) {
 	obj, _, err := exec.LoadExecCredentialFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("LoadExecCredentialFromEnv: %w", err)
@@ -154,6 +156,9 @@ func parseClusterConfig() (*clusterConfig, error) {
 	}
 
 	config.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server)))
+
+	globalFlags := globalflags.Parse(p, cmd)
+	config.Region = globalFlags.Region
 
 	return config, nil
 }
@@ -200,7 +205,7 @@ func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *sk
 }
 
 func buildRequest(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) ske.ApiCreateKubeconfigRequest {
-	req := apiClient.CreateKubeconfig(ctx, clusterConfig.STACKITProjectID, clusterConfig.ClusterName)
+	req := apiClient.CreateKubeconfig(ctx, clusterConfig.STACKITProjectID, clusterConfig.Region, clusterConfig.ClusterName)
 	expirationSeconds := strconv.Itoa(expirationSeconds)
 
 	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
