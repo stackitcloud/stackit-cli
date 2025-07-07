@@ -35,7 +35,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Long:  "Deletes a STACKIT Git instance by its internal ID.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`Delete a instance with ID "xxx"`, `$ stackit git delete xxx`),
+			examples.NewExample(`Delete a instance with ID "xxx"`,
+				`$ stackit git instance delete xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
