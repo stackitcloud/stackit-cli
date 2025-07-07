@@ -21,14 +21,18 @@ var (
 	testClient    = &git.APIClient{}
 	testProjectId = uuid.NewString()
 
-	testName = "test-instance"
+	testName   = "test-instance"
+	testFlavor = "git-100"
+	testAcl    = []string{"0.0.0.0/0"}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 
-		nameFlag: testName,
+		nameFlag:   testName,
+		flavorFlag: testFlavor,
+		aclFlag:    testAcl[0],
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,6 +44,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
 		Name:            testName,
+		Flavor:          testFlavor,
+		Acl:             testAcl,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,7 +55,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureCreatePayload(mods ...func(payload *git.CreateInstancePayload)) (payload git.CreateInstancePayload) {
 	payload = git.CreateInstancePayload{
-		Name: &testName,
+		Name:   &testName,
+		Flavor: git.CreateInstancePayloadGetFlavorAttributeType(&testFlavor),
+		Acl:    &testAcl,
 	}
 	for _, mod := range mods {
 		mod(&payload)
