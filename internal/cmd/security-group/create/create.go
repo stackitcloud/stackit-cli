@@ -156,7 +156,7 @@ func outputResult(p *print.Printer, outputFormat, name string, resp iaas.Securit
 
 		return nil
 	default:
-		p.Outputf("Created security group %q\n", name)
+		p.Outputf("Created security group %q.\nSecurity Group ID %s\n", name, utils.PtrString(resp.Id))
 		return nil
 	}
 }
