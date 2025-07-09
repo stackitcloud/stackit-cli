@@ -29,17 +29,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return &cliErr.SessionExpiredError{}
 			}
 
-			accessToken, err := auth.GetAccessToken()
+			// Try to get a valid access token, refreshing if necessary
+			accessToken, err := auth.RefreshAccessToken(params.Printer)
 			if err != nil {
 				return err
-			}
-
-			accessTokenExpired, err := auth.TokenExpired(accessToken)
-			if err != nil {
-				return err
-			}
-			if accessTokenExpired {
-				return &cliErr.AccessTokenExpiredError{}
 			}
 
 			params.Printer.Outputf("%s\n", accessToken)

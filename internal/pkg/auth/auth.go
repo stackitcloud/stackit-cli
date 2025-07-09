@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -131,4 +132,72 @@ func getEmailFromToken(token string) (string, error) {
 	}
 
 	return claims.Email, nil
+}
+
+// RefreshAccessToken refreshes the access token if it's expired for the user token flow.
+// It returns the new access token or an error if the refresh fails.
+func RefreshAccessToken(p *print.Printer) (string, error) {
+	flow, err := GetAuthFlow()
+	if err != nil {
+		return "", fmt.Errorf("get authentication flow: %w", err)
+	}
+	if flow != AUTH_FLOW_USER_TOKEN {
+		return "", fmt.Errorf("token refresh is only supported for user token flow, current flow: %s", flow)
+	}
+
+	// Load tokens from storage
+	authFields := map[authFieldKey]string{
+		ACCESS_TOKEN:       "",
+		REFRESH_TOKEN:      "",
+		IDP_TOKEN_ENDPOINT: "",
+	}
+	err = GetAuthFieldMap(authFields)
+	if err != nil {
+		return "", fmt.Errorf("get tokens from auth storage: %w", err)
+	}
+
+	accessToken := authFields[ACCESS_TOKEN]
+	refreshToken := authFields[REFRESH_TOKEN]
+	tokenEndpoint := authFields[IDP_TOKEN_ENDPOINT]
+
+	if accessToken == "" {
+		return "", fmt.Errorf("access token not set")
+	}
+	if refreshToken == "" {
+		return "", fmt.Errorf("refresh token not set")
+	}
+	if tokenEndpoint == "" {
+		return "", fmt.Errorf("token endpoint not set")
+	}
+
+	// Check if access token is expired
+	accessTokenExpired, err := TokenExpired(accessToken)
+	if err != nil {
+		return "", fmt.Errorf("check if access token has expired: %w", err)
+	}
+	if !accessTokenExpired {
+		// Token is still valid, return it
+		return accessToken, nil
+	}
+
+	p.Debug(print.DebugLevel, "access token expired, refreshing...")
+
+	// Create a temporary userTokenFlow to reuse the refresh logic
+	utf := &userTokenFlow{
+		printer:       p,
+		client:        &http.Client{},
+		authFlow:      flow,
+		accessToken:   accessToken,
+		refreshToken:  refreshToken,
+		tokenEndpoint: tokenEndpoint,
+	}
+
+	// Refresh the tokens
+	err = refreshTokens(utf)
+	if err != nil {
+		return "", fmt.Errorf("refresh access token: %w", err)
+	}
+
+	// Return the new access token
+	return utf.accessToken, nil
 }
