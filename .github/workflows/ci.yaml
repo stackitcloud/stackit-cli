@@ -58,6 +58,7 @@ jobs:
     name: "Code coverage report"
     if: github.event_name == 'pull_request' # Do not run when workflow is triggered by push to main branch
     runs-on: ubuntu-latest
+    continue-on-error: true  # Add this line to prevent pipeline failures in forks
     needs: main
     permissions:
       contents: read
