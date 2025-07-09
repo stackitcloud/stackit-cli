@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId).Tag("")
+	req := apiClient.ListInstances(ctx, model.ProjectId, model.Region).Tag("")
 	return req
 }
 

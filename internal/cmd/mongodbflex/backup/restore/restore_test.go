@@ -15,11 +15,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 const (
+	testRegion    = "eu02"
 	testBackupId  = "backupID"
 	testTimestamp = "2021-01-01T00:00:00Z"
 )
@@ -33,10 +32,11 @@ var testBackupInstanceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
-		backupIdFlag:         testBackupId,
-		backupInstanceIdFlag: testBackupInstanceId,
-		instanceIdFlag:       testInstanceId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		backupIdFlag:              testBackupId,
+		backupInstanceIdFlag:      testBackupInstanceId,
+		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -48,6 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:       testInstanceId,
@@ -61,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRestoreRequest(mods ...func(request mongodbflex.ApiRestoreInstanceRequest)) mongodbflex.ApiRestoreInstanceRequest {
-	request := testClient.RestoreInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.RestoreInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.RestoreInstancePayload(mongodbflex.RestoreInstancePayload{
 		BackupId:   utils.Ptr(testBackupId),
 		InstanceId: utils.Ptr(testBackupInstanceId),
@@ -73,7 +74,7 @@ func fixtureRestoreRequest(mods ...func(request mongodbflex.ApiRestoreInstanceRe
 }
 
 func fixtureCloneRequest(mods ...func(request mongodbflex.ApiCloneInstanceRequest)) mongodbflex.ApiCloneInstanceRequest {
-	request := testClient.CloneInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.CloneInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.CloneInstancePayload(mongodbflex.CloneInstancePayload{
 		Timestamp:  utils.Ptr(testTimestamp),
 		InstanceId: utils.Ptr(testBackupInstanceId),
@@ -106,21 +107,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

@@ -114,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	return req
 }
 

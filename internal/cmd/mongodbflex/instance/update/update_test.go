@@ -16,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu02"
+)
 
 type testCtxKey struct{}
 
@@ -32,25 +34,25 @@ type mongoDBFlexClientMocked struct {
 	getInstanceResp   *mongodbflex.GetInstanceResponse
 }
 
-func (c *mongoDBFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) mongodbflex.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
+func (c *mongoDBFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiPartialUpdateInstanceRequest {
+	return testClient.PartialUpdateInstance(ctx, projectId, instanceId, region)
 }
 
-func (c *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
+func (c *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
 	return c.getInstanceResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
+func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*mongodbflex.ListFlavorsResponse, error) {
+func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*mongodbflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -73,7 +75,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -83,15 +86,16 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 
 func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		flavorIdFlag:       testFlavorId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0 * * *",
-		storageClassFlag:   "class",
-		storageSizeFlag:    "10",
-		versionFlag:        "5.0",
-		typeFlag:           "Single",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		flavorIdFlag:              testFlavorId,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0 * * *",
+		storageClassFlag:          "class",
+		storageSizeFlag:           "10",
+		versionFlag:               "5.0",
+		typeFlag:                  "Single",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -103,6 +107,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -117,6 +122,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:     testInstanceId,
@@ -136,7 +142,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateInstanceRequest)) mongodbflex.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
@@ -204,7 +210,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -212,7 +218,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -220,7 +226,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureRequiredFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -368,7 +374,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -376,7 +382,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -389,7 +395,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -397,7 +403,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -422,7 +428,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					Storage: &mongodbflex.Storage{
 						Class: utils.Ptr("class"),
@@ -450,7 +456,7 @@ func TestBuildRequest(t *testing.T) {
 					Max: utils.Ptr(int64(100)),
 				},
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					Storage: &mongodbflex.Storage{
 						Class: utils.Ptr("class"),
@@ -478,7 +484,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),

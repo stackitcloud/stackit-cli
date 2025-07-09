@@ -72,7 +72,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -141,7 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
 	req = req.CreateUserPayload(mongodbflex.CreateUserPayload{
 		Username: model.Username,
 		Database: model.Database,
