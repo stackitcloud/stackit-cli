@@ -1,4 +1,4 @@
-package git
+package flavor
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/flavor/list"
@@ -12,8 +12,8 @@ import (
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "flavor",
-		Short: "Provides functionality for STACKIT Git",
-		Long:  "Provides functionality for STACKIT Git.",
+		Short: "Provides functionality for STACKIT Git flavors",
+		Long:  "Provides functionality for STACKIT Git flavors.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
