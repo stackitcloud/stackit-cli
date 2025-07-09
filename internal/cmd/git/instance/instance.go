@@ -1,4 +1,4 @@
-package git
+package instance
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/create"
@@ -15,8 +15,8 @@ import (
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instance",
-		Short: "Provides functionality for STACKIT Git",
-		Long:  "Provides functionality for STACKIT Git.",
+		Short: "Provides functionality for STACKIT Git instances",
+		Long:  "Provides functionality for STACKIT Git instances.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

@@ -1,19 +1,26 @@
-## stackit git
+## stackit git instance delete
 
-Provides functionality for STACKIT Git
+Deletes STACKIT Git instance
 
 ### Synopsis
 
-Provides functionality for STACKIT Git.
+Deletes a STACKIT Git instance by its internal ID.
 
 ```
-stackit git [flags]
+stackit git instance delete INSTANCE_ID [flags]
+```
+
+### Examples
+
+```
+  Delete a instance with ID "xxx"
+  $ stackit git instance delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit git"
+  -h, --help   Help for "stackit git instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +36,5 @@ stackit git [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit git flavor](./stackit_git_flavor.md)	 - Provides functionality for STACKIT Git flavors
 * [stackit git instance](./stackit_git_instance.md)	 - Provides functionality for STACKIT Git instances
 

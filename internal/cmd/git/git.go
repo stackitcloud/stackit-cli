@@ -1,8 +1,8 @@
 package git
 
 import (
-	flavor "github.com/stackitcloud/stackit-cli/internal/cmd/git/flavor"
-	instance "github.com/stackitcloud/stackit-cli/internal/cmd/git/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/flavor"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
