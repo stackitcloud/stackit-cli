@@ -81,7 +81,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongoDBflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
+			instanceLabel, err := mongoDBflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -159,7 +159,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildUpdateBackupScheduleRequest(ctx context.Context, model *inputModel, instance *mongodbflex.Instance, apiClient *mongodbflex.APIClient) mongodbflex.ApiUpdateBackupScheduleRequest {
-	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, *model.InstanceId, model.Region)
 
 	payload := getUpdateBackupSchedulePayload(instance)
 
@@ -229,6 +229,6 @@ func getUpdateBackupSchedulePayload(instance *mongodbflex.Instance) mongodbflex.
 }
 
 func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.GetInstance(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }

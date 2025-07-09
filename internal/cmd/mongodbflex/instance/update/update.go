@@ -83,7 +83,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -112,7 +112,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Updating instance")
-				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for MongoDB Flex instance update: %w", err)
 				}
@@ -200,19 +200,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 type MongoDBFlexClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) mongodbflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*mongodbflex.GetInstanceResponse, error)
-	ListFlavorsExecute(ctx context.Context, projectId string) (*mongodbflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*mongodbflex.ListStoragesResponse, error)
+	PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiPartialUpdateInstanceRequest
+	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.GetInstanceResponse, error)
+	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
 	}
@@ -221,7 +221,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		ram := model.RAM
 		cpu := model.CPU
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
+			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
 			}
@@ -252,13 +252,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 	if model.StorageClass != nil || model.StorageSize != nil {
 		validationFlavorId := flavorId
 		if validationFlavorId == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId)
+			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
 			}
 			validationFlavorId = currentInstance.Item.Flavor.Id
 		}
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId)
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *validationFlavorId, model.Region)
 		if err != nil {
 			return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
 		}

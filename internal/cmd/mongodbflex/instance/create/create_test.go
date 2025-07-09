@@ -16,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu02"
+)
 
 type testCtxKey struct{}
 
@@ -30,18 +32,18 @@ type mongoDBFlexClientMocked struct {
 	listStoragesResp  *mongodbflex.ListStoragesResponse
 }
 
-func (c *mongoDBFlexClientMocked) CreateInstance(ctx context.Context, projectId string) mongodbflex.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
+func (c *mongoDBFlexClientMocked) CreateInstance(ctx context.Context, projectId, region string) mongodbflex.ApiCreateInstanceRequest {
+	return testClient.CreateInstance(ctx, projectId, region)
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
+func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list storages failed")
 	}
 	return c.listStoragesResp, nil
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*mongodbflex.ListFlavorsResponse, error) {
+func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*mongodbflex.ListFlavorsResponse, error) {
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
@@ -53,15 +55,16 @@ var testFlavorId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:      testProjectId,
-		instanceNameFlag:   "example-name",
-		aclFlag:            "0.0.0.0/0",
-		backupScheduleFlag: "0 0/6 * * *",
-		flavorIdFlag:       testFlavorId,
-		storageClassFlag:   "premium-perf4-mongodb", // Non-default
-		storageSizeFlag:    "10",
-		versionFlag:        "6.0",
-		typeFlag:           "Replica",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceNameFlag:          "example-name",
+		aclFlag:                   "0.0.0.0/0",
+		backupScheduleFlag:        "0 0/6 * * *",
+		flavorIdFlag:              testFlavorId,
+		storageClassFlag:          "premium-perf4-mongodb", // Non-default
+		storageSizeFlag:           "10",
+		versionFlag:               "6.0",
+		typeFlag:                  "Replica",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -73,6 +76,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName:   utils.Ptr("example-name"),
@@ -91,7 +95,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiCreateInstanceRequest)) mongodbflex.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -102,7 +106,7 @@ func fixtureRequest(mods ...func(request *mongodbflex.ApiCreateInstanceRequest))
 func fixturePayload(mods ...func(payload *mongodbflex.CreateInstancePayload)) mongodbflex.CreateInstancePayload {
 	payload := mongodbflex.CreateInstancePayload{
 		Name:           utils.Ptr("example-name"),
-		Acl:            &mongodbflex.ACL{Items: utils.Ptr([]string{"0.0.0.0/0"})},
+		Acl:            &mongodbflex.CreateInstancePayloadAcl{Items: utils.Ptr([]string{"0.0.0.0/0"})},
 		BackupSchedule: utils.Ptr("0 0/6 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		Replicas:       utils.Ptr(int64(3)),
@@ -166,21 +170,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -321,7 +325,7 @@ func TestBuildRequest(t *testing.T) {
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -349,7 +353,7 @@ func TestBuildRequest(t *testing.T) {
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -379,7 +383,7 @@ func TestBuildRequest(t *testing.T) {
 				payload.Replicas = utils.Ptr(int64(1))
 			})),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -404,7 +408,7 @@ func TestBuildRequest(t *testing.T) {
 				payload.Replicas = utils.Ptr(int64(9))
 			})),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -442,7 +446,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -477,7 +481,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),
@@ -502,7 +506,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: &[]mongodbflex.HandlersInfraFlavor{
+				Flavors: &[]mongodbflex.InstanceFlavor{
 					{
 						Id:     utils.Ptr(testFlavorId),
 						Cpu:    utils.Ptr(int64(2)),

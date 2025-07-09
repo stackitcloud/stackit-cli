@@ -13,7 +13,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion   = "eu02"
+	testSchedule = "0 0/6 * * *"
+)
 
 type testCtxKey struct{}
 
@@ -21,13 +24,13 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &mongodbflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testSchedule = "0 0/6 * * *"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		scheduleFlag:   testSchedule,
-		instanceIdFlag: testInstanceId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		scheduleFlag:              testSchedule,
+		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -39,10 +42,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:     utils.Ptr(testInstanceId),
-		BackupSchedule: &testSchedule,
+		BackupSchedule: utils.Ptr(testSchedule),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -66,7 +70,7 @@ func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayloa
 }
 
 func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpdateBackupScheduleRequest)) mongodbflex.ApiUpdateBackupScheduleRequest {
-	request := testClient.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId)
+	request := testClient.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -75,7 +79,7 @@ func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpd
 }
 
 func fixtureGetInstanceRequest(mods ...func(request *mongodbflex.ApiGetInstanceRequest)) mongodbflex.ApiGetInstanceRequest {
-	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -84,7 +88,7 @@ func fixtureGetInstanceRequest(mods ...func(request *mongodbflex.ApiGetInstanceR
 
 func fixtureInstance(mods ...func(instance *mongodbflex.Instance)) *mongodbflex.Instance {
 	instance := mongodbflex.Instance{
-		BackupSchedule: &testSchedule,
+		BackupSchedule: utils.Ptr(testSchedule),
 		Options: &map[string]string{
 			"dailySnapshotRetentionDays":     "0",
 			"weeklySnapshotRetentionWeeks":   "3",
@@ -121,21 +125,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -260,6 +264,7 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 				},
 				InstanceId:                utils.Ptr(testInstanceId),
 				DailySnaphotRetentionDays: utils.Ptr(int64(2)),
@@ -276,6 +281,7 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 				},
 				InstanceId:                     utils.Ptr(testInstanceId),
 				BackupSchedule:                 utils.Ptr("0 0/6 5 2 1"),
@@ -300,6 +306,7 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 				},
 				InstanceId: utils.Ptr(testInstanceId),
 			},

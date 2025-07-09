@@ -37,9 +37,9 @@ type inputModel struct {
 }
 
 type options struct {
-	Flavors  *[]mongodbflex.HandlersInfraFlavor `json:"flavors,omitempty"`
-	Versions *[]string                          `json:"versions,omitempty"`
-	Storages *flavorStorages                    `json:"flavorStorages,omitempty"`
+	Flavors  *[]mongodbflex.InstanceFlavor `json:"flavors,omitempty"`
+	Versions *[]string                     `json:"versions,omitempty"`
+	Storages *flavorStorages               `json:"flavorStorages,omitempty"`
 }
 
 type flavorStorages struct {
@@ -138,9 +138,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 type mongoDBFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId string) (*mongodbflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId string) (*mongodbflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*mongodbflex.ListStoragesResponse, error)
+	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
+	ListVersionsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListVersionsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
 }
 
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
@@ -150,19 +150,19 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId)
+		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId)
+		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex storages: %w", err)
 		}
@@ -237,7 +237,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	return nil
 }
 
-func buildFlavorsTable(flavors []mongodbflex.HandlersInfraFlavor) tables.Table {
+func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION", "VALID INSTANCE TYPES")

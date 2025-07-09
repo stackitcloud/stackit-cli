@@ -104,7 +104,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Fill in version, if needed
 			if model.Version == nil {
-				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient, model.ProjectId)
+				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient, model.ProjectId, model.Region)
 				if err != nil {
 					return fmt.Errorf("get latest MongoDB version: %w", err)
 				}
@@ -126,7 +126,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating instance")
-				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+				_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for MongoDB Flex instance creation: %w", err)
 				}
@@ -208,18 +208,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 type MongoDBFlexClient interface {
-	CreateInstance(ctx context.Context, projectId string) mongodbflex.ApiCreateInstanceRequest
-	ListFlavorsExecute(ctx context.Context, projectId string) (*mongodbflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string) (*mongodbflex.ListStoragesResponse, error)
+	CreateInstance(ctx context.Context, projectId, region string) mongodbflex.ApiCreateInstanceRequest
+	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
+	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId)
+	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
 	}
@@ -241,7 +241,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId)
+	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
 	}
@@ -257,7 +257,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{
 		Name:           model.InstanceName,
-		Acl:            &mongodbflex.ACL{Items: model.ACL},
+		Acl:            &mongodbflex.CreateInstancePayloadAcl{Items: model.ACL},
 		BackupSchedule: model.BackupSchedule,
 		FlavorId:       flavorId,
 		Replicas:       &replicas,

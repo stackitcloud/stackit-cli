@@ -61,7 +61,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -75,7 +75,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe backup for MongoDB Flex instance: %w", err)
 			}
 
-			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, model.InstanceId).Execute()
+			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
@@ -122,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.InstanceId, model.BackupId)
+	req := apiClient.GetBackup(ctx, model.ProjectId, model.InstanceId, model.BackupId, model.Region)
 	return req
 }
 
