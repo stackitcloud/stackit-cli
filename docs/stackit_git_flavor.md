@@ -1,19 +1,19 @@
-## stackit git
+## stackit git flavor
 
-Provides functionality for STACKIT Git
+Provides functionality for STACKIT Git flavors
 
 ### Synopsis
 
-Provides functionality for STACKIT Git.
+Provides functionality for STACKIT Git flavors.
 
 ```
-stackit git [flags]
+stackit git flavor [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit git"
+  -h, --help   Help for "stackit git flavor"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +29,6 @@ stackit git [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit git flavor](./stackit_git_flavor.md)	 - Provides functionality for STACKIT Git flavors
-* [stackit git instance](./stackit_git_instance.md)	 - Provides functionality for STACKIT Git instances
+* [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
+* [stackit git flavor list](./stackit_git_flavor_list.md)	 - Lists instances flavors of STACKIT Git.
 
