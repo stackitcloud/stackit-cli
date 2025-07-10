@@ -20,6 +20,7 @@ var (
 )
 
 const (
+	testRegion       = "eu02"
 	testInstanceName = "instance"
 	testUserName     = "user"
 )
@@ -35,28 +36,28 @@ type mongoDBFlexClientMocked struct {
 	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
 }
 
-func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*mongodbflex.ListVersionsResponse, error) {
+func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*mongodbflex.ListVersionsResponse, error) {
 	if m.listVersionsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listVersionsResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _ string) (*mongodbflex.ListRestoreJobsResponse, error) {
+func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListRestoreJobsResponse, error) {
 	if m.listRestoreJobsFails {
 		return nil, fmt.Errorf("could not list versions")
 	}
 	return m.listRestoreJobsResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
+func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
 	return m.getInstanceResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*mongodbflex.GetUserResponse, error) {
+func (m *mongoDBFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*mongodbflex.GetUserResponse, error) {
 	if m.getUserFails {
 		return nil, fmt.Errorf("could not get user")
 	}
@@ -175,13 +176,13 @@ func TestValidateFlavorId(t *testing.T) {
 	tests := []struct {
 		description string
 		flavorId    string
-		flavors     *[]mongodbflex.HandlersInfraFlavor
+		flavors     *[]mongodbflex.InstanceFlavor
 		isValid     bool
 	}{
 		{
 			description: "base",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("foo")},
@@ -197,13 +198,13 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "no flavors",
 			flavorId:    "foo",
-			flavors:     &[]mongodbflex.HandlersInfraFlavor{},
+			flavors:     &[]mongodbflex.InstanceFlavor{},
 			isValid:     false,
 		},
 		{
 			description: "nil flavor id",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: nil},
 				{Id: utils.Ptr("foo")},
@@ -213,7 +214,7 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "invalid flavor",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("bar-3")},
@@ -240,7 +241,7 @@ func TestLoadFlavorId(t *testing.T) {
 		description    string
 		cpu            int64
 		ram            int64
-		flavors        *[]mongodbflex.HandlersInfraFlavor
+		flavors        *[]mongodbflex.InstanceFlavor
 		isValid        bool
 		expectedOutput *string
 	}{
@@ -248,7 +249,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "base",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -279,14 +280,14 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "no flavors",
 			cpu:         2,
 			ram:         4,
-			flavors:     &[]mongodbflex.HandlersInfraFlavor{},
+			flavors:     &[]mongodbflex.InstanceFlavor{},
 			isValid:     false,
 		},
 		{
 			description: "flavors with details missing",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    nil,
@@ -310,7 +311,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "match with nil id",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -333,7 +334,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "invalid settings",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]mongodbflex.HandlersInfraFlavor{
+			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -411,7 +412,7 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 				listVersionsResp:  tt.listVersionsResp,
 			}
 
-			output, err := GetLatestMongoDBVersion(context.Background(), client, testProjectId)
+			output, err := GetLatestMongoDBVersion(context.Background(), client, testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -461,7 +462,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -511,7 +512,7 @@ func TestGetUserName(t *testing.T) {
 				getUserResp:  tt.getUserResp,
 			}
 
-			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId)
+			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

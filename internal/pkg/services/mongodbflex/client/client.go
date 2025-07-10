@@ -18,15 +18,12 @@ func ConfigureClient(p *print.Printer, cliVersion string) (*mongodbflex.APIClien
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return nil, &errors.AuthError{}
 	}
-	region := viper.GetString(config.RegionKey)
 	cfgOptions := []sdkConfig.ConfigurationOption{
 		utils.UserAgentConfigOption(cliVersion),
-		sdkConfig.WithRegion(region),
 		authCfgOption,
 	}
 
 	customEndpoint := viper.GetString(config.MongoDBFlexCustomEndpointKey)
-
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
 	}
