@@ -21,7 +21,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.27.0
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.0
@@ -31,7 +31,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.0.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.26.0
