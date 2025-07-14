@@ -28,17 +28,17 @@ type mongoDBFlexClientMocked struct {
 	listStoragesCalled bool
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _ string) (*mongodbflex.ListFlavorsResponse, error) {
+func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*mongodbflex.ListFlavorsResponse, error) {
 	c.listFlavorsCalled = true
 	if c.listFlavorsFails {
 		return nil, fmt.Errorf("list flavors failed")
 	}
 	return utils.Ptr(mongodbflex.ListFlavorsResponse{
-		Flavors: utils.Ptr([]mongodbflex.HandlersInfraFlavor{}),
+		Flavors: utils.Ptr([]mongodbflex.InstanceFlavor{}),
 	}), nil
 }
 
-func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ string) (*mongodbflex.ListVersionsResponse, error) {
+func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*mongodbflex.ListVersionsResponse, error) {
 	c.listVersionsCalled = true
 	if c.listVersionsFails {
 		return nil, fmt.Errorf("list versions failed")
@@ -48,7 +48,7 @@ func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _ strin
 	}), nil
 }
 
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
+func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
 	c.listStoragesCalled = true
 	if c.listStoragesFails {
 		return nil, fmt.Errorf("list storages failed")
