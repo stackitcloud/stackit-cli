@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.18.0
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
