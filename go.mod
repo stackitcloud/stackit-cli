@@ -21,7 +21,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.27.0
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.4.0
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.0
