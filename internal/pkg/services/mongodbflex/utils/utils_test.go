@@ -29,7 +29,7 @@ type mongoDBFlexClientMocked struct {
 	listVersionsFails    bool
 	listVersionsResp     *mongodbflex.ListVersionsResponse
 	getInstanceFails     bool
-	getInstanceResp      *mongodbflex.GetInstanceResponse
+	getInstanceResp      *mongodbflex.InstanceResponse
 	getUserFails         bool
 	getUserResp          *mongodbflex.GetUserResponse
 	listRestoreJobsFails bool
@@ -50,7 +50,7 @@ func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _
 	return m.listRestoreJobsResp, nil
 }
 
-func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
+func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.InstanceResponse, error) {
 	if m.getInstanceFails {
 		return nil, fmt.Errorf("could not get instance")
 	}
@@ -434,13 +434,13 @@ func TestGetInstanceName(t *testing.T) {
 	tests := []struct {
 		description      string
 		getInstanceFails bool
-		getInstanceResp  *mongodbflex.GetInstanceResponse
+		getInstanceResp  *mongodbflex.InstanceResponse
 		isValid          bool
 		expectedOutput   string
 	}{
 		{
 			description: "base",
-			getInstanceResp: &mongodbflex.GetInstanceResponse{
+			getInstanceResp: &mongodbflex.InstanceResponse{
 				Item: &mongodbflex.Instance{
 					Name: utils.Ptr(testInstanceName),
 				},

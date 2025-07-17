@@ -31,14 +31,14 @@ type mongoDBFlexClientMocked struct {
 	listStoragesFails bool
 	listStoragesResp  *mongodbflex.ListStoragesResponse
 	getInstanceFails  bool
-	getInstanceResp   *mongodbflex.GetInstanceResponse
+	getInstanceResp   *mongodbflex.InstanceResponse
 }
 
 func (c *mongoDBFlexClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiPartialUpdateInstanceRequest {
 	return testClient.PartialUpdateInstance(ctx, projectId, instanceId, region)
 }
 
-func (c *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.GetInstanceResponse, error) {
+func (c *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.InstanceResponse, error) {
 	if c.getInstanceFails {
 		return nil, fmt.Errorf("get instance failed")
 	}
@@ -354,7 +354,7 @@ func TestBuildRequest(t *testing.T) {
 		model             *inputModel
 		expectedRequest   mongodbflex.ApiPartialUpdateInstanceRequest
 		getInstanceFails  bool
-		getInstanceResp   *mongodbflex.GetInstanceResponse
+		getInstanceResp   *mongodbflex.InstanceResponse
 		listFlavorsFails  bool
 		listFlavorsResp   *mongodbflex.ListFlavorsResponse
 		listStoragesFails bool
@@ -414,7 +414,7 @@ func TestBuildRequest(t *testing.T) {
 				model.StorageClass = utils.Ptr("class")
 			}),
 			isValid: true,
-			getInstanceResp: &mongodbflex.GetInstanceResponse{
+			getInstanceResp: &mongodbflex.InstanceResponse{
 				Item: &mongodbflex.Instance{
 					Flavor: &mongodbflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
@@ -442,7 +442,7 @@ func TestBuildRequest(t *testing.T) {
 				model.StorageSize = utils.Ptr(int64(10))
 			}),
 			isValid: true,
-			getInstanceResp: &mongodbflex.GetInstanceResponse{
+			getInstanceResp: &mongodbflex.InstanceResponse{
 				Item: &mongodbflex.Instance{
 					Flavor: &mongodbflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
@@ -528,7 +528,7 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageClass = utils.Ptr("non-existing-class")
 				},
 			),
-			getInstanceResp: &mongodbflex.GetInstanceResponse{
+			getInstanceResp: &mongodbflex.InstanceResponse{
 				Item: &mongodbflex.Instance{
 					Flavor: &mongodbflex.Flavor{
 						Id: utils.Ptr(testFlavorId),
@@ -551,7 +551,7 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageSize = utils.Ptr(int64(9))
 				},
 			),
-			getInstanceResp: &mongodbflex.GetInstanceResponse{
+			getInstanceResp: &mongodbflex.InstanceResponse{
 				Item: &mongodbflex.Instance{
 					Flavor: &mongodbflex.Flavor{
 						Id: utils.Ptr(testFlavorId),

@@ -22,7 +22,7 @@ var instanceTypeToReplicas = map[string]int64{
 
 type MongoDBFlexClient interface {
 	ListVersionsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.GetInstanceResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.InstanceResponse, error)
 	GetUserExecute(ctx context.Context, projectId, instanceId, userId, region string) (*mongodbflex.GetUserResponse, error)
 	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId, region string) (*mongodbflex.ListRestoreJobsResponse, error)
 }

@@ -201,7 +201,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 type MongoDBFlexClient interface {
 	PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.GetInstanceResponse, error)
+	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.InstanceResponse, error)
 	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
 	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
 }
