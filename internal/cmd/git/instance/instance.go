@@ -2,7 +2,7 @@ package instance
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/create"
-	delete2 "github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -29,6 +29,6 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 		list.NewCmd(params),
 		describe.NewCmd(params),
 		create.NewCmd(params),
-		delete2.NewCmd(params),
+		delete.NewCmd(params),
 	)
 }
