@@ -1,7 +1,8 @@
-package create
+package list
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -16,19 +17,17 @@ import (
 
 type testCtxKey struct{}
 
-var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &git.APIClient{}
-	testProjectId = uuid.NewString()
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testClient = &git.APIClient{}
+var testProjectId = uuid.NewString()
 
-	testName = "test-instance"
+const (
+	testLimit = 10
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-
-		nameFlag: testName,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -38,8 +37,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Name:            testName,
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -47,21 +48,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureCreatePayload(mods ...func(payload *git.CreateInstancePayload)) (payload git.CreateInstancePayload) {
-	payload = git.CreateInstancePayload{
-		Name: &testName,
-	}
-	for _, mod := range mods {
-		mod(&payload)
-	}
-	return payload
-}
-
-func fixtureRequest(mods ...func(request *git.ApiCreateInstanceRequest)) git.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
-
-	request = request.CreateInstancePayload(fixtureCreatePayload())
-
+func fixtureRequest(mods ...func(request *git.ApiListFlavorsRequest)) git.ApiListFlavorsRequest {
+	request := testClient.ListFlavors(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -108,9 +96,26 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "name missing",
+			description: "with limit flag",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nameFlag)
+				flagValues["limit"] = strconv.Itoa(testLimit)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = utils.Ptr(int64(testLimit))
+			}),
+		},
+		{
+			description: "with limit flag == 0",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["limit"] = strconv.Itoa(0)
+			}),
+			isValid: false,
+		},
+		{
+			description: "with limit flag < 0",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["limit"] = strconv.Itoa(-1)
 			}),
 			isValid: false,
 		},
@@ -120,8 +125,9 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
 			cmd := NewCmd(&params.CmdParams{Printer: p})
-			if err := globalflags.Configure(cmd.Flags()); err != nil {
-				t.Errorf("cannot configure global flags: %v", err)
+			err := globalflags.Configure(cmd.Flags())
+			if err != nil {
+				t.Fatalf("configure global flags: %v", err)
 			}
 
 			for flag, value := range tt.flagValues {
@@ -134,14 +140,8 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			if err := cmd.ValidateFlagGroups(); err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flag groups: %v", err)
-			}
-
-			if err := cmd.ValidateRequiredFlags(); err != nil {
+			err = cmd.ValidateRequiredFlags()
+			if err != nil {
 				if !tt.isValid {
 					return
 				}
@@ -171,33 +171,22 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest git.ApiCreateInstanceRequest
+		expectedRequest git.ApiListFlavorsRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
-		{
-			description: "name flag",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Name = "new-name"
-			}),
-			expectedRequest: fixtureRequest(func(request *git.ApiCreateInstanceRequest) {
-				*request = (*request).CreateInstancePayload(fixtureCreatePayload(func(payload *git.CreateInstancePayload) {
-					payload.Name = utils.Ptr("new-name")
-				}))
-			}),
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
+
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmp.AllowUnexported(git.NullableString{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -208,8 +197,8 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		model *inputModel
-		resp  *git.Instance
+		outputFormat string
+		flavors      []git.Flavor
 	}
 	tests := []struct {
 		name    string
@@ -217,30 +206,21 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "nil",
-			args: args{
-				model: nil,
-				resp:  nil,
-			},
-			wantErr: true,
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
 		},
 		{
-			name: "empty input",
+			name: "set empty flavors slice",
 			args: args{
-				model: &inputModel{},
-				resp:  &git.Instance{},
+				flavors: []git.Flavor{},
 			},
 			wantErr: false,
 		},
 		{
-			name: "output json",
+			name: "set empty flavors in flavors slice",
 			args: args{
-				model: &inputModel{
-					GlobalFlagModel: &globalflags.GlobalFlagModel{
-						OutputFormat: print.JSONOutputFormat,
-					},
-				},
-				resp: nil,
+				flavors: []git.Flavor{{}},
 			},
 			wantErr: false,
 		},
@@ -249,7 +229,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.flavors); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

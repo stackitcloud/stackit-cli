@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
-
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -23,13 +22,17 @@ import (
 )
 
 const (
-	nameFlag = "name"
+	nameFlag   = "name"
+	flavorFlag = "flavor"
+	aclFlag    = "acl"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Id   *string
-	Name string
+	Id     *string
+	Name   string
+	Flavor string
+	Acl    []string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -41,7 +44,15 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a instance with name 'my-new-instance'`,
-				`$ stackit git create --name my-new-instance`,
+				`$ stackit git instance create --name my-new-instance`,
+			),
+			examples.NewExample(
+				`Create a instance with name 'my-new-instance' and flavor`,
+				`$ stackit git instance create --name my-new-instance --flavor git-100'`,
+			),
+			examples.NewExample(
+				`Create a instance with name 'my-new-instance' and acl`,
+				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1'`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) (err error) {
@@ -95,6 +106,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "The name of the instance.")
+	cmd.Flags().String(flavorFlag, "", "Flavor of the instance.")
+	cmd.Flags().StringSlice(aclFlag, []string{}, "Acl for the instance.")
 	if err := flags.MarkFlagsRequired(cmd, nameFlag); err != nil {
 		cobra.CheckErr(err)
 	}
@@ -107,10 +120,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
+	flavor := flags.FlagToStringValue(p, cmd, flavorFlag)
+	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Name:            name,
+		Flavor:          flavor,
+		Acl:             acl,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -131,7 +148,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClie
 
 func createPayload(model *inputModel) git.CreateInstancePayload {
 	return git.CreateInstancePayload{
-		Name: &model.Name,
+		Name:   &model.Name,
+		Flavor: git.CreateInstancePayloadGetFlavorAttributeType(&model.Flavor),
+		Acl:    &model.Acl,
 	}
 }
 

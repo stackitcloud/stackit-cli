@@ -1,26 +1,30 @@
-## stackit git describe
+## stackit git instance list
 
-Describes STACKIT Git instance
+Lists all instances of STACKIT Git.
 
 ### Synopsis
 
-Describes a STACKIT Git instance by its internal ID.
+Lists all instances of STACKIT Git for the current project.
 
 ```
-stackit git describe INSTANCE_ID [flags]
+stackit git instance list [flags]
 ```
 
 ### Examples
 
 ```
-  Describe instance "xxx"
-  $ stackit git describe xxx
+  List all STACKIT Git instances
+  $ stackit git instance list
+
+  Lists up to 10 STACKIT Git instances
+  $ stackit git instance list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit git describe"
+  -h, --help        Help for "stackit git instance list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +40,5 @@ stackit git describe INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
+* [stackit git instance](./stackit_git_instance.md)	 - Provides functionality for STACKIT Git instances
 

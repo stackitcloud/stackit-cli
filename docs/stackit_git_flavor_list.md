@@ -1,27 +1,30 @@
-## stackit git create
+## stackit git flavor list
 
-Creates STACKIT Git instance
+Lists instances flavors of STACKIT Git.
 
 ### Synopsis
 
-Create a STACKIT Git instance by name.
+Lists instances flavors of STACKIT Git for the current project.
 
 ```
-stackit git create [flags]
+stackit git flavor list [flags]
 ```
 
 ### Examples
 
 ```
-  Create a instance with name 'my-new-instance'
-  $ stackit git create --name my-new-instance
+  List STACKIT Git flavors
+  $ stackit git flavor list
+
+  Lists up to 10 STACKIT Git flavors
+  $ stackit git flavor list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help          Help for "stackit git create"
-      --name string   The name of the instance.
+  -h, --help        Help for "stackit git flavor list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -37,5 +40,5 @@ stackit git create [flags]
 
 ### SEE ALSO
 
-* [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
+* [stackit git flavor](./stackit_git_flavor.md)	 - Provides functionality for STACKIT Git flavors
 
