@@ -1,29 +1,26 @@
-## stackit ske cluster describe
+## stackit ske wakeup
 
-Shows details of a SKE cluster
+Trigger wakeup from hibernation for a SKE cluster
 
 ### Synopsis
 
-Shows details of a STACKIT Kubernetes Engine (SKE) cluster.
+Trigger wakeup from hibernation for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske cluster describe CLUSTER_NAME [flags]
+stackit ske wakeup CLUSTER_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  Get details of an SKE cluster with name "my-cluster"
-  $ stackit ske cluster describe my-cluster
-
-  Get details of an SKE cluster with name "my-cluster" in JSON format
-  $ stackit ske cluster describe my-cluster --output-format json
+  Trigger wakeup from hibernation for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster wakeup my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske cluster describe"
+  -h, --help   Help for "stackit ske wakeup"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +36,5 @@ stackit ske cluster describe CLUSTER_NAME [flags]
 
 ### SEE ALSO
 
-* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
+* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 
