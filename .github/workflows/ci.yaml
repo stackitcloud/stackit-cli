@@ -58,14 +58,15 @@ jobs:
     name: "Code coverage report"
     if: github.event_name == 'pull_request' # Do not run when workflow is triggered by push to main branch
     runs-on: ubuntu-latest
-    continue-on-error: true  # Add this line to prevent pipeline failures in forks
     needs: main
     permissions:
       contents: read
       actions: read  # to download code coverage results from "main" job
       pull-requests: write # write permission needed to comment on PR
     steps:
-      - uses: fgrosse/go-coverage-report@v1.2.0
+      - name: Check new code coverage
+        uses: fgrosse/go-coverage-report@v1.2.0
+        continue-on-error: true  # Add this line to prevent pipeline failures in forks
         with:
           coverage-artifact-name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}
           coverage-file-name: ${{ env.CODE_COVERAGE_FILE_NAME }}
