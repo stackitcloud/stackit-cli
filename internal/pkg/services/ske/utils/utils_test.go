@@ -698,3 +698,42 @@ func TestGetDefaultKubeconfigPath(t *testing.T) {
 		})
 	}
 }
+
+func TestGetDefaultKubeconfigPathWithEnvVar(t *testing.T) {
+	tests := []struct {
+		description      string
+		kubeconfigEnvVar string
+		expected         string
+		userHome         string
+	}{
+		{
+			description:      "base",
+			kubeconfigEnvVar: "~/.kube/custom/config",
+			expected:         "~/.kube/custom/config",
+			userHome:         "/home/test-user",
+		},
+		{
+			description:      "return user home when environment var is empty",
+			kubeconfigEnvVar: "",
+			expected:         "/home/test-user/.kube/config",
+			userHome:         "/home/test-user",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			// Setup environment variables
+			os.Setenv("KUBECONFIG", tt.kubeconfigEnvVar)
+			os.Setenv("HOME", tt.userHome)
+
+			output, err := GetDefaultKubeconfigPath()
+
+			if err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if output != tt.expected {
+				t.Errorf("expected output to be %s, got %s", tt.expected, output)
+			}
+		})
+	}
+}
