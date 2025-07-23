@@ -17,7 +17,46 @@ brew tap stackitcloud/tap
 2. You can then install the CLI via:
 
 ```shell
-brew install stackit
+brew install --cask stackit
+```
+
+#### Formular deprecated
+
+The homebrew formula is deprecated, will no longer be updated and will be removed after 2026-01-22.
+You need to install it as cask.  
+Therefor you need to uninstall the formular and reinstall it as cask.  
+Your profiles should normally remain. To ensure that nothing will be gone, you should backup them.
+
+1. Export your existing profiles. This will create a json file in your current directory.
+```shell
+stackit config profile export default
+```
+
+2. If you have multiple profiles, then execute the export command for each of them. You can find your profiles via:
+
+```shell
+stackit config profile list
+stackit config profile export <profile-name>
+```
+
+3. Uninstall the formula.
+```shell
+brew uninstall stackit
+```
+
+4. Install the STACKIT CLI as cask.
+```shell
+brew install --cask stackit
+```
+
+5. Check if your configs are still stored.
+```shell
+stackit config profile list
+```
+
+6. If the profiles are gone, import your profiles via:
+```shell
+$ stackit config profile import -c @default.json --name myProfile
 ```
 
 ### Linux
