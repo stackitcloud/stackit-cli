@@ -1,13 +1,23 @@
 package getaccesstoken
 
 import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
+
+type inputModel struct {
+	*globalflags.GlobalFlagModel
+}
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
@@ -20,7 +30,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Print a short-lived access token`,
 				"$ stackit auth get-access-token"),
 		),
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			model, err := parseInput(params.Printer, cmd)
+			if err != nil {
+				return err
+			}
+
 			userSessionExpired, err := auth.UserSessionExpired()
 			if err != nil {
 				return err
@@ -35,9 +50,52 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			params.Printer.Outputf("%s\n", accessToken)
-			return nil
+			switch model.OutputFormat {
+			case print.JSONOutputFormat:
+				details, err := json.MarshalIndent(map[string]string{
+					"access_token": accessToken,
+				}, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshal image list: %w", err)
+				}
+				params.Printer.Outputln(string(details))
+
+				return nil
+			case print.YAMLOutputFormat:
+				details, err := yaml.MarshalWithOptions(map[string]string{
+					"access_token": accessToken,
+				}, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+				if err != nil {
+					return fmt.Errorf("marshal image list: %w", err)
+				}
+				params.Printer.Outputln(string(details))
+
+				return nil
+			default:
+				params.Printer.Outputln(accessToken)
+
+				return nil
+			}
 		},
 	}
 	return cmd
+}
+
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+	globalFlags := globalflags.Parse(p, cmd)
+
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+	}
+
+	if p.IsVerbosityDebug() {
+		modelStr, err := print.BuildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
+
+	return &model, nil
 }
