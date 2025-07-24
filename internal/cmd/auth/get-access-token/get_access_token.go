@@ -62,7 +62,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 				return nil
 			case print.YAMLOutputFormat:
-				params.Printer.Outputf(`access_token: %q`, accessToken)
 				details, err := yaml.MarshalWithOptions(map[string]string{
 					"access_token": accessToken,
 				}, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
