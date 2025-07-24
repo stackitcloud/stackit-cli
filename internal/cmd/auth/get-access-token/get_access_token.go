@@ -45,8 +45,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Try to get a valid access token, refreshing if necessary
-
-			// Try to get a valid access token, refreshing if necessary
 			accessToken, err := auth.RefreshAccessToken(params.Printer)
 			if err != nil {
 				return err
