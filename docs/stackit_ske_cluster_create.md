@@ -1,6 +1,6 @@
 ## stackit ske cluster create
 
-Creates an SKE cluster
+Creates a SKE cluster
 
 ### Synopsis
 
@@ -15,13 +15,13 @@ stackit ske cluster create CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Create an SKE cluster using default configuration
+  Create a SKE cluster using default configuration
   $ stackit ske cluster create my-cluster
 
-  Create an SKE cluster using an API payload sourced from the file "./payload.json"
+  Create a SKE cluster using an API payload sourced from the file "./payload.json"
   $ stackit ske cluster create my-cluster --payload @./payload.json
 
-  Create an SKE cluster using an API payload provided as a JSON string
+  Create a SKE cluster using an API payload provided as a JSON string
   $ stackit ske cluster create my-cluster --payload "{...}"
 
   Generate a payload with default values, and adapt it with custom values for the different configuration options

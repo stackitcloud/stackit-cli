@@ -28,11 +28,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
-	cmd.AddCommand(describe.NewCmd(params))
-	cmd.AddCommand(enable.NewCmd(params))
-	cmd.AddCommand(kubeconfig.NewCmd(params))
-	cmd.AddCommand(disable.NewCmd(params))
 	cmd.AddCommand(cluster.NewCmd(params))
 	cmd.AddCommand(credentials.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(disable.NewCmd(params))
+	cmd.AddCommand(enable.NewCmd(params))
+	cmd.AddCommand(kubeconfig.NewCmd(params))
 	cmd.AddCommand(options.NewCmd(params))
 }
