@@ -1,26 +1,26 @@
-## stackit ske reconcile
+## stackit ske cluster hibernate
 
-Trigger reconcile for a SKE cluster
+Trigger hibernate for a SKE cluster
 
 ### Synopsis
 
-Trigger reconcile for a STACKIT Kubernetes Engine (SKE) cluster.
+Trigger hibernate for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske reconcile CLUSTER_NAME [flags]
+stackit ske cluster hibernate CLUSTER_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  Trigger reconcile for a SKE cluster with name "my-cluster"
-  $ stackit ske cluster reconcile my-cluster
+  Trigger hibernate for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster hibernate my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske reconcile"
+  -h, --help   Help for "stackit ske cluster hibernate"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ske reconcile CLUSTER_NAME [flags]
 
 ### SEE ALSO
 
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
+* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 

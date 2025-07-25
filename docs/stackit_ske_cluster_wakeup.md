@@ -1,26 +1,26 @@
-## stackit ske maintenance
+## stackit ske cluster wakeup
 
-Trigger maintenance for a SKE cluster
+Trigger wakeup from hibernation for a SKE cluster
 
 ### Synopsis
 
-Trigger maintenance for a STACKIT Kubernetes Engine (SKE) cluster.
+Trigger wakeup from hibernation for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske maintenance CLUSTER_NAME [flags]
+stackit ske cluster wakeup CLUSTER_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  Trigger maintenance for a SKE cluster with name "my-cluster"
-  $ stackit ske cluster maintenance my-cluster
+  Trigger wakeup from hibernation for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster wakeup my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske maintenance"
+  -h, --help   Help for "stackit ske cluster wakeup"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ske maintenance CLUSTER_NAME [flags]
 
 ### SEE ALSO
 
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
+* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 

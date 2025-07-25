@@ -30,6 +30,6 @@ stackit ske kubeconfig [flags]
 ### SEE ALSO
 
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
-* [stackit ske kubeconfig create](./stackit_ske_kubeconfig_create.md)	 - Creates or update a kubeconfig for an SKE cluster
+* [stackit ske kubeconfig create](./stackit_ske_kubeconfig_create.md)	 - Creates or update a kubeconfig for a SKE cluster
 * [stackit ske kubeconfig login](./stackit_ske_kubeconfig_login.md)	 - Login plugin for kubernetes clients
 

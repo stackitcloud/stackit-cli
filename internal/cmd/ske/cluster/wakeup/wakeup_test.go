@@ -16,11 +16,14 @@ import (
 
 type testCtxKey struct{}
 
+const (
+	testRegion      = "eu01"
+	testClusterName = "my-cluster"
+)
+
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
-var testClusterName = "my-cluster"
 
 func fixtureArgValues(mods ...func([]string)) []string {
 	argValues := []string{testClusterName}
@@ -56,9 +59,8 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(*ske.ApiTriggerHibernateRequest)) ske.ApiTriggerHibernateRequest {
-	// TODO: rewrite to Wakeup
-	req := testClient.TriggerHibernate(testCtx, testProjectId, testRegion, testClusterName)
+func fixtureRequest(mods ...func(*ske.ApiTriggerWakeupRequest)) ske.ApiTriggerWakeupRequest {
+	req := testClient.TriggerWakeup(testCtx, testProjectId, testRegion, testClusterName)
 	for _, m := range mods {
 		m(&req)
 	}

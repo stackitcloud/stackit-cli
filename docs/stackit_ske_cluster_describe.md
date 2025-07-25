@@ -13,10 +13,10 @@ stackit ske cluster describe CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Get details of an SKE cluster with name "my-cluster"
+  Get details of a SKE cluster with name "my-cluster"
   $ stackit ske cluster describe my-cluster
 
-  Get details of an SKE cluster with name "my-cluster" in JSON format
+  Get details of a SKE cluster with name "my-cluster" in JSON format
   $ stackit ske cluster describe my-cluster --output-format json
 ```
 

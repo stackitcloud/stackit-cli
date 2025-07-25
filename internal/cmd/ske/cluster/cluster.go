@@ -6,8 +6,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/describe"
 	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/generate-payload"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/hibernate"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/maintenance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/reconcile"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/wakeup"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -33,4 +37,8 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
+	cmd.AddCommand(hibernate.NewCmd(params))
+	cmd.AddCommand(maintenance.NewCmd(params))
+	cmd.AddCommand(reconcile.NewCmd(params))
+	cmd.AddCommand(wakeup.NewCmd(params))
 }

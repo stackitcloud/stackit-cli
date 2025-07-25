@@ -1,26 +1,26 @@
-## stackit ske wakeup
+## stackit ske cluster reconcile
 
-Trigger wakeup from hibernation for a SKE cluster
+Trigger reconcile for a SKE cluster
 
 ### Synopsis
 
-Trigger wakeup from hibernation for a STACKIT Kubernetes Engine (SKE) cluster.
+Trigger reconcile for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske wakeup CLUSTER_NAME [flags]
+stackit ske cluster reconcile CLUSTER_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  Trigger wakeup from hibernation for a SKE cluster with name "my-cluster"
-  $ stackit ske cluster wakeup my-cluster
+  Trigger reconcile for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster reconcile my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske wakeup"
+  -h, --help   Help for "stackit ske cluster reconcile"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ske wakeup CLUSTER_NAME [flags]
 
 ### SEE ALSO
 
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
+* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 

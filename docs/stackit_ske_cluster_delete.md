@@ -13,7 +13,7 @@ stackit ske cluster delete CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Delete an SKE cluster with name "my-cluster"
+  Delete a SKE cluster with name "my-cluster"
   $ stackit ske cluster delete my-cluster
 ```
 

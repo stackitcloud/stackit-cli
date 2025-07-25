@@ -35,10 +35,6 @@ stackit ske [flags]
 * [stackit ske describe](./stackit_ske_describe.md)	 - Shows overall details regarding SKE
 * [stackit ske disable](./stackit_ske_disable.md)	 - Disables SKE for a project
 * [stackit ske enable](./stackit_ske_enable.md)	 - Enables SKE for a project
-* [stackit ske hibernate](./stackit_ske_hibernate.md)	 - Trigger hibernate for a SKE cluster
 * [stackit ske kubeconfig](./stackit_ske_kubeconfig.md)	 - Provides functionality for SKE kubeconfig
-* [stackit ske maintenance](./stackit_ske_maintenance.md)	 - Trigger maintenance for a SKE cluster
 * [stackit ske options](./stackit_ske_options.md)	 - Lists SKE provider options
-* [stackit ske reconcile](./stackit_ske_reconcile.md)	 - Trigger reconcile for a SKE cluster
-* [stackit ske wakeup](./stackit_ske_wakeup.md)	 - Trigger wakeup from hibernation for a SKE cluster
 
