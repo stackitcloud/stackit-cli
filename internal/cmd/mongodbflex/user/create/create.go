@@ -103,7 +103,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	roleOptions := []string{"read", "readWrite"}
+	roleOptions := []string{"read", "readWrite", "readWriteAnyDatabase"}
 
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
