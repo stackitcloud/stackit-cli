@@ -24,7 +24,8 @@ brew install --cask stackit
 
 The homebrew formula is deprecated, will no longer be updated and will be removed after 2026-01-22.
 You need to install the STACKIT CLI as cask.  
-Therefor you need to uninstall the formular and reinstall it as cask.  
+Therefor you need to uninstall the formula and reinstall it as cask.  
+
 Your profiles should normally remain. To ensure that nothing will be gone, you should backup them.
 
 1. Export your existing profiles. This will create a json file in your current directory.
