@@ -87,9 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-// TODO: rewrite to Wakeup
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiTriggerHibernateRequest {
-	// TODO: rewrite to Wakeup
-	req := apiClient.TriggerHibernate(ctx, model.ProjectId, model.Region, model.ClusterName)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiTriggerWakeupRequest {
+	req := apiClient.TriggerWakeup(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }

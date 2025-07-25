@@ -36,10 +36,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an SKE cluster with name "my-cluster"`,
+				`Get details of a SKE cluster with name "my-cluster"`,
 				"$ stackit ske cluster describe my-cluster"),
 			examples.NewExample(
-				`Get details of an SKE cluster with name "my-cluster" in JSON format`,
+				`Get details of a SKE cluster with name "my-cluster" in JSON format`,
 				"$ stackit ske cluster describe my-cluster --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

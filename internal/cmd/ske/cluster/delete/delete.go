@@ -35,7 +35,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an SKE cluster with name "my-cluster"`,
+				`Delete a SKE cluster with name "my-cluster"`,
 				"$ stackit ske cluster delete my-cluster"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

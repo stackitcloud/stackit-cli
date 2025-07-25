@@ -3,10 +3,6 @@ package ske
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/hibernate"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/maintenance"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/reconcile"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/cluster/wakeup"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/disable"
@@ -37,10 +33,6 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(disable.NewCmd(params))
 	cmd.AddCommand(enable.NewCmd(params))
-	cmd.AddCommand(hibernate.NewCmd(params))
 	cmd.AddCommand(kubeconfig.NewCmd(params))
-	cmd.AddCommand(maintenance.NewCmd(params))
 	cmd.AddCommand(options.NewCmd(params))
-	cmd.AddCommand(reconcile.NewCmd(params))
-	cmd.AddCommand(wakeup.NewCmd(params))
 }

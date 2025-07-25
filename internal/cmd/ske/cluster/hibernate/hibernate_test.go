@@ -16,11 +16,14 @@ import (
 
 type testCtxKey struct{}
 
+const (
+	testRegion      = "eu01"
+	testClusterName = "my-cluster"
+)
+
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &ske.APIClient{}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
-var testClusterName = "my-cluster"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

@@ -1,26 +1,26 @@
-## stackit ske hibernate
+## stackit ske cluster maintenance
 
-Trigger hibernate for a SKE cluster
+Trigger maintenance for a SKE cluster
 
 ### Synopsis
 
-Trigger hibernate for a STACKIT Kubernetes Engine (SKE) cluster.
+Trigger maintenance for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske hibernate CLUSTER_NAME [flags]
+stackit ske cluster maintenance CLUSTER_NAME [flags]
 ```
 
 ### Examples
 
 ```
-  Trigger hibernate for a SKE cluster with name "my-cluster"
-  $ stackit ske cluster hibernate my-cluster
+  Trigger maintenance for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster maintenance my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske hibernate"
+  -h, --help   Help for "stackit ske cluster maintenance"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ske hibernate CLUSTER_NAME [flags]
 
 ### SEE ALSO
 
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
+* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 
