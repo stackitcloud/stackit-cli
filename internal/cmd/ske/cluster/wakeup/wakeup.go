@@ -12,7 +12,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 const (
@@ -55,7 +57,22 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("wakeup SKE cluster: %w", err)
 			}
 
-			params.Printer.Info("Wakeup got triggered for %q\n", model.ClusterName)
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Performing cluster wakeup")
+				_, err = wait.TriggerClusterWakeupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for SKE cluster wakeup: %w", err)
+				}
+				s.Stop()
+			}
+
+			operationState := "Performed wakeup of"
+			if model.Async {
+				operationState = "Triggered wakeup of"
+			}
+			params.Printer.Outputf("%s cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}

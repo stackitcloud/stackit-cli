@@ -12,7 +12,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 const (
@@ -55,7 +57,22 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("reconcile SKE cluster: %w", err)
 			}
 
-			params.Printer.Info("Reconcile got triggered for %q\n", model.ClusterName)
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Performing cluster reconciliation")
+				_, err = wait.TriggerClusterReconciliationWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for SKE cluster reconciliation: %w", err)
+				}
+				s.Stop()
+			}
+
+			operationState := "Performed reconciliation for"
+			if model.Async {
+				operationState = "Triggered reconcile for"
+			}
+			params.Printer.Outputf("%s cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}

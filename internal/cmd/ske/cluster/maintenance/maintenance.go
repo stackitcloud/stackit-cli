@@ -13,7 +13,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
 
 const (
@@ -69,7 +71,22 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("trigger maintenance SKE cluster: %w", err)
 			}
 
-			params.Printer.Info("Maintenance got triggered for %q\n", model.ClusterName)
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Performing cluster maintenance")
+				_, err = wait.TriggerClusterMaintenanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for SKE cluster maintenance to complete: %w", err)
+				}
+				s.Stop()
+			}
+
+			operationState := "Performed maintenance for"
+			if model.Async {
+				operationState = "Triggered maintenance for"
+			}
+			params.Printer.Outputf("%s cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}
