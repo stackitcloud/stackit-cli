@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
@@ -47,8 +48,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to trigger hibernate for %q in project %q?", model.ClusterName, model.ProjectId)
+				prompt := fmt.Sprintf("Are you sure you want to trigger hibernate for %q in project %q?", model.ClusterName, projectLabel)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
