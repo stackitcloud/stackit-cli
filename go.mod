@@ -15,24 +15,24 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
 	github.com/spf13/viper v1.20.1
-	github.com/stackitcloud/stackit-sdk-go/core v0.17.2
-	github.com/stackitcloud/stackit-sdk-go/services/alb v0.6.0
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.17.3
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.6.1
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.1
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.27.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.1
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.0
-	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.1
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.1
+	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.2
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.9.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.1
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.9.1
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.2
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.2.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.1
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.26.0
 	golang.org/x/oauth2 v0.30.0
@@ -238,13 +238,13 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.5.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.1
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.3.1
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.9.0
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.1
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.1
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
