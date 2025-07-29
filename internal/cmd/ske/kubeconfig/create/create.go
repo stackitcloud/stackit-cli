@@ -44,9 +44,9 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", clusterNameArg),
-		Short: "Creates or update a kubeconfig for an SKE cluster",
+		Short: "Creates or update a kubeconfig for a SKE cluster",
 		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s",
-			"Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exits in the kubeconfig file the information will be updated.",
+			"Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exists in the kubeconfig file the information will be updated.",
 			"By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.",
 			"You can override this behavior by specifying a custom filepath with the --filepath flag.\n",
 			"An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.\n",

@@ -37,7 +37,7 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", clusterNameArg),
-		Short: "Updates an SKE cluster",
+		Short: "Updates a SKE cluster",
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Updates a STACKIT Kubernetes Engine (SKE) cluster.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
@@ -46,10 +46,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update an SKE cluster using an API payload sourced from the file "./payload.json"`,
+				`Update a SKE cluster using an API payload sourced from the file "./payload.json"`,
 				"$ stackit ske cluster update my-cluster --payload @./payload.json"),
 			examples.NewExample(
-				`Update an SKE cluster using an API payload provided as a JSON string`,
+				`Update a SKE cluster using an API payload provided as a JSON string`,
 				`$ stackit ske cluster update my-cluster --payload "{...}"`),
 			examples.NewExample(
 				`Generate a payload with the current values of a cluster, and adapt it with custom values for the different configuration options`,
