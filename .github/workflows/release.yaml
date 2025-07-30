@@ -75,11 +75,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-      - name: Verify Docker is available
+      - name: Install Docker
         run: |
-          # Docker should already be available on macOS runners
+          # Install Docker on macOS runner
+          brew install --cask docker
+          # Start Docker daemon
+          sudo /Applications/Docker.app/Contents/MacOS/Docker &
+          # Wait for Docker to be ready
+          sleep 30
           docker --version
-          echo "Docker is available for createrepo_c operations"
+          echo "Docker is now available for createrepo_c operations"
       - name: Publish packages to APT repo
         if: contains(github.ref_name, '-') == false
         env:
