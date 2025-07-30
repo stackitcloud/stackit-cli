@@ -723,8 +723,14 @@ func TestGetDefaultKubeconfigPathWithEnvVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			// Setup environment variables
-			os.Setenv("KUBECONFIG", tt.kubeconfigEnvVar)
-			os.Setenv("HOME", tt.userHome)
+			err := os.Setenv("KUBECONFIG", tt.kubeconfigEnvVar)
+			if err != nil {
+				t.Errorf("could not set KUBECONFIG environment variable: %s", err)
+			}
+			err = os.Setenv("HOME", tt.userHome)
+			if err != nil {
+				t.Errorf("could not set HOME environment variable: %s", err)
+			}
 
 			output, err := GetDefaultKubeconfigPath()
 
