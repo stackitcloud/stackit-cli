@@ -79,20 +79,19 @@ jobs:
         run: |
           # Install Docker on macOS runner
           brew install --cask docker
-          # Start Docker daemon
-          sudo /Applications/Docker.app/Contents/MacOS/Docker &
+          # Start Docker Desktop
+          open -a Docker
           # Wait for Docker to be ready
-          sleep 30
+          echo "Waiting for Docker to start..."
+          timeout 60 bash -c 'until docker info > /dev/null 2>&1; do sleep 2; done'
           docker --version
           echo "Docker is now available for createrepo_c operations"
       - name: Publish packages to APT repo
-        if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./scripts/publish-apt-packages.sh
       - name: Publish packages to RPM repo
-        if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
