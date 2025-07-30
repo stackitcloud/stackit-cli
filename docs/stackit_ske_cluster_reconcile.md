@@ -1,19 +1,26 @@
-## stackit ske kubeconfig
+## stackit ske cluster reconcile
 
-Provides functionality for SKE kubeconfig
+Trigger reconcile for a SKE cluster
 
 ### Synopsis
 
-Provides functionality for STACKIT Kubernetes Engine (SKE) kubeconfig.
+Trigger reconcile for a STACKIT Kubernetes Engine (SKE) cluster.
 
 ```
-stackit ske kubeconfig [flags]
+stackit ske cluster reconcile CLUSTER_NAME [flags]
+```
+
+### Examples
+
+```
+  Trigger reconcile for a SKE cluster with name "my-cluster"
+  $ stackit ske cluster reconcile my-cluster
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske kubeconfig"
+  -h, --help   Help for "stackit ske cluster reconcile"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +36,5 @@ stackit ske kubeconfig [flags]
 
 ### SEE ALSO
 
-* [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
-* [stackit ske kubeconfig create](./stackit_ske_kubeconfig_create.md)	 - Creates or update a kubeconfig for a SKE cluster
-* [stackit ske kubeconfig login](./stackit_ske_kubeconfig_login.md)	 - Login plugin for kubernetes clients
+* [stackit ske cluster](./stackit_ske_cluster.md)	 - Provides functionality for SKE cluster
 

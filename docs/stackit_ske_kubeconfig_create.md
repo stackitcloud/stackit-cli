@@ -1,10 +1,10 @@
 ## stackit ske kubeconfig create
 
-Creates or update a kubeconfig for an SKE cluster
+Creates or update a kubeconfig for a SKE cluster
 
 ### Synopsis
 
-Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exits in the kubeconfig file the information will be updated.
+Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exists in the kubeconfig file the information will be updated.
 
 By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.
 You can override this behavior by specifying a custom filepath using the --filepath flag or by setting the KUBECONFIG env variable (fallback).

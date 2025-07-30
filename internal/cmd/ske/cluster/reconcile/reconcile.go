@@ -1,9 +1,10 @@
-package delete
+package reconcile
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -12,8 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
 )
@@ -29,14 +28,14 @@ type inputModel struct {
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", clusterNameArg),
-		Short: "Deletes a SKE cluster",
-		Long:  "Deletes a STACKIT Kubernetes Engine (SKE) cluster.",
+		Use:   fmt.Sprintf("reconcile %s", clusterNameArg),
+		Short: "Trigger reconcile for a SKE cluster",
+		Long:  "Trigger reconcile for a STACKIT Kubernetes Engine (SKE) cluster.",
 		Args:  args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a SKE cluster with name "my-cluster"`,
-				"$ stackit ske cluster delete my-cluster"),
+				`Trigger reconcile for a SKE cluster with name "my-cluster"`,
+				"$ stackit ske cluster reconcile my-cluster"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -51,37 +50,29 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete cluster %q? (This cannot be undone)", model.ClusterName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete SKE cluster: %w", err)
+				return fmt.Errorf("reconcile SKE cluster: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
-				s.Start("Deleting cluster")
-				_, err = wait.DeleteClusterWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				s.Start("Performing cluster reconciliation")
+				_, err = wait.TriggerClusterReconciliationWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for SKE cluster deletion: %w", err)
+					return fmt.Errorf("wait for SKE cluster reconciliation: %w", err)
 				}
 				s.Stop()
 			}
 
-			operationState := "Deleted"
+			operationState := "Performed reconciliation for"
 			if model.Async {
-				operationState = "Triggered deletion of"
+				operationState = "Triggered reconcile for"
 			}
-			params.Printer.Info("%s cluster %q\n", operationState, model.ClusterName)
+			params.Printer.Outputf("%s cluster %q\n", operationState, model.ClusterName)
 			return nil
 		},
 	}
@@ -113,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiDeleteClusterRequest {
-	req := apiClient.DeleteCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiTriggerReconcileRequest {
+	req := apiClient.TriggerReconcile(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }

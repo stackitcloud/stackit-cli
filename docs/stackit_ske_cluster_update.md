@@ -1,6 +1,6 @@
 ## stackit ske cluster update
 
-Updates an SKE cluster
+Updates a SKE cluster
 
 ### Synopsis
 
@@ -15,10 +15,10 @@ stackit ske cluster update CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Update an SKE cluster using an API payload sourced from the file "./payload.json"
+  Update a SKE cluster using an API payload sourced from the file "./payload.json"
   $ stackit ske cluster update my-cluster --payload @./payload.json
 
-  Update an SKE cluster using an API payload provided as a JSON string
+  Update a SKE cluster using an API payload provided as a JSON string
   $ stackit ske cluster update my-cluster --payload "{...}"
 
   Generate a payload with the current values of a cluster, and adapt it with custom values for the different configuration options
