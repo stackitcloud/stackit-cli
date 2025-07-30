@@ -75,17 +75,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-      - name: Install Docker
+      - name: Setup docker (missing on MacOS)
+        if: runner.os == 'macos'
         run: |
-          # Install Docker on macOS runner
-          brew install --cask docker
-          # Start Docker Desktop
-          open -a Docker
-          # Wait for Docker to be ready
-          echo "Waiting for Docker to start..."
-          timeout 60 bash -c 'until docker info > /dev/null 2>&1; do sleep 2; done'
-          docker --version
-          echo "Docker is now available for createrepo_c operations"
+          brew install docker
+          colima start
       - name: Publish packages to APT repo
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
