@@ -75,9 +75,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - name: Install createrepo_c
+        run: brew install createrepo_c
       - name: Publish packages to APT repo
         if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./scripts/publish-apt-packages.sh
+      - name: Publish packages to RPM repo
+        if: contains(github.ref_name, '-') == false
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+        run: ./scripts/publish-rpm-packages.sh
