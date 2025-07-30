@@ -33,7 +33,7 @@ aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/RPMS/ ${TEMP_DIR}/rpm-repo/
 printf "\n>>> Adding new packages to local repo \n"
 cp ${GORELEASER_PACKAGES_FOLDER}/*.rpm ${TEMP_DIR}/rpm-repo/RPMS/
 
-# Create RPM repository metadata using createrepo_c
+# Create RPM repository metadata using createrepo_c in Docker
 printf "\n>>> Creating RPM repository metadata \n"
 docker run --rm \
     -v "${TEMP_DIR}/rpm-repo:/repo" \
