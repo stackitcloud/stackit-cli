@@ -103,10 +103,10 @@ jobs:
       - name: Install Aptly version 1.5.0
         run: |
           # Install aptly on Ubuntu
-          wget -O - https://www.aptly.info/pubkey.txt | apt-key add -
-          echo "deb https://repo.aptly.info/ squeeze main" | tee -a /etc/apt/sources.list.d/aptly.list
-          apt-get update
-          apt-get install -y aptly
+          wget -O - https://www.aptly.info/pubkey.txt | sudo apt-key add -
+          echo "deb https://repo.aptly.info/ squeeze main" | sudo tee -a /etc/apt/sources.list.d/aptly.list
+          sudo apt-get update
+          sudo apt-get install -y aptly
       - name: Install createrepo_c
         run: |
           # Install createrepo_c on Ubuntu
