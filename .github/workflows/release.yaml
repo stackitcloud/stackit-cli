@@ -75,11 +75,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-      - name: Setup docker (missing on MacOS)
-        if: runner.os == 'macos'
+      - name: Setup Docker with Colima
         run: |
-          brew install docker colima
-          colima start
+          # Install Docker CLI
+          brew install docker
+          # Install Colima
+          brew install colima
+          # Start Colima
+          colima start --cpu 2 --memory 4 --disk 20
+          # Verify Docker is working
+          docker --version
+          docker info
+          echo "Docker is ready!"
       - name: Publish packages to APT repo
         if: contains(github.ref_name, '-') == false
         env:
