@@ -33,18 +33,9 @@ aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/RPMS/ ${TEMP_DIR}/rpm-repo/
 printf "\n>>> Adding new packages to local repo \n"
 cp ${GORELEASER_PACKAGES_FOLDER}/*.rpm ${TEMP_DIR}/rpm-repo/RPMS/
 
-# Create RPM repository metadata using createrepo_c in Docker
+# Create RPM repository metadata using createrepo_c
 printf "\n>>> Creating RPM repository metadata \n"
-docker run --rm \
-    -v "${TEMP_DIR}/rpm-repo:/repo" \
-    fedora:latest \
-    bash -c "
-        # Install createrepo_c
-        dnf install -y createrepo_c
-        
-        # Create repository metadata
-        createrepo_c /repo
-    "
+createrepo_c ${TEMP_DIR}/rpm-repo
 
 # Sign the repository metadata using the same GPG key as APT
 if [ -n "$GPG_PRIVATE_KEY_FINGERPRINT" ] && [ -n "$GPG_PASSPHRASE" ]; then

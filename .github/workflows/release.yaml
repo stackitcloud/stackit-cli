@@ -17,13 +17,12 @@ permissions:
 
 jobs:
   goreleaser:
-    name: Release
+    name: Build and Release
     runs-on: macOS-latest
+    outputs:
+      gpg_fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
-      # Needed to publish new packages to our S3-hosted APT repo
-      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,11 +60,6 @@ jobs:
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           SIGNING_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_ID_CERT }}
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
-      # aptly version 1.6.0 results in an segmentation fault. Therefore we fall back to version 1.5.0.
-      # Since it is not possible to specify a version via brew command a formula was added for aptly 1.5.0
-      # (source: https://github.com/Homebrew/homebrew-core/pull/202415/files)
-      - name: Install Aptly version 1.5.0
-        run: brew install aptly.rb
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
       - name: Run GoReleaser
@@ -75,26 +69,60 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-      - name: Setup Docker with Colima
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  publish-packages:
+    name: Publish Packages
+    runs-on: ubuntu-latest
+    needs: goreleaser
+    if: contains(github.ref_name, '-') == false
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_PRIVATE_KEY_FINGERPRINT: ${{ needs.goreleaser.outputs.gpg_fingerprint }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      # aptly version 1.6.0 results in an segmentation fault. Therefore we fall back to version 1.5.0.
+      # Since it is not possible to specify a version via brew command a formula was added for aptly 1.5.0
+      # (source: https://github.com/Homebrew/homebrew-core/pull/202415/files)
+      - name: Install Aptly version 1.5.0
         run: |
-          # Install Docker CLI
-          brew install docker
-          # Install Colima
-          brew install colima
-          # Start Colima
-          colima start --cpu 2 --memory 4 --disk 20
-          # Verify Docker is working
-          docker --version
-          docker info
-          echo "Docker is ready!"
+          # Install aptly on Ubuntu
+          wget -O - https://www.aptly.info/pubkey.txt | apt-key add -
+          echo "deb https://repo.aptly.info/ squeeze main" | tee -a /etc/apt/sources.list.d/aptly.list
+          apt-get update
+          apt-get install -y aptly
+      - name: Install createrepo_c
+        run: |
+          # Install createrepo_c on Ubuntu
+          sudo apt-get update
+          sudo apt-get install -y createrepo-c
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
       - name: Publish packages to APT repo
-        if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./scripts/publish-apt-packages.sh
       - name: Publish packages to RPM repo
-        if: contains(github.ref_name, '-') == false
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
