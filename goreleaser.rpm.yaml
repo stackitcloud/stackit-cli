@@ -1,0 +1,45 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: linux-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    binary: "stackit"
+    main: ./cmd/stackit
+    ldflags:
+      - -s -w
+      - -X github.com/stackitcloud/stackit-cli/internal/cmd.Version={{.Version}}
+      - -X github.com/stackitcloud/stackit-cli/internal/cmd.Commit={{.Commit}}
+      - -X github.com/stackitcloud/stackit-cli/internal/cmd.Date={{.Date}}
+
+archives: [] # No archives, just RPMs
+
+nfpms:
+  - id: linux-packages
+    ids:
+      - linux-builds
+    package_name: stackit
+    vendor: STACKIT
+    homepage: https://github.com/stackitcloud/stackit-cli
+    maintainer: STACKIT Developer Tools Team <developer-tools@stackit.cloud>
+    description: A command-line interface to manage STACKIT resources.
+    license: Apache 2.0
+    formats:
+      - rpm
+    rpm:
+      signature:
+        enabled: true
+        key_file: "{{ .Env.GPG_PRIVATE_KEY }}"
+        passphrase: "{{ .Env.GPG_PASSPHRASE }}"
+    contents:
+      - src: LICENSE.md
+        dst: LICENSE.md 

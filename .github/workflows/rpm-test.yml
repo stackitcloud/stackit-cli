@@ -1,0 +1,44 @@
+name: RPM Test
+
+on:
+  push:
+    branches:
+      - testrpmworkflow
+  workflow_dispatch:
+
+jobs:
+  rpm-release:
+    runs-on: ubuntu-latest
+    env:
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_PRIVATE_KEY_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Build RPMs
+        run: ./release-rpm.sh
+
+      - name: Install createrepo_c
+        run: sudo apt-get update && sudo apt-get install -y createrepo-c
+
+      - name: Install AWS CLI
+        run: sudo apt-get install -y awscli
+
+      - name: Publish RPM repo
+        run: ./publish-rpm-repo.sh 
