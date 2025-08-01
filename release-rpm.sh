@@ -10,6 +10,6 @@ export GPG_PASSPHRASE
 
 gpg --batch --import <<< "$GPG_PRIVATE_KEY"
 
-goreleaser release --clean --config goreleaser.rpm.yaml --skip-publish --skip-validate
+goreleaser release --clean --config goreleaser.rpm.yaml --snapshot
 
 echo "RPM build complete. Find RPMs in ./dist/" 
