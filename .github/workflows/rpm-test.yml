@@ -25,6 +25,9 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
+      - name: Install GoReleaser
+        run: go install github.com/goreleaser/goreleaser/v2@latest
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
         with:
