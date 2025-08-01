@@ -7,7 +7,7 @@ Creates or update a kubeconfig for a SKE cluster
 Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exists in the kubeconfig file the information will be updated.
 
 By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.
-You can override this behavior by specifying a custom filepath with the --filepath flag.
+You can override this behavior by specifying a custom filepath using the --filepath flag or by setting the KUBECONFIG env variable (fallback).
 
 An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.
 
@@ -47,7 +47,7 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 ```
       --disable-writing     Disable the writing of kubeconfig. Set the output format to json or yaml using the --output-format flag to display the kubeconfig.
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
-      --filepath string     Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.
+      --filepath string     Path to create the kubeconfig file. Will fall back to KUBECONFIG env variable if not set. In case both aren't set, the kubeconfig is created as file named 'config' in the .kube folder in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
   -l, --login               Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
       --overwrite           Overwrite the kubeconfig file.
