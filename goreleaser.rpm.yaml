@@ -37,9 +37,7 @@ nfpms:
       - rpm
     rpm:
       signature:
-        enabled: true
         key_file: "{{ .Env.GPG_PRIVATE_KEY }}"
-        passphrase: "{{ .Env.GPG_PASSPHRASE }}"
     contents:
       - src: LICENSE.md
         dst: LICENSE.md 
