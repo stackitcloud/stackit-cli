@@ -48,7 +48,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s",
 			"Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exists in the kubeconfig file the information will be updated.",
 			"By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.",
-			"You can override this behavior by specifying a custom filepath with the --filepath flag.\n",
+			"You can override this behavior by specifying a custom filepath using the --filepath flag or by setting the KUBECONFIG env variable (fallback).\n",
 			"An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.\n",
 			"Note that the format is <value><unit>, e.g. 30d for 30 days and you can't combine units."),
 		Args: args.SingleArg(clusterNameArg, nil),
@@ -170,7 +170,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(disableWritingFlag, false, fmt.Sprintf("Disable the writing of kubeconfig. Set the output format to json or yaml using the --%s flag to display the kubeconfig.", globalflags.OutputFormatFlag))
 	cmd.Flags().BoolP(loginFlag, "l", false, "Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.")
-	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. By default, the kubeconfig is created as 'config' in the .kube folder, in the user's home directory.")
+	cmd.Flags().String(filepathFlag, "", "Path to create the kubeconfig file. Will fall back to KUBECONFIG env variable if not set. In case both aren't set, the kubeconfig is created as file named 'config' in the .kube folder in the user's home directory.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h")
 	cmd.Flags().Bool(overwriteFlag, false, "Overwrite the kubeconfig file.")
 	cmd.MarkFlagsMutuallyExclusive(loginFlag, expirationFlag)
