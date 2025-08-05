@@ -12,7 +12,6 @@ jobs:
     env:
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      GPG_PRIVATE_KEY_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
       AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
@@ -30,6 +29,7 @@ jobs:
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -49,4 +49,6 @@ jobs:
           version: 2
 
       - name: Publish RPM repo
+        env:
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./publish-rpm-repo.sh 
