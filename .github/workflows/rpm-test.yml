@@ -48,6 +48,12 @@ jobs:
         with:
           version: 2
 
+      - name: Test AWS credentials
+        run: |
+          echo "Testing AWS credentials..."
+          aws s3 ls s3://distribution-test/ --endpoint-url https://object.storage.eu01.onstackit.cloud
+          echo "✅ AWS credentials work!"
+
       - name: Publish RPM repo
         env:
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
