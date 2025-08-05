@@ -44,7 +44,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y createrepo-c
 
       - name: Install AWS CLI
-        run: sudo apt-get install -y awscli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
 
       - name: Publish RPM repo
         run: ./publish-rpm-repo.sh 
