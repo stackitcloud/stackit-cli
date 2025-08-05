@@ -12,8 +12,9 @@ jobs:
     env:
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+      # Use test credentials - replace with your actual test bucket credentials
+      AWS_ACCESS_KEY_ID: ${{ secrets.TEST_OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +51,7 @@ jobs:
 
       - name: Test AWS credentials
         run: |
-          echo "Testing AWS credentials..."
+          echo "Testing AWS credentials with test bucket..."
           aws s3 ls s3://distribution-test/ --endpoint-url https://object.storage.eu01.onstackit.cloud
           echo "✅ AWS credentials work!"
 
