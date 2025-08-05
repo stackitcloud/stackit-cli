@@ -9,12 +9,12 @@ set -euo pipefail
 TEMP_KEY_FILE=$(mktemp)
 echo "$GPG_PRIVATE_KEY" > "$TEMP_KEY_FILE"
 
-# Import key into GPG keyring with passphrase
-echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --import "$TEMP_KEY_FILE"
+# Import key into GPG keyring
+gpg --batch --import "$TEMP_KEY_FILE"
 
-# Set environment variable for GoReleaser to use the key file path
+# Set environment variables for GoReleaser
 export GPG_PRIVATE_KEY="$TEMP_KEY_FILE"
-export GPG_PASSPHRASE
+export NFPM_LINUX_PACKAGES_RPM_PASSPHRASE="$GPG_PASSPHRASE"
 
 goreleaser release --clean --config goreleaser.rpm.yaml --snapshot
 
