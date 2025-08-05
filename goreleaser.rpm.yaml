@@ -23,7 +23,7 @@ builds:
 archives: [] # No archives, just RPMs
 
 nfpms:
-  - id: linux-packages
+  - id: linux_packages
     ids:
       - linux-builds
     package_name: stackit
