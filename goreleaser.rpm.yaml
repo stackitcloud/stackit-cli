@@ -36,7 +36,7 @@ nfpms:
       - rpm
     rpm:
       signature:
-        key_file: "{{ .Env.GPG_PRIVATE_KEY }}"
+        key_file: "{{ .Env.GPG_KEY_PATH }}"
     contents:
       - src: LICENSE.md
         dst: LICENSE.md 

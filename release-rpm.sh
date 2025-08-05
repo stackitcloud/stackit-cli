@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-: "${GPG_PRIVATE_KEY:?GPG_PRIVATE_KEY must be set}"
-: "${GPG_PASSPHRASE:?GPG_PASSPHRASE must be set}"
-
 # Create temporary GPG key file
 TEMP_KEY_FILE=$(mktemp)
 echo "$GPG_PRIVATE_KEY" > "$TEMP_KEY_FILE"
@@ -13,7 +10,7 @@ echo "$GPG_PRIVATE_KEY" > "$TEMP_KEY_FILE"
 gpg --batch --import "$TEMP_KEY_FILE"
 
 # Set environment variables for GoReleaser
-export GPG_PRIVATE_KEY="$TEMP_KEY_FILE"
+export GPG_KEY_PATH="$TEMP_KEY_FILE"
 export NFPM_LINUX_PACKAGES_RPM_PASSPHRASE="$GPG_PASSPHRASE"
 
 goreleaser release --clean --config goreleaser.rpm.yaml --snapshot

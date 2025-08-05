@@ -36,7 +36,8 @@ jobs:
 
       - name: Build RPMs
         env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} # TODO: duplicated?
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          NFPM_LINUX_PACKAGES_RPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: ./release-rpm.sh
 
       - name: Install createrepo_c
