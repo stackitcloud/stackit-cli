@@ -132,13 +132,13 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		if cluster.HasStatus() {
 			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
 			table.AddSeparator()
+			if clusterErrs := cluster.Status.GetErrors(); len(clusterErrs) != 0 {
+				handleClusterErrors(clusterErrs, &table)
+			}
 		}
 		if cluster.Kubernetes != nil {
 			table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
 			table.AddSeparator()
-		}
-		if clusterErrs := cluster.Status.GetErrors(); len(clusterErrs) != 0 {
-			handleClusterErrors(clusterErrs, &table)
 		}
 
 		table.AddRow("ACL", acl)
