@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -131,11 +132,15 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		if cluster.HasStatus() {
 			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
 			table.AddSeparator()
+			if clusterErrs := cluster.Status.GetErrors(); len(clusterErrs) != 0 {
+				handleClusterErrors(clusterErrs, &table)
+			}
 		}
 		if cluster.Kubernetes != nil {
 			table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
 			table.AddSeparator()
 		}
+
 		table.AddRow("ACL", acl)
 		err := table.Display(p)
 		if err != nil {
@@ -144,4 +149,18 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 
 		return nil
 	}
+}
+
+func handleClusterErrors(clusterErrs []ske.ClusterError, table *tables.Table) {
+	errs := make([]string, 0, len(clusterErrs))
+	for _, e := range clusterErrs {
+		b := new(strings.Builder)
+		fmt.Fprint(b, e.GetCode())
+		if msg, ok := e.GetMessageOk(); ok {
+			fmt.Fprintf(b, ": %s", msg)
+		}
+		errs = append(errs, b.String())
+	}
+	table.AddRow("ERRORS", strings.Join(errs, "\n"))
+	table.AddSeparator()
 }
