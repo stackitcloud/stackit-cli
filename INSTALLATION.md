@@ -130,23 +130,108 @@ asset_filters=["stackit-cli_", "_linux_amd64.tar.gz"]
 eget stackitcloud/stackit-cli
 ```
 
-#### RPM package via dnf, yum and zypper
+#### RedHat/Fedora (`dnf`)
 
-The STACKIT CLI is available as [RPM Package](https://github.com/stackitcloud/stackit-cli/releases) and can be installed via dnf, yum and zypper package manager.
+The STACKIT CLI can be installed through the `dnf` package manager on modern RedHat-based distributions.
 
-Just download the rpm package from the [release page](https://github.com/stackitcloud/stackit-cli/releases) and run the install command like the following:
+**Supported distributions:**
+- RHEL 9+
+- Fedora 35+
+- AlmaLinux 9+
+- Rocky Linux 9+
+
+> **Note:** RHEL 8 and older derivatives are not supported due to GPG signature compatibility.
+
+##### Before you begin
+
+To install the STACKIT CLI package, you will need to have the `curl` and `gnupg` packages installed:
 
 ```shell
-dnf install stackitcli.rpm
-yum install stackitcli.rpm
-zypper install stackitcli.rpm
+sudo dnf install curl gnupg
 ```
 
-#### Any distribution
+##### Installing
 
-Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one of the installation methods below.
+1. Import the STACKIT public key:
 
-> We are currently working on distributing the CLI on more package managers for Linux.
+```shell
+curl https://packages.stackit.cloud/keys/key.gpg | sudo gpg --dearmor -o /etc/pki/rpm-gpg/RPM-GPG-KEY-stackit
+```
+
+2. Add the STACKIT CLI package repository:
+
+```shell
+sudo tee /etc/yum.repos.d/stackit.repo << EOF
+[stackit]
+name=STACKIT CLI Repository
+baseurl=https://packages.stackit.cloud/rpm/cli/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-stackit
+EOF
+```
+
+3. Update repository information and install the `stackit` package:
+
+```shell
+sudo dnf update
+sudo dnf install stackit
+```
+
+#### OpenSUSE (`zypper`)
+
+The STACKIT CLI can be installed through the `zypper` package manager.
+
+**Supported distributions:**
+- OpenSUSE Leap 15.4+
+- OpenSUSE Tumbleweed
+
+##### Before you begin
+
+To install the STACKIT CLI package, you will need to have the `curl` and `gnupg` packages installed:
+
+```shell
+sudo zypper install curl gnupg
+```
+
+##### Installing
+
+1. Import the STACKIT public key:
+
+```shell
+curl https://packages.stackit.cloud/keys/key.gpg | sudo gpg --dearmor -o /etc/pki/rpm-gpg/RPM-GPG-KEY-stackit
+```
+
+2. Add the STACKIT CLI package repository:
+
+```shell
+sudo zypper addrepo -g -f https://packages.stackit.cloud/rpm/cli/ stackit
+sudo zypper --gpg-auto-import-keys refresh
+```
+
+3. Install the `stackit` package:
+
+```shell
+sudo zypper install stackit
+```
+
+#### Manual RPM Installation
+
+Alternatively, you can download the RPM package from the [release page](https://github.com/stackitcloud/stackit-cli/releases) and install it manually:
+
+```shell
+# Download and install directly
+sudo dnf install https://github.com/stackitcloud/stackit-cli/releases/latest/download/stackit_*_linux_amd64.rpm
+
+# Or download first, then install
+wget https://github.com/stackitcloud/stackit-cli/releases/latest/download/stackit_*_linux_amd64.rpm
+sudo dnf install stackit_*_linux_amd64.rpm
+```
+
+> **Note:** Manual RPM installation requires a modern distribution (RHEL 9+, Fedora 35+, AlmaLinux 9+, Rocky Linux 9+) for GPG signature verification.
+
+
 
 ### Windows
 
