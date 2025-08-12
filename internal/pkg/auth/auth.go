@@ -134,15 +134,22 @@ func getEmailFromToken(token string) (string, error) {
 	return claims.Email, nil
 }
 
-// RefreshAccessToken refreshes the access token if it's expired for the user token flow.
-// It returns the new access token or an error if the refresh fails.
-func RefreshAccessToken(p *print.Printer) (string, error) {
+// GetValidAccessToken returns a valid access token for the current authentication flow.
+// For user token flows, it refreshes the token if necessary.
+// For service account flows, it returns the current access token.
+func GetValidAccessToken(p *print.Printer) (string, error) {
 	flow, err := GetAuthFlow()
 	if err != nil {
 		return "", fmt.Errorf("get authentication flow: %w", err)
 	}
+
+	// For service account flows, just return the current token
+	if flow == AUTH_FLOW_SERVICE_ACCOUNT_TOKEN || flow == AUTH_FLOW_SERVICE_ACCOUNT_KEY {
+		return GetAccessToken()
+	}
+
 	if flow != AUTH_FLOW_USER_TOKEN {
-		return "", fmt.Errorf("token refresh is only supported for user token flow, current flow: %s", flow)
+		return "", fmt.Errorf("unsupported authentication flow: %s", flow)
 	}
 
 	// Load tokens from storage
