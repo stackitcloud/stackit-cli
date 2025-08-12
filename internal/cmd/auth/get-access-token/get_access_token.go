@@ -44,8 +44,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return &cliErr.SessionExpiredError{}
 			}
 
-			// Get a valid access token for the current authentication flow
-			// For user flows: refreshes if necessary, for service account flows: returns current token
 			accessToken, err := auth.GetValidAccessToken(params.Printer)
 			if err != nil {
 				return err
