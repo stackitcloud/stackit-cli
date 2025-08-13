@@ -167,7 +167,8 @@ func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) 
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
 
-		for _, volume := range volumes {
+		for i := range volumes {
+			volume := volumes[i]
 			table.AddRow(
 				utils.PtrString(volume.Id),
 				utils.PtrString(volume.Name),
