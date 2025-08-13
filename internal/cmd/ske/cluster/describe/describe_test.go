@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -231,6 +232,184 @@ func TestOutputResult(t *testing.T) {
 			name: "empty cluster",
 			args: args{
 				cluster: &ske.Cluster{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with single error",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with multiple errors",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+							{
+								Code:    utils.Ptr("SKE_NODE_MACHINE_TYPE_NOT_FOUND"),
+								Message: utils.Ptr("Specified machine type unavailable"),
+							},
+							{
+								Code:    utils.Ptr("SKE_FETCHING_ERRORS_NOT_POSSIBLE"),
+								Message: utils.Ptr("Fetching errors not possible"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with error but no message",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code: utils.Ptr("SKE_FETCHING_ERRORS_NOT_POSSIBLE"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with nil errors",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: nil,
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with empty errors array",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster without status",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSON output format with errors",
+			args: args{
+				outputFormat: print.JSONOutputFormat,
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "YAML output format with errors",
+			args: args{
+				outputFormat: print.YAMLOutputFormat,
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with kubernetes info and errors",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Kubernetes: &ske.Kubernetes{
+						Version: utils.Ptr("1.28.0"),
+					},
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "cluster with extensions and errors",
+			args: args{
+				outputFormat: "",
+				cluster: &ske.Cluster{
+					Name: utils.Ptr("test-cluster"),
+					Extensions: &ske.Extension{
+						Acl: &ske.ACL{
+							AllowedCidrs: &[]string{"10.0.0.0/8"},
+							Enabled:      utils.Ptr(true),
+						},
+					},
+					Status: &ske.ClusterStatus{
+						Errors: &[]ske.ClusterError{
+							{
+								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
+								Message: utils.Ptr("Network configuration not found"),
+							},
+						},
+					},
+				},
 			},
 			wantErr: false,
 		},
