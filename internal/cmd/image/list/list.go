@@ -166,7 +166,8 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "LABELS")
-		for _, item := range items {
+		for i := range items {
+			item := items[i]
 			var (
 				architecture string = "n/a"
 				os           string = "n/a"
