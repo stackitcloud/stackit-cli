@@ -18,6 +18,9 @@ stackit image create [flags]
 
   Create an image with name 'my-new-image' from a qcow2 image read from '/my/qcow2/image' with labels describing its contents
   $ stackit image create --name my-new-image --disk-format=qcow2 --local-file-path=/my/qcow2/image --labels os=linux,distro=alpine,version=3.12
+
+  Create an image with name 'my-new-image' from a raw disk image located in '/my/raw/image' with uefi disabled
+  $ stackit image create --name my-new-image --disk-format=raw --local-file-path=/my/raw/image --uefi=false
 ```
 
 ### Options
