@@ -274,7 +274,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(rescueBusFlag, "", "Sets the device bus when the image is used as a rescue image.")
 	cmd.Flags().String(rescueDeviceFlag, "", "Sets the device when the image is used as a rescue image.")
 	cmd.Flags().Bool(secureBootFlag, false, "Enables Secure Boot.")
-	cmd.Flags().Bool(uefiFlag, true, "Enables UEFI boot.")
+	cmd.Flags().Bool(uefiFlag, false, "Enables UEFI boot.")
 	cmd.Flags().String(videoModelFlag, "", "Sets Graphic device model.")
 	cmd.Flags().Bool(virtioScsiFlag, false, "Enables the use of VirtIO SCSI to provide block device access. By default instances use VirtIO Block.")
 
