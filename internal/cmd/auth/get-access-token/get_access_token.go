@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -61,13 +60,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 				return nil
 			case print.YAMLOutputFormat:
-				details, err := yaml.MarshalWithOptions(map[string]string{
-					"access_token": accessToken,
-				}, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-				if err != nil {
-					return fmt.Errorf("marshal image list: %w", err)
-				}
-				params.Printer.Outputln(string(details))
+				params.Printer.Outputln(accessToken)
 
 				return nil
 			default:
