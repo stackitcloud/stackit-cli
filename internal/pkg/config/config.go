@@ -36,6 +36,7 @@ const (
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
 	SecretsManagerCustomEndpointKey    = "secrets_manager_custom_endpoint"
+	KMSCustomEndpointKey               = "kms_custom_endpoint"
 	ServiceAccountCustomEndpointKey    = "service_account_custom_endpoint"
 	ServiceEnablementCustomEndpointKey = "service_enablement_custom_endpoint"
 	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
@@ -95,6 +96,7 @@ var ConfigKeys = []string{
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
 	SecretsManagerCustomEndpointKey,
+	KMSCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	ServiceEnablementCustomEndpointKey,
 	ServerBackupCustomEndpointKey,
@@ -180,6 +182,7 @@ func setConfigDefaults() {
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
+	viper.SetDefault(KMSCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(ServiceEnablementCustomEndpointKey, "")
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
