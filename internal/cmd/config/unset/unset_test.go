@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		redisCustomEndpointFlag:           true,
 		resourceManagerCustomEndpointFlag: true,
 		secretsManagerCustomEndpointFlag:  true,
+		kmsCustomEndpointFlag:             true,
 		serviceAccountCustomEndpointFlag:  true,
 		serverBackupCustomEndpointFlag:    true,
 		serverOsUpdateCustomEndpointFlag:  true,
@@ -74,6 +75,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		RedisCustomEndpoint:           true,
 		ResourceManagerCustomEndpoint: true,
 		SecretsManagerCustomEndpoint:  true,
+		KMSCustomEndpoint:             true,
 		ServiceAccountCustomEndpoint:  true,
 		ServerBackupCustomEndpoint:    true,
 		ServerOsUpdateCustomEndpoint:  true,
@@ -129,6 +131,7 @@ func TestParseInput(t *testing.T) {
 				model.RedisCustomEndpoint = false
 				model.ResourceManagerCustomEndpoint = false
 				model.SecretsManagerCustomEndpoint = false
+				model.KMSCustomEndpoint = false
 				model.ServiceAccountCustomEndpoint = false
 				model.ServerBackupCustomEndpoint = false
 				model.ServerOsUpdateCustomEndpoint = false
@@ -217,6 +220,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.SecretsManagerCustomEndpoint = false
+			}),
+		},
+		{
+			description: "kms custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[kmsCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.KMSCustomEndpoint = false
 			}),
 		},
 		{
