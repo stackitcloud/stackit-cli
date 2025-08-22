@@ -59,10 +59,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				params.Printer.Outputln(string(details))
 
 				return nil
-			case print.YAMLOutputFormat:
-				params.Printer.Outputln(accessToken)
-
-				return nil
 			default:
 				params.Printer.Outputln(accessToken)
 
