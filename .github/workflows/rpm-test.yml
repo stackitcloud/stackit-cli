@@ -1,0 +1,61 @@
+name: RPM Test
+
+on:
+  push:
+    branches:
+      - testrpmworkflow
+  workflow_dispatch:
+
+jobs:
+  rpm-release:
+    runs-on: ubuntu-latest
+    env:
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      # Use test credentials - replace with your actual test bucket credentials
+      AWS_ACCESS_KEY_ID: ${{ secrets.TEST_OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Install GoReleaser
+        run: go install github.com/goreleaser/goreleaser/v2@latest
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Build RPMs
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          NFPM_LINUX_PACKAGES_RPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./release-rpm.sh
+
+      - name: Install createrepo_c
+        run: sudo apt-get update && sudo apt-get install -y createrepo-c
+
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+
+      - name: Test AWS credentials
+        run: |
+          echo "Testing AWS credentials with test bucket..."
+          aws s3 ls s3://distribution-test/ --endpoint-url https://object.storage.eu01.onstackit.cloud
+          echo "✅ AWS credentials work!"
+
+      - name: Publish RPM repo
+        env:
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+        run: ./publish-rpm-repo.sh 
