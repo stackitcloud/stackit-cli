@@ -25,7 +25,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	keyRingId string
+	KeyRingId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -62,7 +62,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get KMS Keys: %w", err)
 			}
 			if resp.Keys == nil || len(*resp.Keys) == 0 {
-				params.Printer.Info("No Keys found for project %q in region %q under the key ring %q\n", model.ProjectId, model.Region, model.keyRingId)
+				params.Printer.Info("No Keys found for project %q in region %q under the key ring %q\n", model.ProjectId, model.Region, model.KeyRingId)
 				return nil
 			}
 			keys := *resp.Keys
@@ -84,7 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		keyRingId:       keyRingId,
+		KeyRingId:       keyRingId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -100,7 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiListKeysRequest {
-	req := apiClient.ListKeys(ctx, model.ProjectId, model.Region, model.keyRingId)
+	req := apiClient.ListKeys(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
 }
 

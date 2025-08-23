@@ -24,7 +24,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	keyRingId string
+	KeyRingId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -51,10 +51,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			keyRingLabel, err := kmsUtils.GetKeyRingName(ctx, apiClient, model.ProjectId, model.keyRingId, model.Region)
+			keyRingLabel, err := kmsUtils.GetKeyRingName(ctx, apiClient, model.ProjectId, model.KeyRingId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key ring name: %v", err)
-				keyRingLabel = model.keyRingId
+				keyRingLabel = model.KeyRingId
 			}
 
 			if !model.AssumeYes {
@@ -91,7 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		keyRingId:       keyRingId,
+		KeyRingId:       keyRingId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -107,6 +107,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteKeyRingRequest {
-	req := apiClient.DeleteKeyRing(ctx, model.ProjectId, model.Region, model.keyRingId)
+	req := apiClient.DeleteKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
 }

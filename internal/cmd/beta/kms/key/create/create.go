@@ -40,7 +40,7 @@ type inputModel struct {
 	Backend     string // Keep "backend" as a variable, but set the default to "software" (see UI)
 	Description *string
 	Name        *string
-	ImportOnly  *bool // Default false
+	ImportOnly  bool // Default false
 	Purpose     *string
 }
 
@@ -119,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Backend:         flags.FlagWithDefaultToStringValue(p, cmd, backendFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		ImportOnly:      flags.FlagToBoolPointer(p, cmd, importOnlyFlag),
+		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
 		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
 	}
 
@@ -149,7 +149,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
 		Backend:     kms.CreateKeyPayloadGetBackendAttributeType(&model.Backend),
 		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(model.Purpose),
-		ImportOnly:  model.ImportOnly,
+		ImportOnly:  &model.ImportOnly,
 	})
 	return req, nil
 }

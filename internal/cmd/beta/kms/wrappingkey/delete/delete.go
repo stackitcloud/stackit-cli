@@ -26,8 +26,8 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	keyRingId   string
-	wrappingKey string
+	KeyRingId   string
+	WrappingKey string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -54,10 +54,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			wrappingKeyName, err := kmsUtils.GetWrappingKeyName(ctx, apiClient, model.ProjectId, model.Region, model.keyRingId, model.wrappingKey)
+			wrappingKeyName, err := kmsUtils.GetWrappingKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKey)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get wrapping key name: %v", err)
-				wrappingKeyName = model.wrappingKey
+				wrappingKeyName = model.WrappingKey
 			}
 
 			if !model.AssumeYes {
@@ -107,8 +107,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		keyRingId:       keyRingId,
-		wrappingKey:     wrappingKeyId,
+		KeyRingId:       keyRingId,
+		WrappingKey:     wrappingKeyId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -124,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteWrappingKeyRequest {
-	req := apiClient.DeleteWrappingKey(ctx, model.ProjectId, model.Region, model.keyRingId, model.wrappingKey)
+	req := apiClient.DeleteWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKey)
 	return req
 }
 

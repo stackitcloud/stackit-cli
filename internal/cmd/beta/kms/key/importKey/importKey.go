@@ -2,6 +2,7 @@ package importKey
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -105,13 +106,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	// What checks could this need?
-	// I would rather let the creation fail instead of checking all possible algorithms
+	// WrappedKey needs to be base64 encoded
+	var wrappedKey *string = flags.FlagToStringPointer(p, cmd, wrappedKeyFlag)
+	_, err := base64.StdEncoding.DecodeString(*wrappedKey)
+	if err != nil || *wrappedKey == "" {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    wrappedKeyFlag,
+			Details: "The 'wrappedKey' argument is required and needs to be base64 encoded.",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
-		WrappedKey:      flags.FlagToStringPointer(p, cmd, wrappedKeyFlag),
+		WrappedKey:      wrappedKey,
 		WrappingKeyId:   flags.FlagToStringPointer(p, cmd, wrappingKeyIdFlag),
 	}
 
