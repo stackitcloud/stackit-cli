@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script is used to publish new packages to the CLI APT repository
 # Usage: ./publish-apt-packages.sh
