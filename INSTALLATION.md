@@ -67,7 +67,7 @@ $ stackit config profile import -c @default.json --name myProfile
 The STACKIT CLI is available as a [Snap](https://snapcraft.io/stackit), and can be installed via:
 
 ```shell
-sudo snap install stackit --beta --classic
+sudo snap install stackit --classic
 ```
 
 or via the [Snap Store](https://snapcraft.io/snap-store) for desktop.

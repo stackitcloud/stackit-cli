@@ -5,8 +5,7 @@ Manage STACKIT resources using the command line
 ### Synopsis
 
 Manage STACKIT resources using the command line.
-This CLI is in a BETA state.
-More services and functionality will be supported soon. Your feedback is appreciated!
+Your feedback is appreciated!
 
 ```
 stackit [flags]

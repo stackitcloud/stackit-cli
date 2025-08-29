@@ -5,7 +5,7 @@
 <br>
 </div>
 
-# STACKIT CLI (BETA)
+# STACKIT CLI
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/stackitcloud/stackit-cli)](https://goreportcard.com/report/github.com/stackitcloud/stackit-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stackitcloud/stackit-cli) [![GitHub License](https://img.shields.io/github/license/stackitcloud/stackit-cli)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -19,7 +19,6 @@ The STACKIT CLI allows you to manage your STACKIT services and resources as well
 - DNS zones and record-sets
 - Databases such as PostgreSQL Flex, MongoDB Flex and SQLServer Flex
 
-This CLI is in a BETA state. More services and functionality will be supported soon.
 Your feedback is appreciated! 
 Feel free to open [GitHub issues](https://github.com/stackitcloud/stackit-cli) to provide feature requests and bug reports.
 
