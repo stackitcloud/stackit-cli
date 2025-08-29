@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
-
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
@@ -28,6 +26,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/public-ip"
