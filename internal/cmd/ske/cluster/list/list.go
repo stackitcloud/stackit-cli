@@ -85,22 +85,21 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get SKE clusters: %w", err)
 			}
 			clusters := *resp.Items
-			if len(clusters) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No clusters found for project %q\n", projectLabel)
-				return nil
-			}
 
 			// Truncate output
 			if model.Limit != nil && len(clusters) > int(*model.Limit) {
 				clusters = clusters[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, clusters)
+			projectLabel := model.ProjectId
+			if len(clusters) == 0 {
+				projectLabel, err = projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, clusters)
 		},
 	}
 
@@ -148,7 +147,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, clusters []ske.Cluster) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(clusters, "", "  ")
@@ -167,6 +166,11 @@ func outputResult(p *print.Printer, outputFormat string, clusters []ske.Cluster)
 
 		return nil
 	default:
+		if len(clusters) == 0 {
+			p.Outputf("No clusters found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE", "VERSION", "POOLS", "MONITORING")
 		for i := range clusters {
