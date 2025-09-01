@@ -117,8 +117,6 @@ signs:
 homebrew_casks:
   - name: stackit
     directory: Casks
-    conflicts:
-      - formula: stackit
     repository:
       owner: stackitcloud
       name: homebrew-tap
