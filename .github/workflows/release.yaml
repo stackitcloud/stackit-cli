@@ -64,8 +64,16 @@ jobs:
       # aptly version 1.6.0 results in an segmentation fault. Therefore we fall back to version 1.5.0.
       # Since it is not possible to specify a version via brew command a formula was added for aptly 1.5.0
       # (source: https://github.com/Homebrew/homebrew-core/pull/202415/files)
+      # Homebrew 4.6.4 (https://github.com/Homebrew/brew/releases/tag/4.6.4) introduced a breaking change,
+      # where it isn't possible anymore to install a formula from a file.
+      # (source: https://github.com/Homebrew/brew/issues/18371#issuecomment-2365396463)
       - name: Install Aptly version 1.5.0
-        run: brew install aptly.rb
+        run: |
+          brew tap-new stackitcloud/local-tap --no-git
+          FORMULA_DIR="$(brew --repository)/Library/Taps/stackitcloud/homebrew-local-tap/Formula/"
+          mkdir -p "$FORMULA_DIR"
+          cp ./aptly.rb $FORMULA_DIR
+          brew install stackitcloud/local-tap/aptly
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
       - name: Run GoReleaser
