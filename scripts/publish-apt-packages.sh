@@ -4,8 +4,6 @@
 # Usage: ./publish-apt-packages.sh
 set -eo pipefail
 
-ROOT_DIR=$(git rev-parse --show-toplevel)
-
 PACKAGES_BUCKET_URL="https://packages.stackit.cloud"
 PUBLIC_KEY_FILE_PATH="keys/key.gpg"
 APT_REPO_PATH="apt/cli"
