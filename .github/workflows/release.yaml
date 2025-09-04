@@ -82,7 +82,7 @@ jobs:
   
   publish-apt:
     name: Publish APT
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     needs: [goreleaser]
     env:
       # Needed to publish new packages to our S3-hosted APT repo
