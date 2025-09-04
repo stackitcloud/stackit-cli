@@ -27,7 +27,7 @@ aptly mirror create -config "${APTLY_CONFIG_FILE_PATH}" -keyring="${CUSTOM_KEYRI
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
-aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" current
+aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" -max-tries=5 current
 
 # Create a snapshot of the mirror
 printf "\n>>> Creating snapshop from mirror \n"
