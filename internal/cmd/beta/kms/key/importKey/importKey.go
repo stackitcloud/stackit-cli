@@ -42,12 +42,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import a KMS Key Version",
-		Long:  "Improt a new version to the given KMS key.",
+		Long:  "Import a new version to the given KMS key.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Import a new version for the given KMS Key "my-key"`,
-				`$ stakit beta kms key improt --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"`),
+				`$ stakit beta kms key import --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

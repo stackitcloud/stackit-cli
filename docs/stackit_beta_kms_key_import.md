@@ -4,7 +4,7 @@ Import a KMS Key Version
 
 ### Synopsis
 
-Improt a new version to the given KMS key.
+Import a new version to the given KMS key.
 
 ```
 stackit beta kms key import [flags]
@@ -14,7 +14,7 @@ stackit beta kms key import [flags]
 
 ```
   Import a new version for the given KMS Key "my-key"
-  $ stakit beta kms key improt --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
+  $ stakit beta kms key import --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
 ```
 
 ### Options
@@ -40,5 +40,4 @@ stackit beta kms key import [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
-
+- [stackit beta kms key](./stackit_beta_kms_key.md) - Manage KMS Keys
