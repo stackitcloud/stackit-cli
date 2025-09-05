@@ -30,7 +30,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Long:  "Lists all KMS Keyrings.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			// Enforce a specific region for the KMS
 			examples.NewExample(
 				`List all KMS Keyrings`,
 				"$ stackit beta kms keyring list"),
@@ -57,13 +56,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get KMS Keyrings: %w", err)
 			}
-			if resp.KeyRings == nil || len(*resp.KeyRings) == 0 {
-				params.Printer.Info("No Keyrings found for project %q in region %q\n", model.ProjectId, model.Region)
-				return nil
-			}
-			keyRings := *resp.KeyRings
 
-			return outputResult(params.Printer, model.OutputFormat, keyRings)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, *resp.KeyRings)
 		},
 	}
 
@@ -97,7 +91,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, keyRings []kms.KeyRing) error {
+func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []kms.KeyRing) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyRings, "", "  ")
@@ -116,6 +110,11 @@ func outputResult(p *print.Printer, outputFormat string, keyRings []kms.KeyRing)
 
 		return nil
 	default:
+		if len(keyRings) == 0 {
+			p.Outputf("No Keyrings found for project %q\n", projectId)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS")
 

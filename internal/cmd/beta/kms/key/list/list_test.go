@@ -215,6 +215,8 @@ func TestOutputResult(t *testing.T) {
 	tests := []struct {
 		description  string
 		keys         []kms.Key
+		projectId    string
+		keyRingId    string
 		outputFormat string
 		wantErr      bool
 	}{
@@ -223,17 +225,23 @@ func TestOutputResult(t *testing.T) {
 		{
 			description: "default output",
 			keys:        []kms.Key{},
+			projectId:   uuid.NewString(),
+			keyRingId:   uuid.NewString(),
 			wantErr:     false,
 		},
 		{
 			description:  "json output",
 			keys:         []kms.Key{},
+			projectId:    uuid.NewString(),
+			keyRingId:    uuid.NewString(),
 			outputFormat: print.JSONOutputFormat,
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
 			keys:         []kms.Key{},
+			projectId:    uuid.NewString(),
+			keyRingId:    uuid.NewString(),
 			outputFormat: print.YAMLOutputFormat,
 			wantErr:      false,
 		},
@@ -243,7 +251,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.keys)
+			err := outputResult(p, tt.outputFormat, tt.projectId, tt.keyRingId, tt.keys)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

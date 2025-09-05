@@ -64,13 +64,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Key Versions: %w", err)
 			}
-			if resp.Versions == nil || len(*resp.Versions) == 0 {
-				params.Printer.Info("No Key Versions found for project %q in region %q for the key %q\n", model.ProjectId, model.Region, model.KeyId)
-				return nil
-			}
-			keys := *resp.Versions
 
-			return outputResult(params.Printer, model.OutputFormat, keys)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyId, *resp.Versions)
 		},
 	}
 
@@ -106,7 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return apiClient.ListVersions(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, versions []kms.Version) error {
+func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versions []kms.Version) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(versions, "", "  ")
@@ -125,6 +120,10 @@ func outputResult(p *print.Printer, outputFormat string, versions []kms.Version)
 
 		return nil
 	default:
+		if len(versions) == 0 {
+			p.Outputf("No Key Versions found for project %q for the key %q\n", projectId, keyId)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NUMBER", "CREATED AT", "DESTROY DATE", "STATUS")
 

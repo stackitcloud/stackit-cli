@@ -61,13 +61,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get KMS Keys: %w", err)
 			}
-			if resp.Keys == nil || len(*resp.Keys) == 0 {
-				params.Printer.Info("No Keys found for project %q in region %q under the key ring %q\n", model.ProjectId, model.Region, model.KeyRingId)
-				return nil
-			}
-			keys := *resp.Keys
 
-			return outputResult(params.Printer, model.OutputFormat, keys)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyRingId, *resp.Keys)
 		},
 	}
 
@@ -104,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, keys []kms.Key) error {
+func outputResult(p *print.Printer, outputFormat string, projectId, keyRingId string, keys []kms.Key) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keys, "", "  ")
@@ -123,6 +118,10 @@ func outputResult(p *print.Printer, outputFormat string, keys []kms.Key) error {
 
 		return nil
 	default:
+		if len(keys) == 0 {
+			p.Outputf("No Keys found for project %q under the key ring %q\n", projectId, keyRingId)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SCOPE", "ALGORITHM", "DELETION DATE", "STATUS")
 

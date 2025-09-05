@@ -220,6 +220,8 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	tests := []struct {
 		description  string
+		projectId    string
+		keyRingId    string
 		wrappingKeys []kms.WrappingKey
 		outputFormat string
 		projectLabel string
@@ -249,7 +251,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.wrappingKeys)
+			err := outputResult(p, tt.outputFormat, tt.projectId, tt.keyRingId, tt.wrappingKeys)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

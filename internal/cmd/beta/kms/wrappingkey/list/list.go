@@ -62,13 +62,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get KMS Wrapping Keys: %w", err)
 			}
-			if resp.WrappingKeys == nil || len(*resp.WrappingKeys) == 0 {
-				params.Printer.Info("No Wrapping Keys found for project %q in region %q under the key ring %q\n", model.ProjectId, model.Region, model.KeyRingId)
-				return nil
-			}
-			wrappingKeys := *resp.WrappingKeys
 
-			return outputResult(params.Printer, model.OutputFormat, wrappingKeys)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyRingId, *resp.WrappingKeys)
 		},
 	}
 	return cmd
@@ -104,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, wrappingKeys []kms.WrappingKey) error {
+func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, wrappingKeys []kms.WrappingKey) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(wrappingKeys, "", "  ")
@@ -123,6 +118,10 @@ func outputResult(p *print.Printer, outputFormat string, wrappingKeys []kms.Wrap
 
 		return nil
 	default:
+		if len(wrappingKeys) == 0 {
+			p.Outputf("No Wrapping Keys found for project %q under the key ring %q\n", projectId, keyRingId)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SCOPE", "ALGORITHM", "EXPIRES AT", "STATUS")
 
