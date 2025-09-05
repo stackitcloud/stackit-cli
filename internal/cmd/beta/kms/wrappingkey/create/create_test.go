@@ -16,21 +16,21 @@ import (
 )
 
 const (
-	testRegion = "eu01"
-)
-
-type testCtxKey struct{}
-
-var (
-	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient      = &kms.APIClient{}
-	testProjectId   = uuid.NewString()
-	testKeyRingId   = uuid.NewString()
+	testRegion      = "eu01"
 	testAlgorithm   = "some_rsa_2048"
 	testDisplayName = "my-key"
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"
 	testBackend     = "notSoftware"
+)
+
+type testCtxKey struct{}
+
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &kms.APIClient{}
+	testProjectId = uuid.NewString()
+	testKeyRingId = uuid.NewString()
 )
 
 // Flags
