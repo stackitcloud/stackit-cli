@@ -94,7 +94,7 @@ jobs:
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: goreleaser-dist-temp
           path: dist
