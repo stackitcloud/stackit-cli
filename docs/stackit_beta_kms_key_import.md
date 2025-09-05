@@ -40,4 +40,5 @@ stackit beta kms key import [flags]
 
 ### SEE ALSO
 
-- [stackit beta kms key](./stackit_beta_kms_key.md) - Manage KMS Keys
+* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
+
