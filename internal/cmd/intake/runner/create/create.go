@@ -18,6 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -85,9 +86,8 @@ func NewCreateCmd(p *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create Intake Runner: %w", err)
 			}
-			runnerId := *resp.Id
 
-			return outputResult(p.Printer, model.OutputFormat, projectLabel, runnerId, resp)
+			return outputResult(p.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -150,7 +150,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel, runnerId string, resp *intake.IntakeRunnerResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *intake.IntakeRunnerResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
@@ -169,7 +169,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, runnerId string,
 
 		return nil
 	default:
-		p.Outputf("Created Intake Runner for project %q. Runner ID: %s\n", projectLabel, runnerId)
+		p.Outputf("Created Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 		return nil
 	}
 }

@@ -208,6 +208,13 @@ func TestOutputResult(t *testing.T) {
 			args:    args{runners: nil},
 			wantErr: false,
 		},
+		{
+			name: "empty intake runner in slice",
+			args: args{
+				runners: []intake.IntakeRunnerResponse{{}},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewListCmd(&params.CmdParams{Printer: p})

@@ -5,7 +5,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/intake/runner"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -13,19 +12,15 @@ import (
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "intake",
-		Short: "Provides functionality for STACKIT Intake",
-		Long:  "Provides functionality for STACKIT Intake.",
+		Short: "Provides functionality for intake",
+		Long:  "Provides functionality for intake.",
 		Args:  args.NoArgs,
-		Example: examples.Build(
-			examples.NewExample(
-				``,
-				"$ stackit intake"),
-		),
-		Run: utils.CmdHelp,
+		Run:   utils.CmdHelp,
 	}
-
-	// Sub-commands
-	cmd.AddCommand(runner.NewCmd(params))
-
+	addSubcommands(cmd, params)
 	return cmd
+}
+
+func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+	cmd.AddCommand(runner.NewCmd(params))
 }
