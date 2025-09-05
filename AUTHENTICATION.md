@@ -92,7 +92,12 @@ The expected format of the service account key is a **json** with the following 
 > - setting the environment variable `STACKIT_PRIVATE_KEY_PATH`
 > - setting `STACKIT_PRIVATE_KEY_PATH` in the credentials file (see above)
 
-4. The CLI will search for the keys and, if valid, will use them to get access and refresh tokens which will be used to authenticate all the requests.
+4. Alternative, if you want to pass the keys directly without storing a file on disk:
+
+   - setting the environment variable `STACKIT_SERVICE_ACCOUNT_KEY` with the content of the service account key
+   - optional: setting the environment variable `STACKIT_PRIVATE_KEY` with the content of the private key
+
+5. The CLI will search for the keys and, if valid, will use them to get access and refresh tokens which will be used to authenticate all the requests.
 
 ### Token flow
 
