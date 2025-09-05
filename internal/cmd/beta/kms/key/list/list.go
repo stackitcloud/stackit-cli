@@ -99,7 +99,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, projectId, keyRingId string, keys []kms.Key) error {
+func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, keys []kms.Key) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keys, "", "  ")
