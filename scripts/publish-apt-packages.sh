@@ -4,8 +4,6 @@
 # Usage: ./publish-apt-packages.sh
 set -eo pipefail
 
-ROOT_DIR=$(git rev-parse --show-toplevel)
-
 PACKAGES_BUCKET_URL="https://packages.stackit.cloud"
 PUBLIC_KEY_FILE_PATH="keys/key.gpg"
 APT_REPO_PATH="apt/cli"
@@ -27,7 +25,7 @@ aptly mirror create -config "${APTLY_CONFIG_FILE_PATH}" -keyring="${CUSTOM_KEYRI
 
 # Update the mirror to the latest state
 printf "\n>>> Updating mirror \n"
-aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" current
+aptly mirror update -keyring="${CUSTOM_KEYRING_FILE}" -max-tries=5 current
 
 # Create a snapshot of the mirror
 printf "\n>>> Creating snapshop from mirror \n"

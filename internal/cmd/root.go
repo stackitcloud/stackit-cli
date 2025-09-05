@@ -54,7 +54,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "stackit",
 		Short:             "Manage STACKIT resources using the command line",
-		Long:              "Manage STACKIT resources using the command line.\nThis CLI is in a BETA state.\nMore services and functionality will be supported soon. Your feedback is appreciated!",
+		Long:              "Manage STACKIT resources using the command line.\nYour feedback is appreciated!",
 		Args:              args.NoArgs,
 		SilenceErrors:     true, // Error is beautified in a custom way before being printed
 		SilenceUsage:      true,
@@ -97,7 +97,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if flags.FlagToBoolValue(p, cmd, "version") {
-				p.Outputf("STACKIT CLI (beta)\n")
+				p.Outputf("STACKIT CLI\n")
 
 				parsedDate, err := time.Parse(time.RFC3339, date)
 				if err != nil {

@@ -21,26 +21,26 @@ jobs:
     runs-on: macOS-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
-      # Needed to publish new packages to our S3-hosted APT repo
-      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
+      
       - name: Install go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
           cache: true
+      
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      
       - name: Set up keychain
         run: |
           echo -n $SIGNING_CERTIFICATE_BASE64 | base64 -d -o ./ApplicationID.p12
@@ -61,10 +61,9 @@ jobs:
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           SIGNING_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_ID_CERT }}
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
-      - name: Install Aptly
-        run: brew install aptly
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
+      
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -72,6 +71,44 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+
+      # artifacts need to be passed to the "publish-apt" job somehow
+      - name: Upload artifacts to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreleaser-dist-temp
+          path: dist
+          retention-days: 1
+  
+  publish-apt:
+    name: Publish APT
+    runs-on: macOS-latest
+    needs: [goreleaser]
+    env:
+      # Needed to publish new packages to our S3-hosted APT repo
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # use the artifacts from the "goreleaser" job
+      - name: Download artifacts from workflow
+        uses: actions/download-artifact@v5
+        with:
+          name: goreleaser-dist-temp
+          path: dist
+      
+      - name: Install Aptly
+        run: brew install aptly
+      
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      
       - name: Publish packages to APT repo
         if: contains(github.ref_name, '-') == false
         env:
