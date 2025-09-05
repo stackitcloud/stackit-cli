@@ -15,18 +15,18 @@ import (
 )
 
 const (
-	testRegion = "eu02"
+	testRegion        = "eu02"
+	testVersionNumber = int64(1)
 )
 
 type testCtxKey struct{}
 
 var (
-	testCtx           = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient        = &kms.APIClient{}
-	testProjectId     = uuid.NewString()
-	testKeyRingId     = uuid.NewString()
-	testKeyId         = uuid.NewString()
-	testVersionNumber = int64(1)
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &kms.APIClient{}
+	testProjectId = uuid.NewString()
+	testKeyRingId = uuid.NewString()
+	testKeyId     = uuid.NewString()
 )
 
 // Flags
