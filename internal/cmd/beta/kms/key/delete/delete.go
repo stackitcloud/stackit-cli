@@ -2,8 +2,11 @@ package delete
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -82,8 +85,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			params.Printer.Info("Deletion of KMS Key %q scheduled successfully for the deletion date: %q\n", keyName, deletionDate)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, model.KeyId, keyName, deletionDate)
 		},
 	}
 
@@ -137,4 +139,50 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the actual Key")
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)
+}
+
+func outputResult(p *print.Printer, outputFormat, keyId, keyName string, deletionDate time.Time) error {
+	switch outputFormat {
+	case print.JSONOutputFormat:
+		details := struct {
+			KeyId        string    `json:"keyId"`
+			KeyName      string    `json:"keyName"`
+			Status       string    `json:"status"`
+			DeletionDate time.Time `json:"deletionDate"`
+		}{
+			KeyId:        keyId,
+			KeyName:      keyName,
+			Status:       "Deletion Scheduled",
+			DeletionDate: deletionDate,
+		}
+		b, err := json.MarshalIndent(details, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal output to JSON: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	case print.YAMLOutputFormat:
+		details := struct {
+			KeyId        string    `yaml:"keyId"`
+			KeyName      string    `yaml:"keyName"`
+			Status       string    `yaml:"status"`
+			DeletionDate time.Time `yaml:"deletionDate"`
+		}{
+			KeyId:        keyId,
+			KeyName:      keyName,
+			Status:       "Deletion Scheduled",
+			DeletionDate: deletionDate,
+		}
+		b, err := yaml.Marshal(details)
+		if err != nil {
+			return fmt.Errorf("marshal output to YAML: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	default:
+		p.Outputf("Deletion of KMS Key %q scheduled successfully for the deletion date: %q\n", keyName, deletionDate)
+		return nil
+	}
 }

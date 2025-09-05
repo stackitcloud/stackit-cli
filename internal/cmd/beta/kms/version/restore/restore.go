@@ -69,7 +69,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("restore Key Version: %w", err)
 			}
 
-			params.Printer.Info("Restored version %d of Key %q\n", *model.VersionNumber, keyName)
+			params.Printer.Outputf("Restored version %d of Key %q\n", *model.VersionNumber, keyName)
 			return nil
 		},
 	}
