@@ -74,7 +74,7 @@ func NewListCmd(p *params.CmdParams) *cobra.Command {
 					p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 					projectLabel = model.ProjectId
 				}
-				p.Printer.Info("No Intake Runners found for project %q\n", projectLabel)
+				p.Printer.Outputf("No Intake Runners found for project %q\n", projectLabel)
 				return nil
 			}
 
