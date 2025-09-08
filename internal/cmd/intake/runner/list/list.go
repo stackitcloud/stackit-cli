@@ -68,22 +68,21 @@ func NewListCmd(p *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("list Intake Runners: %w", err)
 			}
 			runners := resp.GetIntakeRunners()
-			if len(runners) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
-				if err != nil {
-					p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				p.Printer.Outputf("No Intake Runners found for project %q\n", projectLabel)
-				return nil
-			}
 
 			// Truncate output
 			if model.Limit != nil && len(runners) > int(*model.Limit) {
 				runners = runners[:*model.Limit]
 			}
 
-			return outputResult(p.Printer, model.OutputFormat, runners)
+			projectLabel := model.ProjectId
+			if len(runners) == 0 {
+				projectLabel, err = projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
+				if err != nil {
+					p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				}
+			}
+
+			return outputResult(p.Printer, model.OutputFormat, projectLabel, runners)
 		},
 	}
 	configureFlags(cmd)
@@ -137,7 +136,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 }
 
 // outputResult formats the API response and prints it to the console
-func outputResult(p *print.Printer, outputFormat string, runners []intake.IntakeRunnerResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, runners []intake.IntakeRunnerResponse) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(runners, "", "  ")
@@ -156,6 +155,11 @@ func outputResult(p *print.Printer, outputFormat string, runners []intake.Intake
 		return nil
 
 	default:
+		if len(runners) == 0 {
+			p.Outputf("No intake runners found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 
 		table.SetHeader("ID", "NAME")
