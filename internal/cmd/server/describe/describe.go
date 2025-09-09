@@ -18,6 +18,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	sdkutils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -118,7 +119,11 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		converted, err := sdkutils.ConvertForYAML(server)
+		if err != nil {
+			return fmt.Errorf("convert server for YAML: %w", err)
+		}
+		details, err := yaml.MarshalWithOptions(converted, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}

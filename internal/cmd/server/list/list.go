@@ -19,6 +19,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	sdkutils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -158,7 +159,17 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(servers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		// Convert each server to map with base64 encoded byte arrays
+		convertedServers := make([]map[string]interface{}, len(servers))
+		for i, server := range servers {
+			converted, err := sdkutils.ConvertForYAML(server)
+			if err != nil {
+				return fmt.Errorf("convert server for YAML: %w", err)
+			}
+			convertedServers[i] = converted
+		}
+
+		details, err := yaml.MarshalWithOptions(convertedServers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}
