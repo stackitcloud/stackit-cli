@@ -119,7 +119,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		return nil
 	case print.YAMLOutputFormat:
-		converted, err := sdkutils.ConvertForYAML(server)
+		converted, err := sdkutils.ConvertByteArraysToBase64(server)
 		if err != nil {
 			return fmt.Errorf("convert server for YAML: %w", err)
 		}

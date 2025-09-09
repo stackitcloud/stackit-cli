@@ -162,7 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 		// Convert each server to map with base64 encoded byte arrays
 		convertedServers := make([]map[string]interface{}, len(servers))
 		for i, server := range servers {
-			converted, err := sdkutils.ConvertForYAML(server)
+			converted, err := sdkutils.ConvertByteArraysToBase64(server)
 			if err != nil {
 				return fmt.Errorf("convert server for YAML: %w", err)
 			}
