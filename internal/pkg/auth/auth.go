@@ -202,7 +202,7 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	// Refresh the tokens
 	err = refreshTokens(utf)
 	if err != nil {
-		return "", fmt.Errorf("refresh access token: %w", err)
+		return "", fmt.Errorf("access token expired and refresh token is invalid. Please run 'stackit auth login' to re-authenticate: %w", err)
 	}
 
 	// Return the new access token
