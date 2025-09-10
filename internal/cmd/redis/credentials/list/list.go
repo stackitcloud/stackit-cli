@@ -69,21 +69,21 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("list Redis credentials: %w", err)
 			}
 			credentials := *resp.CredentialsList
-			if len(credentials) == 0 {
-				instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = model.InstanceId
-				}
-				params.Printer.Info("No credentials found for instance %q\n", instanceLabel)
-				return nil
-			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, credentials)
+
+			instanceLabel := model.InstanceId
+			if len(credentials) == 0 {
+				instanceLabel, err = redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -135,7 +135,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []redis.CredentialsListItem) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, credentials []redis.CredentialsListItem) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(credentials, "", "  ")
@@ -154,6 +154,11 @@ func outputResult(p *print.Printer, outputFormat string, credentials []redis.Cre
 
 		return nil
 	default:
+		if len(credentials) == 0 {
+			p.Outputf("No credentials found for instance %q\n", instanceLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID")
 		for i := range credentials {
