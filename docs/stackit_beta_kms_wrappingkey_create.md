@@ -24,7 +24,6 @@ stackit beta kms wrappingkey create [flags]
 
 ```
       --algorithm string     En-/Decryption algorithm
-      --backend string       The backend that is responsible for maintaining this wrapping key (default "software")
       --description string   Optinal description of the Wrapping Key
   -h, --help                 Help for "stackit beta kms wrappingkey create"
       --key-ring string      ID of the KMS Key Ring

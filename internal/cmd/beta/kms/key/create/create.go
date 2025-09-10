@@ -25,7 +25,6 @@ const (
 	keyRingIdFlag = "key-ring"
 
 	algorithmFlag   = "algorithm"
-	backendFlag     = "backend"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	importOnlyFlag  = "import-only"
@@ -37,7 +36,6 @@ type inputModel struct {
 	KeyRingId string
 
 	Algorithm   *string
-	Backend     string // Keep "backend" as a variable, but set the default to "software" (see UI)
 	Description *string
 	Name        *string
 	ImportOnly  bool // Default false
@@ -116,7 +114,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 		Algorithm:       flags.FlagToStringPointer(p, cmd, algorithmFlag),
-		Backend:         flags.FlagWithDefaultToStringValue(p, cmd, backendFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
@@ -147,7 +144,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 		DisplayName: model.Name,
 		Description: model.Description,
 		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
-		Backend:     kms.CreateKeyPayloadGetBackendAttributeType(&model.Backend),
 		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(model.Purpose),
 		ImportOnly:  &model.ImportOnly,
 	})
@@ -185,7 +181,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
 	cmd.Flags().String(algorithmFlag, "", "En-/Decryption / signing algorithm")
-	cmd.Flags().String(backendFlag, "software", "The backend that is responsible for maintaining this key")
 	cmd.Flags().String(displayNameFlag, "", "The display name to distinguish multiple keys")
 	cmd.Flags().String(descriptionFlag, "", "Optinal description of the Key")
 	cmd.Flags().Bool(importOnlyFlag, false, "States whether versions can be created or only imported")

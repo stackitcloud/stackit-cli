@@ -22,7 +22,6 @@ const (
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"
 	testImportOnly  = "true"
-	testBackend     = "notSoftware"
 )
 
 type testCtxKey struct{}
@@ -45,7 +44,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		purposeFlag:               testPurpose,
 		descriptionFlag:           testDescription,
 		importOnlyFlag:            testImportOnly,
-		backendFlag:               testBackend,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -67,7 +65,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Purpose:     utils.Ptr(testPurpose),
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  true, // Watch out: ImportOnly is not testImportOnly!
-		Backend:     testBackend,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -84,7 +81,6 @@ func fixtureRequest(mods ...func(request *kms.ApiCreateKeyRequest)) kms.ApiCreat
 		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  utils.Ptr(true),
-		Backend:     kms.CreateKeyPayloadGetBackendAttributeType(utils.Ptr(testBackend)),
 	})
 
 	for _, mod := range mods {
@@ -111,13 +107,11 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, descriptionFlag)
 				delete(flagValues, importOnlyFlag)
-				delete(flagValues, backendFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Description = nil
 				model.ImportOnly = false
-				model.Backend = "software"
 			}),
 		},
 		{
@@ -254,7 +248,6 @@ func TestBuildRequest(t *testing.T) {
 				Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 				Description: nil,
 				ImportOnly:  utils.Ptr(false),
-				Backend:     kms.CreateKeyPayloadGetBackendAttributeType(utils.Ptr(testBackend)),
 			}),
 		},
 	}

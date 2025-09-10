@@ -21,7 +21,6 @@ const (
 	testDisplayName = "my-key"
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"
-	testBackend     = "notSoftware"
 )
 
 type testCtxKey struct{}
@@ -43,7 +42,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		displayNameFlag:           testDisplayName,
 		purposeFlag:               testPurpose,
 		descriptionFlag:           testDescription,
-		backendFlag:               testBackend,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -64,7 +62,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:        utils.Ptr(testDisplayName),
 		Purpose:     utils.Ptr(testPurpose),
 		Description: utils.Ptr(testDescription),
-		Backend:     testBackend,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -80,7 +77,6 @@ func fixtureRequest(mods ...func(request *kms.ApiCreateWrappingKeyRequest)) kms.
 		DisplayName: utils.Ptr(testDisplayName),
 		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 		Description: utils.Ptr(testDescription),
-		Backend:     kms.CreateWrappingKeyPayloadGetBackendAttributeType(utils.Ptr(testBackend)),
 	})
 
 	for _, mod := range mods {
@@ -106,12 +102,10 @@ func TestParseInput(t *testing.T) {
 			description: "optional flags omitted",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, descriptionFlag)
-				delete(flagValues, backendFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Description = nil
-				model.Backend = "software"
 			}),
 		},
 		{
@@ -245,7 +239,6 @@ func TestBuildRequest(t *testing.T) {
 				Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
 				DisplayName: utils.Ptr(testDisplayName),
 				Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
-				Backend:     kms.CreateWrappingKeyPayloadGetBackendAttributeType(utils.Ptr(testBackend)),
 			}),
 		},
 	}

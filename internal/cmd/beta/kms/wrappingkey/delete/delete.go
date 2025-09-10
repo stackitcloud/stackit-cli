@@ -76,8 +76,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Wait for async operation not relevant. Wrapping key deletion is synchronous
-			// https://pkg.go.dev/github.com/stackitcloud/stackit-sdk-go/services/kms@v0.5.1/wait
-
 			params.Printer.Info("Deleted wrapping key %q\n", wrappingKeyName)
 			return nil
 		},

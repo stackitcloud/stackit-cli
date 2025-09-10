@@ -24,7 +24,6 @@ stackit beta kms key create [flags]
 
 ```
       --algorithm string     En-/Decryption / signing algorithm
-      --backend string       The backend that is responsible for maintaining this key (default "software")
       --description string   Optinal description of the Key
   -h, --help                 Help for "stackit beta kms key create"
       --import-only          States whether versions can be created or only imported

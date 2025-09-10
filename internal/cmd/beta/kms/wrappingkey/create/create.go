@@ -27,7 +27,6 @@ const (
 	keyRingIdFlag = "key-ring"
 
 	algorithmFlag   = "algorithm"
-	backendFlag     = "backend"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	purposeFlag     = "purpose"
@@ -38,7 +37,6 @@ type inputModel struct {
 	KeyRingId string
 
 	Algorithm   *string
-	Backend     string // Keep "backend" as a variable, but set the default to "software" (see UI)
 	Description *string
 	Name        *string
 	Purpose     *string
@@ -125,7 +123,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 		Algorithm:       flags.FlagToStringPointer(p, cmd, algorithmFlag),
-		Backend:         flags.FlagWithDefaultToStringValue(p, cmd, backendFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
@@ -157,7 +154,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsWrappingK
 		Description: model.Description,
 		Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
 		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(model.Purpose),
-		Backend:     kms.CreateWrappingKeyPayloadGetBackendAttributeType(&model.Backend),
 	})
 	return req, nil
 }
@@ -193,7 +189,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
 	cmd.Flags().String(algorithmFlag, "", "En-/Decryption algorithm")
-	cmd.Flags().String(backendFlag, "software", "The backend that is responsible for maintaining this wrapping key")
 	cmd.Flags().String(displayNameFlag, "", "The display name to distinguish multiple wrapping keys")
 	cmd.Flags().String(descriptionFlag, "", "Optinal description of the Wrapping Key")
 	cmd.Flags().String(purposeFlag, "", "Purpose of the Wrapping Key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' ")
