@@ -162,8 +162,8 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 		return nil
 	default:
 		expireDate := "Never"
-		if resp.Expires != nil && *resp.Expires != "" {
-			expireDate = *resp.Expires
+		if resp.Expires != nil && resp.Expires.IsSet() && *resp.Expires.Get() != "" {
+			expireDate = *resp.Expires.Get()
 		}
 
 		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, utils.PtrString(resp.KeyId))

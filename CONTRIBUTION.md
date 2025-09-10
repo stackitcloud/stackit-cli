@@ -59,6 +59,10 @@ Please remember to always add unit tests for `parseInput`, `buildRequest` (in `b
 
 If the new command `bar` is the first command in the CLI using a STACKIT service `foo`, please refer to [Onboarding a new STACKIT service](./CONTRIBUTION.md/#onboarding-a-new-stackit-service).
 
+You may also have to register the `bar` command as a new sub-command:
+
+https://github.com/stackitcloud/stackit-cli/blob/a5438f4cac3a794cb95d04891a83252aa9ae1f1e/internal/cmd/root.go#L162-L195
+
 #### Outputs, prints and debug logs
 
 The CLI has 4 different verbosity levels:

@@ -67,22 +67,21 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get Redis instances: %w", err)
 			}
 			instances := *resp.Instances
-			if len(instances) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No instances found for project %q\n", projectLabel)
-				return nil
-			}
 
 			// Truncate output
 			if model.Limit != nil && len(instances) > int(*model.Limit) {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, instances)
+			projectLabel := model.ProjectId
+			if len(instances) == 0 {
+				projectLabel, err = projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
 		},
 	}
 
@@ -130,7 +129,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instances []redis.Instance) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []redis.Instance) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(instances, "", "  ")
@@ -149,6 +148,11 @@ func outputResult(p *print.Printer, outputFormat string, instances []redis.Insta
 
 		return nil
 	default:
+		if len(instances) == 0 {
+			p.Outputf("No instances found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
