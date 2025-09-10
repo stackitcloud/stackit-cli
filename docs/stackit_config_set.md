@@ -36,6 +36,7 @@ stackit config set [flags]
       --iaas-custom-endpoint string                                IaaS API base URL, used in calls to this API
       --identity-provider-custom-client-id string                  Identity Provider client ID, used for user authentication
       --identity-provider-custom-well-known-configuration string   Identity Provider well-known OpenID configuration URL, used for user authentication
+      --intake-custom-endpoint string                              Intake API base URL, used in calls to this API
       --load-balancer-custom-endpoint string                       Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string                               LogMe API base URL, used in calls to this API
       --mariadb-custom-endpoint string                             MariaDB API base URL, used in calls to this API

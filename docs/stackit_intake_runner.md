@@ -29,7 +29,7 @@ stackit intake runner [flags]
 
 ### SEE ALSO
 
-* [stackit intake](./stackit_intake.md)	 - Provides functionality for STACKIT Intake
+* [stackit intake](./stackit_intake.md)	 - Provides functionality for intake
 * [stackit intake runner create](./stackit_intake_runner_create.md)	 - Creates a new Intake Runner
 * [stackit intake runner delete](./stackit_intake_runner_delete.md)	 - Deletes an Intake Runner
 * [stackit intake runner describe](./stackit_intake_runner_describe.md)	 - Shows details of an Intake Runner
