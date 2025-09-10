@@ -48,25 +48,22 @@ builds:
         - cmd: spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
           output: true
         # Completion files
-        - cmd: mkdir -p dist/macos-builds_{{.Target}}/completions
-        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion zsh > ./dist/macos-builds_{{.Target}}/completions/stackit.zsh'
-        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion bash > ./dist/macos-builds_{{.Target}}/completions/stackit.bash'
-        - cmd: sh -c './dist/macos-builds_{{.Target}}/{{.Name}} completion fish > ./dist/macos-builds_{{.Target}}/completions/stackit.fish'
+        - cmd: mkdir -p dist/completions
+        - cmd: sh -c 'go run main.go completion zsh > ./dist/completions/stackit.zsh'
+        - cmd: sh -c 'go run main.go completion bash > ./dist/completions/stackit.bash'
+        - cmd: sh -c 'go run main.go completion fish > ./dist/completions/stackit.fish'
 
 archives:
+  - id: windows-archives
+    ids:
+      - windows-builds
+    formats: [ 'zip' ]
   - ids:
       - linux-builds
-      - windows-builds
-    formats: [ 'tar.gz' ]
-    format_overrides:
-      - goos: windows
-        formats: [ 'zip' ]
-  - id: macos-archives
-    ids:
       - macos-builds
     formats: [ 'tar.gz' ]
     files:
-      - src: ./dist/macos-builds_{{.Target}}/completions/*
+      - src: ./dist/completions/*
         dst: completions
       - LICENSE.md
       - README.md
