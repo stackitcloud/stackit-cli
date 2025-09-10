@@ -1,20 +1,13 @@
 ## stackit intake
 
-Provides functionality for STACKIT Intake
+Provides functionality for intake
 
 ### Synopsis
 
-Provides functionality for STACKIT Intake.
+Provides functionality for intake.
 
 ```
 stackit intake [flags]
-```
-
-### Examples
-
-```
-  
-  $ stackit intake
 ```
 
 ### Options
