@@ -31,15 +31,15 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("list %s", keyRingIdArg),
-		Short: "Lists all KMS Keys",
-		Long:  "Lists all KMS Keys inside a key ring.",
+		Short: "List all KMS keys",
+		Long:  "List all KMS keys inside a key ring.",
 		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`List all KMS Keys for the key ring "xxx"`,
+				`List all KMS keys for the key ring "xxx"`,
 				"$ stackit beta kms key list xxx"),
 			examples.NewExample(
-				`List all KMS Keys in JSON format`,
+				`List all KMS keys in JSON format`,
 				"$ stackit beta kms key list xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -119,7 +119,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 		return nil
 	default:
 		if len(keys) == 0 {
-			p.Outputf("No Keys found for project %q under the key ring %q\n", projectId, keyRingId)
+			p.Outputf("No keys found for project %q under the key ring %q\n", projectId, keyRingId)
 			return nil
 		}
 		table := tables.NewTable()
@@ -132,7 +132,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 				utils.PtrString(key.DisplayName),
 				utils.PtrString(key.Purpose),
 				utils.PtrString(key.Algorithm),
-				// utils.PtrString(wrappingKeys.CreatedAt),
 				utils.PtrString(key.DeletionDate),
 				utils.PtrString(key.State),
 			)

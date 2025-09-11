@@ -26,15 +26,15 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all KMS Keyrings",
-		Long:  "Lists all KMS Keyrings.",
+		Short: "Lists all KMS key rings",
+		Long:  "Lists all KMS key rings.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all KMS Keyrings`,
+				`List all KMS key rings`,
 				"$ stackit beta kms keyring list"),
 			examples.NewExample(
-				`List all KMS Keyrings in JSON format`,
+				`List all KMS key rings in JSON format`,
 				"$ stackit beta kms keyring list --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -54,7 +54,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get KMS Keyrings: %w", err)
+				return fmt.Errorf("get KMS key rings: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, *resp.KeyRings)
@@ -96,7 +96,7 @@ func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []k
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyRings, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Keyrings list: %w", err)
+			return fmt.Errorf("marshal KMS key rings list: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -104,14 +104,14 @@ func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []k
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(keyRings, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Keyrings list: %w", err)
+			return fmt.Errorf("marshal KMS key rings list: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		if len(keyRings) == 0 {
-			p.Outputf("No Keyrings found for project %q\n", projectId)
+			p.Outputf("No key rings found for project %q\n", projectId)
 			return nil
 		}
 

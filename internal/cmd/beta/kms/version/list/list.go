@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all Key Versions",
-		Long:  "Lists all versions of a given key.",
+		Short: "List all key versions",
+		Long:  "List all versions of a given key.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -62,7 +62,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get Key Versions: %w", err)
+				return fmt.Errorf("get key version: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyId, *resp.Versions)
@@ -106,7 +106,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(versions, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal Key Versions list: %w", err)
+			return fmt.Errorf("marshal key versions list: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -114,14 +114,14 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(versions, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal Key Versions list: %w", err)
+			return fmt.Errorf("marshal key versions list: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		if len(versions) == 0 {
-			p.Outputf("No Key Versions found for project %q for the key %q\n", projectId, keyId)
+			p.Outputf("No key versions found for project %q for the key %q\n", projectId, keyId)
 			return nil
 		}
 		table := tables.NewTable()
@@ -148,8 +148,8 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the Key")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
+	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the key")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)

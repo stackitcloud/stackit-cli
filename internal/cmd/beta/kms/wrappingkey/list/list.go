@@ -31,16 +31,15 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("list %s", keyRingIdArg),
-		Short: "Lists all KMS Wrapping Keys",
-		Long:  "Lists all KMS Wrapping Keys inside a key ring.",
+		Short: "Lists all KMS wrapping keys",
+		Long:  "Lists all KMS wrapping keys inside a key ring.",
 		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			// Enforce a specific region for the KMS
 			examples.NewExample(
-				`List all KMS Wrapping Keys for the key ring "xxx"`,
+				`List all KMS wrapping keys for the key ring "xxx"`,
 				"$ stackit beta kms wrappingkeys list xxx"),
 			examples.NewExample(
-				`List all KMS Wrapping Keys in JSON format`,
+				`List all KMS wrapping keys in JSON format`,
 				"$ stackit beta kms wrappingkeys list xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -60,7 +59,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get KMS Wrapping Keys: %w", err)
+				return fmt.Errorf("get KMS wrapping keys: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyRingId, *resp.WrappingKeys)
@@ -104,7 +103,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, w
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(wrappingKeys, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Wrapping Keys list: %w", err)
+			return fmt.Errorf("marshal KMS wrapping keys list: %w", err)
 		}
 		p.Outputln(string(details))
 
@@ -112,14 +111,14 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, w
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(wrappingKeys, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Wrapping Keys list: %w", err)
+			return fmt.Errorf("marshal KMS wrapping keys list: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		if len(wrappingKeys) == 0 {
-			p.Outputf("No Wrapping Keys found for project %q under the key ring %q\n", projectId, keyRingId)
+			p.Outputf("No wrapping keys found for project %q under the key ring %q\n", projectId, keyRingId)
 			return nil
 		}
 		table := tables.NewTable()

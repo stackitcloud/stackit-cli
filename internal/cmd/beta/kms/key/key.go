@@ -18,7 +18,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "key",
 		Short: "Manage KMS Keys",
-		Long:  "Provides CRUD functionality for Key operations inside the KMS",
+		Long:  "Provides functionality for key operations inside the KMS",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
