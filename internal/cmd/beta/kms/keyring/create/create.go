@@ -37,15 +37,15 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a KMS Key Ring",
-		Long:  "Creates a KMS Key Ring.",
+		Short: "Creates a KMS key ring",
+		Long:  "Creates a KMS key ring.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a KMS key ring`,
 				"$ stakit beta kms keyring create --name my-keyring"),
 			examples.NewExample(
-				`Create a KMS Key ring with a description`,
+				`Create a KMS key ring with a description`,
 				"$ stakit beta kms keyring create --name my-keyring --description my-description"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -68,7 +68,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a KMS Key Ring for project %q?", projectLabel)
+				prompt := fmt.Sprintf("Are you sure you want to create a KMS key ring for project %q?", projectLabel)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -80,8 +80,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			keyRing, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create KMS Key Ring: %w", err)
+				return fmt.Errorf("create KMS key ring: %w", err)
 			}
+
+			// Prevent potential nil pointer dereference
+			if keyRing == nil || keyRing.Id == nil {
+				return fmt.Errorf("API call succeeded but returned an invalid response (missing key ring ID)")
+			}
+
 			keyRingId := *keyRing.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -90,7 +96,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Start("Creating instance")
 				_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for KMS Key Ring creation: %w", err)
+					return fmt.Errorf("wait for KMS key ring creation: %w", err)
 				}
 				s.Stop()
 			}
@@ -159,7 +165,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Keyring: %w", err)
+			return fmt.Errorf("marshal KMS key ring: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -167,7 +173,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Keyring: %w", err)
+			return fmt.Errorf("marshal KMS key ring: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -179,8 +185,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(keyRingNameFlag, "", "Name of the KMS Key Ring")
-	cmd.Flags().String(descriptionFlag, "", "Optinal description of the Key Ring")
+	cmd.Flags().String(keyRingNameFlag, "", "Name of the KMS key ring")
+	cmd.Flags().String(descriptionFlag, "", "Optional description of the key ring")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingNameFlag)
 	cobra.CheckErr(err)
