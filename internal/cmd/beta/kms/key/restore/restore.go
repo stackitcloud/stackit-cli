@@ -2,6 +2,7 @@ package restore
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -13,9 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
+	"gopkg.in/yaml.v2"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 )
 
@@ -33,12 +34,12 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restore",
-		Short: "Resotre a Key",
+		Short: "Resotre a key",
 		Long:  "Restores the given key from being deleted.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Restore a KMS Key "my-key-id" inside the Key Ring "my-key-ring-id" that was scheduled for deletion.`,
+				`Restore a KMS key "my-key-id" inside the key ring "my-key-ring-id" that was scheduled for deletion.`,
 				`$ stackit beta kms keyring restore --key-ring "my-key-ring-id" --key "my-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -72,11 +73,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("restore KMS Key: %w", err)
+				return fmt.Errorf("restore KMS key: %w", err)
 			}
 
-			params.Printer.Info("Restored Key %q\n", keyName)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, model.KeyId, keyName)
 		},
 	}
 
@@ -90,22 +90,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	keyRingId := flags.FlagToStringValue(p, cmd, keyRingIdFlag)
-	keyId := flags.FlagToStringValue(p, cmd, keyIdFlag)
-
-	// Validate the uuid format of the IDs
-	errKeyRing := utils.ValidateUUID(keyRingId)
-	errKey := utils.ValidateUUID(keyId)
-	if errKeyRing != nil || errKey != nil {
-		return nil, &errors.DSAInputPlanError{
-			Cmd: cmd,
-		}
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeyRingId:       keyRingId,
-		KeyId:           keyId,
+		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
+		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -130,4 +118,46 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the actual Key")
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)
+}
+
+func outputResult(p *print.Printer, outputFormat, keyId, keyName string) error {
+	switch outputFormat {
+	case print.JSONOutputFormat:
+		details := struct {
+			KeyId   string `json:"keyId"`
+			KeyName string `json:"keyName"`
+			Status  string `json:"status"`
+		}{
+			KeyId:   keyId,
+			KeyName: keyName,
+			Status:  "key restored",
+		}
+		b, err := json.MarshalIndent(details, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal output to JSON: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	case print.YAMLOutputFormat:
+		details := struct {
+			KeyId   string `yaml:"keyId"`
+			KeyName string `yaml:"keyName"`
+			Status  string `yaml:"status"`
+		}{
+			KeyId:   keyId,
+			KeyName: keyName,
+			Status:  "key restored",
+		}
+		b, err := yaml.Marshal(details)
+		if err != nil {
+			return fmt.Errorf("marshal output to YAML: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	default:
+		p.Outputf("Successfully restored KMS key %q\n", keyName)
+		return nil
+	}
 }

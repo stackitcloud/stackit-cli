@@ -210,3 +210,41 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	tests := []struct {
+		description  string
+		wantErr      bool
+		outputFormat string
+		keyRingLabel string
+	}{
+		{
+			description:  "default output",
+			keyRingLabel: "yourKeyRing",
+			wantErr:      false,
+		},
+		{
+			description:  "json output",
+			outputFormat: print.JSONOutputFormat,
+			keyRingLabel: "yourKeyRing",
+			wantErr:      false,
+		},
+		{
+			description:  "yaml output",
+			outputFormat: print.YAMLOutputFormat,
+			keyRingLabel: "yourKeyRing",
+			wantErr:      false,
+		},
+	}
+
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := outputResult(p, tt.outputFormat, tt.keyRingLabel)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

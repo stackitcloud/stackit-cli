@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
@@ -214,6 +215,44 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	tests := []struct {
+		description     string
+		wantErr         bool
+		outputFormat    string
+		wrappingKeyName string
+	}{
+		{
+			description:     "default output",
+			wrappingKeyName: "yourWrappingKey",
+			wantErr:         false,
+		},
+		{
+			description:     "json output",
+			outputFormat:    print.JSONOutputFormat,
+			wrappingKeyName: "yourWrappingKey",
+			wantErr:         false,
+		},
+		{
+			description:     "yaml output",
+			outputFormat:    print.YAMLOutputFormat,
+			wrappingKeyName: "yourWrappingKey",
+			wantErr:         false,
+		},
+	}
+
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := outputResult(p, tt.outputFormat, tt.wrappingKeyName)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

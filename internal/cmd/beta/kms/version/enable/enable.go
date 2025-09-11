@@ -2,6 +2,7 @@ package enable
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -35,7 +37,7 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
-		Short: "Enable a Key Versions",
+		Short: "Enable a key version",
 		Long:  "Enable the given key version.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
@@ -62,13 +64,13 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				keyName = model.KeyId
 			}
 
-			// This operatio can be undone. Don't ask for confirmation!
+			// This operation can be undone. Don't ask for confirmation!
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("enable Key Version: %w", err)
+				return fmt.Errorf("enable key version: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
@@ -77,13 +79,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Start("Enabling key version")
 				_, err = wait.EnableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, *model.VersionNumber).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for Key Version to be enabled: %w", err)
+					return fmt.Errorf("wait for key version to be enabled: %w", err)
 				}
 				s.Stop()
 			}
 
-			params.Printer.Info("Enabled version %d of Key %q\n", *model.VersionNumber, keyName)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, *model.VersionNumber, model.KeyId, keyName)
 		},
 	}
 
@@ -121,10 +122,56 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the Key")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
+	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the key")
 	cmd.Flags().Int64(versionNumberFlag, 0, "Version number of the key")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag, versionNumberFlag)
 	cobra.CheckErr(err)
+}
+
+func outputResult(p *print.Printer, outputFormat string, versionNumber int64, keyId, keyName string) error {
+	switch outputFormat {
+	case print.JSONOutputFormat:
+		details := struct {
+			KeyId         string `json:"keyId"`
+			KeyName       string `json:"keyName"`
+			VersionNumber int64  `json:"versionNumber"`
+			Status        string `json:"status"`
+		}{
+			KeyId:         keyId,
+			KeyName:       keyName,
+			VersionNumber: versionNumber,
+			Status:        fmt.Sprintf("Enabled version %d of key '%s'.", versionNumber, keyName),
+		}
+		b, err := json.MarshalIndent(details, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal output to JSON: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	case print.YAMLOutputFormat:
+		details := struct {
+			KeyId         string `yaml:"keyId"`
+			KeyName       string `yaml:"keyName"`
+			VersionNumber int64  `yaml:"versionNumber"`
+			Status        string `yaml:"status"`
+		}{
+			KeyId:         keyId,
+			KeyName:       keyName,
+			VersionNumber: versionNumber,
+			Status:        fmt.Sprintf("Enabled version %d of key '%s'.", versionNumber, keyName),
+		}
+		b, err := yaml.Marshal(details)
+		if err != nil {
+			return fmt.Errorf("marshal output to YAML: %w", err)
+		}
+		p.Outputln(string(b))
+		return nil
+
+	default:
+		p.Outputf("Enabled version %d of key '%q'\n", versionNumber, keyName)
+		return nil
+	}
 }
