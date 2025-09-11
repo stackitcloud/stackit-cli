@@ -1,10 +1,10 @@
 ## stackit beta kms keyring delete
 
-Deletes a KMS Keyring
+Deletes a KMS key ring
 
 ### Synopsis
 
-Deletes a KMS Keyring.
+Deletes a KMS key ring.
 
 ```
 stackit beta kms keyring delete KEYRING_ID [flags]
@@ -13,7 +13,7 @@ stackit beta kms keyring delete KEYRING_ID [flags]
 ### Examples
 
 ```
-  Delete a KMS Keyring with ID "xxx"
+  Delete a KMS key ring with ID "xxx"
   $ stackit beta kms keyring delete xxx
 ```
 
@@ -36,5 +36,5 @@ stackit beta kms keyring delete KEYRING_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS Keyrings
+* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS key rings
 

@@ -1,10 +1,10 @@
 ## stackit beta kms key create
 
-Creates a KMS Key
+Creates a KMS key
 
 ### Synopsis
 
-Creates a KMS Key.
+Creates a KMS key.
 
 ```
 stackit beta kms key create [flags]
@@ -13,23 +13,23 @@ stackit beta kms key create [flags]
 ### Examples
 
 ```
-  Create a Symmetric KMS Key
-  $ stakit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "symmetric_encrypt_decrypt"
+  Create a Symmetric KMS key
+  $ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "symmetric_encrypt_decrypt"
 
-  Create a Message Authentication KMS Key
-  $ stakit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code"
+  Create a Message Authentication KMS key
+  $ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code"
 ```
 
 ### Options
 
 ```
       --algorithm string     En-/Decryption / signing algorithm
-      --description string   Optinal description of the Key
+      --description string   Optional description of the key
   -h, --help                 Help for "stackit beta kms key create"
       --import-only          States whether versions can be created or only imported
-      --key-ring string      ID of the KMS Key Ring
+      --key-ring string      ID of the KMS key ring
       --name string          The display name to distinguish multiple keys
-      --purpose string       Purpose of the Key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' 
+      --purpose string       Purpose of the key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' 
 ```
 
 ### Options inherited from parent commands

@@ -1,10 +1,10 @@
 ## stackit beta kms version
 
-Manage KMS Key versions
+Manage KMS key versions
 
 ### Synopsis
 
-Provides CRUD functionality for Key Version operations inside the KMS
+Provides functionality for key version operations inside the KMS
 
 ```
 stackit beta kms version [flags]
@@ -30,9 +30,9 @@ stackit beta kms version [flags]
 ### SEE ALSO
 
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
-* [stackit beta kms version destroy](./stackit_beta_kms_version_destroy.md)	 - Destroy a Key Versions
-* [stackit beta kms version disable](./stackit_beta_kms_version_disable.md)	 - Disable a Key Versions
-* [stackit beta kms version enable](./stackit_beta_kms_version_enable.md)	 - Enable a Key Versions
-* [stackit beta kms version list](./stackit_beta_kms_version_list.md)	 - Lists all Key Versions
-* [stackit beta kms version restore](./stackit_beta_kms_version_restore.md)	 - Restore a Key Versions
+* [stackit beta kms version destroy](./stackit_beta_kms_version_destroy.md)	 - Destroy a key version
+* [stackit beta kms version disable](./stackit_beta_kms_version_disable.md)	 - Disable a key version
+* [stackit beta kms version enable](./stackit_beta_kms_version_enable.md)	 - Enable a key version
+* [stackit beta kms version list](./stackit_beta_kms_version_list.md)	 - List all key versions
+* [stackit beta kms version restore](./stackit_beta_kms_version_restore.md)	 - Restore a key version
 

@@ -1,10 +1,10 @@
 ## stackit beta kms keyring
 
-Manage KMS Keyrings
+Manage KMS key rings
 
 ### Synopsis
 
-Provides functionality for Keyring operations inside the KMS
+Provides functionality for key ring operations inside the KMS
 
 ```
 stackit beta kms keyring [flags]
@@ -30,7 +30,7 @@ stackit beta kms keyring [flags]
 ### SEE ALSO
 
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
-* [stackit beta kms keyring create](./stackit_beta_kms_keyring_create.md)	 - Creates a KMS Key Ring
-* [stackit beta kms keyring delete](./stackit_beta_kms_keyring_delete.md)	 - Deletes a KMS Keyring
-* [stackit beta kms keyring list](./stackit_beta_kms_keyring_list.md)	 - Lists all KMS Keyrings
+* [stackit beta kms keyring create](./stackit_beta_kms_keyring_create.md)	 - Creates a KMS key ring
+* [stackit beta kms keyring delete](./stackit_beta_kms_keyring_delete.md)	 - Deletes a KMS key ring
+* [stackit beta kms keyring list](./stackit_beta_kms_keyring_list.md)	 - Lists all KMS key rings
 

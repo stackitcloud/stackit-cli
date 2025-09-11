@@ -1,28 +1,28 @@
-## stackit beta kms wrappingkey delete
+## stackit beta kms wrapping-key delete
 
-Deletes a KMS Wrapping Key
+Deletes a KMS wrapping key
 
 ### Synopsis
 
-Deletes a KMS Wrapping Key inside a specific Key Ring.
+Deletes a KMS wrapping key inside a specific key ring.
 
 ```
-stackit beta kms wrappingkey delete [flags]
+stackit beta kms wrapping-key delete [flags]
 ```
 
 ### Examples
 
 ```
-  Delete a KMS Wrapping Key "my-wrapping-key-id" inside the Key Ring "my-key-ring-id"
+  Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-key-ring-id"
   $ stackit beta kms keyring delete --key-ring "my-key-ring-id" --wrapping-key "my-wrapping-key-id"
 ```
 
 ### Options
 
 ```
-  -h, --help                  Help for "stackit beta kms wrappingkey delete"
-      --key-ring string       ID of the KMS Key Ring where the Wrapping Key is stored
-      --wrapping-key string   ID of the actual Wrapping Key
+  -h, --help                  Help for "stackit beta kms wrapping-key delete"
+      --key-ring string       ID of the KMS key ring where the wrapping key is stored
+      --wrapping-key string   ID of the actual wrapping key
 ```
 
 ### Options inherited from parent commands
@@ -38,5 +38,5 @@ stackit beta kms wrappingkey delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms wrappingkey](./stackit_beta_kms_wrappingkey.md)	 - Manage KMS Wrapping Keys
+* [stackit beta kms wrapping-key](./stackit_beta_kms_wrapping-key.md)	 - Manage KMS wrapping keys
 

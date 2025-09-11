@@ -1,6 +1,6 @@
 ## stackit beta kms key restore
 
-Resotre a Key
+Resotre a key
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ stackit beta kms key restore [flags]
 ### Examples
 
 ```
-  Restore a KMS Key "my-key-id" inside the Key Ring "my-key-ring-id" that was scheduled for deletion.
+  Restore a KMS key "my-key-id" inside the key ring "my-key-ring-id" that was scheduled for deletion.
   $ stackit beta kms keyring restore --key-ring "my-key-ring-id" --key "my-key-id"
 ```
 

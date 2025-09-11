@@ -1,19 +1,19 @@
-## stackit beta kms wrappingkey
+## stackit beta kms wrapping-key
 
-Manage KMS Wrapping Keys
+Manage KMS wrapping keys
 
 ### Synopsis
 
-Provides CRUD functionality for Wrapping Key operations inside the KMS
+Provides CRUD functionality for wrapping key operations inside the KMS
 
 ```
-stackit beta kms wrappingkey [flags]
+stackit beta kms wrapping-key [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta kms wrappingkey"
+  -h, --help   Help for "stackit beta kms wrapping-key"
 ```
 
 ### Options inherited from parent commands
@@ -30,7 +30,7 @@ stackit beta kms wrappingkey [flags]
 ### SEE ALSO
 
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
-* [stackit beta kms wrappingkey create](./stackit_beta_kms_wrappingkey_create.md)	 - Creates a KMS Wrapping Key
-* [stackit beta kms wrappingkey delete](./stackit_beta_kms_wrappingkey_delete.md)	 - Deletes a KMS Wrapping Key
-* [stackit beta kms wrappingkey list](./stackit_beta_kms_wrappingkey_list.md)	 - Lists all KMS Wrapping Keys
+* [stackit beta kms wrapping-key create](./stackit_beta_kms_wrapping-key_create.md)	 - Creates a KMS wrapping key
+* [stackit beta kms wrapping-key delete](./stackit_beta_kms_wrapping-key_delete.md)	 - Deletes a KMS wrapping key
+* [stackit beta kms wrapping-key list](./stackit_beta_kms_wrapping-key_list.md)	 - Lists all KMS Wrapping Keys
 

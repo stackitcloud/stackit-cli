@@ -1,4 +1,4 @@
-## stackit beta kms wrappingkey list
+## stackit beta kms wrapping-key list
 
 Lists all KMS Wrapping Keys
 
@@ -7,7 +7,7 @@ Lists all KMS Wrapping Keys
 Lists all KMS Wrapping Keys inside a key ring.
 
 ```
-stackit beta kms wrappingkey list KEYRING_ID [flags]
+stackit beta kms wrapping-key list KEYRING_ID [flags]
 ```
 
 ### Examples
@@ -23,7 +23,7 @@ stackit beta kms wrappingkey list KEYRING_ID [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta kms wrappingkey list"
+  -h, --help   Help for "stackit beta kms wrapping-key list"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +39,5 @@ stackit beta kms wrappingkey list KEYRING_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms wrappingkey](./stackit_beta_kms_wrappingkey.md)	 - Manage KMS Wrapping Keys
+* [stackit beta kms wrapping-key](./stackit_beta_kms_wrapping-key.md)	 - Manage KMS wrapping keys
 

@@ -1,6 +1,6 @@
 ## stackit beta kms version restore
 
-Restore a Key Versions
+Restore a key version
 
 ### Synopsis
 
@@ -21,8 +21,8 @@ stackit beta kms version restore [flags]
 
 ```
   -h, --help              Help for "stackit beta kms version restore"
-      --key string        ID of the Key
-      --key-ring string   ID of the KMS Key Ring
+      --key string        ID of the key
+      --key-ring string   ID of the KMS key ring
       --version int       Version number of the key
 ```
 
@@ -39,5 +39,5 @@ stackit beta kms version restore [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms version](./stackit_beta_kms_version.md)	 - Manage KMS Key versions
+* [stackit beta kms version](./stackit_beta_kms_version.md)	 - Manage KMS key versions
 

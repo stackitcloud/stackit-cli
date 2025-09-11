@@ -1,10 +1,10 @@
 ## stackit beta kms keyring list
 
-Lists all KMS Keyrings
+Lists all KMS key rings
 
 ### Synopsis
 
-Lists all KMS Keyrings.
+Lists all KMS key rings.
 
 ```
 stackit beta kms keyring list [flags]
@@ -13,10 +13,10 @@ stackit beta kms keyring list [flags]
 ### Examples
 
 ```
-  List all KMS Keyrings
+  List all KMS key rings
   $ stackit beta kms keyring list
 
-  List all KMS Keyrings in JSON format
+  List all KMS key rings in JSON format
   $ stackit beta kms keyring list --output-format json
 ```
 
@@ -39,5 +39,5 @@ stackit beta kms keyring list [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS Keyrings
+* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS key rings
 

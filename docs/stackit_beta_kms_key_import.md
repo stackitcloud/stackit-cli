@@ -1,6 +1,6 @@
 ## stackit beta kms key import
 
-Import a KMS Key Version
+Import a KMS key
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ stackit beta kms key import [flags]
 ### Examples
 
 ```
-  Import a new version for the given KMS Key "my-key"
+  Import a new version for the given KMS key "my-key"
   $ stakit beta kms key import --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
 ```
 
@@ -21,10 +21,10 @@ stackit beta kms key import [flags]
 
 ```
   -h, --help                     Help for "stackit beta kms key import"
-      --key string               ID of the KMS Key
-      --key-ring string          ID of the KMS Key Ring
+      --key string               ID of the KMS key
+      --key-ring string          ID of the KMS key ring
       --wrapped-key string       The wrapped key material that has to be imported. Encoded in base64
-      --wrapping-key-id string   he unique id of the wrapping key the key material has been wrapped with
+      --wrapping-key-id string   The unique id of the wrapping key the key material has been wrapped with
 ```
 
 ### Options inherited from parent commands

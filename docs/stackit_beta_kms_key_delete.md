@@ -1,10 +1,10 @@
 ## stackit beta kms key delete
 
-Deletes a KMS Key
+Deletes a KMS key
 
 ### Synopsis
 
-Deletes a KMS Key inside a specific Key Ring.
+Deletes a KMS key inside a specific key ring.
 
 ```
 stackit beta kms key delete [flags]
@@ -13,7 +13,7 @@ stackit beta kms key delete [flags]
 ### Examples
 
 ```
-  Delete a KMS Key "my-key-id" inside the Key Ring "my-key-ring-id"
+  Delete a KMS key "my-key-id" inside the key ring "my-key-ring-id"
   $ stackit beta kms keyring delete --key-ring "my-key-ring-id" --key "my-key-id"
 ```
 

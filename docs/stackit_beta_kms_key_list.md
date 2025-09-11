@@ -1,10 +1,10 @@
 ## stackit beta kms key list
 
-Lists all KMS Keys
+List all KMS keys
 
 ### Synopsis
 
-Lists all KMS Keys inside a key ring.
+List all KMS keys inside a key ring.
 
 ```
 stackit beta kms key list KEYRING_ID [flags]
@@ -13,10 +13,10 @@ stackit beta kms key list KEYRING_ID [flags]
 ### Examples
 
 ```
-  List all KMS Keys for the key ring "xxx"
+  List all KMS keys for the key ring "xxx"
   $ stackit beta kms key list xxx
 
-  List all KMS Keys in JSON format
+  List all KMS keys in JSON format
   $ stackit beta kms key list xxx --output-format json
 ```
 

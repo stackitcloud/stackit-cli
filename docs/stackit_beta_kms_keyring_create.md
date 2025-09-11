@@ -1,10 +1,10 @@
 ## stackit beta kms keyring create
 
-Creates a KMS Key Ring
+Creates a KMS key ring
 
 ### Synopsis
 
-Creates a KMS Key Ring.
+Creates a KMS key ring.
 
 ```
 stackit beta kms keyring create [flags]
@@ -16,16 +16,16 @@ stackit beta kms keyring create [flags]
   Create a KMS key ring
   $ stakit beta kms keyring create --name my-keyring
 
-  Create a KMS Key ring with a description
+  Create a KMS key ring with a description
   $ stakit beta kms keyring create --name my-keyring --description my-description
 ```
 
 ### Options
 
 ```
-      --description string   Optinal description of the Key Ring
+      --description string   Optional description of the key ring
   -h, --help                 Help for "stackit beta kms keyring create"
-      --name string          Name of the KMS Key Ring
+      --name string          Name of the KMS key ring
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +41,5 @@ stackit beta kms keyring create [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS Keyrings
+* [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS key rings
 

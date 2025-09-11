@@ -1,10 +1,10 @@
 ## stackit beta kms version list
 
-Lists all Key Versions
+List all key versions
 
 ### Synopsis
 
-Lists all versions of a given key.
+List all versions of a given key.
 
 ```
 stackit beta kms version list [flags]
@@ -24,8 +24,8 @@ stackit beta kms version list [flags]
 
 ```
   -h, --help              Help for "stackit beta kms version list"
-      --key string        ID of the Key
-      --key-ring string   ID of the KMS Key Ring
+      --key string        ID of the key
+      --key-ring string   ID of the KMS key ring
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +41,5 @@ stackit beta kms version list [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms version](./stackit_beta_kms_version.md)	 - Manage KMS Key versions
+* [stackit beta kms version](./stackit_beta_kms_version.md)	 - Manage KMS key versions
 

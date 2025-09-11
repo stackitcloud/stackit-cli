@@ -1,22 +1,22 @@
-## stackit beta kms wrappingkey create
+## stackit beta kms wrapping-key create
 
-Creates a KMS Wrapping Key
+Creates a KMS wrapping key
 
 ### Synopsis
 
-Creates a KMS Wrapping Key.
+Creates a KMS wrapping key.
 
 ```
-stackit beta kms wrappingkey create [flags]
+stackit beta kms wrapping-key create [flags]
 ```
 
 ### Examples
 
 ```
-  Create a Symmetric KMS Wrapping Key
+  Create a Symmetric KMS wrapping key
   $ stakit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key"
 
-  Create an Asymmetric KMS Wrapping Key with a description
+  Create an Asymmetric KMS wrapping key with a description
   $ stakit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key"
 ```
 
@@ -24,11 +24,11 @@ stackit beta kms wrappingkey create [flags]
 
 ```
       --algorithm string     En-/Decryption algorithm
-      --description string   Optinal description of the Wrapping Key
-  -h, --help                 Help for "stackit beta kms wrappingkey create"
-      --key-ring string      ID of the KMS Key Ring
+      --description string   Optional description of the wrapping key
+  -h, --help                 Help for "stackit beta kms wrapping-key create"
+      --key-ring string      ID of the KMS key ring
       --name string          The display name to distinguish multiple wrapping keys
-      --purpose string       Purpose of the Wrapping Key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' 
+      --purpose string       Purpose of the wrapping key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' 
 ```
 
 ### Options inherited from parent commands
@@ -44,5 +44,5 @@ stackit beta kms wrappingkey create [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms wrappingkey](./stackit_beta_kms_wrappingkey.md)	 - Manage KMS Wrapping Keys
+* [stackit beta kms wrapping-key](./stackit_beta_kms_wrapping-key.md)	 - Manage KMS wrapping keys
 
