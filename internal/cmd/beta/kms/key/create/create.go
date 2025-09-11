@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -19,6 +20,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
 )
 
 const (
@@ -45,16 +47,16 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a KMS Key",
-		Long:  "Creates a KMS Key.",
+		Short: "Creates a KMS key",
+		Long:  "Creates a KMS key.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Symmetric KMS Key`,
-				`$ stakit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "symmetric_encrypt_decrypt"`),
+				`Create a Symmetric KMS key`,
+				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "symmetric_encrypt_decrypt"`),
 			examples.NewExample(
-				`Create a Message Authentication KMS Key`,
-				`$ stakit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code"`),
+				`Create a Message Authentication KMS key`,
+				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -91,10 +93,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			key, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create KMS Key: %w", err)
+				return fmt.Errorf("create KMS key: %w", err)
 			}
 
-			// No wait exists for the key creation
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Creating key")
+				_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, *key.Id).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for KMS key creation: %w", err)
+				}
+				s.Stop()
+			}
+
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, key)
 		},
 	}
@@ -159,7 +171,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -167,24 +179,24 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	default:
-		p.Outputf("Created Key for project %q. Key ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("Created key for project %q. key ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 		return nil
 	}
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
 	cmd.Flags().String(algorithmFlag, "", "En-/Decryption / signing algorithm")
 	cmd.Flags().String(displayNameFlag, "", "The display name to distinguish multiple keys")
-	cmd.Flags().String(descriptionFlag, "", "Optinal description of the Key")
+	cmd.Flags().String(descriptionFlag, "", "Optional description of the key")
 	cmd.Flags().Bool(importOnlyFlag, false, "States whether versions can be created or only imported")
-	cmd.Flags().String(purposeFlag, "", "Purpose of the Key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' ")
+	cmd.Flags().String(purposeFlag, "", "Purpose of the key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' ")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag)
 	cobra.CheckErr(err)
