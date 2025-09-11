@@ -41,12 +41,12 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import a KMS Key Version",
+		Short: "Import a KMS key",
 		Long:  "Import a new version to the given KMS key.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Import a new version for the given KMS Key "my-key"`,
+				`Import a new version for the given KMS key "my-key"`,
 				`$ stakit beta kms key import --key-ring "my-keyring-id" --key "my-key-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -64,17 +64,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			keyName, err := kmsUtils.GetKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get Key name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
 				keyName = model.KeyId
 			}
 			keyRingName, err := kmsUtils.GetKeyRingName(ctx, apiClient, model.ProjectId, model.KeyRingId, model.Region)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get Key Ring name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get key ring name: %v", err)
 				keyRingName = model.KeyRingId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the Key Ring %q?", keyName, keyRingName)
+				prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -89,10 +89,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			keyVersion, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("import KMS Key: %w", err)
+				return fmt.Errorf("import KMS key: %w", err)
 			}
 
-			// No wait exists for the wrapped key import
 			return outputResult(params.Printer, model.OutputFormat, keyRingName, keyName, keyVersion)
 		},
 	}
@@ -160,7 +159,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -168,22 +167,22 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	default:
-		p.Outputf("Imported a new version for the Key %q inside the Key Ring %q\n", keyName, keyRingName)
+		p.Outputf("Imported a new version for the key %q inside the key ring %q\n", keyName, keyRingName)
 		return nil
 	}
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the KMS Key")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
+	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the KMS key")
 	cmd.Flags().String(wrappedKeyFlag, "", "The wrapped key material that has to be imported. Encoded in base64")
-	cmd.Flags().Var(flags.UUIDFlag(), wrappingKeyIdFlag, "he unique id of the wrapping key the key material has been wrapped with")
+	cmd.Flags().Var(flags.UUIDFlag(), wrappingKeyIdFlag, "The unique id of the wrapping key the key material has been wrapped with")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag, wrappedKeyFlag, wrappingKeyIdFlag)
 	cobra.CheckErr(err)

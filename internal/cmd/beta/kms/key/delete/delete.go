@@ -18,7 +18,6 @@ import (
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 )
 
@@ -36,12 +35,12 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Deletes a KMS Key",
-		Long:  "Deletes a KMS Key inside a specific Key Ring.",
+		Short: "Deletes a KMS key",
+		Long:  "Deletes a KMS key inside a specific key ring.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS Key "my-key-id" inside the Key Ring "my-key-ring-id"`,
+				`Delete a KMS key "my-key-id" inside the key ring "my-key-ring-id"`,
 				`$ stackit beta kms keyring delete --key-ring "my-key-ring-id" --key "my-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -75,7 +74,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete KMS Key: %w", err)
+				return fmt.Errorf("delete KMS key: %w", err)
 			}
 
 			// Don't wait for a month until the deletion was performed.
@@ -99,22 +98,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	keyRingId := flags.FlagToStringValue(p, cmd, keyRingIdFlag)
-	keyId := flags.FlagToStringValue(p, cmd, keyIdFlag)
-
-	// Validate the uuid format of the IDs
-	errKeyRing := utils.ValidateUUID(keyRingId)
-	errKey := utils.ValidateUUID(keyId)
-	if errKeyRing != nil || errKey != nil {
-		return nil, &errors.DSAInputPlanError{
-			Cmd: cmd,
-		}
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeyRingId:       keyRingId,
-		KeyId:           keyId,
+		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
+		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -182,7 +169,7 @@ func outputResult(p *print.Printer, outputFormat, keyId, keyName string, deletio
 		return nil
 
 	default:
-		p.Outputf("Deletion of KMS Key %q scheduled successfully for the deletion date: %q\n", keyName, deletionDate)
+		p.Outputf("Deletion of KMS key %q scheduled successfully for the deletion date: %q\n", keyName, deletionDate)
 		return nil
 	}
 }

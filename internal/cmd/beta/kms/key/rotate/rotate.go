@@ -40,8 +40,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Rotate a KMS Key "my-key-id" and increase it's version inside the Key Ring "my-key-ring-id".`,
-				`$ stackit beta kms keyring rotate --key-ring "my-key-ring-id" --key "my-key-id"`),
+				`Rotate a KMS key "my-key-id" and increase it's version inside the key ring "my-key-ring-id".`,
+				`$ stackit beta kms key rotate --key-ring "my-key-ring-id" --key "my-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -74,7 +74,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("rotate KMS Key: %w", err)
+				return fmt.Errorf("rotate KMS key: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, resp)
@@ -91,22 +91,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &errors.ProjectIdError{}
 	}
 
-	keyRingId := flags.FlagToStringValue(p, cmd, keyRingIdFlag)
-	keyId := flags.FlagToStringValue(p, cmd, keyIdFlag)
-
-	// Validate the uuid format of the IDs
-	errKeyRing := utils.ValidateUUID(keyRingId)
-	errKey := utils.ValidateUUID(keyId)
-	if errKeyRing != nil || errKey != nil {
-		return nil, &errors.DSAInputPlanError{
-			Cmd: cmd,
-		}
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeyRingId:       keyRingId,
-		KeyId:           keyId,
+		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
+		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -127,8 +115,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring where the Key is stored")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the actual Key")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key Ring where the key is stored")
+	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the actual key")
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)
 }
@@ -142,7 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key Version: %w", err)
+			return fmt.Errorf("marshal KMS key version: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
@@ -150,13 +138,13 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal KMS Key Version: %w", err)
+			return fmt.Errorf("marshal KMS key version: %w", err)
 		}
 		p.Outputln(string(details))
 		return nil
 
 	default:
-		p.Outputf("Rotated Key %s\n", utils.PtrString(resp.KeyId))
+		p.Outputf("Rotated key %s\n", utils.PtrString(resp.KeyId))
 		return nil
 	}
 }
