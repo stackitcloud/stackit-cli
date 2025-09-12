@@ -120,7 +120,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 type clusterConfig struct {
-	STACKITProjectID string `json:"stackitProjectId"`
+	STACKITProjectID string `json:"stackitProjectID"`
 	ClusterName      string `json:"clusterName"`
 
 	cacheKey string
