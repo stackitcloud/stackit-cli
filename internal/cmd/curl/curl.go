@@ -183,7 +183,8 @@ func getBearerToken(p *print.Printer) (string, error) {
 
 	accessToken, err := auth.GetValidAccessToken(p)
 	if err != nil {
-		return "", err
+		p.Debug(print.ErrorLevel, "get valid access token: %v", err)
+		return "", &errors.SessionExpiredError{}
 	}
 
 	return accessToken, nil
