@@ -45,7 +45,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			accessToken, err := auth.GetValidAccessToken(params.Printer)
 			if err != nil {
-				return err
+				params.Printer.Debug(print.ErrorLevel, "get valid access token: %v", err)
+				return &cliErr.SessionExpiredError{}
 			}
 
 			switch model.OutputFormat {
