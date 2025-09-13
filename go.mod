@@ -1,6 +1,6 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/fatih/color v1.18.0
@@ -34,7 +34,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.1
 	github.com/zalando/go-keyring v0.2.6
-	golang.org/x/mod v0.27.0
+	golang.org/x/mod v0.28.0
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/term v0.34.0
 	golang.org/x/text v0.28.0
