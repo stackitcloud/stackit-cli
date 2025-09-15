@@ -26,7 +26,7 @@ const (
 	maxMessageSizeKiBFlag  = "max-message-size-kib"
 	maxMessagesPerHourFlag = "max-messages-per-hour"
 	descriptionFlag        = "description"
-	labelsFlag             = "labels"
+	labelFlag              = "labels"
 )
 
 // inputModel struct holds all the input parameters for the command
@@ -99,7 +99,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB")
 	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	cmd.Flags().StringToString(labelsFlag, nil, "Labels in key=value format, separated by commas. Example: --labels \"key1=value1,key2=value2\"")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels in key=value format, separated by commas. Example: --labels \"key1=value1,key2=value2\"")
 
 	err := flags.MarkFlagsRequired(cmd, displayNameFlag, maxMessageSizeKiBFlag, maxMessagesPerHourFlag)
 	cobra.CheckErr(err)
@@ -117,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		MaxMessageSizeKiB:  flags.FlagToInt64Pointer(p, cmd, maxMessageSizeKiBFlag),
 		MaxMessagesPerHour: flags.FlagToInt64Pointer(p, cmd, maxMessagesPerHourFlag),
 		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if p.IsVerbosityDebug() {

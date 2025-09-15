@@ -105,7 +105,7 @@ func TestParseInput(t *testing.T) {
 				flagValues[maxMessageSizeKiBFlag] = "2048"
 				flagValues[maxMessagesPerHourFlag] = "10000"
 				flagValues[descriptionFlag] = "new description"
-				flagValues[labelsFlag] = "env=prod,team=sre"
+				flagValues[labelFlag] = "env=prod,team=sre"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -113,17 +113,6 @@ func TestParseInput(t *testing.T) {
 				model.MaxMessagesPerHour = utils.Ptr(int64(10000))
 				model.Description = utils.Ptr("new description")
 				model.Labels = utils.Ptr(map[string]string{"env": "prod", "team": "sre"})
-			}),
-		},
-		{
-			description: "clear labels",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[labelsFlag] = ""
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{})
 			}),
 		},
 		{

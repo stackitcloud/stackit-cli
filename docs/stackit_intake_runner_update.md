@@ -29,7 +29,7 @@ stackit intake runner update RUNNER_ID [flags]
       --description string          Description
       --display-name string         Display name
   -h, --help                        Help for "stackit intake runner update"
-      --labels string               Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels ""
+      --labels stringToString       Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels "" (default [])
       --max-message-size-kib int    Maximum message size in KiB. Note: Overall message capacity cannot be decreased.
       --max-messages-per-hour int   Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.
 ```

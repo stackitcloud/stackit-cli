@@ -43,7 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		maxMessageSizeKiBFlag:     "1024",
 		maxMessagesPerHourFlag:    "10000",
 		descriptionFlag:           testDescription,
-		labelsFlag:                testLabelsString,
+		labelFlag:                 testLabelsString,
 	}
 	for _, mod := range mods {
 		mod(flagValues)

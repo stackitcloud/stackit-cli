@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/intake/common"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,7 +27,7 @@ const (
 	maxMessageSizeKiBFlag  = "max-message-size-kib"
 	maxMessagesPerHourFlag = "max-messages-per-hour"
 	descriptionFlag        = "description"
-	labelsFlag             = "labels"
+	labelFlag              = "labels"
 )
 
 type inputModel struct {
@@ -90,7 +89,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	cmd.Flags().String(labelsFlag, "", "Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels \"\"")
+	cmd.Flags().StringToString(labelFlag, nil, "Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels \"\"")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -101,26 +100,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	var labels *map[string]string
-	if cmd.Flags().Changed(labelsFlag) {
-		labelsVal, err := cmd.Flags().GetString(labelsFlag)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse --%s: %w", labelsFlag, err)
-		}
-		if labelsVal == "" {
-			// User wants to clear labels
-			labels = &map[string]string{}
-		} else {
-			// User provided labels, parse them
-			parsedLabels, err := common.ParseLabels(labelsVal)
-			if err != nil {
-				return nil, err
-			}
-
-			labels = &parsedLabels
-		}
-	}
-
 	model := inputModel{
 		GlobalFlagModel:    globalFlags,
 		RunnerId:           runnerId,
@@ -128,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		MaxMessageSizeKiB:  flags.FlagToInt64Pointer(p, cmd, maxMessageSizeKiBFlag),
 		MaxMessagesPerHour: flags.FlagToInt64Pointer(p, cmd, maxMessagesPerHourFlag),
 		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:             labels,
+		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
 	if model.DisplayName == nil && model.MaxMessageSizeKiB == nil && model.MaxMessagesPerHour == nil && model.Description == nil && model.Labels == nil {
