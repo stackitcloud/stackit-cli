@@ -120,11 +120,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 type clusterConfig struct {
-	STACKITProjectID string `json:"stackitProjectId"`
+	STACKITProjectID string `json:"stackitProjectID"`
 	ClusterName      string `json:"clusterName"`
+	Region           string `json:"region"`
 
 	cacheKey string
-	Region   string
 }
 
 func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, error) {
@@ -157,8 +157,10 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 
 	config.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server)))
 
-	globalFlags := globalflags.Parse(p, cmd)
-	config.Region = globalFlags.Region
+	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
+	if config.Region == "" {
+		config.Region = globalflags.Parse(p, cmd).Region
+	}
 
 	return config, nil
 }
