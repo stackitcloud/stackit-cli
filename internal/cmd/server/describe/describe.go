@@ -30,6 +30,26 @@ type inputModel struct {
 	ServerId string
 }
 
+// convertServerForYAML creates a map with UserData as base64 string for YAML output
+func convertServerForYAML(server *iaas.Server) map[string]interface{} {
+	if server == nil {
+		return nil
+	}
+
+	// Marshal to JSON first to get the correct format for UserData
+	jsonData, err := json.Marshal(server)
+	if err != nil {
+		return nil
+	}
+
+	var serverMap map[string]interface{}
+	if err := json.Unmarshal(jsonData, &serverMap); err != nil {
+		return nil
+	}
+
+	return serverMap
+}
+
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", serverIdArg),
@@ -118,7 +138,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(convertServerForYAML(server), yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}
