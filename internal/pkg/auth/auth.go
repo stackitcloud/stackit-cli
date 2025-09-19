@@ -202,7 +202,7 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	// Refresh the tokens
 	err = refreshTokens(utf)
 	if err != nil {
-		return "", fmt.Errorf("refresh access token: %w", err)
+		return "", fmt.Errorf("access token and refresh token expired: %w", err)
 	}
 
 	// Return the new access token
