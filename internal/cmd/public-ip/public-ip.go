@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/disassociate"
+	ipranges "github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/ip-ranges"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -35,4 +36,5 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(associate.NewCmd(params))
 	cmd.AddCommand(disassociate.NewCmd(params))
+	cmd.AddCommand(ipranges.NewCmd(params))
 }
