@@ -37,5 +37,6 @@ stackit network-area routing-table [flags]
 * [stackit network-area routing-table delete](./stackit_network-area_routing-table_delete.md)	 - Deletes a routing-table
 * [stackit network-area routing-table describe](./stackit_network-area_routing-table_describe.md)	 - Describes a routing-table
 * [stackit network-area routing-table list](./stackit_network-area_routing-table_list.md)	 - Lists all routing-tables
+* [stackit network-area routing-table route](./stackit_network-area_routing-table_route.md)	 - Manages routes of a routing-table
 * [stackit network-area routing-table update](./stackit_network-area_routing-table_update.md)	 - Updates a routing-table
 
