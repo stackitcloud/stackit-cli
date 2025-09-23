@@ -158,7 +158,8 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(servers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		patchedServers := utils.ConvertToBase64PatchedServers(servers)
+		details, err := yaml.MarshalWithOptions(patchedServers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}
