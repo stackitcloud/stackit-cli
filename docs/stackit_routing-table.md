@@ -37,5 +37,6 @@ stackit routing-table [flags]
 * [stackit routing-table delete](./stackit_routing-table_delete.md)	 - Deletes a routing-table
 * [stackit routing-table describe](./stackit_routing-table_describe.md)	 - Describes a routing-table
 * [stackit routing-table list](./stackit_routing-table_list.md)	 - Lists all routing-tables
+* [stackit routing-table route](./stackit_routing-table_route.md)	 - Manages routes of a routing-table
 * [stackit routing-table update](./stackit_routing-table_update.md)	 - Updates a routing-table
 
