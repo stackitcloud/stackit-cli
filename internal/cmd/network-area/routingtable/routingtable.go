@@ -6,6 +6,7 @@ import (
 	rtDelete "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/delete"
 	rtDescribe "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/describe"
 	rtList "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/list"
+	rtRoute "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/route"
 	rtUpdate "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -34,5 +35,6 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 		rtList.NewCmd(params),
 		rtDescribe.NewCmd(params),
 		rtDelete.NewCmd(params),
+		rtRoute.NewCmd(params),
 	)
 }
