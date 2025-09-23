@@ -4,9 +4,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/google/uuid"
 	"github.com/inhies/go-bytesize"
 	"github.com/spf13/cobra"
@@ -152,4 +154,110 @@ func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{
 		result[k] = v
 	}
 	return &result
+}
+
+// Base64Bytes implements yaml.Marshaler to convert []byte to base64 strings
+// ref: https://carlosbecker.com/posts/go-custom-marshaling
+type Base64Bytes []byte
+
+// MarshalYAML implements yaml.Marshaler
+func (b Base64Bytes) MarshalYAML() (interface{}, error) {
+	if len(b) == 0 {
+		return "", nil
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+// MarshalToYAMLWithBase64Bytes converts any struct to YAML with []byte fields as base64 strings
+func MarshalToYAMLWithBase64Bytes(data interface{}) ([]byte, error) {
+	// Convert the data to a map and replace []byte fields with Base64Bytes
+	converted := convertToMapWithBase64Bytes(data)
+	return yaml.MarshalWithOptions(converted, yaml.IndentSequence(true))
+}
+
+// convertToMapWithBase64Bytes converts any data to a map, replacing []byte fields with Base64Bytes
+// using the custom type that implements yaml.Marshaler
+func convertToMapWithBase64Bytes(data interface{}) interface{} {
+	if data == nil {
+		return nil
+	}
+
+	v := reflect.ValueOf(data)
+	t := reflect.TypeOf(data)
+
+	// Handle pointers
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		return convertToMapWithBase64Bytes(v.Elem().Interface())
+	}
+
+	// Handle slices
+	if v.Kind() == reflect.Slice {
+		if v.IsNil() {
+			return nil
+		}
+		result := make([]interface{}, v.Len())
+		for i := 0; i < v.Len(); i++ {
+			result[i] = convertToMapWithBase64Bytes(v.Index(i).Interface())
+		}
+		return result
+	}
+
+	// Handle maps
+	if v.Kind() == reflect.Map {
+		if v.IsNil() {
+			return nil
+		}
+		result := make(map[string]interface{})
+		for _, key := range v.MapKeys() {
+			result[fmt.Sprintf("%v", key)] = convertToMapWithBase64Bytes(v.MapIndex(key).Interface())
+		}
+		return result
+	}
+
+	// Handle structs
+	if v.Kind() == reflect.Struct {
+		result := make(map[string]interface{})
+		for i := 0; i < v.NumField(); i++ {
+			field := v.Field(i)
+			fieldType := t.Field(i)
+
+			if !field.CanInterface() {
+				continue
+			}
+
+			fieldName := fieldType.Name
+			if jsonTag := fieldType.Tag.Get("json"); jsonTag != "" {
+				if parts := strings.Split(jsonTag, ","); len(parts) > 0 && parts[0] != "" {
+					fieldName = parts[0]
+				}
+			}
+
+			// Check if this is a *[]byte field and convert to Base64Bytes
+			if field.Kind() == reflect.Ptr &&
+				field.Type().Elem().Kind() == reflect.Slice &&
+				field.Type().Elem().Elem().Kind() == reflect.Uint8 {
+				if field.IsNil() {
+					result[fieldName] = Base64Bytes(nil)
+				} else {
+					result[fieldName] = Base64Bytes(field.Elem().Bytes())
+				}
+			} else if field.Kind() == reflect.Slice && field.Type().Elem().Kind() == reflect.Uint8 {
+				// Handle direct []byte fields
+				if field.IsNil() {
+					result[fieldName] = Base64Bytes(nil)
+				} else {
+					result[fieldName] = Base64Bytes(field.Bytes())
+				}
+			} else {
+				result[fieldName] = convertToMapWithBase64Bytes(field.Interface())
+			}
+		}
+		return result
+	}
+
+	// For primitive types, return as-is
+	return data
 }
