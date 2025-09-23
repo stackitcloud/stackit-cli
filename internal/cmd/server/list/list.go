@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -158,9 +157,9 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(servers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := utils.MarshalToYAMLWithBase64Bytes(servers)
 		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
+			return fmt.Errorf("marshal servers: %w", err)
 		}
 		p.Outputln(string(details))
 
