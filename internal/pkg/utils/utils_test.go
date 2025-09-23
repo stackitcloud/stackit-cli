@@ -502,3 +502,45 @@ func TestConvertToBase64PatchedServers(t *testing.T) {
 		})
 	}
 }
+
+func TestBase64Bytes_MarshalYAML(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    Base64Bytes
+		expected interface{}
+	}{
+		{
+			name:     "empty bytes",
+			input:    Base64Bytes{},
+			expected: "",
+		},
+		{
+			name:     "nil bytes",
+			input:    Base64Bytes(nil),
+			expected: "",
+		},
+		{
+			name:     "simple text",
+			input:    Base64Bytes("test"),
+			expected: "dGVzdA==",
+		},
+		{
+			name:     "special characters",
+			input:    Base64Bytes("test@#$%"),
+			expected: "dGVzdEAjJCU=",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := tt.input.MarshalYAML()
+			if err != nil {
+				t.Errorf("MarshalYAML() error = %v", err)
+				return
+			}
+			if result != tt.expected {
+				t.Errorf("MarshalYAML() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
