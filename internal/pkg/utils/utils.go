@@ -230,3 +230,17 @@ func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 		Volumes:             server.Volumes,
 	}
 }
+
+// ConvertToBase64PatchedServers converts a slice of iaas.Server to a slice of Base64PatchedServer
+func ConvertToBase64PatchedServers(servers []iaas.Server) []Base64PatchedServer {
+	if servers == nil {
+		return nil
+	}
+
+	result := make([]Base64PatchedServer, len(servers))
+	for i, server := range servers {
+		result[i] = *ConvertToBase64PatchedServer(&server)
+	}
+
+	return result
+}
