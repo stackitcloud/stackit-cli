@@ -238,8 +238,8 @@ func ConvertToBase64PatchedServers(servers []iaas.Server) []Base64PatchedServer 
 	}
 
 	result := make([]Base64PatchedServer, len(servers))
-	for i, server := range servers {
-		result[i] = *ConvertToBase64PatchedServer(&server)
+	for i := range servers {
+		result[i] = *ConvertToBase64PatchedServer(&servers[i])
 	}
 
 	return result
