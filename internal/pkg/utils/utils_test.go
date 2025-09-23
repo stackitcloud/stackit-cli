@@ -3,8 +3,10 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -243,6 +245,258 @@ func TestConvertStringMapToInterfaceMap(t *testing.T) {
 				}
 				if v != expectedVal {
 					t.Errorf("ConvertStringMapToInterfaceMap() value for key %s = %v, want %v", k, v, expectedVal)
+				}
+			}
+		})
+	}
+}
+
+func TestConvertToBase64PatchedServer(t *testing.T) {
+	now := time.Now()
+	userData := []byte("test")
+	emptyUserData := []byte("")
+
+	tests := []struct {
+		name     string
+		input    *iaas.Server
+		expected *Base64PatchedServer
+	}{
+		{
+			name:     "nil input",
+			input:    nil,
+			expected: nil,
+		},
+		{
+			name: "server with user data",
+			input: &iaas.Server{
+				Id:               Ptr("server-123"),
+				Name:             Ptr("test-server"),
+				Status:           Ptr("ACTIVE"),
+				AvailabilityZone: Ptr("eu01-1"),
+				MachineType:      Ptr("t1.1"),
+				UserData:         &userData,
+				CreatedAt:        &now,
+				PowerStatus:      Ptr("RUNNING"),
+				AffinityGroup:    Ptr("group-1"),
+				ImageId:          Ptr("image-123"),
+				KeypairName:      Ptr("keypair-1"),
+			},
+			expected: &Base64PatchedServer{
+				Id:               Ptr("server-123"),
+				Name:             Ptr("test-server"),
+				Status:           Ptr("ACTIVE"),
+				AvailabilityZone: Ptr("eu01-1"),
+				MachineType:      Ptr("t1.1"),
+				UserData:         Ptr(Base64Bytes(userData)),
+				CreatedAt:        &now,
+				PowerStatus:      Ptr("RUNNING"),
+				AffinityGroup:    Ptr("group-1"),
+				ImageId:          Ptr("image-123"),
+				KeypairName:      Ptr("keypair-1"),
+			},
+		},
+		{
+			name: "server with empty user data",
+			input: &iaas.Server{
+				Id:               Ptr("server-456"),
+				Name:             Ptr("test-server-2"),
+				Status:           Ptr("STOPPED"),
+				AvailabilityZone: Ptr("eu01-2"),
+				MachineType:      Ptr("t1.2"),
+				UserData:         &emptyUserData,
+			},
+			expected: &Base64PatchedServer{
+				Id:               Ptr("server-456"),
+				Name:             Ptr("test-server-2"),
+				Status:           Ptr("STOPPED"),
+				AvailabilityZone: Ptr("eu01-2"),
+				MachineType:      Ptr("t1.2"),
+				UserData:         Ptr(Base64Bytes(emptyUserData)),
+			},
+		},
+		{
+			name: "server without user data",
+			input: &iaas.Server{
+				Id:               Ptr("server-789"),
+				Name:             Ptr("test-server-3"),
+				Status:           Ptr("CREATING"),
+				AvailabilityZone: Ptr("eu01-3"),
+				MachineType:      Ptr("t1.3"),
+				UserData:         nil,
+			},
+			expected: &Base64PatchedServer{
+				Id:               Ptr("server-789"),
+				Name:             Ptr("test-server-3"),
+				Status:           Ptr("CREATING"),
+				AvailabilityZone: Ptr("eu01-3"),
+				MachineType:      Ptr("t1.3"),
+				UserData:         nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ConvertToBase64PatchedServer(tt.input)
+
+			if result == nil && tt.expected == nil {
+				return
+			}
+
+			if (result == nil && tt.expected != nil) || (result != nil && tt.expected == nil) {
+				t.Errorf("ConvertToBase64PatchedServer() = %v, want %v", result, tt.expected)
+				return
+			}
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("ConvertToBase64PatchedServer() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestConvertToBase64PatchedServers(t *testing.T) {
+	now := time.Now()
+	userData1 := []byte("test1")
+	userData2 := []byte("test2")
+	emptyUserData := []byte("")
+
+	tests := []struct {
+		name     string
+		input    []iaas.Server
+		expected []Base64PatchedServer
+	}{
+		{
+			name:     "nil input",
+			input:    nil,
+			expected: nil,
+		},
+		{
+			name:     "empty slice",
+			input:    []iaas.Server{},
+			expected: []Base64PatchedServer{},
+		},
+		{
+			name: "single server with user data",
+			input: []iaas.Server{
+				{
+					Id:               Ptr("server-1"),
+					Name:             Ptr("test-server-1"),
+					Status:           Ptr("ACTIVE"),
+					MachineType:      Ptr("t1.1"),
+					AvailabilityZone: Ptr("eu01-1"),
+					UserData:         &userData1,
+					CreatedAt:        &now,
+				},
+			},
+			expected: []Base64PatchedServer{
+				{
+					Id:               Ptr("server-1"),
+					Name:             Ptr("test-server-1"),
+					Status:           Ptr("ACTIVE"),
+					MachineType:      Ptr("t1.1"),
+					AvailabilityZone: Ptr("eu01-1"),
+					UserData:         Ptr(Base64Bytes(userData1)),
+					CreatedAt:        &now,
+				},
+			},
+		},
+		{
+			name: "multiple servers mixed",
+			input: []iaas.Server{
+				{
+					Id:               Ptr("server-1"),
+					Name:             Ptr("test-server-1"),
+					Status:           Ptr("ACTIVE"),
+					MachineType:      Ptr("t1.1"),
+					AvailabilityZone: Ptr("eu01-1"),
+					UserData:         &userData1,
+					CreatedAt:        &now,
+				},
+				{
+					Id:               Ptr("server-2"),
+					Name:             Ptr("test-server-2"),
+					Status:           Ptr("STOPPED"),
+					MachineType:      Ptr("t1.2"),
+					AvailabilityZone: Ptr("eu01-2"),
+					UserData:         &userData2,
+				},
+				{
+					Id:               Ptr("server-3"),
+					Name:             Ptr("test-server-3"),
+					Status:           Ptr("CREATING"),
+					MachineType:      Ptr("t1.3"),
+					AvailabilityZone: Ptr("eu01-3"),
+					UserData:         &emptyUserData,
+				},
+				{
+					Id:               Ptr("server-4"),
+					Name:             Ptr("test-server-4"),
+					Status:           Ptr("ERROR"),
+					MachineType:      Ptr("t1.4"),
+					AvailabilityZone: Ptr("eu01-4"),
+					UserData:         nil,
+				},
+			},
+			expected: []Base64PatchedServer{
+				{
+					Id:               Ptr("server-1"),
+					Name:             Ptr("test-server-1"),
+					Status:           Ptr("ACTIVE"),
+					MachineType:      Ptr("t1.1"),
+					AvailabilityZone: Ptr("eu01-1"),
+					UserData:         Ptr(Base64Bytes(userData1)),
+					CreatedAt:        &now,
+				},
+				{
+					Id:               Ptr("server-2"),
+					Name:             Ptr("test-server-2"),
+					Status:           Ptr("STOPPED"),
+					MachineType:      Ptr("t1.2"),
+					AvailabilityZone: Ptr("eu01-2"),
+					UserData:         Ptr(Base64Bytes(userData2)),
+				},
+				{
+					Id:               Ptr("server-3"),
+					Name:             Ptr("test-server-3"),
+					Status:           Ptr("CREATING"),
+					MachineType:      Ptr("t1.3"),
+					AvailabilityZone: Ptr("eu01-3"),
+					UserData:         Ptr(Base64Bytes(emptyUserData)),
+				},
+				{
+					Id:               Ptr("server-4"),
+					Name:             Ptr("test-server-4"),
+					Status:           Ptr("ERROR"),
+					MachineType:      Ptr("t1.4"),
+					AvailabilityZone: Ptr("eu01-4"),
+					UserData:         nil,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ConvertToBase64PatchedServers(tt.input)
+
+			if result == nil && tt.expected == nil {
+				return
+			}
+
+			if (result == nil && tt.expected != nil) || (result != nil && tt.expected == nil) {
+				t.Errorf("ConvertToBase64PatchedServers() = %v, want %v", result, tt.expected)
+				return
+			}
+
+			if len(result) != len(tt.expected) {
+				t.Errorf("ConvertToBase64PatchedServers() length = %d, want %d", len(result), len(tt.expected))
+				return
+			}
+
+			for i, server := range result {
+				if !reflect.DeepEqual(server, tt.expected[i]) {
+					t.Errorf("ConvertToBase64PatchedServers() [%d] = %v, want %v", i, server, tt.expected[i])
 				}
 			}
 		})
