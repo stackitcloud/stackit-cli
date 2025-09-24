@@ -194,6 +194,9 @@ type Base64PatchedServer struct {
 }
 
 // ConvertToBase64PatchedServer converts an iaas.Server to Base64PatchedServer
+// This is a temporary workaround to get the desired base64 encoded yaml output for userdata
+// and will be replaced by a fix in the Go-SDK
+// ref: https://jira.schwarz/browse/STACKITSDK-246
 func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 	if server == nil {
 		return nil
@@ -232,6 +235,9 @@ func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 }
 
 // ConvertToBase64PatchedServers converts a slice of iaas.Server to a slice of Base64PatchedServer
+// This is a temporary workaround to get the desired base64 encoded yaml output for userdata
+// and will be replaced by a fix in the Go-SDK
+// ref: https://jira.schwarz/browse/STACKITSDK-246
 func ConvertToBase64PatchedServers(servers []iaas.Server) []Base64PatchedServer {
 	if servers == nil {
 		return nil
