@@ -158,7 +158,11 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 
 		return nil
 	case print.YAMLOutputFormat:
+		// This is a temporary workaround to get the desired base64 encoded yaml output for userdata
+		// and will be replaced by a fix in the Go-SDK
+		// ref: https://jira.schwarz/browse/STACKITSDK-246
 		patchedServers := utils.ConvertToBase64PatchedServers(servers)
+
 		details, err := yaml.MarshalWithOptions(patchedServers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
