@@ -178,6 +178,16 @@ To list all profiles, run:
   $ stackit config profile list`
 
 	FILE_ALREADY_EXISTS = `file %q already exists in the export path. Delete the existing file or define a different export path`
+
+	PROJECT_NOT_FOUND = `the project %[2]q (ID: %[1]s) does not exist.
+
+To list all available projects, run:
+  $ stackit project list`
+
+	PROJECT_ACCESS_DENIED = `you don't have access to the project %[2]q (ID: %[1]s).
+
+To list all available projects, run:
+  $ stackit project list`
 )
 
 type ServerNicAttachMissingNicIdError struct {
@@ -499,3 +509,21 @@ type FileAlreadyExistsError struct {
 }
 
 func (e *FileAlreadyExistsError) Error() string { return fmt.Sprintf(FILE_ALREADY_EXISTS, e.Filename) }
+
+type ProjectNotFoundError struct {
+	ProjectId    string
+	ProjectLabel string
+}
+
+func (e *ProjectNotFoundError) Error() string {
+	return fmt.Sprintf(PROJECT_NOT_FOUND, e.ProjectId, e.ProjectLabel)
+}
+
+type ProjectAccessDeniedError struct {
+	ProjectId    string
+	ProjectLabel string
+}
+
+func (e *ProjectAccessDeniedError) Error() string {
+	return fmt.Sprintf(PROJECT_ACCESS_DENIED, e.ProjectId, e.ProjectLabel)
+}

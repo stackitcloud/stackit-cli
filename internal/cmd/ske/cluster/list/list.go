@@ -13,12 +13,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	serviceEnablementClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
 	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/validation"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -57,6 +57,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
+			// Validate project ID (exists and user has access)
+			projectLabel, err := validation.ValidateProject(ctx, params.Printer, params.CliVersion, cmd, model.ProjectId)
+			if err != nil {
+				return err
+			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -91,14 +97,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				clusters = clusters[:*model.Limit]
 			}
 
-			projectLabel := model.ProjectId
-			if len(clusters) == 0 {
-				projectLabel, err = projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				}
-			}
-
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, clusters)
 		},
 	}
@@ -113,9 +111,6 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
-	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
-	}
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
