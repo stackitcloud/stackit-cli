@@ -6,12 +6,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 )
 
 // ConfigureClient creates and configures a new Intake API client
-func ConfigureClient(p *print.Printer) (*intake.APIClient, error) {
+func ConfigureClient(p *print.Printer, cliVersion string) (*intake.APIClient, error) {
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
@@ -20,6 +21,7 @@ func ConfigureClient(p *print.Printer) (*intake.APIClient, error) {
 
 	region := viper.GetString(config.RegionKey)
 	cfgOptions := []sdkConfig.ConfigurationOption{
+		utils.UserAgentConfigOption(cliVersion),
 		sdkConfig.WithRegion(region),
 		authCfgOption,
 	}
