@@ -56,9 +56,6 @@ func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Update the message capacity limits for an Intake Runner with ID "xxx"`,
 				`$ stackit intake runner update xxx --max-message-size-kib 2000 --max-messages-per-hour 10000`),
-			examples.NewExample(
-				`Clear the labels of an Intake Runner with ID "xxx" by providing an empty value`,
-				`$ stackit intake runner update xxx --labels ""`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -98,7 +95,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels \"\"")
+	cmd.Flags().StringToString(labelFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

@@ -65,7 +65,6 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete Intake Runner: %w", err)
 			}
 
-			p.Printer.Outputf("Deletion request for Intake Runner %q sent successfully.\n", model.RunnerId)
 			return nil
 		},
 	}
