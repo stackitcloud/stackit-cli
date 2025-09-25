@@ -55,7 +55,7 @@ func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
 				`$ stackit intake runner update xxx --display-name "new-runner-name"`),
 			examples.NewExample(
 				`Update the message capacity limits for an Intake Runner with ID "xxx"`,
-				`$ stackit intake runner update xxx --max-message-size-kib 2000 --max-messages-per-hour 10000`),
+				`$ stackit intake runner update xxx --max-message-size-kib 1000 --max-messages-per-hour 10000`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
