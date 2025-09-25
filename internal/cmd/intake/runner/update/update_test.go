@@ -247,3 +247,47 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		projectLabel string
+		runnerId     string
+		resp         *intake.IntakeRunnerResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "default output",
+			args:    args{outputFormat: "default", projectLabel: "my-project", runnerId: "runner-id-123", resp: &intake.IntakeRunnerResponse{}},
+			wantErr: false,
+		},
+		{
+			name:    "json output",
+			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")}},
+			wantErr: false,
+		},
+		{
+			name:    "yaml output",
+			args:    args{outputFormat: print.YAMLOutputFormat, resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")}},
+			wantErr: false,
+		},
+		{
+			name:    "nil response",
+			args:    args{outputFormat: print.JSONOutputFormat, resp: nil},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewUpdateCmd(&params.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
