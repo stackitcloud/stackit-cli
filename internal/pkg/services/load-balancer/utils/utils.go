@@ -159,7 +159,9 @@ func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, al
 	}
 
 	var usedCredentialsRefs []string
-	for _, loadBalancer := range *loadBalancers.LoadBalancers {
+	for i := range *loadBalancers.LoadBalancers {
+		loadBalancer := &(*loadBalancers.LoadBalancers)[i]
+
 		if loadBalancer.Options == nil || loadBalancer.Options.Observability == nil {
 			continue
 		}

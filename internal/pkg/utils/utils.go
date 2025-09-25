@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 // Ptr Returns the pointer to any type T
@@ -152,4 +153,100 @@ func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{
 		result[k] = v
 	}
 	return &result
+}
+
+// Base64Bytes implements yaml.Marshaler to convert []byte to base64 strings
+// ref: https://carlosbecker.com/posts/go-custom-marshaling
+type Base64Bytes []byte
+
+// MarshalYAML implements yaml.Marshaler
+func (b Base64Bytes) MarshalYAML() (interface{}, error) {
+	if len(b) == 0 {
+		return "", nil
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+type Base64PatchedServer struct {
+	Id                  *string                             `json:"id,omitempty"`
+	Name                *string                             `json:"name,omitempty"`
+	Status              *string                             `json:"status,omitempty"`
+	AvailabilityZone    *string                             `json:"availabilityZone,omitempty"`
+	BootVolume          *iaas.CreateServerPayloadBootVolume `json:"bootVolume,omitempty"`
+	CreatedAt           *time.Time                          `json:"createdAt,omitempty"`
+	ErrorMessage        *string                             `json:"errorMessage,omitempty"`
+	PowerStatus         *string                             `json:"powerStatus,omitempty"`
+	AffinityGroup       *string                             `json:"affinityGroup,omitempty"`
+	ImageId             *string                             `json:"imageId,omitempty"`
+	KeypairName         *string                             `json:"keypairName,omitempty"`
+	MachineType         *string                             `json:"machineType,omitempty"`
+	Labels              *map[string]interface{}             `json:"labels,omitempty"`
+	LaunchedAt          *time.Time                          `json:"launchedAt,omitempty"`
+	MaintenanceWindow   *iaas.ServerMaintenance             `json:"maintenanceWindow,omitempty"`
+	Metadata            *map[string]interface{}             `json:"metadata,omitempty"`
+	Networking          *iaas.CreateServerPayloadNetworking `json:"networking,omitempty"`
+	Nics                *[]iaas.ServerNetwork               `json:"nics,omitempty"`
+	SecurityGroups      *[]string                           `json:"securityGroups,omitempty"`
+	ServiceAccountMails *[]string                           `json:"serviceAccountMails,omitempty"`
+	UpdatedAt           *time.Time                          `json:"updatedAt,omitempty"`
+	UserData            *Base64Bytes                        `json:"userData,omitempty"`
+	Volumes             *[]string                           `json:"volumes,omitempty"`
+}
+
+// ConvertToBase64PatchedServer converts an iaas.Server to Base64PatchedServer
+// This is a temporary workaround to get the desired base64 encoded yaml output for userdata
+// and will be replaced by a fix in the Go-SDK
+// ref: https://jira.schwarz/browse/STACKITSDK-246
+func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
+	if server == nil {
+		return nil
+	}
+
+	var userData *Base64Bytes
+	if server.UserData != nil {
+		userData = Ptr(Base64Bytes(*server.UserData))
+	}
+
+	return &Base64PatchedServer{
+		Id:                  server.Id,
+		Name:                server.Name,
+		Status:              server.Status,
+		AvailabilityZone:    server.AvailabilityZone,
+		BootVolume:          server.BootVolume,
+		CreatedAt:           server.CreatedAt,
+		ErrorMessage:        server.ErrorMessage,
+		PowerStatus:         server.PowerStatus,
+		AffinityGroup:       server.AffinityGroup,
+		ImageId:             server.ImageId,
+		KeypairName:         server.KeypairName,
+		MachineType:         server.MachineType,
+		Labels:              server.Labels,
+		LaunchedAt:          server.LaunchedAt,
+		MaintenanceWindow:   server.MaintenanceWindow,
+		Metadata:            server.Metadata,
+		Networking:          server.Networking,
+		Nics:                server.Nics,
+		SecurityGroups:      server.SecurityGroups,
+		ServiceAccountMails: server.ServiceAccountMails,
+		UpdatedAt:           server.UpdatedAt,
+		UserData:            userData,
+		Volumes:             server.Volumes,
+	}
+}
+
+// ConvertToBase64PatchedServers converts a slice of iaas.Server to a slice of Base64PatchedServer
+// This is a temporary workaround to get the desired base64 encoded yaml output for userdata
+// and will be replaced by a fix in the Go-SDK
+// ref: https://jira.schwarz/browse/STACKITSDK-246
+func ConvertToBase64PatchedServers(servers []iaas.Server) []Base64PatchedServer {
+	if servers == nil {
+		return nil
+	}
+
+	result := make([]Base64PatchedServer, len(servers))
+	for i := range servers {
+		result[i] = *ConvertToBase64PatchedServer(&servers[i])
+	}
+
+	return result
 }
