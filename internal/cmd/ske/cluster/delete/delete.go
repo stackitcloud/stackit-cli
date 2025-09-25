@@ -6,12 +6,12 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/validation"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/ske"
@@ -41,6 +41,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Validate project ID (exists and user has access)
+			_, err = validation.ValidateProject(ctx, params.Printer, params.CliVersion, cmd, model.ProjectId)
 			if err != nil {
 				return err
 			}
@@ -92,9 +98,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	clusterName := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
-	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
-	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
