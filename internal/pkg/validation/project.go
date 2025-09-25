@@ -14,9 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 )
 
-// ValidateProject validates that the project ID is not empty, exists, and the user has access to it.
-// It returns the project name for display purposes.
-func ValidateProject(ctx context.Context, p *print.Printer, cliVersion string, cmd *cobra.Command, projectId string) (string, error) {
+// ValidateAndGetProjectLabel validates that the project ID is not empty, exists, and the user has access to it.
+// It returns the project label (name or ID) for display purposes.
+func ValidateAndGetProjectLabel(ctx context.Context, p *print.Printer, cliVersion string, cmd *cobra.Command, projectId string) (string, error) {
 	// Check if project ID is empty
 	if projectId == "" {
 		return "", &errors.ProjectIdError{}

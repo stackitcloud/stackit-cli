@@ -42,7 +42,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Validate project ID (exists and user has access)
-			projectLabel, err := validation.ValidateProject(ctx, params.Printer, params.CliVersion, cmd, model.ProjectId)
+			projectLabel, err := validation.ValidateAndGetProjectLabel(ctx, params.Printer, params.CliVersion, cmd, model.ProjectId)
 			if err != nil {
 				return err
 			}
