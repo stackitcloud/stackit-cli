@@ -35,20 +35,13 @@ func ValidateProject(ctx context.Context, p *print.Printer, cliVersion string, c
 		// Check for specific HTTP status codes
 		if httpErr, ok := err.(*oapierror.GenericOpenAPIError); ok { //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
 			switch httpErr.StatusCode {
-			case http.StatusNotFound:
+			case http.StatusNotFound, http.StatusForbidden:
 				// Try to get project name for better error message
 				projectLabel := projectId
 				if projectName, nameErr := projectname.GetProjectName(ctx, p, cliVersion, cmd); nameErr == nil {
 					projectLabel = projectName
 				}
 				return "", &errors.ProjectNotFoundError{ProjectId: projectId, ProjectLabel: projectLabel}
-			case http.StatusForbidden:
-				// Try to get project name for better error message
-				projectLabel := projectId
-				if projectName, nameErr := projectname.GetProjectName(ctx, p, cliVersion, cmd); nameErr == nil {
-					projectLabel = projectName
-				}
-				return "", &errors.ProjectAccessDeniedError{ProjectId: projectId, ProjectLabel: projectLabel}
 			case http.StatusUnauthorized:
 				return "", &errors.AuthError{}
 			}
