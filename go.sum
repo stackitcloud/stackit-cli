@@ -584,6 +584,8 @@ github.com/stackitcloud/stackit-sdk-go/services/intake v0.1.0 h1:IhswZoEHqkBW60w
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.1.0/go.mod h1:vRnT3zxWJ1k7wbAk8JmO0xFmPhmeos5HTIWdsVAAoKU=
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.1.1 h1:qKAGtRfnB89vXom5mIwctMHFeznMQWXJd3cqQBURIK8=
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.1.1/go.mod h1:jOArPjNRkwv4487+9ab3dRG+lM09leu5FiRohbQs9Z4=
+github.com/stackitcloud/stackit-sdk-go/services/intake v0.2.0 h1:p/zi4VPoCQWk7/2ubi3hxsqiaye41x/Pl3GXYbPkYOY=
+github.com/stackitcloud/stackit-sdk-go/services/intake v0.2.0/go.mod h1:jOArPjNRkwv4487+9ab3dRG+lM09leu5FiRohbQs9Z4=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.5.1 h1:OdJEs8eOfrzn9tCBDLxIyP8hX50zPfcXNYnRoQX+chs=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.5.1/go.mod h1:11uzaOPCF9SeDHXEGOPMlHDD3J5r2TnvCGUwW9Igq9c=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.1 h1:hv5WrRU9rN6Jx4OwdOGJRyaQrfA9p1tzEoQK6/CDyoA=

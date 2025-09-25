@@ -2,7 +2,10 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 
 	"github.com/spf13/cobra"
 
@@ -70,14 +73,20 @@ func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
+			if err != nil {
+				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			if err := req.Execute(); err != nil {
+			resp, err := req.Execute()
+			if err != nil {
 				return fmt.Errorf("update Intake Runner: %w", err)
 			}
 
-			p.Printer.Info("Update request for Intake Runner %q sent successfully.\n", model.RunnerId)
-			return nil
+			return outputResult(p.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -148,4 +157,28 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 	req = req.UpdateIntakeRunnerPayload(payload)
 	return req
+}
+
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *intake.IntakeRunnerResponse) error {
+	switch outputFormat {
+	case print.JSONOutputFormat:
+		details, err := json.MarshalIndent(resp, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case print.YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		if err != nil {
+			return fmt.Errorf("marshal instance: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		p.Outputf("Updated Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+		return nil
+	}
 }
