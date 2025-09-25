@@ -56,7 +56,7 @@ func NewListCmd(p *params.CmdParams) *cobra.Command {
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(p.Printer)
+			apiClient, err := client.ConfigureClient(p.Printer, p.CliVersion)
 			if err != nil {
 				return err
 			}
