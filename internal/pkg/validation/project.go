@@ -33,7 +33,7 @@ func ValidateProject(ctx context.Context, p *print.Printer, cliVersion string, c
 	resp, err := req.Execute()
 	if err != nil {
 		// Check for specific HTTP status codes
-		if httpErr, ok := err.(*oapierror.GenericOpenAPIError); ok {
+		if httpErr, ok := err.(*oapierror.GenericOpenAPIError); ok { //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
 			switch httpErr.StatusCode {
 			case http.StatusNotFound:
 				// Try to get project name for better error message
