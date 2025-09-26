@@ -1,8 +1,8 @@
-package ipranges
+package ranges
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/ip-ranges/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/public-ip/ranges/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -11,9 +11,9 @@ import (
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ip-ranges",
-		Short: "Provides functionality for STACKIT Cloud public ip-ranges",
-		Long:  "Provides functionality for STACKIT Cloud public ip-ranges",
+		Use:   "ranges",
+		Short: "Provides functionality for STACKIT public-ip ranges",
+		Long:  "Provides functionality for STACKIT public-ip ranges",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

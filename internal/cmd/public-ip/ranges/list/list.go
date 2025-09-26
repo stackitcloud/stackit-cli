@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -25,17 +24,17 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all STACKIT cloud public IP ranges.",
-		Long:  "Lists all STACKIT cloud public IP ranges.",
+		Short: "Lists all STACKIT public-ip ranges",
+		Long:  "Lists all STACKIT public-ip ranges.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Lists all STACKIT cloud public IP ranges`,
+				`Lists all STACKIT public-ip ranges`,
 				"$ stackit public-ip ranges list",
 			),
 			examples.NewExample(
-				`Lists all STACKIT cloud public IP ranges, piping to a tool like fzf for interactive selection`,
-				"$ stackit public-ip ip-ranges list -o pretty | fzf",
+				`Lists all STACKIT public-ip ranges, piping to a tool like fzf for interactive selection`,
+				"$ stackit public-ip ranges list -o pretty | fzf",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -72,9 +71,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
-	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
-	}
 
 	model := inputModel{GlobalFlagModel: globalFlags}
 
@@ -111,7 +107,7 @@ func outputResult(p *print.Printer, outputFormat string, networkListResponse iaa
 	default:
 		var publicIps []string
 		for _, item := range *networkListResponse.Items {
-			if item.Cidr != nil || *item.Cidr != "" {
+			if item.Cidr != nil && *item.Cidr != "" {
 				publicIps = append(publicIps, *item.Cidr)
 			}
 		}

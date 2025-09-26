@@ -1,29 +1,29 @@
-## stackit public-ip ip-ranges list
+## stackit public-ip ranges list
 
-Lists all STACKIT cloud public IP ranges.
+Lists all STACKIT public-ip ranges
 
 ### Synopsis
 
-Lists all STACKIT cloud public IP ranges.
+Lists all STACKIT public-ip ranges.
 
 ```
-stackit public-ip ip-ranges list [flags]
+stackit public-ip ranges list [flags]
 ```
 
 ### Examples
 
 ```
-  Lists all STACKIT cloud public IP ranges
+  Lists all STACKIT public-ip ranges
   $ stackit public-ip ranges list
 
-  Lists all STACKIT cloud public IP ranges, piping to a tool like fzf for interactive selection
-  $ stackit public-ip ip-ranges list -o pretty | fzf
+  Lists all STACKIT public-ip ranges, piping to a tool like fzf for interactive selection
+  $ stackit public-ip ranges list -o pretty | fzf
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit public-ip ip-ranges list"
+  -h, --help   Help for "stackit public-ip ranges list"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +39,5 @@ stackit public-ip ip-ranges list [flags]
 
 ### SEE ALSO
 
-* [stackit public-ip ip-ranges](./stackit_public-ip_ip-ranges.md)	 - Provides functionality for STACKIT Cloud public ip-ranges
+* [stackit public-ip ranges](./stackit_public-ip_ranges.md)	 - Provides functionality for STACKIT public-ip ranges
 

@@ -34,10 +34,14 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 		},
 		{
-			description:   "missing project id",
-			globalFlags:   map[string]string{},
-			expectedModel: nil,
-			isValid:       false,
+			description: "missing project id does not lead into error",
+			globalFlags: map[string]string{},
+			expectedModel: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					Verbosity: globalflags.InfoVerbosity,
+				},
+			},
+			isValid: true,
 		},
 	}
 
