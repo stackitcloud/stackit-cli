@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
@@ -66,7 +67,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list public IP ranges: %w", err)
 			}
-			publicIpRanges := *resp.Items
+			publicIpRanges := utils.GetSliceFromPointer(resp.Items)
 
 			// Truncate output
 			if model.Limit != nil && len(publicIpRanges) > int(*model.Limit) {
