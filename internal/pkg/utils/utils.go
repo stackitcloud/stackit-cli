@@ -251,7 +251,8 @@ func ConvertToBase64PatchedServers(servers []iaas.Server) []Base64PatchedServer 
 	return result
 }
 
-// GetSliceFromPointer returns the value of a pointer to a slice of type T. If the pointer is nil, it returns an empty slice.
+// GetSliceFromPointer returns the value of a pointer to a slice of type T.
+// If the pointer is nil, it returns an empty slice.
 func GetSliceFromPointer[T any](s *[]T) []T {
 	if s == nil {
 		return []T{}
