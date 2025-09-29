@@ -10,15 +10,22 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	limitFlag = "limit"
+)
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit *int64
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -35,6 +42,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Lists all STACKIT public-ip ranges, piping to a tool like fzf for interactive selection`,
 				"$ stackit public-ip ranges list -o pretty | fzf",
+			),
+			examples.NewExample(
+				`Lists up to 10 STACKIT public-ip ranges`,
+				"$ stackit public-ip ranges list --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -55,7 +66,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			resp, err := req.Execute()
 
 			if err != nil {
-				return fmt.Errorf("list public ip ranges s: %w", err)
+				return fmt.Errorf("list public IP ranges: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
@@ -63,16 +74,40 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return nil
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			publicIpRanges := *resp.Items
+
+			// Truncate output
+			if model.Limit != nil && len(publicIpRanges) > int(*model.Limit) {
+				publicIpRanges = publicIpRanges[:*model.Limit]
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, publicIpRanges)
 		},
 	}
+
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	model := inputModel{GlobalFlagModel: globalFlags}
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+		Limit:           limit,
+	}
 
 	if p.IsVerbosityDebug() {
 		modelStr, err := print.BuildDebugStrFromInputModel(model)
@@ -86,32 +121,32 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkListResponse iaas.PublicNetworkListResponse) error {
+func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.PublicNetwork) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkListResponse, "", "  ")
+		details, err := json.MarshalIndent(publicIpRanges, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
+			return fmt.Errorf("marshal public IP ranges: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkListResponse, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		details, err := yaml.MarshalWithOptions(publicIpRanges, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
+			return fmt.Errorf("marshal public IP ranges: %w", err)
 		}
 		p.Outputln(string(details))
 
 		return nil
 	default:
-		var publicIps []string
-		for _, item := range *networkListResponse.Items {
+		var cidrs []string
+		for _, item := range publicIpRanges {
 			if item.Cidr != nil && *item.Cidr != "" {
-				publicIps = append(publicIps, *item.Cidr)
+				cidrs = append(cidrs, *item.Cidr)
 			}
 		}
-		p.Outputln(strings.Join(publicIps, "\n"))
+		p.Outputln(strings.Join(cidrs, "\n"))
 
 		return nil
 	}
