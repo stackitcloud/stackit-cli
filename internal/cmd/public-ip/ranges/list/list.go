@@ -63,16 +63,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			req := apiClient.ListPublicIPRanges(ctx)
 			resp, err := req.Execute()
-
 			if err != nil {
 				return fmt.Errorf("list public IP ranges: %w", err)
 			}
-
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				params.Printer.Info("No public IP ranges found\n")
-				return nil
-			}
-
 			publicIpRanges := *resp.Items
 
 			// Truncate output
@@ -139,6 +132,11 @@ func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.P
 
 		return nil
 	default:
+		if len(publicIpRanges) == 0 {
+			p.Outputln("No public IP ranges found")
+			return nil
+		}
+
 		for _, item := range publicIpRanges {
 			if item.Cidr != nil && *item.Cidr != "" {
 				p.Outputln(*item.Cidr)
