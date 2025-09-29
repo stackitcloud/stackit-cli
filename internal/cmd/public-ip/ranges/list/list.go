@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
@@ -140,13 +139,11 @@ func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.P
 
 		return nil
 	default:
-		var cidrs []string
 		for _, item := range publicIpRanges {
 			if item.Cidr != nil && *item.Cidr != "" {
-				cidrs = append(cidrs, *item.Cidr)
+				p.Outputln(*item.Cidr)
 			}
 		}
-		p.Outputln(strings.Join(cidrs, "\n"))
 
 		return nil
 	}
