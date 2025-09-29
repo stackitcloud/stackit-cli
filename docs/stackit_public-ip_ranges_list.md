@@ -18,12 +18,16 @@ stackit public-ip ranges list [flags]
 
   Lists all STACKIT public-ip ranges, piping to a tool like fzf for interactive selection
   $ stackit public-ip ranges list -o pretty | fzf
+
+  Lists up to 10 STACKIT public-ip ranges
+  $ stackit public-ip ranges list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit public-ip ranges list"
+  -h, --help        Help for "stackit public-ip ranges list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
