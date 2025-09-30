@@ -39,6 +39,30 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Short: "Describes a network interface",
 		Long:  "Describes a network interface.",
 		Args:  args.SingleArg(nicIdArg, utils.ValidateUUID),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			model, err := parseInput(params.Printer, cmd, []string{""})
+			if err != nil {
+				return []string{"error", err.Error()}, cobra.ShellCompDirectiveError
+			}
+			if model.NetworkId == nil || *model.NetworkId == "" {
+				return nil, cobra.ShellCompDirectiveError
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return []string{"error", err.Error()}, cobra.ShellCompDirectiveError
+			}
+			nics, err := apiClient.ListNicsExecute(cmd.Context(), model.ProjectId, *model.NetworkId)
+			if err != nil {
+				return []string{"error", err.Error()}, cobra.ShellCompDirectiveError
+			}
+			var nicIds []cobra.Completion
+			for _, nic := range *nics.Items {
+				nicIds = append(nicIds, cobra.CompletionWithDesc(*nic.Id, utils.PtrString(nic.Name)))
+			}
+			return nicIds, cobra.ShellCompDirectiveNoFileComp
+		},
 		Example: examples.Build(
 			examples.NewExample(
 				`Describes network interface with nic id "xxx" and network ID "yyy"`,
@@ -76,14 +100,37 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), networkIdFlag, "Network ID")
 
-	err := flags.MarkFlagsRequired(cmd, networkIdFlag)
+	err := cmd.RegisterFlagCompletionFunc(networkIdFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		globalFlags := globalflags.Parse(params.Printer, cmd)
+
+		// Configure API client
+		apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+		if err != nil {
+			return []string{"error", err.Error()}, cobra.ShellCompDirectiveError
+		}
+		networks, err := apiClient.ListNetworksExecute(cmd.Context(), globalFlags.ProjectId)
+		if err != nil {
+			return []string{"error", err.Error()}, cobra.ShellCompDirectiveError
+		}
+		var networkIds []cobra.Completion
+		for _, network := range *networks.Items {
+			networkIds = append(networkIds, cobra.CompletionWithDesc(*network.NetworkId, utils.PtrString(network.Name)))
+		}
+		return networkIds, cobra.ShellCompDirectiveNoFileComp
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = flags.MarkFlagsRequired(cmd, networkIdFlag)
 	cobra.CheckErr(err)
 }
 
