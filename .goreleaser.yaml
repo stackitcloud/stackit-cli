@@ -98,14 +98,16 @@ nfpms:
     formats:
       - deb
       - rpm
-    # The package is signed if a key_file is set
-    signature:
-      # PGP secret key file path (can also be ASCII-armored).
-      #
-      # See "Signing key passphrases" below for more information.
-      #
-      # Templates: allowed.
-      key_file: "{{ .Env.GPG_KEY_PATH }}"
+
+    rpm:
+      # The package is signed if a key_file is set
+      signature:
+        # PGP secret key file path (can also be ASCII-armored).
+        #
+        # See "Signing key passphrases" below for more information.
+        #
+        # Templates: allowed.
+        key_file: "{{ .Env.GPG_KEY_PATH }}"
 
 # signs:
 #   - artifacts: package
