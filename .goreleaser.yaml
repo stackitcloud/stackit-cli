@@ -12,74 +12,74 @@ builds:
       - linux
     binary: "stackit"
 
-  - id: windows-builds
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - windows
-    binary: "stackit"
+  # - id: windows-builds
+  #   env:
+  #     - CGO_ENABLED=0
+  #   goos:
+  #     - windows
+  #   binary: "stackit"
 
-  - id: macos-builds
-    env:
-      - CGO_ENABLED=0
-      - BUNDLE_ID=cloud.stackit.cli
-      - "APPLE_APPLICATION_IDENTITY=Developer ID Application: Schwarz IT KG"
-    goos:
-      - darwin
-    binary: "stackit"
-    goarch:
-      - arm64
-      - amd64
-    hooks:
-      post:
-        # Signing
-        - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
-          output: true
-        - cmd: codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
-          output: true
-        - cmd: hdiutil create -volname "STACKIT-CLI" -srcfolder "dist/macos-builds_{{.Target}}/{{.Name}}" -ov -format UDZO "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          output: true
-        - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          output: true
-        - cmd: xcrun notarytool submit --keychain-profile "stackit-cli" --wait --progress dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
-          output: true
-        - cmd: xcrun stapler staple "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
-          output: true
-        - cmd: spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
-          output: true
-        # Completion files
-        - cmd: mkdir -p dist/completions
-        - cmd: sh -c 'go run main.go completion zsh > ./dist/completions/stackit.zsh'
-        - cmd: sh -c 'go run main.go completion bash > ./dist/completions/stackit.bash'
-        - cmd: sh -c 'go run main.go completion fish > ./dist/completions/stackit.fish'
+  # - id: macos-builds
+  #   env:
+  #     - CGO_ENABLED=0
+  #     - BUNDLE_ID=cloud.stackit.cli
+  #     - "APPLE_APPLICATION_IDENTITY=Developer ID Application: Schwarz IT KG"
+  #   goos:
+  #     - darwin
+  #   binary: "stackit"
+  #   goarch:
+  #     - arm64
+  #     - amd64
+  #   hooks:
+  #     post:
+  #       # Signing
+  #       - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/macos-builds_{{.Target}}/{{.Name}}"
+  #         output: true
+  #       - cmd: codesign -vvv --deep --strict "dist/macos-builds_{{.Target}}/{{.Name}}"
+  #         output: true
+  #       - cmd: hdiutil create -volname "STACKIT-CLI" -srcfolder "dist/macos-builds_{{.Target}}/{{.Name}}" -ov -format UDZO "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+  #         output: true
+  #       - cmd: codesign -s "{{.Env.APPLE_APPLICATION_IDENTITY}}" -f -v --options=runtime "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+  #         output: true
+  #       - cmd: xcrun notarytool submit --keychain-profile "stackit-cli" --wait --progress dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+  #         output: true
+  #       - cmd: xcrun stapler staple "dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg"
+  #         output: true
+  #       - cmd: spctl -a -t open --context context:primary-signature -v dist/{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.dmg
+  #         output: true
+  #       # Completion files
+  #       - cmd: mkdir -p dist/completions
+  #       - cmd: sh -c 'go run main.go completion zsh > ./dist/completions/stackit.zsh'
+  #       - cmd: sh -c 'go run main.go completion bash > ./dist/completions/stackit.bash'
+  #       - cmd: sh -c 'go run main.go completion fish > ./dist/completions/stackit.fish'
 
-archives:
-  - id: windows-archives
-    ids:
-      - windows-builds
-    formats: [ 'zip' ]
-  - ids:
-      - linux-builds
-      - macos-builds
-    formats: [ 'tar.gz' ]
-    files:
-      - src: ./dist/completions/*
-        dst: completions
-      - LICENSE.md
-      - README.md
+# archives:
+#   - id: windows-archives
+#     ids:
+#       - windows-builds
+#     formats: [ 'zip' ]
+#   - ids:
+#       - linux-builds
+#       - macos-builds
+#     formats: [ 'tar.gz' ]
+#     files:
+#       - src: ./dist/completions/*
+#         dst: completions
+#       - LICENSE.md
+#       - README.md
 
-release:
-  # If set to auto, the GitHub release will be marked as "Pre-release"
-  # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-  prerelease: auto
+# release:
+#   # If set to auto, the GitHub release will be marked as "Pre-release"
+#   # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+#   prerelease: auto
 
-changelog:
-  use: github
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+# changelog:
+#   use: github
+#   sort: asc
+#   filters:
+#     exclude:
+#       - "^docs:"
+#       - "^test:"
 
 nfpms:
   - id: linux-packages
@@ -111,63 +111,63 @@ signs:
         "${artifact}",
       ]
 
-homebrew_casks:
-  - name: stackit
-    directory: Casks
-    repository:
-      owner: stackitcloud
-      name: homebrew-tap
-    commit_author:
-      name: CLI Release Bot
-      email: noreply@stackit.de
-    homepage: "https://github.com/stackitcloud/stackit-cli"
-    description: "A command-line interface to manage STACKIT resources."
-    license: "Apache-2.0"
-    # If set to auto, the release will not be uploaded to the homebrew tap repo
-    # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    skip_upload: auto
-    completions:
-      zsh: ./completions/stackit.zsh
-      bash: ./completions/stackit.bash
-      fish: ./completions/stackit.fish
+# homebrew_casks:
+#   - name: stackit
+#     directory: Casks
+#     repository:
+#       owner: stackitcloud
+#       name: homebrew-tap
+#     commit_author:
+#       name: CLI Release Bot
+#       email: noreply@stackit.de
+#     homepage: "https://github.com/stackitcloud/stackit-cli"
+#     description: "A command-line interface to manage STACKIT resources."
+#     license: "Apache-2.0"
+#     # If set to auto, the release will not be uploaded to the homebrew tap repo
+#     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+#     skip_upload: auto
+#     completions:
+#       zsh: ./completions/stackit.zsh
+#       bash: ./completions/stackit.bash
+#       fish: ./completions/stackit.fish
 
-snapcrafts:
-  # IDs of the builds for which to create packages for
-  - ids:
-      - linux-builds
-    # The name of the snap
-    name: stackit
-    # The canonical title of the application, displayed in the software
-    # centre graphical frontends
-    title: STACKIT CLI
-    summary: A command-line interface to manage STACKIT resources.
-    description: "A command-line interface to manage STACKIT resources."
-    license: Apache-2.0
-    confinement: classic
-    # Grade "devel" will only release to `edge` and `beta` channels
-    # Grade "stable" will also release to the `candidate` and `stable` channels
-    grade: stable
-    # Whether to publish the Snap to the store
-    publish: true
+# snapcrafts:
+#   # IDs of the builds for which to create packages for
+#   - ids:
+#       - linux-builds
+#     # The name of the snap
+#     name: stackit
+#     # The canonical title of the application, displayed in the software
+#     # centre graphical frontends
+#     title: STACKIT CLI
+#     summary: A command-line interface to manage STACKIT resources.
+#     description: "A command-line interface to manage STACKIT resources."
+#     license: Apache-2.0
+#     confinement: classic
+#     # Grade "devel" will only release to `edge` and `beta` channels
+#     # Grade "stable" will also release to the `candidate` and `stable` channels
+#     grade: stable
+#     # Whether to publish the Snap to the store
+#     publish: true
 
-winget:
-  - name: stackit
-    publisher: stackitcloud
-    short_description: A command-line interface to manage STACKIT resources.
-    license: Apache-2.0
-    publisher_support_url: "https://github.com/stackitcloud/stackit-cli/issues"
-    package_identifier: stackitcloud.stackit
-    homepage: "https://github.com/stackitcloud/stackit-cli"
-    # If set to auto, the release will not be uploaded to the homebrew tap repo
-    # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    # Temporarily not skipping prereleases to test integration with Winget
-    # skip_upload: auto
-    repository:
-      owner: stackitcloud
-      name: winget-pkgs
-      pull_request:
-        enabled: true
-        base:
-          owner: microsoft
-          name: winget-pkgs
-          branch: master
+# winget:
+#   - name: stackit
+#     publisher: stackitcloud
+#     short_description: A command-line interface to manage STACKIT resources.
+#     license: Apache-2.0
+#     publisher_support_url: "https://github.com/stackitcloud/stackit-cli/issues"
+#     package_identifier: stackitcloud.stackit
+#     homepage: "https://github.com/stackitcloud/stackit-cli"
+#     # If set to auto, the release will not be uploaded to the homebrew tap repo
+#     # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
+#     # Temporarily not skipping prereleases to test integration with Winget
+#     # skip_upload: auto
+#     repository:
+#       owner: stackitcloud
+#       name: winget-pkgs
+#       pull_request:
+#         enabled: true
+#         base:
+#           owner: microsoft
+#           name: winget-pkgs
+#           branch: master
