@@ -54,7 +54,7 @@ done
 
 # Download existing repository metadata if it exists
 printf "\n>>> Downloading existing repository metadata \n"
-aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "${AWS_ENDPOINT_URL}" --delete || echo "No existing repository found, creating new one"
+aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "${AWS_ENDPOINT_URL}" --exclude "*" --include "*/repodata/*" || echo "No existing repository found, creating new one"
 
 # Create repository metadata for each architecture
 printf "\n>>> Creating repository metadata \n"
@@ -85,7 +85,7 @@ done
 
 # Upload the updated repository to S3
 printf "\n>>> Uploading repository to S3 \n"
-aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --endpoint-url "${AWS_ENDPOINT_URL}" --delete
+aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --endpoint-url "${AWS_ENDPOINT_URL}"
 
 # Upload the public key
 printf "\n>>> Uploading public key \n"
