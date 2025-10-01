@@ -101,6 +101,8 @@ jobs:
       # Needed to publish new packages to our S3-hosted RPM repo
       AWS_ACCESS_KEY_ID: ${{ secrets.TEST_OBJECT_STORAGE_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu01
+      AWS_ENDPOINT_URL: https://object.storage.eu01.onstackit.cloud
     steps:
       - name: Checkout
         uses: actions/checkout@v5
