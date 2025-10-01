@@ -41,6 +41,11 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
+      - name: Create GPG key file
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg-private-key.asc
+          chmod 600 gpg-private-key.asc
+      
       - name: Set up keychain
         run: |
           echo -n $SIGNING_CERTIFICATE_BASE64 | base64 -d -o ./ApplicationID.p12
@@ -71,7 +76,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GPG_KEY_PATH: ./gpg-private-key.asc
 
+      - name: Clean up GPG key file
+        run: |
+          rm -f gpg-private-key.asc
+      
       # artifacts need to be passed to the "publish-apt" job somehow
       - name: Upload artifacts to workflow
         uses: actions/upload-artifact@v4
