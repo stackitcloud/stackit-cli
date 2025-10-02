@@ -146,6 +146,17 @@ func TestClusterExists(t *testing.T) {
 
 func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOptions {
 	providerOptions := &ske.ProviderOptions{
+		AvailabilityZones: &[]ske.AvailabilityZone{
+			{Name: utils.Ptr("eu01-m")},
+			{Name: utils.Ptr("eu01-1")},
+			{Name: utils.Ptr("eu01-2")},
+			{Name: utils.Ptr("eu01-3")},
+		},
+		MachineTypes: &[]ske.MachineType{
+			{
+				Name: utils.Ptr("b1.2"),
+			},
+		},
 		KubernetesVersions: &[]ske.KubernetesVersion{
 			{
 				State:   utils.Ptr("supported"),
@@ -263,6 +274,9 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 		Nodepools: &[]ske.Nodepool{
 			{
 				AvailabilityZones: &[]string{
+					"eu01-m",
+					"eu01-1",
+					"eu01-2",
 					"eu01-3",
 				},
 				Cri: &ske.CRI{
@@ -275,9 +289,9 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 						Name:    utils.Ptr("flatcar"),
 					},
 				},
-				MaxSurge:       utils.Ptr(int64(1)),
+				MaxSurge:       utils.Ptr(int64(4)),
 				MaxUnavailable: utils.Ptr(int64(0)),
-				Maximum:        utils.Ptr(int64(2)),
+				Maximum:        utils.Ptr(int64(4)),
 				Minimum:        utils.Ptr(int64(1)),
 				Name:           utils.Ptr("pool-default"),
 				Volume: &ske.Volume{
@@ -311,6 +325,34 @@ func TestGetDefaultPayload(t *testing.T) {
 			description:              "get provider options fails",
 			listProviderOptionsFails: true,
 			isValid:                  false,
+		},
+		{
+			description: "availability zones nil",
+			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
+				po.AvailabilityZones = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "no availability zones",
+			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
+				po.AvailabilityZones = &[]ske.AvailabilityZone{}
+			}),
+			isValid: false,
+		},
+		{
+			description: "machine types nil",
+			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
+				po.MachineTypes = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "no machine types",
+			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
+				po.MachineTypes = &[]ske.MachineType{}
+			}),
+			isValid: false,
 		},
 		{
 			description: "no Kubernetes versions 1",
