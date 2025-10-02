@@ -52,9 +52,9 @@ for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_arm64.rpm; do
     fi
 done
 
-# Download existing repository metadata if it exists
-printf "\n>>> Downloading existing repository metadata \n"
-aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "${AWS_ENDPOINT_URL}" --exclude "*" --include "*/repodata/*" || echo "No existing repository found, creating new one"
+# Download existing repository content (RPMs and metadata) if it exists
+printf "\n>>> Downloading existing repository content \n"
+aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "${AWS_ENDPOINT_URL}" --exclude "*.asc" || echo "No existing repository found, creating new one"
 
 # Create repository metadata for each architecture
 printf "\n>>> Creating repository metadata \n"
@@ -70,6 +70,8 @@ for arch in x86_64 i386 aarch64; do
         
         # Sign the repository metadata
         printf "Signing repository metadata for ${arch}...\n"
+        # Remove existing signature file if it exists
+        rm -f rpm-repo/${arch}/repodata/repomd.xml.asc
         gpg --batch --detach-sign --armor --local-user "${GPG_PRIVATE_KEY_FINGERPRINT}" --passphrase "${GPG_PASSPHRASE}" rpm-repo/${arch}/repodata/repomd.xml
         
         # Verify the signature was created
