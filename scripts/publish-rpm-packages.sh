@@ -87,6 +87,8 @@ done
 
 # Upload the updated repository to S3
 printf "\n>>> Uploading repository to S3 \n"
+# Remove old metadata files first to avoid duplicates
+aws s3 rm s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --recursive --exclude "*" --include "*/repodata/*" --endpoint-url "${AWS_ENDPOINT_URL}" || echo "No old metadata to remove"
 aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --endpoint-url "${AWS_ENDPOINT_URL}"
 
 # Upload the public key
