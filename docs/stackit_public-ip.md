@@ -36,5 +36,6 @@ stackit public-ip [flags]
 * [stackit public-ip describe](./stackit_public-ip_describe.md)	 - Shows details of a Public IP
 * [stackit public-ip disassociate](./stackit_public-ip_disassociate.md)	 - Disassociates a Public IP from a network interface or a virtual IP
 * [stackit public-ip list](./stackit_public-ip_list.md)	 - Lists all Public IPs of a project
+* [stackit public-ip ranges](./stackit_public-ip_ranges.md)	 - Provides functionality for STACKIT public-ip ranges
 * [stackit public-ip update](./stackit_public-ip_update.md)	 - Updates a Public IP
 
