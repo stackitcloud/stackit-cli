@@ -70,7 +70,7 @@ for arch in x86_64 i386 aarch64; do
         
         # Sign the repository metadata
         printf "Signing repository metadata for ${arch}...\n"
-        gpg --detach-sign --armor --local-user "${GPG_PRIVATE_KEY_FINGERPRINT}" --passphrase "${GPG_PASSPHRASE}" rpm-repo/${arch}/repodata/repomd.xml
+        gpg --batch --detach-sign --armor --local-user "${GPG_PRIVATE_KEY_FINGERPRINT}" --passphrase "${GPG_PASSPHRASE}" rpm-repo/${arch}/repodata/repomd.xml
         
         # Verify the signature was created
         if [ -f "rpm-repo/${arch}/repodata/repomd.xml.asc" ]; then
