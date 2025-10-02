@@ -580,6 +580,7 @@ func TestGetSliceFromPointer(t *testing.T) {
 			result := GetSliceFromPointer(tt.input)
 
 			if result == nil {
+				t.Errorf("GetSliceFromPointer() = %v, want %v", result, tt.expected)
 				return
 			}
 
