@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -107,24 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.PublicNetwork) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(publicIpRanges, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal public IP ranges: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(publicIpRanges, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal public IP ranges: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, publicIpRanges, func() error {
 		if len(publicIpRanges) == 0 {
 			p.Outputln("No public IP ranges found")
 			return nil
@@ -137,5 +118,5 @@ func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.P
 		}
 
 		return nil
-	}
+	})
 }

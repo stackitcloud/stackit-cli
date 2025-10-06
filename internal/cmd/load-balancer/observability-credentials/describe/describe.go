@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -89,24 +87,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, credentials *loadbalancer.GetCredentialsResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Load Balancer observability credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, credentials, func() error {
 		if credentials == nil || credentials.Credential == nil {
 			return fmt.Errorf("credentials response is empty")
 		}
@@ -124,5 +105,5 @@ func outputResult(p *print.Printer, outputFormat string, credentials *loadbalanc
 		}
 
 		return nil
-	}
+	})
 }

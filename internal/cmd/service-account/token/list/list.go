@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -138,24 +136,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(tokensMetadata, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal tokens metadata: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(tokensMetadata, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal tokens metadata: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, tokensMetadata, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "ACTIVE", "CREATED_AT", "VALID_UNTIL")
 		for i := range tokensMetadata {
@@ -173,5 +154,5 @@ func outputResult(p *print.Printer, outputFormat string, tokensMetadata []servic
 		}
 
 		return nil
-	}
+	})
 }

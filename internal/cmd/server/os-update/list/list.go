@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -19,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
@@ -133,24 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 }
 
 func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.Update) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(updates, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server os-update list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(updates, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server os-update list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, updates, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "STATUS", "INSTALLED UPDATES", "FAILED UPDATES", "START DATE", "END DATE")
 		for i := range updates {
@@ -182,5 +163,5 @@ func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

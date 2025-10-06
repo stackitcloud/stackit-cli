@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -147,24 +145,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *mo
 		return fmt.Errorf("user is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, user, func() error {
 		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
@@ -175,5 +156,5 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *mo
 		p.Outputf("URI: %s\n", utils.PtrString(user.Uri))
 
 		return nil
-	}
+	})
 }

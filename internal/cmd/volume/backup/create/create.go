@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -190,29 +188,12 @@ func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel
 		return fmt.Errorf("create backup response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		if async {
 			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		} else {
 			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		}
 		return nil
-	}
+	})
 }

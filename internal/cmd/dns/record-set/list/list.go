@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -242,24 +240,7 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 }
 
 func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(recordSets, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(recordSets, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, recordSets, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE", "RECORD DATA")
 		for i := range recordSets {
@@ -284,5 +265,5 @@ func outputResult(p *print.Printer, outputFormat string, recordSets []dns.Record
 		}
 
 		return nil
-	}
+	})
 }

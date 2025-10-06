@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -121,21 +119,9 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.GlobalFlagModel.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created affinity group %q with id %s\n", model.Name, utils.PtrString(resp.Id))
-	}
-	return nil
+		return nil
+	})
 }

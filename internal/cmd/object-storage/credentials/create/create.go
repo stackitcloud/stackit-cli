@@ -2,11 +2,9 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -135,24 +133,7 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 		return fmt.Errorf("create access key response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Object Storage credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Object Storage credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		expireDate := "Never"
 		if resp.Expires != nil && resp.Expires.IsSet() && *resp.Expires.Get() != "" {
 			expireDate = *resp.Expires.Get()
@@ -164,5 +145,5 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 		p.Outputf("Expire Date: %s\n", expireDate)
 
 		return nil
-	}
+	})
 }

@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -149,25 +147,7 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 	}
 	sort.SliceStable(members, sortFn)
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		// Show details
-		details, err := json.MarshalIndent(members, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal members: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(members, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal members: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, members, func() error {
 		table := tables.NewTable()
 		table.SetHeader("SUBJECT", "ROLE")
 		for i := range members {
@@ -191,5 +171,5 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -142,24 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		return fmt.Errorf("restore jobs is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backups, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backups list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backups list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, backups, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE", "RESTORE STATUS")
 		for i := range backups {
@@ -179,5 +160,5 @@ func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.B
 		}
 
 		return nil
-	}
+	})
 }
