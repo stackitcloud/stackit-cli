@@ -134,7 +134,9 @@ eget stackitcloud/stackit-cli
 
 The STACKIT CLI can be installed through the [`DNF/YUM`](https://docs.fedoraproject.org/en-US/fedora/f40/system-administrators-guide/package-management/DNF/) / [`Zypper`](https://de.opensuse.org/Zypper) package managers.
 
-Note: Requires rpm version 4.15 or newer to support Ed25519 signatures.
+> Requires rpm version 4.15 or newer to support Ed25519 signatures.
+
+> `$basearch` is supported by modern distributions. On older systems that don't expand `$basearch`, replace it in the `baseurl` with your architecture explicitly (for example, `.../rpm/cli/x86_64` or `.../rpm/cli/aarch64`).
 
 ##### Installing DNF/YUM
 
