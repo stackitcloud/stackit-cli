@@ -16,11 +16,11 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.17.3
-	github.com/stackitcloud/stackit-sdk-go/services/alb v0.6.1
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.8.1
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.0
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.7.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.30.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.8.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v0.31.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.2
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.1
@@ -243,7 +243,7 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.5.1
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.0

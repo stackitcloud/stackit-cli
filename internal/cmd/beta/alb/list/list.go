@@ -156,7 +156,9 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalance
 	default:
 		table := tables.NewTable()
 		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION", "ERRORS")
-		for _, item := range items {
+		for i := range items {
+			item := &items[i]
+
 			var errNo int
 			if item.Errors != nil {
 				errNo = len(*item.Errors)

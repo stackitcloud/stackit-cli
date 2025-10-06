@@ -544,3 +544,49 @@ func TestBase64Bytes_MarshalYAML(t *testing.T) {
 		})
 	}
 }
+func TestGetSliceFromPointer(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *[]string
+		expected []string
+	}{
+		{
+			name:     "nil pointer",
+			input:    nil,
+			expected: []string{},
+		},
+		{
+			name: "pointer to nil slice",
+			input: func() *[]string {
+				var s []string
+				return &s
+			}(),
+			expected: []string{},
+		},
+		{
+			name:     "empty slice",
+			input:    &[]string{},
+			expected: []string{},
+		},
+		{
+			name:     "populated slice",
+			input:    &[]string{"item1", "item2"},
+			expected: []string{"item1", "item2"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := GetSliceFromPointer(tt.input)
+
+			if result == nil {
+				t.Errorf("GetSliceFromPointer() = %v, want %v", result, tt.expected)
+				return
+			}
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("GetSliceFromPointer() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
