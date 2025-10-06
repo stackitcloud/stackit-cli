@@ -69,7 +69,10 @@ for arch in x86_64 i386 aarch64; do
         printf "Signing repository metadata for ${arch}...\n"
         # Remove existing signature file if it exists
         rm -f rpm-repo/${arch}/repodata/repomd.xml.asc
-        gpg --batch --detach-sign --armor --local-user "${GPG_PRIVATE_KEY_FINGERPRINT}" --passphrase "${GPG_PASSPHRASE}" rpm-repo/${arch}/repodata/repomd.xml
+        gpg --batch --pinentry-mode loopback --detach-sign --armor \
+            --local-user "${GPG_PRIVATE_KEY_FINGERPRINT}" \
+            --passphrase "${GPG_PASSPHRASE}" \
+            rpm-repo/${arch}/repodata/repomd.xml
         
         # Verify the signature was created
         if [ -f "rpm-repo/${arch}/repodata/repomd.xml.asc" ]; then
@@ -82,11 +85,21 @@ for arch in x86_64 i386 aarch64; do
     fi
 done
 
-# Upload the updated repository to S3
-printf "\n>>> Uploading repository to S3 \n"
-# Remove old metadata files first to avoid duplicates
-aws s3 rm s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --recursive --exclude "*" --include "*/repodata/*" --endpoint-url "${AWS_ENDPOINT_URL}" || echo "No old metadata to remove"
-aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ --endpoint-url "${AWS_ENDPOINT_URL}"
+# Upload the updated repository to S3 in two phases (repodata pointers last)
+# clients reading the repo won't see a state where repomd.xml points to files not uploaded yet.
+printf "\n>>> Uploading repository to S3 (phase 1: all except repomd*) \n"
+aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ \
+  --endpoint-url "${AWS_ENDPOINT_URL}" \
+  --delete \
+  --exclude "*/repodata/repomd.xml" \
+  --exclude "*/repodata/repomd.xml.asc"
+
+printf "\n>>> Uploading repository to S3 (phase 2: repomd* only) \n"
+aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ \
+  --endpoint-url "${AWS_ENDPOINT_URL}" \
+  --exclude "*" \
+  --include "*/repodata/repomd.xml" \
+  --include "*/repodata/repomd.xml.asc"
 
 # Upload the public key
 printf "\n>>> Uploading public key \n"
