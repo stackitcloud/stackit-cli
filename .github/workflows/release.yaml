@@ -83,7 +83,7 @@ jobs:
         run: |
           rm -f gpg-private-key.asc
       
-      # artifacts need to be passed to the "publish-apt" job somehow
+      # artifacts need to be passed to further publishing jobs
       - name: Upload artifacts to workflow
         uses: actions/upload-artifact@v4
         with:
@@ -91,43 +91,41 @@ jobs:
           path: dist
           retention-days: 1
 
-  publish-apt:
-    name: Publish APT
-    runs-on: macOS-latest
-    needs: [goreleaser]
-    env:
-      # Needed to publish new packages to our S3-hosted APT repo
-      AWS_ACCESS_KEY_ID: ${{ secrets.TEST_OBJECT_STORAGE_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_OBJECT_STORAGE_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: eu01
-      AWS_ENDPOINT_URL: https://object.storage.eu01.onstackit.cloud
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+  # publish-apt:
+  #   name: Publish APT
+  #   runs-on: macOS-latest
+  #   needs: [goreleaser]
+  #   env:
+  #     # Needed to publish new packages to our S3-hosted APT repo
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
 
-      # use the artifacts from the "goreleaser" job
-      - name: Download artifacts from workflow
-        uses: actions/download-artifact@v5
-        with:
-          name: goreleaser-dist-temp
-          path: dist
+  #     # use the artifacts from the "goreleaser" job
+  #     - name: Download artifacts from workflow
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         name: goreleaser-dist-temp
+  #         path: dist
       
-      - name: Install Aptly
-        run: brew install aptly
+  #     - name: Install Aptly
+  #       run: brew install aptly
       
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        id: import_gpg
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+  #     - name: Import GPG key
+  #       uses: crazy-max/ghaction-import-gpg@v6
+  #       id: import_gpg
+  #       with:
+  #         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+  #         passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
-      - name: Publish packages to APT repo
-#        if: contains(github.ref_name, '-') == false
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-        run: ./scripts/publish-apt-packages.sh
+  #     - name: Publish packages to APT repo
+  #       if: contains(github.ref_name, '-') == false
+  #       env:
+  #         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  #         GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+  #       run: ./scripts/publish-apt-packages.sh
 
   publish-rpm:
     name: Publish RPM
