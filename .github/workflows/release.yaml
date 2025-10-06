@@ -41,6 +41,8 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
+      # nfpm-rpm signing needs gpg provided as filepath
+      # https://goreleaser.com/customization/nfpm/
       - name: Create GPG key file
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg-private-key.asc
@@ -77,6 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GPG_KEY_PATH: ./gpg-private-key.asc
+          # nfpm-rpm signing needs this env to be set.
           NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Clean up GPG key file
