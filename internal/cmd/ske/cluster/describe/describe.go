@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -103,24 +101,7 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		return fmt.Errorf("cluster is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(cluster, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(cluster, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return print.OutputResult(p, outputFormat, cluster, func() error {
 		acl := []string{}
 		if cluster.Extensions != nil && cluster.Extensions.Acl != nil {
 			acl = *cluster.Extensions.Acl.AllowedCidrs
@@ -148,7 +129,7 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		}
 
 		return nil
-	}
+	})
 }
 
 func handleClusterErrors(clusterErrs []ske.ClusterError, table *tables.Table) {

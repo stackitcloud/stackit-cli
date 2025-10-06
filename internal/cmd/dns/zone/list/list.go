@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -239,25 +237,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 }
 
 func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		// Show details
-		details, err := json.MarshalIndent(zones, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(zones, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return print.OutputResult(p, outputFormat, zones, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "TYPE", "DNS NAME", "RECORD COUNT")
 		for i := range zones {
@@ -276,5 +256,5 @@ func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error
 		}
 
 		return nil
-	}
+	})
 }

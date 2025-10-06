@@ -2,9 +2,12 @@ package print
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"syscall"
+
+	"github.com/goccy/go-yaml"
 
 	"log/slog"
 	"os"
@@ -227,4 +230,27 @@ func (p *Printer) IsVerbosityWarning() bool {
 // Returns True if the verbosity level is set to Error, False otherwise.
 func (p *Printer) IsVerbosityError() bool {
 	return p.Verbosity == ErrorLevel
+}
+
+func OutputResult(p *Printer, outputFormat string, output interface{}, prettyOutputFunc func() error) error {
+	switch outputFormat {
+	case JSONOutputFormat:
+		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal json: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(output, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		if err != nil {
+			return fmt.Errorf("marshal yaml: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		return prettyOutputFunc()
+	}
 }
