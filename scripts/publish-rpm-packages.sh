@@ -22,9 +22,6 @@ mkdir -p rpm-repo/x86_64
 mkdir -p rpm-repo/i386
 mkdir -p rpm-repo/aarch64
 
-# Copy RPM packages and signatures to appropriate architecture directories
-printf "\n>>> Copying RPM packages and signatures to architecture directories \n"
-
 # Copy RPM packages to appropriate architecture directories
 printf "\n>>> Copying RPM packages to architecture directories \n"
 
