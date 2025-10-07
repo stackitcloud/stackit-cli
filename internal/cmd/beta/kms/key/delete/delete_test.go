@@ -256,6 +256,11 @@ func TestOutputResult(t *testing.T) {
 		resp         *kms.Key
 	}{
 		{
+			description: "nil response",
+			resp:        nil,
+			wantErr:     true,
+		},
+		{
 			description: "default output",
 			resp:        &kms.Key{},
 			wantErr:     false,

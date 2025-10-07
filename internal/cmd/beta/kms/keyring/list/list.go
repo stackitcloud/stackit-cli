@@ -92,6 +92,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []kms.KeyRing) error {
+	if keyRings == nil {
+		return fmt.Errorf("response was nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keyRings, "", "  ")

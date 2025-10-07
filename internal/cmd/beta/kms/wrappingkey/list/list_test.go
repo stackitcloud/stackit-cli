@@ -212,6 +212,12 @@ func TestOutputResult(t *testing.T) {
 		wantErr      bool
 	}{
 		{
+			description:  "nil response",
+			wrappingKeys: nil,
+			projectLabel: "my-project",
+			wantErr:      true,
+		},
+		{
 			description:  "default output",
 			wrappingKeys: []kms.WrappingKey{},
 			projectLabel: "my-project",

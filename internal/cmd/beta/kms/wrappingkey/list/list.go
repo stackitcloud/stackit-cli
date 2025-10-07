@@ -106,6 +106,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func outputResult(p *print.Printer, outputFormat, keyRingId string, wrappingKeys []kms.WrappingKey) error {
+	if wrappingKeys == nil {
+		return fmt.Errorf("response was nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(wrappingKeys, "", "  ")

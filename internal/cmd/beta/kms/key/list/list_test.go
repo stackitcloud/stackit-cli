@@ -206,8 +206,13 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		wantErr      bool
 	}{
-		// Response check was moved inside NewCmd() for better error feedback.
-		// Thus, no check for 'keys = nil' needed
+		{
+			description: "nil response",
+			keys:        nil,
+			projectId:   uuid.NewString(),
+			keyRingId:   uuid.NewString(),
+			wantErr:     true,
+		},
 		{
 			description: "default output",
 			keys:        []kms.Key{},

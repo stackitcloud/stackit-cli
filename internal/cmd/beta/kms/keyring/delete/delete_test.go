@@ -219,6 +219,11 @@ func TestOutputResult(t *testing.T) {
 		resp         *kms.KeyRing
 	}{
 		{
+			description: "nil response",
+			resp:        nil,
+			wantErr:     true,
+		},
+		{
 			description: "default output",
 			resp:        &kms.KeyRing{},
 			wantErr:     false,

@@ -284,6 +284,11 @@ func TestOutputResult(t *testing.T) {
 		resp         *kms.Version
 	}{
 		{
+			description: "nil response",
+			resp:        nil,
+			wantErr:     true,
+		},
+		{
 			description: "default output",
 			resp:        &kms.Version{},
 			wantErr:     false,

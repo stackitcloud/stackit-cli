@@ -180,6 +180,13 @@ func TestOutputResult(t *testing.T) {
 		wantErr      bool
 	}{
 		{
+			description:  "nil response",
+			keyRings:     nil,
+			projectId:    uuid.NewString(),
+			projectLabel: "my-project",
+			wantErr:      true,
+		},
+		{
 			description:  "default output",
 			projectId:    uuid.NewString(),
 			keyRings:     []kms.KeyRing{},

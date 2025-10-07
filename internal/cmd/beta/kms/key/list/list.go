@@ -106,6 +106,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, keys []kms.Key) error {
+	if keys == nil {
+		return fmt.Errorf("response was an empty list")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(keys, "", "  ")
