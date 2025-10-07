@@ -100,7 +100,6 @@ func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []k
 		}
 		p.Outputln(string(details))
 
-		return nil
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(keyRings, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
@@ -108,7 +107,6 @@ func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []k
 		}
 		p.Outputln(string(details))
 
-		return nil
 	default:
 		if len(keyRings) == 0 {
 			p.Outputf("No key rings found for project %q\n", projectId)
@@ -131,7 +129,7 @@ func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []k
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
 	}
+
+	return nil
 }

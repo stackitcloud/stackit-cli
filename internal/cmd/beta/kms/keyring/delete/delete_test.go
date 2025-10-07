@@ -216,23 +216,23 @@ func TestOutputResult(t *testing.T) {
 		description  string
 		wantErr      bool
 		outputFormat string
-		keyRingLabel string
+		resp         *kms.KeyRing
 	}{
 		{
-			description:  "default output",
-			keyRingLabel: "yourKeyRing",
-			wantErr:      false,
+			description: "default output",
+			resp:        &kms.KeyRing{},
+			wantErr:     false,
 		},
 		{
 			description:  "json output",
 			outputFormat: print.JSONOutputFormat,
-			keyRingLabel: "yourKeyRing",
+			resp:         &kms.KeyRing{},
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
 			outputFormat: print.YAMLOutputFormat,
-			keyRingLabel: "yourKeyRing",
+			resp:         &kms.KeyRing{},
 			wantErr:      false,
 		},
 	}
@@ -241,7 +241,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.keyRingLabel)
+			err := outputResult(p, tt.outputFormat, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

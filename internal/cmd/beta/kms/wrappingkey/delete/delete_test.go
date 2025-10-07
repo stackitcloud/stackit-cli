@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -21,12 +20,23 @@ const (
 type testCtxKey struct{}
 
 var (
-	testCtx               = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient            = &kms.APIClient{}
-	testProjectId         = uuid.NewString()
-	testKeyRingId         = uuid.NewString()
-	testWrappingKeyRingId = uuid.NewString()
+	testCtx           = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient        = &kms.APIClient{}
+	testProjectId     = uuid.NewString()
+	testKeyRingId     = uuid.NewString()
+	testWrappingKeyId = uuid.NewString()
 )
+
+// Args
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testWrappingKeyId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
 
 // Flags
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -34,7 +44,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		keyRingIdFlag:             testKeyRingId,
-		wrappingKeyIdFlag:         testWrappingKeyRingId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,8 +59,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		KeyRingId:   testKeyRingId,
-		WrappingKey: testWrappingKeyRingId,
+		KeyRingId:     testKeyRingId,
+		WrappingKeyId: testWrappingKeyId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiDeleteWrappingKeyRequest)) kms.ApiDeleteWrappingKeyRequest {
-	request := testClient.DeleteWrappingKey(testCtx, testProjectId, testRegion, testKeyRingId, testWrappingKeyRingId)
+	request := testClient.DeleteWrappingKey(testCtx, testProjectId, testRegion, testKeyRingId, testWrappingKeyId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -71,23 +80,33 @@ func fixtureRequest(mods ...func(request *kms.ApiDeleteWrappingKeyRequest)) kms.
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "no args (wrappingKeyId)",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
 			description: "no values provided",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
@@ -95,6 +114,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
@@ -102,6 +122,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
@@ -109,6 +130,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id missing (required)",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, keyRingIdFlag)
 			}),
@@ -116,43 +138,42 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id invalid",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[keyRingIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "wrapping key id missing (required)",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, wrappingKeyIdFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "wrapping key id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[wrappingKeyIdFlag] = ""
-			}),
-			isValid: false,
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "wrapping key id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[wrappingKeyIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			p := print.NewPrinter()
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
 
-			configureFlags(cmd)
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -172,8 +193,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -215,44 +235,6 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
-			}
-		})
-	}
-}
-
-func TestOutputResult(t *testing.T) {
-	tests := []struct {
-		description     string
-		wantErr         bool
-		outputFormat    string
-		wrappingKeyName string
-	}{
-		{
-			description:     "default output",
-			wrappingKeyName: "yourWrappingKey",
-			wantErr:         false,
-		},
-		{
-			description:     "json output",
-			outputFormat:    print.JSONOutputFormat,
-			wrappingKeyName: "yourWrappingKey",
-			wantErr:         false,
-		},
-		{
-			description:     "yaml output",
-			outputFormat:    print.YAMLOutputFormat,
-			wrappingKeyName: "yourWrappingKey",
-			wantErr:         false,
-		},
-	}
-
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.wrappingKeyName)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

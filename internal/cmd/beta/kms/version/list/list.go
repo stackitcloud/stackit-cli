@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring"
-	keyIdFlag     = "key"
+	keyRingIdFlag = "key-ring-id"
+	keyIdFlag     = "key-id"
 )
 
 type inputModel struct {
@@ -110,7 +110,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 		}
 		p.Outputln(string(details))
 
-		return nil
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(versions, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
@@ -118,7 +117,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 		}
 		p.Outputln(string(details))
 
-		return nil
 	default:
 		if len(versions) == 0 {
 			p.Outputf("No key versions found for project %q for the key %q\n", projectId, keyId)
@@ -142,9 +140,9 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
 	}
+
+	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {

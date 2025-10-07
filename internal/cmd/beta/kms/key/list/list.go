@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
@@ -20,7 +21,7 @@ import (
 )
 
 const (
-	keyRingIdArg = "KEYRING_ID"
+	keyRingIdFlag = "key-ring-id"
 )
 
 type inputModel struct {
@@ -30,21 +31,21 @@ type inputModel struct {
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("list %s", keyRingIdArg),
+		Use:   "list",
 		Short: "List all KMS keys",
 		Long:  "List all KMS keys inside a key ring.",
-		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all KMS keys for the key ring "xxx"`,
-				"$ stackit beta kms key list xxx"),
+				`List all KMS keys for the key ring "my-key-ring-id"`,
+				`$ stackit beta kms key list --key-ring "my-key-ring-id"`),
 			examples.NewExample(
 				`List all KMS keys in JSON format`,
-				"$ stackit beta kms key list xxx --output-format json"),
+				`$ stackit beta kms key list --key-ring "my-key-ring-id" --output-format json`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
@@ -66,12 +67,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		},
 	}
 
+	configureFlags(cmd)
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	keyRingId := inputArgs[0]
-
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -79,7 +79,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		KeyRingId:       keyRingId,
+		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -99,6 +99,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring where the Key is stored")
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
+	cobra.CheckErr(err)
+}
+
 func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, keys []kms.Key) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
@@ -108,7 +114,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 		}
 		p.Outputln(string(details))
 
-		return nil
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(keys, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
@@ -116,7 +121,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 		}
 		p.Outputln(string(details))
 
-		return nil
 	default:
 		if len(keys) == 0 {
 			p.Outputf("No keys found for project %q under the key ring %q\n", projectId, keyRingId)
@@ -140,7 +144,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
-		return nil
 	}
+	return nil
 }

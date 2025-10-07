@@ -22,30 +22,31 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring"
-	keyIdFlag     = "key"
+	keyIdArg = "KEY_ID"
+
+	keyRingIdFlag = "key-ring-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	KeyRingId string
 	KeyId     string
+	KeyRingId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "rotate",
+		Use:   fmt.Sprintf("rotate %s", keyIdArg),
 		Short: "Rotate a key",
 		Long:  "Rotates the given key.",
-		Args:  args.NoArgs,
+		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Rotate a KMS key "my-key-id" and increase it's version inside the key ring "my-key-ring-id".`,
-				`$ stackit beta kms key rotate --key-ring "my-key-ring-id" --key "my-key-id"`),
+				`$ stackit beta kms key rotate "my-key-id" --key-ring "my-key-ring-id"`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -85,7 +86,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	keyId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -94,7 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
+		KeyId:           keyId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -116,8 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key Ring where the key is stored")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the actual key")
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
 }
 
@@ -133,7 +135,6 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 			return fmt.Errorf("marshal KMS key version: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
@@ -141,10 +142,10 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 			return fmt.Errorf("marshal KMS key version: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	default:
 		p.Outputf("Rotated key %s\n", utils.PtrString(resp.KeyId))
-		return nil
 	}
+
+	return nil
 }

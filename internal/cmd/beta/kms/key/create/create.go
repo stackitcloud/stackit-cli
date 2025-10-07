@@ -24,13 +24,14 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring"
+	keyRingIdFlag = "key-ring-id"
 
 	algorithmFlag   = "algorithm"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	importOnlyFlag  = "import-only"
 	purposeFlag     = "purpose"
+	protectionFlag  = "protection"
 )
 
 type inputModel struct {
@@ -42,6 +43,7 @@ type inputModel struct {
 	Name        *string
 	ImportOnly  bool // Default false
 	Purpose     *string
+	Protection  *string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -53,10 +55,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS key`,
-				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "symmetric_encrypt_decrypt"`),
+				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
 			examples.NewExample(
 				`Create a Message Authentication KMS key`,
-				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code"`),
+				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -87,10 +89,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return err
-			}
-
 			key, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS key: %w", err)
@@ -128,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
 		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
+		Protection:      flags.FlagToStringPointer(p, cmd, protectionFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -155,6 +154,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
 		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(model.Purpose),
 		ImportOnly:  &model.ImportOnly,
+		Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(model.Protection),
 	})
 	return req, nil
 }
@@ -171,7 +171,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
@@ -179,12 +178,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS key: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	default:
-		p.Outputf("Created key for project %q. key ID: %s\n", projectLabel, utils.PtrString(resp.Id))
-		return nil
+		p.Outputf("Created the key '%s' for project %q. Key ID: %s\n", utils.PtrString(resp.DisplayName), projectLabel, utils.PtrString(resp.Id))
 	}
+	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -194,7 +192,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Optional description of the key")
 	cmd.Flags().Bool(importOnlyFlag, false, "States whether versions can be created or only imported")
 	cmd.Flags().String(purposeFlag, "", "Purpose of the key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' ")
+	cmd.Flags().String(protectionFlag, "", "The underlying system that is responsible for protecting the key material. Value: 'software'")
 
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag, protectionFlag)
 	cobra.CheckErr(err)
 }

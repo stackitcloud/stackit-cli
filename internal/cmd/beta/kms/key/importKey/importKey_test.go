@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -30,13 +29,23 @@ var (
 	testWrappedKey    = "SnVzdCBzYXlpbmcgaGV5Oyk="
 )
 
+// Args
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testKeyId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
+
 // Flags
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		keyRingIdFlag:             testKeyRingId,
-		keyIdFlag:                 testKeyId,
 		wrappedKeyFlag:            testWrappedKey,
 		wrappingKeyIdFlag:         testWrappingKeyId,
 	}
@@ -82,23 +91,33 @@ func fixtureRequest(mods ...func(request *kms.ApiImportKeyRequest)) kms.ApiImpor
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "no args (keyId)",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
 			description: "no values provided",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
@@ -106,6 +125,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
@@ -113,6 +133,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
@@ -120,6 +141,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id missing (required)",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, keyRingIdFlag)
 			}),
@@ -127,6 +149,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[keyRingIdFlag] = ""
 			}),
@@ -134,34 +157,27 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[keyRingIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "key id missing (required)",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, keyIdFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "key id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[keyIdFlag] = ""
-			}),
-			isValid: false,
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "key id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[keyIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
+			argValues:   []string{"invalid-key"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "wrapping key id missing (required)",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, wrappingKeyIdFlag)
 			}),
@@ -169,6 +185,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "wrapping key id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[wrappingKeyIdFlag] = ""
 			}),
@@ -176,6 +193,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "wrapping key id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[wrappingKeyIdFlag] = "invalid-uuid"
 			}),
@@ -183,6 +201,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "wrapped key missing (required)",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, wrappedKeyFlag)
 			}),
@@ -190,6 +209,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "wrapped key invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[wrappedKeyFlag] = ""
 			}),
@@ -197,6 +217,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "wrapped key invalid 2 - not base64",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[wrappedKeyFlag] = "Not Base 64"
 			}),
@@ -206,13 +227,20 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			p := print.NewPrinter()
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
 
-			configureFlags(cmd)
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -232,8 +260,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return

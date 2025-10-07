@@ -2,7 +2,6 @@ package delete
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -14,37 +13,38 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
-	"gopkg.in/yaml.v2"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 )
 
 const (
-	keyRingIdFlag     = "key-ring"
-	wrappingKeyIdFlag = "wrapping-key"
+	wrappingKeyIdArg = "WRAPPING_KEY_ID"
+
+	keyRingIdFlag = "key-ring-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	KeyRingId   string
-	WrappingKey string
+	WrappingKeyId string
+	KeyRingId     string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   fmt.Sprintf("delete %s", wrappingKeyIdArg),
 		Short: "Deletes a KMS wrapping key",
 		Long:  "Deletes a KMS wrapping key inside a specific key ring.",
-		Args:  args.NoArgs,
+		Args:  args.SingleArg(wrappingKeyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms keyring delete --key-ring "my-key-ring-id" --wrapping-key "my-wrapping-key-id"`),
+				`$ stackit beta kms keyring delete "my-wrapping-key-id" --key-ring "my-key-ring-id"`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -55,14 +55,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			wrappingKeyName, err := kmsUtils.GetWrappingKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKey)
+			wrappingKeyName, err := kmsUtils.GetWrappingKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get wrapping key name: %v", err)
-				wrappingKeyName = model.WrappingKey
+				wrappingKeyName = model.WrappingKeyId
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete key ring %q? (This cannot be undone)", wrappingKeyName)
+				prompt := fmt.Sprintf("Are you sure you want to delete the wrapping key %q? (This cannot be undone)", wrappingKeyName)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -77,7 +77,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Wait for async operation not relevant. Wrapping key deletion is synchronous
-			return outputResult(params.Printer, model.OutputFormat, wrappingKeyName)
+
+			// Don't output anything. It's a deletion.
+			params.Printer.Info("Deleted wrapping key %q\n", wrappingKeyName)
+			return nil
 		},
 	}
 
@@ -85,7 +88,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	wrappingKeyId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -94,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		WrappingKey:     flags.FlagToStringValue(p, cmd, wrappingKeyIdFlag),
+		WrappingKeyId:   wrappingKeyId,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -110,51 +115,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteWrappingKeyRequest {
-	req := apiClient.DeleteWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKey)
+	req := apiClient.DeleteWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKeyId)
 	return req
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the wrapping key is stored")
-	cmd.Flags().Var(flags.UUIDFlag(), wrappingKeyIdFlag, "ID of the actual wrapping key")
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, wrappingKeyIdFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
-}
-
-func outputResult(p *print.Printer, outputFormat, wrappingKeyName string) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details := struct {
-			WrappingKeyName string `json:"wrappingKeyName"`
-			Status          string `json:"status"`
-		}{
-			WrappingKeyName: wrappingKeyName,
-			Status:          "Deleted wrapping key.",
-		}
-		b, err := json.MarshalIndent(details, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal output to JSON: %w", err)
-		}
-		p.Outputln(string(b))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details := struct {
-			WrappingKeyName string `yaml:"wrappingKeyName"`
-			Status          string `yaml:"status"`
-		}{
-			WrappingKeyName: wrappingKeyName,
-			Status:          "Deleted wrapping key.",
-		}
-		b, err := yaml.Marshal(details)
-		if err != nil {
-			return fmt.Errorf("marshal output to YAML: %w", err)
-		}
-		p.Outputln(string(b))
-		return nil
-
-	default:
-		p.Outputf("Deleted wrapping key: %s\n", wrappingKeyName)
-		return nil
-	}
 }

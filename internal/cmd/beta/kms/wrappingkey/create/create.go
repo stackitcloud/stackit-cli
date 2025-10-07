@@ -24,12 +24,13 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring"
+	keyRingIdFlag = "key-ring-id"
 
 	algorithmFlag   = "algorithm"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	purposeFlag     = "purpose"
+	protectionFlag  = "protection"
 )
 
 type inputModel struct {
@@ -40,6 +41,7 @@ type inputModel struct {
 	Description *string
 	Name        *string
 	Purpose     *string
+	Protection  *string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -51,10 +53,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS wrapping key`,
-				`$ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key"`),
+				`$ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"`),
 			examples.NewExample(
 				`Create an Asymmetric KMS wrapping key with a description`,
-				`$ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key"`),
+				`$ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -85,10 +87,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return err
-			}
-
 			wrappingKey, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS wrapping key: %w", err)
@@ -126,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
+		Protection:      flags.FlagToStringPointer(p, cmd, protectionFlag),
 	}
 
 	if p.IsVerbosityDebug() {
@@ -152,6 +151,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsWrappingK
 		Description: model.Description,
 		Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
 		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(model.Purpose),
+		Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(model.Protection),
 	})
 	return req, nil
 }
@@ -168,7 +168,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS wrapping key: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
@@ -176,12 +175,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS wrapping key: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	default:
 		p.Outputf("Created wrapping key for project %q. wrapping key ID: %s\n", projectLabel, utils.PtrString(resp.Id))
-		return nil
 	}
+
+	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -191,6 +190,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Optional description of the wrapping key")
 	cmd.Flags().String(purposeFlag, "", "Purpose of the wrapping key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' ")
 
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag)
+	// backend was deprectaed in /v1beta, but protection is a required attribute with value "software"
+	cmd.Flags().String(protectionFlag, "", "Protection of the wrapping key. Value: 'software' ")
+
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag, protectionFlag)
 	cobra.CheckErr(err)
 }

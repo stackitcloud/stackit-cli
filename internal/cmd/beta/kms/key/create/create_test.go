@@ -22,6 +22,7 @@ const (
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"
 	testImportOnly  = "true"
+	testProtection  = "software"
 )
 
 type testCtxKey struct{}
@@ -44,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		purposeFlag:               testPurpose,
 		descriptionFlag:           testDescription,
 		importOnlyFlag:            testImportOnly,
+		protectionFlag:            testProtection,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -65,6 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Purpose:     utils.Ptr(testPurpose),
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  true, // Watch out: ImportOnly is not testImportOnly!
+		Protection:  utils.Ptr(testProtection),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -81,6 +84,7 @@ func fixtureRequest(mods ...func(request *kms.ApiCreateKeyRequest)) kms.ApiCreat
 		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  utils.Ptr(true),
+		Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
 	})
 
 	for _, mod := range mods {
@@ -158,6 +162,13 @@ func TestParseInput(t *testing.T) {
 			description: "algorithm missing (required)",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, algorithmFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "protection missing (required)",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, protectionFlag)
 			}),
 			isValid: false,
 		},
@@ -248,6 +259,7 @@ func TestBuildRequest(t *testing.T) {
 				Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 				Description: nil,
 				ImportOnly:  utils.Ptr(false),
+				Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
 			}),
 		},
 	}

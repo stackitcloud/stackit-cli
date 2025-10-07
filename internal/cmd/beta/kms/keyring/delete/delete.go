@@ -37,8 +37,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS key ring with ID "xxx"`,
-				"$ stackit beta kms keyring delete xxx"),
+				`Delete a KMS key ring with ID "my-key-ring-id"`,
+				`$ stackit beta kms keyring delete "my-key-ring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -76,7 +76,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Wait for async operation not relevant. Key ring deletion is synchronous.
 
-			return outputResult(params.Printer, model.OutputFormat, keyRingLabel)
+			// Get the key ring so it can be outputted in the state it is after the deletion.
+			resp, err := apiClient.GetKeyRingExecute(ctx, model.ProjectId, model.Region, model.KeyRingId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get KMS Key Ring: %w", err)
+			}
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -112,40 +117,27 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, keyRingLabel string) error {
+func outputResult(p *print.Printer, outputFormat string, resp *kms.KeyRing) error {
+	if resp == nil {
+		return fmt.Errorf("response from 'GetKeyExecute()' is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details := struct {
-			KeyRingLabel string `json:"keyRingLabel"`
-			Status       string `json:"status"`
-		}{
-			KeyRingLabel: keyRingLabel,
-			Status:       "Key ring deleted.",
-		}
-		b, err := json.MarshalIndent(details, "", "  ")
+		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal output to JSON: %w", err)
 		}
-		p.Outputln(string(b))
-		return nil
-
+		p.Outputln(string(details))
 	case print.YAMLOutputFormat:
-		details := struct {
-			KeyRingLabel string `yaml:"keyRingLabel"`
-			Status       string `yaml:"status"`
-		}{
-			KeyRingLabel: keyRingLabel,
-			Status:       "Key ring deleted.",
-		}
-		b, err := yaml.Marshal(details)
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal output to YAML: %w", err)
 		}
-		p.Outputln(string(b))
-		return nil
+		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Deleted key ring: %s\n", keyRingLabel)
-		return nil
+		p.Outputf("Deleted key ring: %s\n", utils.PtrString(resp.DisplayName))
 	}
+	return nil
 }

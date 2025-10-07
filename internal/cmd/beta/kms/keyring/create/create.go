@@ -168,7 +168,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS key ring: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
@@ -176,12 +175,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 			return fmt.Errorf("marshal KMS key ring: %w", err)
 		}
 		p.Outputln(string(details))
-		return nil
 
 	default:
-		p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, utils.PtrString(resp.Id))
-		return nil
+		p.Outputf("Created instance for project %q. Key ring ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 	}
+	return nil
 }
 
 func configureFlags(cmd *cobra.Command) {

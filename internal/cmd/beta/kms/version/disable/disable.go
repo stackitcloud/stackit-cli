@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
+	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -14,40 +16,38 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
-	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
-	"gopkg.in/yaml.v2"
 )
 
 const (
-	keyRingIdFlag     = "key-ring"
-	keyIdFlag         = "key"
-	versionNumberFlag = "version"
+	versionNumberArg = "VERSION_NUMBER"
+
+	keyRingIdFlag = "key-ring-id"
+	keyIdFlag     = "key-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId     string
 	KeyId         string
-	VersionNumber *int64
+	VersionNumber int64
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "disable",
+		Use:   fmt.Sprintf("disable %s", versionNumberArg),
 		Short: "Disable a key version",
 		Long:  "Disable the given key version.",
-		Args:  args.NoArgs,
+		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Disable key version "0" for the key "my-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms version disable --key "my-key-id" --key-ring "my-key-ring-id" --version 0`),
+				`Disable key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"`,
+				`$ stackit beta kms version disable 42 --key "my-key-id" --key-ring "my-key-ring-id"`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -56,12 +56,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
-			}
-
-			keyName, err := kmsUtils.GetKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
-				keyName = model.KeyId
 			}
 
 			// This operation can be undone. Don't ask for confirmation!
@@ -73,18 +67,15 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("disable key version: %w", err)
 			}
 
-			// Wait for async operation, if async mode not enabled
-			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Disableing key version")
-				_, err = wait.DisableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, *model.VersionNumber).WaitWithContext(ctx)
-				if err != nil {
-					return fmt.Errorf("wait for key version to be disabled: %w", err)
-				}
-				s.Stop()
+			// kms v1.0.0 has a waiter, but it get's stuck even though the disable api call was already successfully completed.
+
+			// Get the key version in its state afterwards
+			resp, err := apiClient.GetVersionExecute(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get key version: %v", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *model.VersionNumber, model.KeyId, keyName)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 
@@ -92,7 +83,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	versionStr := inputArgs[0]
+	versionNumber, err := strconv.ParseInt(versionStr, 10, 64)
+	if err != nil || versionNumber < 0 {
+		return nil, &errors.ArgValidationError{
+			Arg:     versionNumberArg,
+			Details: fmt.Sprintf("invalid value %q: must be a positive integer", versionStr),
+		}
+	}
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 		KeyId:           flags.FlagToStringValue(p, cmd, keyIdFlag),
-		VersionNumber:   flags.FlagToInt64Pointer(p, cmd, versionNumberFlag),
+		VersionNumber:   versionNumber,
 	}
 
 	if p.IsVerbosityDebug() {
@@ -118,60 +118,40 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDisableVersionRequest {
-	return apiClient.DisableVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, *model.VersionNumber)
+	return apiClient.DisableVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
 	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the rey")
-	cmd.Flags().Int64(versionNumberFlag, 0, "Version number of the key")
 
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag, versionNumberFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)
 }
 
-func outputResult(p *print.Printer, outputFormat string, versionNumber int64, keyId, keyName string) error {
+func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) error {
+	if resp == nil {
+		return fmt.Errorf("response is nil")
+	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		details := struct {
-			KeyId         string `json:"keyId"`
-			KeyName       string `json:"keyName"`
-			VersionNumber int64  `json:"versionNumber"`
-			Status        string `json:"status"`
-		}{
-			KeyId:         keyId,
-			KeyName:       keyName,
-			VersionNumber: versionNumber,
-			Status:        fmt.Sprintf("Disabled version %d of key '%s'.", versionNumber, keyName),
-		}
-		b, err := json.MarshalIndent(details, "", "  ")
+		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
-			return fmt.Errorf("marshal output to JSON: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
-		p.Outputln(string(b))
-		return nil
+		p.Outputln(string(details))
 
 	case print.YAMLOutputFormat:
-		details := struct {
-			KeyId         string `yaml:"keyId"`
-			KeyName       string `yaml:"keyName"`
-			VersionNumber int64  `yaml:"versionNumber"`
-			Status        string `yaml:"status"`
-		}{
-			KeyId:         keyId,
-			KeyName:       keyName,
-			VersionNumber: versionNumber,
-			Status:        fmt.Sprintf("Disabled version %d of key '%s'.", versionNumber, keyName),
-		}
-		b, err := yaml.Marshal(details)
+		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
-			return fmt.Errorf("marshal output to YAML: %w", err)
+			return fmt.Errorf("marshal KMS key: %w", err)
 		}
-		p.Outputln(string(b))
-		return nil
+		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Disabled version %d of key '%q'\n", versionNumber, keyName)
-		return nil
+		p.Outputf("Disabled version %d of key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
 	}
+
+	return nil
 }

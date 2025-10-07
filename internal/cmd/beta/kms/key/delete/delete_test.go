@@ -3,12 +3,10 @@ package delete
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -29,13 +27,23 @@ var (
 	testKeyId     = uuid.NewString()
 )
 
+// Args
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testKeyId,
+	}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
+
 // Flags
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		keyRingIdFlag:             testKeyRingId,
-		keyIdFlag:                 testKeyId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -72,23 +80,33 @@ func fixtureRequest(mods ...func(request *kms.ApiDeleteKeyRequest)) kms.ApiDelet
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			expectedModel: fixtureInputModel(),
 			isValid:       true,
 		},
 		{
+			description: "no args (keyId)",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
 			description: "no values",
+			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
@@ -96,6 +114,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
@@ -103,6 +122,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
@@ -110,6 +130,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id missing",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, keyRingIdFlag)
 			}),
@@ -117,6 +138,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id invalid 1",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[keyRingIdFlag] = ""
 			}),
@@ -124,43 +146,42 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "key ring id invalid 2",
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[keyRingIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "key id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, keyIdFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "key id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[keyIdFlag] = ""
-			}),
-			isValid: false,
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
 			description: "key id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[keyIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			p := print.NewPrinter()
+			cmd := NewCmd(&params.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
 
-			configureFlags(cmd)
+			err = cmd.ValidateArgs(tt.argValues)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error validating args: %v", err)
+			}
 
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
@@ -180,8 +201,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			model, err := parseInput(p, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -233,31 +253,23 @@ func TestOutputResult(t *testing.T) {
 		description  string
 		wantErr      bool
 		outputFormat string
-		keyId        string
-		keyName      string
-		deltionDate  time.Time
+		resp         *kms.Key
 	}{
 		{
 			description: "default output",
-			keyId:       uuid.NewString(),
-			keyName:     uuid.NewString(),
-			deltionDate: time.Now(),
+			resp:        &kms.Key{},
 			wantErr:     false,
 		},
 		{
 			description:  "json output",
 			outputFormat: print.JSONOutputFormat,
-			keyId:        uuid.NewString(),
-			keyName:      uuid.NewString(),
-			deltionDate:  time.Now(),
+			resp:         &kms.Key{},
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
 			outputFormat: print.YAMLOutputFormat,
-			keyId:        uuid.NewString(),
-			keyName:      uuid.NewString(),
-			deltionDate:  time.Now(),
+			resp:         &kms.Key{},
 			wantErr:      false,
 		},
 	}
@@ -266,7 +278,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.keyId, tt.keyName, tt.deltionDate)
+			err := outputResult(p, tt.outputFormat, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

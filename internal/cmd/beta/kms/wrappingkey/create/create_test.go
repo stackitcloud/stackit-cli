@@ -21,6 +21,7 @@ const (
 	testDisplayName = "my-key"
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"
+	testProtection  = "software"
 )
 
 type testCtxKey struct{}
@@ -42,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		displayNameFlag:           testDisplayName,
 		purposeFlag:               testPurpose,
 		descriptionFlag:           testDescription,
+		protectionFlag:            testProtection,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -62,6 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:        utils.Ptr(testDisplayName),
 		Purpose:     utils.Ptr(testPurpose),
 		Description: utils.Ptr(testDescription),
+		Protection:  utils.Ptr(testProtection),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -77,6 +80,7 @@ func fixtureRequest(mods ...func(request *kms.ApiCreateWrappingKeyRequest)) kms.
 		DisplayName: utils.Ptr(testDisplayName),
 		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
 		Description: utils.Ptr(testDescription),
+		Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
 	})
 
 	for _, mod := range mods {
@@ -169,6 +173,13 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "protection missing (required)",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, protectionFlag)
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -239,6 +250,7 @@ func TestBuildRequest(t *testing.T) {
 				Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
 				DisplayName: utils.Ptr(testDisplayName),
 				Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
+				Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
 			}),
 		},
 	}
