@@ -125,8 +125,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, k
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SCOPE", "ALGORITHM", "DELETION DATE", "STATUS")
 
-		for i := range keys {
-			key := keys[i]
+		for _, key := range keys {
 			table.AddRow(
 				utils.PtrString(key.Id),
 				utils.PtrString(key.DisplayName),
