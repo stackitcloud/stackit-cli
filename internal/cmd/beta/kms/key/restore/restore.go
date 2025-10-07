@@ -34,7 +34,7 @@ type inputModel struct {
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restore",
-		Short: "Resotre a key",
+		Short: "Restore a key",
 		Long:  "Restores the given key from being deleted.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
