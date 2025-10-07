@@ -7,23 +7,22 @@ Restore a key version
 Restores the specified version of key.
 
 ```
-stackit beta kms version restore [flags]
+stackit beta kms version restore VERSION_NUMBER [flags]
 ```
 
 ### Examples
 
 ```
-  Restore key version "0" for the key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms version restore --key "my-key-id" --key-ring "my-key-ring-id" --version 0
+  Restore key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"
+  $ stackit beta kms version restore 42 --key "my-key-id" --key-ring "my-key-ring-id"
 ```
 
 ### Options
 
 ```
-  -h, --help              Help for "stackit beta kms version restore"
-      --key string        ID of the key
-      --key-ring string   ID of the KMS key ring
-      --version int       Version number of the key
+  -h, --help                 Help for "stackit beta kms version restore"
+      --key-id string        ID of the key
+      --key-ring-id string   ID of the KMS key ring
 ```
 
 ### Options inherited from parent commands

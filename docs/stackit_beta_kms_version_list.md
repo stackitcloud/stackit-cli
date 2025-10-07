@@ -23,9 +23,9 @@ stackit beta kms version list [flags]
 ### Options
 
 ```
-  -h, --help              Help for "stackit beta kms version list"
-      --key string        ID of the key
-      --key-ring string   ID of the KMS key ring
+  -h, --help                 Help for "stackit beta kms version list"
+      --key-id string        ID of the key
+      --key-ring-id string   ID of the KMS key ring
 ```
 
 ### Options inherited from parent commands

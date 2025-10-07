@@ -1,29 +1,30 @@
 ## stackit beta kms wrapping-key list
 
-Lists all KMS Wrapping Keys
+Lists all KMS wrapping keys
 
 ### Synopsis
 
-Lists all KMS Wrapping Keys inside a key ring.
+Lists all KMS wrapping keys inside a key ring.
 
 ```
-stackit beta kms wrapping-key list KEYRING_ID [flags]
+stackit beta kms wrapping-key list [flags]
 ```
 
 ### Examples
 
 ```
-  List all KMS Wrapping Keys for the key ring "xxx"
-  $ stackit beta kms wrappingkeys list xxx
+  List all KMS wrapping keys for the key ring "my-key-ring-id"
+  $ stackit beta kms wrappingkeys list --key-ring "my-key-ring-id"
 
-  List all KMS Wrapping Keys in JSON format
-  $ stackit beta kms wrappingkeys list xxx --output-format json
+  List all KMS wrapping keys in JSON format
+  $ stackit beta kms wrappingkeys list --key-ring "my-key-ring-id" --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta kms wrapping-key list"
+  -h, --help                 Help for "stackit beta kms wrapping-key list"
+      --key-ring-id string   ID of the KMS Key Ring where the Key is stored
 ```
 
 ### Options inherited from parent commands

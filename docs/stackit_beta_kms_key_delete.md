@@ -7,22 +7,21 @@ Deletes a KMS key
 Deletes a KMS key inside a specific key ring.
 
 ```
-stackit beta kms key delete [flags]
+stackit beta kms key delete KEY_ID [flags]
 ```
 
 ### Examples
 
 ```
   Delete a KMS key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms keyring delete --key-ring "my-key-ring-id" --key "my-key-id"
+  $ stackit beta kms keyring delete "my-key-id" --key-ring "my-key-ring-id"
 ```
 
 ### Options
 
 ```
-  -h, --help              Help for "stackit beta kms key delete"
-      --key string        ID of the actual Key
-      --key-ring string   ID of the KMS Key Ring where the Key is stored
+  -h, --help                 Help for "stackit beta kms key delete"
+      --key-ring-id string   ID of the KMS Key Ring where the Key is stored
 ```
 
 ### Options inherited from parent commands

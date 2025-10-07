@@ -14,10 +14,10 @@ stackit beta kms keyring create [flags]
 
 ```
   Create a KMS key ring
-  $ stakit beta kms keyring create --name my-keyring
+  $ stackit beta kms keyring create --name my-keyring
 
   Create a KMS key ring with a description
-  $ stakit beta kms keyring create --name my-keyring --description my-description
+  $ stackit beta kms keyring create --name my-keyring --description my-description
 ```
 
 ### Options

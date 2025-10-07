@@ -7,23 +7,24 @@ List all KMS keys
 List all KMS keys inside a key ring.
 
 ```
-stackit beta kms key list KEYRING_ID [flags]
+stackit beta kms key list [flags]
 ```
 
 ### Examples
 
 ```
-  List all KMS keys for the key ring "xxx"
-  $ stackit beta kms key list xxx
+  List all KMS keys for the key ring "my-key-ring-id"
+  $ stackit beta kms key list --key-ring "my-key-ring-id"
 
   List all KMS keys in JSON format
-  $ stackit beta kms key list xxx --output-format json
+  $ stackit beta kms key list --key-ring "my-key-ring-id" --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta kms key list"
+  -h, --help                 Help for "stackit beta kms key list"
+      --key-ring-id string   ID of the KMS Key Ring where the Key is stored
 ```
 
 ### Options inherited from parent commands

@@ -7,23 +7,22 @@ Enable a key version
 Enable the given key version.
 
 ```
-stackit beta kms version enable [flags]
+stackit beta kms version enable VERSION_NUMBER [flags]
 ```
 
 ### Examples
 
 ```
-  Enable key version "0" for the key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms version enable --key "my-key-id" --key-ring "my-key-ring-id" --version 0
+  Enable key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"
+  $ stackit beta kms version enable 42 --key "my-key-id" --key-ring "my-key-ring-id"
 ```
 
 ### Options
 
 ```
-  -h, --help              Help for "stackit beta kms version enable"
-      --key string        ID of the key
-      --key-ring string   ID of the KMS key ring
-      --version int       Version number of the key
+  -h, --help                 Help for "stackit beta kms version enable"
+      --key-id string        ID of the key
+      --key-ring-id string   ID of the KMS key ring
 ```
 
 ### Options inherited from parent commands

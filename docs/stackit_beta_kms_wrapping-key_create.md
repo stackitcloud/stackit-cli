@@ -14,10 +14,10 @@ stackit beta kms wrapping-key create [flags]
 
 ```
   Create a Symmetric KMS wrapping key
-  $ stakit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key"
+  $ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"
 
   Create an Asymmetric KMS wrapping key with a description
-  $ stakit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key"
+  $ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"
 ```
 
 ### Options
@@ -26,8 +26,9 @@ stackit beta kms wrapping-key create [flags]
       --algorithm string     En-/Decryption algorithm
       --description string   Optional description of the wrapping key
   -h, --help                 Help for "stackit beta kms wrapping-key create"
-      --key-ring string      ID of the KMS key ring
+      --key-ring-id string   ID of the KMS key ring
       --name string          The display name to distinguish multiple wrapping keys
+      --protection string    Protection of the wrapping key. Value: 'software' 
       --purpose string       Purpose of the wrapping key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' 
 ```
 
