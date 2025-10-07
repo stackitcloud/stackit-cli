@@ -147,8 +147,6 @@ type kmsWrappingKeyClient interface {
 func buildRequest(ctx context.Context, model *inputModel, apiClient kmsWrappingKeyClient) (kms.ApiCreateWrappingKeyRequest, error) {
 	req := apiClient.CreateWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingId)
 
-	// Question: Should there be additional checks here?
-
 	req = req.CreateWrappingKeyPayload(kms.CreateWrappingKeyPayload{
 		DisplayName: model.Name,
 		Description: model.Description,

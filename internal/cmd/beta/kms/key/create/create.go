@@ -120,8 +120,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	// What checks could this need?
-	// I would rather let the creation fail instead of checking all possible algorithms
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
@@ -151,7 +149,6 @@ type kmsKeyClient interface {
 func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient) (kms.ApiCreateKeyRequest, error) {
 	req := apiClient.CreateKey(ctx, model.ProjectId, model.Region, model.KeyRingId)
 
-	// Question: Should there be additional checks here?
 	req = req.CreateKeyPayload(kms.CreateKeyPayload{
 		DisplayName: model.Name,
 		Description: model.Description,

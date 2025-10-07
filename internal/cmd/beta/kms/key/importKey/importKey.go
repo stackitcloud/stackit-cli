@@ -142,7 +142,6 @@ type kmsKeyClient interface {
 func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient) (kms.ApiImportKeyRequest, error) {
 	req := apiClient.ImportKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 
-	// Question: Should there be additional checks here?
 	req = req.ImportKeyPayload(kms.ImportKeyPayload{
 		WrappedKey:    model.WrappedKey,
 		WrappingKeyId: model.WrappingKeyId,
