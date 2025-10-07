@@ -43,10 +43,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a KMS key ring`,
-				"$ stakit beta kms keyring create --name my-keyring"),
+				"$ stackit beta kms keyring create --name my-keyring"),
 			examples.NewExample(
 				`Create a KMS key ring with a description`,
-				"$ stakit beta kms keyring create --name my-keyring --description my-description"),
+				"$ stackit beta kms keyring create --name my-keyring --description my-description"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
