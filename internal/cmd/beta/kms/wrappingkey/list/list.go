@@ -38,7 +38,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all KMS wrapping keys for the key ring "my-key-ring-id"`,
-				`$ stackit beta kms wrappingkeys list --key-ring "my-key-ring-id"`),
+				`$ stackit beta kms wrapping-key list --key-ring "my-key-ring-id"`),
 			examples.NewExample(
 				`List all KMS wrapping keys in JSON format`,
 				`$ stackit beta kms wrappingkeys list --key-ring "my-key-ring-id" --output-format json`),
