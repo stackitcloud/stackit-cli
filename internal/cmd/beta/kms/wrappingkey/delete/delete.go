@@ -40,7 +40,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms keyring delete "my-wrapping-key-id" --key-ring "my-key-ring-id"`),
+				`$ stackit beta kms wrapping-key delete "my-wrapping-key-id" --key-ring "my-key-ring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
