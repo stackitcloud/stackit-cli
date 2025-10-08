@@ -15,7 +15,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wrapping-key",
 		Short: "Manage KMS wrapping keys",
-		Long:  "Provides CRUD functionality for wrapping key operations inside the KMS",
+		Long:  "Provides functionality for wrapping key operations inside the KMS",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
