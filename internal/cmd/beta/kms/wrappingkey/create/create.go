@@ -53,7 +53,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS wrapping key`,
-				`$ stackit beta kms wrappingkey create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"`),
+				`$ stackit beta kms wrapping-key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"`),
 			examples.NewExample(
 				`Create an Asymmetric KMS wrapping key with a description`,
 				`$ stackit beta kms wrapping-key create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"`),
