@@ -101,14 +101,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 		AffinityGroupId: cliArgs[0],
 	}
 
-	if p.IsVerbosityDebug() {
-		modelStr, err := print.BuildDebugStrFromInputModel(model)
-		if err != nil {
-			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
-		} else {
-			p.Debug(print.DebugLevel, "parsed input values: %s", modelStr)
-		}
-	}
-
+	p.DebugInputModel(model)
 	return &model, nil
 }

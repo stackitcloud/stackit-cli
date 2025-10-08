@@ -16,11 +16,11 @@ import (
 
 var defaultHTTPHeaders = []string{"Accept", "Content-Type", "Content-Length", "User-Agent", "Date", "Referrer-Policy", "Traceparent"}
 
-// BuildDebugStrFromInputModel converts an input model to a user-friendly string representation.
+// buildDebugStrFromInputModel converts an input model to a user-friendly string representation.
 // This function converts the input model to a map, removes empty values, and generates a string representation of the map.
 // The purpose of this function is to provide a more readable output than the default JSON representation.
 // It is particularly useful when outputting to the slog logger, as the JSON format with escaped quotes does not look good.
-func BuildDebugStrFromInputModel(model any) (string, error) {
+func buildDebugStrFromInputModel(model any) (string, error) {
 	// Marshaling and Unmarshaling is the best way to convert the struct to a map
 	modelBytes, err := json.Marshal(model)
 	if err != nil {
