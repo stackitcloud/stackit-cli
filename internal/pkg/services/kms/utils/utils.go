@@ -19,6 +19,11 @@ func GetKeyName(ctx context.Context, apiClient KMSClient, projectId, region, key
 	if err != nil {
 		return "", fmt.Errorf("get KMS Key: %w", err)
 	}
+
+	if resp == nil || resp.DisplayName == nil {
+		return "", fmt.Errorf("response is nil / empty")
+	}
+
 	return *resp.DisplayName, nil
 }
 
@@ -27,6 +32,11 @@ func GetKeyDeletionDate(ctx context.Context, apiClient KMSClient, projectId, reg
 	if err != nil {
 		return time.Now(), fmt.Errorf("get KMS Key: %w", err)
 	}
+
+	if resp == nil || resp.DeletionDate == nil {
+		return time.Time{}, fmt.Errorf("response is nil / empty")
+	}
+
 	return *resp.DeletionDate, nil
 }
 
@@ -35,6 +45,11 @@ func GetKeyRingName(ctx context.Context, apiClient KMSClient, projectId, id, reg
 	if err != nil {
 		return "", fmt.Errorf("get KMS Key Ring: %w", err)
 	}
+
+	if resp == nil || resp.DisplayName == nil {
+		return "", fmt.Errorf("response is nil / empty")
+	}
+
 	return *resp.DisplayName, nil
 }
 
@@ -43,5 +58,10 @@ func GetWrappingKeyName(ctx context.Context, apiClient KMSClient, projectId, reg
 	if err != nil {
 		return "", fmt.Errorf("get KMS Wrapping Key: %w", err)
 	}
+
+	if resp == nil || resp.DisplayName == nil {
+		return "", fmt.Errorf("response is nil / empty")
+	}
+
 	return *resp.DisplayName, nil
 }

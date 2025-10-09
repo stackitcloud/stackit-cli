@@ -132,7 +132,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func outputResult(p *print.Printer, outputFormat string, resp *kms.Key) error {
 	if resp == nil {
-		return fmt.Errorf("response from 'GetKeyExecute()' is nil")
+		return fmt.Errorf("response is nil")
 	}
 
 	switch outputFormat {

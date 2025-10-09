@@ -83,12 +83,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient)
-			keyVersion, err := req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("import KMS key: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, keyRingName, keyName, keyVersion)
+			return outputResult(params.Printer, model.OutputFormat, keyRingName, keyName, resp)
 		},
 	}
 	configureFlags(cmd)

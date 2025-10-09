@@ -57,7 +57,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get KMS key rings: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, *resp.KeyRings)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, resp)
 		},
 	}
 
@@ -91,10 +91,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectId string, keyRings []kms.KeyRing) error {
-	if keyRings == nil {
-		return fmt.Errorf("response was nil")
+func outputResult(p *print.Printer, outputFormat, projectId string, resp *kms.KeyRingList) error {
+	if resp == nil || resp.KeyRings == nil {
+		return fmt.Errorf("response was nil / empty")
 	}
+
+	keyRings := *resp.KeyRings
 
 	switch outputFormat {
 	case print.JSONOutputFormat:

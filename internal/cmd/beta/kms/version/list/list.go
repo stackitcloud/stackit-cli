@@ -65,7 +65,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get key version: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyId, *resp.Versions)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyId, resp)
 		},
 	}
 
@@ -101,7 +101,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 	return apiClient.ListVersions(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versions []kms.Version) error {
+func outputResult(p *print.Printer, outputFormat, projectId, keyId string, resp *kms.VersionList) error {
+	if resp == nil || resp.Versions == nil {
+		return fmt.Errorf("response is nil / empty")
+	}
+	versions := *resp.Versions
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(versions, "", "  ")
@@ -125,8 +130,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, versi
 		table := tables.NewTable()
 		table.SetHeader("ID", "NUMBER", "CREATED AT", "DESTROY DATE", "STATUS")
 
-		for i := range versions {
-			version := versions[i]
+		for _, version := range versions {
 			table.AddRow(
 				utils.PtrString(version.KeyId),
 				utils.PtrString(version.Number),

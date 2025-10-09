@@ -63,7 +63,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get KMS wrapping keys: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.KeyRingId, *resp.WrappingKeys)
+			return outputResult(params.Printer, model.OutputFormat, model.KeyRingId, resp)
 		},
 	}
 
@@ -105,10 +105,12 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func outputResult(p *print.Printer, outputFormat, keyRingId string, wrappingKeys []kms.WrappingKey) error {
-	if wrappingKeys == nil {
-		return fmt.Errorf("response was nil")
+func outputResult(p *print.Printer, outputFormat, keyRingId string, resp *kms.WrappingKeyList) error {
+	if resp == nil || resp.WrappingKeys == nil {
+		return fmt.Errorf("response is nil / empty")
 	}
+
+	wrappingKeys := *resp.WrappingKeys
 
 	switch outputFormat {
 	case print.JSONOutputFormat:
@@ -140,7 +142,6 @@ func outputResult(p *print.Printer, outputFormat, keyRingId string, wrappingKeys
 				utils.PtrString(wrappingKey.DisplayName),
 				utils.PtrString(wrappingKey.Purpose),
 				utils.PtrString(wrappingKey.Algorithm),
-				// utils.PtrString(wrappingKey.CreatedAt),
 				utils.PtrString(wrappingKey.ExpiresAt),
 				utils.PtrString(wrappingKey.State),
 			)

@@ -63,7 +63,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("get KMS Keys: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyRingId, *resp.Keys)
+			return outputResult(params.Printer, model.OutputFormat, model.ProjectId, model.KeyRingId, resp)
 		},
 	}
 
@@ -105,10 +105,12 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, keys []kms.Key) error {
-	if keys == nil {
-		return fmt.Errorf("response was an empty list")
+func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, resp *kms.KeyList) error {
+	if resp == nil || resp.Keys == nil {
+		return fmt.Errorf("response was nil / empty")
 	}
+
+	keys := *resp.Keys
 
 	switch outputFormat {
 	case print.JSONOutputFormat:

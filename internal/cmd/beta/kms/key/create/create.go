@@ -89,7 +89,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient)
-			key, err := req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS key: %w", err)
 			}
@@ -98,14 +98,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating key")
-				_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, *key.Id).WaitWithContext(ctx)
+				_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, *resp.Id).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for KMS key creation: %w", err)
 				}
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, key)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)

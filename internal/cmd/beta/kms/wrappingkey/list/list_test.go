@@ -206,32 +206,32 @@ func TestOutputResult(t *testing.T) {
 	tests := []struct {
 		description  string
 		keyRingId    string
-		wrappingKeys []kms.WrappingKey
+		resp         *kms.WrappingKeyList
 		outputFormat string
 		projectLabel string
 		wantErr      bool
 	}{
 		{
 			description:  "nil response",
-			wrappingKeys: nil,
+			resp:         nil,
 			projectLabel: "my-project",
 			wantErr:      true,
 		},
 		{
 			description:  "default output",
-			wrappingKeys: []kms.WrappingKey{},
+			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
 			projectLabel: "my-project",
 			wantErr:      false,
 		},
 		{
 			description:  "json output",
-			wrappingKeys: []kms.WrappingKey{},
+			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
 			outputFormat: print.JSONOutputFormat,
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
-			wrappingKeys: []kms.WrappingKey{},
+			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
 			outputFormat: print.YAMLOutputFormat,
 			wantErr:      false,
 		},
@@ -241,7 +241,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.keyRingId, tt.wrappingKeys)
+			err := outputResult(p, tt.outputFormat, tt.keyRingId, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

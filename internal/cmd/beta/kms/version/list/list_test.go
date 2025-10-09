@@ -232,32 +232,38 @@ func TestOutputResult(t *testing.T) {
 		description  string
 		projectId    string
 		keyId        string
-		versions     []kms.Version
+		resp         *kms.VersionList
 		outputFormat string
 		projectLabel string
 		wantErr      bool
 	}{
 		{
-			description:  "empty default",
-			versions:     nil,
+			description:  "nil response",
+			resp:         nil,
 			projectLabel: "my-project",
-			wantErr:      false,
+			wantErr:      true,
+		},
+		{
+			description:  "empty default",
+			resp:         &kms.VersionList{},
+			projectLabel: "my-project",
+			wantErr:      true,
 		},
 		{
 			description:  "default output",
-			versions:     []kms.Version{},
+			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
 			projectLabel: "my-project",
 			wantErr:      false,
 		},
 		{
 			description:  "json output",
-			versions:     []kms.Version{},
+			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
 			outputFormat: print.JSONOutputFormat,
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
-			versions:     []kms.Version{},
+			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
 			outputFormat: print.YAMLOutputFormat,
 			wantErr:      false,
 		},
@@ -267,7 +273,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.projectId, tt.keyId, tt.versions)
+			err := outputResult(p, tt.outputFormat, tt.projectId, tt.keyId, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
