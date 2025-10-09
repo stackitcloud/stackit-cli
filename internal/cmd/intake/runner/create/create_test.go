@@ -17,21 +17,23 @@ import (
 // Define a unique key for the context to avoid collisions
 type testCtxKey struct{}
 
+const (
+	testRegion             = "eu01"
+	testDisplayName        = "testrunner"
+	testMaxMessageSizeKiB  = int64(1024)
+	testMaxMessagesPerHour = int64(10000)
+	testDescription        = "This is a test runner"
+	testLabelsString       = "env=test,team=dev"
+)
+
 var (
 	// testCtx dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	// testClient mock API client
 	testClient    = &intake.APIClient{}
 	testProjectId = uuid.NewString()
-	testRegion    = "eu01"
 
-	// Define test values for flags
-	testDisplayName        = "testrunner"
-	testMaxMessageSizeKiB  = int64(1024)
-	testMaxMessagesPerHour = int64(10000)
-	testDescription        = "This is a test runner"
-	testLabels             = map[string]string{"env": "test", "team": "dev"}
-	testLabelsString       = "env=test,team=dev"
+	testLabels = map[string]string{"env": "test", "team": "dev"}
 )
 
 // fixtureFlagValues generates a map of flag values for tests

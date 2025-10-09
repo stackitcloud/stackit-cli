@@ -17,12 +17,15 @@ import (
 
 type testCtxKey struct{}
 
+const (
+	testRegion = "eu01"
+	testLimit  = int64(5)
+)
+
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient    = &intake.APIClient{}
 	testProjectId = uuid.NewString()
-	testRegion    = "eu01"
-	testLimit     = int64(5)
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {

@@ -16,6 +16,10 @@ import (
 // Define a unique key for the context to avoid collisions
 type testCtxKey struct{}
 
+const (
+	testRegion = "eu01"
+)
+
 var (
 	// testCtx is a dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -23,7 +27,6 @@ var (
 	testClient    = &intake.APIClient{}
 	testProjectId = uuid.NewString()
 	testRunnerId  = uuid.NewString()
-	testRegion    = "eu01"
 )
 
 // fixtureArgValues generates a slice of arguments for tests
