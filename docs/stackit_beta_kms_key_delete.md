@@ -14,7 +14,7 @@ stackit beta kms key delete KEY_ID [flags]
 
 ```
   Delete a KMS key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms keyring delete "my-key-id" --key-ring "my-key-ring-id"
+  $ stackit beta kms key delete "my-key-id" --key-ring "my-key-ring-id"
 ```
 
 ### Options

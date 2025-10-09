@@ -4,7 +4,7 @@ Manage KMS wrapping keys
 
 ### Synopsis
 
-Provides CRUD functionality for wrapping key operations inside the KMS
+Provides functionality for wrapping key operations inside the KMS
 
 ```
 stackit beta kms wrapping-key [flags]

@@ -14,7 +14,7 @@ stackit beta kms wrapping-key delete WRAPPING_KEY_ID [flags]
 
 ```
   Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms keyring delete "my-wrapping-key-id" --key-ring "my-key-ring-id"
+  $ stackit beta kms wrapping-key delete "my-wrapping-key-id" --key-ring "my-key-ring-id"
 ```
 
 ### Options
