@@ -274,7 +274,6 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 		Nodepools: &[]ske.Nodepool{
 			{
 				AvailabilityZones: &[]string{
-					"eu01-m",
 					"eu01-1",
 					"eu01-2",
 					"eu01-3",
@@ -289,9 +288,9 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 						Name:    utils.Ptr("flatcar"),
 					},
 				},
-				MaxSurge:       utils.Ptr(int64(4)),
+				MaxSurge:       utils.Ptr(int64(3)),
 				MaxUnavailable: utils.Ptr(int64(0)),
-				Maximum:        utils.Ptr(int64(4)),
+				Maximum:        utils.Ptr(int64(3)),
 				Minimum:        utils.Ptr(int64(1)),
 				Name:           utils.Ptr("pool-default"),
 				Volume: &ske.Volume{
