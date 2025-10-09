@@ -117,15 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 	}
 
-	if p.IsVerbosityDebug() {
-		modelStr, err := print.BuildDebugStrFromInputModel(model)
-		if err != nil {
-			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
-		} else {
-			p.Debug(print.InfoLevel, modelStr)
-		}
-	}
-
+	p.DebugInputModel(model)
 	return &model, nil
 }
 
