@@ -2,10 +2,8 @@ package delete
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -76,12 +74,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Wait for async operation not relevant. Key ring deletion is synchronous.
 
-			// Get the key ring so it can be outputted in the state it is after the deletion.
-			resp, err := apiClient.GetKeyRingExecute(ctx, model.ProjectId, model.Region, model.KeyRingId)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get KMS Key Ring: %w", err)
-			}
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			// Don't output anything. It's a deletion.
+			params.Printer.Info("Deleted the key ring %q\n", keyRingLabel)
+			return nil
 		},
 	}
 	return cmd
@@ -115,29 +110,4 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteKeyRingRequest {
 	req := apiClient.DeleteKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
-}
-
-func outputResult(p *print.Printer, outputFormat string, resp *kms.KeyRing) error {
-	if resp == nil {
-		return fmt.Errorf("response from 'GetKeyExecute()' is nil")
-	}
-
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal output to JSON: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal output to YAML: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
-		p.Outputf("Deleted key ring: %s\n", utils.PtrString(resp.DisplayName))
-	}
-	return nil
 }
