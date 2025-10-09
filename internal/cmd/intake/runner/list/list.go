@@ -163,8 +163,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, runners [
 		table := tables.NewTable()
 
 		table.SetHeader("ID", "NAME")
-		for i := range runners {
-			runner := runners[i]
+		for _, runner := range runners {
 			table.AddRow(
 				runner.GetId(),
 				runner.GetDisplayName(),
