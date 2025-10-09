@@ -36,7 +36,7 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete an Intake Runner with ID "xxx"`,
-				`$ stackit intake runner delete xxx`),
+				`$ stackit beta intake runner delete xxx`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

@@ -1,4 +1,4 @@
-package create
+package update
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -19,6 +18,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+)
+
+const (
+	runnerIdArg = "RUNNER_ID"
 )
 
 const (
@@ -29,9 +33,9 @@ const (
 	labelFlag              = "labels"
 )
 
-// inputModel struct holds all the input parameters for the command
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	RunnerId           string
 	DisplayName        *string
 	MaxMessageSizeKiB  *int64
 	MaxMessagesPerHour *int64
@@ -39,23 +43,23 @@ type inputModel struct {
 	Labels             *map[string]string
 }
 
-func NewCreateCmd(p *params.CmdParams) *cobra.Command {
+func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates a new Intake Runner",
-		Long:  "Creates a new Intake Runner.",
-		Args:  args.NoArgs,
+		Use:   fmt.Sprintf("update %s", runnerIdArg),
+		Short: "Updates an Intake Runner",
+		Long:  "Updates an Intake Runner. Only the specified fields are updated.",
+		Args:  args.SingleArg(runnerIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new Intake Runner with a display name and message capacity limits`,
-				`$ stackit intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000`),
+				`Update the display name of an Intake Runner with ID "xxx"`,
+				`$ stackit beta intake runner update xxx --display-name "new-runner-name"`),
 			examples.NewExample(
-				`Create a new Intake Runner with a description and labels`,
-				`$ stackit intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000 --description "Main runner for production" --labels="env=prod,team=billing"`),
+				`Update the message capacity limits for an Intake Runner with ID "xxx"`,
+				`$ stackit beta intake runner update xxx --max-message-size-kib 1000 --max-messages-per-hour 10000`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(p.Printer, cmd)
+			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -72,19 +76,11 @@ func NewCreateCmd(p *params.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create an Intake Runner for project %q?", projectLabel)
-				err = p.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Intake Runner: %w", err)
+				return fmt.Errorf("update Intake Runner: %w", err)
 			}
 
 			return outputResult(p.Printer, model.OutputFormat, projectLabel, resp)
@@ -96,16 +92,15 @@ func NewCreateCmd(p *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
-	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB")
-	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour")
+	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB. Note: Overall message capacity cannot be decreased.")
+	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	cmd.Flags().StringToString(labelFlag, nil, "Labels in key=value format, separated by commas. Example: --labels \"key1=value1,key2=value2\"")
-
-	err := flags.MarkFlagsRequired(cmd, displayNameFlag, maxMessageSizeKiBFlag, maxMessagesPerHourFlag)
-	cobra.CheckErr(err)
+	cmd.Flags().StringToString(labelFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	runnerId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -113,11 +108,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	model := inputModel{
 		GlobalFlagModel:    globalFlags,
+		RunnerId:           runnerId,
 		DisplayName:        flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		MaxMessageSizeKiB:  flags.FlagToInt64Pointer(p, cmd, maxMessageSizeKiBFlag),
 		MaxMessagesPerHour: flags.FlagToInt64Pointer(p, cmd, maxMessagesPerHourFlag),
 		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+	}
+
+	if model.DisplayName == nil && model.MaxMessageSizeKiB == nil && model.MaxMessagesPerHour == nil && model.Description == nil && model.Labels == nil {
+		return nil, &cliErr.EmptyUpdateError{}
 	}
 
 	if p.IsVerbosityDebug() {
@@ -132,21 +132,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiCreateIntakeRunnerRequest {
-	// Start building the request by calling the base method with path parameters
-	req := apiClient.CreateIntakeRunner(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeRunnerRequest {
+	req := apiClient.UpdateIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
 
-	// Create the payload struct with data from the input model
-	payload := intake.CreateIntakeRunnerPayload{
-		DisplayName:        model.DisplayName,
-		MaxMessageSizeKiB:  model.MaxMessageSizeKiB,
-		MaxMessagesPerHour: model.MaxMessagesPerHour,
-		Description:        model.Description,
-		Labels:             model.Labels,
+	payload := intake.UpdateIntakeRunnerPayload{}
+	if model.DisplayName != nil {
+		payload.DisplayName = model.DisplayName
 	}
-	// Attach the payload to the request builder
-	req = req.CreateIntakeRunnerPayload(payload)
+	if model.MaxMessageSizeKiB != nil {
+		payload.MaxMessageSizeKiB = model.MaxMessageSizeKiB
+	}
+	if model.MaxMessagesPerHour != nil {
+		payload.MaxMessagesPerHour = model.MaxMessagesPerHour
+	}
+	if model.Description != nil {
+		payload.Description = model.Description
+	}
+	if model.Labels != nil {
+		payload.Labels = model.Labels
+	}
 
+	req = req.UpdateIntakeRunnerPayload(payload)
 	return req
 }
 
@@ -170,10 +176,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *int
 		return nil
 	default:
 		if resp == nil {
-			p.Outputf("Created Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
+			p.Outputf("Updated Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
 			return nil
 		}
-		p.Outputf("Created Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("Updated Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 		return nil
 	}
 }

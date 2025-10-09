@@ -40,13 +40,13 @@ func NewListCmd(p *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all Intake Runners`,
-				`$ stackit intake runner list`),
+				`$ stackit beta intake runner list`),
 			examples.NewExample(
 				`List all Intake Runners in JSON format`,
-				`$ stackit intake runner list --output-format json`),
+				`$ stackit beta intake runner list --output-format json`),
 			examples.NewExample(
 				`List up to 5 Intake Runners`,
-				`$ stackit intake runner list --limit 5`),
+				`$ stackit beta intake runner list --limit 5`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

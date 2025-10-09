@@ -2,7 +2,7 @@ package intake
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/intake/runner"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

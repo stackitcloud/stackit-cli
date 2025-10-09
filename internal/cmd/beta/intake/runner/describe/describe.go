@@ -38,10 +38,10 @@ func NewDescribeCmd(p *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of an Intake Runner with ID "xxx"`,
-				`$ stackit intake runner describe xxx`),
+				`$ stackit beta intake runner describe xxx`),
 			examples.NewExample(
 				`Get details of an Intake Runner with ID "xxx" in JSON format`,
-				`$ stackit intake runner describe xxx --output-format json`),
+				`$ stackit beta intake runner describe xxx --output-format json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

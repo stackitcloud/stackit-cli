@@ -2,6 +2,7 @@ package beta
 
 import (
 	"fmt"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
@@ -38,4 +39,5 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(alb.NewCmd(params))
+	cmd.AddCommand(intake.NewCmd(params))
 }
