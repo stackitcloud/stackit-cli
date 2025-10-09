@@ -280,6 +280,11 @@ func TestOutputResult(t *testing.T) {
 			args:    args{outputFormat: print.JSONOutputFormat, resp: nil},
 			wantErr: false,
 		},
+		{
+			name:    "nil response - default output",
+			args:    args{outputFormat: "default", resp: nil},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewUpdateCmd(&params.CmdParams{Printer: p})

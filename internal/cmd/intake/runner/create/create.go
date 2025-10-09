@@ -169,6 +169,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *int
 
 		return nil
 	default:
+		if resp == nil {
+			p.Outputf("Created Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
+			return nil
+		}
 		p.Outputf("Created Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 		return nil
 	}
