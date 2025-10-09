@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -109,9 +110,13 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	if resp.AvailabilityZones == nil || len(*resp.AvailabilityZones) == 0 {
 		return nil, fmt.Errorf("no availability zones found")
 	}
-	availabilityZones := make([]string, len(*resp.AvailabilityZones))
+	var availabilityZones []string
 	for i := range *resp.AvailabilityZones {
-		availabilityZones[i] = (*resp.AvailabilityZones)[i].GetName()
+		azName := (*resp.AvailabilityZones)[i].GetName()
+		// don't include availability zones like eu01-m, eu02-m, not all flavors are available there
+		if !regexp.MustCompile(`\w{2}\d{2}-m`).MatchString(azName) {
+			availabilityZones = append(availabilityZones, azName)
+		}
 	}
 
 	if resp.MachineTypes == nil || len(*resp.MachineTypes) == 0 {
