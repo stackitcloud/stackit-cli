@@ -171,7 +171,7 @@ func TestBuildDebugStrFromInputModel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			model := tt.model
-			actual, err := BuildDebugStrFromInputModel(model)
+			actual, err := buildDebugStrFromInputModel(model)
 			if err != nil {
 				if !tt.isValid {
 					return
