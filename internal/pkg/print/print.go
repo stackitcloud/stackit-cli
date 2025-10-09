@@ -51,7 +51,7 @@ type Printer struct {
 	Verbosity Level
 }
 
-// Creates a new printer, including setting up the default logger.
+// NewPrinter creates a new printer, including setting up the default logger.
 func NewPrinter() *Printer {
 	w := os.Stderr
 	logger := slog.New(
@@ -227,4 +227,16 @@ func (p *Printer) IsVerbosityWarning() bool {
 // Returns True if the verbosity level is set to Error, False otherwise.
 func (p *Printer) IsVerbosityError() bool {
 	return p.Verbosity == ErrorLevel
+}
+
+// DebugInputModel prints the given input model in case verbosity level is set to Debug, does nothing otherwise
+func (p *Printer) DebugInputModel(model any) {
+	if p.IsVerbosityDebug() {
+		modelStr, err := buildDebugStrFromInputModel(model)
+		if err != nil {
+			p.Debug(ErrorLevel, "convert model to string for debugging: %v", err)
+		} else {
+			p.Debug(DebugLevel, "parsed input values: %s", modelStr)
+		}
+	}
 }

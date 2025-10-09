@@ -53,7 +53,7 @@ Please remember to run `make generate-docs` after your changes to keep the comma
 
 Below is a typical structure of a CLI command:
 
-https://github.com/stackitcloud/stackit-cli/blob/85ce44cd18d11169f2548d8657031b5fc6f94740/.github/docs/contribution-guide/cmd.go#L23-L156
+https://github.com/stackitcloud/stackit-cli/blob/main/.github/docs/contribution-guide/cmd.go
 
 Please remember to always add unit tests for `parseInput`, `buildRequest` (in `bar_test.go`), and any other util functions used.
 
@@ -87,7 +87,7 @@ If you want to add a command that uses a STACKIT service `foo` that was not yet 
     1.  This is done in `internal/pkg/services/foo/client/client.go`
     2.  Below is an example of a typical `client.go` file structure:
 
-https://github.com/stackitcloud/stackit-cli/blob/85ce44cd18d11169f2548d8657031b5fc6f94740/.github/docs/contribution-guide/client.go#L12-L35
+https://github.com/stackitcloud/stackit-cli/blob/main/.github/docs/contribution-guide/client.go
 
 ### Local development
 
