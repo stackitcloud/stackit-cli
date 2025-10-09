@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -16,13 +17,9 @@ import (
 )
 
 const (
-	defaultNodepoolAvailabilityZone = "eu01-3"
 	defaultNodepoolCRI              = ske.CRINAME_CONTAINERD
-	defaultNodepoolMachineType      = "b1.2"
 	defaultNodepoolMachineImageName = "flatcar"
-	defaultNodepoolMaxSurge         = 1
 	defaultNodepoolMaxUnavailable   = 0
-	defaultNodepoolMaximum          = 2
 	defaultNodepoolMinimum          = 1
 	defaultNodepoolName             = "pool-default"
 	defaultNodepoolVolumeType       = "storage_premium_perf2"
@@ -110,22 +107,38 @@ func getDefaultPayloadKubernetes(resp *ske.ProviderOptions) (*ske.Kubernetes, er
 }
 
 func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error) {
+	if resp.AvailabilityZones == nil || len(*resp.AvailabilityZones) == 0 {
+		return nil, fmt.Errorf("no availability zones found")
+	}
+	var availabilityZones []string
+	for i := range *resp.AvailabilityZones {
+		azName := (*resp.AvailabilityZones)[i].GetName()
+		// don't include availability zones like eu01-m, eu02-m, not all flavors are available there
+		if !regexp.MustCompile(`\w{2}\d{2}-m`).MatchString(azName) {
+			availabilityZones = append(availabilityZones, azName)
+		}
+	}
+
+	if resp.MachineTypes == nil || len(*resp.MachineTypes) == 0 {
+		return nil, fmt.Errorf("no machine types found")
+	}
+	machineType := (*resp.MachineTypes)[0].GetName()
+
 	output := &ske.Nodepool{
-		AvailabilityZones: &[]string{
-			defaultNodepoolAvailabilityZone,
-		},
+		AvailabilityZones: &availabilityZones,
 		Cri: &ske.CRI{
 			Name: utils.Ptr(defaultNodepoolCRI),
 		},
 		Machine: &ske.Machine{
-			Type: utils.Ptr(defaultNodepoolMachineType),
+			Type: &machineType,
 			Image: &ske.Image{
 				Name: utils.Ptr(defaultNodepoolMachineImageName),
 			},
 		},
-		MaxSurge:       utils.Ptr(int64(defaultNodepoolMaxSurge)),
+		// there must be as many nodes as availability zones are given
+		MaxSurge:       utils.Ptr(int64(len(availabilityZones))),
 		MaxUnavailable: utils.Ptr(int64(defaultNodepoolMaxUnavailable)),
-		Maximum:        utils.Ptr(int64(defaultNodepoolMaximum)),
+		Maximum:        utils.Ptr(int64(len(availabilityZones))),
 		Minimum:        utils.Ptr(int64(defaultNodepoolMinimum)),
 		Name:           utils.Ptr(defaultNodepoolName),
 		Volume: &ske.Volume{
