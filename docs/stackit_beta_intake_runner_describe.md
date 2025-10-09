@@ -1,33 +1,29 @@
-## stackit intake runner list
+## stackit beta intake runner describe
 
-Lists all Intake Runners
+Shows details of an Intake Runner
 
 ### Synopsis
 
-Lists all Intake Runners for the current project.
+Shows details of an Intake Runner.
 
 ```
-stackit intake runner list [flags]
+stackit beta intake runner describe RUNNER_ID [flags]
 ```
 
 ### Examples
 
 ```
-  List all Intake Runners
-  $ stackit intake runner list
+  Get details of an Intake Runner with ID "xxx"
+  $ stackit beta intake runner describe xxx
 
-  List all Intake Runners in JSON format
-  $ stackit intake runner list --output-format json
-
-  List up to 5 Intake Runners
-  $ stackit intake runner list --limit 5
+  Get details of an Intake Runner with ID "xxx" in JSON format
+  $ stackit beta intake runner describe xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit intake runner list"
-      --limit int   Maximum number of entries to list
+  -h, --help   Help for "stackit beta intake runner describe"
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +39,5 @@ stackit intake runner list [flags]
 
 ### SEE ALSO
 
-* [stackit intake runner](./stackit_intake_runner.md)	 - Provides functionality for Intake Runners
+* [stackit beta intake runner](./stackit_beta_intake_runner.md)	 - Provides functionality for Intake Runners
 

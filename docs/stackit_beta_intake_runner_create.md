@@ -1,4 +1,4 @@
-## stackit intake runner create
+## stackit beta intake runner create
 
 Creates a new Intake Runner
 
@@ -7,17 +7,17 @@ Creates a new Intake Runner
 Creates a new Intake Runner.
 
 ```
-stackit intake runner create [flags]
+stackit beta intake runner create [flags]
 ```
 
 ### Examples
 
 ```
   Create a new Intake Runner with a display name and message capacity limits
-  $ stackit intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000
+  $ stackit beta intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000
 
   Create a new Intake Runner with a description and labels
-  $ stackit intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000 --description "Main runner for production" --labels="env=prod,team=billing"
+  $ stackit beta intake runner create --display-name my-runner --max-message-size-kib 1000 --max-messages-per-hour 5000 --description "Main runner for production" --labels="env=prod,team=billing"
 ```
 
 ### Options
@@ -25,7 +25,7 @@ stackit intake runner create [flags]
 ```
       --description string          Description
       --display-name string         Display name
-  -h, --help                        Help for "stackit intake runner create"
+  -h, --help                        Help for "stackit beta intake runner create"
       --labels stringToString       Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2" (default [])
       --max-message-size-kib int    Maximum message size in KiB
       --max-messages-per-hour int   Maximum number of messages per hour
@@ -44,5 +44,5 @@ stackit intake runner create [flags]
 
 ### SEE ALSO
 
-* [stackit intake runner](./stackit_intake_runner.md)	 - Provides functionality for Intake Runners
+* [stackit beta intake runner](./stackit_beta_intake_runner.md)	 - Provides functionality for Intake Runners
 

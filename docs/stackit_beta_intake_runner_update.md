@@ -1,4 +1,4 @@
-## stackit intake runner update
+## stackit beta intake runner update
 
 Updates an Intake Runner
 
@@ -7,20 +7,17 @@ Updates an Intake Runner
 Updates an Intake Runner. Only the specified fields are updated.
 
 ```
-stackit intake runner update RUNNER_ID [flags]
+stackit beta intake runner update RUNNER_ID [flags]
 ```
 
 ### Examples
 
 ```
   Update the display name of an Intake Runner with ID "xxx"
-  $ stackit intake runner update xxx --display-name "new-runner-name"
+  $ stackit beta intake runner update xxx --display-name "new-runner-name"
 
   Update the message capacity limits for an Intake Runner with ID "xxx"
-  $ stackit intake runner update xxx --max-message-size-kib 2000 --max-messages-per-hour 10000
-
-  Clear the labels of an Intake Runner with ID "xxx" by providing an empty value
-  $ stackit intake runner update xxx --labels ""
+  $ stackit beta intake runner update xxx --max-message-size-kib 1000 --max-messages-per-hour 10000
 ```
 
 ### Options
@@ -28,8 +25,8 @@ stackit intake runner update RUNNER_ID [flags]
 ```
       --description string          Description
       --display-name string         Display name
-  -h, --help                        Help for "stackit intake runner update"
-      --labels stringToString       Labels in key=value format. To clear all labels, provide an empty string, e.g. --labels "" (default [])
+  -h, --help                        Help for "stackit beta intake runner update"
+      --labels stringToString       Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2". (default [])
       --max-message-size-kib int    Maximum message size in KiB. Note: Overall message capacity cannot be decreased.
       --max-messages-per-hour int   Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.
 ```
@@ -47,5 +44,5 @@ stackit intake runner update RUNNER_ID [flags]
 
 ### SEE ALSO
 
-* [stackit intake runner](./stackit_intake_runner.md)	 - Provides functionality for Intake Runners
+* [stackit beta intake runner](./stackit_beta_intake_runner.md)	 - Provides functionality for Intake Runners
 

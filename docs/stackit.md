@@ -34,7 +34,6 @@ stackit [flags]
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
 * [stackit image](./stackit_image.md)	 - Manage server images
-* [stackit intake](./stackit_intake.md)	 - Provides functionality for intake
 * [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe

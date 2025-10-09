@@ -1,26 +1,19 @@
-## stackit intake runner delete
+## stackit beta intake
 
-Deletes an Intake Runner
+Provides functionality for intake
 
 ### Synopsis
 
-Deletes an Intake Runner.
+Provides functionality for intake.
 
 ```
-stackit intake runner delete RUNNER_ID [flags]
-```
-
-### Examples
-
-```
-  Delete an Intake Runner with ID "xxx"
-  $ stackit intake runner delete xxx
+stackit beta intake [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit intake runner delete"
+  -h, --help   Help for "stackit beta intake"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +29,6 @@ stackit intake runner delete RUNNER_ID [flags]
 
 ### SEE ALSO
 
-* [stackit intake runner](./stackit_intake_runner.md)	 - Provides functionality for Intake Runners
+* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
+* [stackit beta intake runner](./stackit_beta_intake_runner.md)	 - Provides functionality for Intake Runners
 
