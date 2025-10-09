@@ -64,6 +64,7 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 			if err = req.Execute(); err != nil {
 				return fmt.Errorf("delete Intake Runner: %w", err)
 			}
+			p.Printer.Info("Deleted instance %s\n", model.RunnerId)
 
 			return nil
 		},
