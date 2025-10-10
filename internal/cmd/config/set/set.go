@@ -37,6 +37,7 @@ const (
 	redisCustomEndpointFlag             = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
 	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	kmsCustomEndpointFlag               = "kms-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
 	serverOsUpdateCustomEndpointFlag    = "server-osupdate-custom-endpoint"
 	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
@@ -150,6 +151,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis API base URL, used in calls to this API")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource Manager API base URL, used in calls to this API")
 	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Manager API base URL, used in calls to this API")
+	cmd.Flags().String(kmsCustomEndpointFlag, "", "KMS API base URL, used in calls to this API")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(serviceEnablementCustomEndpointFlag, "", "Service Enablement API base URL, used in calls to this API")
 	cmd.Flags().String(serverBackupCustomEndpointFlag, "", "Server Backup API base URL, used in calls to this API")
@@ -196,6 +198,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(resourceManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.KMSCustomEndpointKey, cmd.Flags().Lookup(kmsCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServerBackupCustomEndpointKey, cmd.Flags().Lookup(serverBackupCustomEndpointFlag))
 	cobra.CheckErr(err)
