@@ -1,30 +1,28 @@
-## stackit beta
+## stackit beta routing-table describe
 
-Contains beta STACKIT CLI commands
+Describe a routing-table
 
 ### Synopsis
 
-Contains beta STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+Describe a routing-table
 
 ```
-stackit beta [flags]
+stackit beta routing-table describe ROUTING_TABLE_ID_ARG [flags]
 ```
 
 ### Examples
 
 ```
-  See the currently available beta commands
-  $ stackit beta --help
-
-  Execute a beta command
-  $ stackit beta MY_COMMAND
+  Describe a routing-table
+  $ stackit beta routing-table describe xxxx-xxxx-xxxx-xxxx --organization-id xxx --network-area-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta"
+  -h, --help                     Help for "stackit beta routing-table describe"
+      --network-area-id string   Network-Area ID
+      --organization-id string   Organization ID
 ```
 
 ### Options inherited from parent commands
@@ -40,8 +38,5 @@ stackit beta [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
 * [stackit beta routing-table](./stackit_beta_routing-table.md)	 - Manage routing-tables and its according routes
-* [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 
