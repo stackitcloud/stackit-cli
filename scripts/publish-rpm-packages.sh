@@ -54,11 +54,12 @@ aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "
 # Create repository metadata for each architecture
 printf "\n>>> Creating repository metadata \n"
 for arch in x86_64 i386 aarch64; do
-    if [ -d "rpm-repo/${arch}" ] && [ "$(ls -A rpm-repo/${arch})" ]; then
+    if [ -d "rpm-repo/${arch}" ] && [ -n "$(find "rpm-repo/${arch}" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
         printf "Creating metadata for %s...\n" "$arch"
         
         # List what we're working with
-        printf "Files in %s: %s\n" "$arch" "$(ls "rpm-repo/${arch}/" | tr '\n' ' ')"
+        file_list=$(find "rpm-repo/${arch}" -maxdepth 1 -type f -exec basename {} \; | tr '\n' ' ')
+        printf "Files in %s: %s\n" "$arch" "${file_list% }"
         
         # Create repository metadata
         createrepo_c --update rpm-repo/${arch}
