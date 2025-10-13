@@ -146,10 +146,10 @@ The STACKIT CLI can be installed through the [`DNF/YUM`](https://docs.fedoraproj
 sudo tee /etc/yum.repos.d/stackit.repo > /dev/null << 'EOF'
 [stackit]
 name=STACKIT CLI
-baseurl=https://distribution-test.object.storage.eu01.onstackit.cloud/rpm/cli/$basearch
+baseurl=https://packages.stackit.cloud/rpm/cli/$basearch
 enabled=1
 gpgcheck=1
-gpgkey=https://distribution-test.object.storage.eu01.onstackit.cloud/keys/key.gpg
+gpgkey=https://packages.stackit.cloud/keys/key.gpg
 EOF
 ```
 
@@ -167,10 +167,10 @@ sudo dnf install stackit
 sudo tee /etc/zypp/repos.d/stackit.repo > /dev/null << 'EOF'
 [stackit]
 name=STACKIT CLI
-baseurl=https://distribution-test.object.storage.eu01.onstackit.cloud/rpm/cli/$basearch
+baseurl=https://packages.stackit.cloud/rpm/cli/$basearch
 enabled=1
 gpgcheck=1
-gpgkey=https://distribution-test.object.storage.eu01.onstackit.cloud/keys/key.gpg
+gpgkey=https://packages.stackit.cloud/keys/key.gpg
 EOF
 ```
 
