@@ -101,6 +101,8 @@ aws s3 sync rpm-repo/ s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ \
   --include "*/repodata/repomd.xml.asc"
 
 # Upload the public key
+# Also uploaded in APT publish; intentionally redundant
+# Safe to overwrite and ensures updates if APT fails or key changes.
 printf "\n>>> Uploading public key \n"
 gpg --armor --export "${GPG_PRIVATE_KEY_FINGERPRINT}" > public-key.asc
 aws s3 cp public-key.asc s3://${RPM_BUCKET_NAME}/${PUBLIC_KEY_FILE_PATH} --endpoint-url "${AWS_ENDPOINT_URL}"
