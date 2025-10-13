@@ -45,8 +45,10 @@ jobs:
       # https://goreleaser.com/customization/nfpm/
       - name: Create GPG key file
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg-private-key.asc
-          chmod 600 gpg-private-key.asc
+          KEY_PATH="$RUNNER_TEMP/gpg-private-key.asc"
+          printf '%s' "${{ secrets.GPG_PRIVATE_KEY }}" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "GPG_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
       
       - name: Set up keychain
         run: |
@@ -78,14 +80,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GPG_KEY_PATH: ./gpg-private-key.asc
+          GPG_KEY_PATH: ${{ env.GPG_KEY_PATH }}
           # nfpm-rpm signing needs this env to be set.
           NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Clean up GPG key file
         if: always()
         run: |
-          rm -f gpg-private-key.asc
+          rm -f "$GPG_KEY_PATH"
       
       - name: Upload artifacts to workflow
         uses: actions/upload-artifact@v4
