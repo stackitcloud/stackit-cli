@@ -156,7 +156,7 @@ EOF
 2. Install the CLI:
 
 ```shell
-sudo dnf install -y stackit
+sudo dnf install stackit
 ```
 
 ##### Installation via Zypper
@@ -177,7 +177,7 @@ EOF
 2. Install the CLI:
 
 ```shell
-sudo zypper install -y stackit
+sudo zypper install stackit
 ```
 
 #### Any distribution
