@@ -27,7 +27,7 @@ printf "\n>>> Copying RPM packages to architecture directories \n"
 for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_amd64.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/x86_64/
-        printf "Copied $(basename "$rpm_file") to x86_64/\n"
+        printf "Copied %s to x86_64/\n" "$(basename "$rpm_file")"
     fi
 done
 
@@ -35,7 +35,7 @@ done
 for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_386.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/i386/
-        printf "Copied $(basename "$rpm_file") to i386/\n"
+        printf "Copied %s to i386/\n" "$(basename "$rpm_file")"
     fi
 done
 
@@ -43,7 +43,7 @@ done
 for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_arm64.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/aarch64/
-        printf "Copied $(basename "$rpm_file") to aarch64/\n"
+        printf "Copied %s to aarch64/\n" "$(basename "$rpm_file")"
     fi
 done
 
@@ -55,16 +55,16 @@ aws s3 sync s3://${RPM_BUCKET_NAME}/${RPM_REPO_PATH}/ rpm-repo/ --endpoint-url "
 printf "\n>>> Creating repository metadata \n"
 for arch in x86_64 i386 aarch64; do
     if [ -d "rpm-repo/${arch}" ] && [ "$(ls -A rpm-repo/${arch})" ]; then
-        printf "Creating metadata for ${arch}...\n"
+        printf "Creating metadata for %s...\n" "$arch"
         
         # List what we're working with
-        printf "Files in ${arch}: $(ls rpm-repo/${arch}/ | tr '\n' ' ')\n"
+        printf "Files in %s: %s\n" "$arch" "$(ls "rpm-repo/${arch}/" | tr '\n' ' ')"
         
         # Create repository metadata
         createrepo_c --update rpm-repo/${arch}
         
         # Sign the repository metadata
-        printf "Signing repository metadata for ${arch}...\n"
+        printf "Signing repository metadata for %s...\n" "$arch"
         # Remove existing signature file if it exists
         rm -f rpm-repo/${arch}/repodata/repomd.xml.asc
         gpg --batch --pinentry-mode loopback --detach-sign --armor \
@@ -74,12 +74,12 @@ for arch in x86_64 i386 aarch64; do
         
         # Verify the signature was created
         if [ -f "rpm-repo/${arch}/repodata/repomd.xml.asc" ]; then
-            printf "Repository metadata signed successfully for ${arch}\n"
+            printf "Repository metadata signed successfully for %s\n" "$arch"
         else
-            printf "WARNING: Repository metadata signature not created for ${arch}\n"
+            printf "WARNING: Repository metadata signature not created for %s\n" "$arch"
         fi
     else
-        printf "No packages found for ${arch}, skipping...\n"
+        printf "No packages found for %s, skipping...\n" "$arch"
     fi
 done
 
@@ -105,5 +105,5 @@ gpg --armor --export "${GPG_PRIVATE_KEY_FINGERPRINT}" > public-key.asc
 aws s3 cp public-key.asc s3://${RPM_BUCKET_NAME}/${PUBLIC_KEY_FILE_PATH} --endpoint-url "${AWS_ENDPOINT_URL}"
 
 printf "\n>>> RPM repository published successfully! \n"
-printf "Repository URL: ${PACKAGES_BUCKET_URL}/${RPM_REPO_PATH}/ \n"
-printf "Public key URL: ${PACKAGES_BUCKET_URL}/${PUBLIC_KEY_FILE_PATH} \n"
+printf "Repository URL: %s/%s/ \n" "$PACKAGES_BUCKET_URL" "$RPM_REPO_PATH"
+printf "Public key URL: %s/%s \n" "$PACKAGES_BUCKET_URL" "$PUBLIC_KEY_FILE_PATH"
