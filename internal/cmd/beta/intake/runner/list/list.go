@@ -115,7 +115,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
-
 	return &model, nil
 }
 
