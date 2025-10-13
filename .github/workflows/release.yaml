@@ -83,10 +83,10 @@ jobs:
           NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Clean up GPG key file
+        if: always()
         run: |
           rm -f gpg-private-key.asc
       
-      # artifacts need to be passed to further publishing jobs
       - name: Upload artifacts to workflow
         uses: actions/upload-artifact@v4
         with:
