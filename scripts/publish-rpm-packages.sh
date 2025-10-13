@@ -8,7 +8,6 @@ PACKAGES_BUCKET_URL="https://distribution-test.object.storage.eu01.onstackit.clo
 PUBLIC_KEY_FILE_PATH="keys/key.gpg"
 RPM_REPO_PATH="rpm/cli"
 RPM_BUCKET_NAME="distribution-test"
-CUSTOM_KEYRING_FILE="rpm-keyring.gpg"
 GORELEASER_PACKAGES_FOLDER="dist/"
 
 # We need to disable the key database daemon (keyboxd)
