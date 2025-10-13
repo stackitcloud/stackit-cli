@@ -25,7 +25,7 @@ mkdir -p rpm-repo/aarch64
 printf "\n>>> Copying RPM packages to architecture directories \n"
 
 # Copy x86_64 packages (amd64)
-for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_amd64.rpm; do
+for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_amd64.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/x86_64/
         printf "Copied $(basename "$rpm_file") to x86_64/\n"
@@ -33,7 +33,7 @@ for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_amd64.rpm; do
 done
 
 # Copy i386 packages
-for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_386.rpm; do
+for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_386.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/i386/
         printf "Copied $(basename "$rpm_file") to i386/\n"
@@ -41,7 +41,7 @@ for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_386.rpm; do
 done
 
 # Copy aarch64 packages (arm64)
-for rpm_file in ${GORELEASER_PACKAGES_FOLDER}*_arm64.rpm; do
+for rpm_file in "${GORELEASER_PACKAGES_FOLDER}"*_arm64.rpm; do
     if [ -f "$rpm_file" ]; then
         cp "$rpm_file" rpm-repo/aarch64/
         printf "Copied $(basename "$rpm_file") to aarch64/\n"
