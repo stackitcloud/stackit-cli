@@ -138,7 +138,7 @@ The STACKIT CLI can be installed through the [`DNF/YUM`](https://docs.fedoraproj
 
 > `$basearch` is supported by modern distributions. On older systems that don't expand `$basearch`, replace it in the `baseurl` with your architecture explicitly (for example, `.../rpm/cli/x86_64` or `.../rpm/cli/aarch64`).
 
-##### Installing DNF/YUM
+##### Installation via DNF/YUM
 
 1. Add the repository:
 
@@ -159,7 +159,7 @@ EOF
 sudo dnf install -y stackit
 ```
 
-##### Installing Zypper
+##### Installation via Zypper
 
 1. Add the repository:
 
