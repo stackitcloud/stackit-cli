@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/wait"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,6 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 )
@@ -81,6 +83,17 @@ func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Intake Runner: %w", err)
+			}
+
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(p.Printer)
+				s.Start("Updating STACKIT Intake Runner instance")
+				_, err = wait.CreateOrUpdateIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for STACKIT Instance creation: %w", err)
+				}
+				s.Stop()
 			}
 
 			return outputResult(p.Printer, model.OutputFormat, projectLabel, resp)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/wait"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -12,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 )
@@ -64,7 +66,23 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 			if err = req.Execute(); err != nil {
 				return fmt.Errorf("delete Intake Runner: %w", err)
 			}
-			p.Printer.Info("Deleted runner %s\n", model.RunnerId)
+
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(p.Printer)
+				s.Start("Deleting STACKIT Intake Runner instance")
+				_, err = wait.DeleteIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for STACKIT Instance deletion: %w", err)
+				}
+				s.Stop()
+			}
+
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+			p.Printer.Info("%s stackit Intake Runner instance %s \n", operationState, model.RunnerId)
 
 			return nil
 		},
