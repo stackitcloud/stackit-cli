@@ -154,11 +154,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, runners [
 
 		table := tables.NewTable()
 
-		table.SetHeader("ID", "NAME")
+		table.SetHeader("ID", "NAME", "STATE")
 		for _, runner := range runners {
 			table.AddRow(
 				runner.GetId(),
 				runner.GetDisplayName(),
+				runner.GetState(),
 			)
 		}
 		err := table.Display(p)
