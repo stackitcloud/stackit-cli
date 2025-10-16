@@ -121,15 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		WrappingKeyId:   flags.FlagToStringPointer(p, cmd, wrappingKeyIdFlag),
 	}
 
-	if p.IsVerbosityDebug() {
-		modelStr, err := print.BuildDebugStrFromInputModel(model)
-		if err != nil {
-			p.Debug(print.ErrorLevel, "convert model to string for debugging: %v", err)
-		} else {
-			p.Debug(print.ErrorLevel, "parsed input values: %s", modelStr)
-		}
-	}
-
+	p.DebugInputModel(model)
 	return &model, nil
 }
 
