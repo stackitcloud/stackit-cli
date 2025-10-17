@@ -14,7 +14,7 @@ stackit beta kms key import KEY_ID [flags]
 
 ```
   Import a new version for the given KMS key "my-key-id"
-  $ stackit beta kms key import "my-key-id" --key-ring "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
+  $ stackit beta kms key import "my-key-id" --key-ring-id "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
 ```
 
 ### Options
@@ -39,5 +39,5 @@ stackit beta kms key import KEY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
+* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS keys
 

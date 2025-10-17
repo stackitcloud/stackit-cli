@@ -169,7 +169,6 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s the KMS key '%s'. Key ID: %s\n", operationState, utils.PtrString(resp.DisplayName), utils.PtrString(resp.Id))
-
 	}
 	return nil
 }

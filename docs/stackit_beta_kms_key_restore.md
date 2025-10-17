@@ -14,7 +14,7 @@ stackit beta kms key restore KEY_ID [flags]
 
 ```
   Restore a KMS key "my-key-id" inside the key ring "my-key-ring-id" that was scheduled for deletion.
-  $ stackit beta kms keyring restore "my-key-id" --key-ring "my-key-ring-id"
+  $ stackit beta kms keyring restore "my-key-id" --key-ring-id "my-key-ring-id"
 ```
 
 ### Options
@@ -37,5 +37,5 @@ stackit beta kms key restore KEY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
+* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS keys
 

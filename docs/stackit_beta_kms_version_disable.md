@@ -14,7 +14,7 @@ stackit beta kms version disable VERSION_NUMBER [flags]
 
 ```
   Disable key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms version disable 42 --key "my-key-id" --key-ring "my-key-ring-id"
+  $ stackit beta kms version disable 42 --key-id "my-key-id" --key-ring-id "my-key-ring-id"
 ```
 
 ### Options

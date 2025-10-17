@@ -30,7 +30,7 @@ stackit beta kms [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
+* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS keys
 * [stackit beta kms keyring](./stackit_beta_kms_keyring.md)	 - Manage KMS key rings
 * [stackit beta kms version](./stackit_beta_kms_version.md)	 - Manage KMS key versions
 * [stackit beta kms wrapping-key](./stackit_beta_kms_wrapping-key.md)	 - Manage KMS wrapping keys

@@ -7,7 +7,7 @@ Deletes a KMS key ring
 Deletes a KMS key ring.
 
 ```
-stackit beta kms keyring delete KEYRING_ID [flags]
+stackit beta kms keyring delete KEY_RING_ID [flags]
 ```
 
 ### Examples

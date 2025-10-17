@@ -14,10 +14,10 @@ stackit beta kms wrapping-key create [flags]
 
 ```
   Create a Symmetric KMS wrapping key
-  $ stackit beta kms wrapping-key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"
+  $ stackit beta kms wrapping-key create --key-ring-id "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"
 
   Create an Asymmetric KMS wrapping key with a description
-  $ stackit beta kms wrapping-key create --key-ring "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"
+  $ stackit beta kms wrapping-key create --key-ring-id "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"
 ```
 
 ### Options

@@ -14,10 +14,10 @@ stackit beta kms key create [flags]
 
 ```
   Create a Symmetric KMS key
-  $ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"
+  $ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"
 
   Create a Message Authentication KMS key
-  $ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"
+  $ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"
 ```
 
 ### Options
@@ -46,5 +46,5 @@ stackit beta kms key create [flags]
 
 ### SEE ALSO
 
-* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS Keys
+* [stackit beta kms key](./stackit_beta_kms_key.md)	 - Manage KMS keys
 

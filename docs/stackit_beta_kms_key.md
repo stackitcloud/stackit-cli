@@ -1,6 +1,6 @@
 ## stackit beta kms key
 
-Manage KMS Keys
+Manage KMS keys
 
 ### Synopsis
 
