@@ -11,6 +11,10 @@ import (
 )
 
 func TestParseInput[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, isValid bool) {
+	TestParseInputWithAdditionalFlags(t, cmdFactory, parseInputFunc, expectedModel, argValues, flagValues, map[string][]string{}, isValid)
+}
+
+func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool) {
 	p := print.NewPrinter()
 	cmd := cmdFactory(&params.CmdParams{Printer: p})
 	err := globalflags.Configure(cmd.Flags())
@@ -18,6 +22,7 @@ func TestParseInput[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cob
 		t.Fatalf("configure global flags: %v", err)
 	}
 
+	// set regular flag values
 	for flag, value := range flagValues {
 		err := cmd.Flags().Set(flag, value)
 		if err != nil {
@@ -25,6 +30,19 @@ func TestParseInput[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cob
 				return
 			}
 			t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
+		}
+	}
+
+	// set additional flag values
+	for flag, values := range additionalFlagValues {
+		for _, value := range values {
+			err := cmd.Flags().Set(flag, value)
+			if err != nil {
+				if !isValid {
+					return
+				}
+				t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
+			}
 		}
 	}
 

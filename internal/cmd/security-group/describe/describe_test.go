@@ -56,6 +56,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiGetSecurityGroupRequest)) iaas
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		args          []string

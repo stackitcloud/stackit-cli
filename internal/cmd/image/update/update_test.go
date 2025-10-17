@@ -168,6 +168,7 @@ func fixtureRequest(mods ...func(*iaas.ApiUpdateImageRequest)) iaas.ApiUpdateIma
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool
