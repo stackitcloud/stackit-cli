@@ -246,7 +246,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	// Print the link
 	p.Outputln("Your browser has been opened to visit:\n")
-	p.Outputf("\t%s\n\n", authorizationURL)
+	p.Outputf("%s\n\n", authorizationURL)
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
