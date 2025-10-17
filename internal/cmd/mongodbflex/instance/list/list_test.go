@@ -195,6 +195,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		projectLabel string
 		instanceList []mongodbflex.InstanceListInstance
 	}
 	tests := []struct {
@@ -226,7 +227,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.instanceList); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.instanceList); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
