@@ -284,11 +284,10 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	tests := []struct {
-		description  string
-		key          *kms.Key
-		outputFormat string
-		projectLabel string
-		wantErr      bool
+		description string
+		model       *inputModel
+		key         *kms.Key
+		wantErr     bool
 	}{
 		{
 			description: "nil response",
@@ -296,22 +295,22 @@ func TestOutputResult(t *testing.T) {
 			wantErr:     true,
 		},
 		{
-			description:  "default output",
-			key:          &kms.Key{},
-			projectLabel: "my-project",
-			wantErr:      false,
+			description: "default output",
+			key:         &kms.Key{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+			wantErr:     false,
 		},
 		{
-			description:  "json output",
-			key:          &kms.Key{},
-			outputFormat: print.JSONOutputFormat,
-			wantErr:      false,
+			description: "json output",
+			key:         &kms.Key{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: print.JSONOutputFormat}},
+			wantErr:     false,
 		},
 		{
-			description:  "yaml output",
-			key:          &kms.Key{},
-			outputFormat: print.YAMLOutputFormat,
-			wantErr:      false,
+			description: "yaml output",
+			key:         &kms.Key{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: print.YAMLOutputFormat}},
+			wantErr:     false,
 		},
 	}
 
@@ -319,7 +318,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.projectLabel, tt.key)
+			err := outputResult(p, tt.model, tt.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

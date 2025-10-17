@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	keyRingIdArg = "KEYRING_ID"
+	keyRingIdArg = "KEY_RING_ID"
 )
 
 type inputModel struct {
@@ -58,7 +58,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete key ring %q? (This cannot be undone)", keyRingLabel)
+				prompt := fmt.Sprintf("Are you sure you want to delete key ring %q? (this cannot be undone)", keyRingLabel)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -72,7 +72,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete KMS key ring: %w", err)
 			}
 
-			// Wait for async operation not relevant. Key ring deletion is synchronous.
+			// No async wait required; key ring deletion is synchronous.
 
 			// Don't output anything. It's a deletion.
 			params.Printer.Info("Deleted the key ring %q\n", keyRingLabel)

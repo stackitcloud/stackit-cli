@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
@@ -61,15 +60,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a KMS key ring for project %q?", projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS key ring?")
 				if err != nil {
 					return err
 				}
@@ -93,7 +85,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
-				s.Start("Creating instance")
+				s.Start("Creating key ring")
 				_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for KMS key ring creation: %w", err)
@@ -101,7 +93,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, keyRing)
+			return outputResult(params.Printer, model, keyRing)
 		},
 	}
 	configureFlags(cmd)
@@ -148,12 +140,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyringCl
 	return req, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms.KeyRing) error {
+func outputResult(p *print.Printer, model *inputModel, resp *kms.KeyRing) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
 
-	switch outputFormat {
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -169,7 +161,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Created instance for project %q. Key ring ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s key ring. KMS key ring ID: %s\n", operationState, utils.PtrString(resp.Id))
 	}
 	return nil
 }

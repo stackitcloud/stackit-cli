@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
@@ -55,10 +54,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS key`,
-				`$ stackit beta kms key create --key-ring-id "XXX" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
+				`$ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
 			examples.NewExample(
 				`Create a Message Authentication KMS key`,
-				`$ stackit beta kms key create --key-ring-id "XXX" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
+				`$ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -73,15 +72,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a KMS Key for project %q?", projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
+				err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS Key?")
 				if err != nil {
 					return err
 				}
@@ -105,7 +97,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -151,12 +143,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 	return req, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms.Key) error {
+func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
 
-	switch outputFormat {
+	switch model.OutputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(resp, "", "  ")
 		if err != nil {
@@ -172,7 +164,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *kms
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Created the key '%s' for project %q. Key ID: %s\n", utils.PtrString(resp.DisplayName), projectLabel, utils.PtrString(resp.Id))
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s the KMS key '%s'. Key ID: %s\n", operationState, utils.PtrString(resp.DisplayName), utils.PtrString(resp.Id))
+
 	}
 	return nil
 }

@@ -64,7 +64,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to rotate the key %q? (This cannot be undone)", keyName)
+				prompt := fmt.Sprintf("Are you sure you want to rotate the key %q? (this cannot be undone)", keyName)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
