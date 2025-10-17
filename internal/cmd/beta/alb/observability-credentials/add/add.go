@@ -40,10 +40,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
 				"$ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -84,7 +84,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, usernameFlag, displaynameFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{

@@ -54,6 +54,7 @@ func fixtureRequest(mods ...func(request *git.ApiGetInstanceRequest)) git.ApiGet
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		args          []string

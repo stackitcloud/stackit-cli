@@ -55,6 +55,7 @@ func fixtureRequest(mods ...func(request *git.ApiDeleteInstanceRequest)) git.Api
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool
