@@ -44,6 +44,14 @@ func TestParseInput[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cob
 		t.Fatalf("error validating flags: %v", err)
 	}
 
+	err = cmd.ValidateFlagGroups()
+	if err != nil {
+		if !isValid {
+			return
+		}
+		t.Fatalf("error validating flags: %v", err)
+	}
+
 	model, err := parseInputFunc(p, cmd, argValues)
 	if err != nil {
 		if !isValid {
