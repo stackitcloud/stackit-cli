@@ -42,7 +42,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Restore a KMS key "my-key-id" inside the key ring "my-key-ring-id" that was scheduled for deletion.`,
-				`$ stackit beta kms keyring restore "my-key-id" --key-ring "my-key-ring-id"`),
+				`$ stackit beta kms keyring restore "my-key-id" --key-ring-id "my-key-ring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

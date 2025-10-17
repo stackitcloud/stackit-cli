@@ -55,10 +55,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS key`,
-				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
+				`$ stackit beta kms key create --key-ring-id "XXX" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
 			examples.NewExample(
 				`Create a Message Authentication KMS key`,
-				`$ stackit beta kms key create --key-ring "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
+				`$ stackit beta kms key create --key-ring-id "XXX" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

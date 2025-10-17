@@ -42,7 +42,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Rotate a KMS key "my-key-id" and increase it's version inside the key ring "my-key-ring-id".`,
-				`$ stackit beta kms key rotate "my-key-id" --key-ring "my-key-ring-id"`),
+				`$ stackit beta kms key rotate "my-key-id" --key-ring-id "my-key-ring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
