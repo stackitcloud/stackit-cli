@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -215,29 +213,12 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, securityGro
 	if securityGroupRule == nil {
 		return fmt.Errorf("security group rule is empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(securityGroupRule, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group rule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(securityGroupRule, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group rule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, securityGroupRule, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s security group rule for security group %q in project %q.\nSecurity group rule ID: %s\n", operationState, securityGroupName, projectLabel, utils.PtrString(securityGroupRule.Id))
 		return nil
-	}
+	})
 }

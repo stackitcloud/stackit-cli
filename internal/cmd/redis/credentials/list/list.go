@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -128,24 +126,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 }
 
 func outputResult(p *print.Printer, outputFormat, instanceLabel string, credentials []redis.CredentialsListItem) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Redis credentials list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Redis credentials list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, credentials, func() error {
 		if len(credentials) == 0 {
 			p.Outputf("No credentials found for instance %q\n", instanceLabel)
 			return nil
@@ -163,5 +144,5 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 		}
 
 		return nil
-	}
+	})
 }

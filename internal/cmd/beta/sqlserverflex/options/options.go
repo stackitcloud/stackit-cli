@@ -2,10 +2,8 @@ package options
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -276,55 +274,35 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 		}
 	}
 
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(options, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQL Server Flex options: %w", err)
+	return p.OutputResult(model.OutputFormat, options, func() error {
+		content := []tables.Table{}
+		if model.Flavors && len(*options.Flavors) != 0 {
+			content = append(content, buildFlavorsTable(*options.Flavors))
 		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SQL Server Flex options: %w", err)
+		if model.Versions && len(*options.Versions) != 0 {
+			content = append(content, buildVersionsTable(*options.Versions))
 		}
-		p.Outputln(string(details))
+		if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) != 0 {
+			content = append(content, buildStoragesTable(*options.Storages.Storages))
+		}
+		if model.UserRoles && len(options.UserRoles.UserRoles) != 0 {
+			content = append(content, buildUserRoles(options.UserRoles))
+		}
+		if model.DBCompatibilities && len(options.DBCompatibilities.DBCompatibilities) != 0 {
+			content = append(content, buildDBCompatibilitiesTable(options.DBCompatibilities.DBCompatibilities))
+		}
+		// Rendered at last because table is very long
+		if model.DBCollations && len(options.DBCollations.DBCollations) != 0 {
+			content = append(content, buildDBCollationsTable(options.DBCollations.DBCollations))
+		}
+
+		err := tables.DisplayTables(p, content)
+		if err != nil {
+			return fmt.Errorf("display output: %w", err)
+		}
 
 		return nil
-	default:
-		return outputResultAsTable(p, model, options)
-	}
-}
-
-func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
-	content := []tables.Table{}
-	if model.Flavors && len(*options.Flavors) != 0 {
-		content = append(content, buildFlavorsTable(*options.Flavors))
-	}
-	if model.Versions && len(*options.Versions) != 0 {
-		content = append(content, buildVersionsTable(*options.Versions))
-	}
-	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) != 0 {
-		content = append(content, buildStoragesTable(*options.Storages.Storages))
-	}
-	if model.UserRoles && len(options.UserRoles.UserRoles) != 0 {
-		content = append(content, buildUserRoles(options.UserRoles))
-	}
-	if model.DBCompatibilities && len(options.DBCompatibilities.DBCompatibilities) != 0 {
-		content = append(content, buildDBCompatibilitiesTable(options.DBCompatibilities.DBCompatibilities))
-	}
-	// Rendered at last because table is very long
-	if model.DBCollations && len(options.DBCollations.DBCollations) != 0 {
-		content = append(content, buildDBCollationsTable(options.DBCollations.DBCollations))
-	}
-
-	err := tables.DisplayTables(p, content)
-	if err != nil {
-		return fmt.Errorf("display output: %w", err)
-	}
-
-	return nil
+	})
 }
 
 func buildFlavorsTable(flavors []sqlserverflex.InstanceFlavorEntry) tables.Table {

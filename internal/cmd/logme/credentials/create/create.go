@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -123,24 +121,8 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, inst
 	if !showPassword && resp.HasRaw() && resp.Raw.Credentials != nil {
 		resp.Raw.Credentials.Password = utils.Ptr("hidden")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal LogMe credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal LogMe credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if resp.HasRaw() && resp.Raw.Credentials != nil {
@@ -157,5 +139,5 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, inst
 		}
 		p.Outputf("URI: %s\n", utils.PtrString(resp.Uri))
 		return nil
-	}
+	})
 }

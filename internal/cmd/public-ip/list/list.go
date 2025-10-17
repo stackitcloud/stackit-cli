@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -141,24 +139,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.PublicIp) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(publicIps, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(publicIps, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, publicIps, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "IP ADDRESS", "USED BY")
 
@@ -174,5 +155,5 @@ func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.Public
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

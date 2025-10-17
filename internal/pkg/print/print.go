@@ -2,9 +2,12 @@ package print
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"syscall"
+
+	"github.com/goccy/go-yaml"
 
 	"log/slog"
 	"os"
@@ -238,5 +241,28 @@ func (p *Printer) DebugInputModel(model any) {
 		} else {
 			p.Debug(DebugLevel, "parsed input values: %s", modelStr)
 		}
+	}
+}
+
+func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc func() error) error {
+	switch outputFormat {
+	case JSONOutputFormat:
+		details, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal json: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	case YAMLOutputFormat:
+		details, err := yaml.MarshalWithOptions(output, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
+		if err != nil {
+			return fmt.Errorf("marshal yaml: %w", err)
+		}
+		p.Outputln(string(details))
+
+		return nil
+	default:
+		return prettyOutputFunc()
 	}
 }

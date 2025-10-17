@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -18,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -130,22 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keyPairs, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal key pairs: %w", err)
-		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keyPairs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal key pairs: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(outputFormat, keyPairs, func() error {
 		table := tables.NewTable()
 		table.SetHeader("KEY PAIR NAME", "LABELS", "FINGERPRINT", "CREATED AT", "UPDATED AT")
 
@@ -169,6 +152,6 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 		}
 
 		p.Outputln(table.Render())
-	}
-	return nil
+		return nil
+	})
 }

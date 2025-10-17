@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -119,24 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup mongodbflex.Backup) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backup, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backup, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backup: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, backup, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
@@ -155,5 +136,5 @@ func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup m
 		}
 
 		return nil
-	}
+	})
 }

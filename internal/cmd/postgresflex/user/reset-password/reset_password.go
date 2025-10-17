@@ -2,10 +2,8 @@ package resetpassword
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -129,24 +127,7 @@ func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel strin
 	if user == nil {
 		return fmt.Errorf("no response passed")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgresFlex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal PostgresFlex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, user, func() error {
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
 		if item := user.Item; item != nil {
 			p.Outputf("Username: %s\n", utils.PtrString(item.Username))
@@ -154,5 +135,5 @@ func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel strin
 			p.Outputf("New URI: %s\n", utils.PtrString(item.Uri))
 		}
 		return nil
-	}
+	})
 }

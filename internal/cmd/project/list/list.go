@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -213,24 +211,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 }
 
 func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.Project) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(projects, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal projects list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(projects, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal projects list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, projects, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
@@ -254,5 +235,5 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -132,24 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 }
 
 func outputResult(p *print.Printer, outputFormat string, schedules []serverupdate.UpdateSchedule) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(schedules, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Server os-update Schedules list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(schedules, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Server os-update Schedules list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, schedules, func() error {
 		table := tables.NewTable()
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "MAINTENANCE WINDOW")
 		for i := range schedules {
@@ -167,5 +148,5 @@ func outputResult(p *print.Printer, outputFormat string, schedules []serverupdat
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

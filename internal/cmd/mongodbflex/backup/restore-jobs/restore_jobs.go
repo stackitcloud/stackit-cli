@@ -2,10 +2,8 @@ package restorejobs
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -132,24 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbflex.RestoreInstanceStatus) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(restoreJobs, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex restore jobs list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(restoreJobs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex restore jobs list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, restoreJobs, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "BACKUP ID", "BACKUP INSTANCE ID", "DATE", "STATUS")
 		for i := range restoreJobs {
@@ -169,5 +150,5 @@ func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbfl
 		}
 
 		return nil
-	}
+	})
 }

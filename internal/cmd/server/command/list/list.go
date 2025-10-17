@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -132,24 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 }
 
 func outputResult(p *print.Printer, outputFormat string, commands []runcommand.Commands) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(commands, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server command list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(commands, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server command list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, commands, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "TEMPLATE NAME", "TEMPLATE TITLE", "STATUS", "STARTED_AT", "FINISHED_AT")
 		for i := range commands {
@@ -168,5 +149,5 @@ func outputResult(p *print.Printer, outputFormat string, commands []runcommand.C
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

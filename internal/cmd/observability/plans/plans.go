@@ -2,7 +2,6 @@ package plans
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -17,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
 )
@@ -124,24 +122,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 }
 
 func outputResult(p *print.Printer, outputFormat string, plans []observability.Plan) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(plans, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Observability plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Observability plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, plans, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "PLAN NAME", "DESCRIPTION")
 		for i := range plans {
@@ -160,5 +141,5 @@ func outputResult(p *print.Printer, outputFormat string, plans []observability.P
 		}
 
 		return nil
-	}
+	})
 }

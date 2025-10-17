@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -117,25 +115,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, serviceAc
 		return fmt.Errorf("service account is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serviceAccount, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal service account: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccount, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal service account: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, serviceAccount, func() error {
 		p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, utils.PtrString(serviceAccount.Email))
 		return nil
-	}
+	})
 }

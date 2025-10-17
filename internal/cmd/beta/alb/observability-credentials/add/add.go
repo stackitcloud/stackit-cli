@@ -2,7 +2,6 @@ package add
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -13,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -115,25 +113,10 @@ func outputResult(p *print.Printer, outputFormat string, item *alb.CreateCredent
 		return fmt.Errorf("no credential found")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(item, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+	return p.OutputResult(outputFormat, item, func() error {
 		if item.Credential != nil {
-			p.Outputf("Created credential %s\n",
-				utils.PtrString(item.Credential.CredentialsRef),
-			)
+			p.Outputf("Created credential %s\n", utils.PtrString(item.Credential.CredentialsRef))
 		}
-	}
-	return nil
+		return nil
+	})
 }

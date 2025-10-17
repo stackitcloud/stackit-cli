@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -113,24 +111,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, flavors []git.Flavor) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(flavors, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Observability flavor list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(flavors, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Observability flavor list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, flavors, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESCRIPTION", "DISPLAY_NAME", "AVAILABLE", "SKU")
 		for i := range flavors {
@@ -149,5 +130,5 @@ func outputResult(p *print.Printer, outputFormat string, flavors []git.Flavor) e
 		}
 
 		return nil
-	}
+	})
 }

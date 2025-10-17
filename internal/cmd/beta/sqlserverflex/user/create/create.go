@@ -2,11 +2,9 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -140,24 +138,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 	if user == nil {
 		return fmt.Errorf("user response is empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, user, func() error {
 		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
@@ -175,5 +156,5 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -95,47 +93,25 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 	if loadBalancer == nil {
 		return fmt.Errorf("loadbalancer response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(loadBalancer, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal load balancer: %w", err)
+
+	return p.OutputResult(outputFormat, loadBalancer, func() error {
+		content := []tables.Table{}
+		content = append(content, buildLoadBalancerTable(loadBalancer))
+
+		if loadBalancer.Listeners != nil {
+			content = append(content, buildListenersTable(*loadBalancer.Listeners))
 		}
-		p.Outputln(string(details))
+		if loadBalancer.TargetPools != nil {
+			content = append(content, buildTargetPoolsTable(*loadBalancer.TargetPools))
+		}
+
+		err := tables.DisplayTables(p, content)
+		if err != nil {
+			return fmt.Errorf("display output: %w", err)
+		}
 
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(loadBalancer, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal load balancer: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		return outputResultAsTable(p, loadBalancer)
-	}
-}
-
-func outputResultAsTable(p *print.Printer, loadBalancer *loadbalancer.LoadBalancer) error {
-	content := []tables.Table{}
-
-	content = append(content, buildLoadBalancerTable(loadBalancer))
-
-	if loadBalancer.Listeners != nil {
-		content = append(content, buildListenersTable(*loadBalancer.Listeners))
-	}
-
-	if loadBalancer.TargetPools != nil {
-		content = append(content, buildTargetPoolsTable(*loadBalancer.TargetPools))
-	}
-
-	err := tables.DisplayTables(p, content)
-	if err != nil {
-		return fmt.Errorf("display output: %w", err)
-	}
-
-	return nil
+	})
 }
 
 func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Table {

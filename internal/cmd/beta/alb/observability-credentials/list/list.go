@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -17,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -122,22 +120,8 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.Credentials
 		p.Outputln("no credentials found")
 		return nil
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
 		table.SetHeader("CREDENTIAL REF", "DISPLAYNAME", "USERNAME", "REGION")
 
@@ -151,6 +135,6 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.Credentials
 		}
 
 		p.Outputln(table.Render())
-	}
-	return nil
+		return nil
+	})
 }

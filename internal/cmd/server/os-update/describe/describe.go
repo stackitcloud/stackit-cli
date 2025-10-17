@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -102,24 +100,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 }
 
 func outputResult(p *print.Printer, outputFormat string, update serverupdate.Update) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(update, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server update: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(update, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server update: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, update, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(update.Id))
 		table.AddSeparator()
@@ -142,5 +123,5 @@ func outputResult(p *print.Printer, outputFormat string, update serverupdate.Upd
 		}
 
 		return nil
-	}
+	})
 }
