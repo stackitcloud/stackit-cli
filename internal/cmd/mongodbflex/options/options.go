@@ -62,9 +62,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List MongoDB Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit mongodbflex options --flavors"`,
 				"$ stackit mongodbflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -95,7 +95,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
 	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)

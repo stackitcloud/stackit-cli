@@ -53,9 +53,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1'`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -111,7 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	}
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	if globalFlags.ProjectId == "" {

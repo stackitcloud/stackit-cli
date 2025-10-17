@@ -29,8 +29,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Print a short-lived access token`,
 				"$ stackit auth get-access-token"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{

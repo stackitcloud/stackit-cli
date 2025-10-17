@@ -42,9 +42,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit affinity-group list --limit=10",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -85,7 +85,7 @@ func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClie
 	return apiClient.ListAffinityGroups(ctx, model.ProjectId)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
