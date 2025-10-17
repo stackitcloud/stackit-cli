@@ -33,7 +33,6 @@ const (
 	flavorIdFlag       = "flavor-id"
 	cpuFlag            = "cpu"
 	ramFlag            = "ram"
-	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
 	typeFlag           = "type"
@@ -135,7 +134,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
 	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
-	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
 	cmd.Flags().Var(flags.EnumFlag(false, "", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
@@ -155,13 +153,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
 	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
 	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
-	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
 	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	version := flags.FlagToStringPointer(p, cmd, versionFlag)
 	instanceType := flags.FlagToStringPointer(p, cmd, typeFlag)
 
 	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
-		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {
+		backupSchedule == nil && storageSize == nil && version == nil && instanceType == nil {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
@@ -181,7 +178,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    storageClass,
 		StorageSize:     storageSize,
 		Version:         version,
 		Type:            instanceType,
@@ -265,11 +261,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		payloadAcl = &postgresflex.ACL{Items: model.ACL}
 	}
 
-	var payloadStorage *postgresflex.Storage
+	var payloadStorage *postgresflex.StorageUpdate
 	if model.StorageClass != nil || model.StorageSize != nil {
-		payloadStorage = &postgresflex.Storage{
-			Class: model.StorageClass,
-			Size:  model.StorageSize,
+		payloadStorage = &postgresflex.StorageUpdate{
+			Size: model.StorageSize,
 		}
 	}
 
