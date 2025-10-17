@@ -3,7 +3,7 @@ package runner
 import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/create"
-	delete2 "github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/update"
@@ -22,7 +22,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	}
 	// Pass the params down to each action command
 	cmd.AddCommand(create.NewCreateCmd(params))
-	cmd.AddCommand(delete2.NewDeleteCmd(params))
+	cmd.AddCommand(delete.NewDeleteCmd(params))
 	cmd.AddCommand(describe.NewDescribeCmd(params))
 	cmd.AddCommand(list.NewListCmd(params))
 	cmd.AddCommand(update.NewUpdateCmd(params))
