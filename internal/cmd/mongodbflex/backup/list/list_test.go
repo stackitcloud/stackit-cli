@@ -215,9 +215,10 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		backups      []mongodbflex.Backup
-		restoreJobs  *mongodbflex.ListRestoreJobsResponse
+		outputFormat  string
+		instanceLabel string
+		backups       []mongodbflex.Backup
+		restoreJobs   *mongodbflex.ListRestoreJobsResponse
 	}
 	tests := []struct {
 		name    string
@@ -256,7 +257,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.backups, tt.args.restoreJobs); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.instanceLabel, tt.args.backups, tt.args.restoreJobs); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
