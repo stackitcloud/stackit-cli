@@ -40,10 +40,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all key versions for the key "my-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms version list --key "my-key-id" --key-ring-id "my-key-ring-id"`),
+				`$ stackit beta kms version list --key-id "my-key-id" --key-ring-id "my-key-ring-id"`),
 			examples.NewExample(
 				`List all key versions in JSON format`,
-				`$ stackit beta kms version list --key "my-key-id" --key-ring-id "my-key-ring-id" -o json`),
+				`$ stackit beta kms version list --key-id "my-key-id" --key-ring-id "my-key-ring-id" -o json`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
