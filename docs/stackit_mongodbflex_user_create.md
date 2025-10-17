@@ -29,7 +29,7 @@ stackit mongodbflex user create [flags]
       --database string      The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it
   -h, --help                 Help for "stackit mongodbflex user create"
       --instance-id string   ID of the instance
-      --role strings         Roles of the user, possible values are ["read" "readWrite" "readWriteAnyDatabase"] (default [read])
+      --role strings         Roles of the user, possible values are ["read" "readWrite" "readWriteAnyDatabase" "stackitAdmin"] (default [read])
       --username string      Username of the user. If not specified, a random username will be assigned
 ```
 
