@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -156,25 +155,9 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 		options.VolumeTypes = nil
 	}
 
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(options, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE options: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SKE options: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, options, func() error {
 		return outputResultAsTable(p, options)
-	}
+	})
 }
 
 func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {

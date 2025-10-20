@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -141,24 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 		return fmt.Errorf("list snapshots response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(snapshots, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal snapshots: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(snapshots, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal snapshots: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, snapshots, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "VOLUME ID", "LABELS", "CREATED AT", "UPDATED AT")
 
@@ -186,5 +167,5 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

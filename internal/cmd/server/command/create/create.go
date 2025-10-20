@@ -2,12 +2,10 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -145,25 +143,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp runcommand.NewCommandResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server command: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server command: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created server command for server %s. Command ID: %s\n", serverLabel, utils.PtrString(resp.Id))
 		return nil
-	}
+	})
 }

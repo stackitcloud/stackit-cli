@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -18,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -141,24 +139,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, securityGroupRules []iaas.SecurityGroupRule) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(securityGroupRules, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group rules: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(securityGroupRules, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group rules: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, securityGroupRules, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 
@@ -184,5 +165,5 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -112,24 +110,7 @@ func buildRequest(ctx context.Context, _ *inputModel, apiClient *runcommand.APIC
 }
 
 func outputResult(p *print.Printer, outputFormat string, templates []runcommand.CommandTemplate) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(templates, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server command template list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(templates, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server command template list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, templates, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
 		for i := range templates {
@@ -151,5 +132,5 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

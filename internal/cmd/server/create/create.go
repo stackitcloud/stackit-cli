@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -328,25 +326,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, server *i
 	if server == nil {
 		return fmt.Errorf("server response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(server, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, server, func() error {
 		p.Outputf("Created server for project %q.\nServer ID: %s\n", projectLabel, utils.PtrString(server.Id))
 		return nil
-	}
+	})
 }

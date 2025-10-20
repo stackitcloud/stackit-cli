@@ -2,11 +2,9 @@ package quota
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -82,9 +80,8 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 	if quota == nil {
 		return fmt.Errorf("quota response is empty")
 	}
-	switch outputFormat {
-	case print.PrettyOutputFormat:
 
+	return p.OutputResult(outputFormat, quota, func() error {
 		maxLoadBalancers := "Unlimited"
 		if quota.MaxLoadBalancers != nil && *quota.MaxLoadBalancers != -1 {
 			maxLoadBalancers = strconv.FormatInt(*quota.MaxLoadBalancers, 10)
@@ -93,22 +90,5 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 		p.Outputf("Maximum number of load balancers allowed: %s\n", maxLoadBalancers)
 
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(quota, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal quota: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(quota, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal quota: %w", err)
-		}
-
-		p.Outputln(string(details))
-
-		return nil
-	}
+	})
 }

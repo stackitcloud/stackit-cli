@@ -2,11 +2,9 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -212,25 +210,8 @@ func outputResult(p *print.Printer, model inputModel, resp *resourcemanager.Proj
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("globalflags are empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal project: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal project: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", utils.PtrString(model.ParentId), utils.PtrString(resp.ProjectId))
 		return nil
-	}
+	})
 }

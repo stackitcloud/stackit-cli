@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -147,24 +145,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(nics, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal nics: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(nics, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal nics: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, nics, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
 
@@ -183,5 +164,5 @@ func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error 
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

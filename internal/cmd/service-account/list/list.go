@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -117,20 +115,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+	return p.OutputResult(outputFormat, serviceAccounts, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "EMAIL")
 		for i := range serviceAccounts {
@@ -144,7 +129,6 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-
-	return nil
+		return nil
+	})
 }

@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -132,25 +130,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRange iaas.NetworkRange) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRange, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, networkRange, func() error {
 		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.NetworkRangeId))
 		return nil
-	}
+	})
 }

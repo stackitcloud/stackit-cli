@@ -2,7 +2,6 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -14,7 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -112,21 +110,9 @@ func outputResult(p *print.Printer, model inputModel, keyPair iaas.Keypair) erro
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.GlobalFlagModel.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keyPair, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal key pair: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal key pair: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, keyPair, func() error {
 		p.Outputf("Updated labels of key pair %q\n", utils.PtrString(model.KeyPairName))
-	}
-	return nil
+		return nil
+	})
 }

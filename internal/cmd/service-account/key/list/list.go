@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -133,24 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keys, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal keys metadata: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keys, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal keys metadata: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, keys, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "ACTIVE", "CREATED_AT", "VALID_UNTIL")
 		for i := range keys {
@@ -172,5 +153,5 @@ func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.S
 		}
 
 		return nil
-	}
+	})
 }

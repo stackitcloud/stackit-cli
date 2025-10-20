@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -132,24 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 }
 
 func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.Backup) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backups, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Server Backup list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Server Backup list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, backups, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE (GB)", "STATUS", "CREATED AT", "EXPIRES AT", "LAST RESTORED AT", "VOLUME BACKUPS")
 		for i := range backups {
@@ -176,5 +157,5 @@ func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

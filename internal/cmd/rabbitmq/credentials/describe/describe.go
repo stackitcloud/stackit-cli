@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -108,24 +106,8 @@ func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.C
 	if credentials == nil {
 		return fmt.Errorf("no response passed")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(credentials, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(credentials, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, credentials, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(credentials.Id))
 		table.AddSeparator()
@@ -145,5 +127,5 @@ func outputResult(p *print.Printer, outputFormat string, credentials *rabbitmq.C
 		}
 
 		return nil
-	}
+	})
 }

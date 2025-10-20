@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -133,24 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(routes, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal static routes: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(routes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal static routes: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, routes, func() error {
 		table := tables.NewTable()
 		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
 
@@ -164,5 +145,5 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) er
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

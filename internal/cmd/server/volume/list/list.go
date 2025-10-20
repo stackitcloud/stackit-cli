@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -123,24 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeNames []string, volumes []iaas.VolumeAttachment) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volumes, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server volume list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volumes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server volume list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, volumes, func() error {
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
@@ -156,5 +137,5 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

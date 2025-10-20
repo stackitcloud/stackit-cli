@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -93,20 +91,8 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.GlobalFlagModel.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, resp, func() error {
 		table := tables.NewTable()
 
 		if resp.HasId() {
@@ -129,6 +115,6 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-	return nil
+		return nil
+	})
 }

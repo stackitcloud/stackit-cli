@@ -3,7 +3,6 @@ package create
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	goerrors "errors"
 	"fmt"
 	"io"
@@ -11,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -403,25 +401,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateRes
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal image: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal image: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created image %q with id %s\n", model.Name, utils.PtrString(model.Id))
 		return nil
-	}
+	})
 }

@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -13,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -130,24 +128,11 @@ func outputResult(p *print.Printer, outputFormat string, item *iaas.Keypair) err
 		return fmt.Errorf("no key pair found")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(item, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal key pair: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal key pair: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+	return p.OutputResult(outputFormat, item, func() error {
 		p.Outputf("Created key pair %q.\nkey pair Fingerprint: %q\n",
 			utils.PtrString(item.Name),
 			utils.PtrString(item.Fingerprint),
 		)
-	}
-	return nil
+		return nil
+	})
 }

@@ -2,10 +2,8 @@ package plans
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -123,24 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APICl
 }
 
 func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(plans, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Redis plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Redis plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, plans, func() error {
 		table := tables.NewTable()
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
@@ -166,5 +147,5 @@ func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering)
 		}
 
 		return nil
-	}
+	})
 }

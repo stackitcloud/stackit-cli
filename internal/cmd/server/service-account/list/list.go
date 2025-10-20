@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -15,7 +14,6 @@ import (
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -133,24 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, serverId, serverName string, serviceAccounts []string) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, serviceAccounts, func() error {
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "SERVICE ACCOUNT")
 		for i := range serviceAccounts {
@@ -161,5 +142,5 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverName string, s
 			return fmt.Errorf("rednder table: %w", err)
 		}
 		return nil
-	}
+	})
 }
