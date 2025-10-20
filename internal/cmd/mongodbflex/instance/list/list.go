@@ -65,23 +65,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex instances: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No instances found for project %q\n", projectLabel)
-				return nil
+			instances := utils.GetSliceFromPointer(resp.Items)
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
-			instances := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(instances) > int(*model.Limit) {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, instances)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
 		},
 	}
 
@@ -121,8 +118,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instances []mongodbflex.InstanceListInstance) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []mongodbflex.InstanceListInstance) error {
 	return p.OutputResult(outputFormat, instances, func() error {
+		if len(instances) == 0 {
+			p.Outputf("No instances found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS")
 		for i := range instances {
