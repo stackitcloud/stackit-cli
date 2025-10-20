@@ -25,7 +25,7 @@ import (
 const (
 	keyIdArg = "KEY_ID"
 
-	keyRingIdFlag     = "key-ring-id"
+	keyRingIdFlag     = "keyring-id"
 	wrappedKeyFlag    = "wrapped-key"
 	wrappingKeyIdFlag = "wrapping-key-id"
 )
@@ -47,7 +47,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Import a new version for the given KMS key "my-key-id"`,
-				`$ stackit beta kms key import "my-key-id" --key-ring-id "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"`),
+				`$ stackit beta kms key import "my-key-id" --keyring-id "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

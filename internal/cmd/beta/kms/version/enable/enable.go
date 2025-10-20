@@ -25,7 +25,7 @@ import (
 const (
 	versionNumberArg = "VERSION_NUMBER"
 
-	keyRingIdFlag = "key-ring-id"
+	keyRingIdFlag = "keyring-id"
 	keyIdFlag     = "key-id"
 )
 
@@ -44,8 +44,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Enable key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms version enable 42 --key-id "my-key-id" --key-ring-id "my-key-ring-id"`),
+				`Enable key version "42" for the key "my-key-id" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms version enable 42 --key-id "my-key-id" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

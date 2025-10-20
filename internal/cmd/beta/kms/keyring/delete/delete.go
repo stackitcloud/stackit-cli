@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	keyRingIdArg = "KEY_RING_ID"
+	keyRingIdArg = "KEYRING-ID"
 )
 
 type inputModel struct {
@@ -35,8 +35,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS key ring with ID "my-key-ring-id"`,
-				`$ stackit beta kms keyring delete "my-key-ring-id"`),
+				`Delete a KMS key ring with ID "my-keyring-id"`,
+				`$ stackit beta kms keyring delete "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

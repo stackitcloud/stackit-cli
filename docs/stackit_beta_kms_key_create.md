@@ -14,10 +14,10 @@ stackit beta kms key create [flags]
 
 ```
   Create a Symmetric KMS key
-  $ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"
+  $ stackit beta kms key create --keyring-id "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"
 
   Create a Message Authentication KMS key
-  $ stackit beta kms key create --key-ring-id "my-key-ring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"
+  $ stackit beta kms key create --keyring-id "my-keyring-id" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"
 ```
 
 ### Options
@@ -27,7 +27,7 @@ stackit beta kms key create [flags]
       --description string   Optional description of the key
   -h, --help                 Help for "stackit beta kms key create"
       --import-only          States whether versions can be created or only imported
-      --key-ring-id string   ID of the KMS key ring
+      --keyring-id string    ID of the KMS key ring
       --name string          The display name to distinguish multiple keys
       --protection string    The underlying system that is responsible for protecting the key material. Value: 'software'
       --purpose string       Purpose of the key. Enum: 'symmetric_encrypt_decrypt', 'asymmetric_encrypt_decrypt', 'message_authentication_code', 'asymmetric_sign_verify' 

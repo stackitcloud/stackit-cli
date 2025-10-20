@@ -22,7 +22,7 @@ import (
 const (
 	wrappingKeyIdArg = "WRAPPING_KEY_ID"
 
-	keyRingIdFlag = "key-ring-id"
+	keyRingIdFlag = "keyring-id"
 )
 
 type inputModel struct {
@@ -39,8 +39,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(wrappingKeyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms wrapping-key delete "my-wrapping-key-id" --key-ring-id "my-key-ring-id"`),
+				`Delete a KMS wrapping key "my-wrapping-key-id" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms wrapping-key delete "my-wrapping-key-id" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

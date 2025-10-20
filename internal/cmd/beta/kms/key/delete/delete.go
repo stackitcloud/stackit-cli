@@ -24,7 +24,7 @@ import (
 const (
 	keyIdArg = "KEY_ID"
 
-	keyRingIdFlag = "key-ring-id"
+	keyRingIdFlag = "keyring-id"
 )
 
 type inputModel struct {
@@ -41,8 +41,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS key "my-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms key delete "my-key-id" --key-ring-id "my-key-ring-id"`),
+				`Delete a KMS key "my-key-id" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms key delete "my-key-id" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

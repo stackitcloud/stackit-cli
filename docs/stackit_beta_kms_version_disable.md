@@ -13,16 +13,16 @@ stackit beta kms version disable VERSION_NUMBER [flags]
 ### Examples
 
 ```
-  Disable key version "42" for the key "my-key-id" inside the key ring "my-key-ring-id"
-  $ stackit beta kms version disable 42 --key-id "my-key-id" --key-ring-id "my-key-ring-id"
+  Disable key version "42" for the key "my-key-id" inside the key ring "my-keyring-id"
+  $ stackit beta kms version disable 42 --key-id "my-key-id" --keyring-id "my-keyring-id"
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit beta kms version disable"
-      --key-id string        ID of the rey
-      --key-ring-id string   ID of the KMS key ring
+  -h, --help                Help for "stackit beta kms version disable"
+      --key-id string       ID of the rey
+      --keyring-id string   ID of the KMS key ring
 ```
 
 ### Options inherited from parent commands

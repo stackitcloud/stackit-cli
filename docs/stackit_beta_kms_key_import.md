@@ -14,14 +14,14 @@ stackit beta kms key import KEY_ID [flags]
 
 ```
   Import a new version for the given KMS key "my-key-id"
-  $ stackit beta kms key import "my-key-id" --key-ring-id "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
+  $ stackit beta kms key import "my-key-id" --keyring-id "my-keyring-id" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "my-wrapping-key-id"
 ```
 
 ### Options
 
 ```
   -h, --help                     Help for "stackit beta kms key import"
-      --key-ring-id string       ID of the KMS key ring
+      --keyring-id string        ID of the KMS key ring
       --wrapped-key string       The wrapped key material that has to be imported. Encoded in base64
       --wrapping-key-id string   The unique id of the wrapping key the key material has been wrapped with
 ```

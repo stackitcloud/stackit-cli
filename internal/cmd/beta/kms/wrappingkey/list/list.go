@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring-id"
+	keyRingIdFlag = "keyring-id"
 )
 
 type inputModel struct {
@@ -37,11 +37,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all KMS wrapping keys for the key ring "my-key-ring-id"`,
-				`$ stackit beta kms wrapping-key list --key-ring-id "my-key-ring-id"`),
+				`List all KMS wrapping keys for the key ring "my-keyring-id"`,
+				`$ stackit beta kms wrapping-key list --keyring-id "my-keyring-id"`),
 			examples.NewExample(
 				`List all KMS wrapping keys in JSON format`,
-				`$ stackit beta kms wrappingkeys list --key-ring-id "my-key-ring-id" --output-format json`),
+				`$ stackit beta kms wrappingkeys list --keyring-id "my-keyring-id" --output-format json`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

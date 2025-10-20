@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	keyRingIdFlag = "key-ring-id"
+	keyRingIdFlag = "keyring-id"
 	keyIdFlag     = "key-id"
 )
 
@@ -39,11 +39,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all key versions for the key "my-key-id" inside the key ring "my-key-ring-id"`,
-				`$ stackit beta kms version list --key-id "my-key-id" --key-ring-id "my-key-ring-id"`),
+				`List all key versions for the key "my-key-id" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms version list --key-id "my-key-id" --keyring-id "my-keyring-id"`),
 			examples.NewExample(
 				`List all key versions in JSON format`,
-				`$ stackit beta kms version list --key-id "my-key-id" --key-ring-id "my-key-ring-id" -o json`),
+				`$ stackit beta kms version list --key-id "my-key-id" --keyring-id "my-keyring-id" -o json`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

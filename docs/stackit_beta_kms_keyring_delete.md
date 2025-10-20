@@ -7,14 +7,14 @@ Deletes a KMS key ring
 Deletes a KMS key ring.
 
 ```
-stackit beta kms keyring delete KEY_RING_ID [flags]
+stackit beta kms keyring delete KEYRING-ID [flags]
 ```
 
 ### Examples
 
 ```
-  Delete a KMS key ring with ID "my-key-ring-id"
-  $ stackit beta kms keyring delete "my-key-ring-id"
+  Delete a KMS key ring with ID "my-keyring-id"
+  $ stackit beta kms keyring delete "my-keyring-id"
 ```
 
 ### Options
