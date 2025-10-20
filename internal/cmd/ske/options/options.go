@@ -57,9 +57,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List SKE options regarding Kubernetes versions and machine images`,
 				"$ stackit ske options --kubernetes-versions --machine-images"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -92,7 +92,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(volumeTypesFlag, false, "Lists supported volume types")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	availabilityZones := flags.FlagToBoolValue(p, cmd, availabilityZonesFlag)
 	kubernetesVersions := flags.FlagToBoolValue(p, cmd, kubernetesVersionsFlag)

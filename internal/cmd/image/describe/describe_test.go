@@ -57,6 +57,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiGetImageRequest)) iaas.ApiGetI
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		args          []string

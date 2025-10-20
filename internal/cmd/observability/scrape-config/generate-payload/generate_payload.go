@@ -60,9 +60,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Generate an Update payload with the values of an existing configuration named "my-config" for Observability instance xxx, and preview it in the terminal`,
 				`$ stackit observability scrape-config generate-payload --job-name my-config --instance-id xxx`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -102,7 +102,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(filePathFlag, "f", "", "If set, writes the payload to the given file. If unset, writes the payload to the standard output")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	jobName := flags.FlagToStringPointer(p, cmd, jobNameFlag)

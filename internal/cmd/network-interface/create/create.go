@@ -64,9 +64,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit network-interface create --network-id xxx --allowed-addresses "1.1.1.1,8.8.8.8,9.9.9.9" --labels key=value,key2=value2 --name NAME --security-groups "UUID1,UUID2" --nic-security`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -121,7 +121,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}

@@ -76,8 +76,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Set the DNS custom endpoint. This endpoint will be used on all calls to the DNS API (unless overridden by the "STACKIT_DNS_CUSTOM_ENDPOINT" environment variable)`,
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -217,7 +217,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	sessionTimeLimit, err := parseSessionTimeLimit(p, cmd)
 	if err != nil {
 		return nil, &errors.FlagValidationError{

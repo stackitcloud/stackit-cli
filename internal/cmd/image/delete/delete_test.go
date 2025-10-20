@@ -57,6 +57,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiDeleteImageRequest)) iaas.ApiD
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool

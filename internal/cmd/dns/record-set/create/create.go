@@ -53,9 +53,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a DNS record set with name "my-rr" with records "1.2.3.4" and "5.6.7.8" in zone with ID "xxx"`,
 				"$ stackit dns record-set create --zone-id xxx --name my-rr --record 1.2.3.4 --record 5.6.7.8"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -123,7 +123,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}

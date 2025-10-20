@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -41,7 +42,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		bootVolumeSourceIdFlag:            testSourceId,
 		bootVolumeSourceTypeFlag:          "test-source-type",
 		bootVolumeDeleteOnTerminationFlag: "false",
-		imageIdFlag:                       testImageId,
 		keypairNameFlag:                   "test-keypair-name",
 		networkIdFlag:                     testNetworkId,
 		securityGroupsFlag:                "test-security-groups",
@@ -70,7 +70,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		BootVolumeSourceId:            utils.Ptr(testSourceId),
 		BootVolumeSourceType:          utils.Ptr("test-source-type"),
 		BootVolumeDeleteOnTermination: utils.Ptr(false),
-		ImageId:                       utils.Ptr(testImageId),
 		KeypairName:                   utils.Ptr("test-keypair-name"),
 		NetworkId:                     utils.Ptr(testNetworkId),
 		SecurityGroups:                utils.Ptr([]string{"test-security-groups"}),
@@ -117,7 +116,6 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		Name:                utils.Ptr("test-server-name"),
 		AvailabilityZone:    utils.Ptr("eu01-1"),
 		AffinityGroup:       utils.Ptr("test-affinity-group"),
-		ImageId:             utils.Ptr(testImageId),
 		KeypairName:         utils.Ptr("test-keypair-name"),
 		SecurityGroups:      utils.Ptr([]string{"test-security-groups"}),
 		ServiceAccountMails: utils.Ptr([]string{"test-service-account"}),
@@ -147,6 +145,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -175,6 +174,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, serviceAccountEmailsFlag)
 				delete(flagValues, userDataFlag)
 				delete(flagValues, volumesFlag)
+				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -193,6 +193,7 @@ func TestParseInput(t *testing.T) {
 				model.ServiceAccountMails = nil
 				model.UserData = nil
 				model.Volumes = nil
+				model.ImageId = utils.Ptr(testImageId)
 			}),
 		},
 		{
@@ -292,12 +293,14 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumeSourceIdFlag)
 				delete(flagValues, bootVolumeSourceTypeFlag)
 				delete(flagValues, bootVolumeSizeFlag)
+				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.BootVolumeSourceId = nil
 				model.BootVolumeSourceType = nil
 				model.BootVolumeSize = nil
+				model.ImageId = utils.Ptr(testImageId)
 			}),
 		},
 		{
@@ -326,46 +329,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
