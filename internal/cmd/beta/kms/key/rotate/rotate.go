@@ -41,8 +41,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Rotate a KMS key "my-key-id" and increase it's version inside the key ring "my-keyring-id".`,
-				`$ stackit beta kms key rotate "my-key-id" --keyring-id "my-keyring-id"`),
+				`Rotate a KMS key "MY_KEY_ID" and increase it's version inside the key ring "MY_KEYRING_ID".`,
+				`$ stackit beta kms key rotate "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

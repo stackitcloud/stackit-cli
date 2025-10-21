@@ -44,8 +44,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Enable key version "42" for the key "my-key-id" inside the key ring "my-keyring-id"`,
-				`$ stackit beta kms version enable 42 --key-id "my-key-id" --keyring-id "my-keyring-id"`),
+				`Enable key version "42" for the key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID"`,
+				`$ stackit beta kms version enable 42 --key-id "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

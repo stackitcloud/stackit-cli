@@ -35,8 +35,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyRingIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS key ring with ID "my-keyring-id"`,
-				`$ stackit beta kms keyring delete "my-keyring-id"`),
+				`Delete a KMS key ring with ID "MY_KEYRING_ID"`,
+				`$ stackit beta kms keyring delete "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

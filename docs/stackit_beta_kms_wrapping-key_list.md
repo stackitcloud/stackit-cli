@@ -13,11 +13,11 @@ stackit beta kms wrapping-key list [flags]
 ### Examples
 
 ```
-  List all KMS wrapping keys for the key ring "my-keyring-id"
-  $ stackit beta kms wrapping-key list --keyring-id "my-keyring-id"
+  List all KMS wrapping keys for the key ring "MY_KEYRING_ID"
+  $ stackit beta kms wrapping-key list --keyring-id "MY_KEYRING_ID"
 
   List all KMS wrapping keys in JSON format
-  $ stackit beta kms wrappingkeys list --keyring-id "my-keyring-id" --output-format json
+  $ stackit beta kms wrappingkeys list --keyring-id "MY_KEYRING_ID" --output-format json
 ```
 
 ### Options

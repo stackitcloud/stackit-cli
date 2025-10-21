@@ -42,8 +42,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Disable key version "42" for the key "my-key-id" inside the key ring "my-keyring-id"`,
-				`$ stackit beta kms version disable 42 --key-id "my-key-id" --keyring-id "my-keyring-id"`),
+				`Disable key version "42" for the key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID"`,
+				`$ stackit beta kms version disable 42 --key-id "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -115,7 +115,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
-	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the rey")
+	cmd.Flags().Var(flags.UUIDFlag(), keyIdFlag, "ID of the key")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, keyIdFlag)
 	cobra.CheckErr(err)

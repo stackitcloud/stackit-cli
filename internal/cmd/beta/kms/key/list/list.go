@@ -37,11 +37,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all KMS keys for the key ring "my-keyring-id"`,
-				`$ stackit beta kms key list --keyring-id "my-keyring-id"`),
+				`List all KMS keys for the key ring "MY_KEYRING_ID"`,
+				`$ stackit beta kms key list --keyring-id "MY_KEYRING_ID"`),
 			examples.NewExample(
 				`List all KMS keys in JSON format`,
-				`$ stackit beta kms key list --keyring-id "my-keyring-id" --output-format json`),
+				`$ stackit beta kms key list --keyring-id "MY_KEYRING_ID" --output-format json`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
