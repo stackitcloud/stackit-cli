@@ -64,15 +64,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get LogMe service plans: %w", err)
 			}
-			plans := *resp.Offerings
-			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No plans found for project %q\n", projectLabel)
-				return nil
+			plans := resp.GetOfferings()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -80,7 +77,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, plans)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, plans)
 		},
 	}
 
@@ -120,8 +117,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, plans []logme.Offering) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []logme.Offering) error {
 	return p.OutputResult(outputFormat, plans, func() error {
+		if len(plans) == 0 {
+			p.Outputf("No plans found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
