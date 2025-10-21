@@ -66,23 +66,19 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Object Storage credentials: %w", err)
 			}
-			credentials := *resp.AccessKeys
-			if len(credentials) == 0 {
-				credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
-					credentialsGroupLabel = model.CredentialsGroupId
-				}
+			credentials := resp.GetAccessKeys()
 
-				params.Printer.Info("No credentials found for credentials group %q\n", credentialsGroupLabel)
-				return nil
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
+				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, credentials)
+			return outputResult(params.Printer, model.OutputFormat, credentialsGroupLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -127,8 +123,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []objectstorage.AccessKey) error {
+func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, credentials []objectstorage.AccessKey) error {
 	return p.OutputResult(outputFormat, credentials, func() error {
+		if len(credentials) == 0 {
+			p.Outputf("No credentials found for credentials group %q\n", credentialsGroupLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("CREDENTIALS ID", "ACCESS KEY ID", "EXPIRES AT")
 		for i := range credentials {
