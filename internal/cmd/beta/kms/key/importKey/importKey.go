@@ -50,7 +50,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "BASE64_VALUE" --wrapping-key-id "MY_WRAPPING_KEY_ID"`),
 			examples.NewExample(
 				`Import from a file`,
-				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"`,
+				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "@path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"`,
 			),
 		),
 
@@ -173,7 +173,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), wrappedKeyFlag, "The wrapped key material to be imported. Base64-encoded. Pass the value directly or a file path (e.g. path/to/wrapped.key.b64)")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), wrappedKeyFlag, "The wrapped key material to be imported. Base64-encoded. Pass the value directly or a file path (e.g. @path/to/wrapped.key.b64)")
 	cmd.Flags().Var(flags.UUIDFlag(), wrappingKeyIdFlag, "The unique id of the wrapping key the key material has been wrapped with")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, wrappedKeyFlag, wrappingKeyIdFlag)
