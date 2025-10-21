@@ -63,9 +63,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a STACKIT project with a network area`,
 				"$ stackit project create --parent-id xxxx --name my-project --network-area-id yyyy"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -111,7 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)

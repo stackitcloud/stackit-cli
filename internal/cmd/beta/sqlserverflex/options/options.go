@@ -106,9 +106,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit beta sqlserverflex instance list"`,
 				"$ stackit beta sqlserverflex options --user-roles --db-compatibilities --instance-id <INSTANCE_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -143,7 +143,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(instanceIdFlag, "", `The instance ID to show user roles, database collations and database compatibilities for. Only relevant when "--user-roles", "--db-collations" or "--db-compatibilities" is passed`)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)

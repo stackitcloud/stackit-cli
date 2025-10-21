@@ -49,9 +49,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit public-ip create --associated-resource-id xxx --labels key=value,foo=bar`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -97,7 +97,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a public IP. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}

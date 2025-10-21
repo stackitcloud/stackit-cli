@@ -49,9 +49,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit mongodbflex backup list --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -74,11 +74,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				cmd.Printf("No backups found for instance %q\n", instanceLabel)
-				return nil
-			}
-			backups := *resp.Items
+			backups := utils.GetSliceFromPointer(resp.Items)
 
 			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
 			if err != nil {
@@ -90,7 +86,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				backups = backups[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backups, restoreJobs)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, backups, restoreJobs)
 		},
 	}
 
@@ -106,7 +102,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -135,12 +131,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []mongodbflex.Backup, restoreJobs *mongodbflex.ListRestoreJobsResponse) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups []mongodbflex.Backup, restoreJobs *mongodbflex.ListRestoreJobsResponse) error {
 	if restoreJobs == nil {
 		return fmt.Errorf("restore jobs is empty")
 	}
 
 	return p.OutputResult(outputFormat, backups, func() error {
+		if len(backups) == 0 {
+			p.Outputf("No backups found for instance %q\n", instanceLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE", "RESTORE STATUS")
 		for i := range backups {
