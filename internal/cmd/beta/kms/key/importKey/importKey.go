@@ -42,13 +42,18 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("import %s", keyIdArg),
 		Short: "Import a KMS key",
-		Long:  "Import a new version to the given KMS key.",
+		Long:  "After encrypting the secret with the wrapping key’s public key and Base64-encoding it, import it as a new version of the specified KMS key.",
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Import a new version for the given KMS key "MY_KEY_ID"`,
-				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "MY_WRAPPING_KEY_ID"`),
+				`Import a new version for the given KMS key "MY_KEY_ID" from literal value`,
+				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "BASE64_VALUE" --wrapping-key-id "MY_WRAPPING_KEY_ID"`),
+			examples.NewExample(
+				`Import from a file`,
+				`$ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"`,
+			),
 		),
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
@@ -109,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if err != nil || *wrappedKey == "" {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    wrappedKeyFlag,
-			Details: "The 'wrappedKey' argument is required and needs to be base64 encoded.",
+			Details: "The 'wrappedKey' argument is required and needs to be base64 encoded (whether provided inline or via file).",
 		}
 	}
 
@@ -168,7 +173,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
-	cmd.Flags().String(wrappedKeyFlag, "", "The wrapped key material that has to be imported. Encoded in base64")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), wrappedKeyFlag, "The wrapped key material to be imported. Base64-encoded. Pass the value directly or a file path (e.g. path/to/wrapped.key.b64)")
 	cmd.Flags().Var(flags.UUIDFlag(), wrappingKeyIdFlag, "The unique id of the wrapping key the key material has been wrapped with")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, wrappedKeyFlag, wrappingKeyIdFlag)

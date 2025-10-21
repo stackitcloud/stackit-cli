@@ -4,7 +4,7 @@ Import a KMS key
 
 ### Synopsis
 
-Import a new version to the given KMS key.
+After encrypting the secret with the wrapping key’s public key and Base64-encoding it, import it as a new version of the specified KMS key.
 
 ```
 stackit beta kms key import KEY_ID [flags]
@@ -13,8 +13,11 @@ stackit beta kms key import KEY_ID [flags]
 ### Examples
 
 ```
-  Import a new version for the given KMS key "MY_KEY_ID"
-  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "base64-encoded-wrapped-key-material" --wrapping-key-id "MY_WRAPPING_KEY_ID"
+  Import a new version for the given KMS key "MY_KEY_ID" from literal value
+  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "BASE64_VALUE" --wrapping-key-id "MY_WRAPPING_KEY_ID"
+
+  Import from a file
+  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"
 ```
 
 ### Options
@@ -22,7 +25,7 @@ stackit beta kms key import KEY_ID [flags]
 ```
   -h, --help                     Help for "stackit beta kms key import"
       --keyring-id string        ID of the KMS key ring
-      --wrapped-key string       The wrapped key material that has to be imported. Encoded in base64
+      --wrapped-key string       The wrapped key material to be imported. Base64-encoded. Pass the value directly or a file path (e.g. path/to/wrapped.key.b64)
       --wrapping-key-id string   The unique id of the wrapping key the key material has been wrapped with
 ```
 
