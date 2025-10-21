@@ -13,11 +13,14 @@ stackit beta kms keyring create [flags]
 ### Examples
 
 ```
-  Create a KMS key ring
+  Create a KMS key ring with name "my-keyring"
   $ stackit beta kms keyring create --name my-keyring
 
   Create a KMS key ring with a description
   $ stackit beta kms keyring create --name my-keyring --description my-description
+
+  Create a KMS key ring and print the result as YAML
+  $ stackit beta kms keyring create --name my-keyring -o yaml
 ```
 
 ### Options

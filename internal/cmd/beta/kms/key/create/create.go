@@ -53,11 +53,23 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a Symmetric KMS key`,
-				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "rsa_2048_oaep_sha256" --name "my-key-name" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
+				`Create a symmetric AES key (AES-256) with the name "symm-aes-gcm" under the key ring "MY_KEYRING_ID"`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "aes_256_gcm" --name "symm-aes-gcm" --purpose "symmetric_encrypt_decrypt" --protection "software"`),
 			examples.NewExample(
-				`Create a Message Authentication KMS key`,
-				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "hmac_sha512" --name "my-key-name" --purpose "message_authentication_code" --protection "software"`),
+				`Create an asymmetric RSA encryption key (RSA-2048)`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID"  --algorithm "rsa_2048_oaep_sha256" --name "prod-orders-rsa" --purpose "asymmetric_encrypt_decrypt" --protection "software"`),
+			examples.NewExample(
+				`Create a message authentication key (HMAC-SHA512)`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "hmac_sha512" --name "api-mac-key" --purpose "message_authentication_code" --protection "software"`),
+			examples.NewExample(
+				`Create an ECDSA P-256 key for signing & verification`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "ecdsa_p256_sha256" --name "signing-ecdsa-p256" --purpose "asymmetric_sign_verify" --protection "software"`),
+			examples.NewExample(
+				`Create an import-only key (versions must be imported)`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "rsa_2048_oaep_sha256" --name "ext-managed-rsa" --purpose "asymmetric_encrypt_decrypt" --protection "software" --import-only`),
+			examples.NewExample(
+				`Create a key and print the result as YAML`,
+				`$ stackit beta kms key create --keyring-id "MY_KEYRING_ID" --algorithm "rsa_2048_oaep_sha256" --name "yaml-output-rsa" --purpose "asymmetric_encrypt_decrypt" --protection "software" --output yaml`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
