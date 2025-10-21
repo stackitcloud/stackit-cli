@@ -41,8 +41,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Restore a KMS key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID" that was scheduled for deletion.`,
-				`$ stackit beta kms key restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
+				`Restore a KMS key "MY_KEY_ID" inside the key ring "my-keyring-id" that was scheduled for deletion.`,
+				`$ stackit beta kms key restore "MY_KEY_ID" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -142,7 +142,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Key) error {
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Successfully restored KMS key '%s'\n", utils.PtrString(resp.DisplayName))
+		p.Outputf("Successfully restored KMS key %q\n", utils.PtrString(resp.DisplayName))
 	}
 	return nil
 }

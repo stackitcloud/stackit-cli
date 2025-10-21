@@ -42,8 +42,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
-				`Restore key version "42" for the key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID"`,
-				`$ stackit beta kms version restore 42 --key-id "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
+				`Restore key version "42" for the key "my-key-id" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms version restore 42 --key-id "my-key-id" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -139,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Restored version %d of the key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		p.Outputf("Restored version %d of the key %q\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
 	}
 	return nil
 }

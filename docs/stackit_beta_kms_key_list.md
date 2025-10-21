@@ -13,11 +13,11 @@ stackit beta kms key list [flags]
 ### Examples
 
 ```
-  List all KMS keys for the key ring "MY_KEYRING_ID"
-  $ stackit beta kms key list --keyring-id "MY_KEYRING_ID"
+  List all KMS keys for the key ring "my-keyring-id"
+  $ stackit beta kms key list --keyring-id "my-keyring-id"
 
   List all KMS keys in JSON format
-  $ stackit beta kms key list --keyring-id "MY_KEYRING_ID" --output-format json
+  $ stackit beta kms key list --keyring-id "my-keyring-id" --output-format json
 ```
 
 ### Options

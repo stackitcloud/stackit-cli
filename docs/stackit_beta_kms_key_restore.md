@@ -13,8 +13,8 @@ stackit beta kms key restore KEY_ID [flags]
 ### Examples
 
 ```
-  Restore a KMS key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID" that was scheduled for deletion.
-  $ stackit beta kms key restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"
+  Restore a KMS key "MY_KEY_ID" inside the key ring "my-keyring-id" that was scheduled for deletion.
+  $ stackit beta kms key restore "MY_KEY_ID" --keyring-id "my-keyring-id"
 ```
 
 ### Options

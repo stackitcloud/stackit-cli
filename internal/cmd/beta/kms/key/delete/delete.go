@@ -41,8 +41,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a KMS key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID"`,
-				`$ stackit beta kms key delete "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
+				`Delete a KMS key "MY_KEY_ID" inside the key ring "my-keyring-id"`,
+				`$ stackit beta kms key delete "MY_KEY_ID" --keyring-id "my-keyring-id"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

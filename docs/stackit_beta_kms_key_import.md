@@ -14,10 +14,10 @@ stackit beta kms key import KEY_ID [flags]
 
 ```
   Import a new version for the given KMS key "MY_KEY_ID" from literal value
-  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "BASE64_VALUE" --wrapping-key-id "MY_WRAPPING_KEY_ID"
+  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "my-keyring-id" --wrapped-key "BASE64_VALUE" --wrapping-key-id "MY_WRAPPING_KEY_ID"
 
   Import from a file
-  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" --wrapped-key "@path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"
+  $ stackit beta kms key import "MY_KEY_ID" --keyring-id "my-keyring-id" --wrapped-key "@path/to/wrapped.key.b64" --wrapping-key-id "MY_WRAPPING_KEY_ID"
 ```
 
 ### Options

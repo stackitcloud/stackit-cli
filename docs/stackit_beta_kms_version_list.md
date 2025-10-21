@@ -13,11 +13,11 @@ stackit beta kms version list [flags]
 ### Examples
 
 ```
-  List all key versions for the key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID"
-  $ stackit beta kms version list --key-id "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"
+  List all key versions for the key "my-key-id" inside the key ring "my-keyring-id"
+  $ stackit beta kms version list --key-id "my-key-id" --keyring-id "my-keyring-id"
 
   List all key versions in JSON format
-  $ stackit beta kms version list --key-id "MY_KEY_ID" --keyring-id "MY_KEYRING_ID" -o json
+  $ stackit beta kms version list --key-id "my-key-id" --keyring-id "my-keyring-id" -o json
 ```
 
 ### Options
