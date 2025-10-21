@@ -17,7 +17,7 @@ import (
 
 const (
 	testRegion      = "eu01"
-	testAlgorithm   = "some_rsa_2048"
+	testAlgorithm   = "rsa_2048_oaep_sha256"
 	testDisplayName = "my-key"
 	testPurpose     = "asymmetric_encrypt_decrypt"
 	testDescription = "my key description"

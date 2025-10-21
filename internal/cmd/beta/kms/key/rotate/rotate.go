@@ -111,6 +111,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key Ring where the key is stored")
+
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
 }

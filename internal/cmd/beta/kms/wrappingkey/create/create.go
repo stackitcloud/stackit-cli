@@ -30,6 +30,10 @@ const (
 	displayNameFlag = "name"
 	purposeFlag     = "purpose"
 	protectionFlag  = "protection"
+
+	defaultWrappingAlgorithm = kms.WRAPPINGALGORITHM__2048_OAEP_SHA256
+	defaultWrappingPurpose   = kms.WRAPPINGPURPOSE_ASYMMETRIC_KEY
+	defaultProtection        = kms.PROTECTION_SOFTWARE
 )
 
 type inputModel struct {
@@ -52,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Symmetric KMS wrapping key`,
-				`$ stackit beta kms wrapping-key create --keyring-id "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"`),
+				`$ stackit beta kms wrapping-key create --keyring-id "my-keyring-id" --algorithm "rsa_2048_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_asymmetric_key" --protection "software"`),
 			examples.NewExample(
 				`Create an Asymmetric KMS wrapping key with a description`,
 				`$ stackit beta kms wrapping-key create --keyring-id "my-keyring-id" --algorithm "hmac_sha256" --name "my-wrapping-key-name" --description "my-description" --purpose "wrap_asymmetric_key" --protection "software"`),
@@ -172,14 +176,32 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.WrappingKey) er
 }
 
 func configureFlags(cmd *cobra.Command) {
+	// Algorithm
+	var algorithmFlagOptions []string
+	for _, val := range kms.AllowedWrappingAlgorithmEnumValues {
+		algorithmFlagOptions = append(algorithmFlagOptions, string(val))
+	}
+	cmd.Flags().Var(flags.EnumFlag(false, string(defaultWrappingAlgorithm), algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
+
+	// Purpose
+	var purposeFlagOptions []string
+	for _, val := range kms.AllowedWrappingPurposeEnumValues {
+		purposeFlagOptions = append(purposeFlagOptions, string(val))
+	}
+	cmd.Flags().Var(flags.EnumFlag(false, string(defaultWrappingPurpose), purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the wrapping key. Possible values: %q", purposeFlagOptions))
+
+	// Protection
+	// backend was deprectaed in /v1beta, but protection is a required attribute with value "software"
+	var protectionFlagOptions []string
+	for _, val := range kms.AllowedProtectionEnumValues {
+		protectionFlagOptions = append(protectionFlagOptions, string(val))
+	}
+	cmd.Flags().Var(flags.EnumFlag(false, string(defaultProtection), protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the wrapping key material. Possible values: %q", purposeFlagOptions))
+
+	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
-	cmd.Flags().String(algorithmFlag, "", "En-/Decryption algorithm")
 	cmd.Flags().String(displayNameFlag, "", "The display name to distinguish multiple wrapping keys")
 	cmd.Flags().String(descriptionFlag, "", "Optional description of the wrapping key")
-	cmd.Flags().String(purposeFlag, "", "Purpose of the wrapping key. Enum: 'wrap_symmetric_key', 'wrap_asymmetric_key' ")
-
-	// backend was deprectaed in /v1beta, but protection is a required attribute with value "software"
-	cmd.Flags().String(protectionFlag, "", "Protection of the wrapping key. Value: 'software' ")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag, protectionFlag)
 	cobra.CheckErr(err)
