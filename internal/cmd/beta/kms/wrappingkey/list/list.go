@@ -41,7 +41,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta kms wrapping-key list --keyring-id "MY_KEYRING_ID"`),
 			examples.NewExample(
 				`List all KMS wrapping keys in JSON format`,
-				`$ stackit beta kms wrappingkeys list --keyring-id "MY_KEYRING_ID" --output-format json`),
+				`$ stackit beta kms wrapping-key list --keyring-id "MY_KEYRING_ID" --output-format json`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -92,7 +92,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring where the Key is stored")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the key is stored")
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
 }

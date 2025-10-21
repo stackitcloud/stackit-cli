@@ -4,7 +4,7 @@ Restore a key version
 
 ### Synopsis
 
-Restores the specified version of key.
+Restores the specified version of a key.
 
 ```
 stackit beta kms version restore VERSION_NUMBER [flags]

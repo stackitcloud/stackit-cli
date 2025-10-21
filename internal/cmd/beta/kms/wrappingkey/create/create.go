@@ -51,10 +51,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a symmetric (RSA + AES) KMS wrapping key with name "my-wrapping-key-name" in keyring with ID "MY_KEYRING_ID"`,
+				`Create a symmetric (RSA + AES) KMS wrapping key with name "my-wrapping-key-name" in key ring with ID "MY_KEYRING_ID"`,
 				`$ stackit beta kms wrapping-key create --keyring-id "MY_KEYRING_ID" --algorithm "rsa_2048_oaep_sha256_aes_256_key_wrap" --name "my-wrapping-key-name" --purpose "wrap_symmetric_key" --protection "software"`),
 			examples.NewExample(
-				`Create an asymmetric (RSA) KMS wrapping key with name "my-wrapping-key-name" in keyring with ID "MY_KEYRING_ID"`,
+				`Create an asymmetric (RSA) KMS wrapping key with name "my-wrapping-key-name" in key ring with ID "MY_KEYRING_ID"`,
 				`$ stackit beta kms wrapping-key create --keyring-id "MY_KEYRING_ID" --algorithm "rsa_3072_oaep_sha256" --name "my-wrapping-key-name" --purpose "wrap_asymmetric_key" --protection "software"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

@@ -38,7 +38,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("restore %s", versionNumberArg),
 		Short: "Restore a key version",
-		Long:  "Restores the specified version of key.",
+		Long:  "Restores the specified version of a key.",
 		Args:  args.SingleArg(versionNumberArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -139,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Restored version %d of key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		p.Outputf("Restored version %d of the key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
 	}
 	return nil
 }

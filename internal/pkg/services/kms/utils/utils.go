@@ -43,7 +43,7 @@ func GetKeyDeletionDate(ctx context.Context, apiClient KMSClient, projectId, reg
 func GetKeyRingName(ctx context.Context, apiClient KMSClient, projectId, id, region string) (string, error) {
 	resp, err := apiClient.GetKeyRingExecute(ctx, projectId, region, id)
 	if err != nil {
-		return "", fmt.Errorf("get KMS Key Ring: %w", err)
+		return "", fmt.Errorf("get KMS key ring: %w", err)
 	}
 
 	if resp == nil || resp.DisplayName == nil {

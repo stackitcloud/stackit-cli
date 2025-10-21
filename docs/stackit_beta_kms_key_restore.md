@@ -4,7 +4,7 @@ Restore a key
 
 ### Synopsis
 
-Restores the given key from being deleted.
+Restores the given key from deletion.
 
 ```
 stackit beta kms key restore KEY_ID [flags]
@@ -14,14 +14,14 @@ stackit beta kms key restore KEY_ID [flags]
 
 ```
   Restore a KMS key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID" that was scheduled for deletion.
-  $ stackit beta kms keyring restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"
+  $ stackit beta kms key restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"
 ```
 
 ### Options
 
 ```
   -h, --help                Help for "stackit beta kms key restore"
-      --keyring-id string   ID of the KMS Key Ring where the Key is stored
+      --keyring-id string   ID of the KMS key ring where the key is stored
 ```
 
 ### Options inherited from parent commands

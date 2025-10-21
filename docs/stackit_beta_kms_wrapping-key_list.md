@@ -17,14 +17,14 @@ stackit beta kms wrapping-key list [flags]
   $ stackit beta kms wrapping-key list --keyring-id "MY_KEYRING_ID"
 
   List all KMS wrapping keys in JSON format
-  $ stackit beta kms wrappingkeys list --keyring-id "MY_KEYRING_ID" --output-format json
+  $ stackit beta kms wrapping-key list --keyring-id "MY_KEYRING_ID" --output-format json
 ```
 
 ### Options
 
 ```
   -h, --help                Help for "stackit beta kms wrapping-key list"
-      --keyring-id string   ID of the KMS Key Ring where the Key is stored
+      --keyring-id string   ID of the KMS key ring where the key is stored
 ```
 
 ### Options inherited from parent commands

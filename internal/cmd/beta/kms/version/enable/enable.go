@@ -153,7 +153,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Enabled version %d of key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		p.Outputf("Enabled version %d of the key '%s'\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
 	}
 
 	return nil

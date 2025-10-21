@@ -41,7 +41,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Rotate a KMS key "MY_KEY_ID" and increase it's version inside the key ring "MY_KEYRING_ID".`,
+				`Rotate a KMS key "MY_KEY_ID" and increase its version inside the key ring "MY_KEYRING_ID".`,
 				`$ stackit beta kms key rotate "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -110,7 +110,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key Ring where the key is stored")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the key is stored")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)

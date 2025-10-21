@@ -21,7 +21,7 @@ stackit beta kms key delete KEY_ID [flags]
 
 ```
   -h, --help                Help for "stackit beta kms key delete"
-      --keyring-id string   ID of the KMS Key Ring where the Key is stored
+      --keyring-id string   ID of the KMS key ring where the key is stored
 ```
 
 ### Options inherited from parent commands

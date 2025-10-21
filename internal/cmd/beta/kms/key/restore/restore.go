@@ -37,12 +37,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("restore %s", keyIdArg),
 		Short: "Restore a key",
-		Long:  "Restores the given key from being deleted.",
+		Long:  "Restores the given key from deletion.",
 		Args:  args.SingleArg(keyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Restore a KMS key "MY_KEY_ID" inside the key ring "MY_KEYRING_ID" that was scheduled for deletion.`,
-				`$ stackit beta kms keyring restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
+				`$ stackit beta kms key restore "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -116,7 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS Key Ring where the Key is stored")
+	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the key is stored")
 
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)

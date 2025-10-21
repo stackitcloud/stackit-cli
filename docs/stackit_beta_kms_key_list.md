@@ -24,7 +24,7 @@ stackit beta kms key list [flags]
 
 ```
   -h, --help                Help for "stackit beta kms key list"
-      --keyring-id string   ID of the KMS Key Ring where the Key is stored
+      --keyring-id string   ID of the KMS key ring where the key is stored
 ```
 
 ### Options inherited from parent commands

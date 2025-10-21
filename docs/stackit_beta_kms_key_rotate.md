@@ -13,7 +13,7 @@ stackit beta kms key rotate KEY_ID [flags]
 ### Examples
 
 ```
-  Rotate a KMS key "MY_KEY_ID" and increase it's version inside the key ring "MY_KEYRING_ID".
+  Rotate a KMS key "MY_KEY_ID" and increase its version inside the key ring "MY_KEYRING_ID".
   $ stackit beta kms key rotate "MY_KEY_ID" --keyring-id "MY_KEYRING_ID"
 ```
 
@@ -21,7 +21,7 @@ stackit beta kms key rotate KEY_ID [flags]
 
 ```
   -h, --help                Help for "stackit beta kms key rotate"
-      --keyring-id string   ID of the KMS key Ring where the key is stored
+      --keyring-id string   ID of the KMS key ring where the key is stored
 ```
 
 ### Options inherited from parent commands
