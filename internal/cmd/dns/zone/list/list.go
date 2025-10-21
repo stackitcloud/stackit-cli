@@ -86,17 +86,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(zones) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No zones found for project %q matching the criteria\n", projectLabel)
-				return nil
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, zones)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, zones)
 		},
 	}
 	configureFlags(cmd)
@@ -228,8 +225,13 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	return zones, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, zones []dns.Zone) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, zones []dns.Zone) error {
 	return p.OutputResult(outputFormat, zones, func() error {
+		if len(zones) == 0 {
+			p.Outputf("No zones found for project %q matching the criteria\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "TYPE", "DNS NAME", "RECORD COUNT")
 		for i := range zones {
