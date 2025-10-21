@@ -30,10 +30,6 @@ const (
 	displayNameFlag = "name"
 	purposeFlag     = "purpose"
 	protectionFlag  = "protection"
-
-	defaultWrappingAlgorithm = kms.WRAPPINGALGORITHM__2048_OAEP_SHA256
-	defaultWrappingPurpose   = kms.WRAPPINGPURPOSE_ASYMMETRIC_KEY
-	defaultProtection        = kms.PROTECTION_SOFTWARE
 )
 
 type inputModel struct {
@@ -181,14 +177,14 @@ func configureFlags(cmd *cobra.Command) {
 	for _, val := range kms.AllowedWrappingAlgorithmEnumValues {
 		algorithmFlagOptions = append(algorithmFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultWrappingAlgorithm), algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
 
 	// Purpose
 	var purposeFlagOptions []string
 	for _, val := range kms.AllowedWrappingPurposeEnumValues {
 		purposeFlagOptions = append(purposeFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultWrappingPurpose), purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the wrapping key. Possible values: %q", purposeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the wrapping key. Possible values: %q", purposeFlagOptions))
 
 	// Protection
 	// backend was deprectaed in /v1beta, but protection is a required attribute with value "software"
@@ -196,7 +192,7 @@ func configureFlags(cmd *cobra.Command) {
 	for _, val := range kms.AllowedProtectionEnumValues {
 		protectionFlagOptions = append(protectionFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultProtection), protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the wrapping key material. Possible values: %q", purposeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the wrapping key material. Possible values: %q", purposeFlagOptions))
 
 	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")

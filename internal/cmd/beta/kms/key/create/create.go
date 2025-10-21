@@ -31,10 +31,6 @@ const (
 	importOnlyFlag  = "import-only"
 	purposeFlag     = "purpose"
 	protectionFlag  = "protection"
-
-	defaultAlgorithm  = kms.ALGORITHM_RSA_2048_OAEP_SHA256
-	defaultPurpose    = kms.PURPOSE_ASYMMETRIC_ENCRYPT_DECRYPT
-	defaultProtection = kms.PROTECTION_SOFTWARE
 )
 
 type inputModel struct {
@@ -183,21 +179,21 @@ func configureFlags(cmd *cobra.Command) {
 	for _, val := range kms.AllowedAlgorithmEnumValues {
 		algorithmFlagOptions = append(algorithmFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultAlgorithm), algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
 
 	// Purpose
 	var purposeFlagOptions []string
 	for _, val := range kms.AllowedPurposeEnumValues {
 		purposeFlagOptions = append(purposeFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultPurpose), purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the key. Possible values: %q", purposeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the key. Possible values: %q", purposeFlagOptions))
 
 	// Protection
 	var protectionFlagOptions []string
 	for _, val := range kms.AllowedProtectionEnumValues {
 		protectionFlagOptions = append(protectionFlagOptions, string(val))
 	}
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultProtection), protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the key material. Possible values: %q", purposeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the key material. Possible values: %q", purposeFlagOptions))
 
 	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")

@@ -23,13 +23,13 @@ stackit beta kms wrapping-key create [flags]
 ### Options
 
 ```
-      --algorithm string     En-/Decryption / signing algorithm. Possible values: ["rsa_2048_oaep_sha256" "rsa_3072_oaep_sha256" "rsa_4096_oaep_sha256" "rsa_4096_oaep_sha512" "rsa_2048_oaep_sha256_aes_256_key_wrap" "rsa_3072_oaep_sha256_aes_256_key_wrap" "rsa_4096_oaep_sha256_aes_256_key_wrap" "rsa_4096_oaep_sha512_aes_256_key_wrap"] (default "rsa_2048_oaep_sha256")
+      --algorithm string     En-/Decryption / signing algorithm. Possible values: ["rsa_2048_oaep_sha256" "rsa_3072_oaep_sha256" "rsa_4096_oaep_sha256" "rsa_4096_oaep_sha512" "rsa_2048_oaep_sha256_aes_256_key_wrap" "rsa_3072_oaep_sha256_aes_256_key_wrap" "rsa_4096_oaep_sha256_aes_256_key_wrap" "rsa_4096_oaep_sha512_aes_256_key_wrap"]
       --description string   Optional description of the wrapping key
   -h, --help                 Help for "stackit beta kms wrapping-key create"
       --keyring-id string    ID of the KMS key ring
       --name string          The display name to distinguish multiple wrapping keys
-      --protection string    The underlying system that is responsible for protecting the wrapping key material. Possible values: ["wrap_symmetric_key" "wrap_asymmetric_key"] (default "software")
-      --purpose string       Purpose of the wrapping key. Possible values: ["wrap_symmetric_key" "wrap_asymmetric_key"] (default "wrap_asymmetric_key")
+      --protection string    The underlying system that is responsible for protecting the wrapping key material. Possible values: ["wrap_symmetric_key" "wrap_asymmetric_key"]
+      --purpose string       Purpose of the wrapping key. Possible values: ["wrap_symmetric_key" "wrap_asymmetric_key"]
 ```
 
 ### Options inherited from parent commands
