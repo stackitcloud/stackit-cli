@@ -12,13 +12,13 @@ import (
 
 var (
 	testProjectId     = uuid.NewString()
-	testRegion        = "eu01"
 	testKeyRingId     = uuid.NewString()
 	testKeyId         = uuid.NewString()
 	testWrappingKeyId = uuid.NewString()
 )
 
 const (
+	testRegion          = "eu01"
 	testKeyName         = "my-test-key"
 	testKeyRingName     = "my-key-ring"
 	testWrappingKeyName = "my-wrapping-key"
