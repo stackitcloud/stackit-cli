@@ -332,7 +332,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateImageRequest {
-	request := apiClient.CreateImage(ctx, model.ProjectId).
+	request := apiClient.CreateImage(ctx, model.ProjectId, model.Region).
 		CreateImagePayload(createPayload(ctx, model))
 	return request
 }
