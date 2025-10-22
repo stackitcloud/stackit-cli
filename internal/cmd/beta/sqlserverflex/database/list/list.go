@@ -66,23 +66,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get SQLServer Flex databases: %w", err)
 			}
-			if resp.Databases == nil || len(*resp.Databases) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No databases found for instance %s on project %s\n", model.InstanceId, projectLabel)
-				return nil
+			databases := resp.GetDatabases()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
-			databases := *resp.Databases
 
 			// Truncate output
 			if model.Limit != nil && len(databases) > int(*model.Limit) {
 				databases = databases[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, databases)
+			return outputResult(params.Printer, model.OutputFormat, model.InstanceId, projectLabel, databases)
 		},
 	}
 
@@ -127,8 +124,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, databases []sqlserverflex.Database) error {
+func outputResult(p *print.Printer, outputFormat, instanceId, projectLabel string, databases []sqlserverflex.Database) error {
 	return p.OutputResult(outputFormat, databases, func() error {
+		if len(databases) == 0 {
+			p.Outputf("No databases found for instance %s on project %s\n", instanceId, projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME")
 		for i := range databases {
