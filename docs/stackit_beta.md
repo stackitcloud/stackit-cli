@@ -42,5 +42,6 @@ stackit beta [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit beta alb](./stackit_beta_alb.md)	 - Manages application loadbalancers
+* [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 
