@@ -168,29 +168,29 @@ func (b Base64Bytes) MarshalYAML() (interface{}, error) {
 }
 
 type Base64PatchedServer struct {
-	Id                  *string                             `json:"id,omitempty"`
-	Name                *string                             `json:"name,omitempty"`
-	Status              *string                             `json:"status,omitempty"`
-	AvailabilityZone    *string                             `json:"availabilityZone,omitempty"`
-	BootVolume          *iaas.CreateServerPayloadBootVolume `json:"bootVolume,omitempty"`
-	CreatedAt           *time.Time                          `json:"createdAt,omitempty"`
-	ErrorMessage        *string                             `json:"errorMessage,omitempty"`
-	PowerStatus         *string                             `json:"powerStatus,omitempty"`
-	AffinityGroup       *string                             `json:"affinityGroup,omitempty"`
-	ImageId             *string                             `json:"imageId,omitempty"`
-	KeypairName         *string                             `json:"keypairName,omitempty"`
-	MachineType         *string                             `json:"machineType,omitempty"`
-	Labels              *map[string]interface{}             `json:"labels,omitempty"`
-	LaunchedAt          *time.Time                          `json:"launchedAt,omitempty"`
-	MaintenanceWindow   *iaas.ServerMaintenance             `json:"maintenanceWindow,omitempty"`
-	Metadata            *map[string]interface{}             `json:"metadata,omitempty"`
-	Networking          *iaas.CreateServerPayloadNetworking `json:"networking,omitempty"`
-	Nics                *[]iaas.ServerNetwork               `json:"nics,omitempty"`
-	SecurityGroups      *[]string                           `json:"securityGroups,omitempty"`
-	ServiceAccountMails *[]string                           `json:"serviceAccountMails,omitempty"`
-	UpdatedAt           *time.Time                          `json:"updatedAt,omitempty"`
-	UserData            *Base64Bytes                        `json:"userData,omitempty"`
-	Volumes             *[]string                           `json:"volumes,omitempty"`
+	Id                  *string                 `json:"id,omitempty"`
+	Name                *string                 `json:"name,omitempty"`
+	Status              *string                 `json:"status,omitempty"`
+	AvailabilityZone    *string                 `json:"availabilityZone,omitempty"`
+	BootVolume          *iaas.ServerBootVolume  `json:"bootVolume,omitempty"`
+	CreatedAt           *time.Time              `json:"createdAt,omitempty"`
+	ErrorMessage        *string                 `json:"errorMessage,omitempty"`
+	PowerStatus         *string                 `json:"powerStatus,omitempty"`
+	AffinityGroup       *string                 `json:"affinityGroup,omitempty"`
+	ImageId             *string                 `json:"imageId,omitempty"`
+	KeypairName         *string                 `json:"keypairName,omitempty"`
+	MachineType         *string                 `json:"machineType,omitempty"`
+	Labels              *map[string]interface{} `json:"labels,omitempty"`
+	LaunchedAt          *time.Time              `json:"launchedAt,omitempty"`
+	MaintenanceWindow   *iaas.ServerMaintenance `json:"maintenanceWindow,omitempty"`
+	Metadata            *map[string]interface{} `json:"metadata,omitempty"`
+	Networking          *iaas.ServerNetworking  `json:"networking,omitempty"`
+	Nics                *[]iaas.ServerNetwork   `json:"nics,omitempty"`
+	SecurityGroups      *[]string               `json:"securityGroups,omitempty"`
+	ServiceAccountMails *[]string               `json:"serviceAccountMails,omitempty"`
+	UpdatedAt           *time.Time              `json:"updatedAt,omitempty"`
+	UserData            *Base64Bytes            `json:"userData,omitempty"`
+	Volumes             *[]string               `json:"volumes,omitempty"`
 }
 
 // ConvertToBase64PatchedServer converts an iaas.Server to Base64PatchedServer
