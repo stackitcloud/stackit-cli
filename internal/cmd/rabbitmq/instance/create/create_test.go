@@ -17,8 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -46,17 +44,17 @@ var testMonitoringInstanceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		instanceNameFlag:         "example-name",
-		enableMonitoringFlag:     "true",
-		graphiteFlag:             "example-graphite",
-		metricsFrequencyFlag:     "100",
-		metricsPrefixFlag:        "example-prefix",
-		monitoringInstanceIdFlag: testMonitoringInstanceId,
-		pluginFlag:               "example-plugin",
-		sgwAclFlag:               "198.51.100.14/24",
-		syslogFlag:               "example-syslog",
-		planIdFlag:               testPlanId,
+		globalflags.ProjectIdFlag: testProjectId,
+		instanceNameFlag:          "example-name",
+		enableMonitoringFlag:      "true",
+		graphiteFlag:              "example-graphite",
+		metricsFrequencyFlag:      "100",
+		metricsPrefixFlag:         "example-prefix",
+		monitoringInstanceIdFlag:  testMonitoringInstanceId,
+		pluginFlag:                "example-plugin",
+		sgwAclFlag:                "198.51.100.14/24",
+		syslogFlag:                "example-syslog",
+		planIdFlag:                testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -148,9 +146,9 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required fields only",
 			flagValues: map[string]string{
-				projectIdFlag:    testProjectId,
-				instanceNameFlag: "example-name",
-				planIdFlag:       testPlanId,
+				globalflags.ProjectIdFlag: testProjectId,
+				instanceNameFlag:          "example-name",
+				planIdFlag:                testPlanId,
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -165,13 +163,13 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "zero values",
 			flagValues: map[string]string{
-				projectIdFlag:        testProjectId,
-				planIdFlag:           testPlanId,
-				instanceNameFlag:     "",
-				enableMonitoringFlag: "false",
-				graphiteFlag:         "",
-				metricsFrequencyFlag: "0",
-				metricsPrefixFlag:    "",
+				globalflags.ProjectIdFlag: testProjectId,
+				planIdFlag:                testPlanId,
+				instanceNameFlag:          "",
+				enableMonitoringFlag:      "false",
+				graphiteFlag:              "",
+				metricsFrequencyFlag:      "0",
+				metricsPrefixFlag:         "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -190,21 +188,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
