@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -97,24 +95,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 	if network == nil {
 		return fmt.Errorf("network cannot be nil")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(network, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(network, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, network, func() error {
 		var ipv4nameservers []string
 		if network.Nameservers != nil {
 			ipv4nameservers = append(ipv4nameservers, *network.Nameservers...)
@@ -197,5 +178,5 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

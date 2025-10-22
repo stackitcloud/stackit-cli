@@ -87,6 +87,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateSecurityGroupRequest)) i
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool

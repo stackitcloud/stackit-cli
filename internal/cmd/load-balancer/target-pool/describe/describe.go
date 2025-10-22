@@ -2,12 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -124,90 +122,69 @@ func outputResult(p *print.Printer, outputFormat string, targetPool loadbalancer
 		listener,
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(output, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal load balancer: %w", err)
+	return p.OutputResult(outputFormat, output, func() error {
+		sessionPersistence := "None"
+		if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
+			sessionPersistence = "Use Source IP"
 		}
-		p.Outputln(string(details))
+
+		healthCheckInterval := "-"
+		healthCheckUnhealthyThreshold := "-"
+		healthCheckHealthyThreshold := "-"
+		if targetPool.ActiveHealthCheck != nil {
+			if targetPool.ActiveHealthCheck.Interval != nil {
+				healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
+			}
+			if targetPool.ActiveHealthCheck.UnhealthyThreshold != nil {
+				healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
+			}
+			if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
+				healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
+			}
+		}
+
+		targets := "-"
+		if targetPool.Targets != nil {
+			var targetsSlice []string
+			for _, target := range *targetPool.Targets {
+				targetStr := fmt.Sprintf("%s (%s)", *target.DisplayName, *target.Ip)
+				targetsSlice = append(targetsSlice, targetStr)
+			}
+			targets = strings.Join(targetsSlice, "\n")
+		}
+
+		listenerStr := "-"
+		if listener != nil {
+			listenerStr = fmt.Sprintf("%s (Port:%s, Protocol: %s)",
+				utils.PtrString(listener.Name),
+				utils.PtrString(listener.Port),
+				utils.PtrString(listener.Protocol),
+			)
+		}
+
+		table := tables.NewTable()
+		table.AddRow("NAME", utils.PtrString(targetPool.Name))
+		table.AddSeparator()
+		table.AddRow("TARGET PORT", utils.PtrString(targetPool.TargetPort))
+		table.AddSeparator()
+		table.AddRow("ATTACHED LISTENER", listenerStr)
+		table.AddSeparator()
+		table.AddRow("TARGETS", targets)
+		table.AddSeparator()
+		table.AddRow("SESSION PERSISTENCE", sessionPersistence)
+		table.AddSeparator()
+		table.AddRow("HEALTH CHECK INTERVAL", healthCheckInterval)
+		table.AddSeparator()
+		table.AddRow("HEALTH CHECK DOWN AFTER", healthCheckUnhealthyThreshold)
+		table.AddSeparator()
+		table.AddRow("HEALTH CHECK UP AFTER", healthCheckHealthyThreshold)
+		table.AddSeparator()
+
+		err := p.PagerDisplay(table.Render())
+		if err != nil {
+			return fmt.Errorf("display output: %w", err)
+		}
 
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(output, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal load balancer: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		return outputResultAsTable(p, targetPool, listener)
-	}
-}
-
-func outputResultAsTable(p *print.Printer, targetPool loadbalancer.TargetPool, listener *loadbalancer.Listener) error {
-	sessionPersistence := "None"
-	if targetPool.SessionPersistence != nil && targetPool.SessionPersistence.UseSourceIpAddress != nil && *targetPool.SessionPersistence.UseSourceIpAddress {
-		sessionPersistence = "Use Source IP"
-	}
-
-	healthCheckInterval := "-"
-	healthCheckUnhealthyThreshold := "-"
-	healthCheckHealthyThreshold := "-"
-	if targetPool.ActiveHealthCheck != nil {
-		if targetPool.ActiveHealthCheck.Interval != nil {
-			healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
-		}
-		if targetPool.ActiveHealthCheck.UnhealthyThreshold != nil {
-			healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
-		}
-		if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
-			healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
-		}
-	}
-
-	targets := "-"
-	if targetPool.Targets != nil {
-		var targetsSlice []string
-		for _, target := range *targetPool.Targets {
-			targetStr := fmt.Sprintf("%s (%s)", *target.DisplayName, *target.Ip)
-			targetsSlice = append(targetsSlice, targetStr)
-		}
-		targets = strings.Join(targetsSlice, "\n")
-	}
-
-	listenerStr := "-"
-	if listener != nil {
-		listenerStr = fmt.Sprintf("%s (Port:%s, Protocol: %s)",
-			utils.PtrString(listener.Name),
-			utils.PtrString(listener.Port),
-			utils.PtrString(listener.Protocol),
-		)
-	}
-
-	table := tables.NewTable()
-	table.AddRow("NAME", utils.PtrString(targetPool.Name))
-	table.AddSeparator()
-	table.AddRow("TARGET PORT", utils.PtrString(targetPool.TargetPort))
-	table.AddSeparator()
-	table.AddRow("ATTACHED LISTENER", listenerStr)
-	table.AddSeparator()
-	table.AddRow("TARGETS", targets)
-	table.AddSeparator()
-	table.AddRow("SESSION PERSISTENCE", sessionPersistence)
-	table.AddSeparator()
-	table.AddRow("HEALTH CHECK INTERVAL", healthCheckInterval)
-	table.AddSeparator()
-	table.AddRow("HEALTH CHECK DOWN AFTER", healthCheckUnhealthyThreshold)
-	table.AddSeparator()
-	table.AddRow("HEALTH CHECK UP AFTER", healthCheckHealthyThreshold)
-	table.AddSeparator()
-
-	err := p.PagerDisplay(table.Render())
-	if err != nil {
-		return fmt.Errorf("display output: %w", err)
-	}
-
-	return nil
+	})
 }

@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -47,9 +45,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 Secrets Manager instances`,
 				"$ stackit secrets-manager instance list --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -95,7 +93,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -124,24 +122,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 }
 
 func outputResult(p *print.Printer, outputFormat string, instances []secretsmanager.Instance) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(instances, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instances, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager instance list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, instances, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "SECRETS")
 		for i := range instances {
@@ -159,5 +140,5 @@ func outputResult(p *print.Printer, outputFormat string, instances []secretsmana
 		}
 
 		return nil
-	}
+	})
 }

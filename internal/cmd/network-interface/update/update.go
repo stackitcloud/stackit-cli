@@ -2,11 +2,9 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -205,25 +203,8 @@ func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NI
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(nic, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(nic, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, nic, func() error {
 		p.Outputf("Updated network interface for project %q.\n", projectId)
 		return nil
-	}
+	})
 }

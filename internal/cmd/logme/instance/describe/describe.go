@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -97,24 +95,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *logme.Instanc
 		return fmt.Errorf("instance is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal LogMe instance: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal LogMe instance: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, instance, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(instance.InstanceId))
 		table.AddSeparator()
@@ -142,5 +123,5 @@ func outputResult(p *print.Printer, outputFormat string, instance *logme.Instanc
 		}
 
 		return nil
-	}
+	})
 }

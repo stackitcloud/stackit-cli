@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -102,24 +100,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 }
 
 func outputResult(p *print.Printer, outputFormat string, schedule serverupdate.UpdateSchedule) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(schedule, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server os-update schedule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(schedule, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server os-update schedule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, schedule, func() error {
 		table := tables.NewTable()
 		table.AddRow("SCHEDULE ID", utils.PtrString(schedule.Id))
 		table.AddSeparator()
@@ -138,5 +119,5 @@ func outputResult(p *print.Printer, outputFormat string, schedule serverupdate.U
 		}
 
 		return nil
-	}
+	})
 }

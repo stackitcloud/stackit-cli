@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -92,24 +90,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 	if resp == nil {
 		return fmt.Errorf("image not found")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal image: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal image: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		table := tables.NewTable()
 		if id := resp.Id; id != nil {
 			table.AddRow("ID", *id)
@@ -169,5 +151,5 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 		}
 
 		return nil
-	}
+	})
 }

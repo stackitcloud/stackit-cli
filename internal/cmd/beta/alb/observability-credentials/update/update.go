@@ -2,7 +2,6 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -15,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -132,23 +130,11 @@ func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCreden
 		outputFormat = model.GlobalFlagModel.OutputFormat
 	}
 	if response == nil {
-		return fmt.Errorf("no response passewd")
+		return fmt.Errorf("no response passed")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(response.Credential, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(response.Credential, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, response.Credential, func() error {
 		p.Outputf("Updated credential %q\n", utils.PtrString(model.CredentialsRef))
-	}
-	return nil
+		return nil
+	})
 }

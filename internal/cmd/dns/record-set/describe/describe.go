@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -110,24 +108,8 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 	if recordSet == nil {
 		return fmt.Errorf("record set response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(recordSet, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(recordSet, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, recordSet, func() error {
 		recordsData := make([]string, 0, len(*recordSet.Records))
 		for _, r := range *recordSet.Records {
 			recordsData = append(recordsData, *r.Content)
@@ -152,5 +134,5 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 		}
 
 		return nil
-	}
+	})
 }

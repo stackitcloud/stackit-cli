@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -109,24 +107,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 	if securityGroupRule == nil {
 		return fmt.Errorf("security group rule is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(securityGroupRule, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group rule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(securityGroupRule, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group rule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, securityGroupRule, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(securityGroupRule.Id))
 		table.AddSeparator()
@@ -178,5 +159,5 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

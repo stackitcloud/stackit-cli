@@ -84,6 +84,7 @@ func fixturePayload(mods ...func(payload *alb.UpdateCredentialsPayload)) alb.Upd
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool

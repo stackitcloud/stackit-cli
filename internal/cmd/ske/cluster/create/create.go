@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -195,29 +194,12 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		return fmt.Errorf("cluster is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(cluster, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(cluster, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SKE cluster: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, cluster, func() error {
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s cluster for project %q. Cluster name: %s\n", operationState, projectLabel, utils.PtrString(cluster.Name))
 		return nil
-	}
+	})
 }

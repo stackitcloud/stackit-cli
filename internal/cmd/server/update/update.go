@@ -2,10 +2,7 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -130,25 +127,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, server *iaas.Server) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(server, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, server, func() error {
 		p.Outputf("Updated server %q.\n", serverLabel)
 		return nil
-	}
+	})
 }

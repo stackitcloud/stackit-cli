@@ -1,10 +1,7 @@
 package list
 
 import (
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -93,22 +90,7 @@ func buildOutput(profiles []string, activeProfile string) []profileInfo {
 }
 
 func outputResult(p *print.Printer, outputFormat string, profiles []profileInfo) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(profiles, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal config list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(profiles, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal config list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	default:
+	return p.OutputResult(outputFormat, profiles, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "ACTIVE", "EMAIL")
 		for _, profile := range profiles {
@@ -129,5 +111,5 @@ func outputResult(p *print.Printer, outputFormat string, profiles []profileInfo)
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

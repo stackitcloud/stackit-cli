@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -95,24 +93,8 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 	if instance == nil {
 		return fmt.Errorf("instance response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex instance: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex instance: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, instance, func() error {
 		var acls string
 		if instance.Acl != nil && instance.Acl.HasItems() {
 			aclsArray := *instance.Acl.Items
@@ -150,5 +132,5 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 		}
 
 		return nil
-	}
+	})
 }

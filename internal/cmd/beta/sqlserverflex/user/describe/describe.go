@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -115,24 +113,8 @@ func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.Use
 	if user == nil {
 		return fmt.Errorf("user response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal SQLServer Flex user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, user, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
@@ -160,5 +142,5 @@ func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.Use
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -41,9 +39,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List all service accounts`,
 				"$ stackit service-account list"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -88,7 +86,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -117,20 +115,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal service accounts list: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+	return p.OutputResult(outputFormat, serviceAccounts, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "EMAIL")
 		for i := range serviceAccounts {
@@ -144,7 +129,6 @@ func outputResult(p *print.Printer, outputFormat string, serviceAccounts []servi
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-
-	return nil
+		return nil
+	})
 }

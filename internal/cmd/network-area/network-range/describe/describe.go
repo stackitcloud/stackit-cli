@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -105,24 +103,8 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 	if networkRange == nil {
 		return fmt.Errorf("network range is nil")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRange, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, networkRange, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(networkRange.NetworkRangeId))
 		table.AddSeparator()
@@ -133,5 +115,5 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

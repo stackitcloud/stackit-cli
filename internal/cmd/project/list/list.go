@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -64,9 +62,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List all STACKIT projects that a certain user is a member of`,
 				"$ stackit project list --member example@email.com"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -103,7 +101,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	creationTimeAfter, err := flags.FlagToDateTimePointer(p, cmd, creationTimeAfterFlag, creationTimeAfterFormat)
@@ -213,24 +211,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 }
 
 func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.Project) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(projects, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal projects list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(projects, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal projects list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, projects, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
@@ -254,5 +235,5 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		}
 
 		return nil
-	}
+	})
 }

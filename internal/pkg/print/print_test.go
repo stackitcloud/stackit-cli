@@ -860,3 +860,79 @@ func TestIsVerbosityError(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat     string
+		output           any
+		prettyOutputFunc func() error
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "output format is JSON",
+			args: args{
+				outputFormat: JSONOutputFormat,
+				output:       struct{}{},
+			},
+		},
+		{
+			name: "output format is JSON and output is nil",
+			args: args{
+				outputFormat: JSONOutputFormat,
+				output:       nil,
+			},
+		},
+		{
+			name: "output format is YAML",
+			args: args{
+				outputFormat: YAMLOutputFormat,
+				output:       struct{}{},
+			},
+		},
+		{
+			name: "output format is YAML and output is nil",
+			args: args{
+				outputFormat: YAMLOutputFormat,
+				output:       nil,
+			},
+		},
+		{
+			name: "should return error of pretty output func",
+			args: args{
+				outputFormat: PrettyOutputFormat,
+				output:       struct{}{},
+				prettyOutputFunc: func() error {
+					return fmt.Errorf("dummy error")
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "success of pretty output func",
+			args: args{
+				outputFormat: PrettyOutputFormat,
+				output:       struct{}{},
+				prettyOutputFunc: func() error {
+					return nil
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: ErrorLevel,
+			}
+
+			if err := p.OutputResult(tt.args.outputFormat, tt.args.output, tt.args.prettyOutputFunc); (err != nil) != tt.wantErr {
+				t.Errorf("OutputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

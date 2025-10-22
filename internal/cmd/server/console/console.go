@@ -2,11 +2,9 @@ package console
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -102,24 +100,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl iaas.ServerConsoleUrl) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serverUrl, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal url: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serverUrl, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal url: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, serverUrl, func() error {
 		if _, ok := serverUrl.GetUrlOk(); !ok {
 			return fmt.Errorf("server url is nil")
 		}
@@ -132,5 +113,5 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl 
 		p.Outputf("Remote console URL %q for server %q\n", unescapedURL, serverLabel)
 
 		return nil
-	}
+	})
 }

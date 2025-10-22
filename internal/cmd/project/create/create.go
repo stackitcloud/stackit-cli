@@ -2,11 +2,9 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -65,9 +63,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a STACKIT project with a network area`,
 				"$ stackit project create --parent-id xxxx --name my-project --network-area-id yyyy"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -113,7 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
@@ -212,25 +210,8 @@ func outputResult(p *print.Printer, model inputModel, resp *resourcemanager.Proj
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("globalflags are empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal project: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal project: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", utils.PtrString(model.ParentId), utils.PtrString(resp.ProjectId))
 		return nil
-	}
+	})
 }

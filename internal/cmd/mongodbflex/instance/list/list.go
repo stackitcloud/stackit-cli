@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -48,9 +46,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 MongoDB Flex instances`,
 				"$ stackit mongodbflex instance list --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -67,23 +65,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex instances: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No instances found for project %q\n", projectLabel)
-				return nil
+			instances := utils.GetSliceFromPointer(resp.Items)
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
-			instances := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(instances) > int(*model.Limit) {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, instances)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
 		},
 	}
 
@@ -95,7 +90,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -123,25 +118,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instances []mongodbflex.InstanceListInstance) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(instances, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex instance list: %w", err)
+func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []mongodbflex.InstanceListInstance) error {
+	return p.OutputResult(outputFormat, instances, func() error {
+		if len(instances) == 0 {
+			p.Outputf("No instances found for project %q\n", projectLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instances, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex instance list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS")
 		for i := range instances {
@@ -158,5 +141,5 @@ func outputResult(p *print.Printer, outputFormat string, instances []mongodbflex
 		}
 
 		return nil
-	}
+	})
 }

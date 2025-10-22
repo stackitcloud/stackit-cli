@@ -2,10 +2,7 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -140,25 +137,8 @@ func outputResult(p *print.Printer, outputFormat, volumeLabel string, volume *ia
 	if volume == nil {
 		return fmt.Errorf("volume response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volume, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volume, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, volume, func() error {
 		p.Outputf("Updated volume %q.\n", volumeLabel)
 		return nil
-	}
+	})
 }
