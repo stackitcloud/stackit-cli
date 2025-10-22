@@ -21,8 +21,9 @@ var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testClient    = &alb.APIClient{}
 	testProjectId = uuid.NewString()
-	testRegion    = "eu01"
 )
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -132,6 +133,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		projectLabel string
 		items        []alb.PlanDetails
 	}
 	tests := []struct {
@@ -160,7 +162,7 @@ func Test_outputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.items); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.items); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
