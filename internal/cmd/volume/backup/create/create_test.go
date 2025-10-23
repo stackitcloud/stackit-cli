@@ -16,12 +16,13 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-type testCtxKey struct{}
-
 const (
+	testRegion     = "eu01"
 	testName       = "my-backup"
 	testSourceType = "volume"
 )
+
+type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -34,10 +35,12 @@ var (
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		sourceIdFlag:              testSourceId,
-		sourceTypeFlag:            testSourceType,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
+		globalflags.RegionFlag:    testRegion,
+
+		sourceIdFlag:   testSourceId,
+		sourceTypeFlag: testSourceType,
+		nameFlag:       testName,
+		labelsFlag:     "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,6 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		SourceID:   testSourceId,
 		SourceType: testSourceType,
@@ -63,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateBackupRequest)) iaas.ApiCreateBackupRequest {
-	request := testClient.CreateBackup(testCtx, testProjectId)
+	request := testClient.CreateBackup(testCtx, testProjectId, testRegion)
 
 	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
 	createPayload.Name = utils.Ptr(testName)

@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -27,7 +29,9 @@ var testSourceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		availabilityZoneFlag: "eu01-1",
 		nameFlag:             "example-volume-name",
 		descriptionFlag:      "example-volume-description",
@@ -48,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		AvailabilityZone: utils.Ptr("eu01-1"),
 		Name:             utils.Ptr("example-volume-name"),
@@ -67,7 +72,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
-	request := testClient.CreateVolume(testCtx, testProjectId)
+	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
 	request = request.CreateVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -76,7 +81,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.Api
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
-	request := testClient.CreateVolume(testCtx, testProjectId)
+	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
 	request = request.CreateVolumePayload(iaas.CreateVolumePayload{
 		AvailabilityZone: utils.Ptr("eu01-1"),
 	})
@@ -158,21 +163,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -226,6 +231,7 @@ func TestBuildRequest(t *testing.T) {
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
+					Region:    testRegion,
 				},
 				AvailabilityZone: utils.Ptr("eu01-1"),
 			},

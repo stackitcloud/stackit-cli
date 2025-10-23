@@ -78,14 +78,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Get source name for label (use ID if name not available)
 			sourceLabel := model.SourceID
 			if model.SourceType == "volume" {
-				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.SourceID)
+				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				} else if name != "" {
 					sourceLabel = name
 				}
 			} else if model.SourceType == "snapshot" {
-				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SourceID)
+				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				} else if name != "" {
@@ -107,12 +107,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create volume backup: %w", err)
 			}
+			if resp == nil || resp.Id == nil {
+				return fmt.Errorf("create volume: empty response")
+			}
+			volumeId := *resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating backup")
-				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, *resp.Id).WaitWithContext(ctx)
+				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for backup creation: %w", err)
 				}
@@ -169,7 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
-	req := apiClient.CreateBackup(ctx, model.ProjectId)
+	req := apiClient.CreateBackup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateBackupPayload{
 		Name:   model.Name,

@@ -16,7 +16,8 @@ import (
 type testCtxKey struct{}
 
 const (
-	testName = "test-snapshot"
+	testRegion = "eu01"
+	testName   = "test-snapshot"
 )
 
 var (
@@ -30,9 +31,11 @@ var (
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		volumeIdFlag:              testVolumeId,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
+		globalflags.RegionFlag:    testRegion,
+
+		volumeIdFlag: testVolumeId,
+		nameFlag:     testName,
+		labelsFlag:   "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,6 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		VolumeID: testVolumeId,
@@ -57,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSnapshotRequest)) iaas.ApiCreateSnapshotRequest {
-	request := testClient.CreateSnapshot(testCtx, testProjectId)
+	request := testClient.CreateSnapshot(testCtx, testProjectId, testRegion)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
 	payload.VolumeId = &testVolumeId
 	payload.Name = utils.Ptr(testName)

@@ -14,6 +14,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+	testName   = "test-backup"
+)
+
 type testCtxKey struct{}
 
 var (
@@ -21,7 +26,6 @@ var (
 	testClient    = &iaas.APIClient{}
 	testProjectId = uuid.NewString()
 	testBackupId  = uuid.NewString()
-	testName      = "test-backup"
 	testLabels    = map[string]string{"key1": "value1"}
 )
 
@@ -38,8 +42,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
+		globalflags.RegionFlag:    testRegion,
+
+		nameFlag:   testName,
+		labelsFlag: "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,9 +58,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		BackupId: testBackupId,
-		Name:     &testName,
+		Name:     utils.Ptr(testName),
 		Labels:   testLabels,
 	}
 	for _, mod := range mods {
@@ -64,9 +71,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateBackupRequest)) iaas.ApiUpdateBackupRequest {
-	request := testClient.UpdateBackup(testCtx, testProjectId, testBackupId)
+	request := testClient.UpdateBackup(testCtx, testProjectId, testRegion, testBackupId)
 	payload := iaas.NewUpdateBackupPayloadWithDefaults()
-	payload.Name = &testName
+	payload.Name = utils.Ptr(testName)
 
 	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
 

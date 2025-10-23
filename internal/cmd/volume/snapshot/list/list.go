@@ -126,8 +126,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsRequest {
-	req := apiClient.ListSnapshots(ctx, model.ProjectId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsInProjectRequest {
+	req := apiClient.ListSnapshotsInProject(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}

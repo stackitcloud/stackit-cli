@@ -56,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeId)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
@@ -111,7 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiResizeVolumeRequest {
-	req := apiClient.ResizeVolume(ctx, model.ProjectId, model.VolumeId)
+	req := apiClient.ResizeVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 
 	payload := iaas.ResizeVolumePayload{
 		Size: model.Size,

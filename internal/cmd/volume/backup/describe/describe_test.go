@@ -15,6 +15,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var (
@@ -37,6 +41,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -49,6 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		BackupId: testBackupId,
 	}
@@ -59,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetBackupRequest)) iaas.ApiGetBackupRequest {
-	request := testClient.GetBackup(testCtx, testProjectId, testBackupId)
+	request := testClient.GetBackup(testCtx, testProjectId, testRegion, testBackupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
