@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -38,7 +40,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		networkIdFlag:        testNetworkId,
 		allowedAddressesFlag: "1.1.1.1,8.8.8.8,9.9.9.9",
 		labelFlag:            "key=value",
@@ -62,8 +66,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		NetworkId:        utils.Ptr(testNetworkId),
+		NetworkId:        testNetworkId,
 		AllowedAddresses: utils.Ptr(allowedAddresses),
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
@@ -80,7 +85,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNicRequest)) iaas.ApiUpdateNicRequest {
-	request := testClient.UpdateNic(testCtx, testProjectId, testNetworkId, testNicId)
+	request := testClient.UpdateNic(testCtx, testProjectId, testRegion, testNetworkId, testNicId)
 	request = request.UpdateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)

@@ -15,19 +15,24 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var projectIdFlag = globalflags.ProjectIdFlag
 var testProjectId = uuid.NewString()
 var testNetworkId = uuid.NewString()
 var testSecurityGroup = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		networkIdFlag:        testNetworkId,
 		allowedAddressesFlag: "1.1.1.1,8.8.8.8,9.9.9.9",
 		ipv4Flag:             "1.2.3.4",
@@ -52,9 +57,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		NetworkId:        utils.Ptr(testNetworkId),
+		NetworkId:        testNetworkId,
 		AllowedAddresses: utils.Ptr(allowedAddresses),
 		Ipv4:             utils.Ptr("1.2.3.4"),
 		Ipv6:             utils.Ptr("2001:0db8:85a3:08d3::0370:7344"),
@@ -72,7 +78,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNicRequest)) iaas.ApiCreateNicRequest {
-	request := testClient.CreateNic(testCtx, testProjectId, testNetworkId)
+	request := testClient.CreateNic(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.CreateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)

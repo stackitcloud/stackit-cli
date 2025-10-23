@@ -38,7 +38,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId        *string
+	NetworkId        string
 	AllowedAddresses *[]iaas.AllowedAddressesInner
 	Ipv4             *string
 	Ipv6             *string
@@ -177,7 +177,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		Ipv4:            flags.FlagToStringPointer(p, cmd, ipv4Flag),
 		Ipv6:            flags.FlagToStringPointer(p, cmd, ipv6Flag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
@@ -195,7 +195,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNicRequest {
-	req := apiClient.CreateNic(ctx, model.ProjectId, *model.NetworkId)
+	req := apiClient.CreateNic(ctx, model.ProjectId, model.Region, model.NetworkId)
 
 	payload := iaas.CreateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,

@@ -29,7 +29,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit         *int64
 	LabelSelector *string
-	NetworkId     *string
+	NetworkId     string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -77,12 +77,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, *model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
-					networkLabel = *model.NetworkId
+					networkLabel = model.NetworkId
 				} else if networkLabel == "" {
-					networkLabel = *model.NetworkId
+					networkLabel = model.NetworkId
 				}
 				params.Printer.Info("No network interfaces found for network %q\n", networkLabel)
 				return nil
@@ -128,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -136,7 +136,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
-	req := apiClient.ListNics(ctx, model.ProjectId, *model.NetworkId)
+	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, model.NetworkId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
