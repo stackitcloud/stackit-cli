@@ -10,5 +10,5 @@ import (
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*iaas.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.IaaSCustomEndpointKey), true, genericclient.CreateApiClient[*iaas.APIClient](iaas.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.IaaSCustomEndpointKey), false, genericclient.CreateApiClient[*iaas.APIClient](iaas.NewAPIClient))
 }
