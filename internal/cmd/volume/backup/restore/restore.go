@@ -52,17 +52,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup details: %v", err)
 			}
 
 			// Get source details for labels
 			var sourceLabel string
-			backup, err := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId).Execute()
+			backup, err := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.BackupId).Execute()
 			if err == nil && backup != nil && backup.VolumeId != nil {
 				sourceLabel = *backup.VolumeId
-				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, *backup.VolumeId)
+				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, *backup.VolumeId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume details: %v", err)
 				} else if name != "" {
@@ -89,7 +89,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Restoring backup")
-				_, err = wait.RestoreBackupWaitHandler(ctx, apiClient, model.ProjectId, model.BackupId).WaitWithContext(ctx)
+				_, err = wait.RestoreBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for backup restore: %w", err)
 				}
@@ -125,6 +125,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRestoreBackupRequest {
-	req := apiClient.RestoreBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.RestoreBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }

@@ -86,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSnapshotRequest {
-	return apiClient.GetSnapshot(ctx, model.ProjectId, model.SnapshotId)
+	return apiClient.GetSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot) error {

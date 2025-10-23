@@ -86,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }
 
