@@ -88,7 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetPublicIPRequest {
-	return apiClient.GetPublicIP(ctx, model.ProjectId, model.PublicIpId)
+	return apiClient.GetPublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp) error {
