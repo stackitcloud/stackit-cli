@@ -27,7 +27,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId *string
+	NetworkId string
 	NicId     string
 }
 
@@ -94,7 +94,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		NicId:           nicId,
 	}
 
@@ -103,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNicRequest {
-	req := apiClient.GetNic(ctx, model.ProjectId, *model.NetworkId, model.NicId)
+	req := apiClient.GetNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 	return req
 }
 

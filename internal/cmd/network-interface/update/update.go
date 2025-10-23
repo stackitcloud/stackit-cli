@@ -38,7 +38,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NicId            string
-	NetworkId        *string
+	NetworkId        string
 	AllowedAddresses *[]iaas.AllowedAddressesInner
 	Labels           *map[string]string
 	Name             *string // <= 63 characters + regex  ^[A-Za-z0-9]+((-|_|\s|\.)[A-Za-z0-9]+)*$
@@ -171,7 +171,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		NicId:           nicId,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 		Name:            name,
 		NicSecurity:     flags.FlagToBoolPointer(p, cmd, nicSecurityFlag),
@@ -187,7 +187,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNicRequest {
-	req := apiClient.UpdateNic(ctx, model.ProjectId, *model.NetworkId, model.NicId)
+	req := apiClient.UpdateNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 
 	payload := iaas.UpdateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
