@@ -114,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreatePublicIPRequest {
-	req := apiClient.CreatePublicIP(ctx, model.ProjectId)
+	req := apiClient.CreatePublicIP(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreatePublicIPPayload{
 		NetworkInterface: iaas.NewNullableString(model.AssociatedResourceId),
