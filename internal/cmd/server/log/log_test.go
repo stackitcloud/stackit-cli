@@ -178,9 +178,8 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		serverLabel  string
-		log          string
+		serverLabel string
+		logLines    []string
 	}
 	tests := []struct {
 		name    string
@@ -197,7 +196,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.serverLabel, tt.args.log); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.serverLabel, tt.args.logLines); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
