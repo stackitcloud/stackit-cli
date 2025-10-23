@@ -26,9 +26,6 @@ func ConfigureClient(p *print.Printer, cliVersion string) (*iaas.APIClient, erro
 	customEndpoint := viper.GetString(config.IaaSCustomEndpointKey)
 	if customEndpoint != "" {
 		cfgOptions = append(cfgOptions, sdkConfig.WithEndpoint(customEndpoint))
-	} else {
-		region := viper.GetString(config.RegionKey)
-		cfgOptions = append(cfgOptions, authCfgOption, sdkConfig.WithRegion(region))
 	}
 
 	if p.IsVerbosityDebug() {

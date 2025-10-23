@@ -178,6 +178,12 @@ To list all profiles, run:
   $ stackit config profile list`
 
 	FILE_ALREADY_EXISTS = `file %q already exists in the export path. Delete the existing file or define a different export path`
+
+	FLAG_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `The flag %[1]q must be provided when %[2]q is set`
+
+	MULTIPLE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `The flags %[1]v must be provided when one of the flags %[2]v is set`
+
+	ONE_OF_THE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `One of the flags %[1]v must be provided when %[2]q is set`
 )
 
 type ServerNicAttachMissingNicIdError struct {
@@ -499,3 +505,30 @@ type FileAlreadyExistsError struct {
 }
 
 func (e *FileAlreadyExistsError) Error() string { return fmt.Sprintf(FILE_ALREADY_EXISTS, e.Filename) }
+
+type DependingFlagIsMissing struct {
+	MissingFlag string
+	SetFlag     string
+}
+
+func (e *DependingFlagIsMissing) Error() string {
+	return fmt.Sprintf(FLAG_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, fmt.Sprintf("--%s", e.MissingFlag), fmt.Sprintf("--%s", e.SetFlag))
+}
+
+type MultipleFlagsAreMissing struct {
+	MissingFlags []string
+	SetFlags     []string
+}
+
+func (e *MultipleFlagsAreMissing) Error() string {
+	return fmt.Sprintf(MULTIPLE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, e.MissingFlags, e.SetFlags)
+}
+
+type OneOfFlagsIsMissing struct {
+	MissingFlags []string
+	SetFlag      string
+}
+
+func (e *OneOfFlagsIsMissing) Error() string {
+	return fmt.Sprintf(ONE_OF_THE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, e.MissingFlags, e.SetFlag)
+}

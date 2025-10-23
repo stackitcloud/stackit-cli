@@ -57,7 +57,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.NetworkId)
+			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 				networkLabel = model.NetworkId
@@ -84,7 +84,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Deleting network")
-				_, err = wait.DeleteNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.NetworkId).WaitWithContext(ctx)
+				_, err = wait.DeleteNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for network deletion: %w", err)
 				}
@@ -120,5 +120,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNetworkRequest {
-	return apiClient.DeleteNetwork(ctx, model.ProjectId, model.NetworkId)
+	return apiClient.DeleteNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
 }
