@@ -95,7 +95,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRangeRequest {
-	req := apiClient.GetNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.NetworkRangeId)
+	req := apiClient.GetNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
 	return req
 }
 
@@ -106,7 +106,7 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 
 	return p.OutputResult(outputFormat, networkRange, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(networkRange.NetworkRangeId))
+		table.AddRow("ID", utils.PtrString(networkRange.Id))
 		table.AddSeparator()
 		table.AddRow("Network range", utils.PtrString(networkRange.Prefix))
 
