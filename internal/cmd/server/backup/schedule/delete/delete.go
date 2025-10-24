@@ -57,7 +57,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			serverLabel := model.ServerId
 			// Get server name
 			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
-				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				} else if serverName != "" {

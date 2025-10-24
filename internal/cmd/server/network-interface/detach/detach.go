@@ -65,7 +65,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, *model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
@@ -75,7 +75,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// if the delete flag is provided a network interface is detached and deleted
 			if model.Delete != nil && *model.Delete {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, *model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
@@ -159,9 +159,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequestDetach(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRemoveNicFromServerRequest {
-	return apiClient.RemoveNicFromServer(ctx, model.ProjectId, *model.ServerId, *model.NicId)
+	return apiClient.RemoveNicFromServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NicId)
 }
 
 func buildRequestDetachAndDelete(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRemoveNetworkFromServerRequest {
-	return apiClient.RemoveNetworkFromServer(ctx, model.ProjectId, *model.ServerId, *model.NetworkId)
+	return apiClient.RemoveNetworkFromServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NetworkId)
 }

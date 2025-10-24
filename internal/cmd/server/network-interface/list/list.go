@@ -26,7 +26,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ServerId *string
+	ServerId string
 	Limit    *int64
 }
 
@@ -71,12 +71,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+				serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-					serverLabel = *model.ServerId
+					serverLabel = model.ServerId
 				} else if serverLabel == "" {
-					serverLabel = *model.ServerId
+					serverLabel = model.ServerId
 				}
 				params.Printer.Info("No attached network interfaces found for server %q\n", serverLabel)
 				return nil
@@ -88,7 +88,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *model.ServerId, items)
+			return outputResult(params.Printer, model.OutputFormat, model.ServerId, items)
 		},
 	}
 	configureFlags(cmd)
@@ -119,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 		Limit:           limit,
 	}
 
@@ -127,8 +127,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServerNicsRequest {
-	return apiClient.ListServerNics(ctx, model.ProjectId, *model.ServerId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServerNICsRequest {
+	return apiClient.ListServerNICs(ctx, model.ProjectId, model.Region, model.ServerId)
 }
 
 func outputResult(p *print.Printer, outputFormat, serverId string, serverNics []iaas.NIC) error {

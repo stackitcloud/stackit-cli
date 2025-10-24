@@ -17,7 +17,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -29,9 +31,11 @@ var testLimit = int64(10)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		serverIdFlag:  testServerId,
-		limitFlag:     strconv.FormatInt(testLimit, 10),
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
+		serverIdFlag: testServerId,
+		limitFlag:    strconv.FormatInt(testLimit, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,8 +48,9 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
+			Region:    testRegion,
 		},
-		ServerId: utils.Ptr(testServerId),
+		ServerId: testServerId,
 		Limit:    utils.Ptr(testLimit),
 	}
 	for _, mod := range mods {
@@ -55,7 +60,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListServerServiceAccountsRequest)) iaas.ApiListServerServiceAccountsRequest {
-	request := testClient.ListServerServiceAccounts(testCtx, testProjectId, testServerId)
+	request := testClient.ListServerServiceAccounts(testCtx, testProjectId, testRegion, testServerId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -84,21 +89,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

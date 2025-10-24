@@ -147,7 +147,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating server")
-				_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, serverId).WaitWithContext(ctx)
+				_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for server creation: %w", err)
 				}
@@ -185,6 +185,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceIdFlag)
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceTypeFlag)
 	cmd.MarkFlagsMutuallyExclusive(networkIdFlag, networkInterfaceIdsFlag)
+	cmd.MarkFlagsOneRequired(networkIdFlag, networkInterfaceIdsFlag)
 	cobra.CheckErr(err)
 }
 
@@ -270,7 +271,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateServerRequest {
-	req := apiClient.CreateServer(ctx, model.ProjectId)
+	req := apiClient.CreateServer(ctx, model.ProjectId, model.Region)
 
 	var userData *[]byte
 	if model.UserData != nil {
@@ -293,7 +294,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {
-		payload.BootVolume = &iaas.CreateServerPayloadBootVolume{
+		payload.BootVolume = &iaas.ServerBootVolume{
 			PerformanceClass:    model.BootVolumePerformanceClass,
 			Size:                model.BootVolumeSize,
 			DeleteOnTermination: model.BootVolumeDeleteOnTermination,
@@ -305,7 +306,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.NetworkInterfaceIds != nil || model.NetworkId != nil {
-		payload.Networking = &iaas.CreateServerPayloadNetworking{}
+		payload.Networking = &iaas.CreateServerPayloadAllOfNetworking{}
 
 		if model.NetworkInterfaceIds != nil {
 			payload.Networking.CreateServerNetworkingWithNics = &iaas.CreateServerNetworkingWithNics{

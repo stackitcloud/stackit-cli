@@ -65,7 +65,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, *model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
@@ -73,7 +73,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// if the create flag is provided a network interface will be created and attached
 			if model.Create != nil && *model.Create {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, *model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
@@ -157,9 +157,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequestAttach(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddNicToServerRequest {
-	return apiClient.AddNicToServer(ctx, model.ProjectId, *model.ServerId, *model.NicId)
+	return apiClient.AddNicToServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NicId)
 }
 
 func buildRequestCreateAndAttach(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddNetworkToServerRequest {
-	return apiClient.AddNetworkToServer(ctx, model.ProjectId, *model.ServerId, *model.NetworkId)
+	return apiClient.AddNetworkToServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NetworkId)
 }
