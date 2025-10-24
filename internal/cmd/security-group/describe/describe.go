@@ -68,7 +68,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRequest {
-	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
+	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	return request
 }
 

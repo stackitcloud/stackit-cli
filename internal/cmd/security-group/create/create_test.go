@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -35,7 +37,9 @@ var (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:   testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		descriptionFlag: testDescription,
 		labelsFlag:      "fooKey=fooValue,barKey=barValue,bazKey=bazValue",
 		statefulFlag:    "true",
@@ -49,11 +53,15 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Labels:          &testLabels,
-		Description:     &testDescription,
-		Name:            &testName,
-		Stateful:        &testStateful,
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Region:    testRegion,
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		Labels:      &testLabels,
+		Description: &testDescription,
+		Name:        &testName,
+		Stateful:    &testStateful,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -72,7 +80,7 @@ func toStringAnyMapPtr(m map[string]string) map[string]any {
 	return result
 }
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) iaas.ApiCreateSecurityGroupRequest {
-	request := testClient.CreateSecurityGroup(testCtx, testProjectId)
+	request := testClient.CreateSecurityGroup(testCtx, testProjectId, testRegion)
 
 	request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 		Description: &testDescription,
@@ -109,21 +117,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

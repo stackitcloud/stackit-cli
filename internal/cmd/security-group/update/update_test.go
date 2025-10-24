@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -46,7 +48,9 @@ func toStringAnyMapPtr(m map[string]string) map[string]any {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		descriptionArg: testDescription,
 		labelsArg:      "fooKey=fooValue,barKey=barValue,bazKey=bazValue",
 		nameArg:        testName,
@@ -59,7 +63,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Region:    testRegion,
+			Verbosity: globalflags.VerbosityDefault,
+		},
 		Labels:          &testLabels,
 		Description:     &testDescription,
 		Name:            &testName,
@@ -72,7 +80,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateSecurityGroupRequest)) iaas.ApiUpdateSecurityGroupRequest {
-	request := testClient.UpdateSecurityGroup(testCtx, testProjectId, testGroupId[0])
+	request := testClient.UpdateSecurityGroup(testCtx, testProjectId, testRegion, testGroupId[0])
 	request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
 		Description: &testDescription,
 		Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
@@ -103,7 +111,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no values but valid group id",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
+				globalflags.ProjectIdFlag: testProjectId,
 			},
 			args:    testGroupId,
 			isValid: false,
@@ -116,7 +124,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			args:    testGroupId,
 			isValid: false,
@@ -124,7 +132,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			args:    testGroupId,
 			isValid: false,
@@ -132,7 +140,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			args:    testGroupId,
 			isValid: false,

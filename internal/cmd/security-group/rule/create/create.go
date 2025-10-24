@@ -94,7 +94,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.SecurityGroupId)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = model.SecurityGroupId
@@ -168,7 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRuleRequest {
-	req := apiClient.CreateSecurityGroupRule(ctx, model.ProjectId, model.SecurityGroupId)
+	req := apiClient.CreateSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	icmpParameters := &iaas.ICMPParameters{}
 	portRange := &iaas.PortRange{}
 	protocol := &iaas.CreateProtocol{}
