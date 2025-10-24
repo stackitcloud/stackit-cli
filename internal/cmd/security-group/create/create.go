@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRequest {
-	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId)
+	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateSecurityGroupPayload{
 		Description: model.Description,

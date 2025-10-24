@@ -30,7 +30,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit           *int64
-	SecurityGroupId *string
+	SecurityGroupId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -74,10 +74,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, *model.SecurityGroupId)
+				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
-					securityGroupLabel = *model.SecurityGroupId
+					securityGroupLabel = model.SecurityGroupId
 				}
 
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		SecurityGroupId: flags.FlagToStringPointer(p, cmd, securityGroupIdFlag),
+		SecurityGroupId: flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupRulesRequest {
-	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, *model.SecurityGroupId)
+	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, securityGroupRules []iaas.SecurityGroupRule) error {

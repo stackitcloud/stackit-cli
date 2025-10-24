@@ -53,7 +53,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.SecurityGroupId)
+			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Warn("get security group name: %v", err)
 				groupLabel = model.SecurityGroupId
@@ -98,6 +98,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSecurityGroupRequest {
-	request := apiClient.DeleteSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
+	request := apiClient.DeleteSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	return request
 }
