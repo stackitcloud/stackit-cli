@@ -16,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -27,9 +29,11 @@ var testServerId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		limitFlag:     "10",
-		serverIdFlag:  testServerId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
+		limitFlag:    "10",
+		serverIdFlag: testServerId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -42,9 +46,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
+			Region:    testRegion,
 		},
 		Limit:    utils.Ptr(int64(10)),
-		ServerId: utils.Ptr(testServerId),
+		ServerId: testServerId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -52,8 +57,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiListServerNicsRequest)) iaas.ApiListServerNicsRequest {
-	request := testClient.ListServerNics(testCtx, testProjectId, testServerId)
+func fixtureRequest(mods ...func(request *iaas.ApiListServerNICsRequest)) iaas.ApiListServerNICsRequest {
+	request := testClient.ListServerNICs(testCtx, testProjectId, testRegion, testServerId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -82,21 +87,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -148,7 +153,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiListServerNicsRequest
+		expectedRequest iaas.ApiListServerNICsRequest
 	}{
 		{
 			description:     "base",

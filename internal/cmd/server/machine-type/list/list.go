@@ -120,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListMachineTypesRequest {
-	return apiClient.ListMachineTypes(ctx, model.ProjectId)
+	return apiClient.ListMachineTypes(ctx, model.ProjectId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineTypes iaas.MachineTypeListResponse) error {

@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetMachineTypeRequest {
-	return apiClient.GetMachineType(ctx, model.ProjectId, model.MachineType)
+	return apiClient.GetMachineType(ctx, model.ProjectId, model.Region, model.MachineType)
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineType *iaas.MachineType) error {

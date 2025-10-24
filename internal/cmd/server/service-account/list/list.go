@@ -26,7 +26,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit    *int64
-	ServerId *string
+	ServerId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -62,12 +62,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverName, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverName, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-				serverName = *model.ServerId
+				serverName = model.ServerId
 			} else if serverName == "" {
-				serverName = *model.ServerId
+				serverName = model.ServerId
 			}
 
 			// Call API
@@ -86,7 +86,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				serviceAccounts = serviceAccounts[:int(*model.Limit)]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *model.ServerId, serverName, serviceAccounts)
+			return outputResult(params.Printer, model.OutputFormat, model.ServerId, serverName, serviceAccounts)
 		},
 	}
 	configureFlags(cmd)
@@ -118,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServerServiceAccountsRequest {
-	req := apiClient.ListServerServiceAccounts(ctx, model.ProjectId, *model.ServerId)
+	req := apiClient.ListServerServiceAccounts(ctx, model.ProjectId, model.Region, model.ServerId)
 	return req
 }
 

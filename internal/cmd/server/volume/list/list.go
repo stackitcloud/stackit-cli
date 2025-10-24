@@ -25,7 +25,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ServerId *string
+	ServerId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -55,12 +55,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			} else if serverLabel == "" {
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			}
 
 			// Call API
@@ -78,7 +78,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// get volume names
 			var volumeNames []string
 			for i := range volumes {
-				volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, *volumes[i].VolumeId)
+				volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, *volumes[i].VolumeId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 					volumeLabel = ""
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListAttachedVolumesRequest {
-	req := apiClient.ListAttachedVolumes(ctx, model.ProjectId, *model.ServerId)
+	req := apiClient.ListAttachedVolumes(ctx, model.ProjectId, model.Region, model.ServerId)
 	return req
 }
 
