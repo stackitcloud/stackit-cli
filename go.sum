@@ -569,12 +569,12 @@ github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0 h1:7ZKd3b+E
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0/go.mod h1:/FoXa6hF77Gv8brrvLBCKa5ie1Xy9xn39yfHwaln9Tw=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1 h1:CnhAMLql0MNmAeq4roQKN8OpSKX4FSgTU6Eu6detB4I=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1/go.mod h1:7Bx85knfNSBxulPdJUFuBePXNee3cO+sOTYnUG6M+iQ=
-github.com/stackitcloud/stackit-sdk-go/services/kms v1.0.0 h1:zxoOv7Fu+FmdsvTKiKkbmLItrMKfL+QoVtz9ReEF30E=
-github.com/stackitcloud/stackit-sdk-go/services/kms v1.0.0/go.mod h1:KEPVoO21pC4bjy5l0nyhjUJ0+uVwVWb+k2TYrzJ8xYw=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.8.0 h1:/weT7P5Uwy1Qlhw0NidqtQBlbbb/dQehweDV/I9ShXg=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.8.0/go.mod h1:AXFfYBJZIW1o0W0zZEb/proQMhMsb3Nn5E1htS8NDPE=
 github.com/stackitcloud/stackit-sdk-go/services/iaas v0.31.0 h1:dnEjyapuv8WwRN5vE2z6+4/+ZqQTBx+bX27x2nOF7Jw=
 github.com/stackitcloud/stackit-sdk-go/services/iaas v0.31.0/go.mod h1:854gnLR92NvAbJAA1xZEumrtNh1DoBP1FXTMvhwYA6w=
+github.com/stackitcloud/stackit-sdk-go/services/kms v1.0.0 h1:zxoOv7Fu+FmdsvTKiKkbmLItrMKfL+QoVtz9ReEF30E=
+github.com/stackitcloud/stackit-sdk-go/services/kms v1.0.0/go.mod h1:KEPVoO21pC4bjy5l0nyhjUJ0+uVwVWb+k2TYrzJ8xYw=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.0 h1:q33ZaCBVEBUsnMDxYyuJKtJvGcE5nKgvuPed3s8zXNI=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.0/go.mod h1:20QOZ3rBC9wTGgzXzLz9M6YheX0VaxWE0/JI+s8On7k=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.1 h1:hv5WrRU9rN6Jx4OwdOGJRyaQrfA9p1tzEoQK6/CDyoA=
@@ -595,8 +595,8 @@ github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.1 h1:ALrDCBih8Fu8
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.1/go.mod h1:+qGWSehoV0Js3FalgvT/bOgPj+UqW4I7lP5s8uAxP+o=
 github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.1 h1:8uPt82Ez34OYMOijjEYxB1zUW6kiybkt6veQKl0AL68=
 github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.1/go.mod h1:1Y2GEICmZDt+kr8aGnBx/sjYVAIYHmtfC8xYi9oxNEE=
-github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.1 h1:r7oaINTwLmIG31AaqKTuQHHFF8YNuYGzi+46DOuSjw4=
-github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.17.1/go.mod h1:ipcrPRbwfQXHH18dJVfY7K5ujHF5dTT6isoXgmA7YwQ=
+github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.0 h1:en8IomJeGqZZgGOyLH53PNDCv2F/x4zURz4mGSlhTKs=
+github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.0/go.mod h1:0wVdzrB4PhwhTE6drOVA6rETTmJ+k3eHa0neuxpDM/g=
 github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.1 h1:CPIuqhQw+oPt08I2WLsxJDoVDsPMW2VkvKW7/SlUv10=
 github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.1/go.mod h1:tip0Ob6x06luy3CmRrmnCMtU5cha95fQLdvZlno3J4w=
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.1 h1:WKFzlHllql3JsVcAq+Y1m5pSMkvwp1qH3Vf2N7i8CPg=
