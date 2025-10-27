@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaasalpha"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 func TestExtractRouteDetails(t *testing.T) {
 	tests := []struct {
 		description   string
-		input         *iaasalpha.Route
+		input         *iaas.Route
 		wantDestType  string
 		wantDestValue string
 		wantHopType   string
@@ -19,15 +19,15 @@ func TestExtractRouteDetails(t *testing.T) {
 	}{
 		{
 			description: "CIDRv4 destination, IPv4 nexthop, with labels",
-			input: &iaasalpha.Route{
-				Destination: &iaasalpha.RouteDestination{
-					DestinationCIDRv4: &iaasalpha.DestinationCIDRv4{
+			input: &iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
 						Type:  utils.Ptr("CIDRv4"),
 						Value: utils.Ptr("10.0.0.0/24"),
 					},
 				},
-				Nexthop: &iaasalpha.RouteNexthop{
-					NexthopIPv4: &iaasalpha.NexthopIPv4{
+				Nexthop: &iaas.RouteNexthop{
+					NexthopIPv4: &iaas.NexthopIPv4{
 						Type:  utils.Ptr("IPv4"),
 						Value: utils.Ptr("10.0.0.1"),
 					},
@@ -44,15 +44,15 @@ func TestExtractRouteDetails(t *testing.T) {
 		},
 		{
 			description: "CIDRv6 destination, IPv6 nexthop, with no labels",
-			input: &iaasalpha.Route{
-				Destination: &iaasalpha.RouteDestination{
-					DestinationCIDRv6: &iaasalpha.DestinationCIDRv6{
+			input: &iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv6: &iaas.DestinationCIDRv6{
 						Type:  utils.Ptr("CIDRv6"),
 						Value: utils.Ptr("2001:db8::/32"),
 					},
 				},
-				Nexthop: &iaasalpha.RouteNexthop{
-					NexthopIPv4: &iaasalpha.NexthopIPv4{
+				Nexthop: &iaas.RouteNexthop{
+					NexthopIPv4: &iaas.NexthopIPv4{
 						Type:  utils.Ptr("IPv6"),
 						Value: utils.Ptr("2001:db8::1"),
 					},
@@ -67,15 +67,15 @@ func TestExtractRouteDetails(t *testing.T) {
 		},
 		{
 			description: "Internet nexthop without value",
-			input: &iaasalpha.Route{
-				Destination: &iaasalpha.RouteDestination{
-					DestinationCIDRv4: &iaasalpha.DestinationCIDRv4{
+			input: &iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
 						Type:  utils.Ptr("CIDRv4"),
 						Value: utils.Ptr("0.0.0.0/0"),
 					},
 				},
-				Nexthop: &iaasalpha.RouteNexthop{
-					NexthopInternet: &iaasalpha.NexthopInternet{
+				Nexthop: &iaas.RouteNexthop{
+					NexthopInternet: &iaas.NexthopInternet{
 						Type: utils.Ptr("Internet"),
 					},
 				},
@@ -89,15 +89,15 @@ func TestExtractRouteDetails(t *testing.T) {
 		},
 		{
 			description: "Blackhole nexthop without value and nil labels map",
-			input: &iaasalpha.Route{
-				Destination: &iaasalpha.RouteDestination{
-					DestinationCIDRv6: &iaasalpha.DestinationCIDRv6{
+			input: &iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv6: &iaas.DestinationCIDRv6{
 						Type:  utils.Ptr("CIDRv6"),
 						Value: utils.Ptr("::/0"),
 					},
 				},
-				Nexthop: &iaasalpha.RouteNexthop{
-					NexthopBlackhole: &iaasalpha.NexthopBlackhole{
+				Nexthop: &iaas.RouteNexthop{
+					NexthopBlackhole: &iaas.NexthopBlackhole{
 						Type: utils.Ptr("Blackhole"),
 					},
 				},
