@@ -22,7 +22,8 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 type postgresFlexClientMocked struct {
 	getInstanceFails bool

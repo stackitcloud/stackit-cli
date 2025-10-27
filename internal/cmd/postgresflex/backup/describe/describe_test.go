@@ -22,7 +22,8 @@ var testClient = &postgresflex.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testBackupId = "backupID"
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

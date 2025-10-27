@@ -27,7 +27,8 @@ var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
 var testCredentialsGroupId = uuid.NewString()
 var testExpirationDate = "2024-01-01T00:00:00Z"
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{

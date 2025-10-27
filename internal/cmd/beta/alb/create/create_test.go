@@ -28,7 +28,9 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &alb.APIClient{}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
+
 var testConfig = "testdata/testconfig.json"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {

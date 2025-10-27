@@ -22,7 +22,8 @@ var testServerId = uuid.NewString()
 var testBackupId = uuid.NewString()
 var testVolumeBackupId = uuid.NewString()
 var testRestoreVolumeId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

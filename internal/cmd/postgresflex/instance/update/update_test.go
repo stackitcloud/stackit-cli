@@ -19,7 +19,8 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{}
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 type postgresFlexClientMocked struct {
 	listFlavorsFails  bool

@@ -53,7 +53,8 @@ var testRecoveryTimestamp = "2024-03-08T09:28:00+00:00"
 var testFlavorId = uuid.NewString()
 var testStorageClass = "premium-perf4-stackit"
 var testStorageSize = int64(10)
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

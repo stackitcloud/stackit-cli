@@ -24,7 +24,8 @@ var testClient = &serverbackup.APIClient{}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testVolumeId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
