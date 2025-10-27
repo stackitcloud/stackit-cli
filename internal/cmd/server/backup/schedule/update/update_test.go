@@ -24,7 +24,8 @@ var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testVolumeId = uuid.NewString()
 var testBackupScheduleId = "5"
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

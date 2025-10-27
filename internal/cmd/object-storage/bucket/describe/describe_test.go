@@ -23,7 +23,9 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &objectstorage.APIClient{}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
+
 var testBucketName = "my-bucket"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
