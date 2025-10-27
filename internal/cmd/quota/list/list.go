@@ -93,7 +93,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListQuotasRequest {
-	request := apiClient.ListQuotas(ctx, model.ProjectId)
+	request := apiClient.ListQuotas(ctx, model.ProjectId, model.Region)
 
 	return request
 }
