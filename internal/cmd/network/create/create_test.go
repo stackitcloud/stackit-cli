@@ -40,9 +40,10 @@ var (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
-	testProjectId = uuid.NewString()
+	testCtx            = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient         = &iaas.APIClient{}
+	testProjectId      = uuid.NewString()
+	testRoutingTableId = uuid.NewString()
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -50,9 +51,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
-		nameFlag:      testNetworkName,
-		nonRoutedFlag: strconv.FormatBool(testNonRouted),
-		labelFlag:     "key=value",
+		nameFlag:           testNetworkName,
+		nonRoutedFlag:      strconv.FormatBool(testNonRouted),
+		labelFlag:          "key=value",
+		routingTableIdFlag: testRoutingTableId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -102,6 +104,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
+		RoutingTableID: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -169,6 +172,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.Creat
 		Labels: utils.Ptr(map[string]interface{}{
 			"key": "value",
 		}),
+		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -469,6 +473,14 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 		},
+		{
+			description: "routing-table id invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[routingTableIdFlag] = "invalid-uuid"
+			}),
+			expectedModel: nil,
+			isValid:       false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -529,6 +541,23 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
 				Name:   utils.Ptr(testNetworkName),
 				Routed: utils.Ptr(false),
+			}),
+		},
+		{
+			description: "network with routing-table id attached",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Verbosity: globalflags.VerbosityDefault,
+					Region:    testRegion,
+				},
+				Name:           utils.Ptr(testNetworkName),
+				RoutingTableID: utils.Ptr(testRoutingTableId),
+			},
+			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				Name:           utils.Ptr(testNetworkName),
+				RoutingTableId: utils.Ptr(testRoutingTableId),
+				Routed:         utils.Ptr(true),
 			}),
 		},
 		{
