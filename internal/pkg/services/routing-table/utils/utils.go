@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaasalpha"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-func ExtractRouteDetails(item iaasalpha.Route) (destType, destValue, hopType, hopValue, labels string) {
+func ExtractRouteDetails(item iaas.Route) (destType, destValue, hopType, hopValue, labels string) {
 	if item.Destination.DestinationCIDRv4 != nil {
 		destType = utils.PtrString(item.Destination.DestinationCIDRv4.Type)
 		destValue = utils.PtrString(item.Destination.DestinationCIDRv4.Value)
