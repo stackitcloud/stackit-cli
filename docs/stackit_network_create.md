@@ -30,6 +30,9 @@ stackit network create [flags]
 
   Create an IPv6 network with name "network-1" with DNS name servers, a prefix and a gateway
   $ stackit network create --name network-1  --ipv6-dns-name-servers "2001:4860:4860::8888,2001:4860:4860::8844" --ipv6-prefix "2001:4860:4860::8888" --ipv6-gateway "2001:4860:4860::8888"
+
+  Create a network with name "network-1" and attach routing-table "xxx"
+  $ stackit network create --name network-1 --routing-table-id xxx
 ```
 
 ### Options
@@ -49,6 +52,7 @@ stackit network create [flags]
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
       --non-routed                      If set to true, the network is not routed and therefore not accessible from other networks
+      --routing-table-id string         The ID of the routing-table for the network
 ```
 
 ### Options inherited from parent commands
