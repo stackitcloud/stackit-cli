@@ -484,7 +484,7 @@ func splitValueAndUnit(timeStr string) (valueStr, unitStr string, err error) {
 	}
 
 	// Find the first non-digit character in the string.
-	var splitIndex int = -1
+	var splitIndex = -1
 	for i, r := range timeStr {
 		if !unicode.IsDigit(r) {
 			// If the first non-digit is a '.' or ',' it's a float, which we don't support.
