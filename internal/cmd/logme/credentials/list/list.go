@@ -67,22 +67,19 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list LogMe credentials: %w", err)
 			}
-			credentials := *resp.CredentialsList
-			if len(credentials) == 0 {
-				instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = model.InstanceId
-				}
-				params.Printer.Info("No credentials found for instance %q\n", instanceLabel)
-				return nil
+			credentials := resp.GetCredentialsList()
+
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, credentials)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -126,8 +123,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APICl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []logme.CredentialsListItem) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, credentials []logme.CredentialsListItem) error {
 	return p.OutputResult(outputFormat, credentials, func() error {
+		if len(credentials) == 0 {
+			p.Outputf("No credentials found for instance %q\n", instanceLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID")
 		for i := range credentials {
