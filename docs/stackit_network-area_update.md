@@ -20,14 +20,10 @@ stackit network-area update AREA_ID [flags]
 ### Options
 
 ```
-      --default-prefix-length int   The default prefix length for networks in the network area
-      --dns-name-servers strings    List of DNS name server IPs
-  -h, --help                        Help for "stackit network-area update"
-      --labels stringToString       Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...' (default [])
-      --max-prefix-length int       The maximum prefix length for networks in the network area
-      --min-prefix-length int       The minimum prefix length for networks in the network area
-  -n, --name string                 Network area name
-      --organization-id string      Organization ID
+  -h, --help                     Help for "stackit network-area update"
+      --labels stringToString    Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...' (default [])
+  -n, --name string              Network area name
+      --organization-id string   Organization ID
 ```
 
 ### Options inherited from parent commands

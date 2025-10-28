@@ -10,6 +10,8 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+var _ IaaSClient = &IaaSClientMocked{}
+
 type IaaSClientMocked struct {
 	GetSecurityGroupRuleFails bool
 	GetSecurityGroupRuleResp  *iaas.SecurityGroupRule
@@ -39,49 +41,49 @@ type IaaSClientMocked struct {
 	GetSnapshotResp           *iaas.Snapshot
 }
 
-func (m *IaaSClientMocked) GetAffinityGroupExecute(_ context.Context, _, _ string) (*iaas.AffinityGroup, error) {
+func (m *IaaSClientMocked) GetAffinityGroupExecute(_ context.Context, _, _, _ string) (*iaas.AffinityGroup, error) {
 	if m.GetAffinityGroupsFails {
 		return nil, fmt.Errorf("could not get affinity groups")
 	}
 	return m.GetAffinityGroupResp, nil
 }
 
-func (m *IaaSClientMocked) GetSecurityGroupRuleExecute(_ context.Context, _, _, _ string) (*iaas.SecurityGroupRule, error) {
+func (m *IaaSClientMocked) GetSecurityGroupRuleExecute(_ context.Context, _, _, _, _ string) (*iaas.SecurityGroupRule, error) {
 	if m.GetSecurityGroupRuleFails {
 		return nil, fmt.Errorf("could not get security group rule")
 	}
 	return m.GetSecurityGroupRuleResp, nil
 }
 
-func (m *IaaSClientMocked) GetSecurityGroupExecute(_ context.Context, _, _ string) (*iaas.SecurityGroup, error) {
+func (m *IaaSClientMocked) GetSecurityGroupExecute(_ context.Context, _, _, _ string) (*iaas.SecurityGroup, error) {
 	if m.GetSecurityGroupFails {
 		return nil, fmt.Errorf("could not get security group")
 	}
 	return m.GetSecurityGroupResp, nil
 }
 
-func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _ string) (*iaas.PublicIp, error) {
+func (m *IaaSClientMocked) GetPublicIPExecute(_ context.Context, _, _, _ string) (*iaas.PublicIp, error) {
 	if m.GetPublicIpFails {
 		return nil, fmt.Errorf("could not get public ip")
 	}
 	return m.GetPublicIpResp, nil
 }
 
-func (m *IaaSClientMocked) GetServerExecute(_ context.Context, _, _ string) (*iaas.Server, error) {
+func (m *IaaSClientMocked) GetServerExecute(_ context.Context, _, _, _ string) (*iaas.Server, error) {
 	if m.GetServerFails {
 		return nil, fmt.Errorf("could not get server")
 	}
 	return m.GetServerResp, nil
 }
 
-func (m *IaaSClientMocked) GetVolumeExecute(_ context.Context, _, _ string) (*iaas.Volume, error) {
+func (m *IaaSClientMocked) GetVolumeExecute(_ context.Context, _, _, _ string) (*iaas.Volume, error) {
 	if m.GetVolumeFails {
 		return nil, fmt.Errorf("could not get volume")
 	}
 	return m.GetVolumeResp, nil
 }
 
-func (m *IaaSClientMocked) GetNetworkExecute(_ context.Context, _, _ string) (*iaas.Network, error) {
+func (m *IaaSClientMocked) GetNetworkExecute(_ context.Context, _, _, _ string) (*iaas.Network, error) {
 	if m.GetNetworkFails {
 		return nil, fmt.Errorf("could not get network")
 	}
@@ -102,28 +104,28 @@ func (m *IaaSClientMocked) ListNetworkAreaProjectsExecute(_ context.Context, _, 
 	return m.GetAttachedProjectsResp, nil
 }
 
-func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _ string) (*iaas.NetworkRange, error) {
+func (m *IaaSClientMocked) GetNetworkAreaRangeExecute(_ context.Context, _, _, _, _ string) (*iaas.NetworkRange, error) {
 	if m.GetNetworkAreaRangeFails {
 		return nil, fmt.Errorf("could not get network range")
 	}
 	return m.GetNetworkAreaRangeResp, nil
 }
 
-func (m *IaaSClientMocked) GetImageExecute(_ context.Context, _, _ string) (*iaas.Image, error) {
+func (m *IaaSClientMocked) GetImageExecute(_ context.Context, _, _, _ string) (*iaas.Image, error) {
 	if m.GetImageFails {
 		return nil, fmt.Errorf("could not get image")
 	}
 	return m.GetImageResp, nil
 }
 
-func (m *IaaSClientMocked) GetBackupExecute(_ context.Context, _, _ string) (*iaas.Backup, error) {
+func (m *IaaSClientMocked) GetBackupExecute(_ context.Context, _, _, _ string) (*iaas.Backup, error) {
 	if m.GetBackupFails {
 		return nil, fmt.Errorf("could not get backup")
 	}
 	return m.GetBackupResp, nil
 }
 
-func (m *IaaSClientMocked) GetSnapshotExecute(_ context.Context, _, _ string) (*iaas.Snapshot, error) {
+func (m *IaaSClientMocked) GetSnapshotExecute(_ context.Context, _, _, _ string) (*iaas.Snapshot, error) {
 	if m.GetSnapshotFails {
 		return nil, fmt.Errorf("could not get snapshot")
 	}
@@ -164,7 +166,7 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 				GetSecurityGroupRuleFails: tt.args.getInstanceFails,
 				GetSecurityGroupRuleResp:  tt.args.getInstanceResp,
 			}
-			got, err := GetSecurityGroupRuleName(context.Background(), m, "", "", "")
+			got, err := GetSecurityGroupRuleName(context.Background(), m, "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupRuleName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -230,7 +232,7 @@ func TestGetSecurityGroupName(t *testing.T) {
 				GetSecurityGroupFails: tt.args.getInstanceFails,
 				GetSecurityGroupResp:  tt.args.getInstanceResp,
 			}
-			got, err := GetSecurityGroupName(context.Background(), m, "", "")
+			got, err := GetSecurityGroupName(context.Background(), m, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -279,7 +281,7 @@ func TestGetPublicIp(t *testing.T) {
 				GetPublicIpFails: tt.args.getPublicIpFails,
 				GetPublicIpResp:  tt.args.getPublicIpResp,
 			}
-			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), m, "", "")
+			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), m, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -328,7 +330,7 @@ func TestGetServerName(t *testing.T) {
 				GetServerFails: tt.args.getInstanceFails,
 				GetServerResp:  tt.args.getInstanceResp,
 			}
-			got, err := GetServerName(context.Background(), m, "", "")
+			got, err := GetServerName(context.Background(), m, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetServerName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -394,7 +396,7 @@ func TestGetVolumeName(t *testing.T) {
 				GetVolumeFails: tt.args.getInstanceFails,
 				GetVolumeResp:  tt.args.getInstanceResp,
 			}
-			got, err := GetVolumeName(context.Background(), m, "", "")
+			got, err := GetVolumeName(context.Background(), m, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVolumeName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -460,7 +462,7 @@ func TestGetNetworkName(t *testing.T) {
 				GetNetworkFails: tt.args.getInstanceFails,
 				GetNetworkResp:  tt.args.getInstanceResp,
 			}
-			got, err := GetNetworkName(context.Background(), m, "", "")
+			got, err := GetNetworkName(context.Background(), m, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -619,7 +621,7 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 				GetNetworkAreaRangeFails: tt.args.getNetworkAreaRangeFails,
 				GetNetworkAreaRangeResp:  tt.args.getNetworkAreaRangeResp,
 			}
-			got, err := GetNetworkRangePrefix(context.Background(), m, "", "", "")
+			got, err := GetNetworkRangePrefix(context.Background(), m, "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -650,22 +652,210 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 				nexthop: "1.1.1.1",
 				routes: &[]iaas.Route{
 					{
-						Prefix:  utils.Ptr("1.1.1.0/24"),
-						Nexthop: utils.Ptr("1.1.1.1"),
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Type:  utils.Ptr("cidrv4"),
+								Value: utils.Ptr("1.1.1.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Type:  utils.Ptr("ipv4"),
+								Value: utils.Ptr("1.1.1.1"),
+							},
+						},
 					},
 					{
-						Prefix:  utils.Ptr("2.2.2.0/24"),
-						Nexthop: utils.Ptr("2.2.2.2"),
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Type:  utils.Ptr("cidrv4"),
+								Value: utils.Ptr("2.2.2.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Type:  utils.Ptr("ipv4"),
+								Value: utils.Ptr("2.2.2.2"),
+							},
+						},
 					},
 					{
-						Prefix:  utils.Ptr("3.3.3.0/24"),
-						Nexthop: utils.Ptr("3.3.3.3"),
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("3.3.3.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopBlackhole: &iaas.NexthopBlackhole{
+								Type: utils.Ptr("blackhole"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("4.4.4.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopInternet: &iaas.NexthopInternet{
+								Type: utils.Ptr("internet"),
+							},
+						},
 					},
 				},
 			},
 			want: iaas.Route{
-				Prefix:  utils.Ptr("1.1.1.0/24"),
-				Nexthop: utils.Ptr("1.1.1.1"),
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
+						Type:  utils.Ptr("cidrv4"),
+						Value: utils.Ptr("1.1.1.0/24"),
+					},
+				},
+				Nexthop: &iaas.RouteNexthop{
+					NexthopIPv4: &iaas.NexthopIPv4{
+						Type:  utils.Ptr("ipv4"),
+						Value: utils.Ptr("1.1.1.1"),
+					},
+				},
+			},
+		},
+		{
+			name: "nexthop internet",
+			args: args{
+				prefix:  "4.4.4.0/24",
+				nexthop: "internet",
+				routes: &[]iaas.Route{
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("1.1.1.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("1.1.1.1"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("2.2.2.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("2.2.2.2"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("3.3.3.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopBlackhole: &iaas.NexthopBlackhole{
+								Type: utils.Ptr("blackhole"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("4.4.4.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopInternet: &iaas.NexthopInternet{
+								Type: utils.Ptr("internet"),
+							},
+						},
+					},
+				},
+			},
+			want: iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
+						Value: utils.Ptr("4.4.4.0/24"),
+					},
+				},
+				Nexthop: &iaas.RouteNexthop{
+					NexthopInternet: &iaas.NexthopInternet{
+						Type: utils.Ptr("internet"),
+					},
+				},
+			},
+		},
+		{
+			name: "nexthop backhole",
+			args: args{
+				prefix:  "3.3.3.0/24",
+				nexthop: "blackhole",
+				routes: &[]iaas.Route{
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("1.1.1.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("1.1.1.1"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("2.2.2.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("2.2.2.2"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("3.3.3.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopBlackhole: &iaas.NexthopBlackhole{
+								Type: utils.Ptr("blackhole"),
+							},
+						},
+					},
+					{
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("4.4.4.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopInternet: &iaas.NexthopInternet{
+								Type: utils.Ptr("internet"),
+							},
+						},
+					},
+				},
+			},
+			want: iaas.Route{
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
+						Value: utils.Ptr("3.3.3.0/24"),
+					},
+				},
+				Nexthop: &iaas.RouteNexthop{
+					NexthopBlackhole: &iaas.NexthopBlackhole{
+						Type: utils.Ptr("blackhole"),
+					},
+				},
 			},
 		},
 		{
@@ -675,12 +865,28 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 				nexthop: "1.1.1.1",
 				routes: &[]iaas.Route{
 					{
-						Prefix:  utils.Ptr("2.2.2.0/24"),
-						Nexthop: utils.Ptr("2.2.2.2"),
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("2.2.2.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("2.2.2.2"),
+							},
+						},
 					},
 					{
-						Prefix:  utils.Ptr("3.3.3.0/24"),
-						Nexthop: utils.Ptr("3.3.3.3"),
+						Destination: &iaas.RouteDestination{
+							DestinationCIDRv4: &iaas.DestinationCIDRv4{
+								Value: utils.Ptr("3.3.3.0/24"),
+							},
+						},
+						Nexthop: &iaas.RouteNexthop{
+							NexthopIPv4: &iaas.NexthopIPv4{
+								Value: utils.Ptr("3.3.3.3"),
+							},
+						},
 					},
 				},
 			},
@@ -819,7 +1025,7 @@ func TestGetImageName(t *testing.T) {
 				GetImageFails: tt.imageErr,
 				GetImageResp:  tt.imageResp,
 			}
-			got, err := GetImageName(context.Background(), client, "", "")
+			got, err := GetImageName(context.Background(), client, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetImageName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -876,7 +1082,7 @@ func TestGetAffinityGroupName(t *testing.T) {
 				GetAffinityGroupsFails: tt.affinityErr,
 				GetAffinityGroupResp:   tt.affinityResp,
 			}
-			got, err := GetAffinityGroupName(ctx, client, "", "")
+			got, err := GetAffinityGroupName(ctx, client, "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAffinityGroupName() error = %v, wantErr %v", err, tt.wantErr)
 				return

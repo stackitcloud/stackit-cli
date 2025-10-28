@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRouteRequest {
-	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.RouteId)
+	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
 
 	payload := iaas.UpdateNetworkAreaRoutePayload{
 		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
@@ -128,7 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
-		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.RouteId))
+		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.Id))
 		return nil
 	})
 }
