@@ -127,19 +127,45 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRoutesRequest {
-	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId)
+	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
 	return p.OutputResult(outputFormat, routes, func() error {
 		table := tables.NewTable()
-		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
+		table.SetHeader("Static Route ID", "Next Hop", "Next Hop Type", "Destination")
 
 		for _, route := range routes {
+			var nextHop string
+			var nextHopType string
+			var destination string
+			if routeDest := route.Destination; routeDest != nil {
+				if routeDest.DestinationCIDRv4 != nil {
+					destination = *routeDest.DestinationCIDRv4.Value
+				}
+				if routeDest.DestinationCIDRv6 != nil {
+					destination = *routeDest.DestinationCIDRv6.Value
+				}
+			}
+			if routeNexthop := route.Nexthop; routeNexthop != nil {
+				if routeNexthop.NexthopIPv4 != nil {
+					nextHop = *routeNexthop.NexthopIPv4.Value
+					nextHopType = *routeNexthop.NexthopIPv4.Type
+				} else if routeNexthop.NexthopIPv6 != nil {
+					nextHop = *routeNexthop.NexthopIPv6.Value
+					nextHopType = *routeNexthop.NexthopIPv6.Type
+				} else if routeNexthop.NexthopBlackhole != nil {
+					nextHopType = *routeNexthop.NexthopBlackhole.Type
+				} else if routeNexthop.NexthopInternet != nil {
+					nextHopType = *routeNexthop.NexthopInternet.Type
+				}
+			}
+
 			table.AddRow(
-				utils.PtrString(route.RouteId),
-				utils.PtrString(route.Nexthop),
-				utils.PtrString(route.Prefix),
+				utils.PtrString(route.Id),
+				nextHop,
+				nextHopType,
+				destination,
 			)
 		}
 

@@ -16,6 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -25,6 +29,8 @@ var testNetworkAreaId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrganizationId,
 		networkAreaIdFlag:  testNetworkAreaId,
 		limitFlag:          "10",
@@ -39,6 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		OrganizationId: &testOrganizationId,
 		NetworkAreaId:  &testNetworkAreaId,
@@ -51,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRoutesRequest)) iaas.ApiListNetworkAreaRoutesRequest {
-	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId)
+	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -201,6 +208,24 @@ func TestOutputResult(t *testing.T) {
 			name: "empty route in routes slice",
 			args: args{
 				routes: []iaas.Route{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty destination in route",
+			args: args{
+				routes: []iaas.Route{{
+					Destination: &iaas.RouteDestination{},
+				}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty nexthop in route",
+			args: args{
+				routes: []iaas.Route{{
+					Nexthop: &iaas.RouteNexthop{},
+				}},
 			},
 			wantErr: false,
 		},
