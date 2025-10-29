@@ -46,11 +46,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create a instance with name 'my-new-instance' and flavor`,
-				`$ stackit git instance create --name my-new-instance --flavor git-100'`,
+				`$ stackit git instance create --name my-new-instance --flavor git-100`,
 			),
 			examples.NewExample(
 				`Create a instance with name 'my-new-instance' and acl`,
-				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1'`,
+				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

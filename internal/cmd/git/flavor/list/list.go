@@ -60,19 +60,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get STACKIT Git flavors: %w", err)
 			}
-			flavors := *resp.Flavors
-			if len(flavors) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No flavors found for project %q\n", projectLabel)
-				return nil
-			} else if model.Limit != nil && len(flavors) > int(*model.Limit) {
+			flavors := resp.GetFlavors()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
+			// Truncate output
+			if model.Limit != nil && len(flavors) > int(*model.Limit) {
 				flavors = (flavors)[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, flavors)
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, flavors)
 		},
 	}
 	configureFlags(cmd)
@@ -110,8 +111,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClie
 	return apiClient.ListFlavors(ctx, model.ProjectId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, flavors []git.Flavor) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, flavors []git.Flavor) error {
 	return p.OutputResult(outputFormat, flavors, func() error {
+		if len(flavors) == 0 {
+			p.Outputf("No flavors found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESCRIPTION", "DISPLAY_NAME", "AVAILABLE", "SKU")
 		for i := range flavors {
