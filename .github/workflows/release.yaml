@@ -110,7 +110,7 @@ jobs:
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -147,7 +147,7 @@ jobs:
         uses: actions/checkout@v5
       
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: goreleaser-dist-temp
           path: dist
