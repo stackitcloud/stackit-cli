@@ -64,15 +64,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get RabbitMQ instances: %w", err)
 			}
-			instances := *resp.Instances
-			if len(instances) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No instances found for project %q\n", projectLabel)
-				return nil
+			instances := resp.GetInstances()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -80,7 +77,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				instances = instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, instances)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
 		},
 	}
 
@@ -120,8 +117,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instances []rabbitmq.Instance) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []rabbitmq.Instance) error {
 	return p.OutputResult(outputFormat, instances, func() error {
+		if len(instances) == 0 {
+			p.Outputf("No instances found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
 		for i := range instances {
