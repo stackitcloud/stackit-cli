@@ -63,11 +63,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Object Storage credentials groups: %w", err)
 			}
-			credentialsGroups := *resp.CredentialsGroups
-			if len(credentialsGroups) == 0 {
-				params.Printer.Info("No credentials groups found for your project")
-				return nil
-			}
+			credentialsGroups := resp.GetCredentialsGroups()
 
 			// Truncate output
 			if model.Limit != nil && len(credentialsGroups) > int(*model.Limit) {
@@ -114,6 +110,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 
 func outputResult(p *print.Printer, outputFormat string, credentialsGroups []objectstorage.CredentialsGroup) error {
 	return p.OutputResult(outputFormat, credentialsGroups, func() error {
+		if len(credentialsGroups) == 0 {
+			p.Outputf("No credentials groups found for your project")
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "URN")
 		for i := range credentialsGroups {

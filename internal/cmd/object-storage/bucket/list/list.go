@@ -64,23 +64,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Object Storage buckets: %w", err)
 			}
-			if resp.Buckets == nil || len(*resp.Buckets) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No buckets found for project %s\n", projectLabel)
-				return nil
+			buckets := resp.GetBuckets()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
-			buckets := *resp.Buckets
 
 			// Truncate output
 			if model.Limit != nil && len(buckets) > int(*model.Limit) {
 				buckets = buckets[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, buckets)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, buckets)
 		},
 	}
 
@@ -120,12 +117,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, buckets []objectstorage.Bucket) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, buckets []objectstorage.Bucket) error {
 	if buckets == nil {
 		return fmt.Errorf("buckets is empty")
 	}
 
 	return p.OutputResult(outputFormat, buckets, func() error {
+		if len(buckets) == 0 {
+			p.Outputf("No buckets found for project %s\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("NAME", "REGION", "URL (PATH STYLE)", "URL (VIRTUAL HOSTED STYLE)")
 		for i := range buckets {
