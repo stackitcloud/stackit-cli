@@ -90,16 +90,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(recordSets) == 0 {
-				zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
-					zoneLabel = model.ZoneId
-				}
-				params.Printer.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
-				return nil
+
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
+				zoneLabel = model.ZoneId
 			}
-			return outputResult(params.Printer, model.OutputFormat, recordSets)
+
+			return outputResult(params.Printer, model.OutputFormat, zoneLabel, recordSets)
 		},
 	}
 
@@ -239,8 +237,13 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 	return recordSets, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
+func outputResult(p *print.Printer, outputFormat, zoneLabel string, recordSets []dns.RecordSet) error {
 	return p.OutputResult(outputFormat, recordSets, func() error {
+		if len(recordSets) == 0 {
+			p.Outputf("No record sets found for zone %s matching the criteria\n", zoneLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE", "RECORD DATA")
 		for i := range recordSets {
