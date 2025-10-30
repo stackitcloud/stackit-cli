@@ -67,23 +67,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get SQLServer Flex users: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = *model.InstanceId
-				}
-				params.Printer.Info("No users found for instance %q\n", instanceLabel)
-				return nil
+			users := resp.GetItems()
+
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = *model.InstanceId
 			}
-			users := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(users) > int(*model.Limit) {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, users)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, users)
 		},
 	}
 
@@ -128,8 +125,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, users []sqlserverflex.InstanceListUser) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []sqlserverflex.InstanceListUser) error {
 	return p.OutputResult(outputFormat, users, func() error {
+		if len(users) == 0 {
+			p.Outputf("No users found for instance %q\n", instanceLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
