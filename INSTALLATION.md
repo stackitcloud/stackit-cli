@@ -215,6 +215,24 @@ You can also get the STACKIT CLI by compiling it from source or downloading a pr
    go run . <GROUP> <SUB-GROUP> <COMMAND> <ARGUMENT> <FLAGS>
    ```
 
+### FreeBSD
+
+The STACKIT CLI can be installed through the [FreeBSD ports or packages](https://docs.freebsd.org/en/books/handbook/ports/).
+
+To install the port:
+
+```shell
+cd /usr/ports/sysutils/stackit/ && make install clean
+```
+
+To add the package, run one of these commands:
+
+```shell
+pkg install sysutils/stackit
+# OR
+pkg install stackit
+```
+
 ### Pre-compiled binary
 
 1. Download the binary corresponding to your operating system and CPU architecture from our [Releases](https://github.com/stackitcloud/stackit-cli/releases) page
