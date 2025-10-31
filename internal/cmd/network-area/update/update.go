@@ -118,7 +118,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp == nil || resp.Id == nil {
-				return fmt.Errorf("create network area: empty response")
+				return fmt.Errorf("update network area: empty response")
 			}
 
 			responses := NetworkAreaResponses{
@@ -128,9 +128,6 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if hasDeprecatedFlagsSet(model) {
 				deprecatedFlags := getConfiguredDeprecatedFlags(model)
 				params.Printer.Warn("the flags %q are deprecated and will be removed after April 2026. Use `$ stackit network-area region` to configure these options for a network area.\n", strings.Join(deprecatedFlags, ","))
-				if resp == nil || resp.Id == nil {
-					return fmt.Errorf("create network area: empty response")
-				}
 				reqNetworkArea := buildRequestNetworkAreaRegion(ctx, model, apiClient)
 				respNetworkArea, err := reqNetworkArea.Execute()
 				if err != nil {
