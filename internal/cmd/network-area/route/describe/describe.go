@@ -111,10 +111,13 @@ func outputResult(p *print.Printer, outputFormat string, route iaas.Route) error
 		table.AddSeparator()
 		if destination := route.Destination; destination != nil {
 			if destination.DestinationCIDRv4 != nil {
+				table.AddRow("DESTINATION TYPE", utils.PtrString(destination.DestinationCIDRv4.Type))
+				table.AddSeparator()
 				table.AddRow("DESTINATION", utils.PtrString(destination.DestinationCIDRv4.Value))
 				table.AddSeparator()
-			}
-			if destination.DestinationCIDRv6 != nil {
+			} else if destination.DestinationCIDRv6 != nil {
+				table.AddRow("DESTINATION TYPE", utils.PtrString(destination.DestinationCIDRv6.Type))
+				table.AddSeparator()
 				table.AddRow("DESTINATION", utils.PtrString(destination.DestinationCIDRv6.Value))
 				table.AddSeparator()
 			}

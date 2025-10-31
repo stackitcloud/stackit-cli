@@ -148,10 +148,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 				if !model.AssumeYes {
 					s := spinner.New(params.Printer)
-					s.Start("Create network area")
+					s.Start("Create network area region")
 					_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, *resp.Id, model.Region).WaitWithContext(ctx)
 					if err != nil {
-						return fmt.Errorf("wait for completing SKE credentials rotation %w", err)
+						return fmt.Errorf("wait for creating network area region %w", err)
 					}
 					s.Stop()
 				}
@@ -235,7 +235,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
-	hasAllRequiredRegionalAreaFieldsSet := model.NetworkRanges != nil || model.TransferNetwork != nil
+	// Check if any of the deprecated **optional** fields are set and if no of the associated deprecated **required** fields is set.
+	hasAllRequiredRegionalAreaFieldsSet := model.NetworkRanges != nil && model.TransferNetwork != nil
 	hasOptionalRegionalAreaFieldsSet := model.DnsNameServers != nil || model.DefaultPrefixLength != nil || model.MaxPrefixLength != nil || model.MinPrefixLength != nil
 	if hasOptionalRegionalAreaFieldsSet && !hasAllRequiredRegionalAreaFieldsSet {
 		return nil, &cliErr.MultipleFlagsAreMissing{

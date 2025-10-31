@@ -181,24 +181,40 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "deprecated network ranges missing",
+			description: "set deprecated network ranges - missing transfer network",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, networkRangesFlag)
+				flagValues[networkRangesFlag] = strings.Join(testNetworkRanges, ",")
+			}),
+			isValid: false,
+		},
+		{
+			description: "set deprecated transfer network - missing network ranges",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[transferNetworkFlag] = testTransferNetwork
+			}),
+			isValid: false,
+		},
+		{
+			description: "set deprecated transfer network and network ranges",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[networkRangesFlag] = strings.Join(testNetworkRanges, ",")
+				flagValues[transferNetworkFlag] = testTransferNetwork
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.NetworkRanges = nil
+				model.NetworkRanges = utils.Ptr(testNetworkRanges)
+				model.TransferNetwork = utils.Ptr(testTransferNetwork)
 			}),
 		},
 		{
-			description: "deprecated transfer network missing",
+			description: "set deprecated optional flags",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, transferNetworkFlag)
+				flagValues[dnsNameServersFlag] = strings.Join(testDnsNameservers, ",")
+				flagValues[defaultPrefixLengthFlag] = strconv.FormatInt(testDefaultPrefixLength, 10)
+				flagValues[maxPrefixLengthFlag] = strconv.FormatInt(testMaxPrefixLength, 10)
+				flagValues[minPrefixLengthFlag] = strconv.FormatInt(testMinPrefixLength, 10)
 			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.TransferNetwork = nil
-			}),
+			isValid: false,
 		},
 		{
 			description: "no values",
