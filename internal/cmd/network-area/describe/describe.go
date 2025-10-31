@@ -126,60 +126,11 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 	}
 
 	return p.OutputResult(outputFormat, networkArea, func() error {
-		var routes []string
-		var networkRanges []string
-
-		if networkArea.Ipv4 != nil {
-			if networkArea.Ipv4.Routes != nil {
-				for _, route := range *networkArea.Ipv4.Routes {
-					routes = append(routes, fmt.Sprintf("next hop: %s\nprefix: %s", *route.Nexthop, *route.Prefix))
-				}
-			}
-
-			if networkArea.Ipv4.NetworkRanges != nil {
-				for _, networkRange := range *networkArea.Ipv4.NetworkRanges {
-					networkRanges = append(networkRanges, *networkRange.Prefix)
-				}
-			}
-		}
-
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(networkArea.AreaId))
+		table.AddRow("ID", utils.PtrString(networkArea.Id))
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(networkArea.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(networkArea.State))
-		table.AddSeparator()
-		if len(networkRanges) > 0 {
-			table.AddRow("NETWORK RANGES", strings.Join(networkRanges, ","))
-		}
-		table.AddSeparator()
-		for i, route := range routes {
-			table.AddRow(fmt.Sprintf("STATIC ROUTE %d", i+1), route)
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4 != nil {
-			if networkArea.Ipv4.TransferNetwork != nil {
-				table.AddRow("TRANSFER RANGE", *networkArea.Ipv4.TransferNetwork)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.DefaultNameservers != nil && len(*networkArea.Ipv4.DefaultNameservers) > 0 {
-				table.AddRow("DNS NAME SERVERS", strings.Join(*networkArea.Ipv4.DefaultNameservers, ","))
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.DefaultPrefixLen != nil {
-				table.AddRow("DEFAULT PREFIX LENGTH", *networkArea.Ipv4.DefaultPrefixLen)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.MaxPrefixLen != nil {
-				table.AddRow("MAX PREFIX LENGTH", *networkArea.Ipv4.MaxPrefixLen)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.MinPrefixLen != nil {
-				table.AddRow("MIN PREFIX LENGTH", *networkArea.Ipv4.MinPrefixLen)
-				table.AddSeparator()
-			}
-		}
 		if networkArea.Labels != nil && len(*networkArea.Labels) > 0 {
 			var labels []string
 			for key, value := range *networkArea.Labels {
@@ -195,6 +146,10 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 			table.AddRow("# ATTACHED PROJECTS", utils.PtrString(networkArea.ProjectCount))
 			table.AddSeparator()
 		}
+		table.AddRow("CREATED AT", utils.PtrString(networkArea.CreatedAt))
+		table.AddSeparator()
+		table.AddRow("UPDATED AT", utils.PtrString(networkArea.UpdatedAt))
+		table.AddSeparator()
 
 		err := table.Display(p)
 		if err != nil {

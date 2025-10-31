@@ -14,6 +14,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -35,6 +39,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrgId,
 		networkAreaIdFlag:  testNetworkAreaId,
 		labelFlag:          "value=key",
@@ -74,6 +80,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
@@ -87,7 +94,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNetworkAreaRouteRequest)) iaas.ApiUpdateNetworkAreaRouteRequest {
-	request := testClient.UpdateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRouteId)
+	request := testClient.UpdateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRegion, testRouteId)
 	request = request.UpdateNetworkAreaRoutePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
