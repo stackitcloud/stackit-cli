@@ -97,10 +97,8 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 	}
 	return p.OutputResult(outputFormat, network, func() error {
 		// IPv4
-		var ipv4Nameservers []string
-		var ipv4Prefixes []string
-		var publicIp *string
-		var ipv4Gateway *string
+		var ipv4Nameservers, ipv4Prefixes []string
+		var publicIp, ipv4Gateway *string
 		if ipv4 := network.Ipv4; ipv4 != nil {
 			if ipv4.Nameservers != nil {
 				ipv4Nameservers = append(ipv4Nameservers, *ipv4.Nameservers...)
@@ -117,8 +115,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		}
 
 		// IPv6
-		var ipv6Nameservers []string
-		var ipv6Prefixes []string
+		var ipv6Nameservers, ipv6Prefixes []string
 		var ipv6Gateway *string
 		if ipv6 := network.Ipv6; ipv6 != nil {
 			if ipv6.Nameservers != nil {
