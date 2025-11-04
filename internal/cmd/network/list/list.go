@@ -143,8 +143,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED")
 
 		for _, network := range networks {
-			var publicIp string
-			var prefixes string
+			var publicIp, prefixes string
 			if ipv4 := network.Ipv4; ipv4 != nil {
 				publicIp = utils.PtrString(ipv4.PublicIp)
 				prefixes = utils.JoinStringPtr(ipv4.Prefixes, ", ")
