@@ -129,10 +129,47 @@ func GetNetworkRangePrefix(ctx context.Context, apiClient IaaSClient, organizati
 
 // GetRouteFromAPIResponse returns the static route from the API response that matches the prefix and nexthop
 // This works because static routes are unique by prefix and nexthop
-func GetRouteFromAPIResponse(prefix, nexthop string, routes *[]iaas.Route) (iaas.Route, error) {
+func GetRouteFromAPIResponse(destination, nexthop string, routes *[]iaas.Route) (iaas.Route, error) {
 	for _, route := range *routes {
-		if *route.Prefix == prefix && route.Nexthop.GetActualInstance() == nexthop {
-			return route, nil
+		// Check if destination matches
+		if dest := route.Destination; dest != nil {
+			match := false
+			if destV4 := dest.DestinationCIDRv4; destV4 != nil {
+				if destV4.Value != nil && *destV4.Value == destination {
+					match = true
+				}
+			} else if destV6 := dest.DestinationCIDRv6; destV6 != nil {
+				if destV6.Value != nil && *destV6.Value == destination {
+					match = true
+				}
+			}
+			if !match {
+				continue
+			}
+		}
+		// Check if nexthop matches
+		if routeNexthop := route.Nexthop; routeNexthop != nil {
+			match := false
+			if nexthopIPv4 := routeNexthop.NexthopIPv4; nexthopIPv4 != nil {
+				if nexthopIPv4.Value != nil && *nexthopIPv4.Value == nexthop {
+					match = true
+				}
+			} else if nexthopIPv6 := routeNexthop.NexthopIPv6; nexthopIPv6 != nil {
+				if nexthopIPv6.Value != nil && *nexthopIPv6.Value == nexthop {
+					match = true
+				}
+			} else if nexthopInternet := routeNexthop.NexthopInternet; nexthopInternet != nil {
+				if nexthopInternet.Type != nil && *nexthopInternet.Type == nexthop {
+					match = true
+				}
+			} else if nexthopBlackhole := routeNexthop.NexthopBlackhole; nexthopBlackhole != nil {
+				if nexthopBlackhole.Type != nil && *nexthopBlackhole.Type == nexthop {
+					match = true
+				}
+			}
+			if match {
+				return route, nil
+			}
 		}
 	}
 	return iaas.Route{}, fmt.Errorf("new static route not found in API response")

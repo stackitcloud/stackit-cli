@@ -1,39 +1,51 @@
-package list
+package update
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 const (
-	testRegion = "eu01"
+	testRegion                    = "eu01"
+	testDefaultPrefixLength int64 = 25
+	testMaxPrefixLength     int64 = 29
+	testMinPrefixLength     int64 = 24
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
-var testOrganizationId = uuid.NewString()
-var testNetworkAreaId = uuid.NewString()
+
+var (
+	testAreaId             = uuid.NewString()
+	testOrgId              = uuid.NewString()
+	testDefaultNameservers = []string{"8.8.8.8", "8.8.4.4"}
+	testNetworkRanges      = []string{"192.168.0.0/24", "10.0.0.0/24"}
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.RegionFlag: testRegion,
 
-		organizationIdFlag: testOrganizationId,
-		networkAreaIdFlag:  testNetworkAreaId,
-		limitFlag:          "10",
+		networkAreaIdFlag:           testAreaId,
+		organizationIdFlag:          testOrgId,
+		ipv4DefaultNameservers:      strings.Join(testDefaultNameservers, ","),
+		ipv4DefaultPrefixLengthFlag: strconv.FormatInt(testDefaultPrefixLength, 10),
+		ipv4MaxPrefixLengthFlag:     strconv.FormatInt(testMaxPrefixLength, 10),
+		ipv4MinPrefixLengthFlag:     strconv.FormatInt(testMinPrefixLength, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,12 +56,15 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
+			Verbosity: globalflags.VerbosityDefault,
 		},
-		OrganizationId: &testOrganizationId,
-		NetworkAreaId:  &testNetworkAreaId,
-		Limit:          utils.Ptr(int64(10)),
+		OrganizationId:          testOrgId,
+		NetworkAreaId:           testAreaId,
+		IPv4DefaultNameservers:  utils.Ptr(testDefaultNameservers),
+		IPv4DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
+		IPv4MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
+		IPv4MinPrefixLength:     utils.Ptr(testMinPrefixLength),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -57,12 +72,38 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRoutesRequest)) iaas.ApiListNetworkAreaRoutesRequest {
-	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
+func fixtureRequest(mods ...func(request *iaas.ApiUpdateNetworkAreaRegionRequest)) iaas.ApiUpdateNetworkAreaRegionRequest {
+	request := testClient.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
+	request = request.UpdateNetworkAreaRegionPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
+}
+
+func fixturePayload(mods ...func(payload *iaas.UpdateNetworkAreaRegionPayload)) iaas.UpdateNetworkAreaRegionPayload {
+	var networkRange []iaas.NetworkRange
+	if len(testNetworkRanges) > 0 {
+		networkRange = make([]iaas.NetworkRange, len(testNetworkRanges))
+		for i := range testNetworkRanges {
+			networkRange[i] = iaas.NetworkRange{
+				Prefix: utils.Ptr(testNetworkRanges[i]),
+			}
+		}
+	}
+
+	payload := iaas.UpdateNetworkAreaRegionPayload{
+		Ipv4: &iaas.UpdateRegionalAreaIPv4{
+			DefaultNameservers: utils.Ptr(testDefaultNameservers),
+			DefaultPrefixLen:   utils.Ptr(testDefaultPrefixLength),
+			MaxPrefixLen:       utils.Ptr(testMaxPrefixLength),
+			MinPrefixLen:       utils.Ptr(testMinPrefixLength),
+		},
+	}
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
 }
 
 func TestParseInput(t *testing.T) {
@@ -85,63 +126,61 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "no flag values",
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "organization id missing",
+			description: "org id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, organizationIdFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "organization id invalid 1",
+			description: "org id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[organizationIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "organization id invalid 2",
+			description: "org id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[organizationIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "network area id missing",
+			description: "area id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, networkAreaIdFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "network area id invalid 1",
+			description: "area id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[networkAreaIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "network area id invalid 2",
+			description: "area id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[networkAreaIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "limit invalid",
+			description: "no update data is set",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
+				delete(flagValues, ipv4DefaultPrefixLengthFlag)
+				delete(flagValues, ipv4MaxPrefixLengthFlag)
+				delete(flagValues, ipv4MinPrefixLengthFlag)
+				delete(flagValues, ipv4DefaultNameservers)
 			}),
 			isValid: false,
 		},
 		{
-			description: "limit invalid 2",
+			description: "region empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
+				flagValues[globalflags.RegionFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -158,7 +197,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiListNetworkAreaRoutesRequest
+		expectedRequest iaas.ApiUpdateNetworkAreaRegionRequest
 	}{
 		{
 			description:     "base",
@@ -182,10 +221,12 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func TestOutputResult(t *testing.T) {
+func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		routes       []iaas.Route
+		outputFormat     string
+		region           string
+		networkAreaLabel string
+		regionalArea     iaas.RegionalArea
 	}
 	tests := []struct {
 		name    string
@@ -198,43 +239,25 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "empty route slice",
+			name: "set empty regional area",
 			args: args{
-				routes: []iaas.Route{},
+				regionalArea: iaas.RegionalArea{},
 			},
 			wantErr: false,
 		},
 		{
-			name: "empty route in routes slice",
+			name: "output json",
 			args: args{
-				routes: []iaas.Route{{}},
+				outputFormat: print.JSONOutputFormat,
+				regionalArea: iaas.RegionalArea{},
 			},
-			wantErr: false,
-		},
-		{
-			name: "empty destination in route",
-			args: args{
-				routes: []iaas.Route{{
-					Destination: &iaas.RouteDestination{},
-				}},
-			},
-			wantErr: false,
-		},
-		{
-			name: "empty nexthop in route",
-			args: args{
-				routes: []iaas.Route{{
-					Nexthop: &iaas.RouteNexthop{},
-				}},
-			},
-			wantErr: false,
 		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.routes); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.region, tt.args.networkAreaLabel, tt.args.regionalArea); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
