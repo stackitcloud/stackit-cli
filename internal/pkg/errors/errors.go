@@ -18,6 +18,16 @@ You can configure it for all commands by running:
 	
 or you can also set it through the environment variable [STACKIT_PROJECT_ID]`
 
+	MISSING_REGION = `the region is not currently set.
+	
+It can be set on the command level by re-running your command with the --region flag.
+	
+You can configure it for all commands by running:
+	
+  $ stackit config set --region xxx
+	
+or you can also set it through the environment variable [STACKIT_REGION]`
+
 	EMPTY_UPDATE = `please specify at least one field to update.
 	
 Get details on the available flags by re-running your command with the --help flag.`
@@ -238,6 +248,12 @@ type ProjectIdError struct{}
 
 func (e *ProjectIdError) Error() string {
 	return MISSING_PROJECT_ID
+}
+
+type RegionError struct{}
+
+func (e *RegionError) Error() string {
+	return MISSING_REGION
 }
 
 type EmptyUpdateError struct{}
