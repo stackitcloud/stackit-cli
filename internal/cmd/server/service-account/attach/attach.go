@@ -26,7 +26,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ServerId       *string
+	ServerId       string
 	ServiceAccMail string
 }
 
@@ -54,12 +54,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			} else if serverLabel == "" {
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			}
 
 			if !model.AssumeYes {
@@ -100,7 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 		ServiceAccMail:  serviceAccMail,
 	}
 
@@ -109,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddServiceAccountToServerRequest {
-	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, *model.ServerId, model.ServiceAccMail)
+	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
 	return req
 }
 

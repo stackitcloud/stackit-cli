@@ -107,7 +107,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating volume")
-				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, volumeId).WaitWithContext(ctx)
+				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for volume creation: %w", err)
 				}
@@ -158,7 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateVolumeRequest {
-	req := apiClient.CreateVolume(ctx, model.ProjectId)
+	req := apiClient.CreateVolume(ctx, model.ProjectId, model.Region)
 	source := &iaas.VolumeSource{
 		Id:   model.SourceId,
 		Type: model.SourceType,

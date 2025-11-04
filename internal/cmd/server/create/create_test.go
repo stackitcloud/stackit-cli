@@ -16,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -31,7 +33,9 @@ var testVolumeId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:                     testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		availabilityZoneFlag:              "eu01-1",
 		nameFlag:                          "test-server-name",
 		machineTypeFlag:                   "t1.1",
@@ -59,6 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		AvailabilityZone:              utils.Ptr("eu01-1"),
@@ -87,7 +92,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId)
+	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -96,7 +101,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.Api
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId)
+	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(iaas.CreateServerPayload{
 		MachineType: utils.Ptr("t1.1"),
 		Name:        utils.Ptr("test-server-name"),
@@ -121,7 +126,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		ServiceAccountMails: utils.Ptr([]string{"test-service-account"}),
 		UserData:            utils.Ptr([]byte("test-user-data")),
 		Volumes:             utils.Ptr([]string{testVolumeId}),
-		BootVolume: &iaas.CreateServerPayloadBootVolume{
+		BootVolume: &iaas.ServerBootVolume{
 			PerformanceClass:    utils.Ptr("test-perf-class"),
 			Size:                utils.Ptr(int64(5)),
 			DeleteOnTermination: utils.Ptr(false),
@@ -130,7 +135,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 				Type: utils.Ptr("test-source-type"),
 			},
 		},
-		Networking: &iaas.CreateServerPayloadNetworking{
+		Networking: &iaas.CreateServerPayloadAllOfNetworking{
 			CreateServerNetworking: &iaas.CreateServerNetworking{
 				NetworkId: utils.Ptr(testNetworkId),
 			},
@@ -168,7 +173,6 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumePerformanceClassFlag)
 				delete(flagValues, bootVolumeDeleteOnTerminationFlag)
 				delete(flagValues, keypairNameFlag)
-				delete(flagValues, networkIdFlag)
 				delete(flagValues, networkInterfaceIdsFlag)
 				delete(flagValues, securityGroupsFlag)
 				delete(flagValues, serviceAccountEmailsFlag)
@@ -187,7 +191,6 @@ func TestParseInput(t *testing.T) {
 				model.BootVolumePerformanceClass = nil
 				model.BootVolumeDeleteOnTermination = nil
 				model.KeypairName = nil
-				model.NetworkId = nil
 				model.NetworkInterfaceIds = nil
 				model.SecurityGroups = nil
 				model.ServiceAccountMails = nil
@@ -218,21 +221,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -350,6 +353,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				MachineType: utils.Ptr("t1.1"),

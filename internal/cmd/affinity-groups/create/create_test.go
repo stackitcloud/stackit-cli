@@ -15,7 +15,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-const projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testName   = "test-name"
+	testPolicy = "test-policy"
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -25,14 +29,10 @@ var (
 	testProjectId = uuid.NewString()
 )
 
-const (
-	testName   = "test-name"
-	testPolicy = "test-policy"
-)
-
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 
 		nameFlag:   testName,
 		policyFlag: testPolicy,
@@ -48,6 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
+			Region:    testRegion,
 		},
 		Name:   testName,
 		Policy: testPolicy,
@@ -59,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateAffinityGroupRequest)) iaas.ApiCreateAffinityGroupRequest {
-	request := testClient.CreateAffinityGroup(testCtx, testProjectId)
+	request := testClient.CreateAffinityGroup(testCtx, testProjectId, testRegion)
 	request = request.CreateAffinityGroupPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)

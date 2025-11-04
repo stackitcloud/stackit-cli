@@ -72,7 +72,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get volume name for label
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeID)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeID
@@ -97,7 +97,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating snapshot")
-				resp, err = wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, *resp.Id).WaitWithContext(ctx)
+				resp, err = wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for snapshot creation: %w", err)
 				}
@@ -152,7 +152,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSnapshotRequest {
-	req := apiClient.CreateSnapshot(ctx, model.ProjectId)
+	req := apiClient.CreateSnapshot(ctx, model.ProjectId, model.Region)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
 	payload.VolumeId = &model.VolumeID
 	payload.Name = model.Name

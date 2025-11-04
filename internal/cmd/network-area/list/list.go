@@ -150,21 +150,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.NetworkArea) error {
 	return p.OutputResult(outputFormat, networkAreas, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Network Ranges", "# Attached Projects")
+		table.SetHeader("ID", "Name", "# Attached Projects")
 
 		for _, networkArea := range networkAreas {
-			networkRanges := "n/a"
-			if ipv4 := networkArea.Ipv4; ipv4 != nil {
-				if netRange := ipv4.NetworkRanges; netRange != nil {
-					networkRanges = fmt.Sprint(len(*netRange))
-				}
-			}
-
 			table.AddRow(
-				utils.PtrString(networkArea.AreaId),
+				utils.PtrString(networkArea.Id),
 				utils.PtrString(networkArea.Name),
-				utils.PtrString(networkArea.State),
-				networkRanges,
 				utils.PtrString(networkArea.ProjectCount),
 			)
 			table.AddSeparator()

@@ -28,7 +28,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	SecurityGroupRuleId string
-	SecurityGroupId     *string
+	SecurityGroupId     string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -92,7 +92,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel:     globalFlags,
 		SecurityGroupRuleId: securityGroupRuleId,
-		SecurityGroupId:     flags.FlagToStringPointer(p, cmd, securityGroupIdFlag),
+		SecurityGroupId:     flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -100,7 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRuleRequest {
-	return apiClient.GetSecurityGroupRule(ctx, model.ProjectId, *model.SecurityGroupId, model.SecurityGroupRuleId)
+	return apiClient.GetSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId, model.SecurityGroupRuleId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas.SecurityGroupRule) error {

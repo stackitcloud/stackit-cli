@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetServerRequest {
-	req := apiClient.GetServer(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.GetServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	req = req.Details(true)
 
 	return req

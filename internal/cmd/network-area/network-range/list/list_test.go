@@ -16,6 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -25,6 +29,8 @@ var testNetworkAreaId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrganizationId,
 		networkAreaIdFlag:  testNetworkAreaId,
 		limitFlag:          "10",
@@ -38,6 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		OrganizationId: &testOrganizationId,
@@ -51,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRangesRequest)) iaas.ApiListNetworkAreaRangesRequest {
-	request := testClient.ListNetworkAreaRanges(testCtx, testOrganizationId, testNetworkAreaId)
+	request := testClient.ListNetworkAreaRanges(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

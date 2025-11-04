@@ -82,7 +82,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiListAffinityGroupsRequest {
-	return apiClient.ListAffinityGroups(ctx, model.ProjectId)
+	return apiClient.ListAffinityGroups(ctx, model.ProjectId, model.Region)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {

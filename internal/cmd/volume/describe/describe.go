@@ -88,7 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumeRequest {
-	return apiClient.GetVolume(ctx, model.ProjectId, model.VolumeId)
+	return apiClient.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) error {

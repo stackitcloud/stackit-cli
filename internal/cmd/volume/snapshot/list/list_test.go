@@ -16,6 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+)
+
 type testCtxKey struct{}
 
 var (
@@ -27,8 +31,10 @@ var (
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		limitFlag:                 "10",
-		labelSelectorFlag:         "key1=value1",
+		globalflags.RegionFlag:    testRegion,
+
+		limitFlag:         "10",
+		labelSelectorFlag: "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,6 +46,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Limit:         utils.Ptr(int64(10)),
@@ -51,8 +58,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiListSnapshotsRequest)) iaas.ApiListSnapshotsRequest {
-	request := testClient.ListSnapshots(testCtx, testProjectId)
+func fixtureRequest(mods ...func(request *iaas.ApiListSnapshotsInProjectRequest)) iaas.ApiListSnapshotsInProjectRequest {
+	request := testClient.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
 	request = request.LabelSelector("key1=value1")
 	for _, mod := range mods {
 		mod(&request)
@@ -139,7 +146,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiListSnapshotsRequest
+		expectedRequest iaas.ApiListSnapshotsInProjectRequest
 	}{
 		{
 			description:     "base",
@@ -151,8 +158,8 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(func(model *inputModel) {
 				model.LabelSelector = nil
 			}),
-			expectedRequest: fixtureRequest(func(request *iaas.ApiListSnapshotsRequest) {
-				*request = testClient.ListSnapshots(testCtx, testProjectId)
+			expectedRequest: fixtureRequest(func(request *iaas.ApiListSnapshotsInProjectRequest) {
+				*request = testClient.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
 			}),
 		},
 	}

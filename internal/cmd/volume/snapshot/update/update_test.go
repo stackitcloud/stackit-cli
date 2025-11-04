@@ -14,6 +14,11 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion = "eu01"
+	testName   = "test-snapshot"
+)
+
 type testCtxKey struct{}
 
 var (
@@ -21,7 +26,6 @@ var (
 	testClient     = &iaas.APIClient{}
 	testProjectId  = uuid.NewString()
 	testSnapshotId = uuid.NewString()
-	testName       = "test-snapshot"
 	testLabels     = map[string]string{"key1": "value1"}
 )
 
@@ -38,8 +42,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		nameFlag:                  testName,
-		labelsFlag:                "key1=value1",
+		globalflags.RegionFlag:    testRegion,
+
+		nameFlag:   testName,
+		labelsFlag: "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -51,10 +57,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		SnapshotId: testSnapshotId,
-		Name:       &testName,
+		Name:       utils.Ptr(testName),
 		Labels:     testLabels,
 	}
 	for _, mod := range mods {
@@ -64,9 +71,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateSnapshotRequest)) iaas.ApiUpdateSnapshotRequest {
-	request := testClient.UpdateSnapshot(testCtx, testProjectId, testSnapshotId)
+	request := testClient.UpdateSnapshot(testCtx, testProjectId, testRegion, testSnapshotId)
 	payload := iaas.NewUpdateSnapshotPayloadWithDefaults()
-	payload.Name = &testName
+	payload.Name = utils.Ptr(testName)
 	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
 
 	request = request.UpdateSnapshotPayload(*payload)

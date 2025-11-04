@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -37,8 +39,10 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		nameFlag:               "example-network-name",
-		projectIdFlag:          testProjectId,
 		ipv4DnsNameServersFlag: "1.1.1.0,1.1.2.0",
 		ipv4GatewayFlag:        "10.1.2.3",
 		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
@@ -56,6 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		Name:               utils.Ptr("example-network-name"),
 		NetworkId:          testNetworkId,
@@ -74,7 +79,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) iaas.ApiPartialUpdateNetworkRequest {
-	request := testClient.PartialUpdateNetwork(testCtx, testProjectId, testNetworkId)
+	request := testClient.PartialUpdateNetwork(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.PartialUpdateNetworkPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -88,15 +93,13 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaa
 		Labels: utils.Ptr(map[string]interface{}{
 			"key": "value",
 		}),
-		AddressFamily: &iaas.UpdateNetworkAddressFamily{
-			Ipv4: &iaas.UpdateNetworkIPv4Body{
-				Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-				Gateway:     iaas.NewNullableString(utils.Ptr("10.1.2.3")),
-			},
-			Ipv6: &iaas.UpdateNetworkIPv6Body{
-				Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
-				Gateway:     iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
-			},
+		Ipv4: &iaas.UpdateNetworkIPv4Body{
+			Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
+			Gateway:     iaas.NewNullableString(utils.Ptr("10.1.2.3")),
+		},
+		Ipv6: &iaas.UpdateNetworkIPv6Body{
+			Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
+			Gateway:     iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
 		},
 	}
 	for _, mod := range mods {
@@ -142,7 +145,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -150,7 +153,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -158,7 +161,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

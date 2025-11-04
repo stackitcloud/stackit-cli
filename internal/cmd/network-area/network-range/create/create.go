@@ -118,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRangeRequest {
-	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId)
+	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 	payload := iaas.CreateNetworkAreaRangePayload{
 		Ipv4: &[]iaas.NetworkRange{
 			{
@@ -131,7 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRange iaas.NetworkRange) error {
 	return p.OutputResult(outputFormat, networkRange, func() error {
-		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.NetworkRangeId))
+		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.Id))
 		return nil
 	})
 }

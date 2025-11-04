@@ -59,7 +59,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
 			}
@@ -118,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateBackupRequest {
-	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 
 	payload := iaas.UpdateBackupPayload{
 		Name:   model.Name,

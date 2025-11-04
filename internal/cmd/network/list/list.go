@@ -130,7 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworksRequest {
-	req := apiClient.ListNetworks(ctx, model.ProjectId)
+	req := apiClient.ListNetworks(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -143,18 +143,21 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED")
 
 		for _, network := range networks {
-			publicIp := utils.PtrString(network.PublicIp)
+			var publicIp, prefixes string
+			if ipv4 := network.Ipv4; ipv4 != nil {
+				publicIp = utils.PtrString(ipv4.PublicIp)
+				prefixes = utils.JoinStringPtr(ipv4.Prefixes, ", ")
+			}
 
 			routed := false
 			if network.Routed != nil {
 				routed = *network.Routed
 			}
-			prefixes := utils.JoinStringPtr(network.Prefixes, ", ")
 
 			table.AddRow(
-				utils.PtrString(network.NetworkId),
+				utils.PtrString(network.Id),
 				utils.PtrString(network.Name),
-				utils.PtrString(network.State),
+				utils.PtrString(network.Status),
 				publicIp,
 				prefixes,
 				routed,

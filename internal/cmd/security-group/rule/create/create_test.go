@@ -16,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -29,7 +31,9 @@ var testRemoteSecurityGroupId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:             testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		securityGroupIdFlag:       testSecurityGroupId,
 		directionFlag:             "ingress",
 		descriptionFlag:           "example-description",
@@ -53,6 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		SecurityGroupId:       testSecurityGroupId,
@@ -75,7 +80,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
-	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testSecurityGroupId)
+	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
 	request = request.CreateSecurityGroupRulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -84,7 +89,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
-	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testSecurityGroupId)
+	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
 	request = request.CreateSecurityGroupRulePayload(iaas.CreateSecurityGroupRulePayload{
 		Direction: utils.Ptr("ingress"),
 	})
@@ -203,21 +208,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -267,6 +272,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				Direction:       utils.Ptr("ingress"),

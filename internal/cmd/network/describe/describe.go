@@ -88,7 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkRequest {
-	return apiClient.GetNetwork(ctx, model.ProjectId, model.NetworkId)
+	return apiClient.GetNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) error {
@@ -96,36 +96,49 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		return fmt.Errorf("network cannot be nil")
 	}
 	return p.OutputResult(outputFormat, network, func() error {
-		var ipv4nameservers []string
-		if network.Nameservers != nil {
-			ipv4nameservers = append(ipv4nameservers, *network.Nameservers...)
+		// IPv4
+		var ipv4Nameservers, ipv4Prefixes []string
+		var publicIp, ipv4Gateway *string
+		if ipv4 := network.Ipv4; ipv4 != nil {
+			if ipv4.Nameservers != nil {
+				ipv4Nameservers = append(ipv4Nameservers, *ipv4.Nameservers...)
+			}
+			if ipv4.Prefixes != nil {
+				ipv4Prefixes = append(ipv4Prefixes, *ipv4.Prefixes...)
+			}
+			if ipv4.PublicIp != nil {
+				publicIp = ipv4.PublicIp
+			}
+			if ipv4.Gateway != nil && ipv4.Gateway.IsSet() {
+				ipv4Gateway = ipv4.Gateway.Get()
+			}
 		}
 
-		var ipv4prefixes []string
-		if network.Prefixes != nil {
-			ipv4prefixes = append(ipv4prefixes, *network.Prefixes...)
-		}
-
-		var ipv6nameservers []string
-		if network.NameserversV6 != nil {
-			ipv6nameservers = append(ipv6nameservers, *network.NameserversV6...)
-		}
-
-		var ipv6prefixes []string
-		if network.PrefixesV6 != nil {
-			ipv6prefixes = append(ipv6prefixes, *network.PrefixesV6...)
+		// IPv6
+		var ipv6Nameservers, ipv6Prefixes []string
+		var ipv6Gateway *string
+		if ipv6 := network.Ipv6; ipv6 != nil {
+			if ipv6.Nameservers != nil {
+				ipv6Nameservers = append(ipv6Nameservers, *ipv6.Nameservers...)
+			}
+			if ipv6.Prefixes != nil {
+				ipv6Prefixes = append(ipv6Prefixes, *ipv6.Prefixes...)
+			}
+			if ipv6.Gateway != nil && ipv6.Gateway.IsSet() {
+				ipv6Gateway = ipv6.Gateway.Get()
+			}
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(network.NetworkId))
+		table.AddRow("ID", utils.PtrString(network.Id))
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(network.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(network.State))
+		table.AddRow("STATE", utils.PtrString(network.Status))
 		table.AddSeparator()
 
-		if network.PublicIp != nil {
-			table.AddRow("PUBLIC IP", *network.PublicIp)
+		if publicIp != nil {
+			table.AddRow("PUBLIC IP", *publicIp)
 			table.AddSeparator()
 		}
 
@@ -137,33 +150,33 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddRow("ROUTED", routed)
 		table.AddSeparator()
 
-		if network.Gateway != nil {
-			table.AddRow("IPv4 GATEWAY", *network.Gateway.Get())
+		if ipv4Gateway != nil {
+			table.AddRow("IPv4 GATEWAY", *ipv4Gateway)
 			table.AddSeparator()
 		}
 
-		if len(ipv4nameservers) > 0 {
-			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4nameservers, ", "))
+		if len(ipv4Nameservers) > 0 {
+			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4Nameservers, ", "))
 		}
 		table.AddSeparator()
-		if len(ipv4prefixes) > 0 {
-			table.AddRow("IPv4 PREFIXES", strings.Join(ipv4prefixes, ", "))
+		if len(ipv4Prefixes) > 0 {
+			table.AddRow("IPv4 PREFIXES", strings.Join(ipv4Prefixes, ", "))
 		}
 		table.AddSeparator()
 
-		if network.Gatewayv6 != nil {
-			table.AddRow("IPv6 GATEWAY", *network.Gatewayv6.Get())
+		if ipv6Gateway != nil {
+			table.AddRow("IPv6 GATEWAY", *ipv6Gateway)
 			table.AddSeparator()
 		}
 
-		if len(ipv6nameservers) > 0 {
-			table.AddRow("IPv6 NAME SERVERS", strings.Join(ipv6nameservers, ", "))
+		if len(ipv6Nameservers) > 0 {
+			table.AddRow("IPv6 NAME SERVERS", strings.Join(ipv6Nameservers, ", "))
+			table.AddSeparator()
 		}
-		table.AddSeparator()
-		if len(ipv6prefixes) > 0 {
-			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6prefixes, ", "))
+		if len(ipv6Prefixes) > 0 {
+			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6Prefixes, ", "))
+			table.AddSeparator()
 		}
-		table.AddSeparator()
 		if network.Labels != nil && len(*network.Labels) > 0 {
 			var labels []string
 			for key, value := range *network.Labels {

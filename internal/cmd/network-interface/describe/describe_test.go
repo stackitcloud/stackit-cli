@@ -10,8 +10,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	testRegion = "eu01"
 )
 
 type testCtxKey struct{}
@@ -19,7 +22,6 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var projectIdFlag = globalflags.ProjectIdFlag
 var testProjectId = uuid.NewString()
 var testNetworkId = uuid.NewString()
 var testNicId = uuid.NewString()
@@ -36,8 +38,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		networkIdFlag: testNetworkId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		networkIdFlag:             testNetworkId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,8 +53,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		NetworkId: utils.Ptr(testNetworkId),
+		NetworkId: testNetworkId,
 		NicId:     testNicId,
 	}
 	for _, mod := range mods {
@@ -61,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetNicRequest)) iaas.ApiGetNicRequest {
-	request := testClient.GetNic(testCtx, testProjectId, testNetworkId, testNicId)
+	request := testClient.GetNic(testCtx, testProjectId, testRegion, testNetworkId, testNicId)
 	for _, mod := range mods {
 		mod(&request)
 	}
