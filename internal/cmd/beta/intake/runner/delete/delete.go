@@ -73,7 +73,7 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 				s.Start("Deleting STACKIT Intake Runner")
 				_, err = wait.DeleteIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for STACKIT Instance deletion: %w", err)
+					return fmt.Errorf("wait for STACKIT Intake Runner deletion: %w", err)
 				}
 				s.Stop()
 			}
