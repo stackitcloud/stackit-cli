@@ -70,7 +70,7 @@ func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(p.Printer)
-				s.Start("Deleting STACKIT Intake Runner instance")
+				s.Start("Deleting STACKIT Intake Runner")
 				_, err = wait.DeleteIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Instance deletion: %w", err)
