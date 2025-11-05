@@ -95,7 +95,7 @@ func NewCreateCmd(p *params.CmdParams) *cobra.Command {
 				s.Start("Creating STACKIT Intake Runner")
 				_, err = wait.CreateOrUpdateIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, resp.GetId()).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for STACKIT Instance creation: %w", err)
+					return fmt.Errorf("wait for STACKIT Intake Runner creation: %w", err)
 				}
 				s.Stop()
 			}
