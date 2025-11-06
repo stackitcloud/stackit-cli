@@ -67,6 +67,13 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 		},
 	}
+
+	// hide project id flag from help command because it could mislead users
+	cmd.SetHelpFunc(func(command *cobra.Command, strings []string) {
+		_ = command.Flags().MarkHidden(globalflags.ProjectIdFlag) // nolint:errcheck // there's no chance to handle the error here
+		command.Parent().HelpFunc()(command, strings)
+	})
+
 	return cmd
 }
 
