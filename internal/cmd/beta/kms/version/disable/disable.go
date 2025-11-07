@@ -16,8 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
 )
 
 const (
@@ -67,7 +69,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("disable key version: %w", err)
 			}
 
-			// kms v1.0.0 has a waiter, but it get's stuck even though the disable api call was already successfully completed.
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				s := spinner.New(params.Printer)
+				s.Start("Disabling key version")
+				_, err = wait.DisableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait for key version to be disabled: %w", err)
+				}
+				s.Stop()
+			}
 
 			// Get the key version in its state afterwards
 			resp, err := apiClient.GetVersionExecute(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
