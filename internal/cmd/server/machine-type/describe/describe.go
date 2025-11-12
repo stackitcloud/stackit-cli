@@ -2,10 +2,7 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -90,31 +87,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetMachineTypeRequest {
-	return apiClient.GetMachineType(ctx, model.ProjectId, model.MachineType)
+	return apiClient.GetMachineType(ctx, model.ProjectId, model.Region, model.MachineType)
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineType *iaas.MachineType) error {
 	if machineType == nil {
 		return fmt.Errorf("api response for machine type is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(machineType, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server machine type: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(machineType, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server machine type: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, machineType, func() error {
 		table := tables.NewTable()
 		table.AddRow("NAME", utils.PtrString(machineType.Name))
 		table.AddSeparator()
@@ -132,5 +112,5 @@ func outputResult(p *print.Printer, outputFormat string, machineType *iaas.Machi
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

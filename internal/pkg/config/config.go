@@ -23,6 +23,7 @@ const (
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
+	AlbCustomEndpoint                  = "alb_custom _endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
 	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey             = "logme_custom_endpoint"
@@ -36,6 +37,7 @@ const (
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
 	SecretsManagerCustomEndpointKey    = "secrets_manager_custom_endpoint"
+	KMSCustomEndpointKey               = "kms_custom_endpoint"
 	ServiceAccountCustomEndpointKey    = "service_account_custom_endpoint"
 	ServiceEnablementCustomEndpointKey = "service_enablement_custom_endpoint"
 	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
@@ -96,6 +98,7 @@ var ConfigKeys = []string{
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
 	SecretsManagerCustomEndpointKey,
+	KMSCustomEndpointKey,
 	ServiceAccountCustomEndpointKey,
 	ServiceEnablementCustomEndpointKey,
 	ServerBackupCustomEndpointKey,
@@ -107,6 +110,7 @@ var ConfigKeys = []string{
 	TokenCustomEndpointKey,
 	GitCustomEndpointKey,
 	IntakeCustomEndpointKey,
+	AlbCustomEndpoint,
 }
 
 var defaultConfigFolderPath string
@@ -182,6 +186,7 @@ func setConfigDefaults() {
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
 	viper.SetDefault(SecretsManagerCustomEndpointKey, "")
+	viper.SetDefault(KMSCustomEndpointKey, "")
 	viper.SetDefault(ServiceAccountCustomEndpointKey, "")
 	viper.SetDefault(ServiceEnablementCustomEndpointKey, "")
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
@@ -193,6 +198,7 @@ func setConfigDefaults() {
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")
 	viper.SetDefault(IntakeCustomEndpointKey, "")
+	viper.SetDefault(AlbCustomEndpoint, "")
 }
 
 func getConfigFilePath(configFolder string) string {

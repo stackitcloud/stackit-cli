@@ -41,6 +41,7 @@ const (
 	redisCustomEndpointFlag             = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
 	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	kmsCustomEndpointFlag               = "kms-custom-endpoint"
 	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
@@ -79,6 +80,7 @@ type inputModel struct {
 	RedisCustomEndpoint             bool
 	ResourceManagerCustomEndpoint   bool
 	SecretsManagerCustomEndpoint    bool
+	KMSCustomEndpoint               bool
 	ServerBackupCustomEndpoint      bool
 	ServerOsUpdateCustomEndpoint    bool
 	RunCommandCustomEndpoint        bool
@@ -182,6 +184,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if model.SecretsManagerCustomEndpoint {
 				viper.Set(config.SecretsManagerCustomEndpointKey, "")
 			}
+			if model.KMSCustomEndpoint {
+				viper.Set(config.KMSCustomEndpointKey, "")
+			}
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
 			}
@@ -250,6 +255,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(secretsManagerCustomEndpointFlag, false, "Secrets Manager API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(kmsCustomEndpointFlag, false, "KMS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "Service Account API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceEnablementCustomEndpointFlag, false, "Service Enablement API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serverBackupCustomEndpointFlag, false, "Server Backup base URL. If unset, uses the default base URL")
@@ -289,6 +295,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		RedisCustomEndpoint:             flags.FlagToBoolValue(p, cmd, redisCustomEndpointFlag),
 		ResourceManagerCustomEndpoint:   flags.FlagToBoolValue(p, cmd, resourceManagerCustomEndpointFlag),
 		SecretsManagerCustomEndpoint:    flags.FlagToBoolValue(p, cmd, secretsManagerCustomEndpointFlag),
+		KMSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, kmsCustomEndpointFlag),
 		ServiceAccountCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
 		ServiceEnablementCustomEndpoint: flags.FlagToBoolValue(p, cmd, serviceEnablementCustomEndpointFlag),
 		ServerBackupCustomEndpoint:      flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),

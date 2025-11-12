@@ -10,11 +10,16 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-const projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testName   = "test-name"
+	testPolicy = "test-policy"
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -24,14 +29,10 @@ var (
 	testProjectId = uuid.NewString()
 )
 
-const (
-	testName   = "test-name"
-	testPolicy = "test-policy"
-)
-
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 
 		nameFlag:   testName,
 		policyFlag: testPolicy,
@@ -47,6 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
+			Region:    testRegion,
 		},
 		Name:   testName,
 		Policy: testPolicy,
@@ -58,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateAffinityGroupRequest)) iaas.ApiCreateAffinityGroupRequest {
-	request := testClient.CreateAffinityGroup(testCtx, testProjectId)
+	request := testClient.CreateAffinityGroup(testCtx, testProjectId, testRegion)
 	request = request.CreateAffinityGroupPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -80,6 +82,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateAffinityGroupPayload)) iaas
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -120,43 +123,7 @@ func TestParseInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			if err := globalflags.Configure(cmd.Flags()); err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				if err := cmd.Flags().Set(flag, value); err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			if err := cmd.ValidateRequiredFlags(); err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }

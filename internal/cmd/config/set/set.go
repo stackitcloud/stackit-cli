@@ -37,6 +37,7 @@ const (
 	redisCustomEndpointFlag             = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
 	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	kmsCustomEndpointFlag               = "kms-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
 	serverOsUpdateCustomEndpointFlag    = "server-osupdate-custom-endpoint"
 	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
@@ -77,8 +78,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Set the DNS custom endpoint. This endpoint will be used on all calls to the DNS API (unless overridden by the "STACKIT_DNS_CUSTOM_ENDPOINT" environment variable)`,
 				"$ stackit config set --dns-custom-endpoint https://dns.stackit.cloud"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -151,6 +152,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(redisCustomEndpointFlag, "", "Redis API base URL, used in calls to this API")
 	cmd.Flags().String(resourceManagerCustomEndpointFlag, "", "Resource Manager API base URL, used in calls to this API")
 	cmd.Flags().String(secretsManagerCustomEndpointFlag, "", "Secrets Manager API base URL, used in calls to this API")
+	cmd.Flags().String(kmsCustomEndpointFlag, "", "KMS API base URL, used in calls to this API")
 	cmd.Flags().String(serviceAccountCustomEndpointFlag, "", "Service Account API base URL, used in calls to this API")
 	cmd.Flags().String(serviceEnablementCustomEndpointFlag, "", "Service Enablement API base URL, used in calls to this API")
 	cmd.Flags().String(serverBackupCustomEndpointFlag, "", "Server Backup API base URL, used in calls to this API")
@@ -199,6 +201,8 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.KMSCustomEndpointKey, cmd.Flags().Lookup(kmsCustomEndpointFlag))
+	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServerBackupCustomEndpointKey, cmd.Flags().Lookup(serverBackupCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ServerOsUpdateCustomEndpointKey, cmd.Flags().Lookup(serverOsUpdateCustomEndpointFlag))
@@ -221,7 +225,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	sessionTimeLimit, err := parseSessionTimeLimit(p, cmd)
 	if err != nil {
 		return nil, &errors.FlagValidationError{

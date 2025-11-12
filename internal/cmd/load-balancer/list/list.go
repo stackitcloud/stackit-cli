@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -48,9 +46,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 load balancers `,
 				"$ stackit load-balancer list --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -96,7 +94,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -125,24 +123,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 }
 
 func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbalancer.LoadBalancer) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(loadBalancers, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal load balancer list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(loadBalancers, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal load balancer list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, loadBalancers, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE", "IP ADDRESS", "LISTENERS", "TARGET POOLS")
 		for i := range loadBalancers {
@@ -170,5 +151,5 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbal
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,10 +2,7 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -63,7 +60,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.PublicIpId)
+			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
@@ -120,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdatePublicIPRequest {
-	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.PublicIpId)
+	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 
 	payload := iaas.UpdatePublicIPPayload{
 		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
@@ -130,25 +127,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, model *inputModel, publicIpLabel string, publicIp *iaas.PublicIp) error {
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(publicIp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(publicIp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, publicIp, func() error {
 		p.Outputf("Updated public IP %q.\n", publicIpLabel)
 		return nil
-	}
+	})
 }

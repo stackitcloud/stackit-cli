@@ -2,12 +2,10 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
-	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
-
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -25,26 +24,43 @@ import (
 const (
 	areaIdArg = "AREA_ID"
 
-	nameFlag                = "name"
-	organizationIdFlag      = "organization-id"
-	areaIdFlag              = "area-id"
-	dnsNameServersFlag      = "dns-name-servers"
+	nameFlag           = "name"
+	organizationIdFlag = "organization-id"
+	areaIdFlag         = "area-id"
+	// Deprecated: dnsNameServersFlag is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	dnsNameServersFlag = "dns-name-servers"
+	// Deprecated: defaultPrefixLengthFlag is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	defaultPrefixLengthFlag = "default-prefix-length"
-	maxPrefixLengthFlag     = "max-prefix-length"
-	minPrefixLengthFlag     = "min-prefix-length"
-	labelFlag               = "labels"
+	// Deprecated: maxPrefixLengthFlag is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	maxPrefixLengthFlag = "max-prefix-length"
+	// Deprecated: minPrefixLengthFlag is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	minPrefixLengthFlag = "min-prefix-length"
+	labelFlag           = "labels"
+
+	deprecationMessage = "Deprecated and will be removed after April 2026. Use instead the new command `$ stackit network-area region` to configure these options for a network area."
 )
+
+// NetworkAreaResponses is a workaround, to keep the two responses of the iaas v2 api together for the json and yaml output
+// Should be removed when the deprecated flags are removed
+type NetworkAreaResponses struct {
+	NetworkArea  iaas.NetworkArea   `json:"network_area"`
+	RegionalArea *iaas.RegionalArea `json:"regional_area"`
+}
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	AreaId              string
-	Name                *string
-	OrganizationId      *string
-	DnsNameServers      *[]string
+	AreaId         string
+	Name           *string
+	OrganizationId *string
+	// Deprecated: DnsNameServers is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	DnsNameServers *[]string
+	// Deprecated: DefaultPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	DefaultPrefixLength *int64
-	MaxPrefixLength     *int64
-	MinPrefixLength     *int64
-	Labels              *map[string]string
+	// Deprecated: MaxPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	MaxPrefixLength *int64
+	// Deprecated: MinPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
+	MinPrefixLength *int64
+	Labels          *map[string]string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -101,7 +117,26 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("update network area: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, orgLabel, *resp)
+			if resp == nil || resp.Id == nil {
+				return fmt.Errorf("update network area: empty response")
+			}
+
+			responses := NetworkAreaResponses{
+				NetworkArea: *resp,
+			}
+
+			if hasDeprecatedFlagsSet(model) {
+				deprecatedFlags := getConfiguredDeprecatedFlags(model)
+				params.Printer.Warn("the flags %q are deprecated and will be removed after April 2026. Use `$ stackit network-area region` to configure these options for a network area.\n", strings.Join(deprecatedFlags, ","))
+				reqNetworkArea := buildRequestNetworkAreaRegion(ctx, model, apiClient)
+				respNetworkArea, err := reqNetworkArea.Execute()
+				if err != nil {
+					return fmt.Errorf("create network area region: %w", err)
+				}
+				responses.RegionalArea = respNetworkArea
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, orgLabel, responses)
 		},
 	}
 	configureFlags(cmd)
@@ -116,6 +151,13 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(maxPrefixLengthFlag, 0, "The maximum prefix length for networks in the network area")
 	cmd.Flags().Int64(minPrefixLengthFlag, 0, "The minimum prefix length for networks in the network area")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network-area. E.g. '--labels key1=value1,key2=value2,...'")
+
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(dnsNameServersFlag, deprecationMessage))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(defaultPrefixLengthFlag, deprecationMessage))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(maxPrefixLengthFlag, deprecationMessage))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(minPrefixLengthFlag, deprecationMessage))
+	// Set the output for deprecation warnings to stderr
+	cmd.Flags().SetOutput(os.Stderr)
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
@@ -142,45 +184,68 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+func hasDeprecatedFlagsSet(model *inputModel) bool {
+	deprecatedFlags := getConfiguredDeprecatedFlags(model)
+	return len(deprecatedFlags) > 0
+}
+
+func getConfiguredDeprecatedFlags(model *inputModel) []string {
+	var result []string
+	if model.DnsNameServers != nil {
+		result = append(result, dnsNameServersFlag)
+	}
+	if model.DefaultPrefixLength != nil {
+		result = append(result, defaultPrefixLengthFlag)
+	}
+	if model.MaxPrefixLength != nil {
+		result = append(result, maxPrefixLengthFlag)
+	}
+	if model.MinPrefixLength != nil {
+		result = append(result, minPrefixLengthFlag)
+	}
+	return result
+}
+
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkAreaRequest {
 	req := apiClient.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name:   model.Name,
 		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
-		AddressFamily: &iaas.UpdateAreaAddressFamily{
-			Ipv4: &iaas.UpdateAreaIPv4{
-				DefaultNameservers: model.DnsNameServers,
-				DefaultPrefixLen:   model.DefaultPrefixLength,
-				MaxPrefixLen:       model.MaxPrefixLength,
-				MinPrefixLen:       model.MinPrefixLength,
-			},
-		},
 	}
 
 	return req.PartialUpdateNetworkAreaPayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, networkArea iaas.NetworkArea) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkArea, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
-		}
-		p.Outputln(string(details))
+func buildRequestNetworkAreaRegion(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRegionRequest {
+	req := apiClient.UpdateNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region)
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkArea, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
-		}
-		p.Outputln(string(details))
+	payload := iaas.UpdateNetworkAreaRegionPayload{
+		Ipv4: &iaas.UpdateRegionalAreaIPv4{
+			DefaultNameservers: model.DnsNameServers,
+			DefaultPrefixLen:   model.DefaultPrefixLength,
+			MaxPrefixLen:       model.MaxPrefixLength,
+			MinPrefixLen:       model.MinPrefixLength,
+		},
+	}
 
-		return nil
-	default:
+	return req.UpdateNetworkAreaRegionPayload(payload)
+}
+
+func outputResult(p *print.Printer, outputFormat, projectLabel string, responses NetworkAreaResponses) error {
+	prettyOutputFunc := func() error {
 		p.Outputf("Updated STACKIT Network Area for project %q.\n", projectLabel)
 		return nil
 	}
+
+	// If RegionalArea is NOT set in the reponses, then no deprecated Flags were set.
+	// In this case, only the response of NetworkArea should be printed in JSON and yaml output, to avoid breaking changes after the deprecated fields are removed
+	if responses.RegionalArea == nil {
+		return p.OutputResult(outputFormat, responses.NetworkArea, prettyOutputFunc)
+	}
+
+	return p.OutputResult(outputFormat, responses, func() error {
+		p.Outputf("Updated STACKIT Network Area for project %q.\n", projectLabel)
+		return nil
+	})
 }

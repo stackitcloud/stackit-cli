@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -45,9 +43,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create credentials for a RabbitMQ instance and show the password in the output`,
 				"$ stackit rabbitmq credentials create --instance-id xxx --show-password"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -94,7 +92,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -131,24 +129,8 @@ func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp
 		}
 		resp.Raw.Credentials.Password = utils.Ptr("hidden")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if resp.HasRaw() && resp.Raw.Credentials != nil {
@@ -165,5 +147,5 @@ func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp
 		}
 		p.Outputf("URI: %s\n", utils.PtrString(resp.Uri))
 		return nil
-	}
+	})
 }

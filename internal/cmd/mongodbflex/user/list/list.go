@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -51,9 +49,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit mongodbflex user list --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -70,23 +68,20 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex users: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = *model.InstanceId
-				}
-				params.Printer.Info("No users found for instance %q\n", instanceLabel)
-				return nil
+			users := utils.GetSliceFromPointer(resp.Items)
+
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = *model.InstanceId
 			}
-			users := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(users) > int(*model.Limit) {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, users)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, users)
 		},
 	}
 
@@ -102,7 +97,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -131,25 +126,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, users []mongodbflex.ListUser) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(users, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user list: %w", err)
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []mongodbflex.ListUser) error {
+	return p.OutputResult(outputFormat, users, func() error {
+		if len(users) == 0 {
+			p.Outputf("No users found for instance %q\n", instanceLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(users, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex user list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
@@ -165,5 +148,5 @@ func outputResult(p *print.Printer, outputFormat string, users []mongodbflex.Lis
 		}
 
 		return nil
-	}
+	})
 }

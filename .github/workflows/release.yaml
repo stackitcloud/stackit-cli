@@ -41,6 +41,15 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
+      # nfpm-rpm signing needs gpg provided as filepath
+      # https://goreleaser.com/customization/nfpm/
+      - name: Create GPG key file
+        run: |
+          KEY_PATH="$RUNNER_TEMP/gpg-private-key.asc"
+          printf '%s' "${{ secrets.GPG_PRIVATE_KEY }}" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "GPG_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+      
       - name: Set up keychain
         run: |
           echo -n $SIGNING_CERTIFICATE_BASE64 | base64 -d -o ./ApplicationID.p12
@@ -71,15 +80,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GPG_KEY_PATH: ${{ env.GPG_KEY_PATH }}
+          # nfpm-rpm signing needs this env to be set.
+          NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      # artifacts need to be passed to the "publish-apt" job somehow
+      - name: Clean up GPG key file
+        if: always()
+        run: |
+          rm -f "$GPG_KEY_PATH"
+      
       - name: Upload artifacts to workflow
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: goreleaser-dist-temp
           path: dist
           retention-days: 1
-  
+
   publish-apt:
     name: Publish APT
     runs-on: macOS-latest
@@ -94,7 +110,7 @@ jobs:
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -115,3 +131,42 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: ./scripts/publish-apt-packages.sh
+
+  publish-rpm:
+    name: Publish RPM
+    runs-on: ubuntu-latest
+    needs: [goreleaser]
+    env:
+      # Needed to publish new packages to our S3-hosted RPM repo
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBJECT_STORAGE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu01
+      AWS_ENDPOINT_URL: https://object.storage.eu01.onstackit.cloud
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      
+      - name: Download artifacts from workflow
+        uses: actions/download-artifact@v6
+        with:
+          name: goreleaser-dist-temp
+          path: dist
+
+      - name: Install RPM tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y createrepo-c
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Publish RPM packages
+        if: contains(github.ref_name, '-') == false
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+        run: ./scripts/publish-rpm-packages.sh

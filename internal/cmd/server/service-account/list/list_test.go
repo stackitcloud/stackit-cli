@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -16,7 +17,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -28,9 +31,11 @@ var testLimit = int64(10)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		serverIdFlag:  testServerId,
-		limitFlag:     strconv.FormatInt(testLimit, 10),
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
+		serverIdFlag: testServerId,
+		limitFlag:    strconv.FormatInt(testLimit, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,8 +48,9 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
+			Region:    testRegion,
 		},
-		ServerId: utils.Ptr(testServerId),
+		ServerId: testServerId,
 		Limit:    utils.Ptr(testLimit),
 	}
 	for _, mod := range mods {
@@ -54,7 +60,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListServerServiceAccountsRequest)) iaas.ApiListServerServiceAccountsRequest {
-	request := testClient.ListServerServiceAccounts(testCtx, testProjectId, testServerId)
+	request := testClient.ListServerServiceAccounts(testCtx, testProjectId, testRegion, testServerId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -64,6 +70,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiListServerServiceAccountsReque
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -82,21 +89,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -149,46 +156,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing input: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }

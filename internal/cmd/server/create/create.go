@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -110,9 +108,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml")`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -149,7 +147,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating server")
-				_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, serverId).WaitWithContext(ctx)
+				_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for server creation: %w", err)
 				}
@@ -187,10 +185,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceIdFlag)
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceTypeFlag)
 	cmd.MarkFlagsMutuallyExclusive(networkIdFlag, networkInterfaceIdsFlag)
+	cmd.MarkFlagsOneRequired(networkIdFlag, networkInterfaceIdsFlag)
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -272,7 +271,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateServerRequest {
-	req := apiClient.CreateServer(ctx, model.ProjectId)
+	req := apiClient.CreateServer(ctx, model.ProjectId, model.Region)
 
 	var userData *[]byte
 	if model.UserData != nil {
@@ -295,7 +294,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {
-		payload.BootVolume = &iaas.CreateServerPayloadBootVolume{
+		payload.BootVolume = &iaas.ServerBootVolume{
 			PerformanceClass:    model.BootVolumePerformanceClass,
 			Size:                model.BootVolumeSize,
 			DeleteOnTermination: model.BootVolumeDeleteOnTermination,
@@ -307,7 +306,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.NetworkInterfaceIds != nil || model.NetworkId != nil {
-		payload.Networking = &iaas.CreateServerPayloadNetworking{}
+		payload.Networking = &iaas.CreateServerPayloadAllOfNetworking{}
 
 		if model.NetworkInterfaceIds != nil {
 			payload.Networking.CreateServerNetworkingWithNics = &iaas.CreateServerNetworkingWithNics{
@@ -328,25 +327,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, server *i
 	if server == nil {
 		return fmt.Errorf("server response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(server, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(server, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, server, func() error {
 		p.Outputf("Created server for project %q.\nServer ID: %s\n", projectLabel, utils.PtrString(server.Id))
 		return nil
-	}
+	})
 }

@@ -36,7 +36,7 @@ jobs:
         run: make test
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}
           path: ${{ env.CODE_COVERAGE_FILE_NAME }}

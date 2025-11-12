@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -95,24 +93,7 @@ func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.B
 		return fmt.Errorf("bucket is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(bucket, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Object Storage bucket: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(bucket, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Object Storage bucket: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, bucket, func() error {
 		table := tables.NewTable()
 		table.AddRow("Name", utils.PtrString(bucket.Name))
 		table.AddSeparator()
@@ -128,5 +109,5 @@ func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.B
 		}
 
 		return nil
-	}
+	})
 }

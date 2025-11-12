@@ -58,7 +58,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -85,7 +85,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Rescuing server")
-				_, err = wait.RescueServerWaitHandler(ctx, apiClient, model.ProjectId, model.ServerId).WaitWithContext(ctx)
+				_, err = wait.RescueServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for server rescuing: %w", err)
 				}
@@ -131,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRescueServerRequest {
-	req := apiClient.RescueServer(ctx, model.ProjectId, model.ServerId)
+	req := apiClient.RescueServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	payload := iaas.RescueServerPayload{
 		Image: model.ImageId,
 	}

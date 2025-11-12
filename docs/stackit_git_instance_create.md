@@ -17,10 +17,10 @@ stackit git instance create [flags]
   $ stackit git instance create --name my-new-instance
 
   Create a instance with name 'my-new-instance' and flavor
-  $ stackit git instance create --name my-new-instance --flavor git-100'
+  $ stackit git instance create --name my-new-instance --flavor git-100
 
   Create a instance with name 'my-new-instance' and acl
-  $ stackit git instance create --name my-new-instance --acl 1.1.1.1/1'
+  $ stackit git instance create --name my-new-instance --acl 1.1.1.1/1
 ```
 
 ### Options

@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -70,9 +68,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a DNS zone with name "my-zone", DNS name "www.my-zone.com" and default time to live of 1000ms`,
 				"$ stackit dns zone create --name my-zone --dns-name www.my-zone.com --default-ttl 1000"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -147,7 +145,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -203,29 +201,12 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("dns zone response is empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal DNS zone: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Zone.Id))
 		return nil
-	}
+	})
 }

@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -58,9 +56,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a backup with labels`,
 				"$ stackit volume backup create --source-id xxx --source-type volume --labels key1=value1,key2=value2"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -80,14 +78,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Get source name for label (use ID if name not available)
 			sourceLabel := model.SourceID
 			if model.SourceType == "volume" {
-				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.SourceID)
+				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				} else if name != "" {
 					sourceLabel = name
 				}
 			} else if model.SourceType == "snapshot" {
-				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SourceID)
+				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				} else if name != "" {
@@ -109,12 +107,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create volume backup: %w", err)
 			}
+			if resp == nil || resp.Id == nil {
+				return fmt.Errorf("create volume: empty response")
+			}
+			volumeId := *resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating backup")
-				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, *resp.Id).WaitWithContext(ctx)
+				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for backup creation: %w", err)
 				}
@@ -139,7 +141,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -171,7 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
-	req := apiClient.CreateBackup(ctx, model.ProjectId)
+	req := apiClient.CreateBackup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateBackupPayload{
 		Name:   model.Name,
@@ -190,29 +192,12 @@ func outputResult(p *print.Printer, outputFormat string, async bool, sourceLabel
 		return fmt.Errorf("create backup response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		if async {
 			p.Outputf("Triggered backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		} else {
 			p.Outputf("Created backup of %s in %s. Backup ID: %s\n", sourceLabel, projectLabel, utils.PtrString(resp.Id))
 		}
 		return nil
-	}
+	})
 }

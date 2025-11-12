@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -70,9 +68,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit volume create --availability-zone eu01-1 --performance-class storage_premium_perf1 --size 64`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -109,7 +107,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating volume")
-				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, volumeId).WaitWithContext(ctx)
+				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for volume creation: %w", err)
 				}
@@ -137,7 +135,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -160,7 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateVolumeRequest {
-	req := apiClient.CreateVolume(ctx, model.ProjectId)
+	req := apiClient.CreateVolume(ctx, model.ProjectId, model.Region)
 	source := &iaas.VolumeSource{
 		Id:   model.SourceId,
 		Type: model.SourceType,
@@ -186,25 +184,8 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, volu
 	if volume == nil {
 		return fmt.Errorf("volume response is empty")
 	}
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volume, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volume, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, volume, func() error {
 		p.Outputf("Created volume for project %q.\nVolume ID: %s\n", projectLabel, utils.PtrString(volume.Id))
 		return nil
-	}
+	})
 }

@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -50,9 +48,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 roles and permissions of a project`,
 				"$ stackit project role list --project-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -96,7 +94,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -124,25 +122,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 }
 
 func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		// Show details
-		details, err := json.MarshalIndent(roles, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal roles: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(roles, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal roles: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, roles, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ROLE NAME", "ROLE DESCRIPTION", "PERMISSION NAME", "PERMISSION DESCRIPTION")
 		for i := range roles {
@@ -165,5 +145,5 @@ func outputRolesResult(p *print.Printer, outputFormat string, roles []authorizat
 		}
 
 		return nil
-	}
+	})
 }

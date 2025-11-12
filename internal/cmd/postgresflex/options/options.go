@@ -2,12 +2,10 @@ package options
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -65,9 +63,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List PostgreSQL Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit postgresflex options --flavors"`,
 				"$ stackit postgresflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -98,7 +96,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -185,45 +183,25 @@ func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.List
 		}
 	}
 
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(options, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex options: %w", err)
+	return p.OutputResult(model.OutputFormat, options, func() error {
+		content := []tables.Table{}
+		if model.Flavors && len(*options.Flavors) != 0 {
+			content = append(content, buildFlavorsTable(*options.Flavors))
 		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex options: %w", err)
+		if model.Versions && len(*options.Versions) != 0 {
+			content = append(content, buildVersionsTable(*options.Versions))
 		}
-		p.Outputln(string(details))
+		if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) > 0 {
+			content = append(content, buildStoragesTable(*options.Storages.Storages))
+		}
+
+		err := tables.DisplayTables(p, content)
+		if err != nil {
+			return fmt.Errorf("display output: %w", err)
+		}
 
 		return nil
-	default:
-		return outputResultAsTable(p, model, options)
-	}
-}
-
-func outputResultAsTable(p *print.Printer, model inputModel, options *options) error {
-	content := []tables.Table{}
-	if model.Flavors && len(*options.Flavors) != 0 {
-		content = append(content, buildFlavorsTable(*options.Flavors))
-	}
-	if model.Versions && len(*options.Versions) != 0 {
-		content = append(content, buildVersionsTable(*options.Versions))
-	}
-	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) > 0 {
-		content = append(content, buildStoragesTable(*options.Storages.Storages))
-	}
-
-	err := tables.DisplayTables(p, content)
-	if err != nil {
-		return fmt.Errorf("display output: %w", err)
-	}
-
-	return nil
+	})
 }
 
 func buildFlavorsTable(flavors []postgresflex.Flavor) tables.Table {

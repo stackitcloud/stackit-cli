@@ -10,10 +10,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -34,7 +37,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,6 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		VolumeId: testVolumeId,
 	}
@@ -57,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetVolumeRequest)) iaas.ApiGetVolumeRequest {
-	request := testClient.GetVolume(testCtx, testProjectId, testVolumeId)
+	request := testClient.GetVolume(testCtx, testProjectId, testRegion, testVolumeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -101,7 +106,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -109,7 +114,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -117,7 +122,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -137,54 +142,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating args: %v", err)
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd, tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing input: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }

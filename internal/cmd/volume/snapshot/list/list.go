@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -51,9 +49,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List snapshots filtered by label`,
 				"$ stackit volume snapshot list --label-selector key1=value1"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -102,7 +100,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter snapshots by labels")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -128,8 +126,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsRequest {
-	req := apiClient.ListSnapshots(ctx, model.ProjectId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsInProjectRequest {
+	req := apiClient.ListSnapshotsInProject(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -141,24 +139,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 		return fmt.Errorf("list snapshots response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(snapshots, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal snapshots: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(snapshots, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal snapshots: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, snapshots, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "VOLUME ID", "LABELS", "CREATED AT", "UPDATED AT")
 
@@ -186,5 +167,5 @@ func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapsh
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

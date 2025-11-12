@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -42,9 +40,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit affinity-group create --name AFFINITY_GROUP_NAME --policy soft-affinity",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -90,7 +88,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiCreateAffinityGroupRequest {
-	req := apiClient.CreateAffinityGroup(ctx, model.ProjectId)
+	req := apiClient.CreateAffinityGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateAffinityGroupPayload(
 		iaas.CreateAffinityGroupPayload{
 			Name:   utils.Ptr(model.Name),
@@ -100,7 +98,7 @@ func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClie
 	return req
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -121,21 +119,9 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.GlobalFlagModel.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created affinity group %q with id %s\n", model.Name, utils.PtrString(resp.Id))
-	}
-	return nil
+		return nil
+	})
 }

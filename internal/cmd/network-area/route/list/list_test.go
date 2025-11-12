@@ -7,12 +7,17 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	testRegion = "eu01"
 )
 
 type testCtxKey struct{}
@@ -24,6 +29,8 @@ var testNetworkAreaId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrganizationId,
 		networkAreaIdFlag:  testNetworkAreaId,
 		limitFlag:          "10",
@@ -38,6 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		OrganizationId: &testOrganizationId,
 		NetworkAreaId:  &testNetworkAreaId,
@@ -50,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRoutesRequest)) iaas.ApiListNetworkAreaRoutesRequest {
-	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId)
+	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -60,6 +68,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRoutesRequest))
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -140,46 +149,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing input: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -238,6 +208,24 @@ func TestOutputResult(t *testing.T) {
 			name: "empty route in routes slice",
 			args: args{
 				routes: []iaas.Route{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty destination in route",
+			args: args{
+				routes: []iaas.Route{{
+					Destination: &iaas.RouteDestination{},
+				}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty nexthop in route",
+			args: args{
+				routes: []iaas.Route{{
+					Nexthop: &iaas.RouteNexthop{},
+				}},
 			},
 			wantErr: false,
 		},

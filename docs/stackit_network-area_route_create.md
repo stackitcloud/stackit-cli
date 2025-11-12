@@ -15,22 +15,25 @@ stackit network-area route create [flags]
 ### Examples
 
 ```
-  Create a static route with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit network-area route create --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1
+  Create a static route with destination "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
+  $ stackit network-area route create --organization-id yyy --network-area-id xxx --destination 1.1.1.0/24 --next-hop 1.1.1.1
 
-  Create a static route with labels "key:value" and "foo:bar" with prefix "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
-  $ stackit network-area route create --labels key=value,foo=bar --organization-id yyy --network-area-id xxx --prefix 1.1.1.0/24 --next-hop 1.1.1.1
+  Create a static route with labels "key:value" and "foo:bar" with destination "1.1.1.0/24" and next hop "1.1.1.1" in a STACKIT Network Area with ID "xxx" in organization with ID "yyy"
+  $ stackit network-area route create --labels key=value,foo=bar --organization-id yyy --network-area-id xxx --destination 1.1.1.0/24 --next-hop 1.1.1.1
 ```
 
 ### Options
 
 ```
+      --destination string       Destination route. Must be a valid IPv4 or IPv6 CIDR
   -h, --help                     Help for "stackit network-area route create"
       --labels stringToString    Labels are key-value string pairs which can be attached to a route. A label can be provided with the format key=value and the flag can be used multiple times to provide a list of labels (default [])
       --network-area-id string   STACKIT Network Area ID
-      --next-hop string          Next hop IP address. Must be a valid IPv4
+      --next-hop-ipv4 string     Next hop IPv4 address
+      --next-hop-ipv6 string     Next hop IPv6 address
+      --nexthop-blackhole        Sets next hop to black hole
+      --nexthop-internet         Sets next hop to internet
       --organization-id string   Organization ID
-      --prefix string            Static route prefix
 ```
 
 ### Options inherited from parent commands

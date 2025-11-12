@@ -2,11 +2,9 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -41,9 +39,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			examples.NewExample(`List all groups`, `$ stackit security-group list`),
 			examples.NewExample(`List groups with labels`, `$ stackit security-group list --label-selector label1=value1,label2=value2`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -88,7 +86,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -104,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupsRequest {
-	request := apiClient.ListSecurityGroups(ctx, model.ProjectId)
+	request := apiClient.ListSecurityGroups(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
@@ -112,24 +110,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGroup) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex instance list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATEFUL", "DESCRIPTION", "LABELS")
 		for _, item := range items {
@@ -156,5 +137,5 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGr
 		}
 
 		return nil
-	}
+	})
 }

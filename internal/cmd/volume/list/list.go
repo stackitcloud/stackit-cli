@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -56,9 +54,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit volume list --limit 10",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -104,7 +102,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -129,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListVolumesRequest {
-	req := apiClient.ListVolumes(ctx, model.ProjectId)
+	req := apiClient.ListVolumes(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -138,24 +136,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volumes, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volumes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, volumes, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
 
@@ -174,5 +155,5 @@ func outputResult(p *print.Printer, outputFormat string, volumes []iaas.Volume) 
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

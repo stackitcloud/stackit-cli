@@ -40,9 +40,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Enable Server Backup functionality for your server`,
 				"$ stackit server backup enable --server-id=zzz"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -56,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			serverLabel := model.ServerId
 			// Get server name
 			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
-				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.ServerId)
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				} else if serverName != "" {
@@ -96,7 +96,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}

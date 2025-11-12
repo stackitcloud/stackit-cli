@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -54,9 +52,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit network-area route list --network-area-id xxx --organization-id yyy --limit 10",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -107,7 +105,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
@@ -129,40 +127,49 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRoutesRequest {
-	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId)
+	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(routes, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal static routes: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(routes, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal static routes: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, routes, func() error {
 		table := tables.NewTable()
-		table.SetHeader("Static Route ID", "Next Hop", "Prefix")
+		table.SetHeader("Static Route ID", "Next Hop", "Next Hop Type", "Destination")
 
 		for _, route := range routes {
+			var nextHop string
+			var nextHopType string
+			var destination string
+			if routeDest := route.Destination; routeDest != nil {
+				if routeDest.DestinationCIDRv4 != nil {
+					destination = *routeDest.DestinationCIDRv4.Value
+				}
+				if routeDest.DestinationCIDRv6 != nil {
+					destination = *routeDest.DestinationCIDRv6.Value
+				}
+			}
+			if routeNexthop := route.Nexthop; routeNexthop != nil {
+				if routeNexthop.NexthopIPv4 != nil {
+					nextHop = *routeNexthop.NexthopIPv4.Value
+					nextHopType = *routeNexthop.NexthopIPv4.Type
+				} else if routeNexthop.NexthopIPv6 != nil {
+					nextHop = *routeNexthop.NexthopIPv6.Value
+					nextHopType = *routeNexthop.NexthopIPv6.Type
+				} else if routeNexthop.NexthopBlackhole != nil {
+					nextHopType = *routeNexthop.NexthopBlackhole.Type
+				} else if routeNexthop.NexthopInternet != nil {
+					nextHopType = *routeNexthop.NexthopInternet.Type
+				}
+			}
+
 			table.AddRow(
-				utils.PtrString(route.RouteId),
-				utils.PtrString(route.Nexthop),
-				utils.PtrString(route.Prefix),
+				utils.PtrString(route.Id),
+				nextHop,
+				nextHopType,
+				destination,
 			)
 		}
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

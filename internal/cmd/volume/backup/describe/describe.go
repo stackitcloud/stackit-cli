@@ -2,11 +2,9 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -88,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }
 
@@ -97,24 +95,7 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		return fmt.Errorf("backup response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backup, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backup, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, backup, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
@@ -150,5 +131,5 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		}
 
 		return nil
-	}
+	})
 }

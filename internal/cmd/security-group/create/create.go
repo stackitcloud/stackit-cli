@@ -2,10 +2,8 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -44,9 +42,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			examples.NewExample(`Create a named group`, `$ stackit security-group create --name my-new-group`),
 			examples.NewExample(`Create a named group with labels`, `$ stackit security-group create --name my-new-group --labels label1=value1,label2=value2`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -96,7 +94,7 @@ func configureFlags(cmd *cobra.Command) {
 	}
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -117,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRequest {
-	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId)
+	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateSecurityGroupPayload{
 		Description: model.Description,
@@ -130,25 +128,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, name string, resp iaas.SecurityGroup) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created security group %q.\nSecurity Group ID %s\n", name, utils.PtrString(resp.Id))
 		return nil
-	}
+	})
 }

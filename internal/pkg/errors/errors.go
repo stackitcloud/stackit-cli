@@ -18,6 +18,16 @@ You can configure it for all commands by running:
 	
 or you can also set it through the environment variable [STACKIT_PROJECT_ID]`
 
+	MISSING_REGION = `the region is not currently set.
+	
+It can be set on the command level by re-running your command with the --region flag.
+	
+You can configure it for all commands by running:
+	
+  $ stackit config set --region xxx
+	
+or you can also set it through the environment variable [STACKIT_REGION]`
+
 	EMPTY_UPDATE = `please specify at least one field to update.
 	
 Get details on the available flags by re-running your command with the --help flag.`
@@ -178,6 +188,12 @@ To list all profiles, run:
   $ stackit config profile list`
 
 	FILE_ALREADY_EXISTS = `file %q already exists in the export path. Delete the existing file or define a different export path`
+
+	FLAG_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `The flag %[1]q must be provided when %[2]q is set`
+
+	MULTIPLE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `The flags %[1]v must be provided when one of the flags %[2]v is set`
+
+	ONE_OF_THE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET = `One of the flags %[1]v must be provided when %[2]q is set`
 )
 
 type ServerNicAttachMissingNicIdError struct {
@@ -232,6 +248,12 @@ type ProjectIdError struct{}
 
 func (e *ProjectIdError) Error() string {
 	return MISSING_PROJECT_ID
+}
+
+type RegionError struct{}
+
+func (e *RegionError) Error() string {
+	return MISSING_REGION
 }
 
 type EmptyUpdateError struct{}
@@ -499,3 +521,30 @@ type FileAlreadyExistsError struct {
 }
 
 func (e *FileAlreadyExistsError) Error() string { return fmt.Sprintf(FILE_ALREADY_EXISTS, e.Filename) }
+
+type DependingFlagIsMissing struct {
+	MissingFlag string
+	SetFlag     string
+}
+
+func (e *DependingFlagIsMissing) Error() string {
+	return fmt.Sprintf(FLAG_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, fmt.Sprintf("--%s", e.MissingFlag), fmt.Sprintf("--%s", e.SetFlag))
+}
+
+type MultipleFlagsAreMissing struct {
+	MissingFlags []string
+	SetFlags     []string
+}
+
+func (e *MultipleFlagsAreMissing) Error() string {
+	return fmt.Sprintf(MULTIPLE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, e.MissingFlags, e.SetFlags)
+}
+
+type OneOfFlagsIsMissing struct {
+	MissingFlags []string
+	SetFlag      string
+}
+
+func (e *OneOfFlagsIsMissing) Error() string {
+	return fmt.Sprintf(ONE_OF_THE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, e.MissingFlags, e.SetFlag)
+}

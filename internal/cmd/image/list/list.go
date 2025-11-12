@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -52,9 +50,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit image list --limit=10`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -105,7 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -130,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListImagesRequest {
-	request := apiClient.ListImages(ctx, model.ProjectId)
+	request := apiClient.ListImages(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
@@ -138,24 +136,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal image list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal image list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "LABELS")
 		for i := range items {
@@ -194,5 +175,5 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 		}
 
 		return nil
-	}
+	})
 }

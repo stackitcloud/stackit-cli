@@ -2,10 +2,7 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/goccy/go-yaml"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -70,7 +67,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeId)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
@@ -125,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateVolumeRequest {
-	req := apiClient.UpdateVolume(ctx, model.ProjectId, model.VolumeId)
+	req := apiClient.UpdateVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 
 	payload := iaas.UpdateVolumePayload{
 		Name:        model.Name,
@@ -140,25 +137,8 @@ func outputResult(p *print.Printer, outputFormat, volumeLabel string, volume *ia
 	if volume == nil {
 		return fmt.Errorf("volume response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volume, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volume, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, volume, func() error {
 		p.Outputf("Updated volume %q.\n", volumeLabel)
 		return nil
-	}
+	})
 }
