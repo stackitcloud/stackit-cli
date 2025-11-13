@@ -173,7 +173,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			parseInputWrapper := func(p *print.Printer, cmd *cobra.Command, arg []string) (*inputModel, error) {
+			parseInputWrapper := func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 				return parseInput(p, cmd)
 			}
 			testutils.TestParseInput(t, NewCreateCmd, parseInputWrapper, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
