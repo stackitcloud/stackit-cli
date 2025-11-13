@@ -2,10 +2,8 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -129,24 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 // outputResult formats the API response and prints it to the console
 func outputResult(p *print.Printer, outputFormat, projectLabel string, runners []intake.IntakeRunnerResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(runners, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Intake Runner list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(runners, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Intake Runner list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, runners, func() error {
 		if len(runners) == 0 {
 			p.Outputf("No intake runners found for project %q\n", projectLabel)
 			return nil
@@ -167,5 +148,5 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, runners [
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

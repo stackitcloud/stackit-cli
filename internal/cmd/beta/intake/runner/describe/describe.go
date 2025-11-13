@@ -2,10 +2,8 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 
@@ -97,25 +95,7 @@ func outputResult(p *print.Printer, outputFormat string, runner *intake.IntakeRu
 	if runner == nil {
 		return fmt.Errorf("received nil runner, could not display details")
 	}
-
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(runner, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Intake Runner: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(runner, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Intake Runner: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, runner, func() error {
 		table := tables.NewTable()
 		table.SetHeader("Attribute", "Value")
 		table.AddRow("ID", runner.GetId())
@@ -133,5 +113,5 @@ func outputResult(p *print.Printer, outputFormat string, runner *intake.IntakeRu
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }
