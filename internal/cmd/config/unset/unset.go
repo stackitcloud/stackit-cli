@@ -51,6 +51,7 @@ const (
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 )
 
 type inputModel struct {
@@ -89,6 +90,7 @@ type inputModel struct {
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
+	IntakeCustomEndpoint            bool
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -212,6 +214,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if model.TokenCustomEndpoint {
 				viper.Set(config.TokenCustomEndpointKey, "")
 			}
+			if model.IntakeCustomEndpoint {
+				viper.Set(config.IntakeCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -260,6 +265,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
+	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -299,6 +305,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
+		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)
