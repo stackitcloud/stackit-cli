@@ -15,8 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -25,20 +23,20 @@ var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:     testProjectId,
-		nameFlag:          "example",
-		dnsNameFlag:       "example.com",
-		defaultTTLFlag:    "3600",
-		aclFlag:           "0.0.0.0/0",
-		typeFlag:          string(dns.CREATEZONEPAYLOADTYPE_PRIMARY),
-		primaryFlag:       "1.1.1.1",
-		retryTimeFlag:     "600",
-		refreshTimeFlag:   "3600",
-		negativeCacheFlag: "60",
-		isReverseZoneFlag: "false",
-		expireTimeFlag:    "36000000",
-		descriptionFlag:   "Example",
-		contactEmailFlag:  "example@example.com",
+		globalflags.ProjectIdFlag: testProjectId,
+		nameFlag:                  "example",
+		dnsNameFlag:               "example.com",
+		defaultTTLFlag:            "3600",
+		aclFlag:                   "0.0.0.0/0",
+		typeFlag:                  string(dns.CREATEZONEPAYLOADTYPE_PRIMARY),
+		primaryFlag:               "1.1.1.1",
+		retryTimeFlag:             "600",
+		refreshTimeFlag:           "3600",
+		negativeCacheFlag:         "60",
+		isReverseZoneFlag:         "false",
+		expireTimeFlag:            "36000000",
+		descriptionFlag:           "Example",
+		contactEmailFlag:          "example@example.com",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -118,9 +116,9 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required fields only",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				nameFlag:      "example",
-				dnsNameFlag:   "example.com",
+				globalflags.ProjectIdFlag: testProjectId,
+				nameFlag:                  "example",
+				dnsNameFlag:               "example.com",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -135,19 +133,19 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "zero values",
 			flagValues: map[string]string{
-				projectIdFlag:     testProjectId,
-				nameFlag:          "",
-				dnsNameFlag:       "",
-				defaultTTLFlag:    "0",
-				aclFlag:           "",
-				typeFlag:          "",
-				retryTimeFlag:     "0",
-				refreshTimeFlag:   "0",
-				negativeCacheFlag: "0",
-				isReverseZoneFlag: "false",
-				expireTimeFlag:    "0",
-				descriptionFlag:   "",
-				contactEmailFlag:  "",
+				globalflags.ProjectIdFlag: testProjectId,
+				nameFlag:                  "",
+				dnsNameFlag:               "",
+				defaultTTLFlag:            "0",
+				aclFlag:                   "",
+				typeFlag:                  "",
+				retryTimeFlag:             "0",
+				refreshTimeFlag:           "0",
+				negativeCacheFlag:         "0",
+				isReverseZoneFlag:         "false",
+				expireTimeFlag:            "0",
+				descriptionFlag:           "",
+				contactEmailFlag:          "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -173,21 +171,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
