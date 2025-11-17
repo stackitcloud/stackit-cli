@@ -20,8 +20,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -31,10 +29,10 @@ var testZoneId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:   testProjectId,
-		zoneIdFlag:      testZoneId,
-		nameLikeFlag:    "some-pattern",
-		orderByNameFlag: "asc",
+		globalflags.ProjectIdFlag: testProjectId,
+		zoneIdFlag:                testZoneId,
+		nameLikeFlag:              "some-pattern",
+		orderByNameFlag:           "asc",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -130,8 +128,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required fields only",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				zoneIdFlag:    testZoneId,
+				globalflags.ProjectIdFlag: testProjectId,
+				zoneIdFlag:                testZoneId,
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -146,21 +144,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -468,6 +466,7 @@ func TestFetchRecordSets(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		zoneLabel    string
 		recordSets   []dns.RecordSet
 	}
 	tests := []struct {
@@ -485,7 +484,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.recordSets); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.zoneLabel, tt.args.recordSets); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

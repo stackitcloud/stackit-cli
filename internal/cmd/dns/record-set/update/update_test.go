@@ -16,8 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/dns"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -45,12 +43,12 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		zoneIdFlag:    testZoneId,
-		commentFlag:   "comment",
-		nameFlag:      "example.com",
-		recordFlag:    "1.1.1.1",
-		ttlFlag:       "3600",
+		globalflags.ProjectIdFlag: testProjectId,
+		zoneIdFlag:                testZoneId,
+		commentFlag:               "comment",
+		nameFlag:                  "example.com",
+		recordFlag:                "1.1.1.1",
+		ttlFlag:                   "3600",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -132,8 +130,8 @@ func TestParseInput(t *testing.T) {
 			description: "required flags only (no values to update)",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				zoneIdFlag:    testZoneId,
+				globalflags.ProjectIdFlag: testProjectId,
+				zoneIdFlag:                testZoneId,
 			},
 			isValid: false,
 			expectedModel: &inputModel{
@@ -149,12 +147,12 @@ func TestParseInput(t *testing.T) {
 			description: "zero values",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				zoneIdFlag:    testZoneId,
-				commentFlag:   "",
-				nameFlag:      "",
-				recordFlag:    "1.1.1.1",
-				ttlFlag:       "0",
+				globalflags.ProjectIdFlag: testProjectId,
+				zoneIdFlag:                testZoneId,
+				commentFlag:               "",
+				nameFlag:                  "",
+				recordFlag:                "1.1.1.1",
+				ttlFlag:                   "0",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -174,7 +172,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -182,7 +180,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -190,7 +188,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
