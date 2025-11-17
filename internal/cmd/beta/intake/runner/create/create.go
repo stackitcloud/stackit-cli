@@ -156,10 +156,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *intake.IntakeRunnerResponse) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil {
-			p.Outputf("Created Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
+			p.Outputf("Triggered creation of Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
 			return nil
 		}
-		p.Outputf("Created Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("Triggered creation of Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
 		return nil
 	})
 }
