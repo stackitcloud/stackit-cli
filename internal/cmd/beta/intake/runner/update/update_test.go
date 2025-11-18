@@ -207,9 +207,8 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
+		model        *inputModel
 		projectLabel string
-		runnerId     string
 		resp         *intake.IntakeRunnerResponse
 	}
 	tests := []struct {
@@ -218,28 +217,51 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "default output",
-			args:    args{outputFormat: "default", projectLabel: "my-project", runnerId: "runner-id-123", resp: &intake.IntakeRunnerResponse{}},
+			name: "default output",
+			args: args{
+				model:        fixtureInputModel(),
+				projectLabel: "my-project",
+				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+			},
 			wantErr: false,
 		},
 		{
-			name:    "json output",
-			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")}},
+			name: "default output - async",
+			args: args{
+				model: fixtureInputModel(func(model *inputModel) {
+					model.Async = true
+				}),
+				projectLabel: "my-project",
+				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+			},
 			wantErr: false,
 		},
 		{
-			name:    "yaml output",
-			args:    args{outputFormat: print.YAMLOutputFormat, resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")}},
+			name: "json output",
+			args: args{
+				model: fixtureInputModel(func(model *inputModel) {
+					model.OutputFormat = print.JSONOutputFormat
+				}),
+				resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+			},
 			wantErr: false,
 		},
 		{
-			name:    "nil response",
-			args:    args{outputFormat: print.JSONOutputFormat, resp: nil},
+			name: "nil response - default output",
+			args: args{
+				model: fixtureInputModel(),
+				resp:  nil,
+			},
 			wantErr: false,
 		},
 		{
-			name:    "nil response - default output",
-			args:    args{outputFormat: "default", resp: nil},
+			name: "nil response - json output",
+			args: args{
+				model: fixtureInputModel(func(model *inputModel) {
+					model.OutputFormat = print.JSONOutputFormat
+				}),
+				resp: nil,
+			},
 			wantErr: false,
 		},
 	}
@@ -247,7 +269,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewUpdateCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.model, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

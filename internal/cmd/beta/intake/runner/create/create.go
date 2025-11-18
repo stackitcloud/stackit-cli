@@ -98,7 +98,7 @@ func NewCreateCmd(p *params.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(p.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(p.Printer, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -153,13 +153,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *intake.IntakeRunnerResponse) error {
-	return p.OutputResult(outputFormat, resp, func() error {
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *intake.IntakeRunnerResponse) error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputf("Triggered creation of Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
 			return nil
 		}
-		p.Outputf("Triggered creation of Intake Runner for project %q. Runner ID: %s\n", projectLabel, utils.PtrString(resp.Id))
+
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s Intake Runner for project %q. Runner ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
 		return nil
 	})
 }
