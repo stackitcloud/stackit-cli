@@ -105,7 +105,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create a server with user data (cloud-init)`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml")`,
+				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
