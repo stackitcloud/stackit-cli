@@ -21,11 +21,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Run:   utils.CmdHelp,
 	}
 	// Pass the params down to each action command
-	cmd.AddCommand(create.NewCreateCmd(params))
-	cmd.AddCommand(delete.NewDeleteCmd(params))
-	cmd.AddCommand(describe.NewDescribeCmd(params))
-	cmd.AddCommand(list.NewListCmd(params))
-	cmd.AddCommand(update.NewUpdateCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
 
 	return cmd
 }

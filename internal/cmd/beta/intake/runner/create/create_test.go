@@ -176,7 +176,7 @@ func TestParseInput(t *testing.T) {
 			parseInputWrapper := func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 				return parseInput(p, cmd)
 			}
-			testutils.TestParseInput(t, NewCreateCmd, parseInputWrapper, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, NewCmd, parseInputWrapper, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -282,7 +282,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCreateCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.model, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {

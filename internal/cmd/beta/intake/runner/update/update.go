@@ -43,7 +43,7 @@ type inputModel struct {
 	Labels             *map[string]string
 }
 
-func NewUpdateCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", runnerIdArg),
 		Short: "Updates an Intake Runner",

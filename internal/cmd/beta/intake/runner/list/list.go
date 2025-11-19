@@ -28,8 +28,8 @@ type inputModel struct {
 	Limit *int64
 }
 
-// NewListCmd creates a new cobra command for listing Intake Runners
-func NewListCmd(p *params.CmdParams) *cobra.Command {
+// NewCmd creates a new cobra command for listing Intake Runners
+func NewCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Intake Runners",

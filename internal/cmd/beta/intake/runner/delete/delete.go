@@ -28,8 +28,8 @@ type inputModel struct {
 	RunnerId string
 }
 
-// NewDeleteCmd creates a new cobra command for deleting an Intake Runner
-func NewDeleteCmd(p *params.CmdParams) *cobra.Command {
+// NewCmd creates a new cobra command for deleting an Intake Runner
+func NewCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", runnerIdArg),
 		Short: "Deletes an Intake Runner",

@@ -27,7 +27,7 @@ type inputModel struct {
 	RunnerId string
 }
 
-func NewDescribeCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", runnerIdArg),
 		Short: "Shows details of an Intake Runner",

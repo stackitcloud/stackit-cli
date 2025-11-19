@@ -112,7 +112,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewListCmd, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+			testutils.TestParseInput(t, NewCmd, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 				return parseInput(p, cmd)
 			}, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -186,7 +186,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewListCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, "dummy-projectlabel", tt.args.runners); (err != nil) != tt.wantErr {

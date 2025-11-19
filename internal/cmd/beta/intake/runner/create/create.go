@@ -39,7 +39,7 @@ type inputModel struct {
 	Labels             *map[string]string
 }
 
-func NewCreateCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a new Intake Runner",
