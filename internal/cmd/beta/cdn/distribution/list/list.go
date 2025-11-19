@@ -41,7 +41,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`List all CDN distributions sorted by id`,
-				`$ stackit beta dns distribution list --sort-by=id`,
+				`$ stackit beta cdn distribution list --sort-by=id`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
