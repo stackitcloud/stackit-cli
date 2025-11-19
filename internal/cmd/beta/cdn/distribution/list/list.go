@@ -37,7 +37,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all CDN distributions`,
-				`$ stackit beta dns distribution list`,
+				`$ stackit beta cdn distribution list`,
 			),
 			examples.NewExample(
 				`List all CDN distributions sorted by id`,
