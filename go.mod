@@ -18,6 +18,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0
+	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.0
