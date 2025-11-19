@@ -9,6 +9,7 @@ The profile name can be provided via the STACKIT_CLI_PROFILE environment variabl
 The environment variable takes precedence over the argument.
 If you do not want to set the profile as active, use the --no-set flag.
 If you want to create the new profile with the initial default configurations, use the --empty flag.
+If you want to create the new profile and ignore the error for an already existing profile, use the --ignore-existing flag.
 
 ```
 stackit config profile create PROFILE [flags]
@@ -27,9 +28,10 @@ stackit config profile create PROFILE [flags]
 ### Options
 
 ```
-      --empty    Create the profile with the initial default configurations
-  -h, --help     Help for "stackit config profile create"
-      --no-set   Do not set the profile as the active profile
+      --empty             Create the profile with the initial default configurations
+  -h, --help              Help for "stackit config profile create"
+      --ignore-existing   Suppress the error it the profile exists already
+      --no-set            Do not set the profile as the active profile
 ```
 
 ### Options inherited from parent commands
