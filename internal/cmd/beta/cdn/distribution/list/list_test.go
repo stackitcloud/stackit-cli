@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -20,11 +19,12 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 )
 
+type testCtxKey struct{}
+
 var testProjectId = uuid.NewString()
 var testClient = &cdn.APIClient{}
-var testCtx = context.WithValue(context.Background(), "foo", "foo")
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testNextPageID = "next-page-id-123"
-var testTime = time.Now()
 var testID = "dist-1"
 var testStatus = cdn.DISTRIBUTIONSTATUS_ACTIVE
 
@@ -317,7 +317,7 @@ func TestFetchDistributions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			callCount := 0
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := tt.responses[callCount]
 				callCount++
 				w.Header().Set("Content-Type", "application/json")
