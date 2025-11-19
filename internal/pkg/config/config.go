@@ -48,6 +48,7 @@ const (
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
+	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 
