@@ -14,7 +14,7 @@ stackit routing-table describe ROUTING_TABLE_ID_ARG [flags]
 
 ```
   Describe a routing-table
-  $ stackit routing-table describe xxxx-xxxx-xxxx-xxxx --organization-id xxx --network-area-id yyy
+  $ stackit routing-table describe xxx --organization-id xxx --network-area-id yyy
 ```
 
 ### Options

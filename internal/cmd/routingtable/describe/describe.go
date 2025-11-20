@@ -27,9 +27,9 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkAreaId  *string
-	OrganizationId *string
-	RoutingTableId *string
+	NetworkAreaId  string
+	OrganizationId string
+	RoutingTableId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -41,7 +41,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Describe a routing-table`,
-				`$ stackit routing-table describe xxxx-xxxx-xxxx-xxxx --organization-id xxx --network-area-id yyy`,
+				`$ stackit routing-table describe xxx --organization-id xxx --network-area-id yyy`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -60,10 +60,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			request := apiClient.GetRoutingTableOfArea(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
+				model.RoutingTableId,
 			)
 
 			response, err := request.Execute()
@@ -97,9 +97,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RoutingTableId:  &routingTableId,
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RoutingTableId:  routingTableId,
 	}
 
 	p.DebugInputModel(model)

@@ -37,11 +37,11 @@ type inputModel struct {
 	DestinationType  *string
 	DestinationValue *string
 	Labels           *map[string]string
-	NetworkAreaId    *string
+	NetworkAreaId    string
 	NextHopType      *string
 	NextHopValue     *string
-	OrganizationId   *string
-	RoutingTableId   *string
+	OrganizationId   string
+	RoutingTableId   string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -82,7 +82,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", *model.RoutingTableId)
+				prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", model.RoutingTableId)
 				if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 					return err
 				}
@@ -98,7 +98,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("create route request failed: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp.Items)
+			return outputResult(params.Printer, model.OutputFormat, resp.GetItems())
 		},
 	}
 	configureFlags(cmd)
@@ -136,11 +136,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DestinationType:  flags.FlagToStringPointer(p, cmd, destinationTypeFlag),
 		DestinationValue: flags.FlagToStringPointer(p, cmd, destinationValueFlag),
 		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
-		NetworkAreaId:    flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
+		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		NextHopType:      flags.FlagToStringPointer(p, cmd, nextHopTypeFlag),
 		NextHopValue:     flags.FlagToStringPointer(p, cmd, nextHopValueFlag),
-		OrganizationId:   flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RoutingTableId:   flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
+		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RoutingTableId:   flags.FlagToStringValue(p, cmd, routingTableIdFlag),
 	}
 
 	// Next Hop validation logic
@@ -178,10 +178,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 		return apiClient.AddRoutesToRoutingTable(
 			ctx,
-			*model.OrganizationId,
-			*model.NetworkAreaId,
+			model.OrganizationId,
+			model.NetworkAreaId,
 			model.Region,
-			*model.RoutingTableId,
+			model.RoutingTableId,
 		).AddRoutesToRoutingTablePayload(payload), nil
 	}
 
