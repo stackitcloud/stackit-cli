@@ -30,5 +30,6 @@ stackit beta cdn distribution [flags]
 ### SEE ALSO
 
 * [stackit beta cdn](./stackit_beta_cdn.md)	 - Manage CDN resources
+* [stackit beta cdn distribution create](./stackit_beta_cdn_distribution_create.md)	 - Create a CDN distribution
 * [stackit beta cdn distribution list](./stackit_beta_cdn_distribution_list.md)	 - List CDN distributions
 
