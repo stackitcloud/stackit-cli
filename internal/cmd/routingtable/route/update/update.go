@@ -28,10 +28,10 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Labels         *map[string]string
-	NetworkAreaId  *string
-	OrganizationId *string
-	RouteId        *string
-	RoutingTableId *string
+	NetworkAreaId  string
+	OrganizationId string
+	RouteId        string
+	RoutingTableId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -60,7 +60,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update route %q for routing-table with id %q?", *model.RouteId, *model.RoutingTableId)
+				prompt := fmt.Sprintf("Are you sure you want to update route %q for routing-table with id %q?", model.RouteId, model.RoutingTableId)
 				if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 					return err
 				}
@@ -69,11 +69,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			req := apiClient.UpdateRouteOfRoutingTable(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
-				*model.RouteId,
+				model.RoutingTableId,
+				model.RouteId,
 			)
 
 			payload := iaas.UpdateRouteOfRoutingTablePayload{
@@ -83,10 +83,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update route %q of routing-table %q : %w", *model.RouteId, *model.RoutingTableId, err)
+				return fmt.Errorf("update route %q of routing-table %q : %w", model.RouteId, model.RoutingTableId, err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *model.RoutingTableId, *model.NetworkAreaId, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.RoutingTableId, model.NetworkAreaId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -120,10 +120,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Labels:          labels,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RouteId:         &routeId,
-		RoutingTableId:  flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RouteId:         routeId,
+		RoutingTableId:  flags.FlagToStringValue(p, cmd, routingTableIdFlag),
 	}
 
 	p.DebugInputModel(model)

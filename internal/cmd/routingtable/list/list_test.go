@@ -48,8 +48,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		OrganizationId: utils.Ptr(testOrgId),
-		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
+		OrganizationId: testOrgId,
+		NetworkAreaId:  testNetworkAreaId,
 		LabelSelector:  utils.Ptr(testLabelSelectorFlag),
 		Limit:          utils.Ptr(testLimitFlag),
 	}

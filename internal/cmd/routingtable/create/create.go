@@ -33,11 +33,11 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Description      *string
 	Labels           *map[string]string
-	Name             *string
-	NetworkAreaId    *string
+	Name             string
+	NetworkAreaId    string
 	NonSystemRoutes  bool
 	NonDynamicRoutes bool
-	OrganizationId   *string
+	OrganizationId   string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -77,7 +77,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := "Are you sure you want to create a routing-table?"
+				prompt := fmt.Sprintf("Are you sure you want to create a routing-table with the name %s?", model.Name)
 				if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 					return err
 				}
@@ -121,9 +121,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Description:      flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		NonDynamicRoutes: flags.FlagToBoolValue(p, cmd, nonDynamicRoutesFlag),
 		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
-		Name:             flags.FlagToStringPointer(p, cmd, nameFlag),
-		NetworkAreaId:    flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:   flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		Name:             flags.FlagToStringValue(p, cmd, nameFlag),
+		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		NonSystemRoutes:  flags.FlagToBoolValue(p, cmd, nonSystemRoutesFlag),
 	}
 
@@ -144,7 +144,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   model.Description,
-		Name:          model.Name,
+		Name:          utils.Ptr(model.Name),
 		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
 		SystemRoutes:  utils.Ptr(systemRoutes),
 		DynamicRoutes: utils.Ptr(dynamicRoutes),
@@ -152,8 +152,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return apiClient.AddRoutingTableToArea(
 		ctx,
-		*model.OrganizationId,
-		*model.NetworkAreaId,
+		model.OrganizationId,
+		model.NetworkAreaId,
 		model.Region,
 	).AddRoutingTableToAreaPayload(payload), nil
 }
