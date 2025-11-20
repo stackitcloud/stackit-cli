@@ -24,10 +24,10 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkAreaId  *string
-	OrganizationId *string
-	RouteID        *string
-	RoutingTableId *string
+	NetworkAreaId  string
+	OrganizationId string
+	RouteID        string
+	RoutingTableId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -39,7 +39,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Deletes a route within a routing-table`,
-				`$ stackit routing-table route delete xxxx-xxxx-xxxx-xxxx --routing-table-id xxx --organization-id yyy --network-area-id zzz`,
+				`$ stackit routing-table route delete xxx --routing-table-id xxx --organization-id yyy --network-area-id zzz`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -56,7 +56,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the route %q in routing-table %q for network-area-id %q?", *model.RouteID, *model.RoutingTableId, *model.OrganizationId)
+				prompt := fmt.Sprintf("Are you sure you want to delete the route %q in routing-table %q for network-area-id %q?", model.RouteID, model.RoutingTableId, model.OrganizationId)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -66,18 +66,18 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			req := apiClient.DeleteRouteFromRoutingTable(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
-				*model.RouteID,
+				model.RoutingTableId,
+				model.RouteID,
 			)
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete route from routing-table: %w", err)
 			}
 
-			params.Printer.Outputf("Route %q from routing-table %q deleted.", *model.RouteID, *model.RoutingTableId)
+			params.Printer.Outputf("Route %q from routing-table %q deleted.", model.RouteID, model.RoutingTableId)
 			return nil
 		},
 	}
@@ -105,10 +105,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RouteID:         &routeId,
-		RoutingTableId:  flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RouteID:         routeId,
+		RoutingTableId:  flags.FlagToStringValue(p, cmd, routingTableIdFlag),
 	}
 
 	p.DebugInputModel(model)

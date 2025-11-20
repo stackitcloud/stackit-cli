@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const testRegion = "eu01"
@@ -35,9 +34,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		OrganizationId: utils.Ptr(testOrgId),
-		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		RoutingTableId: utils.Ptr(testRoutingTableId),
+		OrganizationId: testOrgId,
+		NetworkAreaId:  testNetworkAreaId,
+		RoutingTableId: testRoutingTableId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -59,7 +58,7 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(m *inputModel) {
-				m.RoutingTableId = &testRoutingTableId
+				m.RoutingTableId = testRoutingTableId
 			}),
 		},
 		{
