@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 )
@@ -24,9 +25,12 @@ type testCtxKey struct{}
 var testProjectId = uuid.NewString()
 var testClient = &cdn.APIClient{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testNextPageID = "next-page-id-123"
-var testID = "dist-1"
-var testStatus = cdn.DISTRIBUTIONSTATUS_ACTIVE
+
+const (
+	testNextPageID = "next-page-id-123"
+	testID         = "dist-1"
+	testStatus     = cdn.DISTRIBUTIONSTATUS_ACTIVE
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -195,7 +199,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "with next page id",
 			inputModel:  fixtureInputModel(),
-			nextPageID:  &testNextPageID,
+			nextPageID:  utils.Ptr(testNextPageID),
 			expected:    fixtureRequest(requestNextPageID(testNextPageID)),
 		},
 	}
@@ -281,7 +285,7 @@ func TestFetchDistributions(t *testing.T) {
 			description: "multiple distributions, multiple pages",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseNextPageID(&testNextPageID),
+					responseNextPageID(utils.Ptr(testNextPageID)),
 					responseDistributions(
 						fixtureDistribution("dist-1"),
 					),
@@ -310,7 +314,7 @@ func TestFetchDistributions(t *testing.T) {
 			description: "API error on second page",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseNextPageID(&testNextPageID),
+					responseNextPageID(utils.Ptr(testNextPageID)),
 					responseDistributions(
 						fixtureDistribution("dist-1"),
 					),
@@ -389,14 +393,14 @@ func TestOutputResult(t *testing.T) {
 			outputFormat: "table",
 			distributions: []cdn.Distribution{
 				{
-					Id: &testID,
+					Id: utils.Ptr(testID),
 					Config: &cdn.Config{
 						Regions: &[]cdn.Region{
 							cdn.REGION_EU,
 							cdn.REGION_AF,
 						},
 					},
-					Status: &testStatus,
+					Status: utils.Ptr(testStatus),
 				},
 			},
 			expected: `
