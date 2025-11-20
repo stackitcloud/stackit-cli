@@ -32,10 +32,10 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.InfoVerbosity,
 		},
-		OrganizationId: &testOrgId,
-		NetworkAreaId:  &testNetworkAreaId,
-		RoutingTableId: &testRoutingTableId,
-		RouteID:        &testRouteId,
+		OrganizationId: testOrgId,
+		NetworkAreaId:  testNetworkAreaId,
+		RoutingTableId: testRoutingTableId,
+		RouteID:        testRouteId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -57,7 +57,7 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(m *inputModel) {
-				m.RouteID = &testRouteId
+				m.RouteID = testRouteId
 			}),
 		},
 		{

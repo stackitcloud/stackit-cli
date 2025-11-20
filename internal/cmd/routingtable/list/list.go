@@ -33,8 +33,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector  *string
 	Limit          *int64
-	NetworkAreaId  *string
-	OrganizationId *string
+	NetworkAreaId  string
+	OrganizationId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -82,22 +82,22 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				var orgLabel string
 				rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 				if err == nil {
-					orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
+					orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, model.OrganizationId)
 					if err != nil {
 						params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
-						orgLabel = *model.OrganizationId
+						orgLabel = model.OrganizationId
 					} else if orgLabel == "" {
-						orgLabel = *model.OrganizationId
+						orgLabel = model.OrganizationId
 					}
 				} else {
 					params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 				}
-				params.Printer.Info("No routing-tables found for organization %q\n", orgLabel)
+				params.Printer.Outputf("No routing-tables found for organization %q\n", orgLabel)
 				return nil
 			}
 
 			// Truncate output
-			items := *response.Items
+			items := response.GetItems()
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -135,8 +135,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 		Limit:           limit,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -144,7 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListRoutingTablesOfAreaRequest {
-	request := apiClient.ListRoutingTablesOfArea(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
+	request := apiClient.ListRoutingTablesOfArea(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 	if model.LabelSelector != nil {
 		request.LabelSelector(*model.LabelSelector)
 	}

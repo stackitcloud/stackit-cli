@@ -49,8 +49,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		OrganizationId: utils.Ptr(testOrgId),
-		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
+		OrganizationId: testOrgId,
+		NetworkAreaId:  testNetworkAreaId,
 		Name:           utils.Ptr(testRoutingTableName),
 		Description:    utils.Ptr(testRoutingTableDescription),
 		Labels:         utils.Ptr(*testLabels),
@@ -85,7 +85,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.RoutingTableId = &testRoutingTableId
+				model.RoutingTableId = testRoutingTableId
 			}),
 		},
 		{
@@ -97,7 +97,7 @@ func TestParseInput(t *testing.T) {
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.NonDynamicRoutes = true
-				model.RoutingTableId = &testRoutingTableId
+				model.RoutingTableId = testRoutingTableId
 			}),
 		},
 		{
