@@ -9,13 +9,13 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/jedib0t/go-pretty/v6 v6.7.2
+	github.com/jedib0t/go-pretty/v6 v6.7.3
 	github.com/lmittmann/tint v1.1.2
 	github.com/mattn/go-colorable v0.1.14
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.19.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
@@ -33,7 +33,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.2
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.2
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.30.0
 	golang.org/x/oauth2 v0.33.0
@@ -245,9 +245,9 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.1
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.0
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.1
