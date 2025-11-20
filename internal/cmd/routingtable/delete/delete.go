@@ -23,9 +23,9 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkAreaId  *string
-	OrganizationId *string
-	RoutingTableId *string
+	NetworkAreaId  string
+	OrganizationId string
+	RoutingTableId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -37,7 +37,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Deletes a a routing-table`,
-				`$ stackit routing-table delete xxxx-xxxx-xxxx-xxxx --organization-id yyy --network-area-id zzz`,
+				`$ stackit routing-table delete xxx --organization-id yyy --network-area-id zzz`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -54,7 +54,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the routing-table %q for network-area-id %q?", *model.RoutingTableId, *model.OrganizationId)
+				prompt := fmt.Sprintf("Are you sure you want to delete the routing-table %q for network-area-id %q?", model.RoutingTableId, model.OrganizationId)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -64,17 +64,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			req := apiClient.DeleteRoutingTableFromArea(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
+				model.RoutingTableId,
 			)
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete routing-table: %w", err)
 			}
 
-			params.Printer.Outputf("Routing-table %q deleted.", *model.RoutingTableId)
+			params.Printer.Outputf("Routing-table %q deleted.", model.RoutingTableId)
 			return nil
 		},
 	}
@@ -101,9 +101,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RoutingTableId:  &routingTableId,
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RoutingTableId:  routingTableId,
 	}
 
 	p.DebugInputModel(model)

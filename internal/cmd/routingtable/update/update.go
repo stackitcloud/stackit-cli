@@ -28,10 +28,10 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	OrganizationId   *string
-	NetworkAreaId    *string
+	OrganizationId   string
+	NetworkAreaId    string
 	NonDynamicRoutes bool
-	RoutingTableId   *string
+	RoutingTableId   string
 	Description      *string
 	Labels           *map[string]string
 	Name             *string
@@ -75,7 +75,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update routing-table %q?", *model.RoutingTableId)
+				prompt := fmt.Sprintf("Are you sure you want to update routing-table %q?", model.RoutingTableId)
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -85,10 +85,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			req := apiClient.UpdateRoutingTableOfArea(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
+				model.RoutingTableId,
 			)
 
 			dynamicRoutes := true
@@ -106,10 +106,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("update routing-table %q : %w", *model.RoutingTableId, err)
+				return fmt.Errorf("update routing-table %q : %w", model.RoutingTableId, err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *model.NetworkAreaId, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.NetworkAreaId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -141,10 +141,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Description:      flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 		Name:             flags.FlagToStringPointer(p, cmd, nameFlag),
-		NetworkAreaId:    flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
+		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		NonDynamicRoutes: flags.FlagToBoolValue(p, cmd, nonDynamicRoutesFlag),
-		OrganizationId:   flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RoutingTableId:   &routeTableId,
+		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RoutingTableId:   routeTableId,
 	}
 
 	p.DebugInputModel(model)
