@@ -32,9 +32,9 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector  *string
 	Limit          *int64
-	NetworkAreaId  *string
-	OrganizationId *string
-	RoutingTableId *string
+	NetworkAreaId  string
+	OrganizationId string
+	RoutingTableId string
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -73,10 +73,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			// Call API
 			request := apiClient.ListRoutesOfRoutingTable(
 				ctx,
-				*model.OrganizationId,
-				*model.NetworkAreaId,
+				model.OrganizationId,
+				model.NetworkAreaId,
 				model.Region,
-				*model.RoutingTableId,
+				model.RoutingTableId,
 			)
 
 			if model.LabelSelector != nil {
@@ -89,7 +89,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if items := response.Items; items == nil || len(*items) == 0 {
-				params.Printer.Info("No routes  found for routing-table %q\n", *model.RoutingTableId)
+				params.Printer.Outputf("No routes  found for routing-table %q\n", model.RoutingTableId)
 				return nil
 			}
 
@@ -133,9 +133,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 		Limit:           limit,
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		RoutingTableId:  flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		RoutingTableId:  flags.FlagToStringValue(p, cmd, routingTableIdFlag),
 	}
 
 	p.DebugInputModel(model)
