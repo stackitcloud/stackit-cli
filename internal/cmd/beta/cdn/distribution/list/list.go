@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 )
 
@@ -70,11 +71,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-var sortByFlagOptions = []string{"id", "created", "updated", "origin-url", "status"}
+var sortByFlagOptions = []string{"id", "createdAt", "updatedAt", "originUrl", "status", "originUrlRelated"}
 
 func configureFlags(cmd *cobra.Command) {
 	// same default as apiClient
-	cmd.Flags().Var(flags.EnumFlag(false, "created", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "createdAt", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -94,29 +95,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType) cdn.ApiListDistributionsRequest {
 	req := apiClient.ListDistributions(ctx, model.GlobalFlagModel.ProjectId)
-	req = req.SortBy(toAPISortBy(model.SortBy))
+	req = req.SortBy(model.SortBy)
 	req = req.PageSize(100)
 	if nextPageID != nil {
 		req = req.PageIdentifier(*nextPageID)
 	}
 	return req
-}
-
-func toAPISortBy(sortBy string) string {
-	switch sortBy {
-	case "id":
-		return "id"
-	case "created":
-		return "createdAt"
-	case "updated":
-		return "updatedAt"
-	case "origin-url":
-		return "originUrl"
-	case "status":
-		return "status"
-	default:
-		panic("invalid sortBy value, programmer error")
-	}
 }
 
 func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Distribution) error {
@@ -133,11 +117,7 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 		table.SetHeader("ID", "REGIONS", "STATUS")
 		for i := range distributions {
 			d := &distributions[i]
-			regions := make([]string, 0, len(*d.Config.Regions))
-			for _, r := range *d.Config.Regions {
-				regions = append(regions, string(r))
-			}
-			joinedRegions := strings.Join(regions, ", ")
+			joinedRegions := strings.Join(sdkUtils.EnumSliceToStringSlice(*d.Config.Regions), ", ")
 			table.AddRow(
 				utils.PtrString(d.Id),
 				joinedRegions,

@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(m *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		SortBy: "created",
+		SortBy: "createdAt",
 	}
 	for _, mod := range mods {
 		mod(m)
@@ -123,9 +123,9 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "sort by origin-url",
-			flagValues:  fixtureFlagValues(flagSortBy("origin-url")),
+			flagValues:  fixtureFlagValues(flagSortBy("originUrl")),
 			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("origin-url")),
+			expected:    fixtureInputModel(inputSortBy("originUrl")),
 		},
 		{
 			description: "sort by status",
@@ -135,15 +135,21 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "sort by created",
-			flagValues:  fixtureFlagValues(flagSortBy("created")),
+			flagValues:  fixtureFlagValues(flagSortBy("createdAt")),
 			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("created")),
+			expected:    fixtureInputModel(inputSortBy("createdAt")),
 		},
 		{
 			description: "sort by updated",
-			flagValues:  fixtureFlagValues(flagSortBy("updated")),
+			flagValues:  fixtureFlagValues(flagSortBy("updatedAt")),
 			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("updated")),
+			expected:    fixtureInputModel(inputSortBy("updatedAt")),
+		},
+		{
+			description: "sort by originUrlRelated",
+			flagValues:  fixtureFlagValues(flagSortBy("originUrlRelated")),
+			isValid:     true,
+			expected:    fixtureInputModel(inputSortBy("originUrlRelated")),
 		},
 		{
 			description: "invalid sort by",
@@ -158,7 +164,7 @@ func TestParseInput(t *testing.T) {
 				},
 			),
 			isValid:  true,
-			expected: fixtureInputModel(inputSortBy("created")),
+			expected: fixtureInputModel(inputSortBy("createdAt")),
 		},
 	}
 
@@ -183,7 +189,7 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			description: "sort by updatedAt",
-			inputModel:  fixtureInputModel(inputSortBy("updated")),
+			inputModel:  fixtureInputModel(inputSortBy("updatedAt")),
 			expected:    fixtureRequest(requestSortBy("updatedAt")),
 		},
 		{
