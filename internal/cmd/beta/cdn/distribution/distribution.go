@@ -2,6 +2,9 @@ package distribution
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/update"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn/distribution/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn/distribution/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -22,5 +25,8 @@ func NewCommand(params *params.CmdParams) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
 }
