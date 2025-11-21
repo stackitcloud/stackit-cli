@@ -167,10 +167,10 @@ func TestOutputResult(t *testing.T) {
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
-	var buf bytes.Buffer
-	p.Cmd.SetOut(&buf)
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			var buf bytes.Buffer
+			p.Cmd.SetOut(&buf)
 			if err := outputResult(p, tt.outputFmt, tt.keyRing); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
