@@ -3,6 +3,7 @@ package key
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/importKey"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/key/restore"
@@ -33,4 +34,5 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(restore.NewCmd(params))
 	cmd.AddCommand(rotate.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
 }

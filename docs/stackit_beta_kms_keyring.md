@@ -32,5 +32,6 @@ stackit beta kms keyring [flags]
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
 * [stackit beta kms keyring create](./stackit_beta_kms_keyring_create.md)	 - Creates a KMS key ring
 * [stackit beta kms keyring delete](./stackit_beta_kms_keyring_delete.md)	 - Deletes a KMS key ring
+* [stackit beta kms keyring describe](./stackit_beta_kms_keyring_describe.md)	 - Describe a KMS key ring
 * [stackit beta kms keyring list](./stackit_beta_kms_keyring_list.md)	 - Lists all KMS key rings
 

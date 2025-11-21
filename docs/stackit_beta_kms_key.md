@@ -32,6 +32,7 @@ stackit beta kms key [flags]
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
 * [stackit beta kms key create](./stackit_beta_kms_key_create.md)	 - Creates a KMS key
 * [stackit beta kms key delete](./stackit_beta_kms_key_delete.md)	 - Deletes a KMS key
+* [stackit beta kms key describe](./stackit_beta_kms_key_describe.md)	 - Describe a KMS key
 * [stackit beta kms key import](./stackit_beta_kms_key_import.md)	 - Import a KMS key
 * [stackit beta kms key list](./stackit_beta_kms_key_list.md)	 - List all KMS keys
 * [stackit beta kms key restore](./stackit_beta_kms_key_restore.md)	 - Restore a key
