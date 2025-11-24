@@ -48,6 +48,7 @@ const (
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
+	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -108,6 +109,7 @@ var ConfigKeys = []string{
 	IaaSCustomEndpointKey,
 	TokenCustomEndpointKey,
 	GitCustomEndpointKey,
+	IntakeCustomEndpointKey,
 	AlbCustomEndpoint,
 }
 
@@ -195,6 +197,7 @@ func setConfigDefaults() {
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")
+	viper.SetDefault(IntakeCustomEndpointKey, "")
 	viper.SetDefault(AlbCustomEndpoint, "")
 }
 
