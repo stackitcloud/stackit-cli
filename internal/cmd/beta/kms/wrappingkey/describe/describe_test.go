@@ -25,7 +25,7 @@ var testClient = &kms.APIClient{}
 var testProjectId = uuid.NewString()
 var testKeyRingID = uuid.NewString()
 var testWrappingKeyID = uuid.NewString()
-var testTime = time.Now()
+var testTime = time.Time{}
 
 const testRegion = "eu01"
 
@@ -164,31 +164,31 @@ func TestOutputResult(t *testing.T) {
 				Purpose:     utils.Ptr(kms.WRAPPINGPURPOSE_ASYMMETRIC_KEY),
 			},
 			expected: fmt.Sprintf(`
- ID           │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- DISPLAY NAME │ Test Key Ring                                       
-──────────────┼─────────────────────────────────────────────────────
- CREATED AT   │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- STATE        │ active                                              
-──────────────┼─────────────────────────────────────────────────────
- DESCRIPTION  │ This is a test key ring.                            
-──────────────┼─────────────────────────────────────────────────────
- ACCESS SCOPE │ PUBLIC                                              
-──────────────┼─────────────────────────────────────────────────────
- ALGORITHM    │ rsa_2048_oaep_sha256                                
-──────────────┼─────────────────────────────────────────────────────
- EXPIRES AT   │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- KEYRING ID   │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- PROTECTION   │ software                                            
-──────────────┼─────────────────────────────────────────────────────
- PUBLIC KEY   │ -----BEGIN PUBLIC KEY-----                          
-              │ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQ...       
-              │ -----END PUBLIC KEY-----                            
-──────────────┼─────────────────────────────────────────────────────
- PURPOSE      │ wrap_asymmetric_key                                 
+ ID           │ %-46s
+──────────────┼───────────────────────────────────────────────
+ DISPLAY NAME │ Test Key Ring                                 
+──────────────┼───────────────────────────────────────────────
+ CREATED AT   │ %-46s
+──────────────┼───────────────────────────────────────────────
+ STATE        │ active                                        
+──────────────┼───────────────────────────────────────────────
+ DESCRIPTION  │ This is a test key ring.                      
+──────────────┼───────────────────────────────────────────────
+ ACCESS SCOPE │ PUBLIC                                        
+──────────────┼───────────────────────────────────────────────
+ ALGORITHM    │ rsa_2048_oaep_sha256                          
+──────────────┼───────────────────────────────────────────────
+ EXPIRES AT   │ %-46s
+──────────────┼───────────────────────────────────────────────
+ KEYRING ID   │ %-46s
+──────────────┼───────────────────────────────────────────────
+ PROTECTION   │ software                                      
+──────────────┼───────────────────────────────────────────────
+ PUBLIC KEY   │ -----BEGIN PUBLIC KEY-----                    
+              │ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQ... 
+              │ -----END PUBLIC KEY-----                      
+──────────────┼───────────────────────────────────────────────
+ PURPOSE      │ wrap_asymmetric_key                           
 
 `,
 				testWrappingKeyID,

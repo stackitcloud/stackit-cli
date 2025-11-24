@@ -24,7 +24,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &kms.APIClient{}
 var testProjectId = uuid.NewString()
 var testKeyRingID = uuid.NewString()
-var testTime = time.Now()
+var testTime = time.Time{}
 
 const testRegion = "eu01"
 
@@ -149,15 +149,15 @@ func TestOutputResult(t *testing.T) {
 				State:       utils.Ptr(kms.KEYRINGSTATE_ACTIVE),
 			},
 			expected: fmt.Sprintf(`
- ID           │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- DISPLAY NAME │ Test Key Ring                                       
-──────────────┼─────────────────────────────────────────────────────
- CREATED AT   │ %-52s
-──────────────┼─────────────────────────────────────────────────────
- STATE        │ active                                              
-──────────────┼─────────────────────────────────────────────────────
- DESCRIPTION  │ This is a test key ring.                            
+ ID           │ %-37s
+──────────────┼──────────────────────────────────────
+ DISPLAY NAME │ Test Key Ring                        
+──────────────┼──────────────────────────────────────
+ CREATED AT   │ %-37s
+──────────────┼──────────────────────────────────────
+ STATE        │ active                               
+──────────────┼──────────────────────────────────────
+ DESCRIPTION  │ This is a test key ring.             
 
 `,
 				testKeyRingID,
