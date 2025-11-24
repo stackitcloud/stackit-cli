@@ -23,7 +23,7 @@ jobs:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
@@ -106,7 +106,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
@@ -144,7 +144,7 @@ jobs:
       AWS_ENDPOINT_URL: https://object.storage.eu01.onstackit.cloud
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       
       - name: Download artifacts from workflow
         uses: actions/download-artifact@v6
