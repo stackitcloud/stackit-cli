@@ -3,6 +3,7 @@ package wrappingkey
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -27,4 +28,5 @@ func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
 }
