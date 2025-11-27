@@ -3,6 +3,7 @@ package intake
 import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -23,4 +24,5 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
 	cmd.AddCommand(runner.NewCmd(params))
+	cmd.AddCommand(user.NewCmd(params))
 }
