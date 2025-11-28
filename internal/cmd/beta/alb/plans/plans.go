@@ -62,16 +62,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list plans: %w", err)
 			}
+			items := response.GetValidPlans()
 
-			if items := response.ValidPlans; items == nil || len(*items) == 0 {
-				params.Printer.Info("No plans found for project %q", projectLabel)
-			} else {
-				if err := outputResult(params.Printer, model.OutputFormat, *items); err != nil {
-					return fmt.Errorf("output plans: %w", err)
-				}
-			}
-
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 
@@ -98,8 +91,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat string, items []alb.PlanDetails) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []alb.PlanDetails) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No plans found for project %q", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("PLAN ID", "NAME", "FLAVOR", "MAX CONNS", "DESCRIPTION")
 		for _, item := range items {

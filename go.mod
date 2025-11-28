@@ -18,20 +18,20 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.2
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.9.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.2
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.3
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.2.1
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.0
-	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.1
+	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.3
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.2
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.11.2
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.2
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.2
 	github.com/zalando/go-keyring v0.2.6
@@ -246,11 +246,11 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.1.1
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.2
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.1
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.2
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.1
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.2
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
