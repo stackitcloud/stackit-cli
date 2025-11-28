@@ -7,7 +7,7 @@ run:
   concurrency: 4
 
   # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 5m
+  timeout: 10m
 linters-settings:
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
