@@ -50,7 +50,10 @@ type apiClient interface {
 }
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
-func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
+func AuthorizeUser(p *print.Printer, context StorageContext, isReauthentication bool) error {
+	// Set the storage printer so debug messages use the correct verbosity
+	SetStoragePrinter(p)
+
 	idpWellKnownConfigURL, err := getIDPWellKnownConfigURL()
 	if err != nil {
 		return fmt.Errorf("get IDP well-known configuration: %w", err)
@@ -65,7 +68,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 	p.Debug(print.DebugLevel, "get IDP well-known configuration from %s", idpWellKnownConfigURL)
 	httpClient := &http.Client{}
-	idpWellKnownConfig, err := parseWellKnownConfiguration(httpClient, idpWellKnownConfigURL)
+	idpWellKnownConfig, err := parseWellKnownConfiguration(p, httpClient, idpWellKnownConfigURL, context)
 	if err != nil {
 		return fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
@@ -159,7 +162,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "trading authorization code for access and refresh tokens")
 
 		// Trade the authorization code and the code verifier for access and refresh tokens
-		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(idpWellKnownConfig, idpClientID, codeVerifier, code, redirectURL)
+		accessToken, refreshToken, err := getUserAccessAndRefreshTokens(p, idpWellKnownConfig, idpClientID, codeVerifier, code, redirectURL)
 		if err != nil {
 			errServer = fmt.Errorf("retrieve tokens: %w", err)
 			return
@@ -167,21 +170,22 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		p.Debug(print.DebugLevel, "received response from the authentication server")
 
-		sessionExpiresAtUnix, err := getStartingSessionExpiresAtUnix()
+		// Get access token expiration from the token itself (not session time limit)
+		sessionExpiresAtUnix, err := getAccessTokenExpiresAtUnix(accessToken)
 		if err != nil {
-			errServer = fmt.Errorf("compute session expiration timestamp: %w", err)
+			errServer = fmt.Errorf("get access token expiration: %w", err)
 			return
 		}
 
 		sessionExpiresAtUnixInt, err := strconv.Atoi(sessionExpiresAtUnix)
 		if err != nil {
-			p.Debug(print.ErrorLevel, "parse session expiration value \"%s\": %s", sessionExpiresAtUnix, err)
+			p.Debug(print.ErrorLevel, "parse access token expiration value \"%s\": %s", sessionExpiresAtUnix, err)
 		} else {
 			sessionExpiresAt := time.Unix(int64(sessionExpiresAtUnixInt), 0)
-			p.Debug(print.DebugLevel, "session expires at %s", sessionExpiresAt)
+			p.Debug(print.DebugLevel, "access token expires at %s", sessionExpiresAt)
 		}
 
-		err = SetAuthFlow(AUTH_FLOW_USER_TOKEN)
+		err = SetAuthFlowWithContext(context, AUTH_FLOW_USER_TOKEN)
 		if err != nil {
 			errServer = fmt.Errorf("set auth flow type: %w", err)
 			return
@@ -195,7 +199,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 
 		p.Debug(print.DebugLevel, "user %s logged in successfully", email)
 
-		err = LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix)
+		err = LoginUserWithContext(context, email, accessToken, refreshToken, sessionExpiresAtUnix)
 		if err != nil {
 			errServer = fmt.Errorf("set in auth storage: %w", err)
 			return
@@ -211,7 +215,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	mux.HandleFunc(loginSuccessPath, func(w http.ResponseWriter, _ *http.Request) {
 		defer cleanup(server)
 
-		email, err := GetAuthField(USER_EMAIL)
+		email, err := GetAuthFieldWithContext(context, USER_EMAIL)
 		if err != nil {
 			errServer = fmt.Errorf("read user email: %w", err)
 		}
@@ -265,7 +269,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 }
 
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
-func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
+func getUserAccessAndRefreshTokens(p *print.Printer, idpWellKnownConfig *wellKnownConfig, clientID, codeVerifier, authorizationCode, callbackURL string) (accessToken, refreshToken string, err error) {
 	// Set form-encoded data for the POST to the access token endpoint
 	data := fmt.Sprintf(
 		"grant_type=authorization_code&client_id=%s"+
@@ -278,6 +282,10 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 	// Create the request and execute it
 	req, _ := http.NewRequest("POST", idpWellKnownConfig.TokenEndpoint, payload)
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
+
+	// Debug log the request
+	debugHTTPRequest(p, req)
+
 	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
 	if err != nil {
@@ -291,6 +299,10 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 			err = fmt.Errorf("close response body: %w", closeErr)
 		}
 	}()
+
+	// Debug log the response
+	debugHTTPResponse(p, res)
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", "", fmt.Errorf("read response body: %w", err)
@@ -350,8 +362,12 @@ func openBrowser(pageUrl string) error {
 
 // parseWellKnownConfiguration gets the well-known OpenID configuration from the provided URL and returns it as a JSON
 // the method also stores the IDP token endpoint in the authentication storage
-func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
+func parseWellKnownConfiguration(p *print.Printer, httpClient apiClient, wellKnownConfigURL string, context StorageContext) (wellKnownConfig *wellKnownConfig, err error) {
 	req, _ := http.NewRequest("GET", wellKnownConfigURL, http.NoBody)
+
+	// Debug log the request
+	debugHTTPRequest(p, req)
+
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("make the request: %w", err)
@@ -364,6 +380,10 @@ func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string
 			err = fmt.Errorf("close response body: %w", closeErr)
 		}
 	}()
+
+	// Debug log the response
+	debugHTTPResponse(p, res)
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response body: %w", err)
@@ -386,7 +406,7 @@ func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string
 		return nil, fmt.Errorf("found no token endpoint")
 	}
 
-	err = SetAuthField(IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
+	err = SetAuthFieldWithContext(context, IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("set token endpoint in the authentication storage: %w", err)
 	}
