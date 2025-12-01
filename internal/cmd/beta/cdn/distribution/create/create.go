@@ -28,7 +28,7 @@ const (
 	flagHTTPOriginRequestHeaders     = "http-origin-request-headers"
 	flagBucket                       = "bucket"
 	flagBucketURL                    = "bucket-url"
-	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id"
+	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id" //nolint:gosec // linter false positive
 	flagBucketRegion                 = "bucket-region"
 	flagBlockedCountries             = "blocked-countries"
 	flagBlockedIPs                   = "blocked-ips"
@@ -91,7 +91,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 --regions AF,EU`,
 			),
 		),
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRun: func(cmd *cobra.Command, _ []string) {
 			// either flagHTTP or flagBucket must be set, depending on which we mark other flags as required
 			if flags.FlagToBoolValue(params.Printer, cmd, flagHTTP) {
 				err := cmd.MarkFlagRequired(flagHTTPOriginURL)
@@ -265,7 +265,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string {
+func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string { //nolint:gocritic // ptrToRefParam is nice here because of awkward SDK API
 	geofencing := make(map[string][]string)
 	for _, in := range geofencingInput {
 		firstSpace := strings.IndexRune(in, ' ')
@@ -285,7 +285,7 @@ func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]s
 	return &geofencing
 }
 
-func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string {
+func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string { //nolint:gocritic // ptrToRefParam is nice here because of awkward SDK API
 	originRequestHeaders := make(map[string]string)
 	for _, in := range originRequestHeadersInput {
 		parts := strings.Split(in, ":")
@@ -358,7 +358,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClie
 	return req.CreateDistributionPayload(*payload)
 }
 
-func outputResult(p *print.Printer, outputFormat string, projectLabel string, resp *cdn.CreateDistributionResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *cdn.CreateDistributionResponse) error {
 	if resp == nil {
 		return fmt.Errorf("create distribution response is nil")
 	}

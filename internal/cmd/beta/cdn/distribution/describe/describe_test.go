@@ -299,16 +299,16 @@ func TestOutputResult(t *testing.T) {
 				func(r *cdn.GetDistributionResponse) {
 					r.Distribution.Waf = &cdn.DistributionWaf{
 						EnabledRules: &[]cdn.WafStatusRuleBlock{
-							{utils.Ptr("rule-id-1")},
-							{utils.Ptr("rule-id-2")},
+							{Id: utils.Ptr("rule-id-1")},
+							{Id: utils.Ptr("rule-id-2")},
 						},
 						DisabledRules: &[]cdn.WafStatusRuleBlock{
-							{utils.Ptr("rule-id-3")},
-							{utils.Ptr("rule-id-4")},
+							{Id: utils.Ptr("rule-id-3")},
+							{Id: utils.Ptr("rule-id-4")},
 						},
 						LogOnlyRules: &[]cdn.WafStatusRuleBlock{
-							{utils.Ptr("rule-id-5")},
-							{utils.Ptr("rule-id-6")},
+							{Id: utils.Ptr("rule-id-5")},
+							{Id: utils.Ptr("rule-id-6")},
 						},
 					}
 					r.Distribution.Config.Backend = &cdn.ConfigBackend{

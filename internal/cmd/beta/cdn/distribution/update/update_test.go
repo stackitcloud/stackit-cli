@@ -362,5 +362,4 @@ func TestOutputResult(t *testing.T) {
 			}
 		})
 	}
-
 }

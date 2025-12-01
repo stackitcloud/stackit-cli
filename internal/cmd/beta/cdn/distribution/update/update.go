@@ -29,7 +29,7 @@ const (
 	flagHTTPOriginRequestHeaders     = "http-origin-request-headers"
 	flagBucket                       = "bucket"
 	flagBucketURL                    = "bucket-url"
-	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id"
+	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id" //nolint:gosec // linter false positive
 	flagBucketRegion                 = "bucket-region"
 	flagBlockedCountries             = "blocked-countries"
 	flagBlockedIPs                   = "blocked-ips"
@@ -248,7 +248,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 }
 
 // TODO both parseGeofencing and parseOriginRequestHeaders copied from create.go, move to another package and make public?
-func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string {
+func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string { //nolint:gocritic // convenient for setting the SDK payload
 	geofencing := make(map[string][]string)
 	for _, in := range geofencingInput {
 		firstSpace := strings.IndexRune(in, ' ')
@@ -268,7 +268,7 @@ func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]s
 	return &geofencing
 }
 
-func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string {
+func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string { //nolint:gocritic // convenient for setting the SDK payload
 	originRequestHeaders := make(map[string]string)
 	for _, in := range originRequestHeadersInput {
 		parts := strings.Split(in, ":")
@@ -361,7 +361,7 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, projectLabel string, resp *cdn.PatchDistributionResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *cdn.PatchDistributionResponse) error {
 	if resp == nil {
 		return fmt.Errorf("update distribution response is empty")
 	}
