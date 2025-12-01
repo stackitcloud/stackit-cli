@@ -1,31 +1,26 @@
-## stackit beta cdn distribution list
+## stackit beta cdn distribution delete
 
-List CDN distributions
+Delete a CDN distribution
 
 ### Synopsis
 
-List all CDN distributions in your account.
+Delete a CDN distribution by its ID.
 
 ```
-stackit beta cdn distribution list [flags]
+stackit beta cdn distribution delete [flags]
 ```
 
 ### Examples
 
 ```
-  List all CDN distributions
-  $ stackit beta cdn distribution list
-
-  List all CDN distributions sorted by id
-  $ stackit beta cdn distribution list --sort-by=id
+  Delete a CDN distribution with ID "xxx"
+  $ stackit beta cdn distribution delete xxx
 ```
 
 ### Options
 
 ```
-      -- int             Limit the output to the first n elements
-  -h, --help             Help for "stackit beta cdn distribution list"
-      --sort-by string   Sort entries by a specific field, one of ["id" "createdAt" "updatedAt" "originUrl" "status" "originUrlRelated"] (default "createdAt")
+  -h, --help   Help for "stackit beta cdn distribution delete"
 ```
 
 ### Options inherited from parent commands

@@ -31,5 +31,8 @@ stackit beta cdn distribution [flags]
 
 * [stackit beta cdn](./stackit_beta_cdn.md)	 - Manage CDN resources
 * [stackit beta cdn distribution create](./stackit_beta_cdn_distribution_create.md)	 - Create a CDN distribution
+* [stackit beta cdn distribution delete](./stackit_beta_cdn_distribution_delete.md)	 - Delete a CDN distribution
+* [stackit beta cdn distribution describe](./stackit_beta_cdn_distribution_describe.md)	 - Describe a CDN distribution
 * [stackit beta cdn distribution list](./stackit_beta_cdn_distribution_list.md)	 - List CDN distributions
+* [stackit beta cdn distribution update](./stackit_beta_cdn_distribution_update.md)	 - Update a CDN distribution
 

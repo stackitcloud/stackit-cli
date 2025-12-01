@@ -1,26 +1,20 @@
-## stackit beta cdn distribution create
+## stackit beta cdn distribution update
 
-Create a CDN distribution
+Update a CDN distribution
 
 ### Synopsis
 
-Create a CDN distribution for a given originUrl in multiple regions.
+Update a CDN distribution by its ID, allowing replacement of its regions.
 
 ```
-stackit beta cdn distribution create [flags]
+stackit beta cdn distribution update [flags]
 ```
 
 ### Examples
 
 ```
-  Create a CDN distribution with an HTTP backend
-  $ stackit beta cdn create --http  --http-origin-url https://example.com \
---regions AF,EU
-
-  Create a CDN distribution with an Object Storage backend
-  $ stackit beta cdn create --bucket --bucket-url https://bucket.example.com \
---bucket-credentials-access-key-id yyyy --bucket-region EU \
---regions AF,EU
+  update a CDN distribution with ID "123e4567-e89b-12d3-a456-426614174000" to not use optimizer
+  $ stackit beta cdn update 123e4567-e89b-12d3-a456-426614174000 --optimizer=false
 ```
 
 ### Options
@@ -33,7 +27,7 @@ stackit beta cdn distribution create [flags]
       --bucket-region string                      Region for Object Storage backend
       --bucket-url string                         Bucket URL for Object Storage backend
       --default-cache-duration string             ISO8601 duration string for default cache duration (e.g., 'PT1H30M' for 1 hour and 30 minutes)
-  -h, --help                                      Help for "stackit beta cdn distribution create"
+  -h, --help                                      Help for "stackit beta cdn distribution update"
       --http                                      Use HTTP backend
       --http-geofencing stringArray               Geofencing rules for HTTP backend in the format 'https://example.com US,DE'. URL and countries have to be quoted. Repeatable.
       --http-origin-request-headers strings       Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!
