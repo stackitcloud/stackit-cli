@@ -74,10 +74,10 @@ type inputModel struct {
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a CDN distribution",
-		Long:  "Create a CDN distribution for a given originUrl in multiple regions.",
-		Args:  args.NoArgs,
+		Use:     "create",
+		Short:   "Create a CDN distribution",
+		Long:    "Create a CDN distribution for a given originUrl in multiple regions.",
+		Args:    args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a CDN distribution with an HTTP backend`,
