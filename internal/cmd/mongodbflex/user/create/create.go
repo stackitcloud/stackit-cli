@@ -106,7 +106,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user. If not specified, a random username will be assigned")
 	cmd.Flags().String(databaseFlag, "", "The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q. The \"readAnyDatabase\", \"readWriteAnyDatabase\" and \"stackitAdmin\" roles will always be created in the admin database.", roleOptions))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, databaseFlag)
 	cobra.CheckErr(err)
