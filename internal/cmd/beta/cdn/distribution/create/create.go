@@ -25,7 +25,7 @@ const (
 	flagHTTP                         = "http"
 	flagHTTPOriginURL                = "http-origin-url"
 	flagHTTPGeofencing               = "http-geofencing"
-	flagHTTPOriginRequestHeaders     = "http-origin-request-header"
+	flagHTTPOriginRequestHeaders     = "http-origin-request-headers"
 	flagBucket                       = "bucket"
 	flagBucketURL                    = "bucket-url"
 	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id"
@@ -74,12 +74,22 @@ type inputModel struct {
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "Create a CDN distribution",
-		Long:    "Create a CDN distribution for a given originUrl in multiple regions.",
-		Args:    args.NoArgs,
+		Use:   "create",
+		Short: "Create a CDN distribution",
+		Long:  "Create a CDN distribution for a given originUrl in multiple regions.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
-		//TODO
+			examples.NewExample(
+				`Create a CDN distribution with an HTTP backend`,
+				`$ stackit beta cdn create --http  --http-origin-url https://example.com \
+--regions AF,EU`,
+			),
+			examples.NewExample(
+				`Create a CDN distribution with an Object Storage backend`,
+				`$ stackit beta cdn create --bucket --bucket-url https://bucket.example.com \
+--bucket-credentials-access-key-id yyyy --bucket-region EU \
+--regions AF,EU`,
+			),
 		),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			// either flagHTTP or flagBucket must be set, depending on which we mark other flags as required

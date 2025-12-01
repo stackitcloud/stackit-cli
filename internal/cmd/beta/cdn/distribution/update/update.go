@@ -76,12 +76,15 @@ type inputModel struct {
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "update",
-		Short:   "Update a CDN distribution",
-		Long:    "Update a CDN distribution by its ID, allowing replacement of its regions.",
-		Args:    args.SingleArg(argDistributionID, utils.ValidateUUID),
+		Use:   "update",
+		Short: "Update a CDN distribution",
+		Long:  "Update a CDN distribution by its ID, allowing replacement of its regions.",
+		Args:  args.SingleArg(argDistributionID, utils.ValidateUUID),
 		Example: examples.Build(
-		// TODO
+			examples.NewExample(
+				`update a CDN distribution with ID "123e4567-e89b-12d3-a456-426614174000" to not use optimizer`,
+				`$ stackit beta cdn update 123e4567-e89b-12d3-a456-426614174000 --optimizer=false`,
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
