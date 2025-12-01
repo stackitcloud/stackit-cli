@@ -18,7 +18,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.9.0
-	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.6.0
+	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.8.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.0
@@ -36,6 +36,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.2
 	github.com/zalando/go-keyring v0.2.6
+	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/mod v0.30.0
 	golang.org/x/oauth2 v0.33.0
 	golang.org/x/term v0.37.0
@@ -258,7 +259,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.34.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 // indirect
+	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )

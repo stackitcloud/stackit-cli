@@ -3,7 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
-	"net/url"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -21,33 +21,100 @@ import (
 )
 
 const (
-	regionsFlag   = "regions"
-	originURLFlag = "origin-url"
+	flagRegion                       = "regions"
+	flagHTTP                         = "http"
+	flagHTTPOriginURL                = "http-origin-url"
+	flagHTTPGeofencing               = "http-geofencing"
+	flagHTTPOriginRequestHeaders     = "http-origin-request-header"
+	flagBucket                       = "bucket"
+	flagBucketURL                    = "bucket-url"
+	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id"
+	flagBucketRegion                 = "bucket-region"
+	flagBlockedCountries             = "blocked-countries"
+	flagBlockedIPs                   = "blocked-ips"
+	flagDefaultCacheDuration         = "default-cache-duration"
+	flagLoki                         = "loki"
+	flagLokiUsername                 = "loki-username"
+	flagLokiPushURL                  = "loki-push-url"
+	flagMonthlyLimitBytes            = "monthly-limit-bytes"
+	flagOptimizer                    = "optimizer"
 )
+
+type httpInputModel struct {
+	OriginURL            string
+	Geofencing           *map[string][]string
+	OriginRequestHeaders *map[string]string
+}
+
+type bucketInputModel struct {
+	URL         string
+	AccessKeyID string
+	Password    string
+	Region      string
+}
+
+type lokiInputModel struct {
+	Username string
+	Password string
+	PushURL  string
+}
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Regions   []cdn.Region
-	OriginURL string
+	Regions              []cdn.Region
+	HTTP                 *httpInputModel
+	Bucket               *bucketInputModel
+	BlockedCountries     []string
+	BlockedIPs           []string
+	DefaultCacheDuration string
+	MonthlyLimitBytes    *int64
+	Loki                 *lokiInputModel
+	Optimizer            bool
 }
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a CDN distribution",
-		Long:  "Create a CDN distribution for a given originUrl in multiple regions.",
-		Args:  args.NoArgs,
+		Use:     "create",
+		Short:   "Create a CDN distribution",
+		Long:    "Create a CDN distribution for a given originUrl in multiple regions.",
+		Args:    args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(
-				`Create a distribution for regions EU and AF`,
-				`$ stackit beta cdn distribution create --regions=EU,AF --origin-url=https://example.com`,
-			),
+		//TODO
 		),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// either flagHTTP or flagBucket must be set, depending on which we mark other flags as required
+			if flags.FlagToBoolValue(params.Printer, cmd, flagHTTP) {
+				err := cmd.MarkFlagRequired(flagHTTPOriginURL)
+				cobra.CheckErr(err)
+			} else {
+				err := flags.MarkFlagsRequired(cmd, flagBucketURL, flagBucketCredentialsAccessKeyID, flagBucketRegion)
+				cobra.CheckErr(err)
+			}
+			// if user uses loki, mark related flags as required
+			if flags.FlagToBoolValue(params.Printer, cmd, flagLoki) {
+				err := flags.MarkFlagsRequired(cmd, flagLokiUsername, flagLokiPushURL)
+				cobra.CheckErr(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
+			}
+			if model.Bucket != nil {
+				pw, err := params.Printer.PromptForPassword("enter your secret access key for the object storage bucket: ")
+				if err != nil {
+					return fmt.Errorf("reading secret access key: %w", err)
+				}
+				model.Bucket.Password = pw
+			}
+			if model.Loki != nil {
+				pw, err := params.Printer.PromptForPassword("enter your password for the loki log sink: ")
+				if err != nil {
+					return fmt.Errorf("reading loki password: %w", err)
+				}
+				model.Loki.Password = pw
 			}
 
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
@@ -84,9 +151,26 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), regionsFlag, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", cdn.AllowedRegionEnumValues))
-	cmd.Flags().String(originURLFlag, "", "The origin of the content that should be made available through the CDN. Note that the path and query parameters are ignored. Ports are allowed. If no protocol is provided, `https` is assumed. So `www.example.com:1234/somePath?q=123` is normalized to `https://www.example.com:1234`")
-	err := flags.MarkFlagsRequired(cmd, regionsFlag, originURLFlag)
+	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegion, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", cdn.AllowedRegionEnumValues))
+	cmd.Flags().Bool(flagHTTP, false, "Use HTTP backend")
+	cmd.Flags().String(flagHTTPOriginURL, "", "Origin URL for HTTP backend")
+	cmd.Flags().StringSlice(flagHTTPOriginRequestHeaders, []string{}, "Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!")
+	cmd.Flags().StringArray(flagHTTPGeofencing, []string{}, "Geofencing rules for HTTP backend in the format 'https://example.com US,DE'. URL and countries have to be quoted. Repeatable.")
+	cmd.Flags().Bool(flagBucket, false, "Use Object Storage backend")
+	cmd.Flags().String(flagBucketURL, "", "Bucket URL for Object Storage backend")
+	cmd.Flags().String(flagBucketCredentialsAccessKeyID, "", "Access Key ID for Object Storage backend")
+	cmd.Flags().String(flagBucketRegion, "", "Region for Object Storage backend")
+	cmd.Flags().StringSlice(flagBlockedCountries, []string{}, "Comma-separated list of ISO 3166-1 alpha-2 country codes to block (e.g., 'US,DE,FR')")
+	cmd.Flags().StringSlice(flagBlockedIPs, []string{}, "Comma-separated list of IPv4 addresses to block (e.g., '10.0.0.8,127.0.0.1')")
+	cmd.Flags().String(flagDefaultCacheDuration, "", "ISO8601 duration string for default cache duration (e.g., 'PT1H30M' for 1 hour and 30 minutes)")
+	cmd.Flags().Bool(flagLoki, false, "Enable Loki log sink for the CDN distribution")
+	cmd.Flags().String(flagLokiUsername, "", "Username for log sink")
+	cmd.Flags().String(flagLokiPushURL, "", "Push URL for log sink")
+	cmd.Flags().Int64(flagMonthlyLimitBytes, 0, "Monthly limit in bytes for the CDN distribution")
+	cmd.Flags().Bool(flagOptimizer, false, "Enable optimizer for the CDN distribution (paid feature).")
+	cmd.MarkFlagsMutuallyExclusive(flagHTTP, flagBucket)
+	cmd.MarkFlagsOneRequired(flagHTTP, flagBucket)
+	err := flags.MarkFlagsRequired(cmd, flagRegion)
 	cobra.CheckErr(err)
 }
 
@@ -96,33 +180,171 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	regionStrings := flags.FlagToStringSliceValue(p, cmd, regionsFlag)
+	regionStrings := flags.FlagToStringSliceValue(p, cmd, flagRegion)
 	regions := make([]cdn.Region, 0, len(regionStrings))
 	for _, regionStr := range regionStrings {
 		regions = append(regions, cdn.Region(regionStr))
 	}
 
-	originUrlString := flags.FlagToStringValue(p, cmd, originURLFlag)
-	_, err := url.Parse(originUrlString)
-	if err != nil {
-		return nil, fmt.Errorf("invalid originUrl: '%s' (%w)", originUrlString, err)
+	var http *httpInputModel
+	if flags.FlagToBoolValue(p, cmd, flagHTTP) {
+		originURL := flags.FlagToStringValue(p, cmd, flagHTTPOriginURL)
+
+		var geofencing *map[string][]string
+		geofencingInput := flags.FlagToStringArrayValue(p, cmd, flagHTTPGeofencing)
+		if geofencingInput != nil {
+			geofencing = parseGeofencing(p, geofencingInput)
+		}
+
+		var originRequestHeaders *map[string]string
+		originRequestHeadersInput := flags.FlagToStringSliceValue(p, cmd, flagHTTPOriginRequestHeaders)
+		if originRequestHeadersInput != nil {
+			originRequestHeaders = parseOriginRequestHeaders(p, originRequestHeadersInput)
+		}
+
+		http = &httpInputModel{
+			OriginURL:            originURL,
+			Geofencing:           geofencing,
+			OriginRequestHeaders: originRequestHeaders,
+		}
 	}
 
+	var bucket *bucketInputModel
+	if flags.FlagToBoolValue(p, cmd, flagBucket) {
+		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
+		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
+		region := flags.FlagToStringValue(p, cmd, flagBucketRegion)
+
+		bucket = &bucketInputModel{
+			URL:         bucketURL,
+			AccessKeyID: accessKeyID,
+			Password:    "",
+			Region:      region,
+		}
+	}
+
+	blockedCountries := flags.FlagToStringSliceValue(p, cmd, flagBlockedCountries)
+	blockedIPs := flags.FlagToStringSliceValue(p, cmd, flagBlockedIPs)
+	cacheDuration := flags.FlagToStringValue(p, cmd, flagDefaultCacheDuration)
+	monthlyLimit := flags.FlagToInt64Pointer(p, cmd, flagMonthlyLimitBytes)
+
+	var loki *lokiInputModel
+	if flags.FlagToBoolValue(p, cmd, flagLoki) {
+		loki = &lokiInputModel{
+			Username: flags.FlagToStringValue(p, cmd, flagLokiUsername),
+			PushURL:  flags.FlagToStringValue(p, cmd, flagLokiPushURL),
+			Password: "",
+		}
+	}
+
+	optimizer := flags.FlagToBoolValue(p, cmd, flagOptimizer)
+
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Regions:         regions,
-		OriginURL:       originUrlString,
+		GlobalFlagModel:      globalFlags,
+		Regions:              regions,
+		HTTP:                 http,
+		Bucket:               bucket,
+		BlockedCountries:     blockedCountries,
+		BlockedIPs:           blockedIPs,
+		DefaultCacheDuration: cacheDuration,
+		MonthlyLimitBytes:    monthlyLimit,
+		Loki:                 loki,
+		Optimizer:            optimizer,
 	}
 
 	return &model, nil
 }
 
+func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string {
+	geofencing := make(map[string][]string)
+	for _, in := range geofencingInput {
+		firstSpace := strings.IndexRune(in, ' ')
+		if firstSpace == -1 {
+			p.Debug(print.ErrorLevel, "invalid geofencing entry (no space found): %q", in)
+			continue
+		}
+		urlPart := in[:firstSpace]
+		countriesPart := in[firstSpace+1:]
+		geofencing[urlPart] = nil
+		countries := strings.Split(countriesPart, ",")
+		for _, country := range countries {
+			country = strings.TrimSpace(country)
+			geofencing[urlPart] = append(geofencing[urlPart], country)
+		}
+	}
+	return &geofencing
+}
+
+func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string {
+	originRequestHeaders := make(map[string]string)
+	for _, in := range originRequestHeadersInput {
+		parts := strings.Split(in, ":")
+		if len(parts) != 2 {
+			p.Debug(print.ErrorLevel, "invalid origin request header entry (no colon found): %q", in)
+			continue
+		}
+		originRequestHeaders[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+	}
+	return &originRequestHeaders
+}
+
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) cdn.ApiCreateDistributionRequest {
 	req := apiClient.CreateDistribution(ctx, model.ProjectId)
+	var backend cdn.CreateDistributionPayloadGetBackendArgType
+	if model.HTTP != nil {
+		backend = cdn.CreateDistributionPayloadGetBackendArgType{
+			HttpBackendCreate: &cdn.HttpBackendCreate{
+				Geofencing:           model.HTTP.Geofencing,
+				OriginRequestHeaders: model.HTTP.OriginRequestHeaders,
+				OriginUrl:            &model.HTTP.OriginURL,
+				Type:                 utils.Ptr("http"),
+			},
+		}
+	} else {
+		backend = cdn.CreateDistributionPayloadGetBackendArgType{
+			BucketBackendCreate: &cdn.BucketBackendCreate{
+				BucketUrl: &model.Bucket.URL,
+				Credentials: cdn.NewBucketCredentials(
+					model.Bucket.AccessKeyID,
+					model.Bucket.Password,
+				),
+				Region: &model.Bucket.Region,
+				Type:   utils.Ptr("bucket"),
+			},
+		}
+	}
+
 	payload := cdn.NewCreateDistributionPayload(
-		model.OriginURL,
+		backend,
 		model.Regions,
 	)
+	if len(model.BlockedCountries) > 0 {
+		payload.BlockedCountries = &model.BlockedCountries
+	}
+	if len(model.BlockedIPs) > 0 {
+		payload.BlockedIps = &model.BlockedIPs
+	}
+	if model.DefaultCacheDuration != "" {
+		payload.DefaultCacheDuration = utils.Ptr(model.DefaultCacheDuration)
+	}
+	if model.Loki != nil {
+		payload.LogSink = &cdn.CreateDistributionPayloadGetLogSinkArgType{
+			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
+				Credentials: &cdn.LokiLogSinkCredentials{
+					Password: &model.Loki.Password,
+					Username: &model.Loki.Username,
+				},
+				PushUrl: &model.Loki.PushURL,
+				Type:    utils.Ptr("loki"),
+			},
+		}
+	}
+	payload.MonthlyLimitBytes = model.MonthlyLimitBytes
+	if model.Optimizer {
+		payload.Optimizer = &cdn.CreateDistributionPayloadGetOptimizerArgType{
+			Enabled: utils.Ptr(true),
+		}
+	}
 	return req.CreateDistributionPayload(*payload)
 }
 
