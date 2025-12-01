@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -205,7 +207,7 @@ func TestBuildRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			req := buildRequest(testCtx, tt.inputModel, testClient, tt.nextPageID)
+			req := buildRequest(testCtx, tt.inputModel, testClient, tt.nextPageID, maxPageSize)
 			diff := cmp.Diff(req, tt.expected,
 				cmp.AllowUnexported(tt.expected),
 				cmpopts.EquateComparable(testCtx),
@@ -256,9 +258,21 @@ func fixtureDistribution(id string) cdn.Distribution {
 	}
 }
 
+func fixtureDistributions(count int) []cdn.Distribution {
+	distributions := make([]cdn.Distribution, count)
+	for i := 0; i < count; i++ {
+		id := fmt.Sprintf("dist-%d", i+1)
+		distributions[i] = cdn.Distribution{
+			Id: &id,
+		}
+	}
+	return distributions
+}
+
 func TestFetchDistributions(t *testing.T) {
 	tests := []struct {
 		description string
+		limit       int
 		responses   []testResponse
 		expected    []cdn.Distribution
 		fails       bool
@@ -323,6 +337,20 @@ func TestFetchDistributions(t *testing.T) {
 			},
 			fails: true,
 		},
+		{
+			description: "limit across 2 pages",
+			limit:       110,
+			responses: []testResponse{
+				fixtureTestResponse(
+					responseNextPageID(utils.Ptr(testNextPageID)),
+					responseDistributions(fixtureDistributions(100)...),
+				),
+				fixtureTestResponse(
+					responseDistributions(fixtureDistributions(10)...),
+				),
+			},
+			expected: slices.Concat(fixtureDistributions(100), fixtureDistributions(10)),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -350,7 +378,14 @@ func TestFetchDistributions(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to create test client: %v", err)
 			}
-			got, err := fetchDistributions(testCtx, fixtureInputModel(), client)
+			var mods []func(m *inputModel)
+			if tt.limit > 0 {
+				mods = append(mods, func(m *inputModel) {
+					m.Limit = utils.Ptr(int32(tt.limit))
+				})
+			}
+			model := fixtureInputModel(mods...)
+			got, err := fetchDistributions(testCtx, model, client)
 			if err != nil {
 				if !tt.fails {
 					t.Fatalf("fetchDistributions() unexpected error: %v", err)

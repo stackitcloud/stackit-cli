@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -23,10 +24,13 @@ import (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	SortBy string
+	Limit  *int32
 }
 
 const (
-	sortByFlag = "sort-by"
+	sortByFlag  = "sort-by"
+	limitFlag   = ""
+	maxPageSize = int32(100)
 )
 
 func NewCmd(params *params.CmdParams) *cobra.Command {
@@ -76,12 +80,21 @@ var sortByFlagOptions = []string{"id", "createdAt", "updatedAt", "originUrl", "s
 func configureFlags(cmd *cobra.Command) {
 	// same default as apiClient
 	cmd.Flags().Var(flags.EnumFlag(false, "createdAt", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
+	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	limit := flags.FlagToInt32Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
 	}
 
 	model := inputModel{
@@ -93,10 +106,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType) cdn.ApiListDistributionsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType, pageLimit int32) cdn.ApiListDistributionsRequest {
 	req := apiClient.ListDistributions(ctx, model.GlobalFlagModel.ProjectId)
 	req = req.SortBy(model.SortBy)
-	req = req.PageSize(100)
+	req = req.PageSize(pageLimit)
 	if nextPageID != nil {
 		req = req.PageIdentifier(*nextPageID)
 	}
@@ -135,17 +148,24 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) ([]cdn.Distribution, error) {
 	var nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType
 	var distributions []cdn.Distribution
+	received := int32(0)
+	limit := int32(math.MaxInt32)
+	if model.Limit != nil {
+		limit = utils.Min(limit, *model.Limit)
+	}
 	for {
-		request := buildRequest(ctx, model, apiClient, nextPageID)
+		want := utils.Min(maxPageSize, limit-received)
+		request := buildRequest(ctx, model, apiClient, nextPageID, want)
 		response, err := request.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("list distributions: %w", err)
 		}
-		nextPageID = response.NextPageIdentifier
 		if response.Distributions != nil {
 			distributions = append(distributions, *response.Distributions...)
 		}
-		if nextPageID == nil {
+		nextPageID = response.NextPageIdentifier
+		received += want
+		if nextPageID == nil || received >= limit {
 			break
 		}
 	}
