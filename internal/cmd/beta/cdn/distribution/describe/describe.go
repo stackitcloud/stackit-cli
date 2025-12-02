@@ -167,15 +167,19 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 	} else if d.Config.Backend.HttpBackend != nil {
 		h := d.Config.Backend.HttpBackend
 		var geofencing []string
-		for k, v := range *h.Geofencing {
-			geofencing = append(geofencing, fmt.Sprintf("%s: %s", k, strings.Join(v, ", ")))
+		if h.Geofencing != nil {
+			for k, v := range *h.Geofencing {
+				geofencing = append(geofencing, fmt.Sprintf("%s: %s", k, strings.Join(v, ", ")))
+			}
 		}
 		table.AddRow("BACKEND TYPE", "HTTP")
 		table.AddSeparator()
 		table.AddRow("HTTP ORIGIN URL", utils.PtrString(h.OriginUrl))
 		table.AddSeparator()
-		table.AddRow("HTTP ORIGIN REQUEST HEADERS", utils.JoinStringMap(*h.OriginRequestHeaders, ": ", ", "))
-		table.AddSeparator()
+		if h.OriginRequestHeaders != nil {
+			table.AddRow("HTTP ORIGIN REQUEST HEADERS", utils.JoinStringMap(*h.OriginRequestHeaders, ": ", ", "))
+			table.AddSeparator()
+		}
 		table.AddRow("HTTP GEOFENCING PROPERTIES", strings.Join(geofencing, "\n"))
 		table.AddSeparator()
 	}

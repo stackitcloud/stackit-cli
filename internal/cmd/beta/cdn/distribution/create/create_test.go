@@ -20,8 +20,6 @@ import (
 	"k8s.io/utils/ptr"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -32,8 +30,8 @@ const testRegions = cdn.REGION_EU
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		flagRegion:    string(testRegions),
+		globalflags.ProjectIdFlag: testProjectId,
+		flagRegion:                string(testRegions),
 	}
 	flagsHTTPBackend()(flagValues)
 	for _, mod := range mods {
@@ -202,21 +200,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(m map[string]string) {
-				delete(m, projectIdFlag)
+				delete(m, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(m map[string]string) {
-				m[projectIdFlag] = ""
+				m[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(m map[string]string) {
-				m[projectIdFlag] = "invalid-uuid"
+				m[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

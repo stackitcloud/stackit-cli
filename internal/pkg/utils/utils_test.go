@@ -590,3 +590,44 @@ func TestGetSliceFromPointer(t *testing.T) {
 		})
 	}
 }
+
+func TestMin(t *testing.T) {
+	tests := []struct {
+		name string
+		a, b int
+		want int
+	}{
+		{
+			name: "min(0, 0) = 0",
+			a:    0,
+			b:    0,
+			want: 0,
+		},
+		{
+			name: "min(1, 2) = 1",
+			a:    1,
+			b:    2,
+			want: 1,
+		},
+		{
+			name: "min(2, 1) = 1",
+			a:    2,
+			b:    1,
+			want: 1,
+		},
+		{
+			name: "min(-1, 1) = -1",
+			a:    -1,
+			b:    1,
+			want: -1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Min(tt.a, tt.b); got != tt.want {
+				t.Errorf("Min() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+}
