@@ -50,7 +50,6 @@ const (
 	GitCustomEndpointKey               = "git_custom_endpoint"
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
-	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
