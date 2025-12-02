@@ -151,10 +151,10 @@ func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.A
 	received := int32(0)
 	limit := int32(math.MaxInt32)
 	if model.Limit != nil {
-		limit = utils.Min(limit, *model.Limit)
+		limit = min(limit, *model.Limit)
 	}
 	for {
-		want := utils.Min(maxPageSize, limit-received)
+		want := min(maxPageSize, limit-received)
 		request := buildRequest(ctx, model, apiClient, nextPageID, want)
 		response, err := request.Execute()
 		if err != nil {

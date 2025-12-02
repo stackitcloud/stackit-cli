@@ -14,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"golang.org/x/exp/constraints"
 )
 
 // Ptr Returns the pointer to any type T
@@ -259,11 +258,4 @@ func GetSliceFromPointer[T any](s *[]T) []T {
 		return []T{}
 	}
 	return *s
-}
-
-func Min[T constraints.Ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
 }
