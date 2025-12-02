@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -103,7 +104,7 @@ const (
 	protectedFlag   = "protected"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", imageIdArg),
 		Short: "Updates an image",

@@ -5,14 +5,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/kms/wrappingkey/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wrapping-key",
 		Short: "Manage KMS wrapping keys",
@@ -24,7 +24,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))

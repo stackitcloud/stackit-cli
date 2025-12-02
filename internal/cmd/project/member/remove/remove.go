@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -36,7 +37,7 @@ type inputModel struct {
 	Force   bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("remove %s", subjectArg),
 		Short: "Removes a member from a project",
@@ -127,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiRemoveMembersRequest {
-	req := apiClient.RemoveMembers(ctx, model.GlobalFlagModel.ProjectId)
+	req := apiClient.RemoveMembers(ctx, model.ProjectId)
 	payload := authorization.RemoveMembersPayload{
 		Members: utils.Ptr([]authorization.Member{
 			{

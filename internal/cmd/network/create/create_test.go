@@ -6,7 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -634,7 +635,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.projectLabel, tt.args.network); (err != nil) != tt.wantErr {

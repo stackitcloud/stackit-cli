@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -26,7 +27,7 @@ const (
 	affinityGroupId = "AFFINITY_GROUP_ID"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", affinityGroupId),
 		Short: "Show details of an affinity group",
@@ -89,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {

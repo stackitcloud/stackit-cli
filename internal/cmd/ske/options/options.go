@@ -7,8 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -37,7 +38,7 @@ type inputModel struct {
 	VolumeTypes        bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists SKE provider options",
@@ -272,13 +273,13 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 }
 
 func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
-	types := *resp.MachineTypes
+	machineTypes := *resp.MachineTypes
 
 	table := tables.NewTable()
 	table.SetTitle("Machine Types")
 	table.SetHeader("TYPE", "CPU", "MEMORY")
-	for i := range types {
-		t := types[i]
+	for i := range machineTypes {
+		t := machineTypes[i]
 		table.AddRow(
 			utils.PtrString(t.Name),
 			utils.PtrString(t.Cpu),
@@ -289,13 +290,13 @@ func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 }
 
 func buildVolumeTypesTable(resp *ske.ProviderOptions) tables.Table {
-	types := *resp.VolumeTypes
+	volumeTypes := *resp.VolumeTypes
 
 	table := tables.NewTable()
 	table.SetTitle("Volume Types")
 	table.SetHeader("TYPE")
-	for i := range types {
-		z := types[i]
+	for i := range volumeTypes {
+		z := volumeTypes[i]
 		table.AddRow(utils.PtrString(z.Name))
 	}
 	return table
