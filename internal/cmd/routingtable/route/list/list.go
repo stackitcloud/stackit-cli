@@ -3,10 +3,8 @@ package list
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,8 +12,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	routeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/routing-table/utils"
+	routeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/routingtable/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -37,7 +36,7 @@ type inputModel struct {
 	RoutingTableId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all routes within a routing-table",
@@ -59,7 +58,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
 			}
@@ -88,8 +87,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routes: %w", err)
 			}
 
-			if items := response.Items; items == nil || len(*items) == 0 {
-				params.Printer.Outputf("No routes  found for routing-table %q\n", model.RoutingTableId)
+			if items := response.Items; items == nil {
+				params.Printer.Outputf("No routes found for routing-table %q\n", model.RoutingTableId)
 				return nil
 			}
 
@@ -118,7 +117,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
@@ -142,36 +141,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, items []iaas.Route) error {
-	if len(items) == 0 {
-		return fmt.Errorf("create routes response is empty")
+func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
+	if routes == nil {
+		return fmt.Errorf("list routes routes are nil")
 	}
 
-	return p.OutputResult(outputFormat, items, func() error {
+	return p.OutputResult(outputFormat, routes, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "DEST. TYPE", "DEST. VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED", "UPDATED")
-		for _, item := range items {
-			destType, destValue, hopType, hopValue, labels := routeUtils.ExtractRouteDetails(item)
-
-			createdAt := ""
-			if item.CreatedAt != nil {
-				createdAt = item.CreatedAt.Format(time.RFC3339)
-			}
-
-			updatedAt := ""
-			if item.UpdatedAt != nil {
-				updatedAt = item.UpdatedAt.Format(time.RFC3339)
-			}
-
+		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
+		for _, route := range routes {
+			routeDetails := routeUtils.ExtractRouteDetails(route)
 			table.AddRow(
-				utils.PtrString(item.Id),
-				destType,
-				destValue,
-				hopType,
-				hopValue,
-				labels,
-				createdAt,
-				updatedAt,
+				utils.PtrString(route.Id),
+				routeDetails.DestType,
+				routeDetails.DestValue,
+				routeDetails.HopType,
+				routeDetails.HopValue,
+				routeDetails.Labels,
+				routeDetails.CreatedAt,
+				routeDetails.UpdatedAt,
 			)
 		}
 		err := table.Display(p)

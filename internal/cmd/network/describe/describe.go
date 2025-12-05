@@ -152,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddSeparator()
 
 		if network.RoutingTableId != nil {
-			table.AddRow("ROUTING-TABLE ID", utils.PtrString(network.RoutingTableId))
+			table.AddRow("ROUTING TABLE ID", utils.PtrString(network.RoutingTableId))
 			table.AddSeparator()
 		}
 

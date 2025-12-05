@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -15,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -40,7 +39,7 @@ type inputModel struct {
 	OrganizationId   string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a routing-table",
@@ -56,11 +55,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"`,
 			),
 			examples.NewExample(
-				"Create a routing-table with name `rt` with system_routes disabled",
+				"Create a routing-table with name `rt` with system routes disabled",
 				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-system-routes`,
 			),
 			examples.NewExample(
-				"Create a routing-table with name `rt` with dynamic_routes disabled",
+				"Create a routing-table with name `rt` with dynamic routes disabled",
 				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-dynamic-routes`,
 			),
 		),
@@ -132,15 +131,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) (iaas.ApiAddRoutingTableToAreaRequest, error) {
-	systemRoutes := true
-	if model.NonSystemRoutes {
-		systemRoutes = false
-	}
-
-	dynamicRoutes := true
-	if model.NonDynamicRoutes {
-		dynamicRoutes = false
-	}
+	systemRoutes := !model.NonSystemRoutes
+	dynamicRoutes := !model.NonDynamicRoutes
 
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   model.Description,
@@ -175,28 +167,18 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 			}
 		}
 
-		createdAt := ""
-		if routingTable.CreatedAt != nil {
-			createdAt = routingTable.CreatedAt.Format(time.RFC3339)
-		}
-
-		updatedAt := ""
-		if routingTable.UpdatedAt != nil {
-			updatedAt = routingTable.UpdatedAt.Format(time.RFC3339)
-		}
-
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "DESCRIPTION", "CREATED_AT", "UPDATED_AT", "DEFAULT", "LABELS", "SYSTEM_ROUTES", "DYNAMIC_ROUTES")
+		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
 		table.AddRow(
 			utils.PtrString(routingTable.Id),
 			utils.PtrString(routingTable.Name),
 			utils.PtrString(routingTable.Description),
-			createdAt,
-			updatedAt,
 			utils.PtrString(routingTable.Default),
 			strings.Join(labels, "\n"),
 			utils.PtrString(routingTable.SystemRoutes),
 			utils.PtrString(routingTable.DynamicRoutes),
+			utils.ConvertTimePToDateTimeString(routingTable.CreatedAt),
+			utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt),
 		)
 
 		err := table.Display(p)
