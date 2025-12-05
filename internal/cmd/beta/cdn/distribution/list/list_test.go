@@ -44,23 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func flagSortBy(sortBy string) func(m map[string]string) {
-	return func(m map[string]string) {
-		m[sortByFlag] = sortBy
-	}
-}
-
-func flagProjectId(id *string) func(m map[string]string) {
-	return func(m map[string]string) {
-		if id == nil {
-			delete(m, globalflags.ProjectIdFlag)
-		} else {
-			m[globalflags.ProjectIdFlag] = *id
-		}
-	}
-}
-
-func fixtureInputModel(mods ...func(m *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	m := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
@@ -74,32 +58,14 @@ func fixtureInputModel(mods ...func(m *inputModel)) *inputModel {
 	return m
 }
 
-func inputSortBy(sortBy string) func(m *inputModel) {
-	return func(m *inputModel) {
-		m.SortBy = sortBy
-	}
-}
-
-func fixtureRequest(mods ...func(r cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-	r := testClient.ListDistributions(testCtx, testProjectId)
-	r = r.PageSize(100)
-	r = r.SortBy("createdAt")
+func fixtureRequest(mods ...func(request cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
+	request := testClient.ListDistributions(testCtx, testProjectId)
+	request = request.PageSize(100)
+	request = request.SortBy("createdAt")
 	for _, mod := range mods {
-		r = mod(r)
+		request = mod(request)
 	}
-	return r
-}
-
-func requestSortBy(sortBy string) func(r cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-	return func(r cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-		return r.SortBy(sortBy)
-	}
-}
-
-func requestNextPageID(nextPageID string) func(r cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-	return func(r cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-		return r.PageIdentifier(nextPageID)
-	}
+	return request
 }
 
 func TestParseInput(t *testing.T) {
@@ -118,49 +84,77 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no project id",
-			flagValues:  fixtureFlagValues(flagProjectId(nil)),
-			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
 		},
 		{
 			description: "sort by id",
-			flagValues:  fixtureFlagValues(flagSortBy("id")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("id")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "id"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "id"
+			}),
 		},
 		{
 			description: "sort by origin-url",
-			flagValues:  fixtureFlagValues(flagSortBy("originUrl")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("originUrl")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "originUrl"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "originUrl"
+			}),
 		},
 		{
 			description: "sort by status",
-			flagValues:  fixtureFlagValues(flagSortBy("status")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("status")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "status"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "status"
+			}),
 		},
 		{
 			description: "sort by created",
-			flagValues:  fixtureFlagValues(flagSortBy("createdAt")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("createdAt")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "createdAt"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "createdAt"
+			}),
 		},
 		{
 			description: "sort by updated",
-			flagValues:  fixtureFlagValues(flagSortBy("updatedAt")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("updatedAt")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "updatedAt"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "updatedAt"
+			}),
 		},
 		{
 			description: "sort by originUrlRelated",
-			flagValues:  fixtureFlagValues(flagSortBy("originUrlRelated")),
-			isValid:     true,
-			expected:    fixtureInputModel(inputSortBy("originUrlRelated")),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "originUrlRelated"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "originUrlRelated"
+			}),
 		},
 		{
 			description: "invalid sort by",
-			flagValues:  fixtureFlagValues(flagSortBy("invalid")),
-			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[sortByFlag] = "invalid"
+			}),
+			isValid: false,
 		},
 		{
 			description: "missing sort by uses default",
@@ -169,8 +163,10 @@ func TestParseInput(t *testing.T) {
 					delete(flagValues, sortByFlag)
 				},
 			),
-			isValid:  true,
-			expected: fixtureInputModel(inputSortBy("createdAt")),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "createdAt"
+			}),
 		},
 	}
 
@@ -195,14 +191,20 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			description: "sort by updatedAt",
-			inputModel:  fixtureInputModel(inputSortBy("updatedAt")),
-			expected:    fixtureRequest(requestSortBy("updatedAt")),
+			inputModel: fixtureInputModel(func(model *inputModel) {
+				model.SortBy = "updatedAt"
+			}),
+			expected: fixtureRequest(func(req cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
+				return req.SortBy("updatedAt")
+			}),
 		},
 		{
 			description: "with next page id",
 			inputModel:  fixtureInputModel(),
 			nextPageID:  utils.Ptr(testNextPageID),
-			expected:    fixtureRequest(requestNextPageID(testNextPageID)),
+			expected: fixtureRequest(func(req cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
+				return req.PageIdentifier(testNextPageID)
+			}),
 		},
 	}
 	for _, tt := range tests {
@@ -224,38 +226,14 @@ type testResponse struct {
 	body       cdn.ListDistributionsResponse
 }
 
-func fixtureTestResponse(mods ...func(r *testResponse)) testResponse {
-	r := testResponse{
+func fixtureTestResponse(mods ...func(resp *testResponse)) testResponse {
+	resp := testResponse{
 		statusCode: 200,
 	}
 	for _, mod := range mods {
-		mod(&r)
+		mod(&resp)
 	}
-	return r
-}
-
-func responseStatus(statusCode int) func(r *testResponse) {
-	return func(r *testResponse) {
-		r.statusCode = statusCode
-	}
-}
-
-func responseNextPageID(nextPageID *string) func(r *testResponse) {
-	return func(r *testResponse) {
-		r.body.NextPageIdentifier = nextPageID
-	}
-}
-
-func responseDistributions(distributions ...cdn.Distribution) func(r *testResponse) {
-	return func(r *testResponse) {
-		r.body.Distributions = &distributions
-	}
-}
-
-func fixtureDistribution(id string) cdn.Distribution {
-	return cdn.Distribution{
-		Id: &id,
-	}
+	return resp
 }
 
 func fixtureDistributions(count int) []cdn.Distribution {
@@ -288,38 +266,48 @@ func TestFetchDistributions(t *testing.T) {
 			description: "single distribution, single page",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseDistributions(fixtureDistribution("dist-1")),
+					func(resp *testResponse) {
+						resp.body.Distributions = &[]cdn.Distribution{
+							{Id: utils.Ptr("dist-1")},
+						}
+					},
 				),
 			},
 			expected: []cdn.Distribution{
-				fixtureDistribution("dist-1"),
+				{Id: utils.Ptr("dist-1")},
 			},
 		},
 		{
 			description: "multiple distributions, multiple pages",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseNextPageID(utils.Ptr(testNextPageID)),
-					responseDistributions(
-						fixtureDistribution("dist-1"),
-					),
+					func(resp *testResponse) {
+						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
+						resp.body.Distributions = &[]cdn.Distribution{
+							{Id: utils.Ptr("dist-1")},
+						}
+					},
 				),
 				fixtureTestResponse(
-					responseDistributions(
-						fixtureDistribution("dist-2"),
-					),
+					func(resp *testResponse) {
+						resp.body.Distributions = &[]cdn.Distribution{
+							{Id: utils.Ptr("dist-2")},
+						}
+					},
 				),
 			},
 			expected: []cdn.Distribution{
-				fixtureDistribution("dist-1"),
-				fixtureDistribution("dist-2"),
+				{Id: utils.Ptr("dist-1")},
+				{Id: utils.Ptr("dist-2")},
 			},
 		},
 		{
 			description: "API error",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseStatus(500),
+					func(resp *testResponse) {
+						resp.statusCode = 500
+					},
 				),
 			},
 			fails: true,
@@ -328,12 +316,18 @@ func TestFetchDistributions(t *testing.T) {
 			description: "API error on second page",
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseNextPageID(utils.Ptr(testNextPageID)),
-					responseDistributions(
-						fixtureDistribution("dist-1"),
-					),
+					func(resp *testResponse) {
+						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
+						resp.body.Distributions = &[]cdn.Distribution{
+							{Id: utils.Ptr("dist-1")},
+						}
+					},
 				),
-				fixtureTestResponse(responseStatus(500)),
+				fixtureTestResponse(
+					func(resp *testResponse) {
+						resp.statusCode = 500
+					},
+				),
 			},
 			fails: true,
 		},
@@ -342,11 +336,17 @@ func TestFetchDistributions(t *testing.T) {
 			limit:       110,
 			responses: []testResponse{
 				fixtureTestResponse(
-					responseNextPageID(utils.Ptr(testNextPageID)),
-					responseDistributions(fixtureDistributions(100)...),
+					func(resp *testResponse) {
+						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
+						distributions := fixtureDistributions(100)
+						resp.body.Distributions = &distributions
+					},
 				),
 				fixtureTestResponse(
-					responseDistributions(fixtureDistributions(10)...),
+					func(resp *testResponse) {
+						distributions := fixtureDistributions(10)
+						resp.body.Distributions = &distributions
+					},
 				),
 			},
 			expected: slices.Concat(fixtureDistributions(100), fixtureDistributions(10)),

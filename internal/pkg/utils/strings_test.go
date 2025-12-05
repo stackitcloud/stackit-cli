@@ -33,34 +33,34 @@ func TestTruncate(t *testing.T) {
 
 func TestJoinStringMap(t *testing.T) {
 	tests := []struct {
-		name string
-		m    map[string]string
-		want string
+		name  string
+		input map[string]string
+		want  string
 	}{
 		{
-			name: "nil map",
-			m:    nil,
-			want: "",
+			name:  "nil map",
+			input: nil,
+			want:  "",
 		},
 		{
-			name: "empty map",
-			m:    map[string]string{},
-			want: "",
+			name:  "empty map",
+			input: map[string]string{},
+			want:  "",
 		},
 		{
-			name: "single element",
-			m:    map[string]string{"key1": "value1"},
-			want: "key1=value1",
+			name:  "single element",
+			input: map[string]string{"key1": "value1"},
+			want:  "key1=value1",
 		},
 		{
-			name: "multiple elements",
-			m:    map[string]string{"key1": "value1", "key2": "value2"},
-			want: "key1=value1, key2=value2",
+			name:  "multiple elements",
+			input: map[string]string{"key1": "value1", "key2": "value2"},
+			want:  "key1=value1, key2=value2",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := JoinStringMap(tt.m, "=", ", "); got != tt.want {
+			if got := JoinStringMap(tt.input, "=", ", "); got != tt.want {
 				t.Errorf("JoinStringMap() = %v, want %v", got, tt.want)
 			}
 		})

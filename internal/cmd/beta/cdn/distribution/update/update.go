@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
@@ -15,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
+	cdnUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
@@ -179,13 +179,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 		var geofencing *map[string][]string
 		geofencingInput := flags.FlagToStringArrayValue(p, cmd, flagHTTPGeofencing)
 		if geofencingInput != nil {
-			geofencing = parseGeofencing(p, geofencingInput)
+			geofencing = cdnUtils.ParseGeofencing(p, geofencingInput)
 		}
 
 		var originRequestHeaders *map[string]string
 		originRequestHeadersInput := flags.FlagToStringSliceValue(p, cmd, flagHTTPOriginRequestHeaders)
 		if originRequestHeadersInput != nil {
-			originRequestHeaders = parseOriginRequestHeaders(p, originRequestHeadersInput)
+			originRequestHeaders = cdnUtils.ParseOriginRequestHeaders(p, originRequestHeadersInput)
 		}
 
 		http = &httpInputModel{
@@ -245,40 +245,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 
 	p.DebugInputModel(model)
 	return &model, nil
-}
-
-// TODO both parseGeofencing and parseOriginRequestHeaders copied from create.go, move to another package and make public?
-func parseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]string { //nolint:gocritic // convenient for setting the SDK payload
-	geofencing := make(map[string][]string)
-	for _, in := range geofencingInput {
-		firstSpace := strings.IndexRune(in, ' ')
-		if firstSpace == -1 {
-			p.Debug(print.ErrorLevel, "invalid geofencing entry (no space found): %q", in)
-			continue
-		}
-		urlPart := in[:firstSpace]
-		countriesPart := in[firstSpace+1:]
-		geofencing[urlPart] = nil
-		countries := strings.Split(countriesPart, ",")
-		for _, country := range countries {
-			country = strings.TrimSpace(country)
-			geofencing[urlPart] = append(geofencing[urlPart], country)
-		}
-	}
-	return &geofencing
-}
-
-func parseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []string) *map[string]string { //nolint:gocritic // convenient for setting the SDK payload
-	originRequestHeaders := make(map[string]string)
-	for _, in := range originRequestHeadersInput {
-		parts := strings.Split(in, ":")
-		if len(parts) != 2 {
-			p.Debug(print.ErrorLevel, "invalid origin request header entry (no colon found): %q", in)
-			continue
-		}
-		originRequestHeaders[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
-	}
-	return &originRequestHeaders
 }
 
 func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputModel) cdn.ApiPatchDistributionRequest {

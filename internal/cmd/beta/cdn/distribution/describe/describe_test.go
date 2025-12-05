@@ -28,7 +28,7 @@ var (
 	testTime           = time.Time{}
 )
 
-func fixtureFlagValues(mods ...func(m map[string]string)) map[string]string {
+func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectID,
 	}
@@ -38,7 +38,7 @@ func fixtureFlagValues(mods ...func(m map[string]string)) map[string]string {
 	return flagValues
 }
 
-func fixtureInputModel(mods ...func(m *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectID,
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(m *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureResponse(mods ...func(r *cdn.GetDistributionResponse)) *cdn.GetDistributionResponse {
+func fixtureResponse(mods ...func(resp *cdn.GetDistributionResponse)) *cdn.GetDistributionResponse {
 	response := &cdn.GetDistributionResponse{
 		Distribution: &cdn.Distribution{
 			Config: &cdn.Config{
@@ -133,12 +133,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "with WAF",
 			args:        []string{testDistributionID},
-			flags: fixtureFlagValues(func(m map[string]string) {
-				m[flagWithWaf] = "true"
+			flags: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagWithWaf] = "true"
 			}),
 			isValid: true,
-			expected: fixtureInputModel(func(m *inputModel) {
-				m.WithWAF = true
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.WithWAF = true
 			}),
 		},
 	}
@@ -162,8 +162,8 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			description: "with WAF",
-			model: fixtureInputModel(func(m *inputModel) {
-				m.WithWAF = true
+			model: fixtureInputModel(func(model *inputModel) {
+				model.WithWAF = true
 			}),
 			expected: testClient.GetDistribution(testCtx, testProjectID, testDistributionID).WithWafStatus(true),
 		},

@@ -128,9 +128,11 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "REGIONS", "STATUS")
-		for i := range distributions {
-			d := &distributions[i]
-			joinedRegions := strings.Join(sdkUtils.EnumSliceToStringSlice(*d.Config.Regions), ", ")
+		for _, d := range distributions {
+			var joinedRegions string
+			if d.Config != nil && d.Config.Regions != nil {
+				joinedRegions = strings.Join(sdkUtils.EnumSliceToStringSlice(*d.Config.Regions), ", ")
+			}
 			table.AddRow(
 				utils.PtrString(d.Id),
 				joinedRegions,
