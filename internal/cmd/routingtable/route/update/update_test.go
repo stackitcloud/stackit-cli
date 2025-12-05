@@ -1,17 +1,25 @@
 package update
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
+
+type testCtxKey struct{}
+
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testClient = &iaas.APIClient{}
 
 const testRegion = "eu01"
 
@@ -67,6 +75,29 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 		mod(argValues)
 	}
 	return argValues
+}
+
+func fixtureRequest(mods ...func(req *iaas.ApiUpdateRouteOfRoutingTableRequest)) iaas.ApiUpdateRouteOfRoutingTableRequest {
+	req := testClient.UpdateRouteOfRoutingTable(
+		testCtx,
+		testOrgId,
+		testNetworkAreaId,
+		testRegion,
+		testRoutingTableId,
+		testRouteId,
+	)
+
+	payload := iaas.UpdateRouteOfRoutingTablePayload{
+		Labels: utils.ConvertStringMapToInterfaceMap(testLabels),
+	}
+
+	req = req.UpdateRouteOfRoutingTablePayload(payload)
+
+	for _, mod := range mods {
+		mod(&req)
+	}
+
+	return req
 }
 
 func TestParseInput(t *testing.T) {
@@ -159,6 +190,46 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
+func TestBuildRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest iaas.ApiUpdateRouteOfRoutingTableRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "labels nil",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Labels = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRouteOfRoutingTableRequest) {
+				*request = (*request).UpdateRouteOfRoutingTablePayload(iaas.UpdateRouteOfRoutingTablePayload{
+					Labels: nil,
+				})
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			gotReq := buildRequest(testCtx, tt.model, testClient)
+
+			if diff := cmp.Diff(
+				tt.expectedRequest,
+				gotReq,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			); diff != "" {
+				t.Errorf("buildRequest() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestOutputResult(t *testing.T) {
 	dummyRoute := iaas.Route{
 		Id: utils.Ptr("route-foo"),
@@ -182,28 +253,47 @@ func TestOutputResult(t *testing.T) {
 	tests := []struct {
 		name         string
 		outputFormat string
-		route        iaas.Route
+		route        *iaas.Route
 		wantErr      bool
 	}{
 		{
+			name:         "nil route should return error",
+			outputFormat: print.PrettyOutputFormat,
+			route:        nil,
+			wantErr:      true,
+		},
+		{
+			name:         "empty route",
+			outputFormat: print.PrettyOutputFormat,
+			route:        &iaas.Route{},
+			// should fail on pretty format
+			wantErr: true,
+		},
+		{
+			name:         "pretty output with one route",
+			outputFormat: print.PrettyOutputFormat,
+			route:        &dummyRoute,
+			wantErr:      false,
+		},
+		{
 			name:         "json output with one route",
 			outputFormat: print.JSONOutputFormat,
-			route:        dummyRoute,
+			route:        &dummyRoute,
 			wantErr:      false,
 		},
 		{
 			name:         "yaml output with one route",
 			outputFormat: print.YAMLOutputFormat,
-			route:        dummyRoute,
+			route:        &dummyRoute,
 			wantErr:      false,
 		},
 	}
 
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.outputFormat, "", "", &tt.route); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.outputFormat, "", "", tt.route); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

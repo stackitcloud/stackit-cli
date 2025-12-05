@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -23,7 +23,7 @@ const (
 	networkAreaIdFlag    = "network-area-id"
 	nonDynamicRoutesFlag = "non-dynamic-routes"
 	organizationIdFlag   = "organization-id"
-	routingTableIdArg    = "ROUTE_TABLE_ID_ARG"
+	routingTableIdArg    = "ROUTE_TABLE_ID"
 )
 
 type inputModel struct {
@@ -37,7 +37,7 @@ type inputModel struct {
 	Name             *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", routingTableIdArg),
 		Short: "Updates a routing-table",
@@ -57,7 +57,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz",
 			),
 			examples.NewExample(
-				`Disables the dynamic_routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
+				`Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
 				"$ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-dynamic-routes",
 			),
 		),
@@ -82,28 +82,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			// Call API
-			req := apiClient.UpdateRoutingTableOfArea(
-				ctx,
-				model.OrganizationId,
-				model.NetworkAreaId,
-				model.Region,
-				model.RoutingTableId,
-			)
-
-			dynamicRoutes := true
-			if model.NonDynamicRoutes {
-				dynamicRoutes = false
-			}
-
-			payload := iaas.UpdateRoutingTableOfAreaPayload{
-				Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
-				Name:          model.Name,
-				Description:   model.Description,
-				DynamicRoutes: &dynamicRoutes,
-			}
-			req = req.UpdateRoutingTableOfAreaPayload(payload)
-
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update routing-table %q : %w", model.RoutingTableId, err)
@@ -131,9 +110,6 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	if len(inputArgs) == 0 {
-		return nil, fmt.Errorf("at least one argument is required")
-	}
 	routeTableId := inputArgs[0]
 
 	model := inputModel{
@@ -164,4 +140,25 @@ func outputResult(p *print.Printer, outputFormat, networkAreaId string, routingT
 		p.Outputf("Updated routing-table %q in network-area %q.", *routingTable.Id, networkAreaId)
 		return nil
 	})
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateRoutingTableOfAreaRequest {
+	req := apiClient.UpdateRoutingTableOfArea(
+		ctx,
+		model.OrganizationId,
+		model.NetworkAreaId,
+		model.Region,
+		model.RoutingTableId,
+	)
+
+	dynamicRoutes := !model.NonDynamicRoutes
+
+	payload := iaas.UpdateRoutingTableOfAreaPayload{
+		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Name:          model.Name,
+		Description:   model.Description,
+		DynamicRoutes: &dynamicRoutes,
+	}
+
+	return req.UpdateRoutingTableOfAreaPayload(payload)
 }

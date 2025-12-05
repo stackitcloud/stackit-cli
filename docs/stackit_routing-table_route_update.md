@@ -7,7 +7,7 @@ Updates a route in a routing-table
 Updates a route in a routing-table.
 
 ```
-stackit routing-table route update ROUTE_ID_ARG [flags]
+stackit routing-table route update ROUTE_ID [flags]
 ```
 
 ### Examples

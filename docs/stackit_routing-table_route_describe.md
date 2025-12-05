@@ -7,7 +7,7 @@ Describes a route within a routing-table
 Describes a route within a routing-table
 
 ```
-stackit routing-table route describe ROUTE_ID_ARG [flags]
+stackit routing-table route describe ROUTE_ID [flags]
 ```
 
 ### Examples
