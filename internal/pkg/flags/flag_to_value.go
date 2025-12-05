@@ -47,6 +47,20 @@ func FlagToStringSliceValue(p *print.Printer, cmd *cobra.Command, flag string) [
 	return nil
 }
 
+// Returns the flag's value as a []string.
+// Returns nil if flag is not set, if its value can not be converted to []string, or if the flag does not exist.
+func FlagToStringArrayValue(p *print.Printer, cmd *cobra.Command, flag string) []string {
+	value, err := cmd.Flags().GetStringArray(flag)
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag to string array value: %v", err)
+		return nil
+	}
+	if !cmd.Flag(flag).Changed {
+		return nil
+	}
+	return value
+}
+
 // Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to map[string]string, or if the flag does not exist.
 func FlagToStringToStringPointer(p *print.Printer, cmd *cobra.Command, flag string) *map[string]string { //nolint:gocritic //convenient for setting the SDK payload
@@ -67,6 +81,20 @@ func FlagToInt64Pointer(p *print.Printer, cmd *cobra.Command, flag string) *int6
 	value, err := cmd.Flags().GetInt64(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to Int64 pointer: %v", err)
+		return nil
+	}
+	if cmd.Flag(flag).Changed {
+		return &value
+	}
+	return nil
+}
+
+// Returns a pointer to the flag's value.
+// Returns nil if the flag is not set, if its value can not be converted to int64, or if the flag does not exist.
+func FlagToInt32Pointer(p *print.Printer, cmd *cobra.Command, flag string) *int32 {
+	value, err := cmd.Flags().GetInt32(flag)
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag to Int pointer: %v", err)
 		return nil
 	}
 	if cmd.Flag(flag).Changed {
