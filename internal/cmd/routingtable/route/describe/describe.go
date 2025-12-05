@@ -3,18 +3,17 @@ package describe
 import (
 	"context"
 	"fmt"
-	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	routeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/routingtable/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -22,7 +21,7 @@ import (
 const (
 	networkAreaIdFlag  = "network-area-id"
 	organizationIdFlag = "organization-id"
-	routeIdArg         = "ROUTE_ID_ARG"
+	routeIdArg         = "ROUTE_ID"
 	routingTableIdFlag = "routing-table-id"
 )
 
@@ -34,7 +33,7 @@ type inputModel struct {
 	RoutingTableId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", routeIdArg),
 		Short: "Describes a route within a routing-table",
@@ -91,13 +90,9 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
-
-	if len(args) == 0 {
-		return nil, fmt.Errorf("at least one argument is required")
-	}
-	routeId := args[0]
+	routeId := inputArgs[0]
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
@@ -111,78 +106,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Route) error {
-	if routingTable == nil {
-		return fmt.Errorf("describe routes response is empty")
+func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) error {
+	if route == nil {
+		return fmt.Errorf("describe route response is empty")
 	}
 
-	return p.OutputResult(outputFormat, routingTable, func() error {
-		var labels []string
-		if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
-			for key, value := range *routingTable.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
-			}
-		}
-
-		destinationType := ""
-		destinationValue := ""
-		if dest := routingTable.Destination.DestinationCIDRv4; dest != nil {
-			if dest.Type != nil {
-				destinationType = *dest.Type
-			}
-			if dest.Value != nil {
-				destinationValue = *dest.Value
-			}
-		}
-		if dest := routingTable.Destination.DestinationCIDRv6; dest != nil {
-			if dest.Type != nil {
-				destinationType = *dest.Type
-			}
-			if dest.Value != nil {
-				destinationValue = *dest.Value
-			}
-		}
-
-		nextHopType := ""
-		nextHopValue := ""
-		if nextHop := routingTable.Destination.DestinationCIDRv4; nextHop != nil {
-			if nextHop.Type != nil {
-				nextHopType = *nextHop.Type
-			}
-			if nextHop.Value != nil {
-				nextHopValue = *nextHop.Value
-			}
-		}
-		if nextHop := routingTable.Destination.DestinationCIDRv6; nextHop != nil {
-			if nextHop.Type != nil {
-				nextHopType = *nextHop.Type
-			}
-			if nextHop.Value != nil {
-				nextHopValue = *nextHop.Value
-			}
-		}
-
-		createdAt := ""
-		if routingTable.CreatedAt != nil {
-			createdAt = routingTable.CreatedAt.Format(time.RFC3339)
-		}
-
-		updatedAt := ""
-		if routingTable.UpdatedAt != nil {
-			updatedAt = routingTable.UpdatedAt.Format(time.RFC3339)
-		}
+	return p.OutputResult(outputFormat, route, func() error {
+		routeDetails := routeUtils.ExtractRouteDetails(*route)
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "CREATED_AT", "UPDATED_AT", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS")
+		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
 		table.AddRow(
-			utils.PtrString(routingTable.Id),
-			createdAt,
-			updatedAt,
-			destinationType,
-			destinationValue,
-			nextHopType,
-			nextHopValue,
-			strings.Join(labels, "\n"),
+			utils.PtrString(route.Id),
+			routeDetails.DestType,
+			routeDetails.DestValue,
+			routeDetails.HopType,
+			routeDetails.HopValue,
+			routeDetails.Labels,
+			routeDetails.CreatedAt,
+			routeDetails.UpdatedAt,
 		)
 
 		err := table.Display(p)

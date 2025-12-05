@@ -2,17 +2,17 @@ package route
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "route",
 		Short: "Manages routes of a routing-table",
@@ -24,7 +24,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))

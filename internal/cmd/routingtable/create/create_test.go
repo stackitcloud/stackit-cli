@@ -9,10 +9,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	pprint "github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -29,8 +29,10 @@ var testNetworkAreaId = uuid.NewString()
 
 const testRoutingTableName = "test"
 const testRoutingTableDescription = "test"
-const systemRoutesDisabled = true
-const dynamicRoutesDisabled = true
+
+const testNonSystemRoutes = false
+const testNonDynamicRoutes = false
+
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
 var testLabels = &map[string]string{
@@ -45,8 +47,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		networkAreaIdFlag:      testNetworkAreaId,
 		descriptionFlag:        testRoutingTableDescription,
 		nameFlag:               testRoutingTableName,
-		nonSystemRoutesFlag:    strconv.FormatBool(systemRoutesDisabled),
-		nonDynamicRoutesFlag:   strconv.FormatBool(dynamicRoutesDisabled),
+		nonSystemRoutesFlag:    strconv.FormatBool(testNonSystemRoutes),
+		nonDynamicRoutesFlag:   strconv.FormatBool(testNonDynamicRoutes),
 		labelFlag:              testLabelSelectorFlag,
 	}
 	for _, mod := range mods {
@@ -65,8 +67,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		NetworkAreaId:    testNetworkAreaId,
 		Name:             testRoutingTableName,
 		Description:      utils.Ptr(testRoutingTableDescription),
-		NonSystemRoutes:  systemRoutesDisabled,
-		NonDynamicRoutes: dynamicRoutesDisabled,
+		NonSystemRoutes:  testNonSystemRoutes,
+		NonDynamicRoutes: testNonDynamicRoutes,
 		Labels:           utils.Ptr(*testLabels),
 	}
 	for _, mod := range mods {
@@ -85,22 +87,12 @@ func fixtureRequest(mods ...func(request *iaas.ApiAddRoutingTableToAreaRequest))
 }
 
 func fixturePayload(mods ...func(payload *iaas.AddRoutingTableToAreaPayload)) iaas.AddRoutingTableToAreaPayload {
-	systemRoutes := true
-	if dynamicRoutesDisabled {
-		systemRoutes = false
-	}
-
-	dynamicRoutes := true
-	if systemRoutesDisabled {
-		dynamicRoutes = false
-	}
-
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   utils.Ptr(testRoutingTableDescription),
 		Name:          utils.Ptr(testRoutingTableName),
 		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
-		SystemRoutes:  utils.Ptr(systemRoutes),
-		DynamicRoutes: utils.Ptr(dynamicRoutes),
+		SystemRoutes:  utils.Ptr(true),
+		DynamicRoutes: utils.Ptr(true),
 	}
 
 	for _, mod := range mods {
@@ -124,7 +116,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "dynamic_routes disabled",
+			description: "dynamic routes disabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[nonDynamicRoutesFlag] = "true"
 			}),
@@ -134,7 +126,7 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description: "system_routes disabled",
+			description: "system routes disabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[nonSystemRoutesFlag] = "true"
 			}),
@@ -243,9 +235,11 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
-					payload.Labels = nil
-				}))
+				*request = (*request).AddRoutingTableToAreaPayload(
+					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
+						payload.Labels = nil
+					}),
+				)
 			}),
 		},
 		{
@@ -254,9 +248,11 @@ func TestBuildRequest(t *testing.T) {
 				model.NonSystemRoutes = true
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
-					payload.SystemRoutes = utils.Ptr(false)
-				}))
+				*request = (*request).AddRoutingTableToAreaPayload(
+					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
+						payload.SystemRoutes = utils.Ptr(false)
+					}),
+				)
 			}),
 		},
 		{
@@ -265,9 +261,11 @@ func TestBuildRequest(t *testing.T) {
 				model.NonDynamicRoutes = true
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
-					payload.DynamicRoutes = utils.Ptr(false)
-				}))
+				*request = (*request).AddRoutingTableToAreaPayload(
+					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
+						payload.DynamicRoutes = utils.Ptr(false)
+					}),
+				)
 			}),
 		},
 	}
@@ -314,32 +312,32 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:         "empty routing-table",
-			outputFormat: "",
+			outputFormat: print.PrettyOutputFormat,
 			routingTable: &iaas.RoutingTable{},
 			wantErr:      true,
 		},
 		{
-			name:         "table output routing-table",
-			outputFormat: "",
+			name:         "pretty output routing-table",
+			outputFormat: print.PrettyOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 		{
 			name:         "json output routing-table",
-			outputFormat: pprint.JSONOutputFormat,
+			outputFormat: print.JSONOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 		{
 			name:         "yaml output routing-table",
-			outputFormat: pprint.YAMLOutputFormat,
+			outputFormat: print.YAMLOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 	}
 
-	p := pprint.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.outputFormat, tt.routingTable); (err != nil) != tt.wantErr {

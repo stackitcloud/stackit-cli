@@ -2,7 +2,6 @@ package routingtable
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	rtCreate "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/create"
 	rtDelete "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/delete"
 	rtDescribe "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/describe"
@@ -10,10 +9,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/route"
 	rtUpdate "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "routing-table",
 		Short: "Manage routing-tables and its according routes",
@@ -28,7 +28,7 @@ To request access, please contact your account manager or submit a support ticke
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(
 		rtCreate.NewCmd(params),
 		rtUpdate.NewCmd(params),

@@ -296,11 +296,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.CreateNetworkPayload{
-		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
-		Routed: utils.Ptr(!model.NonRouted),
-		Ipv4:   ipv4Network,
-		Ipv6:   ipv6Network,
+		Name:           model.Name,
+		Labels:         utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Routed:         utils.Ptr(!model.NonRouted),
+		Ipv4:           ipv4Network,
+		Ipv6:           ipv6Network,
 		RoutingTableId: model.RoutingTableID,
 	}
 

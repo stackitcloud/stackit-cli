@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -21,7 +21,7 @@ const (
 	labelFlag          = "labels"
 	networkAreaIdFlag  = "network-area-id"
 	organizationIdFlag = "organization-id"
-	routeIdArg         = "ROUTE_ID_ARG"
+	routeIdArg         = "ROUTE_ID"
 	routingTableIdFlag = "routing-table-id"
 )
 
@@ -34,7 +34,7 @@ type inputModel struct {
 	RoutingTableId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", routeIdArg),
 		Short: "Updates a route in a routing-table",
@@ -66,21 +66,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			// Call API
-			req := apiClient.UpdateRouteOfRoutingTable(
-				ctx,
-				model.OrganizationId,
-				model.NetworkAreaId,
-				model.Region,
-				model.RoutingTableId,
-				model.RouteId,
-			)
-
-			payload := iaas.UpdateRouteOfRoutingTablePayload{
-				Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
-			}
-			req = req.UpdateRouteOfRoutingTablePayload(payload)
-
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update route %q of routing-table %q : %w", model.RouteId, model.RoutingTableId, err)
@@ -106,9 +92,6 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	if len(inputArgs) == 0 {
-		return nil, fmt.Errorf("at least one argument is required")
-	}
 	routeId := inputArgs[0]
 
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
@@ -135,8 +118,37 @@ func outputResult(p *print.Printer, outputFormat, routingTableId, networkAreaId 
 		return fmt.Errorf("update route response is empty")
 	}
 
+	if route.Id == nil || *route.Id == "" {
+		return fmt.Errorf("update route response has empty id")
+	}
+
 	return p.OutputResult(outputFormat, route, func() error {
+		if route == nil {
+			return fmt.Errorf("update route response is empty")
+		}
+
+		if route.Id == nil || *route.Id == "" {
+			return fmt.Errorf("update route response has empty id")
+		}
+
 		p.Outputf("Updated route %q for routing-table %q in network-area %q.", *route.Id, routingTableId, networkAreaId)
 		return nil
 	})
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateRouteOfRoutingTableRequest {
+	req := apiClient.UpdateRouteOfRoutingTable(
+		ctx,
+		model.OrganizationId,
+		model.NetworkAreaId,
+		model.Region,
+		model.RoutingTableId,
+		model.RouteId,
+	)
+
+	payload := iaas.UpdateRouteOfRoutingTablePayload{
+		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+	}
+
+	return req.UpdateRouteOfRoutingTablePayload(payload)
 }

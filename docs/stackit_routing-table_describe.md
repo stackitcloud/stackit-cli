@@ -7,7 +7,7 @@ Describes a routing-table
 Describes a routing-table
 
 ```
-stackit routing-table describe ROUTING_TABLE_ID_ARG [flags]
+stackit routing-table describe ROUTING_TABLE_ID [flags]
 ```
 
 ### Examples

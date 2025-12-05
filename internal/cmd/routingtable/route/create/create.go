@@ -5,18 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	routeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/routing-table/utils"
+	routeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/routingtable/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -44,7 +43,7 @@ type inputModel struct {
 	RoutingTableId   string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a route in a routing-table",
@@ -248,36 +247,26 @@ func buildNextHop(model *inputModel) *iaas.RouteNexthop {
 	}
 }
 
-func outputResult(p *print.Printer, outputFormat string, items []iaas.Route) error {
-	if len(items) == 0 {
+func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
+	if len(routes) == 0 {
 		return fmt.Errorf("create routes response is empty")
 	}
 
-	return p.OutputResult(outputFormat, items, func() error {
+	return p.OutputResult(outputFormat, routes, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "DEST. TYPE", "DEST. VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED", "UPDATED")
-		for _, item := range items {
-			destType, destValue, hopType, hopValue, labels := routeUtils.ExtractRouteDetails(item)
-
-			createdAt := ""
-			if item.CreatedAt != nil {
-				createdAt = item.CreatedAt.Format(time.RFC3339)
-			}
-
-			updatedAt := ""
-			if item.UpdatedAt != nil {
-				updatedAt = item.UpdatedAt.Format(time.RFC3339)
-			}
+		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
+		for _, route := range routes {
+			routeDetails := routeUtils.ExtractRouteDetails(route)
 
 			table.AddRow(
-				utils.PtrString(item.Id),
-				destType,
-				destValue,
-				hopType,
-				hopValue,
-				labels,
-				createdAt,
-				updatedAt,
+				utils.PtrString(route.Id),
+				routeDetails.DestType,
+				routeDetails.DestValue,
+				routeDetails.HopType,
+				routeDetails.HopValue,
+				routeDetails.Labels,
+				routeDetails.CreatedAt,
+				routeDetails.UpdatedAt,
 			)
 		}
 		err := table.Display(p)
