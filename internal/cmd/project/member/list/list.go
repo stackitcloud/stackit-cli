@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -36,7 +37,7 @@ type inputModel struct {
 	SortBy  string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of a project",
@@ -129,7 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListMembersRequest {
-	req := apiClient.ListMembers(ctx, projectResourceType, model.GlobalFlagModel.ProjectId)
+	req := apiClient.ListMembers(ctx, projectResourceType, model.ProjectId)
 	if model.Subject != nil {
 		req = req.Subject(*model.Subject)
 	}
@@ -164,9 +165,10 @@ func outputResult(p *print.Printer, model inputModel, members []authorization.Me
 			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
 		}
 
-		if model.SortBy == "subject" {
+		switch model.SortBy {
+		case "subject":
 			table.EnableAutoMergeOnColumns(1)
-		} else if model.SortBy == "role" {
+		case "role":
 			table.EnableAutoMergeOnColumns(2)
 		}
 

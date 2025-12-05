@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -37,7 +38,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all backups which are available for a PostgreSQL Flex instance",
@@ -77,10 +78,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w\n", instanceLabel, err)
+				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				cmd.Printf("No backups found for instance %q\n", instanceLabel)
+				params.Printer.Outputf("No backups found for instance %q", instanceLabel)
 				return nil
 			}
 			backups := *resp.Items
