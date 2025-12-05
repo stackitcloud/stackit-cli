@@ -50,7 +50,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background() // should this be cancellable?
+			ctx := context.Background()
 
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
