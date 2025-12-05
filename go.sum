@@ -618,8 +618,8 @@ github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.1 h1:BHNjq4+Os
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.1/go.mod h1:sTV6ylmBoMOrOxUED8Ebts4a1PaJSPLtmNh5m+s5fus=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.2 h1:g3xzRqwul8W638gOKTZRAnnQuMhYqaliuz/A8BcfjhU=
 github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.2/go.mod h1:OlGmMlXKp33ZYpUm9TqaLYf8SdzhDW5uBKcbgq1zXOk=
-github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.2 h1:SfRbw3DxvDnZF2q6D9xfSy8EKHyrG5TgLMP0qRW8r9o=
-github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.2/go.mod h1:VmXwRQHZsGUjGWdLf8d2WhKNyuPi5+JgCAF/meOp4DE=
+github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3 h1:Y5Ct3Zi5UcIOwjKMWpKl0nrqiq7psTf4NJv0IKgwTkc=
+github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3/go.mod h1:TMl5WcpjzUiAlLWaxMKbu9ysDzFziSPgg4xLxj9jjfY=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.3 h1:tGa+NcjNKTWvChN+0OMdLomb9Jod4MmY6YAiPTJMgfo=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.3/go.mod h1:ciuOzwN5GcqplRy95fXRaS44dFmhfNxvmzTl/ALwV/k=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.1 h1:I9B/zUU7R74xuH/ztcPrDIuMp2KV3QQMjeE7lFudboM=
