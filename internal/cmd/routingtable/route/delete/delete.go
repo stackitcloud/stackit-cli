@@ -5,20 +5,20 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
 	networkAreaIdFlag  = "network-area-id"
 	organizationIdFlag = "organization-id"
-	routeIdArg         = "ROUTE_ID_ARG"
+	routeIdArg         = "ROUTE_ID"
 	routingTableIdFlag = "routing-table-id"
 )
 
@@ -30,7 +30,7 @@ type inputModel struct {
 	RoutingTableId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", routingTableIdFlag),
 		Short: "Deletes a route within a routing-table",
@@ -98,9 +98,6 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
-	if len(inputArgs) == 0 {
-		return nil, fmt.Errorf("at least one argument is required")
-	}
 	routeId := inputArgs[0]
 
 	model := inputModel{

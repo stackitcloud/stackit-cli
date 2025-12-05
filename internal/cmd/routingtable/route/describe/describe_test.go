@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -180,28 +180,52 @@ func TestOutputResult(t *testing.T) {
 	tests := []struct {
 		name         string
 		outputFormat string
-		route        iaas.Route
+		route        *iaas.Route
 		wantErr      bool
 	}{
 		{
+			name:         "nil route should return error",
+			outputFormat: print.PrettyOutputFormat,
+			route:        nil,
+			wantErr:      true,
+		},
+		{
+			name:         "empty route",
+			outputFormat: print.PrettyOutputFormat,
+			route:        &iaas.Route{},
+			wantErr:      false,
+		},
+		{
+			name:         "json empty route",
+			outputFormat: print.JSONOutputFormat,
+			route:        &iaas.Route{},
+			wantErr:      false,
+		},
+		{
+			name:         "pretty output with one route",
+			outputFormat: print.PrettyOutputFormat,
+			route:        &dummyRoute,
+			wantErr:      false,
+		},
+		{
 			name:         "json output with one route",
 			outputFormat: print.JSONOutputFormat,
-			route:        dummyRoute,
+			route:        &dummyRoute,
 			wantErr:      false,
 		},
 		{
 			name:         "yaml output with one route",
 			outputFormat: print.YAMLOutputFormat,
-			route:        dummyRoute,
+			route:        &dummyRoute,
 			wantErr:      false,
 		},
 	}
 
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.outputFormat, &tt.route); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.outputFormat, tt.route); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

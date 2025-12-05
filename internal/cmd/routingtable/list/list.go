@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +16,7 @@ import (
 	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -37,7 +36,7 @@ type inputModel struct {
 	OrganizationId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all routing-tables",
@@ -78,7 +77,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routing-tables: %w", err)
 			}
 
-			if items := response.Items; items == nil || len(*items) == 0 {
+			if items := response.Items; items == nil {
 				var orgLabel string
 				rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 				if err == nil {
@@ -151,41 +150,32 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, items []iaas.RoutingTable) error {
-	if len(items) == 0 {
-		return fmt.Errorf("list routingtable response is empty")
+func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.RoutingTable) error {
+	if routingTables == nil {
+		return fmt.Errorf("list routing-table items are nil")
 	}
 
-	return p.OutputResult(outputFormat, items, func() error {
+	return p.OutputResult(outputFormat, routingTables, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "DESCRIPTION", "CREATED_AT", "UPDATED_AT", "DEFAULT", "LABELS", "SYSTEM_ROUTES", "DYNAMIC_ROUTES")
-
-		for _, item := range items {
+		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
+		for _, routingTable := range routingTables {
 			var labels []string
-			for key, value := range *item.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
-			}
-
-			createdAt := ""
-			if item.CreatedAt != nil {
-				createdAt = item.CreatedAt.Format(time.RFC3339)
-			}
-
-			updatedAt := ""
-			if item.UpdatedAt != nil {
-				updatedAt = item.UpdatedAt.Format(time.RFC3339)
+			if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
+				for key, value := range *routingTable.Labels {
+					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+				}
 			}
 
 			table.AddRow(
-				utils.PtrString(item.Id),
-				utils.PtrString(item.Name),
-				utils.PtrString(item.Description),
-				createdAt,
-				updatedAt,
-				utils.PtrString(item.Default),
+				utils.PtrString(routingTable.Id),
+				utils.PtrString(routingTable.Name),
+				utils.PtrString(routingTable.Description),
+				utils.PtrString(routingTable.Default),
 				strings.Join(labels, "\n"),
-				utils.PtrString(item.SystemRoutes),
-				utils.PtrString(item.DynamicRoutes),
+				utils.PtrString(routingTable.SystemRoutes),
+				utils.PtrString(routingTable.DynamicRoutes),
+				utils.ConvertTimePToDateTimeString(routingTable.CreatedAt),
+				utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt),
 			)
 		}
 		err := table.Display(p)

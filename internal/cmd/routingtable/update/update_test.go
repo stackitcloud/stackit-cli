@@ -1,17 +1,25 @@
 package update
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	pprint "github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
+
+type testCtxKey struct{}
+
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testClient = &iaas.APIClient{}
 
 const testRegion = "eu01"
 
@@ -71,6 +79,30 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	return argValues
 }
 
+func fixtureRequest(mods ...func(request *iaas.ApiUpdateRoutingTableOfAreaRequest)) iaas.ApiUpdateRoutingTableOfAreaRequest {
+	req := testClient.UpdateRoutingTableOfArea(
+		testCtx,
+		testOrgId,
+		testNetworkAreaId,
+		testRegion,
+		testRoutingTableId,
+	)
+
+	payload := iaas.UpdateRoutingTableOfAreaPayload{
+		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Name:          utils.Ptr(testRoutingTableName),
+		Description:   utils.Ptr(testRoutingTableDescription),
+		DynamicRoutes: utils.Ptr(true),
+	}
+
+	req = req.UpdateRoutingTableOfAreaPayload(payload)
+
+	for _, mod := range mods {
+		mod(&req)
+	}
+	return req
+}
+
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
@@ -89,7 +121,7 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description: "dynamic_routes disabled",
+			description: "dynamic routes disabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[nonDynamicRoutesFlag] = "true"
 			}),
@@ -159,6 +191,95 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
+func TestBuildRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest iaas.ApiUpdateRoutingTableOfAreaRequest
+	}{
+		{
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+			}),
+			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "labels missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.Labels = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
+				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+					Labels:        nil,
+					Name:          utils.Ptr(testRoutingTableName),
+					Description:   utils.Ptr(testRoutingTableDescription),
+					DynamicRoutes: utils.Ptr(true),
+				})
+			}),
+		},
+		{
+			description: "name missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.Name = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
+				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Name:          nil,
+					Description:   utils.Ptr(testRoutingTableDescription),
+					DynamicRoutes: utils.Ptr(true),
+				})
+			}),
+		},
+		{
+			description: "description missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.Description = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
+				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Name:          utils.Ptr(testRoutingTableName),
+					Description:   nil,
+					DynamicRoutes: utils.Ptr(true),
+				})
+			}),
+		},
+		{
+			description: "dynamic routes disabled",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.NonDynamicRoutes = true
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
+				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Name:          utils.Ptr(testRoutingTableName),
+					Description:   utils.Ptr(testRoutingTableDescription),
+					DynamicRoutes: utils.Ptr(false),
+				})
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			req := buildRequest(testCtx, tt.model, testClient)
+
+			if diff := cmp.Diff(req, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			); diff != "" {
+				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestOutputResult(t *testing.T) {
 	dummyRoutingTable := iaas.RoutingTable{
 		Id:            utils.Ptr("id-foo"),
@@ -179,38 +300,38 @@ func TestOutputResult(t *testing.T) {
 	}{
 		{
 			name:         "nil routing-table should return error",
-			outputFormat: "",
+			outputFormat: print.PrettyOutputFormat,
 			routingTable: nil,
 			wantErr:      true,
 		},
 		{
 			name:         "empty routing-table",
-			outputFormat: "",
+			outputFormat: print.PrettyOutputFormat,
 			routingTable: &iaas.RoutingTable{},
 			wantErr:      true,
 		},
 		{
-			name:         "table output routing-table",
-			outputFormat: "",
+			name:         "pretty output routing-table",
+			outputFormat: print.PrettyOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 		{
 			name:         "json output routing-table",
-			outputFormat: pprint.JSONOutputFormat,
+			outputFormat: print.JSONOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 		{
 			name:         "yaml output routing-table",
-			outputFormat: pprint.YAMLOutputFormat,
+			outputFormat: print.YAMLOutputFormat,
 			routingTable: &dummyRoutingTable,
 			wantErr:      false,
 		},
 	}
 
-	p := pprint.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.outputFormat, "network-area-id", tt.routingTable); (err != nil) != tt.wantErr {

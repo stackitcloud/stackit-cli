@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -162,41 +162,66 @@ func TestParseInput(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	dummyRouteTable := iaas.RoutingTable{
-		CreatedAt:    utils.Ptr(time.Now()),
-		Default:      nil,
-		Description:  utils.Ptr("description"),
-		Id:           utils.Ptr("route-foo"),
-		Labels:       utils.ConvertStringMapToInterfaceMap(testLabels),
-		Name:         utils.Ptr("route-foo"),
-		SystemRoutes: utils.Ptr(true),
-		UpdatedAt:    utils.Ptr(time.Now()),
+		CreatedAt:     utils.Ptr(time.Now()),
+		Default:       nil,
+		Description:   utils.Ptr("description"),
+		Id:            utils.Ptr("route-foo"),
+		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Name:          utils.Ptr("route-foo"),
+		SystemRoutes:  utils.Ptr(true),
+		DynamicRoutes: utils.Ptr(true),
+		UpdatedAt:     utils.Ptr(time.Now()),
 	}
 
 	tests := []struct {
 		name         string
 		outputFormat string
-		routingTable iaas.RoutingTable
+		routingTable *iaas.RoutingTable
 		wantErr      bool
 	}{
 		{
-			name:         "json output with one route",
-			outputFormat: print.JSONOutputFormat,
-			routingTable: dummyRouteTable,
+			name:         "nil routing table",
+			outputFormat: print.PrettyOutputFormat,
+			routingTable: nil,
+			wantErr:      true,
+		},
+		{
+			name:         "empty routing table",
+			outputFormat: print.PrettyOutputFormat,
+			routingTable: &iaas.RoutingTable{},
 			wantErr:      false,
 		},
 		{
-			name:         "yaml output with one route",
+			name:         "json empty routing table",
+			outputFormat: print.JSONOutputFormat,
+			routingTable: &iaas.RoutingTable{},
+			wantErr:      false,
+		},
+		{
+			name:         "pretty output one route",
+			outputFormat: print.PrettyOutputFormat,
+			routingTable: &dummyRouteTable,
+			wantErr:      false,
+		},
+		{
+			name:         "json output one route",
+			outputFormat: print.JSONOutputFormat,
+			routingTable: &dummyRouteTable,
+			wantErr:      false,
+		},
+		{
+			name:         "yaml output one route",
 			outputFormat: print.YAMLOutputFormat,
-			routingTable: dummyRouteTable,
+			routingTable: &dummyRouteTable,
 			wantErr:      false,
 		},
 	}
 
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.outputFormat, &tt.routingTable); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.outputFormat, tt.routingTable); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -19,10 +19,10 @@ stackit routing-table create [flags]
   Create a routing-table with name `rt` and description `some description`
   stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"
 
-  Create a routing-table with name `rt` with system_routes disabled
+  Create a routing-table with name `rt` with system routes disabled
   stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-system-routes
 
-  Create a routing-table with name `rt` with dynamic_routes disabled
+  Create a routing-table with name `rt` with dynamic routes disabled
   stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-dynamic-routes
 ```
 

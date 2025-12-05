@@ -7,7 +7,7 @@ Updates a routing-table
 Updates a routing-table.
 
 ```
-stackit routing-table update ROUTE_TABLE_ID_ARG [flags]
+stackit routing-table update ROUTE_TABLE_ID [flags]
 ```
 
 ### Examples
@@ -22,7 +22,7 @@ stackit routing-table update ROUTE_TABLE_ID_ARG [flags]
   Updates the description of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
   $ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz
 
-  Disables the dynamic_routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
+  Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
   $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-dynamic-routes
 ```
 
