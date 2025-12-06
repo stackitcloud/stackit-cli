@@ -27,6 +27,7 @@ var testClient = &iaas.APIClient{}
 
 var testProjectId = uuid.NewString()
 var testNetworkId = uuid.NewString()
+var testRoutingTableId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -49,6 +50,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		ipv6DnsNameServersFlag: "2001:4860:4860::8888,2001:4860:4860::8844",
 		ipv6GatewayFlag:        "2001:4860:4860::8888",
 		labelFlag:              "key=value",
+		routingTableIdFlag:     testRoutingTableId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -72,6 +74,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
+		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -102,6 +105,7 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaa
 			Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 			Gateway:     iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
 		},
+		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -240,6 +244,15 @@ func TestParseInput(t *testing.T) {
 				model.Labels = nil
 			}),
 			isValid: true,
+		},
+		{
+			description: "route-table id wrong format",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[routingTableIdFlag] = "wrong-format"
+			}),
+			expectedModel: nil,
+			isValid:       false,
 		},
 	}
 
