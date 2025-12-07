@@ -29,6 +29,7 @@ import (
 
 const (
 	parentIdFlag          = "parent-id"
+	lifecycleStateFlag    = "lifecycle-state"
 	projectIdLikeFlag     = "project-id-like"
 	memberFlag            = "member"
 	creationTimeAfterFlag = "creation-time-after"
@@ -47,6 +48,7 @@ type inputModel struct {
 	CreationTimeAfter *time.Time
 	Limit             *int64
 	PageSize          int64
+	LifecycleState    string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -104,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().String(lifecycleStateFlag, "active", "Filter by lifecycle state")
 	cmd.Flags().String(parentIdFlag, "", "Filter by parent identifier")
 	cmd.Flags().Var(flags.UUIDSliceFlag(), projectIdLikeFlag, "Filter by project identifier. Multiple project IDs can be provided, but they need to belong to the same parent resource")
 	cmd.Flags().String(memberFlag, "", "Filter by member. The list of projects of which the member is part of will be shown")
@@ -147,6 +150,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
+		LifecycleState:    flags.FlagWithDefaultToStringValue(p, cmd, lifecycleStateFlag),
 	}
 
 	p.DebugInputModel(model)

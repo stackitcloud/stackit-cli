@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -38,7 +39,10 @@ type resourceTree struct {
 	authClient     *authorization.APIClient
 	resourceClient *resourcemanager.APIClient
 	member         string
-	roots          map[string]*node
+
+	projectLifecycleState *string
+
+	roots map[string]*node
 }
 
 func newResourceTree(resourceClient *resourcemanager.APIClient, authClient *authorization.APIClient, model *inputModel) (*resourceTree, error) {
@@ -57,6 +61,9 @@ func newResourceTree(resourceClient *resourcemanager.APIClient, authClient *auth
 		resourceClient: resourceClient,
 		authClient:     authClient,
 		roots:          map[string]*node{},
+	}
+	if model.LifecycleState != "" {
+		tree.projectLifecycleState = &model.LifecycleState
 	}
 	return tree, nil
 }
@@ -141,6 +148,9 @@ func (r *resourceTree) getNodeProjects(ctx context.Context, parent *node) error 
 		}
 	}
 	for _, proj := range resp.GetItems() {
+		if r.projectLifecycleState != nil && *r.projectLifecycleState != strings.ToLower(string(proj.GetLifecycleState())) {
+			continue
+		}
 		projNode := &node{
 			resourceID:     proj.GetProjectId(),
 			typ:            resourceTypeProject,
