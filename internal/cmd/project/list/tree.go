@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -40,7 +41,8 @@ type resourceTree struct {
 	resourceClient *resourcemanager.APIClient
 	member         string
 
-	projectLifecycleState *string
+	projectLifecycleState    *string
+	projectCreationTimeAfter *time.Time
 
 	roots map[string]*node
 }
@@ -57,10 +59,11 @@ func newResourceTree(resourceClient *resourcemanager.APIClient, authClient *auth
 		member = *model.Member
 	}
 	tree := &resourceTree{
-		member:         member,
-		resourceClient: resourceClient,
-		authClient:     authClient,
-		roots:          map[string]*node{},
+		member:                   member,
+		resourceClient:           resourceClient,
+		authClient:               authClient,
+		roots:                    map[string]*node{},
+		projectCreationTimeAfter: model.CreationTimeAfter,
 	}
 	if model.LifecycleState != "" {
 		tree.projectLifecycleState = &model.LifecycleState
@@ -150,6 +153,9 @@ func (r *resourceTree) getNodeProjects(ctx context.Context, parent *node) error 
 	for _, proj := range resp.GetItems() {
 		if r.projectLifecycleState != nil && *r.projectLifecycleState != strings.ToLower(string(proj.GetLifecycleState())) {
 			continue
+		}
+		if r.projectCreationTimeAfter != nil && !proj.CreationTime.After(*r.projectCreationTimeAfter) {
+			return nil
 		}
 		projNode := &node{
 			resourceID:     proj.GetProjectId(),
