@@ -62,14 +62,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List all STACKIT projects that the authenticated user or service account is a member of`,
 				"$ stackit project list"),
 			examples.NewExample(
-				`List all STACKIT projects that are children of a specific parent`,
-				"$ stackit project list --parent-id xxx"),
-			examples.NewExample(
-				`List all STACKIT projects that match the given project IDs, located under the same parent resource`,
-				"$ stackit project list --project-id-like xxx,yyy,zzz"),
-			examples.NewExample(
 				`List all STACKIT projects that a certain user is a member of`,
 				"$ stackit project list --member example@email.com"),
+			examples.NewExample(
+				`List all STACKIT projects without regards to the lifecycle status`,
+				"$ stackit project list --lifecycle-state=\"\""),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model, err := parseInput(params.Printer, cmd, args)
