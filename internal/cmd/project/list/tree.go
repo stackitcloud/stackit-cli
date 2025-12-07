@@ -14,8 +14,10 @@ import (
 )
 
 type node struct {
-	resourceID string
-	name       string
+	resourceID     string
+	name           string
+	lifecycleState resourcemanager.LifecycleState
+	labels         map[string]string
 
 	typ      resourceType
 	parent   *node
@@ -73,9 +75,11 @@ func (r *resourceTree) Fill(ctx context.Context) error {
 				return err
 			}
 			orgNode := &node{
-				resourceID: org.GetOrganizationId(),
-				name:       org.GetName(),
-				typ:        resourceTypeOrg,
+				resourceID:     org.GetOrganizationId(),
+				name:           org.GetName(),
+				typ:            resourceTypeOrg,
+				lifecycleState: org.GetLifecycleState(),
+				labels:         org.GetLabels(),
 			}
 			r.mu.Lock()
 			r.roots[orgNode.resourceID] = orgNode
@@ -109,10 +113,12 @@ func (r *resourceTree) fillNode(ctx context.Context, parent *node) error {
 	for _, folder := range resp.GetItems() {
 		g.Go(func() error {
 			newFolderNode := &node{
-				resourceID: folder.GetFolderId(),
-				parent:     parent,
-				typ:        resourceTypeFolder,
-				name:       folder.GetName(),
+				resourceID:     folder.GetFolderId(),
+				parent:         parent,
+				typ:            resourceTypeFolder,
+				name:           folder.GetName(),
+				lifecycleState: resourcemanager.LIFECYCLESTATE_ACTIVE,
+				labels:         folder.GetLabels(),
 			}
 			parent.children = append(parent.children, newFolderNode)
 			return r.fillNode(ctx, newFolderNode)
@@ -136,10 +142,12 @@ func (r *resourceTree) getNodeProjects(ctx context.Context, parent *node) error 
 	}
 	for _, proj := range resp.GetItems() {
 		projNode := &node{
-			resourceID: proj.GetProjectId(),
-			typ:        resourceTypeProject,
-			name:       proj.GetName(),
-			parent:     parent,
+			resourceID:     proj.GetProjectId(),
+			typ:            resourceTypeProject,
+			name:           proj.GetName(),
+			labels:         proj.GetLabels(),
+			lifecycleState: proj.GetLifecycleState(),
+			parent:         parent,
 		}
 		parent.children = append(parent.children, projNode)
 	}

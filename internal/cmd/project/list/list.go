@@ -156,6 +156,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 type project struct {
 	Name         string
 	ID           string
+	Labels       map[string]string
+	State        resourcemanager.LifecycleState
 	Organization string
 	Folder       []string
 }
@@ -181,6 +183,8 @@ func getProjects(ctx context.Context, parent *node, org string, projChan chan<- 
 			}
 			projChan <- project{
 				Name:         child.name,
+				State:        child.lifecycleState,
+				Labels:       child.labels,
 				ID:           child.resourceID,
 				Organization: org,
 				Folder:       folderName,
@@ -236,7 +240,7 @@ func fetchProjects(ctx context.Context, model *inputModel, resourceClient *resou
 func outputResult(p *print.Printer, outputFormat string, projects []project) error {
 	return p.OutputResult(outputFormat, projects, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ORGANIZATION", "FOLDER", "NAME", "ID")
+		table.SetHeader("ORGANIZATION", "FOLDER", "NAME", "ID", "STATE")
 		for i := range projects {
 			p := projects[i]
 			table.AddRow(
@@ -244,6 +248,7 @@ func outputResult(p *print.Printer, outputFormat string, projects []project) err
 				p.FolderPath(),
 				p.Name,
 				p.ID,
+				p.State,
 			)
 		}
 
