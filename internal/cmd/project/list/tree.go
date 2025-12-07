@@ -130,7 +130,9 @@ func (r *resourceTree) fillNode(ctx context.Context, parent *node) error {
 				lifecycleState: resourcemanager.LIFECYCLESTATE_ACTIVE,
 				labels:         folder.GetLabels(),
 			}
+			r.mu.Lock()
 			parent.children = append(parent.children, newFolderNode)
+			r.mu.Unlock()
 			return r.fillNode(ctx, newFolderNode)
 		})
 	}
@@ -138,34 +140,43 @@ func (r *resourceTree) fillNode(ctx context.Context, parent *node) error {
 }
 
 func (r *resourceTree) getNodeProjects(ctx context.Context, parent *node) error {
-	req := r.resourceClient.ListProjects(ctx).ContainerParentId(parent.resourceID)
-	resp, err := req.Execute()
-	if err != nil {
-		if !isForbiddenError(err) {
-			return err
+	offset := 0
+	for {
+		req := r.resourceClient.ListProjects(ctx).ContainerParentId(parent.resourceID).Offset(float32(offset))
+		if r.projectCreationTimeAfter != nil {
+			req = req.CreationTimeStart(*r.projectCreationTimeAfter)
 		}
-		// listing projects for parent was forbidden, trying with member
-		resp, err = req.Member(r.member).Execute()
+		resp, err := req.Execute()
 		if err != nil {
-			return err
+			if !isForbiddenError(err) {
+				return err
+			}
+			// listing projects for parent was forbidden, trying with member
+			resp, err = req.Member(r.member).Execute()
+			if err != nil {
+				return err
+			}
 		}
-	}
-	for _, proj := range resp.GetItems() {
-		if r.projectLifecycleState != nil && *r.projectLifecycleState != strings.ToLower(string(proj.GetLifecycleState())) {
-			continue
+		if len(resp.GetItems()) == 0 {
+			break
 		}
-		if r.projectCreationTimeAfter != nil && !proj.CreationTime.After(*r.projectCreationTimeAfter) {
-			return nil
+		for _, proj := range resp.GetItems() {
+			if r.projectLifecycleState != nil && *r.projectLifecycleState != strings.ToLower(string(proj.GetLifecycleState())) {
+				continue
+			}
+			projNode := &node{
+				resourceID:     proj.GetProjectId(),
+				typ:            resourceTypeProject,
+				name:           proj.GetName(),
+				labels:         proj.GetLabels(),
+				lifecycleState: proj.GetLifecycleState(),
+				parent:         parent,
+			}
+			r.mu.Lock()
+			parent.children = append(parent.children, projNode)
+			r.mu.Unlock()
 		}
-		projNode := &node{
-			resourceID:     proj.GetProjectId(),
-			typ:            resourceTypeProject,
-			name:           proj.GetName(),
-			labels:         proj.GetLabels(),
-			lifecycleState: proj.GetLifecycleState(),
-			parent:         parent,
-		}
-		parent.children = append(parent.children, projNode)
+		offset += len(resp.GetItems())
 	}
 	return nil
 }
