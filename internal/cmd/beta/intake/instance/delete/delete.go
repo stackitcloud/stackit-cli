@@ -83,7 +83,7 @@ func NewCmd(p *params.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Printer.Info("%s stackit Intake instance %s \n", operationState, model.IntakeId)
+			p.Printer.Outputf("%s stackit Intake instance %s \n", operationState, model.IntakeId)
 
 			return nil
 		},
