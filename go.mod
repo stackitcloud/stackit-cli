@@ -268,7 +268,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.2
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.2
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.3
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
