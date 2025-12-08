@@ -427,7 +427,7 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
-					Storage: &postgresflex.Storage{
+					Storage: &postgresflex.StorageUpdate{
 						Class: utils.Ptr("class"),
 					},
 				}),
@@ -455,7 +455,7 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
-					Storage: &postgresflex.Storage{
+					Storage: &postgresflex.StorageUpdate{
 						Class: utils.Ptr("class"),
 						Size:  utils.Ptr(int64(10)),
 					},
