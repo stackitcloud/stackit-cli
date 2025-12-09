@@ -107,7 +107,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html")
+	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/")
 
 	err := flags.MarkFlagsRequired(cmd, machineTypeFlag)
 	cobra.CheckErr(err)

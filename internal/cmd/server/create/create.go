@@ -164,7 +164,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Server name")
-	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html")
+	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/")
 	cmd.Flags().String(affinityGroupFlag, "", "The affinity group the server is assigned to")
 	cmd.Flags().String(availabilityZoneFlag, "", "The availability zone of the server")
 	cmd.Flags().String(bootVolumeSourceIdFlag, "", "ID of the source object of boot volume. It can be either an image or volume ID")
