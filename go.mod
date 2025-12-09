@@ -29,7 +29,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.4
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.2
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.5.0
