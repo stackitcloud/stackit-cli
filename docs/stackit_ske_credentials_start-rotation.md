@@ -18,7 +18,7 @@ After completing the rotation of credentials, you can generate a new kubeconfig 
   $ stackit ske kubeconfig create my-cluster
 Complete the rotation by running:
   $ stackit ske credentials complete-rotation my-cluster
-For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html
+For more information, visit: https://docs.stackit.cloud/products/runtime/kubernetes-engine/how-tos/rotate-ske-credentials/
 
 ```
 stackit ske credentials start-rotation CLUSTER_NAME [flags]

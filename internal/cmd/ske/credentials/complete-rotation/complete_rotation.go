@@ -41,7 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			"  $ stackit ske kubeconfig create my-cluster",
 			"If you haven't, please start the process by running:",
 			"  $ stackit ske credentials start-rotation my-cluster",
-			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
+			"For more information, visit: https://docs.stackit.cloud/products/runtime/kubernetes-engine/how-tos/rotate-ske-credentials/",
 		),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(
