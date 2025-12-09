@@ -20,31 +20,31 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.10.0
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.2
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.2.4
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.3
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.3.2
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.3.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.4
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.2
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.3
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.4
 	github.com/zalando/go-keyring v0.2.6
-	golang.org/x/mod v0.30.0
+	golang.org/x/mod v0.31.0
 	golang.org/x/oauth2 v0.33.0
-	golang.org/x/term v0.37.0
-	golang.org/x/text v0.31.0
+	golang.org/x/term v0.38.0
+	golang.org/x/text v0.32.0
 	k8s.io/apimachinery v0.34.2
 	k8s.io/client-go v0.34.2
 )
 
 require (
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )
@@ -230,9 +230,9 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/telemetry v0.0.0-20251111182119-bc8e575c7b54 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/telemetry v0.0.0-20251203150158-8fff8a5912fc // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
 	mvdan.cc/gofumpt v0.9.2 // indirect
@@ -270,7 +270,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.3
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.34.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
