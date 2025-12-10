@@ -110,13 +110,21 @@ func GetAccessToken() (string, error) {
 
 func getStartingSessionExpiresAtUnix() (string, error) {
 	sessionStart := time.Now()
-	sessionTimeLimitString := viper.GetString(config.SessionTimeLimitKey)
-	sessionTimeLimit, err := time.ParseDuration(sessionTimeLimitString)
+	sessionTimeLimit, err := getSessionExpiration()
 	if err != nil {
-		return "", fmt.Errorf("parse session time limit \"%s\": %w", sessionTimeLimitString, err)
+		return "", err
 	}
 	sessionExpiresAt := sessionStart.Add(sessionTimeLimit)
 	return strconv.FormatInt(sessionExpiresAt.Unix(), 10), nil
+}
+
+func getSessionExpiration() (time.Duration, error) {
+	sessionTimeLimitString := viper.GetString(config.SessionTimeLimitKey)
+	duration, err := time.ParseDuration(sessionTimeLimitString)
+	if err != nil {
+		return 0, fmt.Errorf("parse session time limit \"%s\": %w", sessionTimeLimitString, err)
+	}
+	return duration, nil
 }
 
 func getEmailFromToken(token string) (string, error) {

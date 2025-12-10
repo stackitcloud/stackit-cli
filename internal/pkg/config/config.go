@@ -55,7 +55,7 @@ const (
 
 	AsyncDefault            = false
 	RegionDefault           = "eu01"
-	SessionTimeLimitDefault = "2h"
+	SessionTimeLimitDefault = "12h"
 
 	AllowedUrlDomainDefault = "stackit.cloud"
 )
