@@ -1,28 +1,35 @@
 package list
 
 import (
+	"cmp"
 	"context"
 	"fmt"
+	"path"
+	"slices"
+	"sync"
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
+
+	authclient "github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
+	resourceclient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
 )
 
 const (
 	parentIdFlag          = "parent-id"
+	lifecycleStateFlag    = "lifecycle-state"
 	projectIdLikeFlag     = "project-id-like"
 	memberFlag            = "member"
 	creationTimeAfterFlag = "creation-time-after"
@@ -41,6 +48,7 @@ type inputModel struct {
 	CreationTimeAfter *time.Time
 	Limit             *int64
 	PageSize          int64
+	LifecycleState    string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -54,30 +62,31 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List all STACKIT projects that the authenticated user or service account is a member of`,
 				"$ stackit project list"),
 			examples.NewExample(
-				`List all STACKIT projects that are children of a specific parent`,
-				"$ stackit project list --parent-id xxx"),
-			examples.NewExample(
-				`List all STACKIT projects that match the given project IDs, located under the same parent resource`,
-				"$ stackit project list --project-id-like xxx,yyy,zzz"),
-			examples.NewExample(
 				`List all STACKIT projects that a certain user is a member of`,
 				"$ stackit project list --member example@email.com"),
+			examples.NewExample(
+				`List all STACKIT projects without regards to the lifecycle status`,
+				"$ stackit project list --lifecycle-state=\"\""),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			resourceClient, err := resourceclient.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return err
+			}
+
+			authClient, err := authclient.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
 			// Fetch projects
-			projects, err := fetchProjects(ctx, model, apiClient)
+			projects, err := fetchProjects(cmd.Context(), model, resourceClient, authClient)
 			if err != nil {
 				return err
 			}
@@ -94,6 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().String(lifecycleStateFlag, "active", "Filter by lifecycle state")
 	cmd.Flags().String(parentIdFlag, "", "Filter by parent identifier")
 	cmd.Flags().Var(flags.UUIDSliceFlag(), projectIdLikeFlag, "Filter by project identifier. Multiple project IDs can be provided, but they need to belong to the same parent resource")
 	cmd.Flags().String(memberFlag, "", "Filter by member. The list of projects of which the member is part of will be shown")
@@ -137,96 +147,109 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		CreationTimeAfter: creationTimeAfter,
 		Limit:             limit,
 		PageSize:          pageSize,
+		LifecycleState:    flags.FlagWithDefaultToStringValue(p, cmd, lifecycleStateFlag),
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient resourceManagerClient, offset int) (resourcemanager.ApiListProjectsRequest, error) {
-	req := apiClient.ListProjects(ctx)
-	if model.ParentId != nil {
-		req = req.ContainerParentId(*model.ParentId)
-	}
-	if model.ProjectIdLike != nil {
-		req = req.ContainerIds(model.ProjectIdLike)
-	}
-	if model.Member != nil {
-		req = req.Member(*model.Member)
-	}
-	if model.CreationTimeAfter != nil {
-		req = req.CreationTimeStart(*model.CreationTimeAfter)
-	}
+type project struct {
+	Name         string
+	ID           string
+	Labels       map[string]string
+	State        resourcemanager.LifecycleState
+	Organization string
+	Folder       []string
+}
 
-	if model.ParentId == nil && model.ProjectIdLike == nil && model.Member == nil {
-		email, err := auth.GetAuthEmail()
-		if err != nil {
-			return req, fmt.Errorf("get email of authenticated user: %w", err)
-		}
-		req = req.Member(email)
+func (p project) FolderPath() string {
+	return path.Join(p.Folder...)
+}
+
+func getProjects(ctx context.Context, parent *node, org string, projChan chan<- project) error {
+	g, ctx := errgroup.WithContext(ctx)
+	for _, child := range parent.children {
+		g.Go(func() error {
+			if child.typ != resourceTypeProject {
+				return getProjects(ctx, child, org, projChan)
+			}
+			parent := child.parent
+			folderName := []string{}
+			for parent != nil {
+				if parent.typ == resourceTypeFolder {
+					folderName = append([]string{parent.name}, folderName...)
+				}
+				parent = parent.parent
+			}
+			projChan <- project{
+				Name:         child.name,
+				State:        child.lifecycleState,
+				Labels:       child.labels,
+				ID:           child.resourceID,
+				Organization: org,
+				Folder:       folderName,
+			}
+			return nil
+		})
 	}
-	req = req.Limit(float32(model.PageSize))
-	req = req.Offset(float32(offset))
-	return req, nil
+	return g.Wait()
 }
 
 type resourceManagerClient interface {
 	ListProjects(ctx context.Context) resourcemanager.ApiListProjectsRequest
 }
 
-func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceManagerClient) ([]resourcemanager.Project, error) {
-	if model.Limit != nil && *model.Limit < model.PageSize {
-		model.PageSize = *model.Limit
+func fetchProjects(ctx context.Context, model *inputModel, resourceClient *resourcemanager.APIClient, authClient *authorization.APIClient) ([]project, error) {
+	tree, err := newResourceTree(resourceClient, authClient, model)
+	if err != nil {
+		return nil, err
 	}
 
-	offset := 0
-	projects := []resourcemanager.Project{}
-	for {
-		// Call API
-		req, err := buildRequest(ctx, model, apiClient, offset)
-		if err != nil {
-			return nil, fmt.Errorf("build list projects request: %w", err)
-		}
-		resp, err := req.Execute()
-		if err != nil {
-			return nil, fmt.Errorf("get projects: %w", err)
-		}
-		respProjects := *resp.Items
-		if len(respProjects) == 0 {
-			break
-		}
-		projects = append(projects, respProjects...)
-		// Stop if no more pages
-		if len(respProjects) < int(model.PageSize) {
-			break
-		}
-
-		// Stop and truncate if limit is reached
-		if model.Limit != nil && len(projects) >= int(*model.Limit) {
-			projects = projects[:*model.Limit]
-			break
-		}
-		offset += int(model.PageSize)
+	if err := tree.Fill(ctx); err != nil {
+		return nil, err
 	}
-	return projects, nil
+
+	var projs []project
+	projChan := make(chan project)
+
+	var wg sync.WaitGroup
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+		for p := range projChan {
+			i, _ := slices.BinarySearchFunc(projs, p, func(e project, target project) int {
+				if orgCmp := cmp.Compare(e.Organization, target.Organization); orgCmp != 0 {
+					return orgCmp
+				}
+				return cmp.Compare(e.FolderPath(), p.FolderPath())
+			})
+			projs = slices.Insert(projs, i, p)
+		}
+	}()
+
+	for _, root := range tree.roots {
+		if err := getProjects(ctx, root, root.name, projChan); err != nil {
+			return nil, err
+		}
+	}
+	close(projChan)
+	wg.Wait()
+	return projs, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.Project) error {
+func outputResult(p *print.Printer, outputFormat string, projects []project) error {
 	return p.OutputResult(outputFormat, projects, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
+		table.SetHeader("ORGANIZATION", "FOLDER", "NAME", "ID", "STATE")
 		for i := range projects {
 			p := projects[i]
-
-			var parentId *string
-			if p.Parent != nil {
-				parentId = p.Parent.Id
-			}
 			table.AddRow(
-				utils.PtrString(p.ProjectId),
-				utils.PtrString(p.Name),
-				utils.PtrString(p.LifecycleState),
-				utils.PtrString(parentId),
+				p.Organization,
+				p.FolderPath(),
+				p.Name,
+				p.ID,
+				p.State,
 			)
 		}
 

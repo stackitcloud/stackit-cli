@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -211,8 +213,9 @@ func Execute(version, date string) {
 	// PersistentPreRun is not called when the command is wrongly called
 	p.Cmd = cmd
 	p.Verbosity = print.InfoLevel
-
-	err := cmd.Execute()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer cancel()
+	err := cmd.ExecuteContext(ctx)
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
 		p.Debug(print.ErrorLevel, "execute command: %v", err)
