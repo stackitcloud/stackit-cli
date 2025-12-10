@@ -80,7 +80,7 @@ func GetProfileFromEnv() (string, bool) {
 // If emptyProfile is true, it creates an empty profile. Otherwise, copies the config from the current profile to the new profile.
 // If setProfile is true, it sets the new profile as the active profile.
 // If the profile already exists, it returns an error.
-func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bool) error {
+func CreateProfile(p *print.Printer, profile string, setProfile, ignoreExising, emptyProfile bool) error {
 	err := ValidateProfile(profile)
 	if err != nil {
 		return fmt.Errorf("validate profile: %w", err)
@@ -98,6 +98,9 @@ func CreateProfile(p *print.Printer, profile string, setProfile, emptyProfile bo
 	// Error if the profile already exists
 	_, err = os.Stat(configFolderPath)
 	if err == nil {
+		if ignoreExising {
+			return nil
+		}
 		return fmt.Errorf("profile %q already exists", profile)
 	}
 
