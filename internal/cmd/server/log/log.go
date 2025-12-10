@@ -85,13 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			log := resp.GetOutput()
 			lines := strings.Split(log, "\n")
 
-			if len(lines) > int(*model.Length) {
-				// Truncate output and show most recent logs
-				start := len(lines) - int(*model.Length)
-				return outputResult(params.Printer, model.OutputFormat, serverLabel, strings.Join(lines[start:], "\n"))
+			maxLines := int(*model.Length)
+			if len(lines) <= maxLines {
+				return outputResult(params.Printer, serverLabel, lines)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, serverLabel, log)
+			recentLogs := lines[len(lines)-maxLines:]
+			return outputResult(params.Printer, serverLabel, recentLogs)
 		},
 	}
 	configureFlags(cmd)
@@ -132,9 +132,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.GetServerLog(ctx, model.ProjectId, model.Region, model.ServerId)
 }
 
-func outputResult(p *print.Printer, outputFormat, serverLabel, log string) error {
-	return p.OutputResult(outputFormat, log, func() error {
-		p.Outputf("Log for server %q\n%s", serverLabel, log)
-		return nil
-	})
+func outputResult(p *print.Printer, serverLabel string, logLines []string) error {
+	p.Outputf("Log for server %q\n", serverLabel)
+	for _, line := range logLines {
+		// Skip empty lines
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		p.Outputln(line)
+	}
+
+	return nil
 }
