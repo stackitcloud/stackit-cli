@@ -600,8 +600,8 @@ github.com/ssgreg/nlreturn/v2 v2.2.1 h1:X4XDI7jstt3ySqGU86YGAURbxw3oTDPK9sPEi6YE
 github.com/ssgreg/nlreturn/v2 v2.2.1/go.mod h1:E/iiPB78hV7Szg2YfRgyIrk1AD6JVMTRkkxBiELzh2I=
 github.com/stackitcloud/stackit-sdk-go/core v0.20.1 h1:odiuhhRXmxvEvnVTeZSN9u98edvw2Cd3DcnkepncP3M=
 github.com/stackitcloud/stackit-sdk-go/core v0.20.1/go.mod h1:fqto7M82ynGhEnpZU6VkQKYWYoFG5goC076JWXTUPRQ=
-github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.2 h1:x7ndqw6yaOw+TmThNeAkI+eN9vK5hWgjIJlFZrYPREo=
-github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.2/go.mod h1:wbPNu6e5r/5xhzznCKbC7fEJahrAOb89gmaIm+0w2/s=
+github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.3 h1:DqRtyuIb34/x9C3/sT7Uz5xrD0TQOL3ERnDOS1gst4E=
+github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.3/go.mod h1:63XvbCslxdfWEp+0Q4OSzQrpbY4kvVODOiIEAEEVH8M=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.10.0 h1:6Buzw5CuPb5ixdMHx4tKjmsQkMn0Hpj0xJ+aNDimKnk=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.10.0/go.mod h1:40XVgsSOcVCjoIAsbSycDh8Ikp2y88AdAeqwqIIHvZE=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.3 h1:KD/FxU/cJIzfyMvwiOvTlSWq87ISENpHNmw/quznGnw=
