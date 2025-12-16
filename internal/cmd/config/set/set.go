@@ -49,6 +49,7 @@ const (
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
+	logsCustomEndpointFlag              = "logs-custom-endpoint"
 )
 
 type inputModel struct {
@@ -164,6 +165,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
 	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().String(intakeCustomEndpointFlag, "", "Intake API base URL, used in calls to this API")
+	cmd.Flags().String(logsCustomEndpointFlag, "", "Logs API base URL, used in calls to this API")
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
@@ -223,6 +225,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.TokenCustomEndpointKey, cmd.Flags().Lookup(tokenCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IntakeCustomEndpointKey, cmd.Flags().Lookup(intakeCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.LogsCustomEndpointKey, cmd.Flags().Lookup(logsCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

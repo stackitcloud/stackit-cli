@@ -53,6 +53,7 @@ const (
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
+	logsCustomEndpointFlag              = "logs-custom-endpoint"
 )
 
 type inputModel struct {
@@ -92,6 +93,7 @@ type inputModel struct {
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
 	IntakeCustomEndpoint            bool
+	LogsCustomEndpoint              bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -218,6 +220,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.IntakeCustomEndpoint {
 				viper.Set(config.IntakeCustomEndpointKey, "")
 			}
+			if model.LogsCustomEndpoint {
+				viper.Set(config.LogsCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -267,6 +272,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(logsCustomEndpointFlag, false, "Logs API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -307,6 +313,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
 		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
+		LogsCustomEndpoint:              flags.FlagToBoolValue(p, cmd, logsCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)

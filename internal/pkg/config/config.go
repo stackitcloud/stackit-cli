@@ -49,6 +49,7 @@ const (
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
+	LogsCustomEndpointKey              = "logs_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -111,6 +112,7 @@ var ConfigKeys = []string{
 	GitCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	AlbCustomEndpoint,
+	LogsCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -199,6 +201,7 @@ func setConfigDefaults() {
 	viper.SetDefault(GitCustomEndpointKey, "")
 	viper.SetDefault(IntakeCustomEndpointKey, "")
 	viper.SetDefault(AlbCustomEndpoint, "")
+	viper.SetDefault(LogsCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {
