@@ -9,7 +9,7 @@ Creates a SQLServer Flex user for an instance.
 The password is only visible upon creation and cannot be retrieved later.
 Alternatively, you can reset the password and access the new one by running:
   $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID
-Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.
+Please refer to https://docs.stackit.cloud/products/databases/sqlserver-flex/how-tos/create-logins-and-users-in-sqlserver-flex-instances/ for additional information.
 
 The allowed user roles for your instance can be obtained by running:
   $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID

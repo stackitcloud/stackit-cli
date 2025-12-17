@@ -6,14 +6,14 @@ import (
 	credentialsGroup "github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/credentials-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/disable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/object-storage/enable"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "object-storage",
 		Short: "Provides functionality for Object Storage",
@@ -25,7 +25,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(bucket.NewCmd(params))
 	cmd.AddCommand(disable.NewCmd(params))
 	cmd.AddCommand(enable.NewCmd(params))

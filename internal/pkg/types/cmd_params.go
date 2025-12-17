@@ -1,4 +1,4 @@
-package params
+package types
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"

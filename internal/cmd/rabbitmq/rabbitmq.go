@@ -1,17 +1,17 @@
 package rabbitmq
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq/plans"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rabbitmq",
 		Short: "Provides functionality for RabbitMQ",
@@ -23,7 +23,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(instance.NewCmd(params))
 	cmd.AddCommand(plans.NewCmd(params))
 	cmd.AddCommand(credentials.NewCmd(params))

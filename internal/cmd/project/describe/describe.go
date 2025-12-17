@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -30,7 +31,7 @@ type inputModel struct {
 	IncludeParents bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Shows details of a STACKIT project",
@@ -86,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" && projectId == "" {
-		return nil, fmt.Errorf("Project ID needs to be provided either as an argument or as a flag")
+		return nil, fmt.Errorf("project ID needs to be provided either as an argument or as a flag")
 	}
 
 	if projectId == "" {

@@ -3,7 +3,8 @@ package logout
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -11,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Short: "Logs the user account out of the STACKIT CLI",

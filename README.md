@@ -202,6 +202,6 @@ Apache 2.0
 
 - [STACKIT](https://www.stackit.de/en/)
 
-- [STACKIT Knowledge Base](https://docs.stackit.cloud/stackit/en/knowledge-base-85301704.html)
+- [STACKIT Docs](https://docs.stackit.cloud/)
 
 - [STACKIT Terraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs)

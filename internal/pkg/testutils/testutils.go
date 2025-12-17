@@ -3,23 +3,24 @@ package testutils
 import (
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 // TestParseInput centralizes the logic to test a combination of inputs (arguments, flags) for a cobra command
-func TestParseInput[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, isValid bool) {
+func TestParseInput[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, isValid bool) {
 	TestParseInputWithAdditionalFlags(t, cmdFactory, parseInputFunc, expectedModel, argValues, flagValues, map[string][]string{}, isValid)
 }
 
 // TestParseInputWithAdditionalFlags centralizes the logic to test a combination of inputs (arguments, flags) for a cobra command.
 // It allows to pass multiple instances of a single flag to the cobra command using the `additionalFlagValues` parameter.
-func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*params.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool) {
+func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool) {
 	p := print.NewPrinter()
-	cmd := cmdFactory(&params.CmdParams{Printer: p})
+	cmd := cmdFactory(&types.CmdParams{Printer: p})
 	err := globalflags.Configure(cmd.Flags())
 	if err != nil {
 		t.Fatalf("configure global flags: %v", err)

@@ -7,14 +7,14 @@ import (
 	generatepayload "github.com/stackitcloud/stackit-cli/internal/cmd/observability/scrape-config/generate-payload"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/scrape-config/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/scrape-config/update"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "scrape-config",
 		Short: "Provides functionality for scrape configurations in Observability",
@@ -26,7 +26,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(generatepayload.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))

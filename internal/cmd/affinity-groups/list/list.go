@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -26,7 +27,7 @@ type inputModel struct {
 
 const limitFlag = "limit"
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists affinity groups",
@@ -111,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func outputResult(p *print.Printer, model inputModel, items []iaas.AffinityGroup) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
 
 	return p.OutputResult(outputFormat, items, func() error {

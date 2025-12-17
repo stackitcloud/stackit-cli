@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -49,7 +50,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -87,7 +88,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNicRequest)) iaas.ApiCre
 }
 
 func fixturePayload(mods ...func(payload *iaas.CreateNicPayload)) iaas.CreateNicPayload {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -256,7 +257,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.projectId, tt.args.nic); (err != nil) != tt.wantErr {

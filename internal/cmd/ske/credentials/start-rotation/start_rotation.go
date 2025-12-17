@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -27,7 +28,7 @@ type inputModel struct {
 	ClusterName string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("start-rotation %s", clusterNameArg),
 		Short: "Starts the rotation of the credentials associated to a SKE cluster",
@@ -44,7 +45,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			"  $ stackit ske kubeconfig create my-cluster",
 			"Complete the rotation by running:",
 			"  $ stackit ske credentials complete-rotation my-cluster",
-			"For more information, visit: https://docs.stackit.cloud/stackit/en/how-to-rotate-ske-credentials-200016334.html",
+			"For more information, visit: https://docs.stackit.cloud/products/runtime/kubernetes-engine/how-tos/rotate-ske-credentials/",
 		),
 		Args: args.SingleArg(clusterNameArg, nil),
 		Example: examples.Build(

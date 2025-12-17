@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
@@ -26,7 +28,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/opensearch"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/organization"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project"
 	publicip "github.com/stackitcloud/stackit-cli/internal/cmd/public-ip"
@@ -116,7 +117,7 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 	err := configureFlags(cmd)
 	cobra.CheckErr(err)
 
-	addSubcommands(cmd, &params.CmdParams{
+	addSubcommands(cmd, &types.CmdParams{
 		Printer:    p,
 		CliVersion: version,
 	})
@@ -159,7 +160,7 @@ func configureFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(auth.NewCmd(params))
 	cmd.AddCommand(configCmd.NewCmd(params))
 	cmd.AddCommand(beta.NewCmd(params))

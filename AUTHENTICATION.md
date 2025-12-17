@@ -4,7 +4,7 @@ This document describes how you can configure authentication for the STACKIT CLI
 
 ## Service account
 
-You can use a [service account](https://docs.stackit.cloud/stackit/en/service-accounts-134415819.html) to authenticate to the STACKIT CLI.
+You can use a [service account](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/) to authenticate to the STACKIT CLI.
 The CLI will search for service account credentials similarly to the [STACKIT SDK](https://github.com/stackitcloud/stackit-sdk-go) and [STACKIT Terraform Provider](https://github.com/stackitcloud/terraform-provider-stackit), so if you have already set up your environment for those tools, you can just run:
 
 ```bash
@@ -47,14 +47,14 @@ To use the key flow, you need to have a service account key, which must have an 
 
 When creating the service account key, a new RSA key-pair can be created automatically, which will be included in the service account key. This will make it much easier to configure the key flow authentication in the CLI, by just providing the service account key.
 
-**Optionally**, you can provide your own private key when creating the service account key, which will then require you to also provide it explicitly to the CLI, additionally to the service account key. Check the STACKIT Knowledge Base for an [example of how to create your own key-pair](https://docs.stackit.cloud/stackit/en/usage-of-the-service-account-keys-in-stackit-175112464.html#UsageoftheserviceaccountkeysinSTACKIT-CreatinganRSAkey-pair).
+**Optionally**, you can provide your own private key when creating the service account key, which will then require you to also provide it explicitly to the CLI, additionally to the service account key. Check the STACKIT Docs for an [example of how to create your own key-pair](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-account-keys/).
 
 To configure the key flow, follow this steps:
 
 1.  Create a service account key:
 
 - In the CLI, run `stackit service-account key create --email <SERVICE_ACCOUNT_EMAIL>`
-- As an alternative, use the [STACKIT Portal](https://portal.stackit.cloud/): go to the `Service Accounts` tab, choose a `Service Account` and go to `Service Account Keys` to create a key. For more details, see [Create a service account key](https://docs.stackit.cloud/stackit/en/create-a-service-account-key-175112456.html)
+- As an alternative, use the [STACKIT Portal](https://portal.stackit.cloud/): go to the `Service Accounts` tab, choose a `Service Account` and go to `Service Account Keys` to create a key. For more details, see [Create a service account key](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-account-keys/)
 
 2.  Save the content of the service account key by copying it and saving it in a JSON file.
 

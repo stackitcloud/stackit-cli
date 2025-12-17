@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +31,7 @@ const (
 	limitFlag         = "limit"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists images",
@@ -142,10 +143,10 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 		for i := range items {
 			item := items[i]
 			var (
-				architecture string = "n/a"
-				os           string = "n/a"
-				distro       string = "n/a"
-				version      string = "n/a"
+				architecture = "n/a"
+				os           = "n/a"
+				distro       = "n/a"
+				version      = "n/a"
 			)
 			if cfg := item.Config; cfg != nil {
 				if v := cfg.Architecture; v != nil {

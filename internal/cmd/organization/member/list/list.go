@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -37,7 +38,7 @@ type inputModel struct {
 	SortBy         string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of an organization",
@@ -159,9 +160,10 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
 		}
 
-		if sortBy == "subject" {
+		switch sortBy {
+		case "subject":
 			table.EnableAutoMergeOnColumns(1)
-		} else if sortBy == "role" {
+		case "role":
 			table.EnableAutoMergeOnColumns(2)
 		}
 

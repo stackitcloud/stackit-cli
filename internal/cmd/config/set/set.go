@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -56,7 +57,7 @@ type inputModel struct {
 	ProjectIdSet bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Sets CLI configuration options",
@@ -238,10 +239,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	// globalflags.Parse uses the flags, and fallsback to config file
 	// To check if projectId was passed, we use the first rather than the second
 	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
-	projectIdSet := false
-	if projectIdFromFlag != nil {
-		projectIdSet = true
-	}
+	projectIdSet := projectIdFromFlag != nil
 
 	allowedUrlDomainFromFlag := flags.FlagToStringPointer(p, cmd, allowedUrlDomainFlag)
 	allowedUrlDomainFlagValue := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)

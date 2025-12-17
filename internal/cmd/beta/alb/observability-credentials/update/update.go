@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -33,7 +34,7 @@ type inputModel struct {
 	CredentialsRef *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", credentialRefArg),
 		Short: "Update credentials",
@@ -127,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCredentialsResponse) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
 	if response == nil {
 		return fmt.Errorf("no response passed")

@@ -4,11 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
@@ -217,7 +218,7 @@ func TestOutputResult(t *testing.T) {
 	}
 
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := outputResult(p, tt.outputFormat, tt.projectId, tt.resp)

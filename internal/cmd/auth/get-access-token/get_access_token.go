@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +19,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-access-token",
 		Short: "Prints a short-lived access token.",

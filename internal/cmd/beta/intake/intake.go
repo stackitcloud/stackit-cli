@@ -8,13 +8,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 // NewCmd creates the 'stackit intake' command
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "intake",
 		Short: "Provides functionality for intake",
@@ -26,7 +26,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(runner.NewCmd(params))
 
 	// Intake instance subcommands
