@@ -6,7 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -17,7 +18,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -50,7 +53,8 @@ var (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 
 		nameFlag:                   testName,
 		diskFormatFlag:             testDiskFormat,
@@ -90,11 +94,15 @@ func parseLabels(labelstring string) map[string]string {
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Verbosity: globalflags.VerbosityDefault},
-		Id:              testImageId[0],
-		Name:            &testName,
-		DiskFormat:      &testDiskFormat,
-		Labels:          utils.Ptr(parseLabels(testLabels)),
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
+		},
+		Id:         testImageId[0],
+		Name:       &testName,
+		DiskFormat: &testDiskFormat,
+		Labels:     utils.Ptr(parseLabels(testLabels)),
 		Config: &imageConfig{
 			BootMenu:               &testBootmenu,
 			CdromBus:               &testCdRomBus,
@@ -155,7 +163,7 @@ func fixtureCreatePayload(mods ...func(payload *iaas.UpdateImagePayload)) (paylo
 }
 
 func fixtureRequest(mods ...func(*iaas.ApiUpdateImageRequest)) iaas.ApiUpdateImageRequest {
-	request := testClient.UpdateImage(testCtx, testProjectId, testImageId[0])
+	request := testClient.UpdateImage(testCtx, testProjectId, testRegion, testImageId[0])
 
 	request = request.UpdateImagePayload(fixtureCreatePayload())
 
@@ -168,6 +176,7 @@ func fixtureRequest(mods ...func(*iaas.ApiUpdateImageRequest)) iaas.ApiUpdateIma
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		args          []string
 		isValid       bool
@@ -183,7 +192,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no values but valid image id",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
+				globalflags.ProjectIdFlag: testProjectId,
 			},
 			args:    testImageId,
 			isValid: false,
@@ -195,7 +204,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			args:    testImageId,
 			isValid: false,
@@ -203,7 +212,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			args:    testImageId,
 			isValid: false,
@@ -211,7 +220,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			args:    testImageId,
 			isValid: false,
@@ -301,8 +310,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "update only name",
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
-				nameFlag:      "foo",
+				globalflags.ProjectIdFlag: testProjectId,
+				nameFlag:                  "foo",
 			},
 			args:    testImageId,
 			isValid: true,
@@ -317,7 +326,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Errorf("cannot configure global flags: %v", err)
 			}

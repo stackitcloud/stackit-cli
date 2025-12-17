@@ -2,13 +2,12 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,11 +28,11 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId *string
+	NetworkId string
 	NicId     string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", nicIdArg),
 		Short: "Describes a network interface",
@@ -96,7 +95,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		NicId:           nicId,
 	}
 
@@ -105,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNicRequest {
-	req := apiClient.GetNic(ctx, model.ProjectId, *model.NetworkId, model.NicId)
+	req := apiClient.GetNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 	return req
 }
 
@@ -113,24 +112,7 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(nic, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(nic, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, nic, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(nic.Id))
 		table.AddSeparator()
@@ -181,5 +163,5 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

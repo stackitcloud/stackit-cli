@@ -2,13 +2,12 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -39,7 +38,7 @@ type inputModel struct {
 	SortBy         string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists members of an organization",
@@ -56,9 +55,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 members of an organization`,
 				"$ stackit organization member list --organization-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -105,7 +104,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
@@ -149,25 +148,7 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 	}
 	sort.SliceStable(members, sortFn)
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		// Show details
-		details, err := json.MarshalIndent(members, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal members: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(members, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal members: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, members, func() error {
 		table := tables.NewTable()
 		table.SetHeader("SUBJECT", "ROLE")
 		for i := range members {
@@ -179,9 +160,10 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
 		}
 
-		if sortBy == "subject" {
+		switch sortBy {
+		case "subject":
 			table.EnableAutoMergeOnColumns(1)
-		} else if sortBy == "role" {
+		case "role":
 			table.EnableAutoMergeOnColumns(2)
 		}
 
@@ -191,5 +173,5 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 		}
 
 		return nil
-	}
+	})
 }

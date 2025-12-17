@@ -3,7 +3,8 @@ package unset
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -41,6 +42,7 @@ const (
 	redisCustomEndpointFlag             = "redis-custom-endpoint"
 	resourceManagerCustomEndpointFlag   = "resource-manager-custom-endpoint"
 	secretsManagerCustomEndpointFlag    = "secrets-manager-custom-endpoint"
+	kmsCustomEndpointFlag               = "kms-custom-endpoint"
 	serviceAccountCustomEndpointFlag    = "service-account-custom-endpoint"
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
@@ -50,6 +52,7 @@ const (
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 )
 
 type inputModel struct {
@@ -78,6 +81,7 @@ type inputModel struct {
 	RedisCustomEndpoint             bool
 	ResourceManagerCustomEndpoint   bool
 	SecretsManagerCustomEndpoint    bool
+	KMSCustomEndpoint               bool
 	ServerBackupCustomEndpoint      bool
 	ServerOsUpdateCustomEndpoint    bool
 	RunCommandCustomEndpoint        bool
@@ -87,9 +91,10 @@ type inputModel struct {
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
+	IntakeCustomEndpoint            bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
@@ -180,6 +185,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if model.SecretsManagerCustomEndpoint {
 				viper.Set(config.SecretsManagerCustomEndpointKey, "")
 			}
+			if model.KMSCustomEndpoint {
+				viper.Set(config.KMSCustomEndpointKey, "")
+			}
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
 			}
@@ -206,6 +214,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 			if model.TokenCustomEndpoint {
 				viper.Set(config.TokenCustomEndpointKey, "")
+			}
+			if model.IntakeCustomEndpoint {
+				viper.Set(config.IntakeCustomEndpointKey, "")
 			}
 
 			err := config.Write()
@@ -245,6 +256,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(redisCustomEndpointFlag, false, "Redis API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(resourceManagerCustomEndpointFlag, false, "Resource Manager API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(secretsManagerCustomEndpointFlag, false, "Secrets Manager API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(kmsCustomEndpointFlag, false, "KMS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceAccountCustomEndpointFlag, false, "Service Account API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serviceEnablementCustomEndpointFlag, false, "Service Enablement API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(serverBackupCustomEndpointFlag, false, "Server Backup base URL. If unset, uses the default base URL")
@@ -254,6 +266,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
+	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -283,6 +296,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		RedisCustomEndpoint:             flags.FlagToBoolValue(p, cmd, redisCustomEndpointFlag),
 		ResourceManagerCustomEndpoint:   flags.FlagToBoolValue(p, cmd, resourceManagerCustomEndpointFlag),
 		SecretsManagerCustomEndpoint:    flags.FlagToBoolValue(p, cmd, secretsManagerCustomEndpointFlag),
+		KMSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, kmsCustomEndpointFlag),
 		ServiceAccountCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serviceAccountCustomEndpointFlag),
 		ServiceEnablementCustomEndpoint: flags.FlagToBoolValue(p, cmd, serviceEnablementCustomEndpointFlag),
 		ServerBackupCustomEndpoint:      flags.FlagToBoolValue(p, cmd, serverBackupCustomEndpointFlag),
@@ -292,6 +306,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
+		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)

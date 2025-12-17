@@ -2,12 +2,11 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +33,7 @@ type inputModel struct {
 	Labels   map[string]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", backupIdArg),
 		Short: "Updates a backup",
@@ -61,7 +60,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
 			}
@@ -120,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateBackupRequest {
-	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 
 	payload := iaas.UpdateBackupPayload{
 		Name:   model.Name,
@@ -136,25 +135,8 @@ func outputResult(p *print.Printer, outputFormat, backupLabel string, backup *ia
 		return fmt.Errorf("backup response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backup, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backup, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal backup: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, backup, func() error {
 		p.Outputf("Updated backup %q\n", backupLabel)
 		return nil
-	}
+	})
 }

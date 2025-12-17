@@ -2,13 +2,12 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +29,7 @@ type inputModel struct {
 	SnapshotId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", snapshotIdArg),
 		Short: "Describes a snapshot",
@@ -88,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSnapshotRequest {
-	return apiClient.GetSnapshot(ctx, model.ProjectId, model.SnapshotId)
+	return apiClient.GetSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot) error {
@@ -96,24 +95,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		return fmt.Errorf("get snapshot response is empty")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(snapshot, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal snapshot: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(snapshot, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal snapshot: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-
-	default:
+	return p.OutputResult(outputFormat, snapshot, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(snapshot.Id))
 		table.AddSeparator()
@@ -145,5 +127,5 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		}
 
 		return nil
-	}
+	})
 }

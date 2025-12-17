@@ -2,10 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -32,10 +31,10 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit           *int64
-	SecurityGroupId *string
+	SecurityGroupId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all security group rules in a security group of a project",
@@ -55,9 +54,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit security-group rule list --security-group-id xxx --limit 10",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -76,10 +75,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, *model.SecurityGroupId)
+				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
-					securityGroupLabel = *model.SecurityGroupId
+					securityGroupLabel = model.SecurityGroupId
 				}
 
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
@@ -112,7 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -129,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		SecurityGroupId: flags.FlagToStringPointer(p, cmd, securityGroupIdFlag),
+		SecurityGroupId: flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -137,28 +136,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupRulesRequest {
-	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, *model.SecurityGroupId)
+	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, securityGroupRules []iaas.SecurityGroupRule) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(securityGroupRules, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group rules: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(securityGroupRules, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group rules: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, securityGroupRules, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 
@@ -184,5 +166,5 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRules []ia
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

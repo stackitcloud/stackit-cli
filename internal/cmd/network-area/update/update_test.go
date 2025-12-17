@@ -2,9 +2,12 @@ package update
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -15,13 +18,25 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
+const (
+	testRegion                    = "eu01"
+	testName                      = "example-network-area-name"
+	testDefaultPrefixLength int64 = 25
+	testMinPrefixLength     int64 = 24
+	testMaxPrefixLength     int64 = 26
+)
+
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var testOrgId = uuid.NewString()
-var testAreaId = uuid.NewString()
+var (
+	testOrgId  = uuid.NewString()
+	testAreaId = uuid.NewString()
+
+	testDnsNameservers = []string{"1.1.1.0", "1.1.2.0"}
+)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -35,13 +50,11 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		nameFlag:                "example-network-area-name",
-		organizationIdFlag:      testOrgId,
-		dnsNameServersFlag:      "1.1.1.0,1.1.2.0",
-		defaultPrefixLengthFlag: "24",
-		maxPrefixLengthFlag:     "24",
-		minPrefixLengthFlag:     "24",
-		labelFlag:               "key=value",
+		globalflags.RegionFlag: testRegion,
+
+		nameFlag:           testName,
+		organizationIdFlag: testOrgId,
+		labelFlag:          "key=value",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -53,14 +66,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		Name:                utils.Ptr("example-network-area-name"),
-		OrganizationId:      utils.Ptr(testOrgId),
-		AreaId:              testAreaId,
-		DnsNameServers:      utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-		DefaultPrefixLength: utils.Ptr(int64(24)),
-		MaxPrefixLength:     utils.Ptr(int64(24)),
-		MinPrefixLength:     utils.Ptr(int64(24)),
+		Name:           utils.Ptr(testName),
+		OrganizationId: utils.Ptr(testOrgId),
+		AreaId:         testAreaId,
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
@@ -82,17 +92,33 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkAreaReques
 
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkAreaPayload)) iaas.PartialUpdateNetworkAreaPayload {
 	payload := iaas.PartialUpdateNetworkAreaPayload{
-		Name: utils.Ptr("example-network-area-name"),
+		Name: utils.Ptr(testName),
 		Labels: utils.Ptr(map[string]interface{}{
 			"key": "value",
 		}),
-		AddressFamily: &iaas.UpdateAreaAddressFamily{
-			Ipv4: &iaas.UpdateAreaIPv4{
-				DefaultNameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-				DefaultPrefixLen:   utils.Ptr(int64(24)),
-				MaxPrefixLen:       utils.Ptr(int64(24)),
-				MinPrefixLen:       utils.Ptr(int64(24)),
-			},
+	}
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
+}
+
+func fixtureRequestRegionalArea(mods ...func(request *iaas.ApiUpdateNetworkAreaRegionRequest)) iaas.ApiUpdateNetworkAreaRegionRequest {
+	request := testClient.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
+	request = request.UpdateNetworkAreaRegionPayload(fixturePayloadRegionalArea())
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixturePayloadRegionalArea(mods ...func(payload *iaas.UpdateNetworkAreaRegionPayload)) iaas.UpdateNetworkAreaRegionPayload {
+	payload := iaas.UpdateNetworkAreaRegionPayload{
+		Ipv4: &iaas.UpdateRegionalAreaIPv4{
+			DefaultNameservers: utils.Ptr(testDnsNameservers),
+			DefaultPrefixLen:   utils.Ptr(testDefaultPrefixLength),
+			MaxPrefixLen:       utils.Ptr(testMaxPrefixLength),
+			MinPrefixLen:       utils.Ptr(testMinPrefixLength),
 		},
 	}
 	for _, mod := range mods {
@@ -118,20 +144,20 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "required only",
+			description: "with deprecated flags",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dnsNameServersFlag)
-				delete(flagValues, defaultPrefixLengthFlag)
-				delete(flagValues, maxPrefixLengthFlag)
-				delete(flagValues, minPrefixLengthFlag)
+				flagValues[dnsNameServersFlag] = strings.Join(testDnsNameservers, ",")
+				flagValues[defaultPrefixLengthFlag] = strconv.FormatInt(testDefaultPrefixLength, 10)
+				flagValues[maxPrefixLengthFlag] = strconv.FormatInt(testMaxPrefixLength, 10)
+				flagValues[minPrefixLengthFlag] = strconv.FormatInt(testMinPrefixLength, 10)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = nil
-				model.DefaultPrefixLength = nil
-				model.MaxPrefixLength = nil
-				model.MinPrefixLength = nil
+				model.DnsNameServers = utils.Ptr(testDnsNameservers)
+				model.DefaultPrefixLength = utils.Ptr(testDefaultPrefixLength)
+				model.MaxPrefixLength = utils.Ptr(testMaxPrefixLength)
+				model.MinPrefixLength = utils.Ptr(testMinPrefixLength)
 			}),
 		},
 
@@ -207,7 +233,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -286,11 +312,44 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
+func TestBuildRequestNetworkAreaRegion(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest iaas.ApiUpdateNetworkAreaRegionRequest
+	}{
+		{
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.DnsNameServers = utils.Ptr(testDnsNameservers)
+				model.DefaultPrefixLength = utils.Ptr(testDefaultPrefixLength)
+				model.MaxPrefixLength = utils.Ptr(testMaxPrefixLength)
+				model.MinPrefixLength = utils.Ptr(testMinPrefixLength)
+			}),
+			expectedRequest: fixtureRequestRegionalArea(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildRequestNetworkAreaRegion(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		projectLabel string
-		networkArea  iaas.NetworkArea
+		responses    NetworkAreaResponses
 	}
 	tests := []struct {
 		name    string
@@ -305,17 +364,143 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty network area",
 			args: args{
-				networkArea: iaas.NetworkArea{},
+				responses: NetworkAreaResponses{
+					NetworkArea:  iaas.NetworkArea{},
+					RegionalArea: nil,
+				},
 			},
 			wantErr: false,
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.networkArea); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.responses); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGetConfiguredDeprecatedFlags(t *testing.T) {
+	type args struct {
+		model *inputModel
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "no deprecated flags",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{
+						Verbosity: globalflags.VerbosityDefault,
+					},
+					Name:           utils.Ptr(testName),
+					OrganizationId: utils.Ptr(testOrgId),
+					Labels: utils.Ptr(map[string]string{
+						"key": "value",
+					}),
+					DnsNameServers:      nil,
+					DefaultPrefixLength: nil,
+					MaxPrefixLength:     nil,
+					MinPrefixLength:     nil,
+				},
+			},
+			want: nil,
+		},
+		{
+			name: "deprecated flags",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{
+						Verbosity: globalflags.VerbosityDefault,
+					},
+					Name:           utils.Ptr(testName),
+					OrganizationId: utils.Ptr(testOrgId),
+					Labels: utils.Ptr(map[string]string{
+						"key": "value",
+					}),
+					DnsNameServers:      utils.Ptr(testDnsNameservers),
+					DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
+					MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
+					MinPrefixLength:     utils.Ptr(testMinPrefixLength),
+				},
+			},
+			want: []string{dnsNameServersFlag, defaultPrefixLengthFlag, minPrefixLengthFlag, maxPrefixLengthFlag},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := getConfiguredDeprecatedFlags(tt.args.model)
+
+			less := func(a, b string) bool {
+				return a < b
+			}
+			if diff := cmp.Diff(tt.want, got, cmpopts.SortSlices(less)); diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestHasDeprecatedFlagsSet(t *testing.T) {
+	type args struct {
+		model *inputModel
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "no deprecated flags",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{
+						Verbosity: globalflags.VerbosityDefault,
+					},
+					Name:           utils.Ptr(testName),
+					OrganizationId: utils.Ptr(testOrgId),
+					Labels: utils.Ptr(map[string]string{
+						"key": "value",
+					}),
+					DnsNameServers:      nil,
+					DefaultPrefixLength: nil,
+					MaxPrefixLength:     nil,
+					MinPrefixLength:     nil,
+				},
+			},
+			want: false,
+		},
+		{
+			name: "deprecated flags",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{
+						Verbosity: globalflags.VerbosityDefault,
+					},
+					Name:           utils.Ptr(testName),
+					OrganizationId: utils.Ptr(testOrgId),
+					Labels: utils.Ptr(map[string]string{
+						"key": "value",
+					}),
+					DnsNameServers:      utils.Ptr(testDnsNameservers),
+					DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
+					MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
+					MinPrefixLength:     utils.Ptr(testMinPrefixLength),
+				},
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hasDeprecatedFlagsSet(tt.args.model); got != tt.want {
+				t.Errorf("hasDeprecatedFlagsSet() = %v, want %v", got, tt.want)
 			}
 		})
 	}

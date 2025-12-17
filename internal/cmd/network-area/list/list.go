@@ -2,14 +2,13 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -36,7 +35,7 @@ type inputModel struct {
 	LabelSelector  *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all STACKIT Network Areas (SNA) of an organization",
@@ -60,9 +59,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit network-area list --organization-id xxx --label-selector yyy",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -120,7 +119,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
@@ -150,40 +149,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.NetworkArea) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkAreas, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkAreas, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal area: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, networkAreas, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Network Ranges", "# Attached Projects")
+		table.SetHeader("ID", "Name", "# Attached Projects")
 
 		for _, networkArea := range networkAreas {
-			networkRanges := "n/a"
-			if ipv4 := networkArea.Ipv4; ipv4 != nil {
-				if netRange := ipv4.NetworkRanges; netRange != nil {
-					networkRanges = fmt.Sprint(len(*netRange))
-				}
-			}
-
 			table.AddRow(
-				utils.PtrString(networkArea.AreaId),
+				utils.PtrString(networkArea.Id),
 				utils.PtrString(networkArea.Name),
-				utils.PtrString(networkArea.State),
-				networkRanges,
 				utils.PtrString(networkArea.ProjectCount),
 			)
 			table.AddSeparator()
@@ -191,5 +164,5 @@ func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.Net
 
 		p.Outputln(table.Render())
 		return nil
-	}
+	})
 }

@@ -4,9 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -15,7 +17,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -30,7 +34,9 @@ var testVolumeId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:                     testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		availabilityZoneFlag:              "eu01-1",
 		nameFlag:                          "test-server-name",
 		machineTypeFlag:                   "t1.1",
@@ -41,7 +47,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		bootVolumeSourceIdFlag:            testSourceId,
 		bootVolumeSourceTypeFlag:          "test-source-type",
 		bootVolumeDeleteOnTerminationFlag: "false",
-		imageIdFlag:                       testImageId,
 		keypairNameFlag:                   "test-keypair-name",
 		networkIdFlag:                     testNetworkId,
 		securityGroupsFlag:                "test-security-groups",
@@ -59,6 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		AvailabilityZone:              utils.Ptr("eu01-1"),
@@ -70,7 +76,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		BootVolumeSourceId:            utils.Ptr(testSourceId),
 		BootVolumeSourceType:          utils.Ptr("test-source-type"),
 		BootVolumeDeleteOnTermination: utils.Ptr(false),
-		ImageId:                       utils.Ptr(testImageId),
 		KeypairName:                   utils.Ptr("test-keypair-name"),
 		NetworkId:                     utils.Ptr(testNetworkId),
 		SecurityGroups:                utils.Ptr([]string{"test-security-groups"}),
@@ -88,7 +93,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId)
+	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -97,7 +102,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.Api
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId)
+	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(iaas.CreateServerPayload{
 		MachineType: utils.Ptr("t1.1"),
 		Name:        utils.Ptr("test-server-name"),
@@ -117,13 +122,12 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		Name:                utils.Ptr("test-server-name"),
 		AvailabilityZone:    utils.Ptr("eu01-1"),
 		AffinityGroup:       utils.Ptr("test-affinity-group"),
-		ImageId:             utils.Ptr(testImageId),
 		KeypairName:         utils.Ptr("test-keypair-name"),
 		SecurityGroups:      utils.Ptr([]string{"test-security-groups"}),
 		ServiceAccountMails: utils.Ptr([]string{"test-service-account"}),
 		UserData:            utils.Ptr([]byte("test-user-data")),
 		Volumes:             utils.Ptr([]string{testVolumeId}),
-		BootVolume: &iaas.CreateServerPayloadBootVolume{
+		BootVolume: &iaas.ServerBootVolume{
 			PerformanceClass:    utils.Ptr("test-perf-class"),
 			Size:                utils.Ptr(int64(5)),
 			DeleteOnTermination: utils.Ptr(false),
@@ -132,7 +136,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 				Type: utils.Ptr("test-source-type"),
 			},
 		},
-		Networking: &iaas.CreateServerPayloadNetworking{
+		Networking: &iaas.CreateServerPayloadAllOfNetworking{
 			CreateServerNetworking: &iaas.CreateServerNetworking{
 				NetworkId: utils.Ptr(testNetworkId),
 			},
@@ -147,6 +151,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -169,12 +174,12 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumePerformanceClassFlag)
 				delete(flagValues, bootVolumeDeleteOnTerminationFlag)
 				delete(flagValues, keypairNameFlag)
-				delete(flagValues, networkIdFlag)
 				delete(flagValues, networkInterfaceIdsFlag)
 				delete(flagValues, securityGroupsFlag)
 				delete(flagValues, serviceAccountEmailsFlag)
 				delete(flagValues, userDataFlag)
 				delete(flagValues, volumesFlag)
+				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -187,12 +192,12 @@ func TestParseInput(t *testing.T) {
 				model.BootVolumePerformanceClass = nil
 				model.BootVolumeDeleteOnTermination = nil
 				model.KeypairName = nil
-				model.NetworkId = nil
 				model.NetworkInterfaceIds = nil
 				model.SecurityGroups = nil
 				model.ServiceAccountMails = nil
 				model.UserData = nil
 				model.Volumes = nil
+				model.ImageId = utils.Ptr(testImageId)
 			}),
 		},
 		{
@@ -217,21 +222,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -292,12 +297,14 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumeSourceIdFlag)
 				delete(flagValues, bootVolumeSourceTypeFlag)
 				delete(flagValues, bootVolumeSizeFlag)
+				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.BootVolumeSourceId = nil
 				model.BootVolumeSourceType = nil
 				model.BootVolumeSize = nil
+				model.ImageId = utils.Ptr(testImageId)
 			}),
 		},
 		{
@@ -326,46 +333,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -386,6 +354,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				MachineType: utils.Ptr("t1.1"),
@@ -435,7 +404,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.server); (err != nil) != tt.wantErr {

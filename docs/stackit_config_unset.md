@@ -34,6 +34,8 @@ stackit config unset [flags]
       --iaas-custom-endpoint                                IaaS API base URL. If unset, uses the default base URL
       --identity-provider-custom-client-id                  Identity Provider client ID, used for user authentication
       --identity-provider-custom-well-known-configuration   Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider
+      --intake-custom-endpoint                              Intake API base URL. If unset, uses the default base URL
+      --kms-custom-endpoint                                 KMS API base URL. If unset, uses the default base URL
       --load-balancer-custom-endpoint                       Load Balancer API base URL. If unset, uses the default base URL
       --logme-custom-endpoint                               LogMe API base URL. If unset, uses the default base URL
       --mariadb-custom-endpoint                             MariaDB API base URL. If unset, uses the default base URL

@@ -2,11 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -30,7 +29,7 @@ type inputModel struct {
 	Name string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", loadbalancerNameArg),
 		Short: "Describes an application loadbalancer",
@@ -89,54 +88,27 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.Name)
 }
 
-func outputResult(p *print.Printer, outputFormat string, response *alb.LoadBalancer) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(response, "", "  ")
+func outputResult(p *print.Printer, outputFormat string, loadbalancer *alb.LoadBalancer) error {
+	return p.OutputResult(outputFormat, loadbalancer, func() error {
+		content := []tables.Table{}
 
-		if err != nil {
-			return fmt.Errorf("marshal loadbalancer: %w", err)
+		content = append(content, buildLoadBalancerTable(loadbalancer))
+
+		if loadbalancer.Listeners != nil {
+			content = append(content, buildListenersTable(*loadbalancer.Listeners))
 		}
-		p.Outputln(string(details))
+
+		if loadbalancer.TargetPools != nil {
+			content = append(content, buildTargetPoolsTable(*loadbalancer.TargetPools))
+		}
+
+		err := tables.DisplayTables(p, content)
+		if err != nil {
+			return fmt.Errorf("display output: %w", err)
+		}
 
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(response, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-
-		if err != nil {
-			return fmt.Errorf("marshal loadbalancer: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		if err := outputResultAsTable(p, response); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func outputResultAsTable(p *print.Printer, loadbalancer *alb.LoadBalancer) error {
-	content := []tables.Table{}
-
-	content = append(content, buildLoadBalancerTable(loadbalancer))
-
-	if loadbalancer.Listeners != nil {
-		content = append(content, buildListenersTable(*loadbalancer.Listeners))
-	}
-
-	if loadbalancer.TargetPools != nil {
-		content = append(content, buildTargetPoolsTable(*loadbalancer.TargetPools))
-	}
-
-	err := tables.DisplayTables(p, content)
-	if err != nil {
-		return fmt.Errorf("display output: %w", err)
-	}
-
-	return nil
+	})
 }
 
 func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {

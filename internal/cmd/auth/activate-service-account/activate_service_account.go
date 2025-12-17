@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -33,7 +34,7 @@ type inputModel struct {
 	OnlyPrintAccessToken  bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "activate-service-account",
 		Short: "Authenticates using a service account",
@@ -58,8 +59,11 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
 
 			tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
 			if !model.OnlyPrintAccessToken {
@@ -113,7 +117,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(onlyPrintAccessTokenFlag, false, "If this is set to true the credentials are not stored in either the keyring or a file")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	model := inputModel{
 		ServiceAccountToken:   flags.FlagToStringValue(p, cmd, serviceAccountTokenFlag),
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
@@ -122,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	}
 
 	p.DebugInputModel(model)
-	return &model
+	return &model, nil
 }
 
 func storeCustomEndpoint(tokenCustomEndpoint string) error {

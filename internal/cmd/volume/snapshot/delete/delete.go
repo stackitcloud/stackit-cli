@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +30,7 @@ type inputModel struct {
 	SnapshotId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", snapshotIdArg),
 		Short: "Deletes a snapshot",
@@ -54,7 +55,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get snapshot name for label
-			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SnapshotId)
+			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				snapshotLabel = model.SnapshotId
@@ -79,7 +80,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Deleting snapshot")
-				_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.SnapshotId).WaitWithContext(ctx)
+				_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for snapshot deletion: %w", err)
 				}
@@ -115,5 +116,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSnapshotRequest {
-	return apiClient.DeleteSnapshot(ctx, model.ProjectId, model.SnapshotId)
+	return apiClient.DeleteSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 }

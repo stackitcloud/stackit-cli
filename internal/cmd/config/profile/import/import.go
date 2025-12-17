@@ -2,7 +2,6 @@ package importProfile
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -10,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
 const (
@@ -25,7 +25,7 @@ type inputModel struct {
 	NoSet       bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Imports a CLI configuration profile",
@@ -41,8 +41,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(cmd.MarkFlagRequired(configFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := &inputModel{

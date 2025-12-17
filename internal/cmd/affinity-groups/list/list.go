@@ -2,11 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -28,7 +27,7 @@ type inputModel struct {
 
 const limitFlag = "limit"
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists affinity groups",
@@ -44,9 +43,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit affinity-group list --limit=10",
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -84,10 +83,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiListAffinityGroupsRequest {
-	return apiClient.ListAffinityGroups(ctx, model.ProjectId)
+	return apiClient.ListAffinityGroups(ctx, model.ProjectId, model.Region)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -113,22 +112,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 func outputResult(p *print.Printer, model inputModel, items []iaas.AffinityGroup) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal affinity groups: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal affinity groups: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "POLICY")
 		for _, item := range items {
@@ -143,6 +130,7 @@ func outputResult(p *print.Printer, model inputModel, items []iaas.AffinityGroup
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-	return nil
+
+		return nil
+	})
 }

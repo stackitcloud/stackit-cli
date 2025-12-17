@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +19,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-access-token",
 		Short: "Prints a short-lived access token.",
@@ -29,8 +30,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Print a short-lived access token`,
 				"$ stackit auth get-access-token"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -67,10 +68,17 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 		},
 	}
+
+	// hide project id flag from help command because it could mislead users
+	cmd.SetHelpFunc(func(command *cobra.Command, strings []string) {
+		_ = command.Flags().MarkHidden(globalflags.ProjectIdFlag) // nolint:errcheck // there's no chance to handle the error here
+		command.Parent().HelpFunc()(command, strings)
+	})
+
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{

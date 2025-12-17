@@ -2,10 +2,10 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -35,7 +34,7 @@ type inputModel struct {
 	CredentialsRef *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", credentialRefArg),
 		Short: "Update credentials",
@@ -129,26 +128,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCredentialsResponse) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
 	if response == nil {
-		return fmt.Errorf("no response passewd")
+		return fmt.Errorf("no response passed")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(response.Credential, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(response.Credential, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, response.Credential, func() error {
 		p.Outputf("Updated credential %q\n", utils.PtrString(model.CredentialsRef))
-	}
-	return nil
+		return nil
+	})
 }

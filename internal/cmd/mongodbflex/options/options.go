@@ -2,12 +2,10 @@ package options
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -47,7 +45,7 @@ type flavorStorages struct {
 	Storages *mongodbflex.ListStoragesResponse `json:"storages"`
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists MongoDB Flex options",
@@ -64,9 +62,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List MongoDB Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit mongodbflex options --flavors"`,
 				"$ stackit mongodbflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -97,7 +95,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
 	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)
@@ -182,25 +180,9 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 		}
 	}
 
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(options, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(options, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex options: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(model.OutputFormat, options, func() error {
 		return outputResultAsTable(p, model, options)
-	}
+	})
 }
 
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {

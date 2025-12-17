@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -15,8 +16,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
 )
-
-var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
@@ -58,16 +57,16 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		enableMonitoringFlag:     "true",
-		graphiteFlag:             "example-graphite",
-		metricsFrequencyFlag:     "100",
-		metricsPrefixFlag:        "example-prefix",
-		monitoringInstanceIdFlag: testMonitoringInstanceId,
-		pluginFlag:               "example-plugin",
-		sgwAclFlag:               "198.51.100.14/24",
-		syslogFlag:               "example-syslog",
-		planIdFlag:               testPlanId,
+		globalflags.ProjectIdFlag: testProjectId,
+		enableMonitoringFlag:      "true",
+		graphiteFlag:              "example-graphite",
+		metricsFrequencyFlag:      "100",
+		metricsPrefixFlag:         "example-prefix",
+		monitoringInstanceIdFlag:  testMonitoringInstanceId,
+		pluginFlag:                "example-plugin",
+		sgwAclFlag:                "198.51.100.14/24",
+		syslogFlag:                "example-syslog",
+		planIdFlag:                testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -159,7 +158,7 @@ func TestParseInput(t *testing.T) {
 			description: "required flags only (no values to update)",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
+				globalflags.ProjectIdFlag: testProjectId,
 			},
 			isValid: false,
 			expectedModel: &inputModel{
@@ -174,12 +173,12 @@ func TestParseInput(t *testing.T) {
 			description: "zero values",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag:        testProjectId,
-				planIdFlag:           testPlanId,
-				enableMonitoringFlag: "false",
-				graphiteFlag:         "",
-				metricsFrequencyFlag: "0",
-				metricsPrefixFlag:    "",
+				globalflags.ProjectIdFlag: testProjectId,
+				planIdFlag:                testPlanId,
+				enableMonitoringFlag:      "false",
+				graphiteFlag:              "",
+				metricsFrequencyFlag:      "0",
+				metricsPrefixFlag:         "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -199,7 +198,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -207,7 +206,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -215,7 +214,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -295,7 +294,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)

@@ -2,12 +2,11 @@ package plans
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -24,7 +23,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists the application load balancer plans",
@@ -36,9 +35,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta alb plans`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -64,23 +63,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list plans: %w", err)
 			}
+			items := response.GetValidPlans()
 
-			if items := response.ValidPlans; items == nil || len(*items) == 0 {
-				params.Printer.Info("No plans found for project %q", projectLabel)
-			} else {
-				if err := outputResult(params.Printer, model.OutputFormat, *items); err != nil {
-					return fmt.Errorf("output plans: %w", err)
-				}
-			}
-
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -100,25 +92,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat string, items []alb.PlanDetails) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal plans: %w", err)
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []alb.PlanDetails) error {
+	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No plans found for project %q", projectLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("PLAN ID", "NAME", "FLAVOR", "MAX CONNS", "DESCRIPTION")
 		for _, item := range items {
@@ -135,5 +115,5 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.PlanDetails
 		}
 
 		return nil
-	}
+	})
 }

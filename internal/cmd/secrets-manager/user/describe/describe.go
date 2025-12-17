@@ -2,11 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +33,7 @@ type inputModel struct {
 	UserId     string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", userIdArg),
 		Short: "Shows details of a Secrets Manager user",
@@ -107,24 +106,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 }
 
 func outputResult(p *print.Printer, outputFormat string, user secretsmanager.User) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(user, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(user, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager user: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, user, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
@@ -146,5 +128,5 @@ func outputResult(p *print.Printer, outputFormat string, user secretsmanager.Use
 		}
 
 		return nil
-	}
+	})
 }

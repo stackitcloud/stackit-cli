@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -166,21 +167,21 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 		return nil, err
 	}
 
+	form := url.Values{}
+	form.Set("grant_type", "refresh_token")
+	form.Set("client_id", idpClientID)
+	form.Set("refresh_token", utf.refreshToken)
+
 	req, err := http.NewRequest(
 		http.MethodPost,
 		utf.tokenEndpoint,
-		http.NoBody,
+		strings.NewReader(form.Encode()),
 	)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	if err != nil {
 		return nil, err
 	}
-	reqQuery := url.Values{}
-	reqQuery.Set("grant_type", "refresh_token")
-	reqQuery.Set("client_id", idpClientID)
-	reqQuery.Set("refresh_token", utf.refreshToken)
-	reqQuery.Set("token_format", "jwt")
-	req.URL.RawQuery = reqQuery.Encode()
-
 	return req, nil
 }
 

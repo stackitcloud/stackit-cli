@@ -2,11 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +33,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all scrape configurations of an Observability instance",
@@ -51,9 +50,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 scrape configurations of Observability instance "xxx"`,
 				"$ stackit observability scrape-config list --instance-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -102,7 +101,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -129,24 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 }
 
 func outputResult(p *print.Printer, outputFormat string, configs []observability.Job) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(configs, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal scrape configurations list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(configs, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal scrape configurations list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, configs, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "TARGETS", "SCRAPE INTERVAL")
 		for i := range configs {
@@ -174,5 +156,5 @@ func outputResult(p *print.Printer, outputFormat string, configs []observability
 		}
 
 		return nil
-	}
+	})
 }

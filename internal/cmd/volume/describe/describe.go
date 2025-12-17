@@ -2,13 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +29,7 @@ type inputModel struct {
 	VolumeId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", volumeIdArg),
 		Short: "Shows details of a volume",
@@ -91,31 +89,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumeRequest {
-	return apiClient.GetVolume(ctx, model.ProjectId, model.VolumeId)
+	return apiClient.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) error {
 	if volume == nil {
 		return fmt.Errorf("volume response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(volume, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(volume, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal volume: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, volume, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(volume.Id))
 		table.AddSeparator()
@@ -155,5 +136,5 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

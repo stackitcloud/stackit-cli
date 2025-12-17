@@ -2,13 +2,12 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -40,7 +39,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NicId            string
-	NetworkId        *string
+	NetworkId        string
 	AllowedAddresses *[]iaas.AllowedAddressesInner
 	Labels           *map[string]string
 	Name             *string // <= 63 characters + regex  ^[A-Za-z0-9]+((-|_|\s|\.)[A-Za-z0-9]+)*$
@@ -48,7 +47,7 @@ type inputModel struct {
 	SecurityGroups   *[]string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", nicIdArg),
 		Short: "Updates a network interface",
@@ -173,7 +172,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		NicId:           nicId,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 		Name:            name,
 		NicSecurity:     flags.FlagToBoolPointer(p, cmd, nicSecurityFlag),
@@ -189,7 +188,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNicRequest {
-	req := apiClient.UpdateNic(ctx, model.ProjectId, *model.NetworkId, model.NicId)
+	req := apiClient.UpdateNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 
 	payload := iaas.UpdateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
@@ -205,25 +204,8 @@ func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NI
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(nic, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(nic, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, nic, func() error {
 		p.Outputf("Updated network interface for project %q.\n", projectId)
 		return nil
-	}
+	})
 }

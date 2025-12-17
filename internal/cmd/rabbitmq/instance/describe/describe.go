@@ -2,11 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +30,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of a RabbitMQ instance",
@@ -96,24 +95,8 @@ func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Inst
 	if instance == nil {
 		return fmt.Errorf("no instance passed")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(instance, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ instance: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(instance, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ instance: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, instance, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(instance.InstanceId))
 		table.AddSeparator()
@@ -143,5 +126,5 @@ func outputResult(p *print.Printer, outputFormat string, instance *rabbitmq.Inst
 		}
 
 		return nil
-	}
+	})
 }

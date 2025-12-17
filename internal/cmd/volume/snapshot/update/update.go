@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -32,7 +33,7 @@ type inputModel struct {
 	Labels     map[string]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", snapshotIdArg),
 		Short: "Updates a snapshot",
@@ -60,7 +61,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get snapshot name for label
-			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.SnapshotId)
+			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				snapshotLabel = model.SnapshotId
@@ -125,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateSnapshotRequest {
-	req := apiClient.UpdateSnapshot(ctx, model.ProjectId, model.SnapshotId)
+	req := apiClient.UpdateSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 	payload := iaas.NewUpdateSnapshotPayloadWithDefaults()
 	payload.Name = model.Name
 	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels))

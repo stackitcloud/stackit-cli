@@ -2,13 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +29,7 @@ type inputModel struct {
 	PublicIpId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", publicIpIdArg),
 		Short: "Shows details of a Public IP",
@@ -91,28 +89,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetPublicIPRequest {
-	return apiClient.GetPublicIP(ctx, model.ProjectId, model.PublicIpId)
+	return apiClient.GetPublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(publicIp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(publicIp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal public IP: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, publicIp, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(publicIp.Id))
 		table.AddSeparator()
@@ -138,5 +119,5 @@ func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp)
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

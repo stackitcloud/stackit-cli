@@ -2,12 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +30,7 @@ type inputModel struct {
 	UpdateId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", updateIdArg),
 		Short: "Shows details of a Server os-update",
@@ -102,24 +101,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 }
 
 func outputResult(p *print.Printer, outputFormat string, update serverupdate.Update) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(update, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal server update: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(update, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal server update: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, update, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(update.Id))
 		table.AddSeparator()
@@ -142,5 +124,5 @@ func outputResult(p *print.Printer, outputFormat string, update serverupdate.Upd
 		}
 
 		return nil
-	}
+	})
 }

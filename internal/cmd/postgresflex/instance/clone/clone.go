@@ -2,11 +2,10 @@ package clone
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -41,7 +40,7 @@ type inputModel struct {
 	RecoveryDate *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("clone %s", instanceIdArg),
 		Short: "Clones a PostgreSQL Flex instance",
@@ -202,29 +201,13 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceLab
 	if resp == nil {
 		return fmt.Errorf("response not set")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgresFlex instance clone: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal PostgresFlex instance clone: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		operationState := "Cloned"
 		if async {
 			operationState = "Triggered cloning of"
 		}
 		p.Info("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
 		return nil
-	}
+	})
 }

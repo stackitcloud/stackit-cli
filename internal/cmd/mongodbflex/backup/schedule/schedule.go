@@ -2,12 +2,11 @@ package schedule
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +28,7 @@ type inputModel struct {
 	InstanceId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "schedule",
 		Short: "Shows details of the backup schedule and retention policy of a MongoDB Flex instance",
@@ -43,9 +42,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Get details of the backup schedule of a MongoDB Flex instance with ID "xxx" in JSON format`,
 				"$ stackit mongodbflex backup schedule --instance-id xxx --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -76,7 +75,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -119,24 +118,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		output.WeeklySnapshotRetentionWeeks = (*instance.Options)["weeklySnapshotRetentionWeeks"]
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(output, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backup schedule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(output, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal MongoDB Flex backup schedule: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, output, func() error {
 		table := tables.NewTable()
 		table.AddRow("BACKUP SCHEDULE (UTC)", output.BackupSchedule)
 		table.AddSeparator()
@@ -157,5 +139,5 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		}
 
 		return nil
-	}
+	})
 }

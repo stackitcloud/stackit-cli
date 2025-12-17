@@ -2,11 +2,10 @@ package plans
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +30,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
 		Short: "Lists all RabbitMQ service plans",
@@ -48,9 +47,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 RabbitMQ service plans`,
 				"$ stackit rabbitmq plans --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -67,15 +66,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get RabbitMQ service plans: %w", err)
 			}
-			plans := *resp.Offerings
-			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No plans found for project %q\n", projectLabel)
-				return nil
+			plans := resp.GetOfferings()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -83,7 +79,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, plans)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, plans)
 		},
 	}
 
@@ -95,7 +91,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -123,25 +119,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.AP
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offering) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(plans, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ plans: %w", err)
+func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []rabbitmq.Offering) error {
+	return p.OutputResult(outputFormat, plans, func() error {
+		if len(plans) == 0 {
+			p.Outputf("No plans found for project %q\n", projectLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(plans, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal RabbitMQ plans: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
 		for i := range plans {
@@ -167,5 +151,5 @@ func outputResult(p *print.Printer, outputFormat string, plans []rabbitmq.Offeri
 		}
 
 		return nil
-	}
+	})
 }

@@ -130,16 +130,54 @@ asset_filters=["stackit-cli_", "_linux_amd64.tar.gz"]
 eget stackitcloud/stackit-cli
 ```
 
-#### RPM package via dnf, yum and zypper
+#### RHEL/Fedora/Rocky/Alma/openSUSE/... (`DNF/YUM/Zypper`)
 
-The STACKIT CLI is available as [RPM Package](https://github.com/stackitcloud/stackit-cli/releases) and can be installed via dnf, yum and zypper package manager.
+The STACKIT CLI can be installed through the [`DNF/YUM`](https://docs.fedoraproject.org/en-US/fedora/f40/system-administrators-guide/package-management/DNF/) / [`Zypper`](https://de.opensuse.org/Zypper) package managers.
 
-Just download the rpm package from the [release page](https://github.com/stackitcloud/stackit-cli/releases) and run the install command like the following:
+> Requires rpm version 4.15 or newer to support Ed25519 signatures.
+
+> `$basearch` is supported by modern distributions. On older systems that don't expand `$basearch`, replace it in the `baseurl` with your architecture explicitly (for example, `.../rpm/cli/x86_64` or `.../rpm/cli/aarch64`).
+
+##### Installation via DNF/YUM
+
+1. Add the repository:
 
 ```shell
-dnf install stackitcli.rpm
-yum install stackitcli.rpm
-zypper install stackitcli.rpm
+sudo tee /etc/yum.repos.d/stackit.repo > /dev/null << 'EOF'
+[stackit]
+name=STACKIT CLI
+baseurl=https://packages.stackit.cloud/rpm/cli/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.stackit.cloud/keys/key.gpg
+EOF
+```
+
+2. Install the CLI:
+
+```shell
+sudo dnf install stackit
+```
+
+##### Installation via Zypper
+
+1. Add the repository:
+
+```shell
+sudo tee /etc/zypp/repos.d/stackit.repo > /dev/null << 'EOF'
+[stackit]
+name=STACKIT CLI
+baseurl=https://packages.stackit.cloud/rpm/cli/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.stackit.cloud/keys/key.gpg
+EOF
+```
+
+2. Install the CLI:
+
+```shell
+sudo zypper install stackit
 ```
 
 #### Any distribution

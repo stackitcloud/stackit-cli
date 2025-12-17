@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -35,7 +36,7 @@ type inputModel struct {
 	Labels   map[string]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a snapshot from a volume",
@@ -52,9 +53,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Create a snapshot from a volume with ID "xxx" and labels`,
 				"$ stackit volume snapshot create --volume-id xxx --labels key1=value1,key2=value2"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -72,7 +73,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 
 			// Get volume name for label
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.VolumeID)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeID
@@ -97,7 +98,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating snapshot")
-				resp, err = wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, *resp.Id).WaitWithContext(ctx)
+				resp, err = wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for snapshot creation: %w", err)
 				}
@@ -126,7 +127,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -152,7 +153,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSnapshotRequest {
-	req := apiClient.CreateSnapshot(ctx, model.ProjectId)
+	req := apiClient.CreateSnapshot(ctx, model.ProjectId, model.Region)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
 	payload.VolumeId = &model.VolumeID
 	payload.Name = model.Name

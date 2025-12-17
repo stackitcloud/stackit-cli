@@ -2,11 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -39,7 +38,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all backups which are available for a PostgreSQL Flex instance",
@@ -56,9 +55,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				"$ stackit postgresflex backup list --instance-id xxx --limit 10"),
 		),
 		Args: args.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -79,10 +78,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w\n", instanceLabel, err)
+				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				cmd.Printf("No backups found for instance %q\n", instanceLabel)
+				params.Printer.Outputf("No backups found for instance %q", instanceLabel)
 				return nil
 			}
 			backups := *resp.Items
@@ -108,7 +107,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -135,24 +134,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 }
 
 func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.Backup) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(backups, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex backup list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(backups, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal PostgreSQL Flex backup list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, backups, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
 		for i := range backups {
@@ -178,5 +160,5 @@ func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.
 		}
 
 		return nil
-	}
+	})
 }

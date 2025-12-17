@@ -9,10 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -81,6 +84,7 @@ func fixtureRequest(mods ...func(request *resourcemanager.ApiListProjectsRequest
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description         string
+		argValues           []string
 		flagValues          map[string]string
 		projectIdLikevalues *[]string
 		isValid             bool
@@ -194,66 +198,9 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			if tt.projectIdLikevalues != nil {
-				for _, value := range *tt.projectIdLikevalues {
-					err := cmd.Flags().Set(projectIdLikeFlag, value)
-					if err != nil {
-						if !tt.isValid {
-							return
-						}
-						t.Fatalf("setting flag --%s=%s: %v", projectIdLikeFlag, value, err)
-					}
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			err = cmd.ValidateFlagGroups()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating one of required flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInputWithAdditionalFlags(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, map[string][]string{
+				projectIdLikeFlag: utils.GetSliceFromPointer(tt.projectIdLikevalues),
+			}, tt.isValid)
 		})
 	}
 }
@@ -540,7 +487,7 @@ func Test_outputResult(t *testing.T) {
 	}
 
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

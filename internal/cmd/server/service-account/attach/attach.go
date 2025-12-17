@@ -2,10 +2,10 @@ package attach
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -28,11 +27,11 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ServerId       *string
+	ServerId       string
 	ServiceAccMail string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("attach %s", serviceAccMailArg),
 		Short: "Attach a service account to a server",
@@ -56,12 +55,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			} else if serverLabel == "" {
-				serverLabel = *model.ServerId
+				serverLabel = model.ServerId
 			}
 
 			if !model.AssumeYes {
@@ -102,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ServerId:        flags.FlagToStringPointer(p, cmd, serverIdFlag),
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 		ServiceAccMail:  serviceAccMail,
 	}
 
@@ -111,30 +110,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddServiceAccountToServerRequest {
-	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, *model.ServerId, model.ServiceAccMail)
+	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, serviceAccounts iaas.ServiceAccountMailListResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serviceAccounts, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal service account: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serviceAccounts, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal service account: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, serviceAccounts, func() error {
 		p.Outputf("Attached service account %q to server %q\n", serviceAccMail, serverLabel)
 		return nil
-	}
+	})
 }

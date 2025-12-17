@@ -2,12 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -28,7 +27,7 @@ const (
 	affinityGroupId = "AFFINITY_GROUP_ID"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", affinityGroupId),
 		Short: "Show details of an affinity group",
@@ -70,7 +69,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiGetAffinityGroupRequest {
-	return apiClient.GetAffinityGroup(ctx, model.ProjectId, model.AffinityGroupId)
+	return apiClient.GetAffinityGroup(ctx, model.ProjectId, model.Region, model.AffinityGroupId)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
@@ -91,22 +90,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal affinity group: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+
+	return p.OutputResult(outputFormat, resp, func() error {
 		table := tables.NewTable()
 
 		if resp.HasId() {
@@ -129,6 +116,6 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-	return nil
+		return nil
+	})
 }

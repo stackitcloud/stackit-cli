@@ -2,13 +2,12 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -36,7 +35,7 @@ type inputModel struct {
 	ShowAttachedProjects bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", areaIdArg),
 		Short: "Shows details of a STACKIT Network Area",
@@ -126,78 +125,13 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 	if networkArea == nil {
 		return fmt.Errorf("network area is nil")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkArea, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkArea, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network area: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		var routes []string
-		var networkRanges []string
-
-		if networkArea.Ipv4 != nil {
-			if networkArea.Ipv4.Routes != nil {
-				for _, route := range *networkArea.Ipv4.Routes {
-					routes = append(routes, fmt.Sprintf("next hop: %s\nprefix: %s", *route.Nexthop, *route.Prefix))
-				}
-			}
-
-			if networkArea.Ipv4.NetworkRanges != nil {
-				for _, networkRange := range *networkArea.Ipv4.NetworkRanges {
-					networkRanges = append(networkRanges, *networkRange.Prefix)
-				}
-			}
-		}
-
+	return p.OutputResult(outputFormat, networkArea, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(networkArea.AreaId))
+		table.AddRow("ID", utils.PtrString(networkArea.Id))
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(networkArea.Name))
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(networkArea.State))
-		table.AddSeparator()
-		if len(networkRanges) > 0 {
-			table.AddRow("NETWORK RANGES", strings.Join(networkRanges, ","))
-		}
-		table.AddSeparator()
-		for i, route := range routes {
-			table.AddRow(fmt.Sprintf("STATIC ROUTE %d", i+1), route)
-			table.AddSeparator()
-		}
-		if networkArea.Ipv4 != nil {
-			if networkArea.Ipv4.TransferNetwork != nil {
-				table.AddRow("TRANSFER RANGE", *networkArea.Ipv4.TransferNetwork)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.DefaultNameservers != nil && len(*networkArea.Ipv4.DefaultNameservers) > 0 {
-				table.AddRow("DNS NAME SERVERS", strings.Join(*networkArea.Ipv4.DefaultNameservers, ","))
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.DefaultPrefixLen != nil {
-				table.AddRow("DEFAULT PREFIX LENGTH", *networkArea.Ipv4.DefaultPrefixLen)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.MaxPrefixLen != nil {
-				table.AddRow("MAX PREFIX LENGTH", *networkArea.Ipv4.MaxPrefixLen)
-				table.AddSeparator()
-			}
-			if networkArea.Ipv4.MinPrefixLen != nil {
-				table.AddRow("MIN PREFIX LENGTH", *networkArea.Ipv4.MinPrefixLen)
-				table.AddSeparator()
-			}
-		}
 		if networkArea.Labels != nil && len(*networkArea.Labels) > 0 {
 			var labels []string
 			for key, value := range *networkArea.Labels {
@@ -213,11 +147,15 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 			table.AddRow("# ATTACHED PROJECTS", utils.PtrString(networkArea.ProjectCount))
 			table.AddSeparator()
 		}
+		table.AddRow("CREATED AT", utils.PtrString(networkArea.CreatedAt))
+		table.AddSeparator()
+		table.AddRow("UPDATED AT", utils.PtrString(networkArea.UpdatedAt))
+		table.AddSeparator()
 
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

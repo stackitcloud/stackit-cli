@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -47,7 +48,7 @@ type inputModel struct {
 	Labels             *map[string]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", networkIdArg),
 		Short: "Updates a network",
@@ -84,7 +85,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.NetworkId)
+			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 				networkLabel = model.NetworkId
@@ -112,7 +113,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Updating network")
-				_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient, model.ProjectId, networkId).WaitWithContext(ctx)
+				_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for network update: %w", err)
 				}
@@ -168,40 +169,39 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkRequest {
-	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.NetworkId)
-	addressFamily := &iaas.UpdateNetworkAddressFamily{}
+	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
+	var payloadIPv4 *iaas.UpdateNetworkIPv4Body
+	var payloadIPv6 *iaas.UpdateNetworkIPv6Body
 
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
-		addressFamily.Ipv6 = &iaas.UpdateNetworkIPv6Body{
+		payloadIPv6 = &iaas.UpdateNetworkIPv6Body{
 			Nameservers: model.IPv6DnsNameServers,
 		}
 
 		if model.NoIPv6Gateway {
-			addressFamily.Ipv6.Gateway = iaas.NewNullableString(nil)
+			payloadIPv6.Gateway = iaas.NewNullableString(nil)
 		} else if model.IPv6Gateway != nil {
-			addressFamily.Ipv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
+			payloadIPv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
 		}
 	}
 
 	if model.IPv4DnsNameServers != nil || model.NoIPv4Gateway || model.IPv4Gateway != nil {
-		addressFamily.Ipv4 = &iaas.UpdateNetworkIPv4Body{
+		payloadIPv4 = &iaas.UpdateNetworkIPv4Body{
 			Nameservers: model.IPv4DnsNameServers,
 		}
 
 		if model.NoIPv4Gateway {
-			addressFamily.Ipv4.Gateway = iaas.NewNullableString(nil)
+			payloadIPv4.Gateway = iaas.NewNullableString(nil)
 		} else if model.IPv4Gateway != nil {
-			addressFamily.Ipv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+			payloadIPv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
 		}
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name:   model.Name,
+		Ipv4:   payloadIPv4,
+		Ipv6:   payloadIPv6,
 		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
-	}
-
-	if addressFamily.Ipv4 != nil || addressFamily.Ipv6 != nil {
-		payload.AddressFamily = addressFamily
 	}
 
 	return req.PartialUpdateNetworkPayload(payload)

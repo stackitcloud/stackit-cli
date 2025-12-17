@@ -2,10 +2,10 @@ package add
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -13,7 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -31,7 +30,7 @@ type inputModel struct {
 	Password    *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Adds observability credentials to an application load balancer",
@@ -42,10 +41,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
 				"$ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -71,7 +70,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("add credential: %w", err)
 			}
 
-			return outputResult(params.Printer, model.GlobalFlagModel.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -86,7 +85,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, usernameFlag, displaynameFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
@@ -115,25 +114,10 @@ func outputResult(p *print.Printer, outputFormat string, item *alb.CreateCredent
 		return fmt.Errorf("no credential found")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(item, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(item, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal credential: %w", err)
-		}
-		p.Outputln(string(details))
-	default:
+	return p.OutputResult(outputFormat, item, func() error {
 		if item.Credential != nil {
-			p.Outputf("Created credential %s\n",
-				utils.PtrString(item.Credential.CredentialsRef),
-			)
+			p.Outputf("Created credential %s\n", utils.PtrString(item.Credential.CredentialsRef))
 		}
-	}
-	return nil
+		return nil
+	})
 }

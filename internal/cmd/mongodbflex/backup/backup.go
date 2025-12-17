@@ -7,14 +7,14 @@ import (
 	restorejobs "github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/restore-jobs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/schedule"
 	updateschedule "github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex/backup/update-schedule"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
 		Short: "Provides functionality for MongoDB Flex instance backups",
@@ -26,7 +26,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(updateschedule.NewCmd(params))
 	cmd.AddCommand(schedule.NewCmd(params))
 	cmd.AddCommand(restore.NewCmd(params))

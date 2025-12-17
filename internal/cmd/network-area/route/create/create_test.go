@@ -4,15 +4,23 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	testRegion            = "eu01"
+	testDestinationCIDRv4 = "1.1.1.0/24"
+	testNexthopIPv4       = "1.1.1.1"
 )
 
 type testCtxKey struct{}
@@ -25,10 +33,12 @@ var testNetworkAreaId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrgId,
 		networkAreaIdFlag:  testNetworkAreaId,
-		prefixFlag:         "1.1.1.0/24",
-		nexthopFlag:        "1.1.1.1",
+		destinationFlag:    testDestinationCIDRv4,
+		nexthopIPv4Flag:    testNexthopIPv4,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -40,11 +50,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		Prefix:         utils.Ptr("1.1.1.0/24"),
-		Nexthop:        utils.Ptr("1.1.1.1"),
+		DestinationV4:  utils.Ptr(testDestinationCIDRv4),
+		NexthopV4:      utils.Ptr(testNexthopIPv4),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -53,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRouteRequest)) iaas.ApiCreateNetworkAreaRouteRequest {
-	request := testClient.CreateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId)
+	request := testClient.CreateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRegion)
 	request = request.CreateNetworkAreaRoutePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -63,10 +74,20 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRouteRequest)
 
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRoutePayload)) iaas.CreateNetworkAreaRoutePayload {
 	payload := iaas.CreateNetworkAreaRoutePayload{
-		Ipv4: &[]iaas.Route{
+		Items: &[]iaas.Route{
 			{
-				Prefix:  utils.Ptr("1.1.1.0/24"),
-				Nexthop: utils.Ptr("1.1.1.1"),
+				Destination: &iaas.RouteDestination{
+					DestinationCIDRv4: &iaas.DestinationCIDRv4{
+						Type:  utils.Ptr(destinationCIDRv4Type),
+						Value: utils.Ptr(testDestinationCIDRv4),
+					},
+				},
+				Nexthop: &iaas.RouteNexthop{
+					NexthopIPv4: &iaas.NexthopIPv4{
+						Type:  utils.Ptr(nexthopIPv4Type),
+						Value: utils.Ptr(testNexthopIPv4),
+					},
+				},
 			},
 		},
 	}
@@ -79,6 +100,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRoutePayload)) i
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		aclValues     []string
 		isValid       bool
@@ -94,7 +116,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nexthopFlag)
+				delete(flagValues, nexthopIPv4Flag)
 			}),
 			isValid: false,
 		},
@@ -146,23 +168,23 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "prefix missing",
+			description: "destination missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, prefixFlag)
+				delete(flagValues, destinationFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "prefix invalid 1",
+			description: "destinationFlag invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = ""
+				flagValues[destinationFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "prefix invalid 2",
+			description: "destinationFlag invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[prefixFlag] = "invalid-prefix"
+				flagValues[destinationFlag] = "invalid-destinationFlag"
 			}),
 			isValid: false,
 		},
@@ -176,50 +198,28 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 		},
+		{
+			description: "conflicting destination and prefix set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[prefixFlag] = testDestinationCIDRv4
+			}),
+			isValid: false,
+		},
+		{
+			description: "conflicting nexthop and nexthop-ipv4 set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nexthopFlag] = testNexthopIPv4
+			}),
+			isValid: false,
+		},
+		{
+			description: "conflicting nexthop and nexthop-ipv4 set",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -242,7 +242,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
 				*request = (*request).CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
-					(*payload.Ipv4)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
+					(*payload.Items)[0].Labels = utils.Ptr(map[string]interface{}{"key": "value"})
 				}))
 			}),
 		},
@@ -288,7 +288,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.networkAreaLabel, tt.args.route); (err != nil) != tt.wantErr {

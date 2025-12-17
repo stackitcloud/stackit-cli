@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -15,7 +16,9 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
+const (
+	testRegion = "eu01"
+)
 
 type testCtxKey struct{}
 
@@ -38,7 +41,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		networkIdFlag:        testNetworkId,
 		allowedAddressesFlag: "1.1.1.1,8.8.8.8,9.9.9.9",
 		labelFlag:            "key=value",
@@ -53,7 +58,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -62,8 +67,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		NetworkId:        utils.Ptr(testNetworkId),
+		NetworkId:        testNetworkId,
 		AllowedAddresses: utils.Ptr(allowedAddresses),
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
@@ -80,7 +86,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNicRequest)) iaas.ApiUpdateNicRequest {
-	request := testClient.UpdateNic(testCtx, testProjectId, testNetworkId, testNicId)
+	request := testClient.UpdateNic(testCtx, testProjectId, testRegion, testNetworkId, testNicId)
 	request = request.UpdateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -89,7 +95,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateNicRequest)) iaas.ApiUpd
 }
 
 func fixturePayload(mods ...func(payload *iaas.UpdateNicPayload)) iaas.UpdateNicPayload {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -214,7 +220,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -318,7 +324,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.projectId, tt.args.nic); (err != nil) != tt.wantErr {

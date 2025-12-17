@@ -2,12 +2,11 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -35,7 +34,7 @@ type inputModel struct {
 	Acl    []string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates STACKIT Git instance",
@@ -48,22 +47,22 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Create a instance with name 'my-new-instance' and flavor`,
-				`$ stackit git instance create --name my-new-instance --flavor git-100'`,
+				`$ stackit git instance create --name my-new-instance --flavor git-100`,
 			),
 			examples.NewExample(
 				`Create a instance with name 'my-new-instance' and acl`,
-				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1'`,
+				`$ stackit git instance create --name my-new-instance --acl 1.1.1.1/1`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
 			// Configure API client
-			apiClient, err := client.ConfigureClient(params.Printer)
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
@@ -113,7 +112,7 @@ func configureFlags(cmd *cobra.Command) {
 	}
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	if globalFlags.ProjectId == "" {
@@ -154,25 +153,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *git.Instance) error
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal instance: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal iminstanceage: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created instance %q with id %s\n", model.Name, utils.PtrString(model.Id))
 		return nil
-	}
+	})
 }

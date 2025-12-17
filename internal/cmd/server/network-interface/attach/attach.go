@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -36,7 +36,7 @@ type inputModel struct {
 	Create    *bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "attach",
 		Short: "Attaches a network interface to a server",
@@ -52,9 +52,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit server network-interface attach --network-id xxx --server-id yyy --create`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -65,7 +65,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, *model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, *model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = *model.ServerId
@@ -73,7 +73,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// if the create flag is provided a network interface will be created and attached
 			if model.Create != nil && *model.Create {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, *model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
@@ -131,10 +131,10 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	// if create is not provided then network-interface-id is needed
@@ -157,9 +157,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequestAttach(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddNicToServerRequest {
-	return apiClient.AddNicToServer(ctx, model.ProjectId, *model.ServerId, *model.NicId)
+	return apiClient.AddNicToServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NicId)
 }
 
 func buildRequestCreateAndAttach(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddNetworkToServerRequest {
-	return apiClient.AddNetworkToServer(ctx, model.ProjectId, *model.ServerId, *model.NetworkId)
+	return apiClient.AddNetworkToServer(ctx, model.ProjectId, model.Region, *model.ServerId, *model.NetworkId)
 }

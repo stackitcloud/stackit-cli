@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -13,6 +14,11 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	projectIdFlag = globalflags.ProjectIdFlag
+	testRegion    = "eu01"
 )
 
 type testCtxKey struct{}
@@ -36,6 +42,8 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
+		globalflags.RegionFlag: testRegion,
+
 		organizationIdFlag: testOrgId,
 		networkAreaIdFlag:  testNetworkAreaId,
 	}
@@ -48,6 +56,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		OrganizationId: utils.Ptr(testOrgId),
@@ -61,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetNetworkAreaRangeRequest)) iaas.ApiGetNetworkAreaRangeRequest {
-	request := testClient.GetNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testNetworkRangeId)
+	request := testClient.GetNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testRegion, testNetworkRangeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -157,7 +166,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -260,7 +269,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.networkRange); (err != nil) != tt.wantErr {

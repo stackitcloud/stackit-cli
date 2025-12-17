@@ -2,10 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/alb"
 )
@@ -29,7 +28,7 @@ type inputModel struct {
 	CredentialRef string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", credentialRefArg),
 		Short: "Describes observability credentials for the Application Load Balancer",
@@ -89,26 +88,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, response alb.CredentialsResponse) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(response, "", "  ")
-
-		if err != nil {
-			return fmt.Errorf("marshal credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(response, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-
-		if err != nil {
-			return fmt.Errorf("marshal credentials: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, response, func() error {
 		table := tables.NewTable()
 		table.AddRow("CREDENTIAL REF", utils.PtrString(response.CredentialsRef))
 		table.AddSeparator()
@@ -120,7 +100,6 @@ func outputResult(p *print.Printer, outputFormat string, response alb.Credential
 		table.AddSeparator()
 
 		p.Outputln(table.Render())
-	}
-
-	return nil
+		return nil
+	})
 }

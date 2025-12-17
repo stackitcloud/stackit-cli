@@ -2,11 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -34,7 +33,7 @@ type inputModel struct {
 	NetworkRangeId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", networkRangeIdArg),
 		Short: "Shows details of a network range in a STACKIT Network Area (SNA)",
@@ -97,7 +96,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRangeRequest {
-	req := apiClient.GetNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.NetworkRangeId)
+	req := apiClient.GetNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
 	return req
 }
 
@@ -105,26 +104,10 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 	if networkRange == nil {
 		return fmt.Errorf("network range is nil")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRange, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, networkRange, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(networkRange.NetworkRangeId))
+		table.AddRow("ID", utils.PtrString(networkRange.Id))
 		table.AddSeparator()
 		table.AddRow("Network range", utils.PtrString(networkRange.Prefix))
 
@@ -133,5 +116,5 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.Netw
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

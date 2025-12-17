@@ -2,12 +2,11 @@ package quota
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -23,7 +22,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "quota",
 		Short: "Shows the configured Load Balancer quota",
@@ -34,9 +33,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`Get the configured load balancer quota for the project`,
 				"$ stackit load-balancer quota"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -59,7 +58,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -82,9 +81,8 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 	if quota == nil {
 		return fmt.Errorf("quota response is empty")
 	}
-	switch outputFormat {
-	case print.PrettyOutputFormat:
 
+	return p.OutputResult(outputFormat, quota, func() error {
 		maxLoadBalancers := "Unlimited"
 		if quota.MaxLoadBalancers != nil && *quota.MaxLoadBalancers != -1 {
 			maxLoadBalancers = strconv.FormatInt(*quota.MaxLoadBalancers, 10)
@@ -93,22 +91,5 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 		p.Outputf("Maximum number of load balancers allowed: %s\n", maxLoadBalancers)
 
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(quota, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal quota: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		details, err := json.MarshalIndent(quota, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal quota: %w", err)
-		}
-
-		p.Outputln(string(details))
-
-		return nil
-	}
+	})
 }

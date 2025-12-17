@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -12,17 +14,19 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
-
-	"github.com/spf13/cobra"
 )
 
 const (
 	areaIdArg          = "AREA_ID"
 	organizationIdFlag = "organization-id"
+
+	deprecationMessage = "The regional network area configuration %q for the area %q still exists.\n" +
+		"The regional configuration of the network area was moved to the new command group `$ stackit network-area region`.\n" +
+		"The regional area will be automatically deleted. This behavior is deprecated and will be removed after April 2026.\n" +
+		"Use in the future the command `$ stackit network-area region delete` to delete the regional network area and afterwards delete the network-area with the command `$ stackit network-area delete`.\n"
 )
 
 type inputModel struct {
@@ -31,7 +35,7 @@ type inputModel struct {
 	AreaId         string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", areaIdArg),
 		Short: "Deletes a STACKIT Network Area (SNA)",
@@ -73,6 +77,23 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
+			// Check if the network area has a regional configuration
+			regionalArea, err := apiClient.GetNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get regional area: %v", err)
+			}
+			if regionalArea != nil {
+				params.Printer.Warn(deprecationMessage, model.Region, networkAreaLabel)
+				err = apiClient.DeleteNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
+				if err != nil {
+					return fmt.Errorf("delete network area region: %w", err)
+				}
+				_, err := wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient, *model.OrganizationId, model.AreaId, model.Region).WaitWithContext(ctx)
+				if err != nil {
+					return fmt.Errorf("wait delete network area region: %w", err)
+				}
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
@@ -80,22 +101,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete network area: %w", err)
 			}
 
-			// Wait for async operation, if async mode not enabled
-			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting network area")
-				_, err = wait.DeleteNetworkAreaWaitHandler(ctx, apiClient, *model.OrganizationId, model.AreaId).WaitWithContext(ctx)
-				if err != nil {
-					return fmt.Errorf("wait for network area deletion: %w", err)
-				}
-				s.Stop()
-			}
-
-			operationState := "Deleted"
-			if model.Async {
-				operationState = "Triggered deletion of"
-			}
-			params.Printer.Info("%s STACKIT Network Area %q\n", operationState, networkAreaLabel)
+			params.Printer.Outputf("Deleted STACKIT Network Area %q\n", networkAreaLabel)
 			return nil
 		},
 	}

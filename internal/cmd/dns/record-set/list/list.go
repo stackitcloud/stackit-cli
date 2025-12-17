@@ -2,14 +2,13 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -51,7 +50,7 @@ type inputModel struct {
 	PageSize    int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists DNS record sets",
@@ -74,9 +73,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List the deleted DNS record-sets for zone with ID "xxx"`,
 				"$ stackit dns record-set list --zone-id xxx --deleted"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -92,16 +91,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(recordSets) == 0 {
-				zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
-					zoneLabel = model.ZoneId
-				}
-				params.Printer.Info("No record sets found for zone %s matching the criteria\n", zoneLabel)
-				return nil
+
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
+				zoneLabel = model.ZoneId
 			}
-			return outputResult(params.Printer, model.OutputFormat, recordSets)
+
+			return outputResult(params.Printer, model.OutputFormat, zoneLabel, recordSets)
 		},
 	}
 
@@ -125,7 +122,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -241,25 +238,13 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 	return recordSets, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, recordSets []dns.RecordSet) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(recordSets, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set list: %w", err)
+func outputResult(p *print.Printer, outputFormat, zoneLabel string, recordSets []dns.RecordSet) error {
+	return p.OutputResult(outputFormat, recordSets, func() error {
+		if len(recordSets) == 0 {
+			p.Outputf("No record sets found for zone %s matching the criteria\n", zoneLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(recordSets, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal DNS record set list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE", "RECORD DATA")
 		for i := range recordSets {
@@ -284,5 +269,5 @@ func outputResult(p *print.Printer, outputFormat string, recordSets []dns.Record
 		}
 
 		return nil
-	}
+	})
 }

@@ -2,13 +2,12 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -40,7 +39,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	NetworkId        *string
+	NetworkId        string
 	AllowedAddresses *[]iaas.AllowedAddressesInner
 	Ipv4             *string
 	Ipv6             *string
@@ -50,7 +49,7 @@ type inputModel struct {
 	SecurityGroups   *[]string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a network interface",
@@ -66,9 +65,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit network-interface create --network-id xxx --allowed-addresses "1.1.1.1,8.8.8.8,9.9.9.9" --labels key=value,key2=value2 --name NAME --security-groups "UUID1,UUID2" --nic-security`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -123,7 +122,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -179,7 +178,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		Ipv4:            flags.FlagToStringPointer(p, cmd, ipv4Flag),
 		Ipv6:            flags.FlagToStringPointer(p, cmd, ipv6Flag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
@@ -197,7 +196,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNicRequest {
-	req := apiClient.CreateNic(ctx, model.ProjectId, *model.NetworkId)
+	req := apiClient.CreateNic(ctx, model.ProjectId, model.Region, model.NetworkId)
 
 	payload := iaas.CreateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
@@ -215,25 +214,8 @@ func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NI
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(nic, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(nic, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network interface: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, nic, func() error {
 		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", projectId, utils.PtrString(nic.Id))
 		return nil
-	}
+	})
 }

@@ -2,11 +2,10 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -32,7 +31,7 @@ type inputModel struct {
 	IncludeParents bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Shows details of a STACKIT project",
@@ -88,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" && projectId == "" {
-		return nil, fmt.Errorf("Project ID needs to be provided either as an argument or as a flag")
+		return nil, fmt.Errorf("project ID needs to be provided either as an argument or as a flag")
 	}
 
 	if projectId == "" {
@@ -115,24 +114,8 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 	if project == nil {
 		return fmt.Errorf("response not set")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(project, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal project details: %w", err)
-		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(project, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal project details: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, project, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(project.ProjectId))
 		table.AddSeparator()
@@ -151,5 +134,5 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 		}
 
 		return nil
-	}
+	})
 }

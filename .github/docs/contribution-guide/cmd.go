@@ -2,11 +2,11 @@ package bar
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/alb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"gopkg.in/yaml.v2"
 	// (...)
 )
 
@@ -35,7 +34,7 @@ type inputModel struct {
 }
 
 // "bar" command constructor
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bar",
 		Short: "Short description of the command (is shown in the help of parent command)",
@@ -118,22 +117,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *foo.APIClie
 
 // Output result based on the configured output format
 func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, resources []foo.Resource) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resources, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal resource list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.Marshal(resources)
-		if err != nil {
-			return fmt.Errorf("marshal resource list: %w", err)
-		}
-		p.Outputln(string(details))
-		return nil
-	default:
+	// the output result handles JSON/YAML output, you can pass your own callback func for pretty (default) output format
+	return p.OutputResult(outputFormat, resources, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE")
 		for i := range resources {
@@ -145,5 +130,5 @@ func outputResult(p *print.Printer, cmd *cobra.Command, outputFormat string, res
 			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
-	}
+	})
 }

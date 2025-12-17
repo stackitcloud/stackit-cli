@@ -249,6 +249,10 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		return fmt.Errorf("open browser to URL %s: %w", authorizationURL, err)
 	}
 
+	// Print the link
+	p.Info("Your browser has been opened to visit:\n\n")
+	p.Info("%s\n\n", authorizationURL)
+
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
 	p.Debug(print.DebugLevel, "listening for response from authentication server on %s", redirectURL)

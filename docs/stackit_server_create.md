@@ -38,7 +38,7 @@ stackit server create [flags]
   $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy
 
   Create a server with user data (cloud-init)
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml")
+  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
 ```
 
 ### Options
@@ -55,7 +55,7 @@ stackit server create [flags]
       --image-id string                        The image ID to be used for an ephemeral disk on the server. Either 'image-id' or 'boot-volume-...' flags are required
       --keypair-name string                    The name of the SSH keypair used during the server creation
       --labels stringToString                  Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...' (default [])
-      --machine-type string                    Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html
+      --machine-type string                    Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/
   -n, --name string                            Server name
       --network-id string                      ID of the network for the initial networking setup for the server creation
       --network-interface-ids strings          List of network interface IDs for the initial networking setup for the server creation

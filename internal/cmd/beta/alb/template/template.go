@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -37,7 +38,7 @@ var (
 	templatePool string
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "template",
 		Short: "creates configuration templates to use for resource creation",
@@ -53,8 +54,8 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta alb template --format=json --type pool`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			model, err := parseInput(params.Printer, cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -100,7 +101,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.EnumFlag(true, "alb", "alb", "pool"), typeFlag, "t", "Defines the output type ('alb' or 'pool'), default is 'alb'")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}

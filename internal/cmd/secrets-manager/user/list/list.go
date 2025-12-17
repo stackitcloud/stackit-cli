@@ -2,12 +2,11 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -33,7 +32,7 @@ type inputModel struct {
 	Limit      *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Secrets Manager users",
@@ -50,9 +49,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`List up to 10 Secrets Manager users with ID "xxx"`,
 				"$ stackit secrets-manager user list --instance-id xxx --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -101,7 +100,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -131,24 +130,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 }
 
 func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.User) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(users, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager user list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(users, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal Secrets Manager user list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, users, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME", "DESCRIPTION", "WRITE ACCESS")
 		for i := range users {
@@ -166,5 +148,5 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 		}
 
 		return nil
-	}
+	})
 }

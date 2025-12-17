@@ -4,14 +4,20 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+)
+
+const (
+	testRegion = "eu01"
 )
 
 type testCtxKey struct{}
@@ -19,14 +25,15 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &iaas.APIClient{}
 
-var projectIdFlag = globalflags.ProjectIdFlag
 var testProjectId = uuid.NewString()
 var testNetworkId = uuid.NewString()
 var testSecurityGroup = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:        testProjectId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+
 		networkIdFlag:        testNetworkId,
 		allowedAddressesFlag: "1.1.1.1,8.8.8.8,9.9.9.9",
 		ipv4Flag:             "1.2.3.4",
@@ -43,7 +50,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -51,9 +58,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		NetworkId:        utils.Ptr(testNetworkId),
+		NetworkId:        testNetworkId,
 		AllowedAddresses: utils.Ptr(allowedAddresses),
 		Ipv4:             utils.Ptr("1.2.3.4"),
 		Ipv6:             utils.Ptr("2001:0db8:85a3:08d3::0370:7344"),
@@ -71,7 +79,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNicRequest)) iaas.ApiCreateNicRequest {
-	request := testClient.CreateNic(testCtx, testProjectId, testNetworkId)
+	request := testClient.CreateNic(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.CreateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -80,7 +88,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNicRequest)) iaas.ApiCre
 }
 
 func fixturePayload(mods ...func(payload *iaas.CreateNicPayload)) iaas.CreateNicPayload {
-	var allowedAddresses []iaas.AllowedAddressesInner = []iaas.AllowedAddressesInner{
+	var allowedAddresses = []iaas.AllowedAddressesInner{
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("1.1.1.1")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("8.8.8.8")),
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
@@ -105,6 +113,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNicPayload)) iaas.CreateNic
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
+		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -190,46 +199,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -287,7 +257,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.projectId, tt.args.nic); (err != nil) != tt.wantErr {

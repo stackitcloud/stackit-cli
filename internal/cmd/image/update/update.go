@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -103,7 +104,7 @@ const (
 	protectedFlag   = "protected"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", imageIdArg),
 		Short: "Updates an image",
@@ -132,7 +133,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.Id)
+			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.Region, model.Id)
 			if err != nil {
 				params.Printer.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
@@ -238,7 +239,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateImageRequest {
-	request := apiClient.UpdateImage(ctx, model.ProjectId, model.Id)
+	request := apiClient.UpdateImage(ctx, model.ProjectId, model.Region, model.Id)
 	payload := iaas.NewUpdateImagePayload()
 
 	// Config *ImageConfig `json:"config,omitempty"`

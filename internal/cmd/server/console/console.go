@@ -2,12 +2,11 @@ package console
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +29,7 @@ type inputModel struct {
 	ServerId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("console %s", serverIdArg),
 		Short: "Gets a URL for server remote console",
@@ -59,7 +58,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -98,28 +97,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetServerConsoleRequest {
-	return apiClient.GetServerConsole(ctx, model.ProjectId, model.ServerId)
+	return apiClient.GetServerConsole(ctx, model.ProjectId, model.Region, model.ServerId)
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl iaas.ServerConsoleUrl) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(serverUrl, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal url: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(serverUrl, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal url: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, serverUrl, func() error {
 		if _, ok := serverUrl.GetUrlOk(); !ok {
 			return fmt.Errorf("server url is nil")
 		}
@@ -132,5 +114,5 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl 
 		p.Outputf("Remote console URL %q for server %q\n", unescapedURL, serverLabel)
 
 		return nil
-	}
+	})
 }

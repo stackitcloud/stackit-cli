@@ -2,11 +2,10 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -33,7 +32,7 @@ type inputModel struct {
 	NetworkRange   *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a network range in a STACKIT Network Area (SNA)",
@@ -45,9 +44,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit network-area network-range create --network-area-id xxx --organization-id yyy --network-range "1.1.1.0/24"`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -105,7 +104,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
@@ -120,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRangeRequest {
-	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId)
+	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 	payload := iaas.CreateNetworkAreaRangePayload{
 		Ipv4: &[]iaas.NetworkRange{
 			{
@@ -132,25 +131,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRange iaas.NetworkRange) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(networkRange, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
+	return p.OutputResult(outputFormat, networkRange, func() error {
+		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.Id))
 		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(networkRange, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal network range: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
-		p.Outputf("Created network range for SNA %q.\nNetwork range ID: %s\n", networkAreaLabel, utils.PtrString(networkRange.NetworkRangeId))
-		return nil
-	}
+	})
 }

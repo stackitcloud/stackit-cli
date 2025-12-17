@@ -2,12 +2,11 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -27,11 +26,10 @@ type inputModel struct {
 }
 
 const (
-	labelSelectorFlag = "label-selector"
-	limitFlag         = "limit"
+	limitFlag = "limit"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists albs",
@@ -47,9 +45,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta alb list --limit=10`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -75,19 +73,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list load balancerse: %w", err)
 			}
+			items := response.GetLoadBalancers()
 
-			if items := response.LoadBalancers; items == nil || len(*items) == 0 {
-				params.Printer.Info("No load balancers found for project %q", projectLabel)
-			} else {
-				if model.Limit != nil && len(*items) > int(*model.Limit) {
-					*items = (*items)[:*model.Limit]
-				}
-				if err := outputResult(params.Printer, model.OutputFormat, *items); err != nil {
-					return fmt.Errorf("output loadbalancers: %w", err)
-				}
+			// Truncate output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = items[:*model.Limit]
 			}
 
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 
@@ -99,7 +92,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -127,25 +120,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalancer) error {
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(items, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal loadbalancer list: %w", err)
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []alb.LoadBalancer) error {
+	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No load balancers found for project %q", projectLabel)
+			return nil
 		}
-		p.Outputln(string(details))
 
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(items, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal loadbalancer list: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
 		table := tables.NewTable()
 		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION", "ERRORS")
 		for i := range items {
@@ -169,5 +150,5 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalance
 		}
 
 		return nil
-	}
+	})
 }

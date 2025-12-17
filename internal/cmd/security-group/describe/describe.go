@@ -2,11 +2,11 @@ package describe
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
@@ -28,7 +27,7 @@ type inputModel struct {
 
 const groupIdArg = "GROUP_ID"
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", groupIdArg),
 		Short: "Describes security groups",
@@ -70,7 +69,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRequest {
-	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.SecurityGroupId)
+	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	return request
 }
 
@@ -93,24 +92,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 	if resp == nil {
 		return fmt.Errorf("security group response is empty")
 	}
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal security group: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal security group: %w", err)
-		}
-		p.Outputln(string(details))
-
-		return nil
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		var content []tables.Table
 
 		table := tables.NewTable()
@@ -209,5 +191,5 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 		}
 
 		return nil
-	}
+	})
 }

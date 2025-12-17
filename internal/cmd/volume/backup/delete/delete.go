@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,7 +30,7 @@ type inputModel struct {
 	BackupId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", backupIdArg),
 		Short: "Deletes a backup",
@@ -52,7 +53,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
 			}
@@ -76,7 +77,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Deleting backup")
-				_, err = wait.DeleteBackupWaitHandler(ctx, apiClient, model.ProjectId, model.BackupId).WaitWithContext(ctx)
+				_, err = wait.DeleteBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for backup deletion: %w", err)
 				}
@@ -112,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteBackupRequest {
-	req := apiClient.DeleteBackup(ctx, model.ProjectId, model.BackupId)
+	req := apiClient.DeleteBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }
