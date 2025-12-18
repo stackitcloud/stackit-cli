@@ -5,14 +5,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/user"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sqlserverflex",
 		Short: "Provides functionality for SQLServer Flex",
@@ -24,7 +24,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(database.NewCmd(params))
 	cmd.AddCommand(instance.NewCmd(params))
 	cmd.AddCommand(options.NewCmd(params))

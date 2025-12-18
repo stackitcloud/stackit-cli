@@ -3,6 +3,8 @@ package profile
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/export"
@@ -10,14 +12,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/config/profile/unset"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "profile",
 		Short: "Manage the CLI configuration profiles",
@@ -34,7 +35,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(set.NewCmd(params))
 	cmd.AddCommand(unset.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))

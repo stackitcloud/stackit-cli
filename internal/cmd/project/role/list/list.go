@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -31,7 +32,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists roles and permissions of a project",
@@ -118,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListRolesRequest {
-	return apiClient.ListRoles(ctx, projectResourceType, model.GlobalFlagModel.ProjectId)
+	return apiClient.ListRoles(ctx, projectResourceType, model.ProjectId)
 }
 
 func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {

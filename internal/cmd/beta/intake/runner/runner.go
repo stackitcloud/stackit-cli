@@ -7,12 +7,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/update"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "runner",
 		Short: "Provides functionality for Intake Runners",

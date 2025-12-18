@@ -21,7 +21,7 @@ stackit server resize SERVER_ID [flags]
 
 ```
   -h, --help                  Help for "stackit server resize"
-      --machine-type string   Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html
+      --machine-type string   Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/
 ```
 
 ### Options inherited from parent commands

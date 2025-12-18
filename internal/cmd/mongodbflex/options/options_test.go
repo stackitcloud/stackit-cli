@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -254,7 +255,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := &print.Printer{}
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 			p.Cmd = cmd
 			client := &mongoDBFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
@@ -369,7 +370,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.inputModel, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
@@ -418,7 +419,7 @@ func TestOutputResultAsTable(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResultAsTable(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {

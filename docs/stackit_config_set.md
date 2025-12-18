@@ -56,7 +56,7 @@ stackit config set [flags]
       --serverbackup-custom-endpoint string                        Server Backup API base URL, used in calls to this API
       --service-account-custom-endpoint string                     Service Account API base URL, used in calls to this API
       --service-enablement-custom-endpoint string                  Service Enablement API base URL, used in calls to this API
-      --session-time-limit string                                  Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s (BETA: currently values greater than 2h have no effect)
+      --session-time-limit string                                  Maximum time before authentication is required again. After this time, you will be prompted to login again to execute commands that require authentication. Can't be larger than 24h. Requires authentication after being set to take effect. Examples: 3h, 5h30m40s
       --ske-custom-endpoint string                                 SKE API base URL, used in calls to this API
       --sqlserverflex-custom-endpoint string                       SQLServer Flex API base URL, used in calls to this API
       --token-custom-endpoint string                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
