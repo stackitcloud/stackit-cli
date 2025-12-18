@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
 	cdnUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
@@ -74,7 +74,7 @@ type inputModel struct {
 	Optimizer            *bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a CDN distribution",
@@ -86,9 +86,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				`$ stackit beta cdn update 123e4567-e89b-12d3-a456-426614174000 --optimizer=false`,
 			),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return err
 			}
@@ -159,12 +159,12 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsMutuallyExclusive(flagHTTP, flagBucket)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
-	distributionID := args[0]
+	distributionID := inputArgs[0]
 
 	regionStrings := flags.FlagToStringSliceValue(p, cmd, flagRegions)
 	regions := make([]cdn.Region, 0, len(regionStrings))

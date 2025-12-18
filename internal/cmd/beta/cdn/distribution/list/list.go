@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
@@ -33,7 +33,7 @@ const (
 	maxPageSize = int32(100)
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List CDN distributions",
@@ -107,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType, pageLimit int32) cdn.ApiListDistributionsRequest {
-	req := apiClient.ListDistributions(ctx, model.GlobalFlagModel.ProjectId)
+	req := apiClient.ListDistributions(ctx, model.ProjectId)
 	req = req.SortBy(model.SortBy)
 	req = req.PageSize(pageLimit)
 	if nextPageID != nil {

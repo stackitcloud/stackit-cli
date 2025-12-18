@@ -13,10 +13,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
@@ -250,7 +250,7 @@ func fixtureDistributions(count int) []cdn.Distribution {
 func TestFetchDistributions(t *testing.T) {
 	tests := []struct {
 		description string
-		limit       int
+		limit       int32
 		responses   []testResponse
 		expected    []cdn.Distribution
 		fails       bool
@@ -381,7 +381,7 @@ func TestFetchDistributions(t *testing.T) {
 			var mods []func(m *inputModel)
 			if tt.limit > 0 {
 				mods = append(mods, func(m *inputModel) {
-					m.Limit = utils.Ptr(int32(tt.limit))
+					m.Limit = utils.Ptr(tt.limit)
 				})
 			}
 			model := fixtureInputModel(mods...)
@@ -452,7 +452,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {

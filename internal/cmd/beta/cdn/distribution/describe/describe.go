@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
@@ -29,7 +29,7 @@ type inputModel struct {
 	WithWAF        bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Describe a CDN distribution",
@@ -75,7 +75,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flagWithWaf, false, "Include WAF details in the distribution description")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -83,7 +83,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, args []string) (*inputMode
 
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
-		DistributionID:  args[0],
+		DistributionID:  inputArgs[0],
 		WithWAF:         flags.FlagToBoolValue(p, cmd, flagWithWaf),
 	}
 	p.DebugInputModel(model)

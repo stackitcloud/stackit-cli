@@ -40,29 +40,29 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func flagsHTTPBackend() func(m map[string]string) {
-	return func(m map[string]string) {
-		delete(m, flagBucket)
-		m[flagHTTP] = "true"
-		m[flagHTTPOriginURL] = "https://http-backend.example.com"
+func flagsHTTPBackend() func(flagValues map[string]string) {
+	return func(flagValues map[string]string) {
+		delete(flagValues, flagBucket)
+		flagValues[flagHTTP] = "true"
+		flagValues[flagHTTPOriginURL] = "https://http-backend.example.com"
 	}
 }
 
-func flagsBucketBackend() func(m map[string]string) {
-	return func(m map[string]string) {
-		delete(m, flagHTTP)
-		m[flagBucket] = "true"
-		m[flagBucketURL] = "https://bucket-backend.example.com"
-		m[flagBucketCredentialsAccessKeyID] = "access-key-id"
-		m[flagBucketRegion] = "eu"
+func flagsBucketBackend() func(flagValues map[string]string) {
+	return func(flagValues map[string]string) {
+		delete(flagValues, flagHTTP)
+		flagValues[flagBucket] = "true"
+		flagValues[flagBucketURL] = "https://bucket-backend.example.com"
+		flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
+		flagValues[flagBucketRegion] = "eu"
 	}
 }
 
-func flagsLoki() func(m map[string]string) {
-	return func(m map[string]string) {
-		m[flagLoki] = "true"
-		m[flagLokiPushURL] = "https://loki.example.com"
-		m[flagLokiUsername] = "loki-user"
+func flagsLoki() func(flagValues map[string]string) {
+	return func(flagValues map[string]string) {
+		flagValues[flagLoki] = "true"
+		flagValues[flagLokiPushURL] = "https://loki.example.com"
+		flagValues[flagLokiUsername] = "loki-user"
 	}
 }
 
@@ -77,7 +77,7 @@ func flagRegions(regions ...cdn.Region) func(flagValues map[string]string) {
 	}
 }
 
-func fixtureModel(mods ...func(m *inputModel)) *inputModel {
+func fixtureModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
@@ -92,25 +92,25 @@ func fixtureModel(mods ...func(m *inputModel)) *inputModel {
 	return model
 }
 
-func modelRegions(regions ...cdn.Region) func(m *inputModel) {
-	return func(m *inputModel) {
-		m.Regions = regions
+func modelRegions(regions ...cdn.Region) func(model *inputModel) {
+	return func(model *inputModel) {
+		model.Regions = regions
 	}
 }
 
-func modelHTTPBackend() func(m *inputModel) {
-	return func(m *inputModel) {
-		m.Bucket = nil
-		m.HTTP = &httpInputModel{
+func modelHTTPBackend() func(model *inputModel) {
+	return func(model *inputModel) {
+		model.Bucket = nil
+		model.HTTP = &httpInputModel{
 			OriginURL: "https://http-backend.example.com",
 		}
 	}
 }
 
-func modelBucketBackend() func(m *inputModel) {
-	return func(m *inputModel) {
-		m.HTTP = nil
-		m.Bucket = &bucketInputModel{
+func modelBucketBackend() func(model *inputModel) {
+	return func(model *inputModel) {
+		model.HTTP = nil
+		model.Bucket = &bucketInputModel{
 			URL:         "https://bucket-backend.example.com",
 			AccessKeyID: "access-key-id",
 			Region:      "eu",
@@ -118,17 +118,17 @@ func modelBucketBackend() func(m *inputModel) {
 	}
 }
 
-func modelLoki() func(m *inputModel) {
-	return func(m *inputModel) {
-		m.Loki = &lokiInputModel{
+func modelLoki() func(model *inputModel) {
+	return func(model *inputModel) {
+		model.Loki = &lokiInputModel{
 			PushURL:  "https://loki.example.com",
 			Username: "loki-user",
 		}
 	}
 }
 
-func fixturePayload(mods ...func(p *cdn.CreateDistributionPayload)) cdn.CreateDistributionPayload {
-	p := *cdn.NewCreateDistributionPayload(
+func fixturePayload(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.CreateDistributionPayload {
+	payload := *cdn.NewCreateDistributionPayload(
 		cdn.CreateDistributionPayloadGetBackendArgType{
 			HttpBackendCreate: &cdn.HttpBackendCreate{
 				Type:      utils.Ptr("http"),
@@ -138,20 +138,20 @@ func fixturePayload(mods ...func(p *cdn.CreateDistributionPayload)) cdn.CreateDi
 		[]cdn.Region{testRegions},
 	)
 	for _, mod := range mods {
-		mod(&p)
+		mod(&payload)
 	}
-	return p
+	return payload
 }
 
-func payloadRegions(regions ...cdn.Region) func(p *cdn.CreateDistributionPayload) {
-	return func(p *cdn.CreateDistributionPayload) {
-		p.Regions = &regions
+func payloadRegions(regions ...cdn.Region) func(payload *cdn.CreateDistributionPayload) {
+	return func(payload *cdn.CreateDistributionPayload) {
+		payload.Regions = &regions
 	}
 }
 
-func payloadBucketBackend() func(p *cdn.CreateDistributionPayload) {
-	return func(p *cdn.CreateDistributionPayload) {
-		p.Backend = &cdn.CreateDistributionPayloadGetBackendArgType{
+func payloadBucketBackend() func(payload *cdn.CreateDistributionPayload) {
+	return func(payload *cdn.CreateDistributionPayload) {
+		payload.Backend = &cdn.CreateDistributionPayloadGetBackendArgType{
 			BucketBackendCreate: &cdn.BucketBackendCreate{
 				Type:      utils.Ptr("bucket"),
 				BucketUrl: utils.Ptr("https://bucket-backend.example.com"),
@@ -165,9 +165,9 @@ func payloadBucketBackend() func(p *cdn.CreateDistributionPayload) {
 	}
 }
 
-func payloadLoki() func(p *cdn.CreateDistributionPayload) {
-	return func(p *cdn.CreateDistributionPayload) {
-		p.LogSink = &cdn.CreateDistributionPayloadGetLogSinkArgType{
+func payloadLoki() func(payload *cdn.CreateDistributionPayload) {
+	return func(payload *cdn.CreateDistributionPayload) {
+		payload.LogSink = &cdn.CreateDistributionPayloadGetLogSinkArgType{
 			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
 				Type:        utils.Ptr("loki"),
 				PushUrl:     utils.Ptr("https://loki.example.com"),
@@ -177,7 +177,7 @@ func payloadLoki() func(p *cdn.CreateDistributionPayload) {
 	}
 }
 
-func fixtureRequest(mods ...func(p *cdn.CreateDistributionPayload)) cdn.ApiCreateDistributionRequest {
+func fixtureRequest(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.ApiCreateDistributionRequest {
 	req := testClient.CreateDistribution(testCtx, testProjectId)
 	req = req.CreateDistributionPayload(fixturePayload(mods...))
 	return req
@@ -199,22 +199,22 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id missing",
-			flagValues: fixtureFlagValues(func(m map[string]string) {
-				delete(m, globalflags.ProjectIdFlag)
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
-			flagValues: fixtureFlagValues(func(m map[string]string) {
-				m[globalflags.ProjectIdFlag] = ""
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
-			flagValues: fixtureFlagValues(func(m map[string]string) {
-				m[globalflags.ProjectIdFlag] = "invalid-uuid"
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -239,8 +239,8 @@ func TestParseInput(t *testing.T) {
 			description: "bucket backend missing url",
 			flagValues: fixtureFlagValues(
 				flagsBucketBackend(),
-				func(m map[string]string) {
-					delete(m, flagBucketURL)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagBucketURL)
 				},
 			),
 			isValid: false,
@@ -249,8 +249,8 @@ func TestParseInput(t *testing.T) {
 			description: "bucket backend missing access key id",
 			flagValues: fixtureFlagValues(
 				flagsBucketBackend(),
-				func(m map[string]string) {
-					delete(m, flagBucketCredentialsAccessKeyID)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagBucketCredentialsAccessKeyID)
 				},
 			),
 			isValid: false,
@@ -259,8 +259,8 @@ func TestParseInput(t *testing.T) {
 			description: "bucket backend missing region",
 			flagValues: fixtureFlagValues(
 				flagsBucketBackend(),
-				func(m map[string]string) {
-					delete(m, flagBucketRegion)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagBucketRegion)
 				},
 			),
 			isValid: false,
@@ -268,8 +268,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "http backend missing url",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					delete(m, flagHTTPOriginURL)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagHTTPOriginURL)
 				},
 			),
 			isValid: false,
@@ -277,14 +277,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "http backend with geofencing",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagHTTPGeofencing] = "https://dach.example.com DE,AT,CH"
+				func(flagValues map[string]string) {
+					flagValues[flagHTTPGeofencing] = "https://dach.example.com DE,AT,CH"
 				},
 			),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.HTTP.Geofencing = &map[string][]string{
+				func(model *inputModel) {
+					model.HTTP.Geofencing = &map[string][]string{
 						"https://dach.example.com": {"DE", "AT", "CH"},
 					}
 				},
@@ -293,14 +293,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "http backend with origin request headers",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagHTTPOriginRequestHeaders] = "X-Custom-Header:Value1,X-Another-Header:Value2"
+				func(flagValues map[string]string) {
+					flagValues[flagHTTPOriginRequestHeaders] = "X-Custom-Header:Value1,X-Another-Header:Value2"
 				},
 			),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.HTTP.OriginRequestHeaders = &map[string]string{
+				func(model *inputModel) {
+					model.HTTP.OriginRequestHeaders = &map[string]string{
 						"X-Custom-Header":  "Value1",
 						"X-Another-Header": "Value2",
 					}
@@ -310,50 +310,50 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "with blocked countries",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagBlockedCountries] = "DE,AT"
+				func(flagValues map[string]string) {
+					flagValues[flagBlockedCountries] = "DE,AT"
 				}),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.BlockedCountries = []string{"DE", "AT"}
+				func(model *inputModel) {
+					model.BlockedCountries = []string{"DE", "AT"}
 				},
 			),
 		},
 		{
 			description: "with blocked IPs",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagBlockedIPs] = "127.0.0.1,10.0.0.8"
+				func(flagValues map[string]string) {
+					flagValues[flagBlockedIPs] = "127.0.0.1,10.0.0.8"
 				}),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.BlockedIPs = []string{"127.0.0.1", "10.0.0.8"}
+				func(model *inputModel) {
+					model.BlockedIPs = []string{"127.0.0.1", "10.0.0.8"}
 				}),
 		},
 		{
 			description: "with default cache duration",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagDefaultCacheDuration] = "PT1H30M"
+				func(flagValues map[string]string) {
+					flagValues[flagDefaultCacheDuration] = "PT1H30M"
 				}),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.DefaultCacheDuration = "PT1H30M"
+				func(model *inputModel) {
+					model.DefaultCacheDuration = "PT1H30M"
 				}),
 		},
 		{
 			description: "with optimizer",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagOptimizer] = "true"
+				func(flagValues map[string]string) {
+					flagValues[flagOptimizer] = "true"
 				}),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.Optimizer = true
+				func(model *inputModel) {
+					model.Optimizer = true
 				}),
 		},
 		{
@@ -370,8 +370,8 @@ func TestParseInput(t *testing.T) {
 			description: "loki with missing username",
 			flagValues: fixtureFlagValues(
 				flagsLoki(),
-				func(m map[string]string) {
-					delete(m, flagLokiUsername)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagLokiUsername)
 				},
 			),
 			isValid: false,
@@ -380,8 +380,8 @@ func TestParseInput(t *testing.T) {
 			description: "loki with missing push url",
 			flagValues: fixtureFlagValues(
 				flagsLoki(),
-				func(m map[string]string) {
-					delete(m, flagLokiPushURL)
+				func(flagValues map[string]string) {
+					delete(flagValues, flagLokiPushURL)
 				},
 			),
 			isValid: false,
@@ -389,13 +389,13 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "with monthly limit bytes",
 			flagValues: fixtureFlagValues(
-				func(m map[string]string) {
-					m[flagMonthlyLimitBytes] = "1073741824" // 1 GiB
+				func(flagValues map[string]string) {
+					flagValues[flagMonthlyLimitBytes] = "1073741824" // 1 GiB
 				}),
 			isValid: true,
 			expected: fixtureModel(
-				func(m *inputModel) {
-					m.MonthlyLimitBytes = ptr.To[int64](1073741824)
+				func(model *inputModel) {
+					model.MonthlyLimitBytes = ptr.To[int64](1073741824)
 				}),
 		},
 	}
@@ -430,22 +430,22 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "http backend with geofencing and origin request headers",
 			model: fixtureModel(
-				func(m *inputModel) {
-					m.HTTP.Geofencing = &map[string][]string{
+				func(model *inputModel) {
+					model.HTTP.Geofencing = &map[string][]string{
 						"https://dach.example.com": {"DE", "AT", "CH"},
 					}
-					m.HTTP.OriginRequestHeaders = &map[string]string{
+					model.HTTP.OriginRequestHeaders = &map[string]string{
 						"X-Custom-Header":  "Value1",
 						"X-Another-Header": "Value2",
 					}
 				},
 			),
 			expected: fixtureRequest(
-				func(p *cdn.CreateDistributionPayload) {
-					p.Backend.HttpBackendCreate.Geofencing = &map[string][]string{
+				func(payload *cdn.CreateDistributionPayload) {
+					payload.Backend.HttpBackendCreate.Geofencing = &map[string][]string{
 						"https://dach.example.com": {"DE", "AT", "CH"},
 					}
-					p.Backend.HttpBackendCreate.OriginRequestHeaders = &map[string]string{
+					payload.Backend.HttpBackendCreate.OriginRequestHeaders = &map[string]string{
 						"X-Custom-Header":  "Value1",
 						"X-Another-Header": "Value2",
 					}
@@ -455,23 +455,23 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "with full options",
 			model: fixtureModel(
-				func(m *inputModel) {
-					m.MonthlyLimitBytes = ptr.To[int64](5368709120) // 5 GiB
-					m.Optimizer = true
-					m.BlockedCountries = []string{"DE", "AT"}
-					m.BlockedIPs = []string{"127.0.0.1"}
-					m.DefaultCacheDuration = "PT2H"
+				func(model *inputModel) {
+					model.MonthlyLimitBytes = ptr.To[int64](5368709120) // 5 GiB
+					model.Optimizer = true
+					model.BlockedCountries = []string{"DE", "AT"}
+					model.BlockedIPs = []string{"127.0.0.1"}
+					model.DefaultCacheDuration = "PT2H"
 				},
 			),
 			expected: fixtureRequest(
-				func(p *cdn.CreateDistributionPayload) {
-					p.MonthlyLimitBytes = utils.Ptr[int64](5368709120)
-					p.Optimizer = &cdn.CreateDistributionPayloadGetOptimizerArgType{
+				func(payload *cdn.CreateDistributionPayload) {
+					payload.MonthlyLimitBytes = utils.Ptr[int64](5368709120)
+					payload.Optimizer = &cdn.CreateDistributionPayloadGetOptimizerArgType{
 						Enabled: utils.Ptr(true),
 					}
-					p.BlockedCountries = &[]string{"DE", "AT"}
-					p.BlockedIps = &[]string{"127.0.0.1"}
-					p.DefaultCacheDuration = utils.Ptr("PT2H")
+					payload.BlockedCountries = &[]string{"DE", "AT"}
+					payload.BlockedIps = &[]string{"127.0.0.1"}
+					payload.DefaultCacheDuration = utils.Ptr("PT2H")
 				},
 			),
 		},

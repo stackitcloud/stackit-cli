@@ -7,11 +7,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn/distribution/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn/distribution/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn/distribution/update"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCommand(params *params.CmdParams) *cobra.Command {
+func NewCommand(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "distribution",
 		Short: "Manage CDN distributions",
@@ -23,7 +23,7 @@ func NewCommand(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))
