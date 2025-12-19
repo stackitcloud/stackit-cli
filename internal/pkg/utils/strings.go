@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strings"
 	"unicode/utf8"
 )
@@ -24,6 +25,18 @@ func JoinStringKeysPtr(m map[string]any, sep string) string {
 		return ""
 	}
 	return JoinStringKeys(m, sep)
+}
+
+// JoinStringMap concatenates the key-value pairs of a string map, key and value separated by keyValueSeparator, key value pairs separated by separator.
+func JoinStringMap(m map[string]string, keyValueSeparator, separator string) string {
+	if m == nil {
+		return ""
+	}
+	parts := make([]string, 0, len(m))
+	for k, v := range m {
+		parts = append(parts, fmt.Sprintf("%s%s%s", k, keyValueSeparator, v))
+	}
+	return strings.Join(parts, separator)
 }
 
 // JoinStringPtr concatenates the strings of a string slice pointer, each separatore by the
