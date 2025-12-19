@@ -652,8 +652,8 @@ github.com/stackitcloud/stackit-sdk-go/services/sfs v0.2.0 h1:DRp1p0Gb1YZSnFXgki
 github.com/stackitcloud/stackit-sdk-go/services/sfs v0.2.0/go.mod h1:XHOtGgBwwCqPSoQt2ojIRb/BeOd4kICwb9RuMXXFGt8=
 github.com/stackitcloud/stackit-sdk-go/services/ske v1.5.1 h1:HVlBylGwXVR3qDUGwUMqofAcLEawRaWSgeYXbyAcN1E=
 github.com/stackitcloud/stackit-sdk-go/services/ske v1.5.1/go.mod h1:NzcTU5GGlUF6Lys3Ra7ylRj4ZKxJr3f/29/yoE5tjPI=
-github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.4 h1:IUhMJH9fQ+CaMas+5bbnrH7m1Hadf1vWoUtu9KeAEFM=
-github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.3.4/go.mod h1:fd13ANCU/Pye8uDd/6E0I605+6PYfHuVIQpPEK2Ph6c=
+github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.4.0 h1:KgIRTw4gpxx8qoiaLGLbXPVDcBgCxPl60gigw+tizYc=
+github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.4.0/go.mod h1:fd13ANCU/Pye8uDd/6E0I605+6PYfHuVIQpPEK2Ph6c=
 github.com/stbenjam/no-sprintf-host-port v0.3.1 h1:AyX7+dxI4IdLBPtDbsGAyqiTSLpCP9hWRrXQDU4Cm/g=
 github.com/stbenjam/no-sprintf-host-port v0.3.1/go.mod h1:ODbZesTCHMVKthBHskvUUexdcNHAQRXk9NpSsL8p/HQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
