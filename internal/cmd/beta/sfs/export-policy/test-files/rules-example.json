@@ -1,0 +1,14 @@
+[
+  {
+    "description": "first rule",
+    "ipAcl": ["192.168.2.0/24"],
+    "order": 1,
+    "superUser": false,
+    "setUuid": true
+  },
+  {
+    "ipAcl": ["192.168.2.0/24", "127.0.0.1/32"],
+    "order": 2,
+    "readonly": true
+  }
+]

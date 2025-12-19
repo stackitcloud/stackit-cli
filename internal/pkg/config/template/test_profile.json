@@ -26,6 +26,7 @@
   "service_account_custom_endpoint": "",
   "service_enablement_custom_endpoint": "",
   "session_time_limit": "12h",
+  "sfs_custom_endpoint": "",
   "ske_custom_endpoint": "",
   "sqlserverflex_custom_endpoint": "",
   "token_custom_endpoint": "",

@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		serverBackupCustomEndpointFlag:    true,
 		serverOsUpdateCustomEndpointFlag:  true,
 		runCommandCustomEndpointFlag:      true,
+		sfsCustomEndpointFlag:             true,
 		skeCustomEndpointFlag:             true,
 		sqlServerFlexCustomEndpointFlag:   true,
 		iaasCustomEndpointFlag:            true,
@@ -81,6 +82,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServerBackupCustomEndpoint:    true,
 		ServerOsUpdateCustomEndpoint:  true,
 		RunCommandCustomEndpoint:      true,
+		SfsCustomEndpoint:             true,
 		SKECustomEndpoint:             true,
 		SQLServerFlexCustomEndpoint:   true,
 		IaaSCustomEndpoint:            true,
@@ -138,6 +140,7 @@ func TestParseInput(t *testing.T) {
 				model.ServerBackupCustomEndpoint = false
 				model.ServerOsUpdateCustomEndpoint = false
 				model.RunCommandCustomEndpoint = false
+				model.SfsCustomEndpoint = false
 				model.SKECustomEndpoint = false
 				model.SQLServerFlexCustomEndpoint = false
 				model.IaaSCustomEndpoint = false
@@ -243,6 +246,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ServiceAccountCustomEndpoint = false
+			}),
+		},
+		{
+			description: "sfs custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[sfsCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.SfsCustomEndpoint = false
 			}),
 		},
 		{
