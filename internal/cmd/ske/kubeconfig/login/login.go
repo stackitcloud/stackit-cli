@@ -19,6 +19,8 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
@@ -150,20 +152,25 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 	if execCredential == nil || execCredential.Spec.Cluster == nil {
 		return nil, fmt.Errorf("ExecCredential contains not all needed fields")
 	}
-	config := &clusterConfig{}
-	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, config)
+	clusterConfig := &clusterConfig{}
+	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, clusterConfig)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal: %w", err)
 	}
 
-	config.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server)))
-
-	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
-	if config.Region == "" {
-		config.Region = globalflags.Parse(p, cmd).Region
+	profile, err := config.GetProfile()
+	if err != nil {
+		return nil, fmt.Errorf("error getting profile: %w", err)
 	}
 
-	return config, nil
+	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server+auth.GetProfileEmail(profile))))
+
+	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
+	if clusterConfig.Region == "" {
+		clusterConfig.Region = globalflags.Parse(p, cmd).Region
+	}
+
+	return clusterConfig, nil
 }
 
 func getCachedKubeConfig(key string) *rest.Config {
