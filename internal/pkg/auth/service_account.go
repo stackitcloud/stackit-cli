@@ -37,6 +37,9 @@ var _ http.RoundTripper = &keyFlowWithStorage{}
 // It returns the email associated with the service account
 // If disableWriting is set to true the credentials are not stored on disk (keyring, file).
 func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableWriting bool) (email, accessToken string, err error) {
+	// Set the storage printer so debug messages use the correct verbosity
+	SetStoragePrinter(p)
+
 	authFields := make(map[authFieldKey]string)
 	var authFlowType AuthFlow
 	switch flow := rt.(type) {
