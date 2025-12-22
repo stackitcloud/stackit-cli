@@ -178,7 +178,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty instance in instances slice",
 			args: args{
-				instances: []logs.LogsInstance{},
+				instances: []logs.LogsInstance{{}},
 			},
 			wantErr: false,
 		},
