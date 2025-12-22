@@ -129,7 +129,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "ID", "STATUS")
-		for i := range instances {
+		for _, instance := range instances {
 			instance := instances[i]
 
 			instanceStatus := ""
