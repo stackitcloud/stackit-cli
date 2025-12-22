@@ -15,8 +15,9 @@ import (
 
 type userTokenFlow struct {
 	printer                *print.Printer
-	reauthorizeUserRoutine func(p *print.Printer, isReauthentication bool) error // Called if the user needs to login again
+	reauthorizeUserRoutine func(p *print.Printer, context StorageContext, isReauthentication bool) error // Called if the user needs to login again
 	client                 *http.Client
+	context                StorageContext
 	authFlow               AuthFlow
 	accessToken            string
 	refreshToken           string
@@ -27,15 +28,26 @@ type userTokenFlow struct {
 var _ http.RoundTripper = &userTokenFlow{}
 
 // Returns a round tripper that adds authentication according to the user token flow
+// Uses the CLI storage context by default
 func UserTokenFlow(p *print.Printer) *userTokenFlow {
+	return UserTokenFlowWithContext(p, StorageContextCLI)
+}
+
+// Returns a round tripper that adds authentication according to the user token flow
+// with the specified storage context
+func UserTokenFlowWithContext(p *print.Printer, context StorageContext) *userTokenFlow {
 	return &userTokenFlow{
 		printer:                p,
 		reauthorizeUserRoutine: AuthorizeUser,
 		client:                 &http.Client{},
+		context:                context,
 	}
 }
 
 func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Set the storage printer so debug messages use the correct verbosity
+	SetStoragePrinter(utf.printer)
+
 	err := loadVarsFromStorage(utf)
 	if err != nil {
 		return nil, err
@@ -73,7 +85,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func loadVarsFromStorage(utf *userTokenFlow) error {
-	authFlow, err := GetAuthFlow()
+	authFlow, err := GetAuthFlowWithContext(utf.context)
 	if err != nil {
 		return fmt.Errorf("get auth flow type: %w", err)
 	}
@@ -82,7 +94,7 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 		REFRESH_TOKEN:      "",
 		IDP_TOKEN_ENDPOINT: "",
 	}
-	err = GetAuthFieldMap(authFields)
+	err = GetAuthFieldMapWithContext(utf.context, authFields)
 	if err != nil {
 		return fmt.Errorf("get tokens from auth storage: %w", err)
 	}
@@ -95,7 +107,7 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 }
 
 func reauthenticateUser(utf *userTokenFlow) error {
-	err := utf.reauthorizeUserRoutine(utf.printer, true)
+	err := utf.reauthorizeUserRoutine(utf.printer, utf.context, true)
 	if err != nil {
 		return fmt.Errorf("authenticate user: %w", err)
 	}
@@ -134,6 +146,9 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 		return fmt.Errorf("build request: %w", err)
 	}
 
+	// Debug log the request
+	debugHTTPRequest(utf.printer, req)
+
 	resp, err := utf.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("call API: %w", err)
@@ -145,13 +160,24 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 		}
 	}()
 
+	// Debug log the response
+	debugHTTPResponse(utf.printer, resp)
+
 	accessToken, refreshToken, err := parseRefreshTokensResponse(resp)
 	if err != nil {
 		return fmt.Errorf("parse API response: %w", err)
 	}
-	err = SetAuthFieldMap(map[authFieldKey]string{
-		ACCESS_TOKEN:  accessToken,
-		REFRESH_TOKEN: refreshToken,
+
+	// Get the new access token's expiration time
+	expiresAtUnix, err := getAccessTokenExpiresAtUnix(accessToken)
+	if err != nil {
+		return fmt.Errorf("get access token expiration: %w", err)
+	}
+
+	err = SetAuthFieldMapWithContext(utf.context, map[authFieldKey]string{
+		ACCESS_TOKEN:            accessToken,
+		REFRESH_TOKEN:           refreshToken,
+		SESSION_EXPIRES_AT_UNIX: expiresAtUnix,
 	})
 	if err != nil {
 		return fmt.Errorf("set refreshed tokens in auth storage: %w", err)
