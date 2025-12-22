@@ -99,7 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			params.Printer.Info("%s instance %q\n", operationState, instanceLabel)
+			params.Printer.Outputf("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}
