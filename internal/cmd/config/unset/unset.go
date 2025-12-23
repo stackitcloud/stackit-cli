@@ -48,6 +48,7 @@ const (
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
 	serverOsUpdateCustomEndpointFlag    = "server-osupdate-custom-endpoint"
 	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
+	sfsCustomEndpointFlag               = "sfs-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
@@ -88,6 +89,7 @@ type inputModel struct {
 	RunCommandCustomEndpoint        bool
 	ServiceAccountCustomEndpoint    bool
 	ServiceEnablementCustomEndpoint bool
+	SfsCustomEndpoint               bool
 	SKECustomEndpoint               bool
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
@@ -222,6 +224,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.LogsCustomEndpoint {
 				viper.Set(config.LogsCustomEndpointKey, "")
+      }
+			if model.SfsCustomEndpoint {
+				viper.Set(config.SfsCustomEndpointKey, "")
 			}
 
 			err := config.Write()
@@ -273,6 +278,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logsCustomEndpointFlag, false, "Logs API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -309,6 +315,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServerOsUpdateCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serverOsUpdateCustomEndpointFlag),
 		RunCommandCustomEndpoint:        flags.FlagToBoolValue(p, cmd, runCommandCustomEndpointFlag),
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
+		SfsCustomEndpoint:               flags.FlagToBoolValue(p, cmd, sfsCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),

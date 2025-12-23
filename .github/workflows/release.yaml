@@ -90,7 +90,7 @@ jobs:
           rm -f "$GPG_KEY_PATH"
       
       - name: Upload artifacts to workflow
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -110,7 +110,7 @@ jobs:
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -147,7 +147,7 @@ jobs:
         uses: actions/checkout@v6
       
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: goreleaser-dist-temp
           path: dist

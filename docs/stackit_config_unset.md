@@ -57,7 +57,8 @@ stackit config unset [flags]
       --serverbackup-custom-endpoint                        Server Backup base URL. If unset, uses the default base URL
       --service-account-custom-endpoint                     Service Account API base URL. If unset, uses the default base URL
       --service-enablement-custom-endpoint                  Service Enablement API base URL. If unset, uses the default base URL
-      --session-time-limit                                  Maximum time before authentication is required again. If unset, defaults to 2h
+      --session-time-limit                                  Maximum time before authentication is required again. If unset, defaults to 12h
+      --sfs-custom-endpoint                                 SFS API base URL. If unset, uses the default base URL
       --ske-custom-endpoint                                 SKE API base URL. If unset, uses the default base URL
       --sqlserverflex-custom-endpoint                       SQLServer Flex API base URL. If unset, uses the default base URL
       --token-custom-endpoint                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.

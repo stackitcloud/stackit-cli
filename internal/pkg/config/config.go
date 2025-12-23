@@ -43,6 +43,7 @@ const (
 	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
 	ServerOsUpdateCustomEndpointKey    = "serverosupdate_custom_endpoint"
 	RunCommandCustomEndpointKey        = "runcommand_custom_endpoint"
+	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
@@ -56,7 +57,7 @@ const (
 
 	AsyncDefault            = false
 	RegionDefault           = "eu01"
-	SessionTimeLimitDefault = "2h"
+	SessionTimeLimitDefault = "12h"
 
 	AllowedUrlDomainDefault = "stackit.cloud"
 )
