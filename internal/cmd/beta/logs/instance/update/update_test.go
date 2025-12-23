@@ -294,3 +294,47 @@ func TestBuildRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestOutputResult(t *testing.T) {
+	tests := []struct {
+		description string
+		model       *inputModel
+		instance    *logs.LogsInstance
+		wantErr     bool
+	}{
+		{
+			description: "nil response",
+			instance:    nil,
+			wantErr:     true,
+		},
+		{
+			description: "default output",
+			instance:    &logs.LogsInstance{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+			wantErr:     false,
+		},
+		{
+			description: "json output",
+			instance:    &logs.LogsInstance{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: print.JSONOutputFormat}},
+			wantErr:     false,
+		},
+		{
+			description: "yaml output",
+			instance:    &logs.LogsInstance{},
+			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: print.YAMLOutputFormat}},
+			wantErr:     false,
+		},
+	}
+
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			err := outputResult(p, tt.model, "label", tt.instance)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -130,17 +130,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		table := tables.NewTable()
 		table.SetHeader("NAME", "ID", "STATUS")
 		for _, instance := range instances {
-			instance := instances[i]
-
-			instanceStatus := ""
-			if instance.Status != nil {
-				instanceStatus = utils.PtrString(instance.Status)
-			}
-
 			table.AddRow(
 				utils.PtrString(instance.DisplayName),
 				utils.PtrString(instance.Id),
-				instanceStatus,
+				utils.PtrString(instance.Status),
 			)
 		}
 		err := table.Display(p)
