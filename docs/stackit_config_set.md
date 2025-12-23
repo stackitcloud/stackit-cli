@@ -40,6 +40,7 @@ stackit config set [flags]
       --kms-custom-endpoint string                                 KMS API base URL, used in calls to this API
       --load-balancer-custom-endpoint string                       Load Balancer API base URL, used in calls to this API
       --logme-custom-endpoint string                               LogMe API base URL, used in calls to this API
+      --logs-custom-endpoint string                                Logs API base URL, used in calls to this API
       --mariadb-custom-endpoint string                             MariaDB API base URL, used in calls to this API
       --mongodbflex-custom-endpoint string                         MongoDB Flex API base URL, used in calls to this API
       --object-storage-custom-endpoint string                      Object Storage API base URL, used in calls to this API
