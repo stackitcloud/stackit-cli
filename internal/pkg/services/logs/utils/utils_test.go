@@ -54,6 +54,20 @@ func TestGetInstanceName(t *testing.T) {
 			getInstanceFails: true,
 			isValid:          false,
 		},
+		{
+			description:      "response is nil",
+			getInstanceFails: false,
+			getInstanceResp:  nil,
+			isValid:          false,
+		},
+		{
+			description:      "name in response is nil",
+			getInstanceFails: false,
+			getInstanceResp: &logs.LogsInstance{
+				DisplayName: nil,
+			},
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
