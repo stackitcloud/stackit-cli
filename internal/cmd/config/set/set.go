@@ -229,6 +229,7 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.IntakeCustomEndpointKey, cmd.Flags().Lookup(intakeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.LogsCustomEndpointKey, cmd.Flags().Lookup(logsCustomEndpointFlag))
+	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SfsCustomEndpointKey, cmd.Flags().Lookup(sfsCustomEndpointFlag))
 	cobra.CheckErr(err)
 }

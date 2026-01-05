@@ -224,7 +224,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.LogsCustomEndpoint {
 				viper.Set(config.LogsCustomEndpointKey, "")
-      }
+			}
 			if model.SfsCustomEndpoint {
 				viper.Set(config.SfsCustomEndpointKey, "")
 			}
