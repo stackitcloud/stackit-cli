@@ -20,7 +20,19 @@ func TestParseInput[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobr
 // TestParseInputWithAdditionalFlags centralizes the logic to test a combination of inputs (arguments, flags) for a cobra command.
 // It allows to pass multiple instances of a single flag to the cobra command using the `additionalFlagValues` parameter.
 func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool) {
-	t.Helper()
+	TestParseInputWithOptions(t, cmdFactory, parseInputFunc, expectedModel, argValues, flagValues, additionalFlagValues, isValid, nil)
+}
+
+func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool, testingOptions []TestingOption) {
+	opts := Option{}
+	for _, option := range testingOptions {
+		err := option(&opts)
+		if err != nil {
+			t.Errorf("Configuring testing options: %v", err)
+			return
+		}
+	}
+
 	p := print.NewPrinter()
 	cmd := cmdFactory(&types.CmdParams{Printer: p})
 	err := globalflags.Configure(cmd.Flags())
@@ -102,7 +114,7 @@ func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*typ
 	if !isValid {
 		t.Fatalf("did not fail on invalid input")
 	}
-	diff := cmp.Diff(model, expectedModel)
+	diff := cmp.Diff(model, expectedModel, opts.cmpOptions...)
 	if diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
 	}
