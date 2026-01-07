@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -172,6 +173,7 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 				geofencing = append(geofencing, fmt.Sprintf("%s: %s", k, strings.Join(v, ", ")))
 			}
 		}
+		slices.Sort(geofencing)
 		table.AddRow("BACKEND TYPE", "HTTP")
 		table.AddSeparator()
 		table.AddRow("HTTP ORIGIN URL", utils.PtrString(h.OriginUrl))
