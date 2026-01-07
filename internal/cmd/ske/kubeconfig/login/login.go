@@ -84,19 +84,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
-
 			if cachedKubeconfig == nil {
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, nil)
 			}
 
 			isValid, notAfter := checkKubeconfigExpiry(cachedKubeconfig.CertData)
 			if !isValid {
 				// cert is expired or invalid, request new
 				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, nil)
 			} else if time.Now().Add(refreshBeforeDuration).After(notAfter.UTC()) {
 				// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, true, cachedKubeconfig)
+				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, cachedKubeconfig)
 			}
 			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
 			return output(params.Printer, clusterConfig.cacheKey, cachedKubeconfig)
@@ -188,11 +187,11 @@ func checkKubeconfigExpiry(certData []byte) (bool, time.Time) {
 	return true, certificate.NotAfter.UTC()
 }
 
-func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
+func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig, cachedKubeconfig *rest.Config) error {
 	req := buildRequest(ctx, apiClient, clusterConfig)
 	kubeconfigResponse, err := req.Execute()
 	if err != nil {
-		if fallbackToCache {
+		if cachedKubeconfig != nil {
 			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("request kubeconfig: %w", err)
@@ -200,13 +199,13 @@ func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *sk
 
 	kubeconfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(*kubeconfigResponse.Kubeconfig))
 	if err != nil {
-		if fallbackToCache {
+		if cachedKubeconfig != nil {
 			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("parse kubeconfig: %w", err)
 	}
 	if err = cache.PutObject(clusterConfig.cacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
-		if fallbackToCache {
+		if cachedKubeconfig != nil {
 			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
 		}
 		return fmt.Errorf("cache kubeconfig: %w", err)
