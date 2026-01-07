@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -32,9 +33,14 @@ func JoinStringMap(m map[string]string, keyValueSeparator, separator string) str
 	if m == nil {
 		return ""
 	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
 	parts := make([]string, 0, len(m))
-	for k, v := range m {
-		parts = append(parts, fmt.Sprintf("%s%s%s", k, keyValueSeparator, v))
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s%s%s", k, keyValueSeparator, m[k]))
 	}
 	return strings.Join(parts, separator)
 }
