@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/jedib0t/go-pretty/v6 v6.7.7
+	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/lmittmann/tint v1.1.2
 	github.com/mattn/go-colorable v0.1.14
 	github.com/spf13/cobra v1.10.2
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.7.3
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.10.1
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.3
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.3.0
@@ -261,7 +261,7 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/kms v1.1.2
+	github.com/stackitcloud/stackit-sdk-go/services/kms v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.6.2
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3
