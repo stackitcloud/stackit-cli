@@ -89,33 +89,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
 			}
 
-			certPem, _ := pem.Decode(cachedKubeconfig.CertData)
-			if certPem == nil {
+			isValid, notAfter := checkKubeconfigExpiry(cachedKubeconfig.CertData)
+			if !isValid {
+				// cert is expired or invalid, request new
 				_ = cache.DeleteObject(clusterConfig.cacheKey)
 				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
-			}
-
-			certificate, err := x509.ParseCertificate(certPem.Bytes)
-			if err != nil {
-				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
-			}
-
-			// cert is expired, request new
-			if time.Now().After(certificate.NotAfter.UTC()) {
-				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, false, nil)
-			}
-			// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
-			if time.Now().Add(refreshBeforeDuration).After(certificate.NotAfter.UTC()) {
+			} else if time.Now().Add(refreshBeforeDuration).After(notAfter.UTC()) {
+				// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
 				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, true, cachedKubeconfig)
 			}
-
 			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
-			if err := output(params.Printer, clusterConfig.cacheKey, cachedKubeconfig); err != nil {
-				return err
-			}
-			return nil
+			return output(params.Printer, clusterConfig.cacheKey, cachedKubeconfig)
 		},
 	}
 	return cmd
@@ -184,6 +168,24 @@ func getCachedKubeConfig(key string) *rest.Config {
 	}
 
 	return restConfig
+}
+
+func checkKubeconfigExpiry(certData []byte) (bool, time.Time) {
+	certPem, _ := pem.Decode(certData)
+	if certPem == nil {
+		return false, time.Time{}
+	}
+
+	certificate, err := x509.ParseCertificate(certPem.Bytes)
+	if err != nil {
+		return false, time.Time{}
+	}
+
+	// cert is expired
+	if time.Now().After(certificate.NotAfter.UTC()) {
+		return false, time.Time{}
+	}
+	return true, certificate.NotAfter.UTC()
 }
 
 func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig, fallbackToCache bool, cachedKubeconfig *rest.Config) error {
