@@ -83,22 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
-			if cachedKubeconfig == nil {
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, nil)
-			}
-
-			isValid, notAfter := checkKubeconfigExpiry(cachedKubeconfig.CertData)
-			if !isValid {
-				// cert is expired or invalid, request new
-				_ = cache.DeleteObject(clusterConfig.cacheKey)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, nil)
-			} else if time.Now().Add(refreshBeforeDuration).After(notAfter.UTC()) {
-				// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
-				return GetAndOutputKubeconfig(ctx, params.Printer, apiClient, clusterConfig, cachedKubeconfig)
-			}
-			// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
-			return output(params.Printer, clusterConfig.cacheKey, cachedKubeconfig)
+			return outputLoginKubeconfig(ctx, params.Printer, apiClient, clusterConfig)
 		},
 	}
 	return cmd
@@ -153,6 +138,25 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 	}
 
 	return clusterConfig, nil
+}
+
+func outputLoginKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig) error {
+	cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
+	if cachedKubeconfig == nil {
+		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, nil)
+	}
+
+	isValid, notAfter := checkKubeconfigExpiry(cachedKubeconfig.CertData)
+	if !isValid {
+		// cert is expired or invalid, request new
+		_ = cache.DeleteObject(clusterConfig.cacheKey)
+		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, nil)
+	} else if time.Now().Add(refreshBeforeDuration).After(notAfter.UTC()) {
+		// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
+		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, cachedKubeconfig)
+	}
+	// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
+	return output(p, clusterConfig.cacheKey, cachedKubeconfig)
 }
 
 func getCachedKubeConfig(key string) *rest.Config {
