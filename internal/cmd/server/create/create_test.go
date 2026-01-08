@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
+		agentProvisioningPolicyFlag:       "INHERIT",
 		availabilityZoneFlag:              "eu01-1",
 		nameFlag:                          "test-server-name",
 		machineTypeFlag:                   "t1.1",
@@ -65,6 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
+		AgentProvisioningPolicy:       utils.Ptr("INHERIT"),
 		AvailabilityZone:              utils.Ptr("eu01-1"),
 		Name:                          utils.Ptr("test-server-name"),
 		MachineType:                   utils.Ptr("t1.1"),
@@ -164,6 +166,7 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, affinityGroupFlag)
+				delete(flagValues, agentProvisioningPolicyFlag)
 				delete(flagValues, availabilityZoneFlag)
 				delete(flagValues, labelFlag)
 				delete(flagValues, bootVolumeSourceIdFlag)
@@ -182,6 +185,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.AffinityGroup = nil
+				model.AgentProvisioningPolicy = nil
 				model.AvailabilityZone = nil
 				model.Labels = nil
 				model.BootVolumeSourceId = nil
@@ -327,6 +331,26 @@ func TestParseInput(t *testing.T) {
 				model.ImageId = nil
 			}),
 		},
+		{
+			description: "valid with agent-provisioned flag missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, agentProvisioningPolicyFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AgentProvisioningPolicy = nil
+			}),
+		},
+		{
+			description: "agent-provisioned flag properly handled",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[agentProvisioningPolicyFlag] = "ALWAYS"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AgentProvisioningPolicy = utils.Ptr("ALWAYS")
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -359,6 +383,19 @@ func TestBuildRequest(t *testing.T) {
 				Name:        utils.Ptr("test-server-name"),
 			},
 			expectedRequest: fixtureRequiredRequest(),
+		},
+		{
+			description: "with provisioned agent",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.AgentProvisioningPolicy = utils.Ptr("ALWAYS")
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateServerRequest) {
+				payload := fixturePayload()
+				payload.Agent = &iaas.ServerAgent{
+					Provisioned: utils.Ptr(true),
+				}
+				*request = (*request).CreateServerPayload(payload)
+			}),
 		},
 	}
 
