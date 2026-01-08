@@ -254,7 +254,7 @@ func parseLoginKubeConfigToExecCredential(kubeconfig *rest.Config) ([]byte, erro
 			Kind:       "ExecCredential",
 		},
 		Status: &clientauthenticationv1.ExecCredentialStatus{
-			ExpirationTimestamp:   &v1.Time{Time: certificate.NotAfter.Add(-time.Minute * 15)},
+			ExpirationTimestamp:   &v1.Time{Time: certificate.NotAfter.Add(-refreshBeforeDuration)},
 			ClientCertificateData: string(kubeconfig.CertData),
 			ClientKeyData:         string(kubeconfig.KeyData),
 		},
