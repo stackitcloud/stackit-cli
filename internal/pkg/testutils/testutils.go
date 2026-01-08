@@ -13,6 +13,7 @@ import (
 
 // TestParseInput centralizes the logic to test a combination of inputs (arguments, flags) for a cobra command
 func TestParseInput[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, isValid bool) {
+	t.Helper()
 	TestParseInputWithAdditionalFlags(t, cmdFactory, parseInputFunc, expectedModel, argValues, flagValues, map[string][]string{}, isValid)
 }
 
@@ -60,6 +61,21 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 				}
 				t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 			}
+		}
+	}
+
+	if cmd.PreRun != nil {
+		// can be used for dynamic flag configuration
+		cmd.PreRun(cmd, argValues)
+	}
+
+	if cmd.PreRunE != nil {
+		err := cmd.PreRunE(cmd, argValues)
+		if err != nil {
+			if !isValid {
+				return
+			}
+			t.Fatalf("error in PreRunE: %v", err)
 		}
 	}
 
