@@ -37,6 +37,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
+		agentProvisionedFlag:              "false",
 		availabilityZoneFlag:              "eu01-1",
 		nameFlag:                          "test-server-name",
 		machineTypeFlag:                   "t1.1",
@@ -67,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
+		AgentProvisioned:              utils.Ptr(false),
 		AvailabilityZone:              utils.Ptr("eu01-1"),
 		Name:                          utils.Ptr("test-server-name"),
 		MachineType:                   utils.Ptr("t1.1"),
@@ -118,8 +120,11 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		Labels: utils.Ptr(map[string]interface{}{
 			"key": "value",
 		}),
-		MachineType:         utils.Ptr("t1.1"),
-		Name:                utils.Ptr("test-server-name"),
+		MachineType: utils.Ptr("t1.1"),
+		Name:        utils.Ptr("test-server-name"),
+		Agent: &iaas.ServerAgent{
+			Provisioned: utils.Ptr(false),
+		},
 		AvailabilityZone:    utils.Ptr("eu01-1"),
 		AffinityGroup:       utils.Ptr("test-affinity-group"),
 		KeypairName:         utils.Ptr("test-keypair-name"),
@@ -166,6 +171,7 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, affinityGroupFlag)
+				delete(flagValues, agentProvisionedFlag)
 				delete(flagValues, availabilityZoneFlag)
 				delete(flagValues, labelFlag)
 				delete(flagValues, bootVolumeSourceIdFlag)
@@ -184,6 +190,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.AffinityGroup = nil
+				model.AgentProvisioned = nil
 				model.AvailabilityZone = nil
 				model.Labels = nil
 				model.BootVolumeSourceId = nil
@@ -327,6 +334,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ImageId = nil
+			}),
+		},
+		{
+			description: "valid with agent-provisioned flag missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, agentProvisionedFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AgentProvisioned = nil
 			}),
 		},
 	}
