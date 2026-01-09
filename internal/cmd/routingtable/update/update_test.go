@@ -93,6 +93,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateRoutingTableOfAreaReques
 		Name:          utils.Ptr(testRoutingTableName),
 		Description:   utils.Ptr(testRoutingTableDescription),
 		DynamicRoutes: utils.Ptr(true),
+		SystemRoutes:  utils.Ptr(true),
 	}
 
 	req = req.UpdateRoutingTableOfAreaPayload(payload)
@@ -129,6 +130,18 @@ func TestParseInput(t *testing.T) {
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.NonDynamicRoutes = true
+				model.RoutingTableId = testRoutingTableId
+			}),
+		},
+		{
+			description: "system routes disabled",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nonSystemRoutesFlag] = "true"
+			}),
+			argValues: fixtureArgValues(),
+			isValid:   true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.NonSystemRoutes = true
 				model.RoutingTableId = testRoutingTableId
 			}),
 		},
@@ -216,6 +229,7 @@ func TestBuildRequest(t *testing.T) {
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
 					DynamicRoutes: utils.Ptr(true),
+					SystemRoutes:  utils.Ptr(true),
 				})
 			}),
 		},
@@ -231,6 +245,7 @@ func TestBuildRequest(t *testing.T) {
 					Name:          nil,
 					Description:   utils.Ptr(testRoutingTableDescription),
 					DynamicRoutes: utils.Ptr(true),
+					SystemRoutes:  utils.Ptr(true),
 				})
 			}),
 		},
@@ -246,6 +261,7 @@ func TestBuildRequest(t *testing.T) {
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   nil,
 					DynamicRoutes: utils.Ptr(true),
+					SystemRoutes:  utils.Ptr(true),
 				})
 			}),
 		},
@@ -261,6 +277,23 @@ func TestBuildRequest(t *testing.T) {
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
 					DynamicRoutes: utils.Ptr(false),
+					SystemRoutes:  utils.Ptr(true),
+				})
+			}),
+		},
+		{
+			description: "system routes disabled",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.NonSystemRoutes = true
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
+				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Name:          utils.Ptr(testRoutingTableName),
+					Description:   utils.Ptr(testRoutingTableDescription),
+					SystemRoutes:  utils.Ptr(false),
+					DynamicRoutes: utils.Ptr(true),
 				})
 			}),
 		},
