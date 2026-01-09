@@ -46,7 +46,6 @@ stackit beta [flags]
 * [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
 * [stackit beta intake](./stackit_beta_intake.md)	 - Provides functionality for intake
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
-* [stackit beta routing-table](./stackit_beta_routing-table.md)	 - Manage routing-tables and its according routes
 * [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

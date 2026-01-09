@@ -23,7 +23,7 @@ const (
 	networkAreaIdFlag    = "network-area-id"
 	nonDynamicRoutesFlag = "non-dynamic-routes"
 	organizationIdFlag   = "organization-id"
-	routingTableIdArg    = "ROUTE_TABLE_ID"
+	routingTableIdArg    = "ROUTING_TABLE_ID"
 )
 
 type inputModel struct {
