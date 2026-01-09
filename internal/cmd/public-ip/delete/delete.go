@@ -63,12 +63,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				publicIpLabel = model.PublicIpId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete public IP %q? (This cannot be undone)", publicIpLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete public IP %q? (This cannot be undone)", publicIpLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

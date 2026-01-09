@@ -67,12 +67,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				snapshotLabel = model.SnapshotId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update snapshot %q?", snapshotLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update snapshot %q?", snapshotLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

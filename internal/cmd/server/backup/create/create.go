@@ -79,12 +79,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

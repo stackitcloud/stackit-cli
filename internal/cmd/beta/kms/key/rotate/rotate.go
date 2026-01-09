@@ -64,12 +64,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				keyName = model.KeyId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to rotate the key %q? (this cannot be undone)", keyName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to rotate the key %q? (this cannot be undone)", keyName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

@@ -79,12 +79,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				volumeLabel = model.VolumeID
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create snapshot from volume %q? (This cannot be undone)", volumeLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create snapshot from volume %q? (This cannot be undone)", volumeLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

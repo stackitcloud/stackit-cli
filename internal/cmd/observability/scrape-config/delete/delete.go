@@ -63,12 +63,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete scrape configuration %q on Observability instance %q? (This cannot be undone)", model.JobName, instanceLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete scrape configuration %q on Observability instance %q? (This cannot be undone)", model.JobName, instanceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

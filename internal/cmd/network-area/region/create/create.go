@@ -90,12 +90,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				networkAreaLabel = model.NetworkAreaId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create the regional configuration %q for STACKIT Network Area (SNA) %q?", model.Region, networkAreaLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create the regional configuration %q for STACKIT Network Area (SNA) %q?", model.Region, networkAreaLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

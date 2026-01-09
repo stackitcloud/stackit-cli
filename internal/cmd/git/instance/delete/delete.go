@@ -65,12 +65,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				instanceName = model.InstanceId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the stackit git instance %q for %q?", instanceName, projectName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete the stackit git instance %q for %q?", instanceName, projectName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
