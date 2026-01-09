@@ -22,6 +22,7 @@ const (
 	nameFlag             = "name"
 	networkAreaIdFlag    = "network-area-id"
 	nonDynamicRoutesFlag = "non-dynamic-routes"
+	nonSystemRoutesFlag  = "non-system-routes"
 	organizationIdFlag   = "organization-id"
 	routingTableIdArg    = "ROUTING_TABLE_ID"
 )
@@ -31,6 +32,7 @@ type inputModel struct {
 	OrganizationId   string
 	NetworkAreaId    string
 	NonDynamicRoutes bool
+	NonSystemRoutes  bool
 	RoutingTableId   string
 	Description      *string
 	Labels           *map[string]string
@@ -59,6 +61,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
 				"$ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-dynamic-routes",
+			),
+			examples.NewExample(
+				`Disables the system routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
+				"$ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-system-routes",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -101,6 +107,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringToString(labelFlag, nil, "Key=value labels")
 	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "Network-Area ID")
 	cmd.Flags().Bool(nonDynamicRoutesFlag, false, "If true, preventing dynamic routes from propagating to the routing-table.")
+	cmd.Flags().Bool(nonSystemRoutesFlag, false, "If true, automatically disables routes for project-to-project communication.")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
@@ -119,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Name:             flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		NonDynamicRoutes: flags.FlagToBoolValue(p, cmd, nonDynamicRoutesFlag),
+		NonSystemRoutes:  flags.FlagToBoolValue(p, cmd, nonSystemRoutesFlag),
 		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		RoutingTableId:   routeTableId,
 	}
@@ -152,12 +160,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	)
 
 	dynamicRoutes := !model.NonDynamicRoutes
+	systemRoutes := !model.NonSystemRoutes
 
 	payload := iaas.UpdateRoutingTableOfAreaPayload{
 		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Name:          model.Name,
 		Description:   model.Description,
 		DynamicRoutes: &dynamicRoutes,
+		SystemRoutes:  &systemRoutes,
 	}
 
 	return req.UpdateRoutingTableOfAreaPayload(payload)
