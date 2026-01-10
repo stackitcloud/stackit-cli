@@ -37,7 +37,7 @@ require (
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.32.0
 	golang.org/x/oauth2 v0.34.0
-	golang.org/x/term v0.38.0
+	golang.org/x/term v0.39.0
 	golang.org/x/text v0.32.0
 	k8s.io/apimachinery v0.34.2
 	k8s.io/client-go v0.34.2
@@ -272,7 +272,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.2.0
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.34.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
