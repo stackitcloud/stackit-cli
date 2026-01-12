@@ -12,25 +12,23 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"k8s.io/client-go/rest"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
-
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	clientauthenticationv1 "k8s.io/client-go/pkg/apis/clientauthentication/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/auth/exec"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-sdk-go/services/ske"
 )
 
 const (
