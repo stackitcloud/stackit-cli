@@ -87,12 +87,10 @@ The available performance class values can be obtained by running:
 				resourcePoolName = model.ResourcePoolId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update resource-pool %q for project %q?", resourcePoolName, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update resource-pool %q for project %q?", resourcePoolName, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

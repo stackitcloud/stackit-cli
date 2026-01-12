@@ -69,16 +69,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				validUntilInfo := "The key will be valid until deleted"
-				if model.ExpiresInDays != nil {
-					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
-				}
-				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			validUntilInfo := "The key will be valid until deleted"
+			if model.ExpiresInDays != nil {
+				validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
+			}
+			prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

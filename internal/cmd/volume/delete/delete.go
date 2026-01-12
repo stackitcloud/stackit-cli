@@ -64,12 +64,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				volumeLabel = model.VolumeId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete volume %q?", volumeLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete volume %q?", volumeLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

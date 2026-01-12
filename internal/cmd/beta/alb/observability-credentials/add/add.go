@@ -55,12 +55,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := "Are your sure you want to add credentials?"
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := "Are your sure you want to add credentials?"
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

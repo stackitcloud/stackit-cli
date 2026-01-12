@@ -79,12 +79,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				keyRingName = model.KeyRingId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

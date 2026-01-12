@@ -60,12 +60,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				groupLabel = model.SecurityGroupId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the security group %q for %q?", groupLabel, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete the security group %q for %q?", groupLabel, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

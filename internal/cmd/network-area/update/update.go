@@ -103,12 +103,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update a network area for organization %q?", orgLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update a network area for organization %q?", orgLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

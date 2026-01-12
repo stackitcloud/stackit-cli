@@ -64,12 +64,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update credential %q for %q?", *model.CredentialsRef, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return fmt.Errorf("update credential: %w", err)
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update credential %q for %q?", *model.CredentialsRef, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return fmt.Errorf("update credential: %w", err)
 			}
 
 			// Call API

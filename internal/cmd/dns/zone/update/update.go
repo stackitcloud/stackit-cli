@@ -82,12 +82,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				zoneLabel = model.ZoneId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update zone %s?", zoneLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update zone %s?", zoneLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

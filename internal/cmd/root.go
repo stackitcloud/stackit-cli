@@ -62,7 +62,9 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			p.Cmd = cmd
-			p.Verbosity = print.Level(globalflags.Parse(p, cmd).Verbosity)
+			globalFlags := globalflags.Parse(p, cmd)
+			p.Verbosity = print.Level(globalFlags.Verbosity)
+			p.AssumeYes = globalFlags.AssumeYes
 
 			argsString := print.BuildDebugStrFromSlice(os.Args)
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
@@ -209,6 +211,7 @@ func Execute(version, date string) {
 
 	// We need to set the printer and verbosity here because the
 	// PersistentPreRun is not called when the command is wrongly called
+	// In this case Printer.AssumeYes isn't set either, but `false` as default is acceptable
 	p.Cmd = cmd
 	p.Verbosity = print.InfoLevel
 

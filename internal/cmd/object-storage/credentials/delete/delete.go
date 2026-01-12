@@ -65,12 +65,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				credentialsLabel = model.CredentialsId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete credentials %q of credentials group  %q? (This cannot be undone)", credentialsLabel, credentialsGroupLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete credentials %q of credentials group  %q? (This cannot be undone)", credentialsLabel, credentialsGroupLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

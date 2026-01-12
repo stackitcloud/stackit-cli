@@ -90,7 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes && !model.DisableWriting {
+			if !model.DisableWriting {
 				var prompt string
 				if model.Overwrite {
 					prompt = fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)

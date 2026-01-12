@@ -68,12 +68,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				networkAreaName = model.NetworkAreaId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the regional configuration %q for STACKIT Network Area (SNA) %q?", model.Region, networkAreaName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete the regional configuration %q for STACKIT Network Area (SNA) %q?", model.Region, networkAreaName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

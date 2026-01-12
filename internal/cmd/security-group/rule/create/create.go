@@ -101,12 +101,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				securityGroupLabel = model.SecurityGroupId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a security group rule for security group %q for project %q?", securityGroupLabel, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a security group rule for security group %q for project %q?", securityGroupLabel, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
