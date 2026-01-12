@@ -27,7 +27,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("log out failed: %w", err)
 			}
 
-			p.Printer.Info("Successfully logged out from STACKIT Terraform Provider and SDK.\n")
+			p.Printer.Outputln("Successfully logged out from STACKIT Terraform Provider and SDK.")
 			return nil
 		},
 	}
