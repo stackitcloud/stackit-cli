@@ -62,7 +62,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, testClient, tt.clusterConfig)
+			request := buildLoginKubeconfigRequest(testCtx, testClient, tt.clusterConfig)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -127,7 +127,7 @@ zbRjZmli7cnenEnfnNoFIGbgkbjGXRUCIC5zFtWXFK7kA+B2vDxD0DlLcQodNwi4
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			execCredential, err := parseKubeConfigToExecCredential(tt.kubeconfig)
+			execCredential, err := parseLoginKubeConfigToExecCredential(tt.kubeconfig)
 			if err != nil {
 				t.Fatalf("func returned error: %s", err)
 			}

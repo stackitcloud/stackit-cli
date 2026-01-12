@@ -80,8 +80,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			return outputLoginKubeconfig(ctx, params.Printer, apiClient, clusterConfig)
+			kubeconfig, err := retrieveLoginKubeconfig(ctx, apiClient, clusterConfig)
+			if err != nil {
+				return err
+			}
+			return outputLoginKubeconfig(params.Printer, clusterConfig.cacheKey, kubeconfig)
 		},
 	}
 	return cmd
@@ -138,23 +141,29 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 	return clusterConfig, nil
 }
 
-func outputLoginKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig) error {
+func retrieveLoginKubeconfig(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) (*rest.Config, error) {
 	cachedKubeconfig := getCachedKubeConfig(clusterConfig.cacheKey)
 	if cachedKubeconfig == nil {
-		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, nil)
+		return requestNewLoginKubeconfig(ctx, apiClient, clusterConfig)
 	}
 
 	isValid, notAfter := checkKubeconfigExpiry(cachedKubeconfig.CertData)
 	if !isValid {
 		// cert is expired or invalid, request new
 		_ = cache.DeleteObject(clusterConfig.cacheKey)
-		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, nil)
+		return requestNewLoginKubeconfig(ctx, apiClient, clusterConfig)
 	} else if time.Now().Add(refreshBeforeDuration).After(notAfter.UTC()) {
-		// cert expires within the next 15min, refresh (try to get a new, use cache on failure)
-		return GetAndOutputKubeconfig(ctx, p, apiClient, clusterConfig, cachedKubeconfig)
+		// cert expires within the next 15min -> refresh
+		kubeconfig, err := requestNewLoginKubeconfig(ctx, apiClient, clusterConfig)
+		// try to get a new one but use cache on failure
+		if err != nil {
+			return cachedKubeconfig, nil
+		}
+		return kubeconfig, nil
 	}
 	// cert not expired, nor will it expire in the next 15min; therefore, use the cached kubeconfig
-	return output(p, clusterConfig.cacheKey, cachedKubeconfig)
+	return cachedKubeconfig, nil
+
 }
 
 func getCachedKubeConfig(key string) *rest.Config {
@@ -189,63 +198,46 @@ func checkKubeconfigExpiry(certData []byte) (bool, time.Time) {
 	return true, certificate.NotAfter.UTC()
 }
 
-func GetAndOutputKubeconfig(ctx context.Context, p *print.Printer, apiClient *ske.APIClient, clusterConfig *clusterConfig, cachedKubeconfig *rest.Config) error {
-	req := buildRequest(ctx, apiClient, clusterConfig)
+func requestNewLoginKubeconfig(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) (*rest.Config, error) {
+	req := buildLoginKubeconfigRequest(ctx, apiClient, clusterConfig)
 	kubeconfigResponse, err := req.Execute()
 	if err != nil {
-		if cachedKubeconfig != nil {
-			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
-		}
-		return fmt.Errorf("request kubeconfig: %w", err)
+		return nil, fmt.Errorf("request kubeconfig: %w", err)
 	}
-
 	kubeconfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(*kubeconfigResponse.Kubeconfig))
 	if err != nil {
-		if cachedKubeconfig != nil {
-			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
-		}
-		return fmt.Errorf("parse kubeconfig: %w", err)
+		return nil, fmt.Errorf("parse kubeconfig: %w", err)
 	}
 	if err = cache.PutObject(clusterConfig.cacheKey, []byte(*kubeconfigResponse.Kubeconfig)); err != nil {
-		if cachedKubeconfig != nil {
-			return output(p, clusterConfig.cacheKey, cachedKubeconfig)
-		}
-		return fmt.Errorf("cache kubeconfig: %w", err)
+		return nil, fmt.Errorf("cache kubeconfig: %w", err)
 	}
 
-	return output(p, clusterConfig.cacheKey, kubeconfig)
+	return kubeconfig, nil
 }
 
-func buildRequest(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) ske.ApiCreateKubeconfigRequest {
+func buildLoginKubeconfigRequest(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) ske.ApiCreateKubeconfigRequest {
 	req := apiClient.CreateKubeconfig(ctx, clusterConfig.STACKITProjectID, clusterConfig.Region, clusterConfig.ClusterName)
 	expirationSeconds := strconv.Itoa(expirationSeconds)
 
 	return req.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{ExpirationSeconds: &expirationSeconds})
 }
 
-func output(p *print.Printer, cacheKey string, kubeconfig *rest.Config) error {
-	if kubeconfig == nil {
-		_ = cache.DeleteObject(cacheKey)
-		return errors.New("kubeconfig is nil")
-	}
-
-	outputExecCredential, err := parseKubeConfigToExecCredential(kubeconfig)
+func outputLoginKubeconfig(p *print.Printer, cacheKey string, kubeconfig *rest.Config) error {
+	output, err := parseLoginKubeConfigToExecCredential(kubeconfig)
 	if err != nil {
 		_ = cache.DeleteObject(cacheKey)
 		return fmt.Errorf("convert to ExecCredential: %w", err)
-	}
-
-	output, err := json.Marshal(outputExecCredential)
-	if err != nil {
-		_ = cache.DeleteObject(cacheKey)
-		return fmt.Errorf("marshal ExecCredential: %w", err)
 	}
 
 	p.Outputf("%s", string(output))
 	return nil
 }
 
-func parseKubeConfigToExecCredential(kubeconfig *rest.Config) (*clientauthenticationv1.ExecCredential, error) {
+func parseLoginKubeConfigToExecCredential(kubeconfig *rest.Config) ([]byte, error) {
+	if kubeconfig == nil {
+		return nil, errors.New("kubeconfig is nil")
+	}
+
 	certPem, _ := pem.Decode(kubeconfig.CertData)
 	if certPem == nil {
 		return nil, fmt.Errorf("decoded pem is nil")
@@ -267,5 +259,10 @@ func parseKubeConfigToExecCredential(kubeconfig *rest.Config) (*clientauthentica
 			ClientKeyData:         string(kubeconfig.KeyData),
 		},
 	}
-	return &outputExecCredential, nil
+
+	output, err := json.Marshal(outputExecCredential)
+	if err != nil {
+		return nil, fmt.Errorf("marshal: %w", err)
+	}
+	return output, nil
 }
