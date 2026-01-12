@@ -109,22 +109,28 @@ func reauthenticateUser(utf *userTokenFlow) error {
 	return nil
 }
 
-func TokenExpired(token string) (bool, error) {
+func TokenExpirationTime(token string) (time.Time, error) {
 	// We can safely use ParseUnverified because we are not authenticating the user at this point.
 	// We're just checking the expiration time
 	tokenParsed, _, err := jwt.NewParser().ParseUnverified(token, &jwt.RegisteredClaims{})
 	if err != nil {
-		return false, fmt.Errorf("parse access token: %w", err)
+		return time.Time{}, fmt.Errorf("parse access token: %w", err)
 	}
 	expirationTimestampNumeric, err := tokenParsed.Claims.GetExpirationTime()
 	if err != nil {
-		return false, fmt.Errorf("get expiration timestamp from access token: %w", err)
+		return time.Time{}, fmt.Errorf("get expiration timestamp from access token: %w", err)
 	} else if expirationTimestampNumeric == nil {
-		return false, nil
+		return time.Time{}, nil
 	}
-	expirationTimestamp := expirationTimestampNumeric.Time
-	now := time.Now()
-	return now.After(expirationTimestamp), nil
+	return expirationTimestampNumeric.Time, nil
+}
+
+func TokenExpired(token string) (bool, error) {
+	expirationTimestamp, err := TokenExpirationTime(token)
+	if err != nil || expirationTimestamp.Equal(time.Time{}) {
+		return false, err
+	}
+	return time.Now().After(expirationTimestamp), nil
 }
 
 // Refresh access and refresh tokens using a valid refresh token
@@ -162,7 +168,7 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 }
 
 func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
-	idpClientID, err := getIDPClientID()
+	idpClientID, err := GetIDPClientID()
 	if err != nil {
 		return nil, err
 	}
@@ -177,11 +183,11 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 		utf.tokenEndpoint,
 		strings.NewReader(form.Encode()),
 	)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	return req, nil
 }
 

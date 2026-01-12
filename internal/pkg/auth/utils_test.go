@@ -103,7 +103,7 @@ func TestGetIDPClientID(t *testing.T) {
 			viper.Reset()
 			viper.Set(config.IdentityProviderCustomClientIdKey, tt.idpCustomClientID)
 
-			got, err := getIDPClientID()
+			got, err := GetIDPClientID()
 
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)

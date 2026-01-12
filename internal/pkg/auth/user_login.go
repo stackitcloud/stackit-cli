@@ -70,7 +70,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		return fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
 
-	idpClientID, err := getIDPClientID()
+	idpClientID, err := GetIDPClientID()
 	if err != nil {
 		return err
 	}
