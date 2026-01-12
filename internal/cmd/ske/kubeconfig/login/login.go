@@ -20,7 +20,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
@@ -158,12 +157,12 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 		return nil, fmt.Errorf("unmarshal: %w", err)
 	}
 
-	profile, err := config.GetProfile()
+	authEmail, err := auth.GetAuthEmail()
 	if err != nil {
-		return nil, fmt.Errorf("error getting profile: %w", err)
+		return nil, fmt.Errorf("error getting auth email: %w", err)
 	}
 
-	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server+auth.GetProfileEmail(profile))))
+	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server+"\x00"+authEmail)))
 
 	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
 	if clusterConfig.Region == "" {
