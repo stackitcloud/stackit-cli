@@ -136,7 +136,7 @@ func (p *Printer) Error(msg string, args ...any) {
 // Returns ErrAborted if the user answers negative.
 func (p *Printer) PromptForConfirmation(prompt string) error {
 	if p.AssumeYes {
-		p.Warn("Auto-confirming prompt: %q", prompt)
+		p.Warn("Auto-confirming prompt: %q\n", prompt)
 		return nil
 	}
 	question := fmt.Sprintf("%s [y/N] ", prompt)
