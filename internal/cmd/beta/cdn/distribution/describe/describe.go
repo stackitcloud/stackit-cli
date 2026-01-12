@@ -197,7 +197,6 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 	table.AddSeparator()
 	table.AddRow("OPTIMIZER ENABLED", optimizerEnabled)
 	table.AddSeparator()
-	// TODO config has yet another WAF block, left it out because the docs say to use the WAF block at the top level to determine enabled rules. There's also mode and type fields here, both left out.
 	return table
 }
 

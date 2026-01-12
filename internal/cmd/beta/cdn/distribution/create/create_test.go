@@ -520,7 +520,7 @@ func TestOutputResult(t *testing.T) {
 					Id: ptr.To("dist-1234"),
 				},
 			},
-			expected: fmt.Sprintf("Created CDN distribution for %q. Id: dist-1234\n", testProjectId),
+			expected: fmt.Sprintf("Created CDN distribution for %q. ID: dist-1234\n", testProjectId),
 		},
 	}
 

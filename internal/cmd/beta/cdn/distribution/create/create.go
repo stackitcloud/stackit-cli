@@ -330,7 +330,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *cdn
 		return fmt.Errorf("create distribution response is nil")
 	}
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created CDN distribution for %q. Id: %s\n", projectLabel, utils.PtrString(resp.Distribution.Id))
+		p.Outputf("Created CDN distribution for %q. ID: %s\n", projectLabel, utils.PtrString(resp.Distribution.Id))
 		return nil
 	})
 }

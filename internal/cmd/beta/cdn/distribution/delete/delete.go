@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete loadbalancer: %w", err)
 			}
 
-			params.Printer.Outputf("CDN distribution %q deleted.", model.DistributionID)
+			params.Printer.Outputf("CDN distribution %q deleted.\n", model.DistributionID)
 			return nil
 		},
 	}
