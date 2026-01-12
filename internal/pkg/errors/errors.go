@@ -1,10 +1,13 @@
 package errors
 
 import (
+	"encoding/json"
+	sysErrors "errors"
 	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 )
 
 const (
@@ -547,4 +550,137 @@ type OneOfFlagsIsMissing struct {
 
 func (e *OneOfFlagsIsMissing) Error() string {
 	return fmt.Sprintf(ONE_OF_THE_FLAGS_MUST_BE_PROVIDED_WHEN_ANOTHER_FLAG_IS_SET, e.MissingFlags, e.SetFlag)
+}
+
+// ___FORMATTING_ERRORS_________________________________________________________
+
+// InvalidFormatError indicates that an unsupported format was provided.
+type InvalidFormatError struct {
+	Format string // The invalid format that was provided
+}
+
+func (e *InvalidFormatError) Error() string {
+	if e.Format != "" {
+		return fmt.Sprintf("unsupported format provided: %s", e.Format)
+	}
+	return "unsupported format provided"
+}
+
+// NewInvalidFormatError creates a new InvalidFormatError with the provided format.
+func NewInvalidFormatError(format string) *InvalidFormatError {
+	return &InvalidFormatError{
+		Format: format,
+	}
+}
+
+// ___BUILD_REQUEST_ERRORS______________________________________________________
+// BuildRequestError indicates that a request could not be built.
+type BuildRequestError struct {
+	Reason string // Optional: specific reason why the request failed to build
+	Err    error  // Optional: underlying error
+}
+
+func (e *BuildRequestError) Error() string {
+	if e.Reason != "" && e.Err != nil {
+		return fmt.Sprintf("could not build request (%s): %v", e.Reason, e.Err)
+	}
+	if e.Reason != "" {
+		return fmt.Sprintf("could not build request: %s", e.Reason)
+	}
+	if e.Err != nil {
+		return fmt.Sprintf("could not build request: %v", e.Err)
+	}
+	return "could not build request"
+}
+
+func (e *BuildRequestError) Unwrap() error {
+	return e.Err
+}
+
+// NewBuildRequestError creates a new BuildRequestError with optional reason and underlying error.
+func NewBuildRequestError(reason string, err error) *BuildRequestError {
+	return &BuildRequestError{
+		Reason: reason,
+		Err:    err,
+	}
+}
+
+// ___REQUESTS_ERRORS___________________________________________________________
+// RequestFailedError indicates that an API request failed.
+// If the provided error is an OpenAPI error, the status code and message from the error body will be included in the error message.
+type RequestFailedError struct {
+	Err error // Optional: underlying error
+}
+
+func (e *RequestFailedError) Error() string {
+	var msg = "request failed"
+
+	if e.Err != nil {
+		var oApiErr *oapierror.GenericOpenAPIError
+		if sysErrors.As(e.Err, &oApiErr) {
+			// Extract status code from OpenAPI error header if it exists
+			if oApiErr.StatusCode > 0 {
+				msg += fmt.Sprintf(" (%d)", oApiErr.StatusCode)
+			}
+
+			// Try to extract message from OpenAPI error body
+			if bodyMsg := extractOpenApiMessageFromBody(oApiErr.Body); bodyMsg != "" {
+				msg += fmt.Sprintf(": %s", bodyMsg)
+			} else if trimmedBody := strings.TrimSpace(string(oApiErr.Body)); trimmedBody != "" {
+				msg += fmt.Sprintf(": %s", trimmedBody)
+			} else {
+				// Otherwise use the Go error
+				msg += fmt.Sprintf(": %v", e.Err)
+			}
+		} else {
+			// If this can't be cased into a OpenApi error use the Go error
+			msg += fmt.Sprintf(": %v", e.Err)
+		}
+	}
+
+	return msg
+}
+
+func (e *RequestFailedError) Unwrap() error {
+	return e.Err
+}
+
+// NewRequestFailedError creates a new RequestFailedError with optional details.
+func NewRequestFailedError(err error) *RequestFailedError {
+	return &RequestFailedError{
+		Err: err,
+	}
+}
+
+// ___HELPERS___________________________________________________________________
+// extractOpenApiMessageFromBody attempts to parse a JSON body and extract the "message"
+// field. It returns an empty string if parsing fails or if no message is found.
+func extractOpenApiMessageFromBody(body []byte) string {
+	trimmedBody := strings.TrimSpace(string(body))
+	// Return early if empty.
+	if trimmedBody == "" {
+		return ""
+	}
+
+	// Try to unmarshal as a structured error first
+	var errorBody struct {
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(body, &errorBody); err == nil && errorBody.Message != "" {
+		if msg := strings.TrimSpace(errorBody.Message); msg != "" {
+			return msg
+		}
+	}
+
+	// If that fails, try to unmarshal as a plain string
+	var plainBody string
+	if err := json.Unmarshal(body, &plainBody); err == nil && plainBody != "" {
+		if msg := strings.TrimSpace(plainBody); msg != "" {
+			return msg
+		}
+		return ""
+	}
+
+	// All parsing attempts failed or yielded no message
+	return ""
 }
