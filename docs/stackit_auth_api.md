@@ -10,6 +10,10 @@ These commands allow you to authenticate with your personal STACKIT account
 and share the credentials with the STACKIT Terraform Provider and SDK.
 This provides an alternative to using service accounts for local development.
 
+Tokens are stored separately from tokens received from "stackit auth login", this allows using separate accounts when using the cli directly vs. using it to manage credentials for the SDK and TF provider.
+
+Tokens are stored in the OS keychain with a fallback to local storage.
+
 ```
 stackit auth api [flags]
 ```
