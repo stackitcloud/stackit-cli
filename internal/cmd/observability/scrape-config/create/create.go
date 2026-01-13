@@ -89,12 +89,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				model.Payload = &defaultPayload
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Observability instance %q?", *model.Payload.JobName, instanceLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Observability instance %q?", *model.Payload.JobName, instanceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

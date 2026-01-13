@@ -78,13 +78,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
 				}
-				if !model.AssumeYes {
-					prompt := fmt.Sprintf("Are you sure you want to create a network interface for network %q and attach it to server %q?", networkLabel, serverLabel)
-					err = params.Printer.PromptForConfirmation(prompt)
-					if err != nil {
-						return err
-					}
+				prompt := fmt.Sprintf("Are you sure you want to create a network interface for network %q and attach it to server %q?", networkLabel, serverLabel)
+				err = params.Printer.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
 				}
+
 				// Call API
 				req := buildRequestCreateAndAttach(ctx, model, apiClient)
 				err = req.Execute()
@@ -95,13 +94,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return nil
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to attach network interface %q to server %q?", *model.NicId, serverLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to attach network interface %q to server %q?", *model.NicId, serverLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
+
 			// Call API
 			req := buildRequestAttach(ctx, model, apiClient)
 			err = req.Execute()

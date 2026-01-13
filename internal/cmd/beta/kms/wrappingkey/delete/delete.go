@@ -62,12 +62,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				wrappingKeyName = model.WrappingKeyId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the wrapping key %q? (this cannot be undone)", wrappingKeyName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete the wrapping key %q? (this cannot be undone)", wrappingKeyName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

@@ -65,12 +65,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Warn("The profile you are trying to delete is the active profile. The default profile will be set to active.\n")
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete profile %q? (This cannot be undone)", model.Profile)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete profile %q? (This cannot be undone)", model.Profile)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			err = config.DeleteProfile(params.Printer, model.Profile)

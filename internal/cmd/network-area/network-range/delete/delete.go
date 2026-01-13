@@ -71,12 +71,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				networkRangeLabel = model.NetworkRangeId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area (SNA) %q?", networkRangeLabel, networkAreaLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area (SNA) %q?", networkRangeLabel, networkAreaLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

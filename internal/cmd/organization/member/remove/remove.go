@@ -68,15 +68,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to remove the %s role from %s on organization with ID %q?", *model.Role, model.Subject, *model.OrganizationId)
-				if model.Force {
-					prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
-				}
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to remove the %s role from %s on organization with ID %q?", *model.Role, model.Subject, *model.OrganizationId)
+			if model.Force {
+				prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
+			}
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

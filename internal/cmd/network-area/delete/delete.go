@@ -69,12 +69,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				networkAreaLabel = model.AreaId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete network area %q?", networkAreaLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete network area %q?", networkAreaLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Check if the network area has a regional configuration

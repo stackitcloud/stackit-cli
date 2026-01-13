@@ -114,12 +114,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a network area for organization %q?", orgLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a network area for organization %q?", orgLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
@@ -147,7 +145,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("create network area region: %w", err)
 				}
-				if !model.AssumeYes {
+				if !model.Async {
 					s := spinner.New(params.Printer)
 					s.Start("Create network area region")
 					_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, *resp.Id, model.Region).WaitWithContext(ctx)
