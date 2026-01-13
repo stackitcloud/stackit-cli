@@ -1,15 +1,22 @@
 package cache
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
 var (
-	cacheFolderPath string
+	cacheFolderPath    string
+	cacheEncryptionKey []byte
 
 	identifierRegex             = regexp.MustCompile("^[a-zA-Z0-9-]+$")
 	ErrorInvalidCacheIdentifier = fmt.Errorf("invalid cache identifier")
@@ -21,6 +28,25 @@ func Init() error {
 		return fmt.Errorf("get user cache dir: %w", err)
 	}
 	cacheFolderPath = filepath.Join(cacheDir, "stackit")
+
+	key, _ := auth.GetAuthField(auth.CACHE_ENCRYPTION_KEY)
+	cacheEncryptionKey = nil
+	if key != "" {
+		cacheEncryptionKey, _ = base64.StdEncoding.DecodeString(key)
+		// invalid key length
+		if len(cacheEncryptionKey) != 32 {
+			cacheEncryptionKey = nil
+		}
+	}
+	if len(cacheEncryptionKey) == 0 {
+		cacheEncryptionKey = make([]byte, 32)
+		_, err := rand.Read(cacheEncryptionKey)
+		if err != nil {
+			return fmt.Errorf("cache encryption key: %v", err)
+		}
+		key := base64.StdEncoding.EncodeToString(cacheEncryptionKey)
+		return auth.SetAuthField(auth.CACHE_ENCRYPTION_KEY, key)
+	}
 	return nil
 }
 
@@ -32,7 +58,21 @@ func GetObject(identifier string) ([]byte, error) {
 		return nil, ErrorInvalidCacheIdentifier
 	}
 
-	return os.ReadFile(filepath.Join(cacheFolderPath, identifier))
+	data, err := os.ReadFile(filepath.Join(cacheFolderPath, identifier))
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := aes.NewCipher(cacheEncryptionKey)
+	if err != nil {
+		return nil, err
+	}
+	aead, err := cipher.NewGCMWithRandomNonce(block)
+	if err != nil {
+		return nil, err
+	}
+
+	return aead.Open(nil, nil, data, nil)
 }
 
 func PutObject(identifier string, data []byte) error {
@@ -48,7 +88,17 @@ func PutObject(identifier string, data []byte) error {
 		return err
 	}
 
-	return os.WriteFile(filepath.Join(cacheFolderPath, identifier), data, 0o600)
+	block, err := aes.NewCipher(cacheEncryptionKey)
+	if err != nil {
+		return err
+	}
+	aead, err := cipher.NewGCMWithRandomNonce(block)
+	if err != nil {
+		return err
+	}
+	encrypted := aead.Seal(nil, nil, data, nil)
+
+	return os.WriteFile(filepath.Join(cacheFolderPath, identifier), encrypted, 0o600)
 }
 
 func DeleteObject(identifier string) error {

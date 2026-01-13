@@ -37,6 +37,7 @@ const (
 	PRIVATE_KEY             authFieldKey = "private_key"
 	TOKEN_CUSTOM_ENDPOINT   authFieldKey = "token_custom_endpoint"
 	IDP_TOKEN_ENDPOINT      authFieldKey = "idp_token_endpoint" //nolint:gosec // linter false positive
+	CACHE_ENCRYPTION_KEY    authFieldKey = "cache_encryption_key"
 )
 
 const (
@@ -59,6 +60,7 @@ var authFieldKeys = []authFieldKey{
 	TOKEN_CUSTOM_ENDPOINT,
 	IDP_TOKEN_ENDPOINT,
 	authFlowType,
+	CACHE_ENCRYPTION_KEY,
 }
 
 // All fields that are set when a user logs in

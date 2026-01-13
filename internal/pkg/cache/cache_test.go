@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 )
 
-func TestGetObject(t *testing.T) {
+func TestGetObjectErrors(t *testing.T) {
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -20,12 +21,6 @@ func TestGetObject(t *testing.T) {
 		expectFile  bool
 		expectedErr error
 	}{
-		{
-			description: "identifier exists",
-			identifier:  "test-cache-get-exists",
-			expectFile:  true,
-			expectedErr: nil,
-		},
 		{
 			description: "identifier does not exist",
 			identifier:  "test-cache-get-not-exists",
@@ -203,5 +198,28 @@ func TestDeleteObject(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestWriteAndRead(t *testing.T) {
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
+	id := "test-cycle-" + uuid.NewString()
+	data := []byte("test-data")
+	err := PutObject(id, data)
+	if err != nil {
+		t.Fatalf("putobject failed: %v", err)
+	}
+
+	readData, err := GetObject(id)
+	if err != nil {
+		t.Fatalf("getobject failed: %v", err)
+	}
+
+	diff := cmp.Diff(data, readData)
+	if diff != "" {
+		t.Fatalf("unexpected data diff: %v", diff)
 	}
 }
