@@ -58,16 +58,16 @@ func Init() error {
 		cacheEncryptionKey = make([]byte, 32)
 		_, err := rand.Read(cacheEncryptionKey)
 		if err != nil {
-			return fmt.Errorf("cache encryption key: %v", err)
+			return fmt.Errorf("cache encryption key: %w", err)
 		}
 		key := base64.StdEncoding.EncodeToString(cacheEncryptionKey)
 		err = auth.SetAuthField(auth.CACHE_ENCRYPTION_KEY, key)
 		if err != nil {
-			return fmt.Errorf("save cache encryption key: %v", err)
+			return fmt.Errorf("save cache encryption key: %w", err)
 		}
 		err = auth.SetAuthField(auth.CACHE_ENCRYPTION_KEY_AGE, fmt.Sprint(time.Now().Unix()))
 		if err != nil {
-			return fmt.Errorf("save cache encryption key age: %v", err)
+			return fmt.Errorf("save cache encryption key age: %w", err)
 		}
 	}
 	return nil
