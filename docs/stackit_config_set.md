@@ -32,6 +32,7 @@ stackit config set [flags]
       --allowed-url-domain string                                  Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command
       --authorization-custom-endpoint string                       Authorization API base URL, used in calls to this API
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
+      --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
   -h, --help                                                       Help for "stackit config set"
       --iaas-custom-endpoint string                                IaaS API base URL, used in calls to this API
       --identity-provider-custom-client-id string                  Identity Provider client ID, used for user authentication

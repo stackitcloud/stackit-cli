@@ -6,12 +6,20 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 )
 
 var cmd *cobra.Command
 var service *cobra.Command
 var resource *cobra.Command
 var operation *cobra.Command
+
+var (
+	testErrorMessage = "test error message"
+	errStringErrTest = errors.New(testErrorMessage)
+	errOpenApi404    = &oapierror.GenericOpenAPIError{StatusCode: 404, Body: []byte(`{"message":"not found"}`)}
+	errOpenApi500    = &oapierror.GenericOpenAPIError{StatusCode: 500, Body: []byte(`invalid-json`)}
+)
 
 func setupCmd() {
 	cmd = &cobra.Command{
@@ -682,6 +690,241 @@ func TestAppendUsageTip(t *testing.T) {
 
 			if err.Error() != tt.expectedError.Error() {
 				t.Fatalf("expected error to be %s, got %s", tt.expectedError, err.Error())
+			}
+		})
+	}
+}
+
+func TestInvalidFormatError(t *testing.T) {
+	type args struct {
+		format string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "empty",
+			args: args{
+				format: "",
+			},
+			want: "unsupported format provided",
+		},
+		{
+			name: "with format",
+			args: args{
+				format: "yaml",
+			},
+			want: "unsupported format provided: yaml",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := (&InvalidFormatError{Format: tt.args.format}).Error()
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBuildRequestError(t *testing.T) {
+	type args struct {
+		reason string
+		err    error
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "empty",
+			args: args{
+				reason: "",
+				err:    nil,
+			},
+			want: "could not build request",
+		},
+		{
+			name: "reason only",
+			args: args{
+				reason: testErrorMessage,
+				err:    nil,
+			},
+			want: fmt.Sprintf("could not build request: %s", testErrorMessage),
+		},
+		{
+			name: "error only",
+			args: args{
+				reason: "",
+				err:    errStringErrTest,
+			},
+			want: fmt.Sprintf("could not build request: %s", testErrorMessage),
+		},
+		{
+			name: "reason and error",
+			args: args{
+				reason: testErrorMessage,
+				err:    errStringErrTest,
+			},
+			want: fmt.Sprintf("could not build request (%s): %s", testErrorMessage, testErrorMessage),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := (&BuildRequestError{Reason: tt.args.reason, Err: tt.args.err}).Error()
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRequestFailedError(t *testing.T) {
+	type args struct {
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "nil underlying",
+			args: args{
+				err: nil,
+			},
+			want: "request failed",
+		},
+		{
+			name: "non-openapi error",
+			args: args{
+				err: errStringErrTest,
+			},
+			want: fmt.Sprintf("request failed: %s", testErrorMessage),
+		},
+		{
+			name: "openapi error with message",
+			args: args{
+				err: errOpenApi404,
+			},
+			want: "request failed (404): not found",
+		},
+		{
+			name: "openapi error without message",
+			args: args{
+				err: errOpenApi500,
+			},
+			want: "request failed (500): invalid-json",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := (&RequestFailedError{Err: tt.args.err}).Error()
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractMessageFromBody(t *testing.T) {
+	type args struct {
+		body []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "empty body",
+			args: args{
+				body: []byte(""),
+			},
+			want: "",
+		},
+		{
+			name: "invalid json",
+			args: args{
+				body: []byte("not-json"),
+			},
+			want: "",
+		},
+		{
+			name: "missing message field",
+			args: args{
+				body: []byte(`{"error":"oops"}`),
+			},
+			want: "",
+		},
+		{
+			name: "with message field",
+			args: args{
+				body: []byte(`{"message":"the reason"}`),
+			},
+			want: "the reason",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractOpenApiMessageFromBody(tt.args.body)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConstructorsReturnExpected(t *testing.T) {
+	buildRequestError := NewBuildRequestError(testErrorMessage, errStringErrTest)
+
+	tests := []struct {
+		name string
+		got  any
+		want any
+	}{
+		{
+			name: "InvalidFormat format",
+			got:  NewInvalidFormatError("fmt").Format,
+			want: "fmt",
+		},
+		{
+			name: "BuildRequestError error",
+			got:  buildRequestError.Err,
+			want: errStringErrTest,
+		},
+		{
+			name: "BuildRequestError reason",
+			got:  buildRequestError.Reason,
+			want: testErrorMessage,
+		},
+		{
+			name: "RequestFailed error",
+			got:  NewRequestFailedError(errStringErrTest).Err,
+			want: errStringErrTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			wantErr, wantIsErr := tt.want.(error)
+			gotErr, gotIsErr := tt.got.(error)
+			if wantIsErr {
+				if !gotIsErr {
+					t.Fatalf("expected error but got %T", tt.got)
+				}
+				if !errors.Is(gotErr, wantErr) {
+					t.Errorf("got error %v, want %v", gotErr, wantErr)
+				}
+				return
+			}
+
+			if tt.got != tt.want {
+				t.Errorf("got %v, want %v", tt.got, tt.want)
 			}
 		})
 	}

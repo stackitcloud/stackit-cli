@@ -30,6 +30,7 @@ stackit config unset [flags]
       --async                                               Configuration option to run commands asynchronously
       --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
       --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
+      --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL
   -h, --help                                                Help for "stackit config unset"
       --iaas-custom-endpoint                                IaaS API base URL. If unset, uses the default base URL
       --identity-provider-custom-client-id                  Identity Provider client ID, used for user authentication

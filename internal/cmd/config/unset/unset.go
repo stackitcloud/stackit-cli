@@ -30,6 +30,7 @@ const (
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
+	edgeCustomEndpointFlag              = "edge-custom-endpoint"
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag             = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
@@ -70,6 +71,7 @@ type inputModel struct {
 
 	AuthorizationCustomEndpoint     bool
 	DNSCustomEndpoint               bool
+	EdgeCustomEndpoint              bool
 	LoadBalancerCustomEndpoint      bool
 	LogMeCustomEndpoint             bool
 	MariaDBCustomEndpoint           bool
@@ -153,6 +155,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
+			}
+			if model.EdgeCustomEndpoint {
+				viper.Set(config.EdgeCustomEndpointKey, "")
 			}
 			if model.LoadBalancerCustomEndpoint {
 				viper.Set(config.LoadBalancerCustomEndpointKey, "")
@@ -250,6 +255,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(observabilityCustomEndpointFlag, false, "Observability API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(edgeCustomEndpointFlag, false, "Edge API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(loadBalancerCustomEndpointFlag, false, "Load Balancer API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
@@ -290,6 +296,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
+		EdgeCustomEndpoint:              flags.FlagToBoolValue(p, cmd, edgeCustomEndpointFlag),
 		LoadBalancerCustomEndpoint:      flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
 		LogMeCustomEndpoint:             flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:           flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),

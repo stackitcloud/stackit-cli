@@ -25,6 +25,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
+		edgeCustomEndpointFlag:            true,
 		loadBalancerCustomEndpointFlag:    true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
@@ -67,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
+		EdgeCustomEndpoint:            true,
 		LoadBalancerCustomEndpoint:    true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
@@ -125,6 +127,7 @@ func TestParseInput(t *testing.T) {
 
 				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
+				model.EdgeCustomEndpoint = false
 				model.LoadBalancerCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
@@ -216,6 +219,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.DNSCustomEndpoint = false
+			}),
+		},
+		{
+			description: "edge custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[edgeCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.EdgeCustomEndpoint = false
 			}),
 		},
 		{
