@@ -509,6 +509,7 @@ func TestPromptForConfirmation(t *testing.T) {
 		verbosity   Level
 		isValid     bool
 		isAborted   bool
+		assumeYes   bool
 	}{
 		// Note: Some of these inputs have normal spaces, others have tabs
 		{
@@ -647,6 +648,13 @@ func TestPromptForConfirmation(t *testing.T) {
 			verbosity:   DebugLevel,
 			isValid:     false,
 		},
+		{
+			description: "no input with assume yes",
+			input:       "",
+			verbosity:   DebugLevel,
+			isValid:     true,
+			assumeYes:   true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -665,6 +673,7 @@ func TestPromptForConfirmation(t *testing.T) {
 			p := &Printer{
 				Cmd:       cmd,
 				Verbosity: tt.verbosity,
+				AssumeYes: tt.assumeYes,
 			}
 
 			err = p.PromptForConfirmation("")

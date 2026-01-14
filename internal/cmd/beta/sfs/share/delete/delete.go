@@ -65,12 +65,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				shareLabel = model.ShareId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete SFS share %q? (This cannot be undone)", shareLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete SFS share %q? (This cannot be undone)", shareLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

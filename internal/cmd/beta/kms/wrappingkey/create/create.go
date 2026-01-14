@@ -71,11 +71,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS wrapping key?")
-				if err != nil {
-					return err
-				}
+			err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS wrapping key?")
+			if err != nil {
+				return err
 			}
 
 			// Call API

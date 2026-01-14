@@ -53,6 +53,16 @@ builds:
         - cmd: sh -c 'go run main.go completion bash > ./dist/completions/stackit.bash'
         - cmd: sh -c 'go run main.go completion fish > ./dist/completions/stackit.fish'
 
+  - id: freebsd-builds
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - freebsd
+    goarch:
+      - arm64
+      - amd64
+    binary: "stackit"
+
 archives:
   - id: windows-archives
     ids:
@@ -61,6 +71,7 @@ archives:
   - ids:
       - linux-builds
       - macos-builds
+      - freebsd-builds
     formats: [ 'tar.gz' ]
     files:
       - src: ./dist/completions/*
