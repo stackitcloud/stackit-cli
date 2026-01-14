@@ -120,6 +120,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 
 	return request
 }
+
 func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []logs.LogsInstance) error {
 	return p.OutputResult(outputFormat, instances, func() error {
 		if len(instances) == 0 {
