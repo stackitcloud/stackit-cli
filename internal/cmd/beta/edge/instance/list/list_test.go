@@ -52,10 +52,10 @@ func (m *mockExecutable) Execute() (*edge.InstanceList, error) {
 
 // mockAPIClient is a mock for the edge.APIClient interface
 type mockAPIClient struct {
-	getInstancesMock edge.ApiGetInstancesRequest
+	getInstancesMock edge.ApiListInstancesRequest
 }
 
-func (m *mockAPIClient) GetInstances(_ context.Context, _, _ string) edge.ApiGetInstancesRequest {
+func (m *mockAPIClient) ListInstances(_ context.Context, _, _ string) edge.ApiListInstancesRequest {
 	if m.getInstancesMock != nil {
 		return m.getInstancesMock
 	}
@@ -63,7 +63,7 @@ func (m *mockAPIClient) GetInstances(_ context.Context, _, _ string) edge.ApiGet
 }
 
 // Unused methods to satisfy the interface
-func (m *mockAPIClient) PostInstances(_ context.Context, _, _ string) edge.ApiPostInstancesRequest {
+func (m *mockAPIClient) CreateInstance(_ context.Context, _, _ string) edge.ApiCreateInstanceRequest {
 	return nil
 }
 func (m *mockAPIClient) GetInstance(_ context.Context, _, _, _ string) edge.ApiGetInstanceRequest {
