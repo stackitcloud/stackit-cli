@@ -76,12 +76,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a Logs instance for project %q?", projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a Logs instance for project %q?", projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+
+			if err != nil {
+				return err
 			}
 
 			// Call API

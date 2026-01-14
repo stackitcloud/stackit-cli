@@ -69,12 +69,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				instanceLabel = model.InstanceID
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete instance %q from project %q? (This cannot be undone)", instanceLabel, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete instance %q from project %q? (This cannot be undone)", instanceLabel, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+
+			if err != nil {
+				return err
 			}
 
 			// Call API
