@@ -15,12 +15,12 @@ import (
 
 // APIClient is an interface that consolidates all client functionality to allow for mocking of the API client during testing.
 type APIClient interface {
-	PostInstances(ctx context.Context, projectId, region string) edge.ApiPostInstancesRequest
+	CreateInstance(ctx context.Context, projectId, region string) edge.ApiCreateInstanceRequest
 	DeleteInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiDeleteInstanceRequest
 	DeleteInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiDeleteInstanceByNameRequest
 	GetInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiGetInstanceRequest
 	GetInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiGetInstanceByNameRequest
-	GetInstances(ctx context.Context, projectId, region string) edge.ApiGetInstancesRequest
+	ListInstances(ctx context.Context, projectId, region string) edge.ApiListInstancesRequest
 	UpdateInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiUpdateInstanceRequest
 	UpdateInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiUpdateInstanceByNameRequest
 	GetKubeconfigByInstanceId(ctx context.Context, projectId, region, instanceId string) edge.ApiGetKubeconfigByInstanceIdRequest
