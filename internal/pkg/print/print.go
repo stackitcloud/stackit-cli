@@ -262,10 +262,10 @@ func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc
 		encoder.SetEscapeHTML(false)
 		encoder.SetIndent("", "  ")
 		err := encoder.Encode(output)
-		details := buffer.Bytes()
 		if err != nil {
 			return fmt.Errorf("marshal json: %w", err)
 		}
+		details := buffer.Bytes()
 		p.Outputln(string(details))
 
 		return nil
