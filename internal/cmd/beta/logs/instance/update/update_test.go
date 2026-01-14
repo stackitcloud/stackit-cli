@@ -268,6 +268,12 @@ func TestOutputResult(t *testing.T) {
 			wantErr:     false,
 		},
 		{
+			description: "global flag nil",
+			instance:    &logs.LogsInstance{},
+			model:       &inputModel{GlobalFlagModel: nil},
+			wantErr:     false,
+		},
+		{
 			description: "json output",
 			instance:    &logs.LogsInstance{},
 			model:       &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: print.JSONOutputFormat}},
