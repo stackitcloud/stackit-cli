@@ -52,12 +52,12 @@ func (m *mockExecutable) Execute() (*edge.InstanceList, error) {
 
 // mockAPIClient is a mock for the edge.APIClient interface
 type mockAPIClient struct {
-	getInstancesMock edge.ApiListInstancesRequest
+	listInstancesMock edge.ApiListInstancesRequest
 }
 
 func (m *mockAPIClient) ListInstances(_ context.Context, _, _ string) edge.ApiListInstancesRequest {
-	if m.getInstancesMock != nil {
-		return m.getInstancesMock
+	if m.listInstancesMock != nil {
+		return m.listInstancesMock
 	}
 	return &mockExecutable{}
 }
@@ -291,7 +291,7 @@ func TestRun(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					getInstancesMock: &mockExecutable{
+					listInstancesMock: &mockExecutable{
 						executeResp: &edge.InstanceList{Instances: &[]edge.Instance{}},
 					},
 				},
@@ -303,7 +303,7 @@ func TestRun(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					getInstancesMock: &mockExecutable{
+					listInstancesMock: &mockExecutable{
 						executeFails: true,
 					},
 				},
@@ -426,7 +426,7 @@ func TestBuildRequest(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					getInstancesMock: &mockExecutable{},
+					listInstancesMock: &mockExecutable{},
 				},
 			},
 		},
@@ -442,7 +442,7 @@ func TestBuildRequest(t *testing.T) {
 					model.Limit = utils.Ptr(int64(10))
 				}),
 				client: &mockAPIClient{
-					getInstancesMock: &mockExecutable{},
+					listInstancesMock: &mockExecutable{},
 				},
 			},
 		},

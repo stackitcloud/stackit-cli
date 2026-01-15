@@ -57,12 +57,12 @@ func (m *mockExecutable) Execute() (*edge.Instance, error) {
 
 // mockAPIClient is a mock for the client.APIClient interface
 type mockAPIClient struct {
-	postInstancesMock edge.ApiCreateInstanceRequest
+	createInstanceMock edge.ApiCreateInstanceRequest
 }
 
 func (m *mockAPIClient) CreateInstance(_ context.Context, _, _ string) edge.ApiCreateInstanceRequest {
-	if m.postInstancesMock != nil {
-		return m.postInstancesMock
+	if m.createInstanceMock != nil {
+		return m.createInstanceMock
 	}
 	return &mockExecutable{}
 }
@@ -285,7 +285,7 @@ func TestBuildRequest(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					postInstancesMock: &mockExecutable{},
+					createInstanceMock: &mockExecutable{},
 				},
 			},
 			want: &createRequestSpec{
@@ -331,7 +331,7 @@ func TestRun(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					postInstancesMock: &mockExecutable{
+					createInstanceMock: &mockExecutable{
 						resp: &edge.Instance{Id: &testInstanceId},
 					},
 				},
@@ -343,7 +343,7 @@ func TestRun(t *testing.T) {
 			args: args{
 				model: fixtureInputModel(),
 				client: &mockAPIClient{
-					postInstancesMock: &mockExecutable{
+					createInstanceMock: &mockExecutable{
 						executeFails: true,
 					},
 				},
