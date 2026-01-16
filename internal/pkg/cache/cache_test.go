@@ -11,7 +11,15 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
+func overwriteCacheDir(t *testing.T) func() {
+	cacheDirOverwrite = t.TempDir()
+	return func() {
+		cacheDirOverwrite = ""
+	}
+}
+
 func TestGetObjectErrors(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -42,10 +50,6 @@ func TestGetObjectErrors(t *testing.T) {
 
 			// setup
 			if tt.expectFile {
-				err := os.MkdirAll(cacheFolderPath, 0o750)
-				if err != nil {
-					t.Fatalf("create cache folder: %s", err.Error())
-				}
 				path := filepath.Join(cacheFolderPath, id)
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed", path)
@@ -71,6 +75,7 @@ func TestGetObjectErrors(t *testing.T) {
 	}
 }
 func TestPutObject(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -145,6 +150,7 @@ func TestPutObject(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -182,8 +188,11 @@ func TestDeleteObject(t *testing.T) {
 
 			// setup
 			if tt.existingFile {
+				if err := os.MkdirAll(cacheFolderPath, 0o700); err != nil {
+					t.Fatalf("setup: MkdirAll (%s) failed: %v", path, err)
+				}
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
-					t.Fatalf("setup: WriteFile (%s) failed", path)
+					t.Fatalf("setup: WriteFile (%s) failed: %v", path, err)
 				}
 			}
 			// test
@@ -228,6 +237,7 @@ func TestWriteAndRead(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
+			defer overwriteCacheDir(t)()
 			if tt.clearKeys {
 				clearKeys(t)
 			}
@@ -256,6 +266,7 @@ func TestWriteAndRead(t *testing.T) {
 }
 
 func TestCacheCleanup(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -277,5 +288,12 @@ func TestCacheCleanup(t *testing.T) {
 	_, err = GetObject(id)
 	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("getobject failed with unexpected error: %v", err)
+	}
+}
+
+func TestInit(t *testing.T) {
+	// test that init without cache directory overwrite works
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
 	}
 }

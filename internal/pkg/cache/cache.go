@@ -17,6 +17,7 @@ import (
 )
 
 var (
+	cacheDirOverwrite  string // for testing only
 	cacheFolderPath    string
 	cacheEncryptionKey []byte
 
@@ -29,10 +30,17 @@ const (
 )
 
 func Init() error {
-	cacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return fmt.Errorf("get user cache dir: %w", err)
+	var cacheDir string
+	if cacheDirOverwrite == "" {
+		var err error
+		cacheDir, err = os.UserCacheDir()
+		if err != nil {
+			return fmt.Errorf("get user cache dir: %w", err)
+		}
+	} else {
+		cacheDir = cacheDirOverwrite
 	}
+
 	cacheFolderPath = filepath.Join(cacheDir, "stackit")
 
 	// Encryption keys should only be used a limited number of times for aes-gcm.
