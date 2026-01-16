@@ -1,19 +1,26 @@
-## stackit auth
+## stackit auth api get-access-token
 
-Authenticates the STACKIT CLI
+Prints a short-lived access token for the STACKIT Terraform Provider and SDK
 
 ### Synopsis
 
-Authenticates in the STACKIT CLI.
+Prints a short-lived access token for the STACKIT Terraform Provider and SDK which can be used e.g. for API calls.
 
 ```
-stackit auth [flags]
+stackit auth api get-access-token [flags]
+```
+
+### Examples
+
+```
+  Print a short-lived access token for the STACKIT Terraform Provider and SDK
+  $ stackit auth api get-access-token
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit auth"
+  -h, --help   Help for "stackit auth api get-access-token"
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +36,5 @@ stackit auth [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit auth activate-service-account](./stackit_auth_activate-service-account.md)	 - Authenticates using a service account
 * [stackit auth api](./stackit_auth_api.md)	 - Manages authentication for the STACKIT Terraform Provider and SDK
-* [stackit auth get-access-token](./stackit_auth_get-access-token.md)	 - Prints a short-lived access token.
-* [stackit auth login](./stackit_auth_login.md)	 - Logs in to the STACKIT CLI
-* [stackit auth logout](./stackit_auth_logout.md)	 - Logs the user account out of the STACKIT CLI
 

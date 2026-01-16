@@ -29,7 +29,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("log out failed: %w", err)
 			}
 
-			params.Printer.Info("Successfully logged out of the STACKIT CLI.\n")
+			params.Printer.Outputln("Successfully logged out of the STACKIT CLI.")
 			return nil
 		},
 	}

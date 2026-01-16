@@ -1,11 +1,6 @@
 package getaccesstoken
 
 import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -13,30 +8,31 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *types.CmdParams) *cobra.Command {
+func NewCmd(p *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-access-token",
-		Short: "Prints a short-lived access token.",
-		Long:  "Prints a short-lived access token which can be used e.g. for API calls.",
+		Short: "Prints a short-lived access token for the STACKIT Terraform Provider and SDK",
+		Long:  "Prints a short-lived access token for the STACKIT Terraform Provider and SDK which can be used e.g. for API calls.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Print a short-lived access token`,
-				"$ stackit auth get-access-token"),
+				`Print a short-lived access token for the STACKIT Terraform Provider and SDK`,
+				"$ stackit auth api get-access-token"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
 
-			userSessionExpired, err := auth.UserSessionExpired()
+			userSessionExpired, err := auth.UserSessionExpiredWithContext(auth.StorageContextAPI)
 			if err != nil {
 				return err
 			}
@@ -44,28 +40,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return &cliErr.SessionExpiredError{}
 			}
 
-			accessToken, err := auth.GetValidAccessToken(params.Printer)
+			accessToken, err := auth.GetValidAccessTokenWithContext(p.Printer, auth.StorageContextAPI)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get valid access token: %v", err)
+				p.Printer.Debug(print.ErrorLevel, "get valid access token: %v", err)
 				return &cliErr.SessionExpiredError{}
 			}
 
-			switch model.OutputFormat {
-			case print.JSONOutputFormat:
-				details, err := json.MarshalIndent(map[string]string{
-					"access_token": accessToken,
-				}, "", "  ")
-				if err != nil {
-					return fmt.Errorf("marshal image list: %w", err)
-				}
-				params.Printer.Outputln(string(details))
-
-				return nil
-			default:
-				params.Printer.Outputln(accessToken)
-
-				return nil
+			result := map[string]string{
+				"access_token": accessToken,
 			}
+			return p.Printer.OutputResult(model.OutputFormat, result, func() error {
+				p.Printer.Outputln(accessToken)
+				return nil
+			})
 		},
 	}
 

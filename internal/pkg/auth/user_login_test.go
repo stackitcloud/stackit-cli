@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/zalando/go-keyring"
 )
 
@@ -93,7 +94,9 @@ func TestParseWellKnownConfig(t *testing.T) {
 				tt.getResponse,
 			}
 
-			got, err := parseWellKnownConfiguration(&testClient, "")
+			p := print.NewPrinter()
+
+			got, err := parseWellKnownConfiguration(p, &testClient, "", StorageContextCLI)
 
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)
