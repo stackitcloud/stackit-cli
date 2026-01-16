@@ -69,6 +69,7 @@ func Init() error {
 		if err != nil {
 			return fmt.Errorf("save cache encryption key age: %w", err)
 		}
+		// cleanup old cache entries as they won't be readable anymore
 		if err := cleanupCache(); err != nil {
 			return err
 		}
