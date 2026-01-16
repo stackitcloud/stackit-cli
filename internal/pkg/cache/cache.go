@@ -165,7 +165,7 @@ func cleanupCache() error {
 	for _, entry := range entries {
 		name := entry.Name()
 		err := DeleteObject(name)
-		if err != nil && err != ErrorInvalidCacheIdentifier {
+		if err != nil && !errors.Is(err, ErrorInvalidCacheIdentifier) {
 			return err
 		}
 	}
