@@ -3,7 +3,8 @@ package project
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/project/describe"
@@ -17,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project",
 		Short: "Manages projects",
@@ -32,7 +33,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func addSubcommands(cmd *cobra.Command, params *params.CmdParams) {
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))

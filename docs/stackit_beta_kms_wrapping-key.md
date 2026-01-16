@@ -32,5 +32,6 @@ stackit beta kms wrapping-key [flags]
 * [stackit beta kms](./stackit_beta_kms.md)	 - Provides functionality for KMS
 * [stackit beta kms wrapping-key create](./stackit_beta_kms_wrapping-key_create.md)	 - Creates a KMS wrapping key
 * [stackit beta kms wrapping-key delete](./stackit_beta_kms_wrapping-key_delete.md)	 - Deletes a KMS wrapping key
+* [stackit beta kms wrapping-key describe](./stackit_beta_kms_wrapping-key_describe.md)	 - Describe a KMS wrapping key
 * [stackit beta kms wrapping-key list](./stackit_beta_kms_wrapping-key_list.md)	 - Lists all KMS wrapping keys
 

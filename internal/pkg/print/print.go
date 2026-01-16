@@ -2,6 +2,7 @@ package print
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -51,6 +52,7 @@ var (
 
 type Printer struct {
 	Cmd       *cobra.Command
+	AssumeYes bool
 	Verbosity Level
 }
 
@@ -134,6 +136,10 @@ func (p *Printer) Error(msg string, args ...any) {
 // Returns nil only if the user (explicitly) answers positive.
 // Returns ErrAborted if the user answers negative.
 func (p *Printer) PromptForConfirmation(prompt string) error {
+	if p.AssumeYes {
+		p.Warn("Auto-confirming prompt: %q\n", prompt)
+		return nil
+	}
 	question := fmt.Sprintf("%s [y/N] ", prompt)
 	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	for i := 0; i < 3; i++ {
@@ -157,6 +163,10 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 //
 // Returns nil if the user presses Enter.
 func (p *Printer) PromptForEnter(prompt string) error {
+	if p.AssumeYes {
+		p.Warn("Auto-confirming prompt: %q", prompt)
+		return nil
+	}
 	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	p.Cmd.PrintErr(prompt)
 	_, err := reader.ReadString('\n')
@@ -247,10 +257,15 @@ func (p *Printer) DebugInputModel(model any) {
 func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc func() error) error {
 	switch outputFormat {
 	case JSONOutputFormat:
-		details, err := json.MarshalIndent(output, "", "  ")
+		buffer := &bytes.Buffer{}
+		encoder := json.NewEncoder(buffer)
+		encoder.SetEscapeHTML(false)
+		encoder.SetIndent("", "  ")
+		err := encoder.Encode(output)
 		if err != nil {
 			return fmt.Errorf("marshal json: %w", err)
 		}
+		details := buffer.Bytes()
 		p.Outputln(string(details))
 
 		return nil

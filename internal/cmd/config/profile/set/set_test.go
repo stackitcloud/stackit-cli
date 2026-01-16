@@ -65,7 +65,7 @@ func TestParseInput(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.GlobalFlagModel.Verbosity = globalflags.DebugVerbosity
+				model.Verbosity = globalflags.DebugVerbosity
 			}),
 		},
 		{

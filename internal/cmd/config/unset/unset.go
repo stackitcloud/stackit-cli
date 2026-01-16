@@ -3,7 +3,8 @@ package unset
 import (
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -29,6 +30,7 @@ const (
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
+	edgeCustomEndpointFlag              = "edge-custom-endpoint"
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag             = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
@@ -47,10 +49,12 @@ const (
 	serverBackupCustomEndpointFlag      = "serverbackup-custom-endpoint"
 	serverOsUpdateCustomEndpointFlag    = "server-osupdate-custom-endpoint"
 	runCommandCustomEndpointFlag        = "runcommand-custom-endpoint"
+	sfsCustomEndpointFlag               = "sfs-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
+	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 )
 
 type inputModel struct {
@@ -67,6 +71,7 @@ type inputModel struct {
 
 	AuthorizationCustomEndpoint     bool
 	DNSCustomEndpoint               bool
+	EdgeCustomEndpoint              bool
 	LoadBalancerCustomEndpoint      bool
 	LogMeCustomEndpoint             bool
 	MariaDBCustomEndpoint           bool
@@ -85,13 +90,15 @@ type inputModel struct {
 	RunCommandCustomEndpoint        bool
 	ServiceAccountCustomEndpoint    bool
 	ServiceEnablementCustomEndpoint bool
+	SfsCustomEndpoint               bool
 	SKECustomEndpoint               bool
 	SQLServerFlexCustomEndpoint     bool
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
+	IntakeCustomEndpoint            bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unset",
 		Short: "Unsets CLI configuration options",
@@ -148,6 +155,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			}
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
+			}
+			if model.EdgeCustomEndpoint {
+				viper.Set(config.EdgeCustomEndpointKey, "")
 			}
 			if model.LoadBalancerCustomEndpoint {
 				viper.Set(config.LoadBalancerCustomEndpointKey, "")
@@ -212,6 +222,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if model.TokenCustomEndpoint {
 				viper.Set(config.TokenCustomEndpointKey, "")
 			}
+			if model.IntakeCustomEndpoint {
+				viper.Set(config.IntakeCustomEndpointKey, "")
+			}
+			if model.SfsCustomEndpoint {
+				viper.Set(config.SfsCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -239,6 +255,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(observabilityCustomEndpointFlag, false, "Observability API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(edgeCustomEndpointFlag, false, "Edge API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(loadBalancerCustomEndpointFlag, false, "Load Balancer API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
@@ -260,6 +277,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
+	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -277,6 +296,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
 		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
+		EdgeCustomEndpoint:              flags.FlagToBoolValue(p, cmd, edgeCustomEndpointFlag),
 		LoadBalancerCustomEndpoint:      flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
 		LogMeCustomEndpoint:             flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:           flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
@@ -296,9 +316,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ServerOsUpdateCustomEndpoint:    flags.FlagToBoolValue(p, cmd, serverOsUpdateCustomEndpointFlag),
 		RunCommandCustomEndpoint:        flags.FlagToBoolValue(p, cmd, runCommandCustomEndpointFlag),
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
+		SfsCustomEndpoint:               flags.FlagToBoolValue(p, cmd, sfsCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
+		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)

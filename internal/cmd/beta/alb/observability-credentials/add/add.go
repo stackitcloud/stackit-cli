@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Password    *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Adds observability credentials to an application load balancer",
@@ -54,12 +55,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := "Are your sure you want to add credentials?"
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := "Are your sure you want to add credentials?"
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
@@ -69,7 +68,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return fmt.Errorf("add credential: %w", err)
 			}
 
-			return outputResult(params.Printer, model.GlobalFlagModel.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)

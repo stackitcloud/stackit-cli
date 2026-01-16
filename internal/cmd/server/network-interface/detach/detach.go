@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -36,7 +36,7 @@ type inputModel struct {
 	Delete    *bool
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "detach",
 		Short: "Detaches a network interface from a server",
@@ -80,13 +80,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = *model.NetworkId
 				}
-				if !model.AssumeYes {
-					prompt := fmt.Sprintf("Are you sure you want to detach and delete all network interfaces of network %q from server %q? (This cannot be undone)", networkLabel, serverLabel)
-					err = params.Printer.PromptForConfirmation(prompt)
-					if err != nil {
-						return err
-					}
+				prompt := fmt.Sprintf("Are you sure you want to detach and delete all network interfaces of network %q from server %q? (This cannot be undone)", networkLabel, serverLabel)
+				err = params.Printer.PromptForConfirmation(prompt)
+				if err != nil {
+					return err
 				}
+
 				// Call API
 				req := buildRequestDetachAndDelete(ctx, model, apiClient)
 				err = req.Execute()
@@ -97,13 +96,12 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return nil
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to detach network interface %q from server %q?", *model.NicId, serverLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to detach network interface %q from server %q?", *model.NicId, serverLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
+
 			// Call API
 			req := buildRequestDetach(ctx, model, apiClient)
 			err = req.Execute()
@@ -136,7 +134,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	// if delete is not provided then network-interface-id is needed

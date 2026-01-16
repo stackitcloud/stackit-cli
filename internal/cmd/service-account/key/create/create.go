@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -34,7 +35,7 @@ type inputModel struct {
 	PublicKey           *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a service account key",
@@ -68,16 +69,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				validUntilInfo := "The key will be valid until deleted"
-				if model.ExpiresInDays != nil {
-					validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
-				}
-				prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			validUntilInfo := "The key will be valid until deleted"
+			if model.ExpiresInDays != nil {
+				validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
+			}
+			prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

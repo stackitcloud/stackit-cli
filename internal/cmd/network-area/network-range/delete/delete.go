@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -32,7 +33,7 @@ type inputModel struct {
 	NetworkRangeId string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", networkRangeIdArg),
 		Short: "Deletes a network range in a STACKIT Network Area (SNA)",
@@ -70,12 +71,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				networkRangeLabel = model.NetworkRangeId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area (SNA) %q?", networkRangeLabel, networkAreaLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete network range %q on STACKIT Network Area (SNA) %q?", networkRangeLabel, networkAreaLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -25,11 +26,10 @@ type inputModel struct {
 }
 
 const (
-	labelSelectorFlag = "label-selector"
-	limitFlag         = "limit"
+	limitFlag = "limit"
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists albs",
@@ -73,19 +73,14 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list load balancerse: %w", err)
 			}
+			items := response.GetLoadBalancers()
 
-			if items := response.LoadBalancers; items == nil || len(*items) == 0 {
-				params.Printer.Info("No load balancers found for project %q", projectLabel)
-			} else {
-				if model.Limit != nil && len(*items) > int(*model.Limit) {
-					*items = (*items)[:*model.Limit]
-				}
-				if err := outputResult(params.Printer, model.OutputFormat, *items); err != nil {
-					return fmt.Errorf("output loadbalancers: %w", err)
-				}
+			// Truncate output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = items[:*model.Limit]
 			}
 
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 
@@ -125,8 +120,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, items []alb.LoadBalancer) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []alb.LoadBalancer) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No load balancers found for project %q", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION", "ERRORS")
 		for i := range items {

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -22,7 +23,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cleanup",
 		Short: "Deletes observability credentials unused by any Load Balancer",
@@ -71,21 +72,19 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return nil
 			}
 
-			if !model.AssumeYes {
-				prompt := "Will delete the following unused observability credentials: \n"
-				for _, credential := range credentials {
-					if credential.DisplayName == nil || credential.Username == nil {
-						return fmt.Errorf("list unused Load Balancer observability credentials: credentials %q missing display name or username", *credential.CredentialsRef)
-					}
-					name := *credential.DisplayName
-					username := *credential.Username
-					prompt += fmt.Sprintf("  - %s (username: %q)\n", name, username)
+			prompt := "Will delete the following unused observability credentials: \n"
+			for _, credential := range credentials {
+				if credential.DisplayName == nil || credential.Username == nil {
+					return fmt.Errorf("list unused Load Balancer observability credentials: credentials %q missing display name or username", *credential.CredentialsRef)
 				}
-				prompt += fmt.Sprintf("Are you sure you want to delete unused observability credentials on project %q? (This cannot be undone)", projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+				name := *credential.DisplayName
+				username := *credential.Username
+				prompt += fmt.Sprintf("  - %s (username: %q)\n", name, username)
+			}
+			prompt += fmt.Sprintf("Are you sure you want to delete unused observability credentials on project %q? (This cannot be undone)", projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			for _, credential := range credentials {

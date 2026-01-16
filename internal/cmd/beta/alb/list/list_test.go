@@ -5,8 +5,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -19,11 +22,14 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx             = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient          = &alb.APIClient{}
-	testProjectId       = uuid.NewString()
-	testRegion          = "eu01"
-	testLimit     int64 = 10
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &alb.APIClient{}
+	testProjectId = uuid.NewString()
+)
+
+const (
+	testRegion       = "eu01"
+	testLimit  int64 = 10
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -41,7 +47,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Region: testRegion, Verbosity: globalflags.VerbosityDefault},
-		Limit:           &testLimit,
+		Limit:           utils.Ptr(testLimit),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -136,6 +142,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		projectLabel string
 		items        []alb.LoadBalancer
 	}
 	tests := []struct {
@@ -161,10 +168,10 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.items); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.items); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

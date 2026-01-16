@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -29,7 +30,7 @@ type inputModel struct {
 	Limit *int64
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all credentials",
@@ -68,13 +69,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list credentials: %w", err)
 			}
+			items := resp.GetCredentials()
 
-			if resp.Credentials == nil || len(*resp.Credentials) == 0 {
-				params.Printer.Info("No credentials found\n")
-				return nil
-			}
-
-			items := *resp.Credentials
+			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -116,12 +113,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 }
 
 func outputResult(p *print.Printer, outputFormat string, items []alb.CredentialsResponse) error {
-	if items == nil {
-		p.Outputln("no credentials found")
-		return nil
-	}
-
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No credentials found\n")
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("CREDENTIAL REF", "DISPLAYNAME", "USERNAME", "REGION")
 

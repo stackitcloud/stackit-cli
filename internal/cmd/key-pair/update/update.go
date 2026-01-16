@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -28,7 +29,7 @@ type inputModel struct {
 	KeyPairName *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", keyPairNameArg),
 		Short: "Updates a key pair",
@@ -50,12 +51,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeyPairName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return fmt.Errorf("update key pair: %w", err)
-				}
+			prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeyPairName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return fmt.Errorf("update key pair: %w", err)
 			}
 
 			// Call API
@@ -108,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 func outputResult(p *print.Printer, model inputModel, keyPair iaas.Keypair) error {
 	var outputFormat string
 	if model.GlobalFlagModel != nil {
-		outputFormat = model.GlobalFlagModel.OutputFormat
+		outputFormat = model.OutputFormat
 	}
 
 	return p.OutputResult(outputFormat, keyPair, func() error {

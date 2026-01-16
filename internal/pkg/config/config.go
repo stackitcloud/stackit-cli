@@ -25,6 +25,7 @@ const (
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
 	AlbCustomEndpoint                  = "alb_custom _endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
+	EdgeCustomEndpointKey              = "edge_custom_endpoint"
 	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey             = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey           = "mariadb_custom_endpoint"
@@ -43,18 +44,20 @@ const (
 	ServerBackupCustomEndpointKey      = "serverbackup_custom_endpoint"
 	ServerOsUpdateCustomEndpointKey    = "serverosupdate_custom_endpoint"
 	RunCommandCustomEndpointKey        = "runcommand_custom_endpoint"
+	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
+	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
 
 	AsyncDefault            = false
 	RegionDefault           = "eu01"
-	SessionTimeLimitDefault = "2h"
+	SessionTimeLimitDefault = "12h"
 
 	AllowedUrlDomainDefault = "stackit.cloud"
 )
@@ -83,6 +86,7 @@ var ConfigKeys = []string{
 	AllowedUrlDomainKey,
 
 	DNSCustomEndpointKey,
+	EdgeCustomEndpointKey,
 	LoadBalancerCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
@@ -108,6 +112,7 @@ var ConfigKeys = []string{
 	IaaSCustomEndpointKey,
 	TokenCustomEndpointKey,
 	GitCustomEndpointKey,
+	IntakeCustomEndpointKey,
 	AlbCustomEndpoint,
 }
 
@@ -176,6 +181,7 @@ func setConfigDefaults() {
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
 	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
+	viper.SetDefault(EdgeCustomEndpointKey, "")
 	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
@@ -195,6 +201,7 @@ func setConfigDefaults() {
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")
+	viper.SetDefault(IntakeCustomEndpointKey, "")
 	viper.SetDefault(AlbCustomEndpoint, "")
 }
 

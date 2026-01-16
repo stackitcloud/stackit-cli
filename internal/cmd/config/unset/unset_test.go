@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
@@ -25,6 +25,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 
 		authorizationCustomEndpointFlag:   true,
 		dnsCustomEndpointFlag:             true,
+		edgeCustomEndpointFlag:            true,
 		loadBalancerCustomEndpointFlag:    true,
 		logMeCustomEndpointFlag:           true,
 		mariaDBCustomEndpointFlag:         true,
@@ -40,10 +41,12 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		serverBackupCustomEndpointFlag:    true,
 		serverOsUpdateCustomEndpointFlag:  true,
 		runCommandCustomEndpointFlag:      true,
+		sfsCustomEndpointFlag:             true,
 		skeCustomEndpointFlag:             true,
 		sqlServerFlexCustomEndpointFlag:   true,
 		iaasCustomEndpointFlag:            true,
 		tokenCustomEndpointFlag:           true,
+		intakeCustomEndpointFlag:          true,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -65,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 		AuthorizationCustomEndpoint:   true,
 		DNSCustomEndpoint:             true,
+		EdgeCustomEndpoint:            true,
 		LoadBalancerCustomEndpoint:    true,
 		LogMeCustomEndpoint:           true,
 		MariaDBCustomEndpoint:         true,
@@ -80,10 +84,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServerBackupCustomEndpoint:    true,
 		ServerOsUpdateCustomEndpoint:  true,
 		RunCommandCustomEndpoint:      true,
+		SfsCustomEndpoint:             true,
 		SKECustomEndpoint:             true,
 		SQLServerFlexCustomEndpoint:   true,
 		IaaSCustomEndpoint:            true,
 		TokenCustomEndpoint:           true,
+		IntakeCustomEndpoint:          true,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -121,6 +127,7 @@ func TestParseInput(t *testing.T) {
 
 				model.AuthorizationCustomEndpoint = false
 				model.DNSCustomEndpoint = false
+				model.EdgeCustomEndpoint = false
 				model.LoadBalancerCustomEndpoint = false
 				model.LogMeCustomEndpoint = false
 				model.MariaDBCustomEndpoint = false
@@ -136,10 +143,12 @@ func TestParseInput(t *testing.T) {
 				model.ServerBackupCustomEndpoint = false
 				model.ServerOsUpdateCustomEndpoint = false
 				model.RunCommandCustomEndpoint = false
+				model.SfsCustomEndpoint = false
 				model.SKECustomEndpoint = false
 				model.SQLServerFlexCustomEndpoint = false
 				model.IaaSCustomEndpoint = false
 				model.TokenCustomEndpoint = false
+				model.IntakeCustomEndpoint = false
 			}),
 		},
 		{
@@ -213,6 +222,16 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "edge custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[edgeCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.EdgeCustomEndpoint = false
+			}),
+		},
+		{
 			description: "secrets manager custom endpoint empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
 				flagValues[secretsManagerCustomEndpointFlag] = false
@@ -240,6 +259,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ServiceAccountCustomEndpoint = false
+			}),
+		},
+		{
+			description: "sfs custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[sfsCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.SfsCustomEndpoint = false
 			}),
 		},
 		{
@@ -306,7 +335,7 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			p := print.NewPrinter()
-			cmd := NewCmd(&params.CmdParams{Printer: p})
+			cmd := NewCmd(&types.CmdParams{Printer: p})
 
 			for flag, value := range tt.flagValues {
 				stringBool := fmt.Sprintf("%v", value)

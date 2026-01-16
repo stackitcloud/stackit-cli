@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
@@ -38,7 +39,7 @@ type inputModel struct {
 	WrappingKeyId *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("import %s", keyIdArg),
 		Short: "Import a KMS key",
@@ -78,12 +79,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				keyRingName = model.KeyRingId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
@@ -109,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	// WrappedKey needs to be base64 encoded
-	var wrappedKey *string = flags.FlagToStringPointer(p, cmd, wrappedKeyFlag)
+	var wrappedKey = flags.FlagToStringPointer(p, cmd, wrappedKeyFlag)
 	_, err := base64.StdEncoding.DecodeString(*wrappedKey)
 	if err != nil || *wrappedKey == "" {
 		return nil, &cliErr.FlagValidationError{

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -39,7 +40,7 @@ type inputModel struct {
 	Labels     map[string]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a backup from a specific source",
@@ -77,14 +78,16 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 			// Get source name for label (use ID if name not available)
 			sourceLabel := model.SourceID
-			if model.SourceType == "volume" {
+
+			switch model.SourceType {
+			case "volume":
 				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				} else if name != "" {
 					sourceLabel = name
 				}
-			} else if model.SourceType == "snapshot" {
+			case "snapshot":
 				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
@@ -93,12 +96,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				}
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create backup from %s? (This cannot be undone)", sourceLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create backup from %s? (This cannot be undone)", sourceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

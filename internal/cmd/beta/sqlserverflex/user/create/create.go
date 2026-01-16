@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -33,7 +34,7 @@ type inputModel struct {
 	Roles      *[]string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a SQLServer Flex user",
@@ -42,7 +43,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 			"The password is only visible upon creation and cannot be retrieved later.",
 			"Alternatively, you can reset the password and access the new one by running:",
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
-			"Please refer to https://docs.stackit.cloud/stackit/en/creating-logins-and-users-in-sqlserver-flex-instances-210862358.html for additional information.",
+			"Please refer to https://docs.stackit.cloud/products/databases/sqlserver-flex/how-tos/create-logins-and-users-in-sqlserver-flex-instances/ for additional information.",
 			"The allowed user roles for your instance can be obtained by running:",
 			"  $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID",
 		),
@@ -74,12 +75,10 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

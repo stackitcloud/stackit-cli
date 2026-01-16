@@ -121,8 +121,13 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	// Initialize the code verifier
 	codeVerifier := oauth2.GenerateVerifier()
 
+	// Generate max age based on the session time limit
+	maxSessionDuration, err := getSessionExpiration()
+	if err != nil {
+		return err
+	}
 	// Construct the authorization URL
-	authorizationURL := conf.AuthCodeURL("", oauth2.S256ChallengeOption(codeVerifier))
+	authorizationURL := conf.AuthCodeURL("", oauth2.S256ChallengeOption(codeVerifier), oauth2.SetAuthURLParam("max_age", fmt.Sprintf("%d", int64(maxSessionDuration.Seconds()))))
 
 	// Start a web server to listen on a callback URL
 	mux := http.NewServeMux()
@@ -245,8 +250,8 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	}
 
 	// Print the link
-	p.Outputln("Your browser has been opened to visit:\n")
-	p.Outputf("%s\n\n", authorizationURL)
+	p.Info("Your browser has been opened to visit:\n\n")
+	p.Info("%s\n\n", authorizationURL)
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()

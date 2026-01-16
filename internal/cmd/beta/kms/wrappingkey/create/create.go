@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
@@ -43,7 +44,7 @@ type inputModel struct {
 	Protection  *string
 }
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a KMS wrapping key",
@@ -70,11 +71,9 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS wrapping key?")
-				if err != nil {
-					return err
-				}
+			err = params.Printer.PromptForConfirmation("Are you sure you want to create a KMS wrapping key?")
+			if err != nil {
+				return err
 			}
 
 			// Call API

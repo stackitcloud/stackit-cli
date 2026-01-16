@@ -12,12 +12,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"k8s.io/client-go/rest"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
@@ -36,7 +38,7 @@ const (
 	refreshBeforeDuration = 15 * time.Minute // 15 min
 )
 
-func NewCmd(params *params.CmdParams) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login plugin for kubernetes clients",
@@ -149,20 +151,25 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command) (*clusterConfig, e
 	if execCredential == nil || execCredential.Spec.Cluster == nil {
 		return nil, fmt.Errorf("ExecCredential contains not all needed fields")
 	}
-	config := &clusterConfig{}
-	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, config)
+	clusterConfig := &clusterConfig{}
+	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, clusterConfig)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal: %w", err)
 	}
 
-	config.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server)))
-
-	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
-	if config.Region == "" {
-		config.Region = globalflags.Parse(p, cmd).Region
+	authEmail, err := auth.GetAuthEmail()
+	if err != nil {
+		return nil, fmt.Errorf("error getting auth email: %w", err)
 	}
 
-	return config, nil
+	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server+"\x00"+authEmail)))
+
+	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
+	if clusterConfig.Region == "" {
+		clusterConfig.Region = globalflags.Parse(p, cmd).Region
+	}
+
+	return clusterConfig, nil
 }
 
 func getCachedKubeConfig(key string) *rest.Config {
