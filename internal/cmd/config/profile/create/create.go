@@ -88,7 +88,7 @@ func NewCmd(params *params.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(noSetFlag, false, "Do not set the profile as the active profile")
-	cmd.Flags().Bool(ignoreExistingFlag, false, "Suppress the error if the profile exists already")
+	cmd.Flags().Bool(ignoreExistingFlag, false, "Suppress the error if the profile exists already. An existing profile will not be modified or overwritten")
 	cmd.Flags().Bool(fromEmptyProfile, false, "Create the profile with the initial default configurations")
 }
 

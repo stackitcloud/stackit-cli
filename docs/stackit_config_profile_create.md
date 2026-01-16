@@ -30,7 +30,7 @@ stackit config profile create PROFILE [flags]
 ```
       --empty             Create the profile with the initial default configurations
   -h, --help              Help for "stackit config profile create"
-      --ignore-existing   Suppress the error if the profile exists already
+      --ignore-existing   Suppress the error if the profile exists already. An existing profile will not be modified or overwritten
       --no-set            Do not set the profile as the active profile
 ```
 
