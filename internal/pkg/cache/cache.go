@@ -69,6 +69,9 @@ func Init() error {
 		if err != nil {
 			return fmt.Errorf("save cache encryption key age: %w", err)
 		}
+		if err := cleanupCache(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -141,6 +144,29 @@ func DeleteObject(identifier string) error {
 func validateCacheFolderPath() error {
 	if cacheFolderPath == "" {
 		return errors.New("cacheFolderPath not set. Forgot to call Init()?")
+	}
+	return nil
+}
+
+func cleanupCache() error {
+	if err := validateCacheFolderPath(); err != nil {
+		return err
+	}
+
+	entries, err := os.ReadDir(cacheFolderPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+
+	for _, entry := range entries {
+		name := entry.Name()
+		err := DeleteObject(name)
+		if err != nil && err != ErrorInvalidCacheIdentifier {
+			return err
+		}
 	}
 	return nil
 }

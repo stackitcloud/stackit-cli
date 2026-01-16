@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
 func TestGetObjectErrors(t *testing.T) {
@@ -201,7 +202,60 @@ func TestDeleteObject(t *testing.T) {
 	}
 }
 
+func clearKeys(t *testing.T) {
+	t.Helper()
+	err := auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY)
+	if err != nil {
+		t.Fatalf("delete cache encryption key: %v", err)
+	}
+	err = auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY_AGE)
+	if err != nil {
+		t.Fatalf("delete cache encryption key age: %v", err)
+	}
+}
+
 func TestWriteAndRead(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		clearKeys bool
+	}{
+		{
+			name: "normal",
+		},
+		{
+			name:      "fresh keys",
+			clearKeys: true,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.clearKeys {
+				clearKeys(t)
+			}
+			if err := Init(); err != nil {
+				t.Fatalf("cache init failed: %s", err)
+			}
+
+			id := "test-cycle-" + uuid.NewString()
+			data := []byte("test-data")
+			err := PutObject(id, data)
+			if err != nil {
+				t.Fatalf("putobject failed: %v", err)
+			}
+
+			readData, err := GetObject(id)
+			if err != nil {
+				t.Fatalf("getobject failed: %v", err)
+			}
+
+			diff := cmp.Diff(data, readData)
+			if diff != "" {
+				t.Fatalf("unexpected data diff: %v", diff)
+			}
+		})
+	}
+}
+
+func TestCacheCleanup(t *testing.T) {
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -213,13 +267,15 @@ func TestWriteAndRead(t *testing.T) {
 		t.Fatalf("putobject failed: %v", err)
 	}
 
-	readData, err := GetObject(id)
-	if err != nil {
-		t.Fatalf("getobject failed: %v", err)
+	clearKeys(t)
+
+	// initialize again to trigger cache cleanup
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
 	}
 
-	diff := cmp.Diff(data, readData)
-	if diff != "" {
-		t.Fatalf("unexpected data diff: %v", diff)
+	_, err = GetObject(id)
+	if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("getobject failed with unexpected error: %v", err)
 	}
 }
