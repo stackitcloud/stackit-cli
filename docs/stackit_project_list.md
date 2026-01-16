@@ -31,6 +31,7 @@ stackit project list [flags]
 ```
       --creation-time-after string   Filter by creation timestamp, in a date-time with the RFC3339 layout format, e.g. 2023-01-01T00:00:00Z. The list of projects that were created after the given timestamp will be shown
   -h, --help                         Help for "stackit project list"
+      --lifecycle-state string       Filter by lifecycle state (default "active")
       --limit int                    Maximum number of entries to list
       --member string                Filter by member. The list of projects of which the member is part of will be shown
       --page-size int                Number of items fetched in each API call. Does not affect the number of items in the command output (default 50)
