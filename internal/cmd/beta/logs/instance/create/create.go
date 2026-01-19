@@ -156,9 +156,17 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("create logs instance response is empty")
 	}
-	return p.OutputResult(model.OutputFormat, resp, func() error {
+	var outputFormat string
+	var async bool
+
+	if model.GlobalFlagModel != nil {
+		outputFormat = model.OutputFormat
+		async = model.Async
+	}
+
+	return p.OutputResult(outputFormat, resp, func() error {
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
