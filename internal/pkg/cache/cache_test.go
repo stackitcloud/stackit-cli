@@ -27,19 +27,16 @@ func TestGetObjectErrors(t *testing.T) {
 	tests := []struct {
 		description string
 		identifier  string
-		expectFile  bool
 		expectedErr error
 	}{
 		{
 			description: "identifier does not exist",
 			identifier:  "test-cache-get-not-exists",
-			expectFile:  false,
 			expectedErr: os.ErrNotExist,
 		},
 		{
 			description: "identifier is invalid",
 			identifier:  "in../../valid",
-			expectFile:  false,
 			expectedErr: ErrorInvalidCacheIdentifier,
 		},
 	}
@@ -48,13 +45,6 @@ func TestGetObjectErrors(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			id := tt.identifier + "-" + uuid.NewString()
 
-			// setup
-			if tt.expectFile {
-				path := filepath.Join(cacheFolderPath, id)
-				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
-					t.Fatalf("setup: WriteFile (%s) failed", path)
-				}
-			}
 			// test
 			file, err := GetObject(id)
 
@@ -62,14 +52,8 @@ func TestGetObjectErrors(t *testing.T) {
 				t.Fatalf("returned error (%q) does not match %q", err.Error(), tt.expectedErr.Error())
 			}
 
-			if tt.expectFile {
-				if len(file) < 1 {
-					t.Fatalf("expected a file but byte array is empty (len %d)", len(file))
-				}
-			} else {
-				if len(file) > 0 {
-					t.Fatalf("didn't expect a file, but byte array is not empty (len %d)", len(file))
-				}
+			if len(file) > 0 {
+				t.Fatalf("didn't expect a file, but byte array is not empty (len %d)", len(file))
 			}
 		})
 	}
