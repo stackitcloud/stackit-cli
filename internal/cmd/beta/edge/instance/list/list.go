@@ -154,7 +154,7 @@ func run(ctx context.Context, model *inputModel, apiClient client.APIClient) ([]
 
 // buildRequest constructs the spec that can be tested.
 func buildRequest(ctx context.Context, model *inputModel, apiClient client.APIClient) (*listRequestSpec, error) {
-	req := apiClient.GetInstances(ctx, model.ProjectId, model.Region)
+	req := apiClient.ListInstances(ctx, model.ProjectId, model.Region)
 
 	return &listRequestSpec{
 		ProjectID: model.ProjectId,

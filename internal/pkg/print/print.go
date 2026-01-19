@@ -2,6 +2,7 @@ package print
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -256,10 +257,15 @@ func (p *Printer) DebugInputModel(model any) {
 func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc func() error) error {
 	switch outputFormat {
 	case JSONOutputFormat:
-		details, err := json.MarshalIndent(output, "", "  ")
+		buffer := &bytes.Buffer{}
+		encoder := json.NewEncoder(buffer)
+		encoder.SetEscapeHTML(false)
+		encoder.SetIndent("", "  ")
+		err := encoder.Encode(output)
 		if err != nil {
 			return fmt.Errorf("marshal json: %w", err)
 		}
+		details := buffer.Bytes()
 		p.Outputln(string(details))
 
 		return nil

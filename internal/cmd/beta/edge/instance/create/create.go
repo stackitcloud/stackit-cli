@@ -124,7 +124,7 @@ type createRequestSpec struct {
 	// Exported fields allow tests to inspect the request inputs
 	ProjectID string
 	Region    string
-	Payload   edge.PostInstancesPayload
+	Payload   edge.CreateInstancePayload
 
 	// Execute is a closure that wraps the actual SDK call
 	Execute func() (*edge.Instance, error)
@@ -191,15 +191,15 @@ func run(ctx context.Context, model *inputModel, apiClient client.APIClient) (*e
 
 // buildRequest constructs the spec that can be tested.
 func buildRequest(ctx context.Context, model *inputModel, apiClient client.APIClient) (*createRequestSpec, error) {
-	req := apiClient.PostInstances(ctx, model.ProjectId, model.Region)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	// Build request payload
-	payload := edge.PostInstancesPayload{
+	payload := edge.CreateInstancePayload{
 		DisplayName: &model.DisplayName,
 		Description: &model.Description,
 		PlanId:      &model.PlanId,
 	}
-	req = req.PostInstancesPayload(payload)
+	req = req.CreateInstancePayload(payload)
 
 	return &createRequestSpec{
 		ProjectID: model.ProjectId,

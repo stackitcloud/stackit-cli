@@ -15,18 +15,18 @@ import (
 
 // APIClient is an interface that consolidates all client functionality to allow for mocking of the API client during testing.
 type APIClient interface {
-	PostInstances(ctx context.Context, projectId, region string) edge.ApiPostInstancesRequest
-	DeleteInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiDeleteInstanceRequest
-	DeleteInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiDeleteInstanceByNameRequest
-	GetInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiGetInstanceRequest
-	GetInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiGetInstanceByNameRequest
-	GetInstances(ctx context.Context, projectId, region string) edge.ApiGetInstancesRequest
-	UpdateInstance(ctx context.Context, projectId, region, instanceId string) edge.ApiUpdateInstanceRequest
-	UpdateInstanceByName(ctx context.Context, projectId, region, instanceName string) edge.ApiUpdateInstanceByNameRequest
-	GetKubeconfigByInstanceId(ctx context.Context, projectId, region, instanceId string) edge.ApiGetKubeconfigByInstanceIdRequest
-	GetKubeconfigByInstanceName(ctx context.Context, projectId, region, instanceName string) edge.ApiGetKubeconfigByInstanceNameRequest
-	GetTokenByInstanceId(ctx context.Context, projectId, region, instanceId string) edge.ApiGetTokenByInstanceIdRequest
-	GetTokenByInstanceName(ctx context.Context, projectId, region, instanceName string) edge.ApiGetTokenByInstanceNameRequest
+	CreateInstance(ctx context.Context, projectId, regionId string) edge.ApiCreateInstanceRequest
+	DeleteInstance(ctx context.Context, projectId, regionId, instanceId string) edge.ApiDeleteInstanceRequest
+	DeleteInstanceByName(ctx context.Context, projectId, regionId, displayName string) edge.ApiDeleteInstanceByNameRequest
+	GetInstance(ctx context.Context, projectId, regionId, instanceId string) edge.ApiGetInstanceRequest
+	GetInstanceByName(ctx context.Context, projectId, regionId, displayName string) edge.ApiGetInstanceByNameRequest
+	ListInstances(ctx context.Context, projectId, regionId string) edge.ApiListInstancesRequest
+	UpdateInstance(ctx context.Context, projectId, regionId, instanceId string) edge.ApiUpdateInstanceRequest
+	UpdateInstanceByName(ctx context.Context, projectId, regionId, displayName string) edge.ApiUpdateInstanceByNameRequest
+	GetKubeconfigByInstanceId(ctx context.Context, projectId, regionId, instanceId string) edge.ApiGetKubeconfigByInstanceIdRequest
+	GetKubeconfigByInstanceName(ctx context.Context, projectId, regionId, displayName string) edge.ApiGetKubeconfigByInstanceNameRequest
+	GetTokenByInstanceId(ctx context.Context, projectId, regionId, instanceId string) edge.ApiGetTokenByInstanceIdRequest
+	GetTokenByInstanceName(ctx context.Context, projectId, regionId, displayName string) edge.ApiGetTokenByInstanceNameRequest
 	ListPlansProject(ctx context.Context, projectId string) edge.ApiListPlansProjectRequest
 }
 

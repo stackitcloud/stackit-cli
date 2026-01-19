@@ -19,13 +19,15 @@ import (
 const (
 	profileArg = "PROFILE"
 
-	noSetFlag        = "no-set"
-	fromEmptyProfile = "empty"
+	noSetFlag          = "no-set"
+	ignoreExistingFlag = "ignore-existing"
+	fromEmptyProfile   = "empty"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NoSet            bool
+	IgnoreExisting   bool
 	FromEmptyProfile bool
 	Profile          string
 }
@@ -34,12 +36,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("create %s", profileArg),
 		Short: "Creates a CLI configuration profile",
-		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s",
 			"Creates a CLI configuration profile based on the currently active profile and sets it as active.",
 			`The profile name can be provided via the STACKIT_CLI_PROFILE environment variable or as an argument in this command.`,
 			"The environment variable takes precedence over the argument.",
 			"If you do not want to set the profile as active, use the --no-set flag.",
 			"If you want to create the new profile with the initial default configurations, use the --empty flag.",
+			"If you want to create the new profile and ignore the error for an already existing profile, use the --ignore-existing flag.",
 		),
 		Args: args.SingleArg(profileArg, nil),
 		Example: examples.Build(
@@ -56,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			err = config.CreateProfile(params.Printer, model.Profile, !model.NoSet, model.FromEmptyProfile)
+			err = config.CreateProfile(params.Printer, model.Profile, !model.NoSet, model.IgnoreExisting, model.FromEmptyProfile)
 			if err != nil {
 				return fmt.Errorf("create profile: %w", err)
 			}
@@ -85,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(noSetFlag, false, "Do not set the profile as the active profile")
+	cmd.Flags().Bool(ignoreExistingFlag, false, "Suppress the error if the profile exists already. An existing profile will not be modified or overwritten")
 	cmd.Flags().Bool(fromEmptyProfile, false, "Create the profile with the initial default configurations")
 }
 
@@ -103,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Profile:          profile,
 		FromEmptyProfile: flags.FlagToBoolValue(p, cmd, fromEmptyProfile),
 		NoSet:            flags.FlagToBoolValue(p, cmd, noSetFlag),
+		IgnoreExisting:   flags.FlagToBoolValue(p, cmd, ignoreExistingFlag),
 	}
 
 	p.DebugInputModel(model)
