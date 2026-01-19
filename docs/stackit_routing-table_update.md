@@ -23,23 +23,23 @@ stackit routing-table update ROUTING_TABLE_ID [flags]
   $ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz
 
   Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-dynamic-routes
+  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --disable-dynamic-routes
 
   Disables the system routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --non-system-routes
+  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --disable-system-routes
 ```
 
 ### Options
 
 ```
       --description string       Description of the routing-table
+      --dynamic-routes           If set to false, prevents dynamic routes from propagating to the routing table. (default true)
   -h, --help                     Help for "stackit routing-table update"
       --labels stringToString    Key=value labels (default [])
       --name string              Name of the routing-table
       --network-area-id string   Network-Area ID
-      --non-dynamic-routes       If true, preventing dynamic routes from propagating to the routing-table.
-      --non-system-routes        If true, automatically disables routes for project-to-project communication.
       --organization-id string   Organization ID
+      --system-routes            If set to false, disables routes for project-to-project communication. (default true)
 ```
 
 ### Options inherited from parent commands

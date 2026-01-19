@@ -80,11 +80,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", model.RoutingTableId)
-				if err := params.Printer.PromptForConfirmation(prompt); err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", model.RoutingTableId)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			req, err := buildRequest(ctx, model, apiClient)

@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -31,6 +32,9 @@ const testRoutingTableName = "test"
 const testRoutingTableDescription = "test"
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
+const testSystemRoutesFlag = true
+const testDynamicRoutesFlag = true
+
 var testLabels = &map[string]string{
 	"key1": "value1",
 	"key2": "value2",
@@ -43,6 +47,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		networkAreaIdFlag:      testNetworkAreaId,
 		descriptionFlag:        testRoutingTableDescription,
 		nameFlag:               testRoutingTableName,
+		systemRoutesFlag:       strconv.FormatBool(testSystemRoutesFlag),
+		dynamicRoutesFlag:      strconv.FormatBool(testDynamicRoutesFlag),
 		labelFlag:              testLabelSelectorFlag,
 	}
 	for _, mod := range mods {
@@ -61,6 +67,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		NetworkAreaId:  testNetworkAreaId,
 		Name:           utils.Ptr(testRoutingTableName),
 		Description:    utils.Ptr(testRoutingTableDescription),
+		SystemRoutes:   testSystemRoutesFlag,
+		DynamicRoutes:  testDynamicRoutesFlag,
 		Labels:         utils.Ptr(*testLabels),
 	}
 	for _, mod := range mods {
@@ -124,24 +132,24 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "dynamic routes disabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nonDynamicRoutesFlag] = "true"
+				flagValues[dynamicRoutesFlag] = "false"
 			}),
 			argValues: fixtureArgValues(),
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.NonDynamicRoutes = true
+				model.DynamicRoutes = false
 				model.RoutingTableId = testRoutingTableId
 			}),
 		},
 		{
 			description: "system routes disabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nonSystemRoutesFlag] = "true"
+				flagValues[systemRoutesFlag] = "false"
 			}),
 			argValues: fixtureArgValues(),
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.NonSystemRoutes = true
+				model.SystemRoutes = false
 				model.RoutingTableId = testRoutingTableId
 			}),
 		},
@@ -269,7 +277,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "dynamic routes disabled",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.RoutingTableId = testRoutingTableId
-				model.NonDynamicRoutes = true
+				model.DynamicRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
@@ -285,15 +293,15 @@ func TestBuildRequest(t *testing.T) {
 			description: "system routes disabled",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.RoutingTableId = testRoutingTableId
-				model.NonSystemRoutes = true
+				model.DynamicRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
-					SystemRoutes:  utils.Ptr(false),
-					DynamicRoutes: utils.Ptr(true),
+					SystemRoutes:  utils.Ptr(true),
+					DynamicRoutes: utils.Ptr(false),
 				})
 			}),
 		},

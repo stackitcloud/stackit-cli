@@ -18,7 +18,7 @@ import (
 const (
 	networkAreaIdFlag  = "network-area-id"
 	organizationIdFlag = "organization-id"
-	routingTableIdArg  = "ROUTING_TABLE"
+	routingTableIdArg  = "ROUTING_TABLE_ID"
 )
 
 type inputModel struct {
@@ -53,12 +53,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete the routing-table %q for network-area-id %q?", model.RoutingTableId, model.OrganizationId)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete the routing-table %q?", model.RoutingTableId)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

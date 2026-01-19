@@ -238,7 +238,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.outputFormat, tt.routes); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.outputFormat, tt.routes, "dummy-org", "dummy-route-table-id"); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

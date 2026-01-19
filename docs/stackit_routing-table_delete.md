@@ -7,7 +7,7 @@ Deletes a routing-table
 Deletes a routing-table
 
 ```
-stackit routing-table delete ROUTING_TABLE [flags]
+stackit routing-table delete ROUTING_TABLE_ID [flags]
 ```
 
 ### Examples
