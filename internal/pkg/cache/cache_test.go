@@ -113,6 +113,10 @@ func TestPutObject(t *testing.T) {
 
 			// setup
 			if tt.existingFile {
+				err := os.MkdirAll(cacheFolderPath, 0o750)
+				if err != nil {
+					t.Fatalf("create cache folder: %s", err.Error())
+				}
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed", path)
 				}
