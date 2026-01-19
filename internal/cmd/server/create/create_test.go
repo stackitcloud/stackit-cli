@@ -346,6 +346,16 @@ func TestParseInput(t *testing.T) {
 				model.AgentProvisioned = nil
 			}),
 		},
+		{
+			description: "agent-provisioned flag properly handled",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[agentProvisionedFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AgentProvisioned = utils.Ptr(true)
+			}),
+		},
 	}
 
 	for _, tt := range tests {
