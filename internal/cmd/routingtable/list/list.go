@@ -13,8 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
-	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -77,31 +75,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routing-tables: %w", err)
 			}
 
-			if items := response.Items; items == nil {
-				var orgLabel string
-				rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
-				if err == nil {
-					orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, model.OrganizationId)
-					if err != nil {
-						params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
-						orgLabel = model.OrganizationId
-					} else if orgLabel == "" {
-						orgLabel = model.OrganizationId
-					}
-				} else {
-					params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
-				}
-				params.Printer.Outputf("No routing-tables found for organization %q\n", orgLabel)
-				return nil
-			}
+			routingTables := utils.GetSliceFromPointer(response.Items)
 
 			// Truncate output
-			items := response.GetItems()
-			if model.Limit != nil && len(items) > int(*model.Limit) {
-				items = items[:*model.Limit]
+			if model.Limit != nil && len(routingTables) > int(*model.Limit) {
+				routingTables = routingTables[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, routingTables, model.OrganizationId)
 		},
 	}
 
@@ -150,12 +131,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.RoutingTable) error {
+func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.RoutingTable, orgId string) error {
 	if routingTables == nil {
 		return fmt.Errorf("list routing-table items are nil")
 	}
 
 	return p.OutputResult(outputFormat, routingTables, func() error {
+		if len(routingTables) == 0 {
+			p.Outputf("No routing-tables found for organization %q\n", orgId)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
 		for _, routingTable := range routingTables {

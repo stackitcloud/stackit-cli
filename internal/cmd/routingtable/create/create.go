@@ -19,24 +19,24 @@ import (
 )
 
 const (
-	descriptionFlag      = "description"
-	labelFlag            = "labels"
-	nameFlag             = "name"
-	networkAreaIdFlag    = "network-area-id"
-	nonDynamicRoutesFlag = "non-dynamic-routes"
-	nonSystemRoutesFlag  = "non-system-routes"
-	organizationIdFlag   = "organization-id"
+	descriptionFlag    = "description"
+	labelFlag          = "labels"
+	nameFlag           = "name"
+	networkAreaIdFlag  = "network-area-id"
+	dynamicRoutesFlag  = "dynamic-routes"
+	systemRoutesFlag   = "system-routes"
+	organizationIdFlag = "organization-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Description      *string
-	Labels           *map[string]string
-	Name             string
-	NetworkAreaId    string
-	NonSystemRoutes  bool
-	NonDynamicRoutes bool
-	OrganizationId   string
+	Description    *string
+	Labels         *map[string]string
+	Name           string
+	NetworkAreaId  string
+	SystemRoutes   bool
+	DynamicRoutes  bool
+	OrganizationId string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -56,11 +56,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				"Create a routing-table with name `rt` with system routes disabled",
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-system-routes`,
+				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false`,
 			),
 			examples.NewExample(
 				"Create a routing-table with name `rt` with dynamic routes disabled",
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-dynamic-routes`,
+				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -75,11 +75,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create a routing-table with the name %s?", model.Name)
-				if err := params.Printer.PromptForConfirmation(prompt); err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create the routing-table %q?", model.Name)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			req, err := buildRequest(ctx, model, apiClient)
@@ -104,8 +103,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringToString(labelFlag, nil, "Key=value labels")
 	cmd.Flags().String(nameFlag, "", "Name of the routing-table")
 	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "Network-Area ID")
-	cmd.Flags().Bool(nonDynamicRoutesFlag, false, "If true, preventing dynamic routes from propagating to the routing-table.")
-	cmd.Flags().Bool(nonSystemRoutesFlag, false, "If true, automatically disables routes for project-to-project communication.")
+	cmd.Flags().Bool(dynamicRoutesFlag, true, "If set to false, prevents dynamic routes from propagating to the routing table.")
+	cmd.Flags().Bool(systemRoutesFlag, true, "If set to false, disables routes for project-to-project communication.")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, nameFlag)
@@ -116,14 +115,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := &inputModel{
-		GlobalFlagModel:  globalFlags,
-		Description:      flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		NonDynamicRoutes: flags.FlagToBoolValue(p, cmd, nonDynamicRoutesFlag),
-		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
-		Name:             flags.FlagToStringValue(p, cmd, nameFlag),
-		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
-		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
-		NonSystemRoutes:  flags.FlagToBoolValue(p, cmd, nonSystemRoutesFlag),
+		GlobalFlagModel: globalFlags,
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
+		DynamicRoutes:   flags.FlagToBoolValue(p, cmd, dynamicRoutesFlag),
+		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		SystemRoutes:    flags.FlagToBoolValue(p, cmd, systemRoutesFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -131,15 +130,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) (iaas.ApiAddRoutingTableToAreaRequest, error) {
-	systemRoutes := !model.NonSystemRoutes
-	dynamicRoutes := !model.NonDynamicRoutes
-
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   model.Description,
 		Name:          utils.Ptr(model.Name),
 		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
-		SystemRoutes:  utils.Ptr(systemRoutes),
-		DynamicRoutes: utils.Ptr(dynamicRoutes),
+		SystemRoutes:  utils.Ptr(model.SystemRoutes),
+		DynamicRoutes: utils.Ptr(model.DynamicRoutes),
 	}
 
 	return apiClient.AddRoutingTableToArea(
