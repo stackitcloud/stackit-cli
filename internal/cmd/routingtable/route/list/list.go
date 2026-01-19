@@ -87,18 +87,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routes: %w", err)
 			}
 
-			if items := response.Items; items == nil {
-				params.Printer.Outputf("No routes found for routing-table %q\n", model.RoutingTableId)
-				return nil
-			}
+			routes := utils.GetSliceFromPointer(response.Items)
 
 			// Truncate output
-			items := response.GetItems()
-			if model.Limit != nil && len(items) > int(*model.Limit) {
-				items = items[:*model.Limit]
+			if model.Limit != nil && len(routes) > int(*model.Limit) {
+				routes = routes[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, routes, model.OrganizationId, model.RoutingTableId)
 		},
 	}
 
@@ -141,12 +137,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, orgId, routeTableId string) error {
 	if routes == nil {
 		return fmt.Errorf("list routes routes are nil")
 	}
 
 	return p.OutputResult(outputFormat, routes, func() error {
+		if len(routes) == 0 {
+			p.Outputf("No routes found for routing-table %q in organization %q \n", routeTableId, orgId)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
 		for _, route := range routes {

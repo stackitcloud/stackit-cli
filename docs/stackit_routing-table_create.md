@@ -20,23 +20,23 @@ stackit routing-table create [flags]
   stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"
 
   Create a routing-table with name `rt` with system routes disabled
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-system-routes
+  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false
 
   Create a routing-table with name `rt` with dynamic routes disabled
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --non-dynamic-routes
+  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false
 ```
 
 ### Options
 
 ```
       --description string       Description of the routing-table
+      --dynamic-routes           If set to false, prevents dynamic routes from propagating to the routing table. (default true)
   -h, --help                     Help for "stackit routing-table create"
       --labels stringToString    Key=value labels (default [])
       --name string              Name of the routing-table
       --network-area-id string   Network-Area ID
-      --non-dynamic-routes       If true, preventing dynamic routes from propagating to the routing-table.
-      --non-system-routes        If true, automatically disables routes for project-to-project communication.
       --organization-id string   Organization ID
+      --system-routes            If set to false, disables routes for project-to-project communication. (default true)
 ```
 
 ### Options inherited from parent commands
