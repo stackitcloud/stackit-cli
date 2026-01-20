@@ -268,7 +268,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.2
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.15.1
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.2.0
