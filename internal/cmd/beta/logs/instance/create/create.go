@@ -92,6 +92,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create Logs instance: %w", err)
 			}
+			if resp == nil {
+				return fmt.Errorf("create Logs instance: empty response from API")
+			}
+			if resp.Id == nil {
+				return fmt.Errorf("create Logs instance: instance id missing in response")
+			}
 			instanceId := *resp.Id
 
 			// Wait for async operation, if async mode not enabled
