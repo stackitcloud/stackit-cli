@@ -155,18 +155,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *logs.LogsInstance) error {
 	if resp == nil {
 		return fmt.Errorf("create logs instance response is empty")
-	}
-	var outputFormat string
-	var async bool
-
-	if model.GlobalFlagModel != nil {
-		outputFormat = model.OutputFormat
-		async = model.Async
+	} else if model == nil || model.GlobalFlagModel == nil {
+		return fmt.Errorf("input model is nil")
 	}
 
-	return p.OutputResult(outputFormat, resp, func() error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
-		if async {
+		if model.Async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))

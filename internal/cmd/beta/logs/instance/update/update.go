@@ -155,12 +155,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, instance *logs.LogsInstance) error {
 	if instance == nil {
 		return fmt.Errorf("instance is nil")
+	} else if model == nil || model.GlobalFlagModel == nil {
+		return fmt.Errorf("input model is nil")
 	}
-	var outputFormat string
-	if model.GlobalFlagModel != nil {
-		outputFormat = model.OutputFormat
-	}
-	return p.OutputResult(outputFormat, instance, func() error {
+	return p.OutputResult(model.OutputFormat, instance, func() error {
 		p.Outputf("Updated instance %q for project %q.\n", utils.PtrString(instance.DisplayName), projectLabel)
 		return nil
 	})

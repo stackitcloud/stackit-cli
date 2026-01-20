@@ -212,10 +212,16 @@ func TestOutputResult(t *testing.T) {
 			wantErr:     true,
 		},
 		{
+			description: "model is nil",
+			instance:    &logs.LogsInstance{},
+			model:       nil,
+			wantErr:     true,
+		},
+		{
 			description: "global flag nil",
 			instance:    &logs.LogsInstance{},
 			model:       &inputModel{GlobalFlagModel: nil},
-			wantErr:     false,
+			wantErr:     true,
 		},
 		{
 			description: "default output",
