@@ -33,6 +33,10 @@ type inputModel struct {
 	NetworkId     string
 }
 
+type ExecutableRequest interface {
+	Execute() (*iaas.NICListResponse, error)
+}
+
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -40,6 +44,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Lists all network interfaces of a network.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			examples.NewExample(
+				`Lists all network interfaces in your current project`,
+				`$ stackit network-interface list`,
+			),
 			examples.NewExample(
 				`Lists all network interfaces with network ID "xxx"`,
 				`$ stackit network-interface list --network-id xxx`,
@@ -71,22 +79,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
-			if err != nil {
-				return fmt.Errorf("list network interfaces: %w", err)
-			}
+			var req ExecutableRequest
+			var networkLabel = ""
+			if model.NetworkId == "" {
+				// Return all NICs in the Project
+				req = buildProjectRequest(ctx, model, apiClient)
+			} else {
+				// Return the NICs for one Network
+				req = buildRequest(ctx, model, apiClient)
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
+				networkLabel, err = iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 					networkLabel = model.NetworkId
 				} else if networkLabel == "" {
 					networkLabel = model.NetworkId
 				}
-				params.Printer.Info("No network interfaces found for network %q\n", networkLabel)
-				return nil
+			}
+			resp, err := req.Execute()
+			if err != nil {
+				return fmt.Errorf("list network interfaces: %w", err)
 			}
 
 			// Truncate output
@@ -95,7 +107,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, items, networkLabel)
 		},
 	}
 	configureFlags(cmd)
@@ -106,9 +118,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), networkIdFlag, "Network ID")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
-
-	err := flags.MarkFlagsRequired(cmd, networkIdFlag)
-	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -136,7 +145,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
+func buildProjectRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) ExecutableRequest {
+	req := apiClient.ListProjectNICs(ctx, model.ProjectId, model.Region)
+	if model.LabelSelector != nil {
+		req = req.LabelSelector(*model.LabelSelector)
+	}
+
+	return req
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) ExecutableRequest {
 	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, model.NetworkId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
@@ -145,8 +163,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
+func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC, networkLabel string) error {
 	return p.OutputResult(outputFormat, nics, func() error {
+		if nics == nil || len(nics) == 0 {
+			if networkLabel == "" {
+				p.Outputf("No network interfaces found for your current project\n")
+			} else {
+				p.Outputf("No network interfaces found for network %q\n", networkLabel)
+			}
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
 
