@@ -278,7 +278,7 @@ func TestRoundTrip(t *testing.T) {
 				authorizeUserCalled: &authorizeUserCalled,
 				tokensRefreshed:     &tokensRefreshed,
 			}
-			authorizeUserRoutine := func(_ *print.Printer, _ bool) error {
+			authorizeUserRoutine := func(_ *print.Printer, _ StorageContext, _ bool) error {
 				return reauthorizeUser(authorizeUserContext)
 			}
 
@@ -292,6 +292,7 @@ func TestRoundTrip(t *testing.T) {
 				printer:                p,
 				reauthorizeUserRoutine: authorizeUserRoutine,
 				client:                 client,
+				context:                StorageContextCLI,
 			}
 			req, err := http.NewRequest(http.MethodGet, "request/url", http.NoBody)
 			if err != nil {
