@@ -27,16 +27,18 @@ const (
 )
 
 const (
-	SESSION_EXPIRES_AT_UNIX authFieldKey = "session_expires_at_unix"
-	ACCESS_TOKEN            authFieldKey = "access_token"
-	REFRESH_TOKEN           authFieldKey = "refresh_token"
-	SERVICE_ACCOUNT_TOKEN   authFieldKey = "service_account_token"
-	SERVICE_ACCOUNT_EMAIL   authFieldKey = "service_account_email"
-	USER_EMAIL              authFieldKey = "user_email"
-	SERVICE_ACCOUNT_KEY     authFieldKey = "service_account_key"
-	PRIVATE_KEY             authFieldKey = "private_key"
-	TOKEN_CUSTOM_ENDPOINT   authFieldKey = "token_custom_endpoint"
-	IDP_TOKEN_ENDPOINT      authFieldKey = "idp_token_endpoint" //nolint:gosec // linter false positive
+	SESSION_EXPIRES_AT_UNIX  authFieldKey = "session_expires_at_unix"
+	ACCESS_TOKEN             authFieldKey = "access_token"
+	REFRESH_TOKEN            authFieldKey = "refresh_token"
+	SERVICE_ACCOUNT_TOKEN    authFieldKey = "service_account_token"
+	SERVICE_ACCOUNT_EMAIL    authFieldKey = "service_account_email"
+	USER_EMAIL               authFieldKey = "user_email"
+	SERVICE_ACCOUNT_KEY      authFieldKey = "service_account_key"
+	PRIVATE_KEY              authFieldKey = "private_key"
+	TOKEN_CUSTOM_ENDPOINT    authFieldKey = "token_custom_endpoint"
+	IDP_TOKEN_ENDPOINT       authFieldKey = "idp_token_endpoint" //nolint:gosec // linter false positive
+	CACHE_ENCRYPTION_KEY     authFieldKey = "cache_encryption_key"
+	CACHE_ENCRYPTION_KEY_AGE authFieldKey = "cache_encryption_key_age"
 )
 
 const (
@@ -59,6 +61,8 @@ var authFieldKeys = []authFieldKey{
 	TOKEN_CUSTOM_ENDPOINT,
 	IDP_TOKEN_ENDPOINT,
 	authFlowType,
+	CACHE_ENCRYPTION_KEY,
+	CACHE_ENCRYPTION_KEY_AGE,
 }
 
 // All fields that are set when a user logs in

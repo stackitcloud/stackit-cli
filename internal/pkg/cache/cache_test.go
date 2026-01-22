@@ -6,10 +6,20 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
-func TestGetObject(t *testing.T) {
+func overwriteCacheDir(t *testing.T) func() {
+	cacheDirOverwrite = t.TempDir()
+	return func() {
+		cacheDirOverwrite = ""
+	}
+}
+
+func TestGetObjectErrors(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -17,25 +27,16 @@ func TestGetObject(t *testing.T) {
 	tests := []struct {
 		description string
 		identifier  string
-		expectFile  bool
 		expectedErr error
 	}{
 		{
-			description: "identifier exists",
-			identifier:  "test-cache-get-exists",
-			expectFile:  true,
-			expectedErr: nil,
-		},
-		{
 			description: "identifier does not exist",
 			identifier:  "test-cache-get-not-exists",
-			expectFile:  false,
 			expectedErr: os.ErrNotExist,
 		},
 		{
 			description: "identifier is invalid",
 			identifier:  "in../../valid",
-			expectFile:  false,
 			expectedErr: ErrorInvalidCacheIdentifier,
 		},
 	}
@@ -44,17 +45,6 @@ func TestGetObject(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			id := tt.identifier + "-" + uuid.NewString()
 
-			// setup
-			if tt.expectFile {
-				err := os.MkdirAll(cacheFolderPath, 0o750)
-				if err != nil {
-					t.Fatalf("create cache folder: %s", err.Error())
-				}
-				path := filepath.Join(cacheFolderPath, id)
-				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
-					t.Fatalf("setup: WriteFile (%s) failed", path)
-				}
-			}
 			// test
 			file, err := GetObject(id)
 
@@ -62,19 +52,14 @@ func TestGetObject(t *testing.T) {
 				t.Fatalf("returned error (%q) does not match %q", err.Error(), tt.expectedErr.Error())
 			}
 
-			if tt.expectFile {
-				if len(file) < 1 {
-					t.Fatalf("expected a file but byte array is empty (len %d)", len(file))
-				}
-			} else {
-				if len(file) > 0 {
-					t.Fatalf("didn't expect a file, but byte array is not empty (len %d)", len(file))
-				}
+			if len(file) > 0 {
+				t.Fatalf("didn't expect a file, but byte array is not empty (len %d)", len(file))
 			}
 		})
 	}
 }
 func TestPutObject(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -128,6 +113,10 @@ func TestPutObject(t *testing.T) {
 
 			// setup
 			if tt.existingFile {
+				err := os.MkdirAll(cacheFolderPath, 0o750)
+				if err != nil {
+					t.Fatalf("create cache folder: %s", err.Error())
+				}
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed", path)
 				}
@@ -149,6 +138,7 @@ func TestPutObject(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -186,8 +176,11 @@ func TestDeleteObject(t *testing.T) {
 
 			// setup
 			if tt.existingFile {
+				if err := os.MkdirAll(cacheFolderPath, 0o700); err != nil {
+					t.Fatalf("setup: MkdirAll (%s) failed: %v", path, err)
+				}
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
-					t.Fatalf("setup: WriteFile (%s) failed", path)
+					t.Fatalf("setup: WriteFile (%s) failed: %v", path, err)
 				}
 			}
 			// test
@@ -203,5 +196,92 @@ func TestDeleteObject(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func clearKeys(t *testing.T) {
+	t.Helper()
+	err := auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY)
+	if err != nil {
+		t.Fatalf("delete cache encryption key: %v", err)
+	}
+	err = auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY_AGE)
+	if err != nil {
+		t.Fatalf("delete cache encryption key age: %v", err)
+	}
+}
+
+func TestWriteAndRead(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		clearKeys bool
+	}{
+		{
+			name: "normal",
+		},
+		{
+			name:      "fresh keys",
+			clearKeys: true,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			defer overwriteCacheDir(t)()
+			if tt.clearKeys {
+				clearKeys(t)
+			}
+			if err := Init(); err != nil {
+				t.Fatalf("cache init failed: %s", err)
+			}
+
+			id := "test-cycle-" + uuid.NewString()
+			data := []byte("test-data")
+			err := PutObject(id, data)
+			if err != nil {
+				t.Fatalf("putobject failed: %v", err)
+			}
+
+			readData, err := GetObject(id)
+			if err != nil {
+				t.Fatalf("getobject failed: %v", err)
+			}
+
+			diff := cmp.Diff(data, readData)
+			if diff != "" {
+				t.Fatalf("unexpected data diff: %v", diff)
+			}
+		})
+	}
+}
+
+func TestCacheCleanup(t *testing.T) {
+	defer overwriteCacheDir(t)()
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
+	id := "test-cycle-" + uuid.NewString()
+	data := []byte("test-data")
+	err := PutObject(id, data)
+	if err != nil {
+		t.Fatalf("putobject failed: %v", err)
+	}
+
+	clearKeys(t)
+
+	// initialize again to trigger cache cleanup
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
+	}
+
+	_, err = GetObject(id)
+	if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("getobject failed with unexpected error: %v", err)
+	}
+}
+
+func TestInit(t *testing.T) {
+	// test that init without cache directory overwrite works
+	if err := Init(); err != nil {
+		t.Fatalf("cache init failed: %s", err)
 	}
 }
