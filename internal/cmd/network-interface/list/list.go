@@ -165,7 +165,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC, networkLabel string) error {
 	return p.OutputResult(outputFormat, nics, func() error {
-		if nics == nil || len(nics) == 0 {
+		if len(nics) == 0 {
 			if networkLabel == "" {
 				p.Outputf("No network interfaces found for your current project\n")
 			} else {
