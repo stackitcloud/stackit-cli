@@ -332,7 +332,7 @@ func cleanup(server *http.Server) {
 func openBrowser(pageUrl string) error {
 	var err error
 	switch runtime.GOOS {
-	case "linux":
+	case "freebsd", "linux":
 		// We need to use the windows way on WSL, otherwise we do not pass query
 		// parameters correctly. https://github.com/microsoft/WSL/issues/3832
 		if _, ok := os.LookupEnv("WSL_DISTRO_NAME"); !ok {
