@@ -977,9 +977,11 @@ func TestPromptForPassword(t *testing.T) {
 			var pw string
 			var err error
 			var wg sync.WaitGroup
-			wg.Go(func() {
+			go func() {
+				wg.Add(1)
 				pw, err = p.PromptForPassword("Enter password: ")
-			})
+				wg.Done()
+			}()
 			w.Write([]byte(tt.input))
 			wg.Wait()
 			if err != nil {
