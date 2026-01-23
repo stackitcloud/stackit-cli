@@ -966,8 +966,8 @@ func TestPromptForPassword(t *testing.T) {
 			cmd := &cobra.Command{}
 			r, w := io.Pipe()
 			defer func() {
-				r.Close()
-				w.Close()
+				r.Close() //nolint:errcheck // ignore error on close
+				w.Close() //nolint:errcheck // ignore error on close
 			}()
 			cmd.SetIn(r)
 			p := &Printer{
@@ -977,12 +977,12 @@ func TestPromptForPassword(t *testing.T) {
 			var pw string
 			var err error
 			var wg sync.WaitGroup
+			wg.Add(1)
 			go func() {
-				wg.Add(1)
 				pw, err = p.PromptForPassword("Enter password: ")
 				wg.Done()
 			}()
-			w.Write([]byte(tt.input))
+			w.Write([]byte(tt.input)) //nolint:errcheck // ignore error
 			wg.Wait()
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
