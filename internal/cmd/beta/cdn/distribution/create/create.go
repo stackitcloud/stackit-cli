@@ -81,13 +81,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a CDN distribution with an HTTP backend`,
-				`$ stackit beta cdn create --http  --http-origin-url https://example.com \
+				`$ stackit beta cdn distribution create --http  --http-origin-url https://example.com \
 --regions AF,EU`,
 			),
 			examples.NewExample(
 				`Create a CDN distribution with an Object Storage backend`,
-				`$ stackit beta cdn create --bucket --bucket-url https://bucket.example.com \
+				`$ stackit beta cdn distribution create --bucket --bucket-url https://bucket.example.com \
 --bucket-credentials-access-key-id yyyy --bucket-region EU \
+--regions AF,EU`,
+			),
+			examples.NewExample(
+				`Create a CDN distribution passing the password via stdin, take care that there's a '\n' at the end of the input'`,
+				`$ cat secret.txt | stackit beta cdn distribution create -y --project-id xxx \
+--bucket --bucket-url https://bucket.example.com --bucekt-credentials-access-key-id yyyy --bucket-region EU \
 --regions AF,EU`,
 			),
 		),
