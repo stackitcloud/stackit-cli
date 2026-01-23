@@ -415,12 +415,14 @@ func TestOutputResult(t *testing.T) {
 			outputFormat:  "json",
 			distributions: []cdn.Distribution{},
 			expected: `[]
+
 `,
 		},
 		{
 			description:  "no distributions nil slice",
 			outputFormat: "json",
 			expected: `[]
+
 `,
 		},
 		{
