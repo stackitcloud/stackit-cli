@@ -25,6 +25,7 @@ const (
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
 	AlbCustomEndpoint                  = "alb_custom _endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
+	EdgeCustomEndpointKey              = "edge_custom_endpoint"
 	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey             = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey           = "mariadb_custom_endpoint"
@@ -86,6 +87,7 @@ var ConfigKeys = []string{
 	AllowedUrlDomainKey,
 
 	DNSCustomEndpointKey,
+	EdgeCustomEndpointKey,
 	LoadBalancerCustomEndpointKey,
 	LogMeCustomEndpointKey,
 	MariaDBCustomEndpointKey,
@@ -181,6 +183,7 @@ func setConfigDefaults() {
 	viper.SetDefault(IdentityProviderCustomClientIdKey, "")
 	viper.SetDefault(AllowedUrlDomainKey, AllowedUrlDomainDefault)
 	viper.SetDefault(DNSCustomEndpointKey, "")
+	viper.SetDefault(EdgeCustomEndpointKey, "")
 	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")

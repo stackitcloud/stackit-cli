@@ -54,12 +54,10 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete Intake Runner %q?", model.RunnerId)
-				err = p.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete Intake Runner %q?", model.RunnerId)
+			err = p.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

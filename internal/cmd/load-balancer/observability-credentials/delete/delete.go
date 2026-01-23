@@ -64,12 +64,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				credentialsLabel = model.CredentialsRef
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to delete observability credentials %q on project %q?(This cannot be undone)", credentialsLabel, projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to delete observability credentials %q on project %q?(This cannot be undone)", credentialsLabel, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

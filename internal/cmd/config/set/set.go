@@ -26,6 +26,7 @@ const (
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
+	edgeCustomEndpointFlag              = "edge-custom-endpoint"
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag             = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
@@ -144,6 +145,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(observabilityCustomEndpointFlag, "", "Observability API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
+	cmd.Flags().String(edgeCustomEndpointFlag, "", "Edge API base URL, used in calls to this API")
 	cmd.Flags().String(loadBalancerCustomEndpointFlag, "", "Load Balancer API base URL, used in calls to this API")
 	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe API base URL, used in calls to this API")
 	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB API base URL, used in calls to this API")
@@ -183,6 +185,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.EdgeCustomEndpointKey, cmd.Flags().Lookup(edgeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.LoadBalancerCustomEndpointKey, cmd.Flags().Lookup(loadBalancerCustomEndpointFlag))
 	cobra.CheckErr(err)

@@ -70,12 +70,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
 			}
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to reboot server %q?", serverLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to reboot server %q?", serverLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
