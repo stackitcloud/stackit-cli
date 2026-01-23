@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"sync"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -932,6 +933,52 @@ func TestOutputResult(t *testing.T) {
 
 			if err := p.OutputResult(tt.args.outputFormat, tt.args.output, tt.args.prettyOutputFunc); (err != nil) != tt.wantErr {
 				t.Errorf("OutputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestPromptForPassword(t *testing.T) {
+	tests := []struct {
+		description string
+		input       string
+	}{
+		{
+			description: "password",
+			input:       "mypassword\n",
+		},
+		{
+			description: "empty password",
+			input:       "\n",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			r, w := io.Pipe()
+			defer func() {
+				r.Close()
+				w.Close()
+			}()
+			cmd.SetIn(r)
+			p := &Printer{
+				Cmd:       cmd,
+				Verbosity: ErrorLevel,
+			}
+			var pw string
+			var err error
+			var wg sync.WaitGroup
+			wg.Go(func() {
+				pw, err = p.PromptForPassword("Enter password: ")
+			})
+			w.Write([]byte(tt.input))
+			wg.Wait()
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			withoutNewline := tt.input[:len(tt.input)-1]
+			if pw != withoutNewline {
+				t.Fatalf("unexpected password: got %q, want %q", pw, withoutNewline)
 			}
 		})
 	}
