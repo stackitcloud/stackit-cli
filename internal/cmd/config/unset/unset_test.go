@@ -47,6 +47,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		iaasCustomEndpointFlag:            true,
 		tokenCustomEndpointFlag:           true,
 		intakeCustomEndpointFlag:          true,
+		logsCustomEndpointFlag:            true,
 		cdnCustomEndpointFlag:             true,
 	}
 	for _, mod := range mods {
@@ -91,6 +92,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IaaSCustomEndpoint:            true,
 		TokenCustomEndpoint:           true,
 		IntakeCustomEndpoint:          true,
+		LogsCustomEndpoint:            true,
 		CDNCustomEndpoint:             true,
 	}
 	for _, mod := range mods {
@@ -151,6 +153,7 @@ func TestParseInput(t *testing.T) {
 				model.IaaSCustomEndpoint = false
 				model.TokenCustomEndpoint = false
 				model.IntakeCustomEndpoint = false
+				model.LogsCustomEndpoint = false
 				model.CDNCustomEndpoint = false
 			}),
 		},
@@ -332,6 +335,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.TokenCustomEndpoint = false
+			}),
+		},
+		{
+			description: "logs custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[logsCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.LogsCustomEndpoint = false
 			}),
 		},
 		{

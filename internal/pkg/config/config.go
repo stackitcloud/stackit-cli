@@ -52,6 +52,7 @@ const (
 	GitCustomEndpointKey               = "git_custom_endpoint"
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
+	LogsCustomEndpointKey              = "logs_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -115,6 +116,7 @@ var ConfigKeys = []string{
 	GitCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	AlbCustomEndpoint,
+	LogsCustomEndpointKey,
 	CDNCustomEndpointKey,
 }
 
@@ -205,6 +207,7 @@ func setConfigDefaults() {
 	viper.SetDefault(GitCustomEndpointKey, "")
 	viper.SetDefault(IntakeCustomEndpointKey, "")
 	viper.SetDefault(AlbCustomEndpoint, "")
+	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
 }
 
