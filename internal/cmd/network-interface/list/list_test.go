@@ -61,7 +61,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiListNicsRequest)) iaas.ApiListNicsRequest {
+func fixtureProjectRequest(mods ...func(request *iaas.ApiListProjectNICsRequest)) iaas.ApiListProjectNICsRequest {
+	request := testClient.ListProjectNICs(testCtx, testProjectId, testRegion)
+	request = request.LabelSelector(testLabelSelector)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureNetworkRequest(mods ...func(request *iaas.ApiListNicsRequest)) iaas.ApiListNicsRequest {
 	request := testClient.ListNics(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
@@ -148,22 +157,22 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildProjectRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest iaas.ApiListNicsRequest
+		expectedRequest iaas.ApiListProjectNICsRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
+			expectedRequest: fixtureProjectRequest(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildProjectRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -176,7 +185,35 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func TestOutputResult(t *testing.T) {
+func TestBuildNetworkRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest iaas.ApiListNicsRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureNetworkRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildNetworkRequest(testCtx, tt.model, testClient)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputProjectResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		nics         []iaas.NIC
@@ -191,12 +228,55 @@ func TestOutputResult(t *testing.T) {
 			args:    args{},
 			wantErr: false,
 		},
+		{
+			name: "empty NIC in NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				nics:         []iaas.NIC{{}},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.nics, "Label"); (err != nil) != tt.wantErr {
+			if err := outputProjectResult(p, tt.args.outputFormat, tt.args.nics, "Label"); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestOutputNetworkResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		nics         []iaas.NIC
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "empty NIC in NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				nics:         []iaas.NIC{{}},
+			},
+			wantErr: false,
+		},
+	}
+	p := print.NewPrinter()
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputNetworkResult(p, tt.args.outputFormat, tt.args.nics, "Label"); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
