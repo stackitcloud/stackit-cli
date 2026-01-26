@@ -106,7 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Start("Creating instance")
 				_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 				if err != nil {
-					return fmt.Errorf("wait for LogMe instance creation: %w", err)
+					return fmt.Errorf("wait for logs instance creation: %w", err)
 				}
 				s.Stop()
 			}
