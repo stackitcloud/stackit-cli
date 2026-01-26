@@ -9,10 +9,10 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 )
@@ -111,7 +111,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, func(p *print.Printer, cmd *cobra.Command, args []string) (*inputModel, error) {
+			testutils.TestParseInput(t, NewCmd, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 				return parseInput(p, cmd)
 			}, tt.expectedModel, nil, tt.flagValues, tt.isValid)
 		})
@@ -194,7 +194,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	p := print.NewPrinter()
-	p.Cmd = NewCmd(&params.CmdParams{Printer: p})
+	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.args.outputFormat, tt.args.projectLabel, tt.args.intakes); (err != nil) != tt.wantErr {

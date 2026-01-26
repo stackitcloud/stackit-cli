@@ -8,7 +8,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -64,7 +64,7 @@ type inputModel struct {
 	DremioToken         *string
 }
 
-func NewCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", intakeIdArg),
 		Short: "Updates an Intake",
