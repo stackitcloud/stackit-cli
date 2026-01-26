@@ -98,6 +98,16 @@ func outputResult(p *print.Printer, outputFormat string, instance *logs.LogsInst
 		table.AddRow("RETENTION DAYS", utils.PtrString(instance.RetentionDays))
 		table.AddSeparator()
 		table.AddRow("ACL IP RANGES", utils.PtrString(instance.Acl))
+		table.AddSeparator()
+		table.AddRow("DATA SOURCE", utils.PtrString(instance.DatasourceUrl))
+		table.AddSeparator()
+		table.AddRow("OTLP INGEST", utils.PtrString(instance.IngestOtlpUrl))
+		table.AddSeparator()
+		table.AddRow("INGEST", utils.PtrString(instance.IngestUrl))
+		table.AddSeparator()
+		table.AddRow("QUERY RANGE", utils.PtrString(instance.QueryRangeUrl))
+		table.AddSeparator()
+		table.AddRow("QUERY", utils.PtrString(instance.QueryUrl))
 
 		err := table.Display(p)
 		if err != nil {
