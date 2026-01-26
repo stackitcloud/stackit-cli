@@ -117,12 +117,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to update a CDN distribution for project %q?", projectLabel)
-				err = params.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+		
+			prompt := fmt.Sprintf("Are you sure you want to update a CDN distribution for project %q?", projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			req := buildRequest(ctx, apiClient, model)
