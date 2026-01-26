@@ -3,6 +3,7 @@ package beta
 import (
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
@@ -47,4 +48,5 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(edge.NewCmd(params))
 	cmd.AddCommand(intake.NewCmd(params))
 	cmd.AddCommand(kms.NewCmd(params))
+	cmd.AddCommand(logs.NewCmd(params))
 }

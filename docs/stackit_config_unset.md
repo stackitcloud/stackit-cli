@@ -39,6 +39,7 @@ stackit config unset [flags]
       --kms-custom-endpoint                                 KMS API base URL. If unset, uses the default base URL
       --load-balancer-custom-endpoint                       Load Balancer API base URL. If unset, uses the default base URL
       --logme-custom-endpoint                               LogMe API base URL. If unset, uses the default base URL
+      --logs-custom-endpoint                                Logs API base URL. If unset, uses the default base URL
       --mariadb-custom-endpoint                             MariaDB API base URL. If unset, uses the default base URL
       --mongodbflex-custom-endpoint                         MongoDB Flex API base URL. If unset, uses the default base URL
       --object-storage-custom-endpoint                      Object Storage API base URL. If unset, uses the default base URL
