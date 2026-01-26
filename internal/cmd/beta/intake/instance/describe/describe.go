@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -28,7 +28,7 @@ type inputModel struct {
 	IntakeId string
 }
 
-func NewCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", intakeIdArg),
 		Short: "Shows details of an Intake",
@@ -90,38 +90,38 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, intake *intake.IntakeResponse) error {
-	if intake == nil {
+func outputResult(p *print.Printer, outputFormat string, intk *intake.IntakeResponse) error {
+	if intk == nil {
 		return fmt.Errorf("received nil response, could not display details")
 	}
 
-	return p.OutputResult(outputFormat, intake, func() error {
+	return p.OutputResult(outputFormat, intk, func() error {
 		table := tables.NewTable()
 		table.SetHeader("Attribute", "Value")
 
-		table.AddRow("ID", intake.GetId())
-		table.AddRow("Name", intake.GetDisplayName())
-		table.AddRow("State", intake.GetState())
-		table.AddRow("Runner ID", intake.GetIntakeRunnerId())
-		table.AddRow("Created", intake.GetCreateTime())
-		table.AddRow("Labels", intake.GetLabels())
+		table.AddRow("ID", intk.GetId())
+		table.AddRow("Name", intk.GetDisplayName())
+		table.AddRow("State", intk.GetState())
+		table.AddRow("Runner ID", intk.GetIntakeRunnerId())
+		table.AddRow("Created", intk.GetCreateTime())
+		table.AddRow("Labels", intk.GetLabels())
 
-		if description := intake.GetDescription(); description != "" {
+		if description := intk.GetDescription(); description != "" {
 			table.AddRow("Description", description)
 		}
 
-		if failureMessage := intake.GetFailureMessage(); failureMessage != "" {
+		if failureMessage := intk.GetFailureMessage(); failureMessage != "" {
 			table.AddRow("Failure Message", failureMessage)
 		}
 
 		table.AddSeparator()
-		table.AddRow("Ingestion URI", intake.GetUri())
-		table.AddRow("Topic", intake.GetTopic())
-		table.AddRow("Dead Letter Topic", intake.GetDeadLetterTopic())
-		table.AddRow("Undelivered Messages", intake.GetUndeliveredMessageCount())
+		table.AddRow("Ingestion URI", intk.GetUri())
+		table.AddRow("Topic", intk.GetTopic())
+		table.AddRow("Dead Letter Topic", intk.GetDeadLetterTopic())
+		table.AddRow("Undelivered Messages", intk.GetUndeliveredMessageCount())
 
 		table.AddSeparator()
-		catalog := intake.GetCatalog()
+		catalog := intk.GetCatalog()
 		table.AddRow("Catalog URI", catalog.GetUri())
 		table.AddRow("Catalog Warehouse", catalog.GetWarehouse())
 		if namespace := catalog.GetNamespace(); namespace != "" {

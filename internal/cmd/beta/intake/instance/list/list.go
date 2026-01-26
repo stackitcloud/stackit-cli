@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/params"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
 const (
@@ -30,7 +30,7 @@ type inputModel struct {
 }
 
 // NewCmd creates a new cobra command for listing Intakes
-func NewCmd(p *params.CmdParams) *cobra.Command {
+func NewCmd(p *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all Intakes",
