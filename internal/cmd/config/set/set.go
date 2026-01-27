@@ -52,6 +52,7 @@ const (
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
 	sfsCustomEndpointFlag               = "sfs-custom-endpoint"
+	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 )
 
 type inputModel struct {
@@ -170,6 +171,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(intakeCustomEndpointFlag, "", "Intake API base URL, used in calls to this API")
 	cmd.Flags().String(logsCustomEndpointFlag, "", "Logs API base URL, used in calls to this API")
 	cmd.Flags().String(sfsCustomEndpointFlag, "", "SFS API base URL, used in calls to this API")
+	cmd.Flags().String(cdnCustomEndpointFlag, "", "CDN API base URL, used in calls to this API")
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
@@ -235,6 +237,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.LogsCustomEndpointKey, cmd.Flags().Lookup(logsCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SfsCustomEndpointKey, cmd.Flags().Lookup(sfsCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.CDNCustomEndpointKey, cmd.Flags().Lookup(cdnCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 

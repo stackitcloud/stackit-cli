@@ -29,6 +29,7 @@ stackit config unset [flags]
       --allowed-url-domain                                  Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
       --async                                               Configuration option to run commands asynchronously
       --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
+      --cdn-custom-endpoint                                 Custom CDN endpoint URL. If unset, uses the default base URL
       --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
       --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL
   -h, --help                                                Help for "stackit config unset"

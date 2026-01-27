@@ -182,11 +182,20 @@ func (p *Printer) PromptForEnter(prompt string) error {
 func (p *Printer) PromptForPassword(prompt string) (string, error) {
 	p.Cmd.PrintErr(prompt)
 	defer p.Outputln("")
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return "", fmt.Errorf("read password: %w", err)
+	if term.IsTerminal(syscall.Stdin) {
+		bytePassword, err := term.ReadPassword(syscall.Stdin)
+		if err != nil {
+			return "", fmt.Errorf("read password: %w", err)
+		}
+		return string(bytePassword), nil
 	}
-	return string(bytePassword), nil
+	// Fallback for non-terminal environments
+	reader := bufio.NewReader(p.Cmd.InOrStdin())
+	pw, err := reader.ReadString('\n')
+	if err != nil {
+		return "", fmt.Errorf("read password from non-terminal: %w", err)
+	}
+	return pw[:len(pw)-1], nil // remove trailing newline
 }
 
 // Shows the content in the command's stdout using the "less" command
