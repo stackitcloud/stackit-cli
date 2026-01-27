@@ -96,12 +96,10 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			if !model.AssumeYes {
-				prompt := fmt.Sprintf("Are you sure you want to create an Intake for project %q?", projectLabel)
-				err = p.Printer.PromptForConfirmation(prompt)
-				if err != nil {
-					return err
-				}
+			prompt := fmt.Sprintf("Are you sure you want to create an Intake for project %q?", projectLabel)
+			err = p.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API
