@@ -69,13 +69,13 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a new Intake with required parameters`,
-				`$ stackit beta intake create --display-name my-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse"`),
+				`$ stackit beta intake create --display-name my-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-auth-type none`),
 			examples.NewExample(
 				`Create a new Intake with a description, labels, and Dremio authentication`,
 				`$ stackit beta intake create --display-name my-intake --runner-id xxx --description "Production intake" --labels "env=prod,team=billing" --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-auth-type "dremio" --dremio-token-endpoint "https://auth.dremio.cloud/oauth/token" --dremio-pat "MY_TOKEN"`),
 			examples.NewExample(
 				`Create a new Intake with manual partitioning by a date field`,
-				`$ stackit beta intake create --display-name my-partitioned-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-partitioning "manual" --catalog-partition-by "day(__intake_ts)"`),
+				`$ stackit beta intake create --display-name my-partitioned-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-partitioning "manual" --catalog-partition-by "day(__intake_ts)" --catalog-auth-type "none"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
