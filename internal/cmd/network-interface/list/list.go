@@ -1,10 +1,10 @@
 package list
 
 import (
-	"bytes"
+	"cmp"
 	"context"
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -33,7 +33,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit         *int64
 	LabelSelector *string
-	NetworkId     string
+	NetworkId     *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -43,8 +43,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Lists all network interfaces of a network.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			// Note: this subcommand uses two different API enpoints, which makes the implementation somewhat messy
 			examples.NewExample(
-				`Lists all network interfaces in your current project`,
+				`Lists all network interfaces`,
 				`$ stackit network-interface list`,
 			),
 			examples.NewExample(
@@ -77,18 +78,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			// Call API
-			if model.NetworkId == "" {
-				// Return all NICs in the Project
+			if model.NetworkId == nil {
+				// Call API to get all NICs in the Project
 				req := buildProjectRequest(ctx, model, apiClient)
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					projectLabel = model.ProjectId
-				}
 
 				resp, err := req.Execute()
 				if err != nil {
 					return fmt.Errorf("list network interfaces: %w", err)
+				}
+
+				if resp.Items == nil || len(*resp.Items) == 0 {
+					projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+					if err != nil {
+						projectLabel = model.ProjectId
+					}
+					params.Printer.Outputf("No network interfaces found for project %q\n", projectLabel)
+					return nil
 				}
 
 				// Truncate output
@@ -97,23 +102,27 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					items = items[:*model.Limit]
 				}
 
-				return outputProjectResult(params.Printer, model.OutputFormat, items, projectLabel)
+				return outputProjectResult(params.Printer, model.OutputFormat, items)
 			}
 
-			// Return the NICs for one Network
+			// Call API to get NICs for one Network
 			req := buildNetworkRequest(ctx, model, apiClient)
-
-			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
-				networkLabel = model.NetworkId
-			} else if networkLabel == "" {
-				networkLabel = model.NetworkId
-			}
 
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list network interfaces: %w", err)
+			}
+
+			if resp.Items == nil || len(*resp.Items) == 0 {
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
+					networkLabel = *model.NetworkId
+				} else if networkLabel == "" {
+					networkLabel = *model.NetworkId
+				}
+				params.Printer.Outputf("No network interfaces found for network %q\n", networkLabel)
+				return nil
 			}
 
 			// Truncate output
@@ -122,7 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputNetworkResult(params.Printer, model.OutputFormat, items, networkLabel)
+			return outputNetworkResult(params.Printer, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)
@@ -153,7 +162,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
-		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -170,7 +179,7 @@ func buildProjectRequest(ctx context.Context, model *inputModel, apiClient *iaas
 }
 
 func buildNetworkRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
-	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, model.NetworkId)
+	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, *model.NetworkId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -178,16 +187,10 @@ func buildNetworkRequest(ctx context.Context, model *inputModel, apiClient *iaas
 	return req
 }
 
-func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC, projectLabel string) error {
+func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
 	return p.OutputResult(outputFormat, nics, func() error {
-		if len(nics) == 0 {
-			p.Outputf("No network interfaces found for project %q\n", projectLabel)
-			return nil
-		}
-
-		sort.SliceStable(nics, func(i, j int) bool {
-			result := bytes.Compare([]byte(*nics[i].NetworkId), []byte(*nics[j].NetworkId))
-			return result == -1
+		slices.SortFunc(nics, func(a, b iaas.NIC) int {
+			return cmp.Compare(*a.NetworkId, *b.NetworkId)
 		})
 
 		table := tables.NewTable()
@@ -212,13 +215,8 @@ func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 	})
 }
 
-func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC, networkLabel string) error {
+func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
 	return p.OutputResult(outputFormat, nics, func() error {
-		if len(nics) == 0 {
-			p.Outputf("No network interfaces found for network %q\n", networkLabel)
-			return nil
-		}
-
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
 

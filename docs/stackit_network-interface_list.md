@@ -13,7 +13,7 @@ stackit network-interface list [flags]
 ### Examples
 
 ```
-  Lists all network interfaces in your current project
+  Lists all network interfaces
   $ stackit network-interface list
 
   Lists all network interfaces with network ID "xxx"
