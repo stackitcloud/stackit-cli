@@ -13,8 +13,8 @@ stackit beta cdn distribution update [flags]
 ### Examples
 
 ```
-  update a CDN distribution with ID "123e4567-e89b-12d3-a456-426614174000" to not use optimizer
-  $ stackit beta cdn update 123e4567-e89b-12d3-a456-426614174000 --optimizer=false
+  update a CDN distribution with ID "xxx" to not use optimizer
+  $ stackit beta cdn distribution update xxx --optimizer=false
 ```
 
 ### Options
