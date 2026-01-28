@@ -1,9 +1,12 @@
 package list
 
 import (
+	"cmp"
 	"context"
 	"fmt"
+	"slices"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
@@ -30,7 +33,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit         *int64
 	LabelSelector *string
-	NetworkId     string
+	NetworkId     *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -40,6 +43,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Lists all network interfaces of a network.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
+			// Note: this subcommand uses two different API enpoints, which makes the implementation somewhat messy
+			examples.NewExample(
+				`Lists all network interfaces`,
+				`$ stackit network-interface list`,
+			),
 			examples.NewExample(
 				`Lists all network interfaces with network ID "xxx"`,
 				`$ stackit network-interface list --network-id xxx`,
@@ -70,22 +78,50 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			if model.NetworkId == nil {
+				// Call API to get all NICs in the Project
+				req := buildProjectRequest(ctx, model, apiClient)
+
+				resp, err := req.Execute()
+				if err != nil {
+					return fmt.Errorf("list network interfaces: %w", err)
+				}
+
+				if resp.Items == nil || len(*resp.Items) == 0 {
+					projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+					if err != nil {
+						projectLabel = model.ProjectId
+					}
+					params.Printer.Outputf("No network interfaces found for project %q\n", projectLabel)
+					return nil
+				}
+
+				// Truncate output
+				items := *resp.Items
+				if model.Limit != nil && len(items) > int(*model.Limit) {
+					items = items[:*model.Limit]
+				}
+
+				return outputProjectResult(params.Printer, model.OutputFormat, items)
+			}
+
+			// Call API to get NICs for one Network
+			req := buildNetworkRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list network interfaces: %w", err)
 			}
 
 			if resp.Items == nil || len(*resp.Items) == 0 {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
+				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
-					networkLabel = model.NetworkId
+					networkLabel = *model.NetworkId
 				} else if networkLabel == "" {
-					networkLabel = model.NetworkId
+					networkLabel = *model.NetworkId
 				}
-				params.Printer.Info("No network interfaces found for network %q\n", networkLabel)
+				params.Printer.Outputf("No network interfaces found for network %q\n", networkLabel)
 				return nil
 			}
 
@@ -95,7 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputNetworkResult(params.Printer, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)
@@ -106,9 +142,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), networkIdFlag, "Network ID")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
-
-	err := flags.MarkFlagsRequired(cmd, networkIdFlag)
-	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -129,15 +162,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
-		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
+		NetworkId:       flags.FlagToStringPointer(p, cmd, networkIdFlag),
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
-	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, model.NetworkId)
+func buildProjectRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListProjectNICsRequest {
+	req := apiClient.ListProjectNICs(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -145,7 +178,44 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
+func buildNetworkRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
+	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, *model.NetworkId)
+	if model.LabelSelector != nil {
+		req = req.LabelSelector(*model.LabelSelector)
+	}
+
+	return req
+}
+
+func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
+	return p.OutputResult(outputFormat, nics, func() error {
+		slices.SortFunc(nics, func(a, b iaas.NIC) int {
+			return cmp.Compare(*a.NetworkId, *b.NetworkId)
+		})
+
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "NETWORK ID", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
+
+		for _, nic := range nics {
+			table.AddRow(
+				utils.PtrString(nic.Id),
+				utils.PtrString(nic.Name),
+				utils.PtrString(nic.NetworkId),
+				utils.PtrString(nic.NicSecurity),
+				utils.PtrString(nic.Device),
+				utils.PtrString(nic.Ipv4),
+				utils.PtrString(nic.Status),
+				utils.PtrString(nic.Type),
+			)
+			table.AddSeparator()
+		}
+
+		p.Outputln(table.Render())
+		return nil
+	})
+}
+
+func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
 	return p.OutputResult(outputFormat, nics, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
