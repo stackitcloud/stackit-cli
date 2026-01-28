@@ -14,13 +14,13 @@ stackit beta intake create [flags]
 
 ```
   Create a new Intake with required parameters
-  $ stackit beta intake create --display-name my-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-auth-type none
+  $ stackit beta intake create --display-name my-intake --runner-id xxx --catalog-auth-type none --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse"
 
   Create a new Intake with a description, labels, and Dremio authentication
-  $ stackit beta intake create --display-name my-intake --runner-id xxx --description "Production intake" --labels "env=prod,team=billing" --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-auth-type "dremio" --dremio-token-endpoint "https://auth.dremio.cloud/oauth/token" --dremio-pat "MY_TOKEN"
+  $ stackit beta intake create --display-name my-intake --runner-id xxx --description "Production intake" --labels "env=prod,team=billing" --catalog-auth-type "dremio" --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --dremio-token-endpoint "https://auth.dremio.cloud/oauth/token" --dremio-pat "MY_TOKEN"
 
   Create a new Intake with manual partitioning by a date field
-  $ stackit beta intake create --display-name my-partitioned-intake --runner-id xxx --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-partitioning "manual" --catalog-partition-by "day(__intake_ts)" --catalog-auth-type "none"
+  $ stackit beta intake create --display-name my-partitioned-intake --runner-id xxx --catalog-auth-type "none" --catalog-uri "http://dremio.example.com" --catalog-warehouse "my-warehouse" --catalog-partitioning "manual" --catalog-partition-by "day(__intake_ts)"
 ```
 
 ### Options
