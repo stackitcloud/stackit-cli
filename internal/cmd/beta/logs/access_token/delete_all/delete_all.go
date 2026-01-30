@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete all access tokens in instance "xxx"`,
-				"$ stackit logs access-token delete --instance-id xxx",
+				"$ stackit logs access-token delete-all --instance-id xxx",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -59,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to delete all access tokens in instance %q?", instanceLabel)
+			prompt := fmt.Sprintf("Are you sure you want to delete all access tokens for instance %q?", instanceLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err

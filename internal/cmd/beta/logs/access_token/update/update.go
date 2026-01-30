@@ -44,11 +44,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update access token with ID "xxx" with new name "access-token-1"`,
-				`$ stackit logs access-token update xxx --display-name access-token-1`,
+				`$ stackit logs access-token update xxx --instance-id yyy --display-name access-token-1`,
 			),
 			examples.NewExample(
 				`Update access token with ID "xxx" with new description "Access token for Service XY"`,
-				`$ stackit logs access-token update xxx --description "Access token for Service XY"`,
+				`$ stackit logs access-token update xxx --instance-id yyy --description "Access token for Service XY"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

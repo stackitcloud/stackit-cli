@@ -154,8 +154,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, accessTo
 		return fmt.Errorf("access token cannot be nil")
 	}
 	return p.OutputResult(outputFormat, accessToken, func() error {
-		operationState := "Created"
-		p.Outputf("%s access token for log instance %q.\n\nID: %s\nToken: %s\n", operationState, instanceLabel, *accessToken.Id, *accessToken.AccessToken)
+		p.Outputf("Created access token for log instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, *accessToken.Id, *accessToken.AccessToken)
 		return nil
 	})
 }

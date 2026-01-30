@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete all expired access tokens in instance "xxx"`,
-				"$ stackit logs access-token delete --instance-id xxx",
+				"$ stackit logs access-token delete-all-expired --instance-id xxx",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
