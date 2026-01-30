@@ -1,19 +1,34 @@
-## stackit beta logs
+## stackit beta logs access-token list
 
-Provides functionality for Logs
+Lists all access tokens of a project
 
 ### Synopsis
 
-Provides functionality for Logs.
+Lists all access tokens of a project.
 
 ```
-stackit beta logs [flags]
+stackit beta logs access-token list [flags]
+```
+
+### Examples
+
+```
+  Lists all access tokens of the instance "xxx"
+  $ stackit logs access-token list --instance-id xxx
+
+  Lists all access tokens in JSON format
+  $ stackit logs access-token list --instance-id xxx --output-format json
+
+  Lists up to 10 access-token
+  $ stackit logs access-token list --instance-id xxx --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs"
+  -h, --help                 Help for "stackit beta logs access-token list"
+      --instance-id string   ID of the logs instance
+      --limit int            Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +44,5 @@ stackit beta logs [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
 
