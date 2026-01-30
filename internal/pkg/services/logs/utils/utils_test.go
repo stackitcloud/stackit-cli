@@ -22,8 +22,9 @@ const (
 )
 
 type logsClientMocked struct {
-	getInstanceFails bool
-	getInstanceResp  *logs.LogsInstance
+	getInstanceFails   bool
+	getInstanceResp    *logs.LogsInstance
+	getAccessTokenResp *logs.AccessToken
 }
 
 func (m *logsClientMocked) GetLogsInstanceExecute(_ context.Context, _, _, _ string) (*logs.LogsInstance, error) {
@@ -31,6 +32,13 @@ func (m *logsClientMocked) GetLogsInstanceExecute(_ context.Context, _, _, _ str
 		return nil, fmt.Errorf("could not get instance")
 	}
 	return m.getInstanceResp, nil
+}
+
+func (m *logsClientMocked) GetAccessTokenExecute(_ context.Context, _, _, _, _ string) (*logs.AccessToken, error) {
+	if m.getInstanceFails {
+		return nil, fmt.Errorf("could not get instance")
+	}
+	return m.getAccessTokenResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {

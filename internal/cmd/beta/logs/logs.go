@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -23,4 +24,5 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(instance.NewCmd(params))
+	cmd.AddCommand(access_token.NewCmd(params))
 }
