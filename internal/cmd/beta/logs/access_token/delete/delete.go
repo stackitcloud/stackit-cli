@@ -78,8 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete access token: %w", err)
 			}
 
-			operationState := "Deleted"
-			params.Printer.Outputf("%s access token %q\n", operationState, accessTokenLabel)
+			params.Printer.Outputf("Deleted access token %q\n", accessTokenLabel)
 			return nil
 		},
 	}
