@@ -39,8 +39,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(accessTokenIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete access token with ID "xxx"`,
-				"$ stackit logs access-token delete xxx",
+				`Delete access token with ID "xxx" in instance "yyy"`,
+				"$ stackit logs access-token delete xxx --instance-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
