@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.19.2
-	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.20.1
+	github.com/stackitcloud/stackit-sdk-go/core v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.9.1
