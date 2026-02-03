@@ -14,7 +14,6 @@ import (
 type keyFlowInterface interface {
 	GetAccessToken() (string, error)
 	GetConfig() clients.KeyFlowConfig
-	GetToken() clients.TokenResponseBody
 	RoundTrip(*http.Request) (*http.Response, error)
 }
 
@@ -32,7 +31,7 @@ var _ http.RoundTripper = &keyFlowWithStorage{}
 
 // AuthenticateServiceAccount checks the type of the provided roundtripper,
 // authenticates the CLI accordingly and store the credentials.
-// For the key flow, it fetches an access and refresh token from the Service Account API.
+// For the key flow, it fetches an access token from the Service Account API.
 // For the token flow, it just stores the provided token and doesn't check if it is valid.
 // It returns the email associated with the service account
 // If disableWriting is set to true the credentials are not stored on disk (keyring, file).
@@ -56,7 +55,6 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		}
 
 		authFields[ACCESS_TOKEN] = accessToken
-		authFields[REFRESH_TOKEN] = flow.GetToken().RefreshToken
 		authFields[SERVICE_ACCOUNT_KEY] = string(saKeyBytes)
 		authFields[PRIVATE_KEY] = flow.GetConfig().PrivateKey
 	case tokenFlowInterface:
@@ -100,8 +98,6 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 // initKeyFlowWithStorage initializes the keyFlow from the SDK and creates a keyFlowWithStorage struct that uses that keyFlow
 func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	authFields := map[authFieldKey]string{
-		ACCESS_TOKEN:          "",
-		REFRESH_TOKEN:         "",
 		SERVICE_ACCOUNT_KEY:   "",
 		PRIVATE_KEY:           "",
 		TOKEN_CUSTOM_ENDPOINT: "",
@@ -109,12 +105,6 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	err := GetAuthFieldMap(authFields)
 	if err != nil {
 		return nil, fmt.Errorf("get from auth storage: %w", err)
-	}
-	if authFields[ACCESS_TOKEN] == "" {
-		return nil, fmt.Errorf("access token not set")
-	}
-	if authFields[REFRESH_TOKEN] == "" {
-		return nil, fmt.Errorf("refresh token not set")
 	}
 
 	var serviceAccountKey = &clients.ServiceAccountKeyResponse{}
@@ -134,10 +124,6 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("initialize key flow: %w", err)
 	}
-	err = keyFlow.SetToken(authFields[ACCESS_TOKEN], authFields[REFRESH_TOKEN])
-	if err != nil {
-		return nil, fmt.Errorf("set access and refresh token: %w", err)
-	}
 
 	// create keyFlowWithStorage roundtripper that stores the credentials after executing a request
 	keyFlowWithStorage := &keyFlowWithStorage{
@@ -146,21 +132,26 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	return keyFlowWithStorage, nil
 }
 
-// The keyFlowWithStorage Roundtrip executes the keyFlow roundtrip and then stores the access and refresh tokens
+// The keyFlowWithStorage Roundtrip executes the keyFlow roundtrip and then stores the access token
 func (kf *keyFlowWithStorage) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err := kf.keyFlow.RoundTrip(req)
 
-	token := kf.keyFlow.GetToken()
-	accessToken := token.AccessToken
-	refreshToken := token.RefreshToken
+	accessToken, getTokenErr := kf.keyFlow.GetAccessToken()
+	if getTokenErr != nil {
+		return nil, fmt.Errorf("get access token: %w", getTokenErr)
+	}
+
 	tokenValues := map[authFieldKey]string{
-		ACCESS_TOKEN:  accessToken,
-		REFRESH_TOKEN: refreshToken,
+		ACCESS_TOKEN: accessToken,
 	}
 
 	storageErr := SetAuthFieldMap(tokenValues)
 	if storageErr != nil {
-		return nil, fmt.Errorf("set access and refresh token in the storage: %w", err)
+		// If the request was successful, but storing the token failed we still return the response and a nil error
+		if err == nil {
+			return resp, nil
+		}
+		return nil, fmt.Errorf("set access token in the storage: %w", err)
 	}
 
 	return resp, err

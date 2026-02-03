@@ -4,9 +4,12 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
@@ -235,58 +238,28 @@ func TestAuthenticationConfig(t *testing.T) {
 
 func TestInitKeyFlow(t *testing.T) {
 	tests := []struct {
-		description    string
-		accessTokenSet bool
-		refreshToken   string
-		saKey          string
-		privateKeySet  bool
-		tokenEndpoint  string
-		isValid        bool
+		description   string
+		saKey         string
+		privateKeySet bool
+		isValid       bool
 	}{
 		{
-			description:    "base",
-			accessTokenSet: true,
-			refreshToken:   "refresh_token",
-			saKey:          testServiceAccountKey,
-			privateKeySet:  true,
-			tokenEndpoint:  "token_url",
-			isValid:        true,
+			description:   "base",
+			saKey:         testServiceAccountKey,
+			privateKeySet: true,
+			isValid:       true,
 		},
 		{
-			description:    "invalid_service_account_key",
-			accessTokenSet: true,
-			refreshToken:   "refresh_token",
-			saKey:          "",
-			privateKeySet:  true,
-			tokenEndpoint:  "token_url",
-			isValid:        false,
+			description:   "invalid_service_account_key",
+			saKey:         "",
+			privateKeySet: true,
+			isValid:       false,
 		},
 		{
-			description:    "invalid_private_key",
-			accessTokenSet: true,
-			refreshToken:   "refresh_token",
-			saKey:          testServiceAccountKey,
-			privateKeySet:  false,
-			tokenEndpoint:  "token_url",
-			isValid:        false,
-		},
-		{
-			description:    "invalid_access_token",
-			accessTokenSet: false,
-			refreshToken:   "refresh_token",
-			saKey:          testServiceAccountKey,
-			privateKeySet:  true,
-			tokenEndpoint:  "token_url",
-			isValid:        false,
-		},
-		{
-			description:    "empty_refresh_token",
-			accessTokenSet: false,
-			refreshToken:   "",
-			saKey:          testServiceAccountKey,
-			privateKeySet:  true,
-			tokenEndpoint:  "token_url",
-			isValid:        false,
+			description:   "no_private_key_set",
+			saKey:         testServiceAccountKey,
+			privateKeySet: false,
+			isValid:       false,
 		},
 	}
 
@@ -297,13 +270,11 @@ func TestInitKeyFlow(t *testing.T) {
 			authFields := make(map[authFieldKey]string)
 			var accessToken string
 			var err error
-			if tt.accessTokenSet {
-				accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(timestamp)})
-				accessToken, err = accessTokenJWT.SignedString(testSigningKey)
-				if err != nil {
-					t.Fatalf("Get test access token as string: %s", err)
-				}
+			accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(timestamp)})
+			accessToken, err = accessTokenJWT.SignedString(testSigningKey)
+			if err != nil {
+				t.Fatalf("Get test access token as string: %s", err)
 			}
 			if tt.privateKeySet {
 				privateKey, err := generatePrivateKey()
@@ -313,16 +284,42 @@ func TestInitKeyFlow(t *testing.T) {
 				authFields[PRIVATE_KEY] = string(privateKey)
 			}
 			authFields[ACCESS_TOKEN] = accessToken
-			authFields[REFRESH_TOKEN] = tt.refreshToken
 			authFields[SERVICE_ACCOUNT_KEY] = tt.saKey
-			authFields[TOKEN_CUSTOM_ENDPOINT] = tt.tokenEndpoint
+
+			// Mock server to avoid HTTP calls
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				resp := clients.TokenResponseBody{
+					AccessToken: accessToken,
+					ExpiresIn:   3600,
+					TokenType:   "Bearer",
+				}
+				jsonResp, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatalf("Failed to marshal json: %v", err)
+				}
+				_, err = w.Write(jsonResp)
+				if err != nil {
+					t.Fatalf("Failed to write response: %v", err)
+				}
+			}))
+			defer server.Close()
+			authFields[TOKEN_CUSTOM_ENDPOINT] = server.URL
+
 			err = SetAuthFieldMap(authFields)
 			if err != nil {
 				t.Fatalf("Failed to set in auth storage: %v", err)
 			}
 
 			keyFlowWithStorage, err := initKeyFlowWithStorage()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("Expected no error but error was returned: %v", err)
+			}
 
+			getAccessToken, err := keyFlowWithStorage.keyFlow.GetAccessToken()
 			if !tt.isValid {
 				if err == nil {
 					t.Fatalf("Expected error but no error was returned")
@@ -331,15 +328,8 @@ func TestInitKeyFlow(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Expected no error but error was returned: %v", err)
 				}
-				expectedToken := &clients.TokenResponseBody{
-					AccessToken:  accessToken,
-					ExpiresIn:    int(timestamp.Unix()),
-					RefreshToken: tt.refreshToken,
-					Scope:        "",
-					TokenType:    "Bearer",
-				}
-				if !cmp.Equal(*expectedToken, keyFlowWithStorage.keyFlow.GetToken()) {
-					t.Errorf("The returned result is wrong. Expected %+v, got %+v", expectedToken, keyFlowWithStorage.keyFlow.GetToken())
+				if !cmp.Equal(accessToken, getAccessToken) {
+					t.Errorf("The returned result is wrong. Expected %+v, got %+v", accessToken, getAccessToken)
 				}
 			}
 		})
