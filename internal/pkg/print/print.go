@@ -6,14 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"syscall"
-
-	"github.com/goccy/go-yaml"
-
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 
 	"github.com/fatih/color"
 	"github.com/lmittmann/tint"
@@ -182,13 +180,16 @@ func (p *Printer) PromptForEnter(prompt string) error {
 func (p *Printer) PromptForPassword(prompt string) (string, error) {
 	p.Cmd.PrintErr(prompt)
 	defer p.Outputln("")
-	if term.IsTerminal(syscall.Stdin) {
-		bytePassword, err := term.ReadPassword(syscall.Stdin)
+
+	fd := int(os.Stdin.Fd())
+	if term.IsTerminal(fd) {
+		bytePassword, err := term.ReadPassword(fd)
 		if err != nil {
 			return "", fmt.Errorf("read password: %w", err)
 		}
 		return string(bytePassword), nil
 	}
+
 	// Fallback for non-terminal environments
 	reader := bufio.NewReader(p.Cmd.InOrStdin())
 	pw, err := reader.ReadString('\n')
