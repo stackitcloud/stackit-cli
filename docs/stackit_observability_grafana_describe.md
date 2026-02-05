@@ -28,8 +28,7 @@ stackit observability grafana describe INSTANCE_ID [flags]
 ### Options
 
 ```
-  -h, --help            Help for "stackit observability grafana describe"
-  -s, --show-password   Show password in output
+  -h, --help   Help for "stackit observability grafana describe"
 ```
 
 ### Options inherited from parent commands
