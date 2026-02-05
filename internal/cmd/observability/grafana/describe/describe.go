@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	instanceIdArg    = "INSTANCE_ID"
+	instanceIdArg = "INSTANCE_ID"
+	// Deprecated: showPasswordFlag is deprecated and will be removed on 2026-07-05.
 	showPasswordFlag = "show-password"
 )
 
@@ -86,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(showPasswordFlag, "This flag is deprecated and will be removed on 2026-07-05."))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -122,8 +124,10 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 	} else if grafanaConfigs == nil {
 		return fmt.Errorf("grafanaConfigs is nil")
 	}
+	p.Warn("GrafanaAdminPassword and GrafanaAdminUser are deprecated and will be removed on 2026-07-05.")
 
 	return p.OutputResult(outputFormat, grafanaConfigs, func() error {
+		//nolint:staticcheck // field is deprecated but still supported until 2026-07-05
 		initialAdminPassword := utils.PtrString(instance.Instance.GrafanaAdminPassword)
 		if !showPassword {
 			initialAdminPassword = "<hidden>"
@@ -136,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 		table.AddSeparator()
 		table.AddRow("SINGLE SIGN-ON", utils.PtrString(grafanaConfigs.UseStackitSso))
 		table.AddSeparator()
+		//nolint:staticcheck // field is deprecated but still supported until 2026-07-05
 		table.AddRow("INITIAL ADMIN USER (DEFAULT)", utils.PtrString(instance.Instance.GrafanaAdminUser))
 		table.AddSeparator()
 		table.AddRow("INITIAL ADMIN PASSWORD (DEFAULT)", initialAdminPassword)
