@@ -6,7 +6,7 @@ Shows details of the Grafana configuration of an Observability instance
 
 Shows details of the Grafana configuration of an Observability instance.
 The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.
-The initial password is hidden by default, if you want to show it use the "--show-password" flag.
+%!s(MISSING)
 
 ```
 stackit observability grafana describe INSTANCE_ID [flags]
@@ -17,9 +17,6 @@ stackit observability grafana describe INSTANCE_ID [flags]
 ```
   Get details of the Grafana configuration of an Observability instance with ID "xxx"
   $ stackit observability grafana describe xxx
-
-  Get details of the Grafana configuration of an Observability instance with ID "xxx" and show the initial admin password
-  $ stackit observability grafana describe xxx --show-password
 
   Get details of the Grafana configuration of an Observability instance with ID "xxx" in JSON format
   $ stackit observability grafana describe xxx --output-format json
