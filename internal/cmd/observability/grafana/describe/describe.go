@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of the Grafana configuration of an Observability instance",
-		Long: fmt.Sprintf("%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s",
 			"Shows details of the Grafana configuration of an Observability instance.",
 			`The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.`,
 		),

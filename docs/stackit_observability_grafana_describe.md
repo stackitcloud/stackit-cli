@@ -6,7 +6,6 @@ Shows details of the Grafana configuration of an Observability instance
 
 Shows details of the Grafana configuration of an Observability instance.
 The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.
-%!s(MISSING)
 
 ```
 stackit observability grafana describe INSTANCE_ID [flags]
