@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	instanceIdArg    = "INSTANCE_ID"
+	instanceIdArg = "INSTANCE_ID"
+	// Deprecated: showPasswordFlag is deprecated and will be removed on 2026-07-05.
 	showPasswordFlag = "show-password"
 )
 
@@ -35,19 +36,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
 		Short: "Shows details of the Grafana configuration of an Observability instance",
-		Long: fmt.Sprintf("%s\n%s\n%s",
+		Long: fmt.Sprintf("%s\n%s",
 			"Shows details of the Grafana configuration of an Observability instance.",
 			`The Grafana dashboard URL and initial credentials (admin user and password) will be shown in the "pretty" output format. These credentials are only valid for first login. Please change the password after first login. After changing, the initial password is no longer valid.`,
-			`The initial password is hidden by default, if you want to show it use the "--show-password" flag.`,
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Observability instance with ID "xxx"`,
 				"$ stackit observability grafana describe xxx"),
-			examples.NewExample(
-				`Get details of the Grafana configuration of an Observability instance with ID "xxx" and show the initial admin password`,
-				"$ stackit observability grafana describe xxx --show-password"),
 			examples.NewExample(
 				`Get details of the Grafana configuration of an Observability instance with ID "xxx" in JSON format`,
 				"$ stackit observability grafana describe xxx --output-format json"),
@@ -86,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(showPasswordFlag, "This flag is deprecated and will be removed on 2026-07-05."))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -122,8 +120,10 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 	} else if grafanaConfigs == nil {
 		return fmt.Errorf("grafanaConfigs is nil")
 	}
+	p.Warn("GrafanaAdminPassword and GrafanaAdminUser are deprecated and will be removed on 2026-07-05.")
 
 	return p.OutputResult(outputFormat, grafanaConfigs, func() error {
+		//nolint:staticcheck // field is deprecated but still supported until 2026-07-05
 		initialAdminPassword := utils.PtrString(instance.Instance.GrafanaAdminPassword)
 		if !showPassword {
 			initialAdminPassword = "<hidden>"
@@ -136,6 +136,7 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 		table.AddSeparator()
 		table.AddRow("SINGLE SIGN-ON", utils.PtrString(grafanaConfigs.UseStackitSso))
 		table.AddSeparator()
+		//nolint:staticcheck // field is deprecated but still supported until 2026-07-05
 		table.AddRow("INITIAL ADMIN USER (DEFAULT)", utils.PtrString(instance.Instance.GrafanaAdminUser))
 		table.AddSeparator()
 		table.AddRow("INITIAL ADMIN PASSWORD (DEFAULT)", initialAdminPassword)
