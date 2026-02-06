@@ -113,8 +113,8 @@ func outputResult(p *print.Printer, outputFormat string, commandTemplate runcomm
 			table.AddRow("OS TYPE", utils.JoinStringPtr(commandTemplate.OsType, "\n"))
 			table.AddSeparator()
 		}
-		if commandTemplate.ParameterSchema != nil {
-			table.AddRow("PARAMS", *commandTemplate.ParameterSchema)
+		if commandTemplate.ParametersSchema != nil {
+			table.AddRow("PARAMS", *commandTemplate.ParametersSchema)
 		} else {
 			table.AddRow("PARAMS", "")
 		}
