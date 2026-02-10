@@ -224,8 +224,18 @@ func TestOutputProjectResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "nil as NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				nics:         []iaas.NIC{},
+			},
 			wantErr: false,
 		},
 		{
@@ -259,8 +269,18 @@ func TestOutputNetworkResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "nil as NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty NIC-slice",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				nics:         []iaas.NIC{},
+			},
 			wantErr: false,
 		},
 		{
