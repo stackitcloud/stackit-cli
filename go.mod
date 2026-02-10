@@ -271,7 +271,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.5
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.16.3
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.3
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.6
 	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.3
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.3.0
 	github.com/subosito/gotenv v1.6.0 // indirect
