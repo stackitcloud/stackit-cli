@@ -604,8 +604,8 @@ github.com/stackitcloud/stackit-sdk-go/core v0.21.1 h1:Y/PcAgM7DPYMNqum0MLv4n1mF
 github.com/stackitcloud/stackit-sdk-go/core v0.21.1/go.mod h1:osMglDby4csGZ5sIfhNyYq1bS1TxIdPY88+skE/kkmI=
 github.com/stackitcloud/stackit-sdk-go/services/alb v0.9.0 h1:P24WoKPt14dfUiUJ4czIv+IiVmdCFQGrKgVtw23fxNg=
 github.com/stackitcloud/stackit-sdk-go/services/alb v0.9.0/go.mod h1:63XvbCslxdfWEp+0Q4OSzQrpbY4kvVODOiIEAEEVH8M=
-github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.0 h1:4YFY5PG4vP/NiEP1uxCwh+kQHEU7iHG6syuFD7NPqcw=
-github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.0/go.mod h1:v4xdRA5P8Vr+zLdHh+ODgspN0WJG04wLImIJoYjrPK4=
+github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.3 h1:JMKEeNQpA+Mb1DRpY3MRQL3pko5JjUWGrevN0xOrx+4=
+github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.3/go.mod h1:uYI9pHAA2g84jJN25ejFUxa0/JtfpPZqMDkctQ1BzJk=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.9.1 h1:PiNC8VmLqi1WUnBSPefjDXThD43Fvb87p+Y6H8onGA0=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.9.1/go.mod h1:Nnfe/Zv4Z8F56Ljw/MfXjL0/2Ajia4bGuL/CZuvIXk8=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.3 h1:KD/FxU/cJIzfyMvwiOvTlSWq87ISENpHNmw/quznGnw=
