@@ -87,22 +87,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("list network interfaces: %w", err)
 				}
 
-				if resp.Items == nil || len(*resp.Items) == 0 {
-					projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-					if err != nil {
-						projectLabel = model.ProjectId
-					}
-					params.Printer.Outputf("No network interfaces found for project %q\n", projectLabel)
-					return nil
+				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+				if err != nil {
+					projectLabel = model.ProjectId
 				}
 
 				// Truncate output
-				items := *resp.Items
+				items := utils.GetSliceFromPointer(resp.Items)
 				if model.Limit != nil && len(items) > int(*model.Limit) {
 					items = items[:*model.Limit]
 				}
 
-				return outputProjectResult(params.Printer, model.OutputFormat, items)
+				return outputProjectResult(params.Printer, model.OutputFormat, items, projectLabel)
 			}
 
 			// Call API to get NICs for one Network
@@ -113,25 +109,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list network interfaces: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
-					networkLabel = *model.NetworkId
-				} else if networkLabel == "" {
-					networkLabel = *model.NetworkId
-				}
-				params.Printer.Outputf("No network interfaces found for network %q\n", networkLabel)
-				return nil
+			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
+				networkLabel = *model.NetworkId
+			} else if networkLabel == "" {
+				networkLabel = *model.NetworkId
 			}
 
 			// Truncate output
-			items := *resp.Items
+			items := utils.GetSliceFromPointer(resp.Items)
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputNetworkResult(params.Printer, model.OutputFormat, items)
+			return outputNetworkResult(params.Printer, model.OutputFormat, items, networkLabel)
 		},
 	}
 	configureFlags(cmd)
@@ -187,8 +179,13 @@ func buildNetworkRequest(ctx context.Context, model *inputModel, apiClient *iaas
 	return req
 }
 
-func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
+func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC, projectLabel string) error {
 	return p.OutputResult(outputFormat, nics, func() error {
+		if len(nics) == 0 {
+			p.Outputf("No network interfaces found for project %q\n", projectLabel)
+			return nil
+		}
+
 		slices.SortFunc(nics, func(a, b iaas.NIC) int {
 			return cmp.Compare(*a.NetworkId, *b.NetworkId)
 		})
@@ -215,8 +212,13 @@ func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC)
 	})
 }
 
-func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC) error {
+func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC, networkLabel string) error {
 	return p.OutputResult(outputFormat, nics, func() error {
+		if len(nics) == 0 {
+			p.Outputf("No network interfaces found for network %q\n", networkLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "NIC SECURITY", "DEVICE ID", "IPv4 ADDRESS", "STATUS", "TYPE")
 
