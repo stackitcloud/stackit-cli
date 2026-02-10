@@ -246,6 +246,14 @@ func TestOutputProjectResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "two empty NICs in NIC-slice to verify sorting by network id does not break on nil pointers",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				nics:         []iaas.NIC{{}, {}},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})

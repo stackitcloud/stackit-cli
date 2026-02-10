@@ -187,7 +187,7 @@ func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 		}
 
 		slices.SortFunc(nics, func(a, b iaas.NIC) int {
-			return cmp.Compare(*a.NetworkId, *b.NetworkId)
+			return cmp.Compare(utils.PtrValue(a.NetworkId), utils.PtrValue(b.NetworkId))
 		})
 
 		table := tables.NewTable()
