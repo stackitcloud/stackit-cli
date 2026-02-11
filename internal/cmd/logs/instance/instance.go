@@ -1,11 +1,11 @@
 package instance
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

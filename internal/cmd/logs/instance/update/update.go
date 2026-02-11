@@ -48,13 +48,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the display name of the Logs instance with ID "xxx"`,
-				"$ stackit beta logs instance update xxx --display-name new-name"),
+				"$ stackit logs instance update xxx --display-name new-name"),
 			examples.NewExample(
 				`Update the retention time of the Logs instance with ID "xxx"`,
-				"$ stackit beta logs instance update xxx --retention-days 40"),
+				"$ stackit logs instance update xxx --retention-days 40"),
 			examples.NewExample(
 				`Update the ACL of the Logs instance with ID "xxx"`,
-				"$ stackit beta logs instance update xxx --acl 1.2.3.0/24"),
+				"$ stackit logs instance update xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

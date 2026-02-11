@@ -1,19 +1,30 @@
-## stackit beta logs
+## stackit logs instance list
 
-Provides functionality for Logs
+Lists Logs instances
 
 ### Synopsis
 
-Provides functionality for Logs.
+Lists Logs instances within the project.
 
 ```
-stackit beta logs [flags]
+stackit logs instance list [flags]
+```
+
+### Examples
+
+```
+  List all Logs instances
+  $ stackit logs instance list
+
+  List the first 10 Logs instances
+  $ stackit logs instance list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs"
+  -h, --help        Help for "stackit logs instance list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -29,6 +40,5 @@ stackit beta logs [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 

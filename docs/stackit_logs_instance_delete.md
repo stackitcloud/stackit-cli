@@ -1,29 +1,26 @@
-## stackit beta logs instance describe
+## stackit logs instance delete
 
-Shows details of a Logs instance
+Deletes the given Logs instance
 
 ### Synopsis
 
-Shows details of a Logs instance
+Deletes the given Logs instance.
 
 ```
-stackit beta logs instance describe INSTANCE_ID [flags]
+stackit logs instance delete INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Get details of a Logs instance with ID "xxx"
-  $ stackit beta logs instance describe xxx
-
-  Get details of a Logs instance with ID "xxx" in JSON format
-  $ stackit beta logs instance describe xxx --output-format json
+  Delete a Logs instance with ID "xxx"
+  $ stackit logs instance delete "xxx"
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs instance describe"
+  -h, --help   Help for "stackit logs instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +36,5 @@ stackit beta logs instance describe INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 
