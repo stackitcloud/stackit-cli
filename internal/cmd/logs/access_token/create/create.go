@@ -98,10 +98,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create log access-token : %w", err)
 			}
 
-			if resp == nil || resp.Id == nil {
-				return fmt.Errorf("create log access-token : empty response")
-			}
-
 			return outputResult(params.Printer, model.OutputFormat, instanceLabel, resp)
 		},
 	}
