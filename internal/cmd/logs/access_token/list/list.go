@@ -81,7 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := *resp.Tokens
+			items := utils.PtrValue(resp.Tokens)
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -95,7 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)

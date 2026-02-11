@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", accessTokenIdArg),
-		Short: "Deletes a logs access token",
-		Long:  "Deletes a logs access token.",
+		Short: "Deletes a Logs access token",
+		Long:  "Deletes a Logs access token.",
 		Args:  args.SingleArg(accessTokenIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)

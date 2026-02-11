@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Get the display name for confirmation
 			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get logs instance: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get Logs instance: %v", err)
 			}
 			if instanceLabel == "" {
 				instanceLabel = model.InstanceId
@@ -104,7 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 	cmd.Flags().String(displayNameFlag, "", "Display name for the access token")
 	cmd.Flags().String(descriptionFlag, "", "Description of the access token")
 

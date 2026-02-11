@@ -41,8 +41,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a logs access token",
-		Long:  "Creates a logs access token.",
+		Short: "Creates a Logs access token",
+		Long:  "Creates a Logs access token.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -85,7 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				instanceLabel = model.InstanceId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create a access token for the logs instance %q in the project %q?", instanceLabel, projectLabel)
+			prompt := fmt.Sprintf("Are you sure you want to create a access token for the Logs instance %q in the project %q?", instanceLabel, projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -95,7 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create logs access-token : %w", err)
+				return fmt.Errorf("create Logs access-token : %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, instanceLabel, resp)
@@ -106,7 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 	cmd.Flags().String(displayNameFlag, "", "Display name for the access token")
 	cmd.Flags().String(descriptionFlag, "", "Description of the access token")
 	cmd.Flags().Int64(lifetimeFlag, 0, "Lifetime of the access token in days [1 - 180]")
@@ -151,7 +151,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, accessTo
 		return fmt.Errorf("access token cannot be nil")
 	}
 	return p.OutputResult(outputFormat, accessToken, func() error {
-		p.Outputf("Created access token for logs instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, utils.PtrValue(accessToken.Id), utils.PtrValue(accessToken.AccessToken))
+		p.Outputf("Created access token for Logs instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, utils.PtrValue(accessToken.Id), utils.PtrValue(accessToken.AccessToken))
 		return nil
 	})
 }

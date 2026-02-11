@@ -34,16 +34,16 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", accessTokenIdArg),
-		Short: "Shows details of a logs access token",
-		Long:  "Shows details of a logs access token.",
+		Short: "Shows details of a Logs access token",
+		Long:  "Shows details of a Logs access token.",
 		Args:  args.SingleArg(accessTokenIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Show details of a logs access token with ID "xxx"`,
+				`Show details of a Logs access token with ID "xxx"`,
 				"$ stackit logs access-token describe xxx",
 			),
 			examples.NewExample(
-				`Show details of a logs access token with ID "xxx" in JSON format`,
+				`Show details of a Logs access token with ID "xxx" in JSON format`,
 				"$ stackit logs access-token describe xxx --output-format json",
 			),
 		),
@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)

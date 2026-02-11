@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/logs"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -14,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"
+	logUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -31,8 +32,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete-all",
-		Short: "Deletes all logs access token",
-		Long:  "Deletes all logs access token.",
+		Short: "Deletes all Logs access token",
+		Long:  "Deletes all Logs access token.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -53,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := utils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -72,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete access token: %w", err)
 			}
 
-			params.Printer.Outputf("Deleted %d access token(s)\n", len(*items.Tokens))
+			params.Printer.Outputf("Deleted %d access token(s)\n", len(utils.PtrValue(items.Tokens)))
 			return nil
 		},
 	}
@@ -81,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the logs instance")
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
