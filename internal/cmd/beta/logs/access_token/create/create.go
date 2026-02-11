@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -154,7 +155,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, accessTo
 		return fmt.Errorf("access token cannot be nil")
 	}
 	return p.OutputResult(outputFormat, accessToken, func() error {
-		p.Outputf("Created access token for log instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, *accessToken.Id, *accessToken.AccessToken)
+		p.Outputf("Created access token for log instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, utils.PtrValue(accessToken.Id), utils.PtrValue(accessToken.AccessToken))
 		return nil
 	})
 }
