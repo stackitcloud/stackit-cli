@@ -20,7 +20,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.11.3
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.6
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.4.0
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.4.3
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.10.3
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.4.4
@@ -268,7 +268,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.2.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.7.3
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.6
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.3
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.6
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.5
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.16.3
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.25.6
