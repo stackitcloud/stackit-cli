@@ -14,7 +14,7 @@ stackit beta logs access-token delete-all-expired [flags]
 
 ```
   Delete all expired access tokens in instance "xxx"
-  $ stackit logs access-token delete --instance-id xxx
+  $ stackit logs access-token delete-all-expired --instance-id xxx
 ```
 
 ### Options

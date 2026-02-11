@@ -197,7 +197,7 @@ func TestOutputResult(t *testing.T) {
 			name: "base",
 			args: args{
 				accessTokens: []logs.AccessToken{
-					logs.AccessToken{
+					{
 						Id: utils.Ptr(uuid.NewString()),
 						Permissions: utils.Ptr([]string{
 							"read",
@@ -217,7 +217,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty access token",
 			args: args{
 				accessTokens: []logs.AccessToken{
-					logs.AccessToken{},
+					{},
 				},
 			},
 			wantErr: false,

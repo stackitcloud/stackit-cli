@@ -13,8 +13,8 @@ stackit beta logs access-token delete ACCESS_TOKEN_ID [flags]
 ### Examples
 
 ```
-  Delete access token with ID "xxx"
-  $ stackit logs access-token delete xxx
+  Delete access token with ID "xxx" in instance "yyy"
+  $ stackit logs access-token delete xxx --instance-id yyy
 ```
 
 ### Options

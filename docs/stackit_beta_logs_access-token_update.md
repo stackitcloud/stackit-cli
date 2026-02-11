@@ -14,10 +14,10 @@ stackit beta logs access-token update ACCESS_TOKEN_ID [flags]
 
 ```
   Update access token with ID "xxx" with new name "access-token-1"
-  $ stackit logs access-token update xxx --display-name access-token-1
+  $ stackit logs access-token update xxx --instance-id yyy --display-name access-token-1
 
   Update access token with ID "xxx" with new description "Access token for Service XY"
-  $ stackit logs access-token update xxx --description "Access token for Service XY"
+  $ stackit logs access-token update xxx --instance-id yyy --description "Access token for Service XY"
 ```
 
 ### Options

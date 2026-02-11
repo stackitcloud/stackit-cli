@@ -14,7 +14,7 @@ stackit beta logs access-token delete-all [flags]
 
 ```
   Delete all access tokens in instance "xxx"
-  $ stackit logs access-token delete --instance-id xxx
+  $ stackit logs access-token delete-all --instance-id xxx
 ```
 
 ### Options
