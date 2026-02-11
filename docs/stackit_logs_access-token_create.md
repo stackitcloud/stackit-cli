@@ -1,10 +1,10 @@
 ## stackit logs access-token create
 
-Creates a logs access token
+Creates a Logs access token
 
 ### Synopsis
 
-Creates a logs access token.
+Creates a Logs access token.
 
 ```
 stackit logs access-token create [flags]
@@ -29,7 +29,7 @@ stackit logs access-token create [flags]
       --description string    Description of the access token
       --display-name string   Display name for the access token
   -h, --help                  Help for "stackit logs access-token create"
-      --instance-id string    ID of the logs instance
+      --instance-id string    ID of the Logs instance
       --lifetime int          Lifetime of the access token in days [1 - 180]
       --permissions strings   Permissions of the access token ["read" "write"]
 ```

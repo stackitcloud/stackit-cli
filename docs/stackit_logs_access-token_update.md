@@ -26,7 +26,7 @@ stackit logs access-token update ACCESS_TOKEN_ID [flags]
       --description string    Description of the access token
       --display-name string   Display name for the access token
   -h, --help                  Help for "stackit logs access-token update"
-      --instance-id string    ID of the logs instance
+      --instance-id string    ID of the Logs instance
 ```
 
 ### Options inherited from parent commands

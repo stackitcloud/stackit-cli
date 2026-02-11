@@ -1,10 +1,10 @@
 ## stackit logs access-token describe
 
-Shows details of a logs access token
+Shows details of a Logs access token
 
 ### Synopsis
 
-Shows details of a logs access token.
+Shows details of a Logs access token.
 
 ```
 stackit logs access-token describe ACCESS_TOKEN_ID [flags]
@@ -13,10 +13,10 @@ stackit logs access-token describe ACCESS_TOKEN_ID [flags]
 ### Examples
 
 ```
-  Show details of a logs access token with ID "xxx"
+  Show details of a Logs access token with ID "xxx"
   $ stackit logs access-token describe xxx
 
-  Show details of a logs access token with ID "xxx" in JSON format
+  Show details of a Logs access token with ID "xxx" in JSON format
   $ stackit logs access-token describe xxx --output-format json
 ```
 
@@ -24,7 +24,7 @@ stackit logs access-token describe ACCESS_TOKEN_ID [flags]
 
 ```
   -h, --help                 Help for "stackit logs access-token describe"
-      --instance-id string   ID of the logs instance
+      --instance-id string   ID of the Logs instance
 ```
 
 ### Options inherited from parent commands

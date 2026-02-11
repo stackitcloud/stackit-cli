@@ -27,7 +27,7 @@ stackit logs access-token list [flags]
 
 ```
   -h, --help                 Help for "stackit logs access-token list"
-      --instance-id string   ID of the logs instance
+      --instance-id string   ID of the Logs instance
       --limit int            Maximum number of entries to list
 ```
 

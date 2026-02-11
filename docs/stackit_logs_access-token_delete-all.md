@@ -1,10 +1,10 @@
 ## stackit logs access-token delete-all
 
-Deletes all logs access token
+Deletes all Logs access token
 
 ### Synopsis
 
-Deletes all logs access token.
+Deletes all Logs access token.
 
 ```
 stackit logs access-token delete-all [flags]
@@ -21,7 +21,7 @@ stackit logs access-token delete-all [flags]
 
 ```
   -h, --help                 Help for "stackit logs access-token delete-all"
-      --instance-id string   ID of the logs instance
+      --instance-id string   ID of the Logs instance
 ```
 
 ### Options inherited from parent commands

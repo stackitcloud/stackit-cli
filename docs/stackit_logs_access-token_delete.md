@@ -1,10 +1,10 @@
 ## stackit logs access-token delete
 
-Deletes a logs access token
+Deletes a Logs access token
 
 ### Synopsis
 
-Deletes a logs access token.
+Deletes a Logs access token.
 
 ```
 stackit logs access-token delete ACCESS_TOKEN_ID [flags]
@@ -21,7 +21,7 @@ stackit logs access-token delete ACCESS_TOKEN_ID [flags]
 
 ```
   -h, --help                 Help for "stackit logs access-token delete"
-      --instance-id string   ID of the logs instance
+      --instance-id string   ID of the Logs instance
 ```
 
 ### Options inherited from parent commands
