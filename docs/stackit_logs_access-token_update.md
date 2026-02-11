@@ -1,4 +1,4 @@
-## stackit beta logs access-token update
+## stackit logs access-token update
 
 Updates a access token
 
@@ -7,7 +7,7 @@ Updates a access token
 Updates a access token.
 
 ```
-stackit beta logs access-token update ACCESS_TOKEN_ID [flags]
+stackit logs access-token update ACCESS_TOKEN_ID [flags]
 ```
 
 ### Examples
@@ -25,7 +25,7 @@ stackit beta logs access-token update ACCESS_TOKEN_ID [flags]
 ```
       --description string    Description of the access token
       --display-name string   Display name for the access token
-  -h, --help                  Help for "stackit beta logs access-token update"
+  -h, --help                  Help for "stackit logs access-token update"
       --instance-id string    ID of the logs instance
 ```
 
@@ -42,5 +42,5 @@ stackit beta logs access-token update ACCESS_TOKEN_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

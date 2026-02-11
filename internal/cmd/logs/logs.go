@@ -1,8 +1,8 @@
 package logs
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/instance"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

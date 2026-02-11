@@ -1,27 +1,19 @@
-## stackit beta logs access-token delete
+## stackit logs
 
-Deletes a log access token
+Provides functionality for Logs
 
 ### Synopsis
 
-Deletes a log access token.
+Provides functionality for Logs.
 
 ```
-stackit beta logs access-token delete ACCESS_TOKEN_ID [flags]
-```
-
-### Examples
-
-```
-  Delete access token with ID "xxx" in instance "yyy"
-  $ stackit logs access-token delete xxx --instance-id yyy
+stackit logs [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit beta logs access-token delete"
-      --instance-id string   ID of the logs instance
+  -h, --help   Help for "stackit logs"
 ```
 
 ### Options inherited from parent commands
@@ -37,5 +29,7 @@ stackit beta logs access-token delete ACCESS_TOKEN_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 

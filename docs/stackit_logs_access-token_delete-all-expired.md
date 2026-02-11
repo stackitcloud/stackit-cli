@@ -1,26 +1,27 @@
-## stackit beta logs instance delete
+## stackit logs access-token delete-all-expired
 
-Deletes the given Logs instance
+Deletes all expired log access token
 
 ### Synopsis
 
-Deletes the given Logs instance.
+Deletes all expired log access token.
 
 ```
-stackit beta logs instance delete INSTANCE_ID [flags]
+stackit logs access-token delete-all-expired [flags]
 ```
 
 ### Examples
 
 ```
-  Delete a Logs instance with ID "xxx"
-  $ stackit beta logs instance delete "xxx"
+  Delete all expired access tokens in instance "xxx"
+  $ stackit logs access-token delete-all-expired --instance-id xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs instance delete"
+  -h, --help                 Help for "stackit logs access-token delete-all-expired"
+      --instance-id string   ID of the logs instance
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +37,5 @@ stackit beta logs instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

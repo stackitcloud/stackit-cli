@@ -1,30 +1,27 @@
-## stackit beta logs instance list
+## stackit logs access-token delete
 
-Lists Logs instances
+Deletes a log access token
 
 ### Synopsis
 
-Lists Logs instances within the project.
+Deletes a log access token.
 
 ```
-stackit beta logs instance list [flags]
+stackit logs access-token delete ACCESS_TOKEN_ID [flags]
 ```
 
 ### Examples
 
 ```
-  List all Logs instances
-  $ stackit beta logs instance list
-
-  List the first 10 Logs instances
-  $ stackit beta logs instance list --limit=10
+  Delete access token with ID "xxx" in instance "yyy"
+  $ stackit logs access-token delete xxx --instance-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit beta logs instance list"
-      --limit int   Limit the output to the first n elements
+  -h, --help                 Help for "stackit logs access-token delete"
+      --instance-id string   ID of the logs instance
 ```
 
 ### Options inherited from parent commands
@@ -40,5 +37,5 @@ stackit beta logs instance list [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

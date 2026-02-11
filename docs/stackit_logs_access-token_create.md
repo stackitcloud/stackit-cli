@@ -1,4 +1,4 @@
-## stackit beta logs access-token create
+## stackit logs access-token create
 
 Creates a log access token
 
@@ -7,7 +7,7 @@ Creates a log access token
 Creates a log access token.
 
 ```
-stackit beta logs access-token create [flags]
+stackit logs access-token create [flags]
 ```
 
 ### Examples
@@ -28,7 +28,7 @@ stackit beta logs access-token create [flags]
 ```
       --description string    Description of the access token
       --display-name string   Display name for the access token
-  -h, --help                  Help for "stackit beta logs access-token create"
+  -h, --help                  Help for "stackit logs access-token create"
       --instance-id string    ID of the logs instance
       --lifetime int          Lifetime of the access token in days [1 - 180]
       --permissions strings   Permissions of the access token ["read" "write"]
@@ -47,5 +47,5 @@ stackit beta logs access-token create [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

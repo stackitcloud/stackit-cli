@@ -37,6 +37,7 @@ stackit [flags]
 * [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
+* [stackit logs](./stackit_logs.md)	 - Provides functionality for Logs
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
 * [stackit network](./stackit_network.md)	 - Provides functionality for networks

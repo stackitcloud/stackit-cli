@@ -1,26 +1,29 @@
-## stackit beta logs access-token delete-all-expired
+## stackit logs access-token describe
 
-Deletes all expired log access token
+Shows details of a logs access token
 
 ### Synopsis
 
-Deletes all expired log access token.
+Shows details of a logs access token.
 
 ```
-stackit beta logs access-token delete-all-expired [flags]
+stackit logs access-token describe ACCESS_TOKEN_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Delete all expired access tokens in instance "xxx"
-  $ stackit logs access-token delete-all-expired --instance-id xxx
+  Show details of a logs access token with ID "xxx"
+  $ stackit logs access-token describe xxx
+
+  Show details of a logs access token with ID "xxx" in JSON format
+  $ stackit logs access-token describe xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit beta logs access-token delete-all-expired"
+  -h, --help                 Help for "stackit logs access-token describe"
       --instance-id string   ID of the logs instance
 ```
 
@@ -37,5 +40,5 @@ stackit beta logs access-token delete-all-expired [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

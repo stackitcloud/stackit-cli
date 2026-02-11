@@ -1,29 +1,27 @@
-## stackit beta logs instance describe
+## stackit logs access-token delete-all
 
-Shows details of a Logs instance
+Deletes all log access token
 
 ### Synopsis
 
-Shows details of a Logs instance
+Deletes all log access token.
 
 ```
-stackit beta logs instance describe INSTANCE_ID [flags]
+stackit logs access-token delete-all [flags]
 ```
 
 ### Examples
 
 ```
-  Get details of a Logs instance with ID "xxx"
-  $ stackit beta logs instance describe xxx
-
-  Get details of a Logs instance with ID "xxx" in JSON format
-  $ stackit beta logs instance describe xxx --output-format json
+  Delete all access tokens in instance "xxx"
+  $ stackit logs access-token delete-all --instance-id xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs instance describe"
+  -h, --help                 Help for "stackit logs access-token delete-all"
+      --instance-id string   ID of the logs instance
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +37,5 @@ stackit beta logs instance describe INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 

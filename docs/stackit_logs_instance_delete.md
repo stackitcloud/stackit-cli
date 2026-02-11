@@ -1,19 +1,26 @@
-## stackit beta logs
+## stackit logs instance delete
 
-Provides functionality for Logs
+Deletes the given Logs instance
 
 ### Synopsis
 
-Provides functionality for Logs.
+Deletes the given Logs instance.
 
 ```
-stackit beta logs [flags]
+stackit logs instance delete INSTANCE_ID [flags]
+```
+
+### Examples
+
+```
+  Delete a Logs instance with ID "xxx"
+  $ stackit logs instance delete "xxx"
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta logs"
+  -h, --help   Help for "stackit logs instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +36,5 @@ stackit beta logs [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 

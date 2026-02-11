@@ -1,13 +1,13 @@
 package access_token
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/delete_all"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/delete_all_expired"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/logs/access_token/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/delete_all"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/delete_all_expired"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs/access_token/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

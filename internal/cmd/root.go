@@ -19,6 +19,7 @@ import (
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/key-pair"
 	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/logs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network"
@@ -170,6 +171,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(dns.NewCmd(params))
 	cmd.AddCommand(loadbalancer.NewCmd(params))
 	cmd.AddCommand(logme.NewCmd(params))
+	cmd.AddCommand(logs.NewCmd(params))
 	cmd.AddCommand(mariadb.NewCmd(params))
 	cmd.AddCommand(mongodbflex.NewCmd(params))
 	cmd.AddCommand(objectstorage.NewCmd(params))

@@ -1,4 +1,4 @@
-## stackit beta logs access-token list
+## stackit logs access-token list
 
 Lists all access tokens of a project
 
@@ -7,7 +7,7 @@ Lists all access tokens of a project
 Lists all access tokens of a project.
 
 ```
-stackit beta logs access-token list [flags]
+stackit logs access-token list [flags]
 ```
 
 ### Examples
@@ -26,7 +26,7 @@ stackit beta logs access-token list [flags]
 ### Options
 
 ```
-  -h, --help                 Help for "stackit beta logs access-token list"
+  -h, --help                 Help for "stackit logs access-token list"
       --instance-id string   ID of the logs instance
       --limit int            Maximum number of entries to list
 ```
@@ -44,5 +44,5 @@ stackit beta logs access-token list [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs access-token](./stackit_beta_logs_access-token.md)	 - Provides functionality for Logs access-tokens
+* [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
 
