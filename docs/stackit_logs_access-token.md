@@ -30,10 +30,10 @@ stackit logs access-token [flags]
 ### SEE ALSO
 
 * [stackit logs](./stackit_logs.md)	 - Provides functionality for Logs
-* [stackit logs access-token create](./stackit_logs_access-token_create.md)	 - Creates a log access token
-* [stackit logs access-token delete](./stackit_logs_access-token_delete.md)	 - Deletes a log access token
-* [stackit logs access-token delete-all](./stackit_logs_access-token_delete-all.md)	 - Deletes all log access token
-* [stackit logs access-token delete-all-expired](./stackit_logs_access-token_delete-all-expired.md)	 - Deletes all expired log access token
+* [stackit logs access-token create](./stackit_logs_access-token_create.md)	 - Creates a logs access token
+* [stackit logs access-token delete](./stackit_logs_access-token_delete.md)	 - Deletes a logs access token
+* [stackit logs access-token delete-all](./stackit_logs_access-token_delete-all.md)	 - Deletes all logs access token
+* [stackit logs access-token delete-all-expired](./stackit_logs_access-token_delete-all-expired.md)	 - Deletes all expired logs access token
 * [stackit logs access-token describe](./stackit_logs_access-token_describe.md)	 - Shows details of a logs access token
 * [stackit logs access-token list](./stackit_logs_access-token_list.md)	 - Lists all access tokens of a project
 * [stackit logs access-token update](./stackit_logs_access-token_update.md)	 - Updates a access token

@@ -1,10 +1,10 @@
 ## stackit logs access-token delete-all
 
-Deletes all log access token
+Deletes all logs access token
 
 ### Synopsis
 
-Deletes all log access token.
+Deletes all logs access token.
 
 ```
 stackit logs access-token delete-all [flags]

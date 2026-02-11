@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete-all-expired",
-		Short: "Deletes all expired log access token",
-		Long:  "Deletes all expired log access token.",
+		Short: "Deletes all expired logs access token",
+		Long:  "Deletes all expired logs access token.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Get the display name for confirmation
 			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get log instance: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get logs instance: %v", err)
 			}
 			if instanceLabel == "" {
 				instanceLabel = model.InstanceId

@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete-all",
-		Short: "Deletes all log access token",
-		Long:  "Deletes all log access token.",
+		Short: "Deletes all logs access token",
+		Long:  "Deletes all logs access token.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

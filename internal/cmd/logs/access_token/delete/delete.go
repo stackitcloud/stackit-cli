@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", accessTokenIdArg),
-		Short: "Deletes a log access token",
-		Long:  "Deletes a log access token.",
+		Short: "Deletes a logs access token",
+		Long:  "Deletes a logs access token.",
 		Args:  args.SingleArg(accessTokenIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

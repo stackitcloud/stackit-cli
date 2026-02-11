@@ -1,10 +1,10 @@
 ## stackit logs access-token create
 
-Creates a log access token
+Creates a logs access token
 
 ### Synopsis
 
-Creates a log access token.
+Creates a logs access token.
 
 ```
 stackit logs access-token create [flags]
