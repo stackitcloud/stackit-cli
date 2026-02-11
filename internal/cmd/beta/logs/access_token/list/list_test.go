@@ -186,6 +186,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		accessTokens []logs.AccessToken
+		projectLabel string
 	}
 	tests := []struct {
 		name    string
@@ -231,7 +232,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.accessTokens); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.accessTokens, tt.args.projectLabel); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

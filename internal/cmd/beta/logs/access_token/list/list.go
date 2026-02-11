@@ -72,16 +72,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list access tokens: %w", err)
 			}
 
-			if resp.Tokens == nil || len(*resp.Tokens) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				} else if projectLabel == "" {
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Outputf("No access token found for project %q\n", projectLabel)
-				return nil
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -90,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, items, projectLabel)
 		},
 	}
 	configureFlags(cmd)
@@ -133,8 +129,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 	return apiClient.ListAccessTokens(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, tokens []logs.AccessToken) error {
+func outputResult(p *print.Printer, outputFormat string, tokens []logs.AccessToken, projectLabel string) error {
 	return p.OutputResult(outputFormat, tokens, func() error {
+		if len(tokens) == 0 {
+			p.Outputf("No access token found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "PERMISSIONS", "VALID UNTIL", "STATUS")
 
