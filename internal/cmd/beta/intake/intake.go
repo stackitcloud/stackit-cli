@@ -2,12 +2,12 @@ package intake
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
