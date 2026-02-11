@@ -38,11 +38,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all Logs instances`,
-				`$ stackit beta logs instance list`,
+				`$ stackit logs instance list`,
 			),
 			examples.NewExample(
 				`List the first 10 Logs instances`,
-				`$ stackit beta logs instance list --limit=10`,
+				`$ stackit logs instance list --limit=10`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -47,13 +47,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Logs instance with name "my-instance" and retention time 10 days`,
-				`$ stackit beta logs instance create --display-name "my-instance" --retention-days 10`),
+				`$ stackit logs instance create --display-name "my-instance" --retention-days 10`),
 			examples.NewExample(
 				`Create a Logs instance with name "my-instance", retention time 10 days, and a description`,
-				`$ stackit beta logs instance create --display-name "my-instance" --retention-days 10 --description "Description of the instance"`),
+				`$ stackit logs instance create --display-name "my-instance" --retention-days 10 --description "Description of the instance"`),
 			examples.NewExample(
 				`Create a Logs instance with name "my-instance", retention time 10 days, and restrict access to a specific range of IP addresses.`,
-				`$ stackit beta logs instance create --display-name "my-instance" --retention-days 10 --acl 1.2.3.0/24`),
+				`$ stackit logs instance create --display-name "my-instance" --retention-days 10 --acl 1.2.3.0/24`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

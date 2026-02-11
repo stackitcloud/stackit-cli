@@ -1,4 +1,4 @@
-## stackit beta logs instance update
+## stackit logs instance update
 
 Updates a Logs instance
 
@@ -7,20 +7,20 @@ Updates a Logs instance
 Updates a Logs instance.
 
 ```
-stackit beta logs instance update INSTANCE_ID [flags]
+stackit logs instance update INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
   Update the display name of the Logs instance with ID "xxx"
-  $ stackit beta logs instance update xxx --display-name new-name
+  $ stackit logs instance update xxx --display-name new-name
 
   Update the retention time of the Logs instance with ID "xxx"
-  $ stackit beta logs instance update xxx --retention-days 40
+  $ stackit logs instance update xxx --retention-days 40
 
   Update the ACL of the Logs instance with ID "xxx"
-  $ stackit beta logs instance update xxx --acl 1.2.3.0/24
+  $ stackit logs instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -29,7 +29,7 @@ stackit beta logs instance update INSTANCE_ID [flags]
       --acl strings           Access control list
       --description string    Description
       --display-name string   Display name
-  -h, --help                  Help for "stackit beta logs instance update"
+  -h, --help                  Help for "stackit logs instance update"
       --retention-days int    The days for how long the logs should be stored before being cleaned up
 ```
 
@@ -46,5 +46,5 @@ stackit beta logs instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta logs instance](./stackit_beta_logs_instance.md)	 - Provides functionality for Logs instances
+* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 

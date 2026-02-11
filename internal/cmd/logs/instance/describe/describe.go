@@ -36,11 +36,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a Logs instance with ID "xxx"`,
-				`$ stackit beta logs instance describe xxx`,
+				`$ stackit logs instance describe xxx`,
 			),
 			examples.NewExample(
 				`Get details of a Logs instance with ID "xxx" in JSON format`,
-				"$ stackit beta logs instance describe xxx --output-format json"),
+				"$ stackit logs instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
