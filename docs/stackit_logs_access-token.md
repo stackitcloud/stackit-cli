@@ -35,6 +35,6 @@ stackit logs access-token [flags]
 * [stackit logs access-token delete-all](./stackit_logs_access-token_delete-all.md)	 - Deletes all Logs access token
 * [stackit logs access-token delete-all-expired](./stackit_logs_access-token_delete-all-expired.md)	 - Deletes all expired Logs access token
 * [stackit logs access-token describe](./stackit_logs_access-token_describe.md)	 - Shows details of a Logs access token
-* [stackit logs access-token list](./stackit_logs_access-token_list.md)	 - Lists all access tokens of a project
-* [stackit logs access-token update](./stackit_logs_access-token_update.md)	 - Updates a access token
+* [stackit logs access-token list](./stackit_logs_access-token_list.md)	 - Lists all Logs access tokens of a project
+* [stackit logs access-token update](./stackit_logs_access-token_update.md)	 - Updates a Logs access token
 

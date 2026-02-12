@@ -1,6 +1,6 @@
 ## stackit logs access-token list
 
-Lists all access tokens of a project
+Lists all Logs access tokens of a project
 
 ### Synopsis
 

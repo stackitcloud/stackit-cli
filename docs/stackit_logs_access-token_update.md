@@ -1,6 +1,6 @@
 ## stackit logs access-token update
 
-Updates a access token
+Updates a Logs access token
 
 ### Synopsis
 
