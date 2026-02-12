@@ -70,7 +70,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			items, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete access token: %w", err)
+				return fmt.Errorf("delete all access token: %w", err)
+			}
+			if items == nil {
+				return fmt.Errorf("delete all access token: nil result")
 			}
 
 			params.Printer.Outputf("Deleted %d access token(s)\n", len(utils.PtrValue(items.Tokens)))
