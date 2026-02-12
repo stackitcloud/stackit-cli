@@ -35,7 +35,7 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all access tokens of a project",
+		Short: "Lists all Logs access tokens of a project",
 		Long:  "Lists all access tokens of a project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
