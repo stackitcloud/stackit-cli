@@ -38,7 +38,7 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", accessTokenIdArg),
-		Short: "Updates a access token",
+		Short: "Updates a Logs access token",
 		Long:  "Updates a access token.",
 		Args:  args.SingleArg(accessTokenIdArg, utils.ValidateUUID),
 		Example: examples.Build(
