@@ -1,19 +1,27 @@
-## stackit logs
+## stackit logs access-token delete-all-expired
 
-Provides functionality for Logs
+Deletes all expired Logs access token
 
 ### Synopsis
 
-Provides functionality for Logs.
+Deletes all expired Logs access token.
 
 ```
-stackit logs [flags]
+stackit logs access-token delete-all-expired [flags]
+```
+
+### Examples
+
+```
+  Delete all expired access tokens in instance "xxx"
+  $ stackit logs access-token delete-all-expired --instance-id xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit logs"
+  -h, --help                 Help for "stackit logs access-token delete-all-expired"
+      --instance-id string   ID of the Logs instance
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +37,5 @@ stackit logs [flags]
 
 ### SEE ALSO
 
-* [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit logs access-token](./stackit_logs_access-token.md)	 - Provides functionality for Logs access-tokens
-* [stackit logs instance](./stackit_logs_instance.md)	 - Provides functionality for Logs instances
 
