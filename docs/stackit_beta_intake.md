@@ -36,4 +36,5 @@ stackit beta intake [flags]
 * [stackit beta intake list](./stackit_beta_intake_list.md)	 - Lists all Intakes
 * [stackit beta intake runner](./stackit_beta_intake_runner.md)	 - Provides functionality for Intake Runners
 * [stackit beta intake update](./stackit_beta_intake_update.md)	 - Updates an Intake
+* [stackit beta intake user](./stackit_beta_intake_user.md)	 - Provides functionality for Intake Users
 
