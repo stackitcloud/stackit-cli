@@ -1,6 +1,6 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/fatih/color v1.18.0
@@ -42,7 +42,7 @@ require (
 	golang.org/x/oauth2 v0.35.0
 	golang.org/x/term v0.39.0
 	golang.org/x/text v0.33.0
-	k8s.io/apimachinery v0.34.2
+	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.34.2
 )
 
@@ -231,7 +231,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20251023183803-a4bb9ffd2546 // indirect
 	golang.org/x/sync v0.19.0 // indirect
@@ -239,6 +239,7 @@ require (
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
 	mvdan.cc/gofumpt v0.9.2 // indirect
 	mvdan.cc/unparam v0.0.0-20251027182757-5beb8c8f8f15 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
@@ -279,8 +280,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.34.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
-	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
+	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
+	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
