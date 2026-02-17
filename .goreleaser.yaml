@@ -137,24 +137,25 @@ homebrew_casks:
       bash: ./completions/stackit.bash
       fish: ./completions/stackit.fish
 
-snapcrafts:
-  # IDs of the builds for which to create packages for
-  - ids:
-      - linux-builds
-    # The name of the snap
-    name: stackit
-    # The canonical title of the application, displayed in the software
-    # centre graphical frontends
-    title: STACKIT CLI
-    summary: A command-line interface to manage STACKIT resources.
-    description: "A command-line interface to manage STACKIT resources."
-    license: Apache-2.0
-    confinement: classic
-    # Grade "devel" will only release to `edge` and `beta` channels
-    # Grade "stable" will also release to the `candidate` and `stable` channels
-    grade: stable
-    # Whether to publish the Snap to the store
-    publish: true
+# Temporary disable snap release, see https://jira.schwarz/browse/STACKITCLI-330
+# snapcrafts:
+#   # IDs of the builds for which to create packages for
+#   - ids:
+#       - linux-builds
+#     # The name of the snap
+#     name: stackit
+#     # The canonical title of the application, displayed in the software
+#     # centre graphical frontends
+#     title: STACKIT CLI
+#     summary: A command-line interface to manage STACKIT resources.
+#     description: "A command-line interface to manage STACKIT resources."
+#     license: Apache-2.0
+#     confinement: classic
+#     # Grade "devel" will only release to `edge` and `beta` channels
+#     # Grade "stable" will also release to the `candidate` and `stable` channels
+#     grade: stable
+#     # Whether to publish the Snap to the store
+#     publish: true
 
 winget:
   - name: stackit
