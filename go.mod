@@ -43,7 +43,7 @@ require (
 	golang.org/x/term v0.40.0
 	golang.org/x/text v0.34.0
 	k8s.io/apimachinery v0.35.1
-	k8s.io/client-go v0.34.2
+	k8s.io/client-go v0.35.1
 )
 
 require (
@@ -253,7 +253,6 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -278,7 +277,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.34.2 // indirect
+	k8s.io/api v0.35.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
