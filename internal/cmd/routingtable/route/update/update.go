@@ -113,14 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func outputResult(p *print.Printer, outputFormat, routingTableId, networkAreaId string, route *iaas.Route) error {
-	if route == nil {
-		return fmt.Errorf("update route response is empty")
-	}
-
-	if route.Id == nil || *route.Id == "" {
-		return fmt.Errorf("update route response has empty id")
-	}
-
 	return p.OutputResult(outputFormat, route, func() error {
 		if route == nil {
 			return fmt.Errorf("update route response is empty")
