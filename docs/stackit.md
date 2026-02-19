@@ -53,6 +53,7 @@ stackit [flags]
 * [stackit quota](./stackit_quota.md)	 - Manage server quotas
 * [stackit rabbitmq](./stackit_rabbitmq.md)	 - Provides functionality for RabbitMQ
 * [stackit redis](./stackit_redis.md)	 - Provides functionality for Redis
+* [stackit routing-table](./stackit_routing-table.md)	 - Manage routing-tables and its according routes
 * [stackit secrets-manager](./stackit_secrets-manager.md)	 - Provides functionality for Secrets Manager
 * [stackit security-group](./stackit_security-group.md)	 - Manage security groups
 * [stackit server](./stackit_server.md)	 - Provides functionality for servers
