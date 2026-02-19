@@ -481,6 +481,16 @@ func TestParseInput(t *testing.T) {
 			expectedModel: nil,
 			isValid:       false,
 		},
+		{
+			description: "routing-table id not set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, routingTableIdFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableID = nil
+			}),
+		},
 	}
 
 	for _, tt := range tests {
