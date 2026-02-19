@@ -316,6 +316,12 @@ func getAccessToken(params *types.CmdParams) (string, error) {
 		params.Printer.Debug(print.ErrorLevel, "get valid access token: %v", err)
 		return "", &cliErr.SessionExpiredError{}
 	}
+
+	err = auth.EnsureIDPTokenEndpoint(params.Printer)
+	if err != nil {
+		return "", err
+	}
+
 	return accessToken, nil
 }
 

@@ -216,3 +216,18 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	// Return the new access token
 	return utf.accessToken, nil
 }
+
+// EnsureIDPTokenEndpoint ensures that the `IDP_TOKEN_ENDPOINT` auth field is set.
+// This field is by default only initialized for user accounts. Call this method to also
+// initialize it for service accounts.
+func EnsureIDPTokenEndpoint(p *print.Printer) error {
+	idpTokenEndpoint, err := GetAuthField(IDP_TOKEN_ENDPOINT)
+	if err != nil {
+		return fmt.Errorf("failed to check idp token endpoint configuration value: %w", err)
+	}
+	if idpTokenEndpoint == "" {
+		_, err := retrieveIDPWellKnownConfig(p)
+		return err
+	}
+	return nil
+}
