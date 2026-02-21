@@ -333,6 +333,27 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 				UserData:         nil,
 			},
 		},
+		{
+			name: "server with agent",
+			input: &iaas.Server{
+				Id:               Ptr("server-456"),
+				Name:             Ptr("test-server-2"),
+				Status:           Ptr("STOPPED"),
+				AvailabilityZone: Ptr("eu01-2"),
+				MachineType:      Ptr("t1.2"),
+				UserData:         &emptyUserData,
+				Agent:            &iaas.ServerAgent{Provisioned: Ptr(true)},
+			},
+			expected: &Base64PatchedServer{
+				Id:               Ptr("server-456"),
+				Name:             Ptr("test-server-2"),
+				Status:           Ptr("STOPPED"),
+				AvailabilityZone: Ptr("eu01-2"),
+				MachineType:      Ptr("t1.2"),
+				UserData:         Ptr(Base64Bytes(emptyUserData)),
+				Agent:            Ptr(iaas.ServerAgent{Provisioned: Ptr(true)}),
+			},
+		},
 	}
 
 	for _, tt := range tests {
