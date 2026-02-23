@@ -26,7 +26,7 @@ var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
 var testPayload = &observability.CreateScrapeConfigPayload{
-	BasicAuth: &observability.CreateScrapeConfigPayloadBasicAuth{
+	BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
 		Username: utils.Ptr("username"),
 		Password: utils.Ptr("password"),
 	},
@@ -35,9 +35,9 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 	HonorTimeStamps: utils.Ptr(true),
 	MetricsPath:     utils.Ptr("/metrics"),
 	JobName:         utils.Ptr("default-name"),
-	MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+	MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
 		{
-			Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+			Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 			Modulus:      utils.Ptr(1.0),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),
@@ -54,7 +54,7 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 	Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS.Ptr(),
 	ScrapeInterval: utils.Ptr("interval"),
 	ScrapeTimeout:  utils.Ptr("timeout"),
-	StaticConfigs: &[]observability.CreateScrapeConfigPayloadStaticConfigsInner{
+	StaticConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerStaticConfigsInner{
 		{
 			Labels: &map[string]interface{}{
 				"label":  "value",
@@ -63,7 +63,7 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 			Targets: &[]string{"target"},
 		},
 	},
-	TlsConfig: &observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+	TlsConfig: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
 		InsecureSkipVerify: utils.Ptr(true),
 	},
 }

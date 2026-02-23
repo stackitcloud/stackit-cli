@@ -24,7 +24,7 @@ var testInstanceId = uuid.NewString()
 var testJobName = "my-config"
 
 var testPayload = observability.UpdateScrapeConfigPayload{
-	BasicAuth: &observability.CreateScrapeConfigPayloadBasicAuth{
+	BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
 		Username: utils.Ptr("username"),
 		Password: utils.Ptr("password"),
 	},
@@ -32,9 +32,9 @@ var testPayload = observability.UpdateScrapeConfigPayload{
 	HonorLabels:     utils.Ptr(true),
 	HonorTimeStamps: utils.Ptr(true),
 	MetricsPath:     utils.Ptr("/metrics"),
-	MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+	MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
 		{
-			Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+			Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 			Modulus:      utils.Ptr(1.0),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),
