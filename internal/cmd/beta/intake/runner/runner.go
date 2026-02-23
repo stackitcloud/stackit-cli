@@ -20,12 +20,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
+
+	addSubcommands(cmd, params)
+	return cmd
+}
+
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	// Pass the params down to each action command
 	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
-
-	return cmd
 }
