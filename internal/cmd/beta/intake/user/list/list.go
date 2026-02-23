@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake"
 )
 
@@ -139,16 +140,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, intakeId string,
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "DISPLAY NAME", "TYPE", "STATE")
-		for i := range users {
-			user := users[i]
-			userType := ""
-			if user.Type != nil {
-				userType = string(*user.Type)
-			}
+		for _, user := range users {
 			table.AddRow(
 				user.GetId(),
 				user.GetDisplayName(),
-				userType,
+				utils.PtrString(user.Type),
 				user.GetState(),
 			)
 		}
