@@ -106,6 +106,16 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "params flag missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, paramsFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Params = nil
+			}),
+		},
+		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
