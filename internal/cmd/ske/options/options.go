@@ -7,6 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options/availability_zones"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options/kubernetes_versions"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options/machine_images"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options/machine_types"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/ske/options/volume_types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
@@ -82,7 +87,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+	addSubcommands(cmd, params)
 	return cmd
+}
+
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(availability_zones.NewCmd(params))
+	cmd.AddCommand(kubernetes_versions.NewCmd(params))
+	cmd.AddCommand(machine_images.NewCmd(params))
+	cmd.AddCommand(machine_types.NewCmd(params))
+	cmd.AddCommand(volume_types.NewCmd(params))
 }
 
 func configureFlags(cmd *cobra.Command) {
