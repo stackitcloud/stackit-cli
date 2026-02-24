@@ -266,7 +266,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.3.2
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.7.3
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.6
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.6
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.4.5
