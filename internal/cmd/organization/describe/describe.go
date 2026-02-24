@@ -89,7 +89,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 func outputResult(p *print.Printer, outputFormat string, organization *resourcemanager.OrganizationResponse) error {
 	return p.OutputResult(outputFormat, organization, func() error {
 		if organization == nil {
-			p.Error("show organization: empty response")
+			p.Outputln("show organization: empty response")
 			return nil
 		}
 

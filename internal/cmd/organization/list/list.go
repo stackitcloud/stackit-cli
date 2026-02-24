@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -70,11 +69,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list organizations: %w", err)
+				return err
 			}
 
 			if resp == nil {
-				params.Printer.Info("list organizations: empty response")
+				params.Printer.Outputln("list organizations: empty response")
 				return nil
 			}
 
