@@ -92,10 +92,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
-	if limit != nil && *limit < 1 {
+	if limit != nil && (*limit < 1 || *limit > 100) {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
-			Details: "must be greater than 0",
+			Details: "must be between 0 and 100",
 		}
 	}
 
