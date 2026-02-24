@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func ParseScriptParams(params *map[string]string) (*map[string]string, error) {
+func ParseScriptParams(params *map[string]string) (*map[string]string, error) { //nolint:gocritic // flag value is a map pointer
 	if params == nil {
 		return nil, nil
 	}
