@@ -30,7 +30,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Show a organization",
-		Long:  "Show a organization.",
+		Long:  "Show an organization.",
 		// the arg can be the organization uuid or the container id, which is not a uuid, so no validation needed
 		Args: args.SingleArg(organizationIdArg, nil),
 		Example: examples.Build(
