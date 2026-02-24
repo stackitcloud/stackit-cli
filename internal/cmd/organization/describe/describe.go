@@ -2,6 +2,7 @@ package describe
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -109,7 +110,10 @@ func outputResult(p *print.Printer, outputFormat string, organization *resourcem
 		table.AddSeparator()
 		table.AddRow("LABELS", utils.JoinStringMap(utils.PtrValue(organization.Labels), ": ", ", "))
 
-		p.Outputln(table.Render())
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 		return nil
 	})
 }

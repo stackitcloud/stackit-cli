@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -73,8 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			if resp == nil {
-				params.Printer.Outputln("list organizations: empty response")
-				return nil
+				return fmt.Errorf("list organizations: empty response")
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, utils.PtrValue(resp.Items))
@@ -136,7 +136,10 @@ func outputResult(p *print.Printer, outputFormat string, organizations []resourc
 			table.AddSeparator()
 		}
 
-		p.Outputln(table.Render())
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
 		return nil
 	})
 }
