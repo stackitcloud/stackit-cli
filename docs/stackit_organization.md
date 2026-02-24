@@ -31,7 +31,7 @@ stackit organization [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit organization describe](./stackit_organization_describe.md)	 - Show a organization
+* [stackit organization describe](./stackit_organization_describe.md)	 - Show an organization
 * [stackit organization list](./stackit_organization_list.md)	 - Lists all organizations
 * [stackit organization member](./stackit_organization_member.md)	 - Manages organization members
 * [stackit organization role](./stackit_organization_role.md)	 - Manages organization roles

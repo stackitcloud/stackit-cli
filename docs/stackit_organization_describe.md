@@ -1,10 +1,10 @@
 ## stackit organization describe
 
-Show a organization
+Show an organization
 
 ### Synopsis
 
-Show a organization.
+Show an organization.
 
 ```
 stackit organization describe [flags]
