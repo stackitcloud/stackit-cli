@@ -54,7 +54,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			model.Member = auth.GetProfileEmail(config.DefaultProfileName)
+			activeProfile, err := config.GetProfile()
+			if err != nil {
+				return fmt.Errorf("get profile: %w", err)
+			}
+			model.Member = auth.GetProfileEmail(activeProfile)
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
