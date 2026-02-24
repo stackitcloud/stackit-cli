@@ -188,7 +188,22 @@ Alternatively, you can install via [Homebrew](https://brew.sh/) or refer to one 
 
 ### Windows
 
-> We are currently working on distributing the CLI on a package manager for Windows. For the moment, please refer to one of the installation methods below.
+#### Scoop
+
+The STACKIT CLI can be installed through the [Scoop](https://scoop.sh/) package manager.
+
+1. Install Scoop (if not already installed):
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+```
+
+2. Install the CLI:
+
+```powershell
+scoop install stackit
+```
 
 ## Manual installation
 
