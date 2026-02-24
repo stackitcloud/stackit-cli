@@ -43,10 +43,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit organization list",
 			),
 			examples.NewExample(
-				`Lists organizations for the user with the email foo@bar`,
-				"$ stackit organization list --member foo@bar",
-			),
-			examples.NewExample(
 				`Lists the first 10 organizations`,
 				"$ stackit organization list --limit 10",
 			),

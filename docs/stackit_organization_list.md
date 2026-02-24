@@ -16,9 +16,6 @@ stackit organization list [flags]
   Lists organizations for your user
   $ stackit organization list
 
-  Lists organizations for the user with the email foo@bar
-  $ stackit organization list --member foo@bar
-
   Lists the first 10 organizations
   $ stackit organization list --limit 10
 ```
