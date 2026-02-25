@@ -51,7 +51,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			"Lists STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types).",
 			"Pass one or more flags to filter what categories are shown.",
 		),
-		Args: args.NoArgs,
+		Deprecated: "splitted in separate subcommands, use them instead.",
+		Args:       args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for all categories`,
