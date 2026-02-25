@@ -95,11 +95,14 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil {
-		return fmt.Errorf("model is nil")
-	} else if options == nil {
+	if options == nil {
 		return fmt.Errorf("options is nil")
 	}
+
+	options.AvailabilityZones = nil
+	options.MachineImages = nil
+	options.MachineTypes = nil
+	options.VolumeTypes = nil
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
 		versions := utils.PtrValue(options.KubernetesVersions)
