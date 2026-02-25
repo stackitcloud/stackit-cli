@@ -35,7 +35,7 @@ const (
 )
 
 type inputModel struct {
-	*globalflags.GlobalFlagModel
+	globalflags.GlobalFlagModel
 	AvailabilityZones  bool
 	KubernetesVersions bool
 	MachineImages      bool
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	model := inputModel{
-		GlobalFlagModel:    globalFlags,
+		GlobalFlagModel:    utils.PtrValue(globalFlags),
 		AvailabilityZones:  availabilityZones,
 		KubernetesVersions: kubernetesVersions,
 		MachineImages:      machineImages,
@@ -143,7 +143,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil || model.GlobalFlagModel == nil {
+	if model == nil {
 		return fmt.Errorf("model is nil")
 	} else if options == nil {
 		return fmt.Errorf("options is nil")

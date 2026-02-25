@@ -25,7 +25,7 @@ const (
 )
 
 type inputModel struct {
-	*globalflags.GlobalFlagModel
+	globalflags.GlobalFlagModel
 	Supported bool
 }
 
@@ -33,10 +33,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "kubernetes-versions",
 		Short: "Lists SKE provider options for kubernetes-versions",
-		Long: fmt.Sprintf("%s\n%s",
-			"Lists STACKIT Kubernetes Engine (SKE) provider options for kubernetes-versions.",
-		),
-		Args: args.NoArgs,
+		Long:  "Lists STACKIT Kubernetes Engine (SKE) provider options for kubernetes-versions.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for kubernetes-versions`,
@@ -80,7 +78,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
+		GlobalFlagModel: utils.PtrValue(globalFlags),
 		Supported:       flags.FlagToBoolValue(p, cmd, supportedFlag),
 	}
 
@@ -97,22 +95,22 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil || model.GlobalFlagModel == nil {
+	if model == nil {
 		return fmt.Errorf("model is nil")
 	} else if options == nil {
 		return fmt.Errorf("options is nil")
 	}
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		versions := *options.KubernetesVersions
+		versions := utils.PtrValue(options.KubernetesVersions)
 
 		table := tables.NewTable()
 		table.SetHeader("VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
 		for i := range versions {
 			v := versions[i]
-			featureGate, err := json.Marshal(*v.FeatureGates)
+			featureGate, err := json.Marshal(utils.PtrValue(v.FeatureGates))
 			if err != nil {
-				return fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", *v.Version, err)
+				return fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", utils.PtrValue(v.Version), err)
 			}
 			expirationDate := ""
 			if v.ExpirationDate != nil {

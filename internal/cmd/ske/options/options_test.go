@@ -39,7 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
+		GlobalFlagModel:    globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  false,
 		KubernetesVersions: false,
 		MachineImages:      false,
@@ -54,7 +54,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    &globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
+		GlobalFlagModel:    globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
 		AvailabilityZones:  true,
 		KubernetesVersions: true,
 		MachineImages:      true,
@@ -187,24 +187,24 @@ func TestOutputResult(t *testing.T) {
 			name: "missing options",
 			args: args{
 				model: &inputModel{
-					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 			},
 			wantErr: true,
 		},
 		{
-			name: "missing global flags in model",
+			name: "empty input model",
 			args: args{
 				model:   &inputModel{},
 				options: &ske.ProviderOptions{},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "set model and options",
 			args: args{
 				model: &inputModel{
-					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{},
 			},

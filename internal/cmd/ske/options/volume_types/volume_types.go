@@ -18,17 +18,15 @@ import (
 )
 
 type inputModel struct {
-	*globalflags.GlobalFlagModel
+	globalflags.GlobalFlagModel
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "volume-types",
 		Short: "Lists SKE provider options for volume-types",
-		Long: fmt.Sprintf("%s\n%s",
-			"Lists STACKIT Kubernetes Engine (SKE) provider options for volume-types.",
-		),
-		Args: args.NoArgs,
+		Long:  "Lists STACKIT Kubernetes Engine (SKE) provider options for volume-types.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for volume-types`,
@@ -64,7 +62,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
+		GlobalFlagModel: utils.PtrValue(globalFlags),
 	}
 
 	p.DebugInputModel(model)
@@ -77,14 +75,14 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil || model.GlobalFlagModel == nil {
+	if model == nil {
 		return fmt.Errorf("model is nil")
 	} else if options == nil {
 		return fmt.Errorf("options is nil")
 	}
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		volumeTypes := *options.VolumeTypes
+		volumeTypes := utils.PtrValue(options.VolumeTypes)
 
 		table := tables.NewTable()
 		table.SetHeader("TYPE")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -17,17 +18,15 @@ import (
 )
 
 type inputModel struct {
-	*globalflags.GlobalFlagModel
+	globalflags.GlobalFlagModel
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "availability-zones",
 		Short: "Lists SKE provider options for availability-zones",
-		Long: fmt.Sprintf("%s\n%s",
-			"Lists STACKIT Kubernetes Engine (SKE) provider options for availability-zones.",
-		),
-		Args: args.NoArgs,
+		Long:  "Lists STACKIT Kubernetes Engine (SKE) provider options for availability-zones.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for availability-zones`,
@@ -63,7 +62,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
+		GlobalFlagModel: utils.PtrValue(globalFlags),
 	}
 
 	p.DebugInputModel(model)
@@ -76,23 +75,20 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil || model.GlobalFlagModel == nil {
+	if model == nil {
 		return fmt.Errorf("model is nil")
 	} else if options == nil {
 		return fmt.Errorf("options is nil")
 	}
 
-	options.MachineTypes = nil
-	options.VolumeTypes = nil
-
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		zones := *options.AvailabilityZones
+		zones := utils.PtrValue(options.AvailabilityZones)
 
 		table := tables.NewTable()
 		table.SetHeader("ZONE")
 		for i := range zones {
 			z := zones[i]
-			table.AddRow(*z.Name)
+			table.AddRow(utils.PtrValue(z.Name))
 		}
 
 		err := table.Display(p)

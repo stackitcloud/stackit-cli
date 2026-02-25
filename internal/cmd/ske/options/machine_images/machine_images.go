@@ -20,17 +20,15 @@ import (
 )
 
 type inputModel struct {
-	*globalflags.GlobalFlagModel
+	globalflags.GlobalFlagModel
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "machine-images",
 		Short: "Lists SKE provider options for machine-images",
-		Long: fmt.Sprintf("%s\n%s",
-			"Lists STACKIT Kubernetes Engine (SKE) provider options for machine-images.",
-		),
-		Args: args.NoArgs,
+		Long:  "Lists STACKIT Kubernetes Engine (SKE) provider options for machine-images.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List SKE options for machine-images`,
@@ -66,7 +64,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
+		GlobalFlagModel: utils.PtrValue(globalFlags),
 	}
 
 	p.DebugInputModel(model)
@@ -79,26 +77,26 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 }
 
 func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOptions) error {
-	if model == nil || model.GlobalFlagModel == nil {
+	if model == nil {
 		return fmt.Errorf("model is nil")
 	} else if options == nil {
 		return fmt.Errorf("options is nil")
 	}
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		images := *options.MachineImages
+		images := utils.PtrValue(options.MachineImages)
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
 		for i := range images {
 			image := images[i]
-			versions := *image.Versions
+			versions := utils.PtrValue(image.Versions)
 			for j := range versions {
 				version := versions[j]
 				criNames := make([]string, 0)
-				for i := range *version.Cri {
-					cri := (*version.Cri)[i]
-					criNames = append(criNames, string(*cri.Name))
+				for i := range utils.PtrValue(version.Cri) {
+					cri := utils.PtrValue(version.Cri)[i]
+					criNames = append(criNames, utils.PtrString(cri.Name))
 				}
 				criNamesString := strings.Join(criNames, ", ")
 
