@@ -2,26 +2,34 @@ package utils
 
 import (
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParseScriptParams(t *testing.T) {
 	tests := []struct {
 		description    string
-		input          map[string]string
-		expectedOutput map[string]string
+		input          *map[string]string
+		expectedOutput *map[string]string
 		isValid        bool
 	}{
 		{
-			"base-ok",
-			map[string]string{"script": "ls /"},
-			map[string]string{"script": "ls /"},
-			true,
+			description:    "base-ok",
+			input:          &map[string]string{"script": "ls /"},
+			expectedOutput: &map[string]string{"script": "ls /"},
+			isValid:        true,
 		},
 		{
-			"not-ok-nonexistant-file-specified-for-script",
-			map[string]string{"script": "@{/some/file/which/does/not/exist/and/thus/fails}"},
-			nil,
-			false,
+			description:    "nil input",
+			input:          nil,
+			expectedOutput: nil,
+			isValid:        true,
+		},
+		{
+			description:    "not-ok-nonexistant-file-specified-for-script",
+			input:          &map[string]string{"script": "@{/some/file/which/does/not/exist/and/thus/fails}"},
+			expectedOutput: nil,
+			isValid:        false,
 		},
 	}
 
@@ -38,8 +46,9 @@ func TestParseScriptParams(t *testing.T) {
 			if !tt.isValid {
 				return
 			}
-			if output["script"] != tt.expectedOutput["script"] {
-				t.Errorf("expected output to be %s, got %s", tt.expectedOutput["script"], output["script"])
+			diff := cmp.Diff(output, tt.expectedOutput)
+			if diff != "" {
+				t.Fatalf("ParseScriptParams() output mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
