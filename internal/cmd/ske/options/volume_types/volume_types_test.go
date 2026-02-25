@@ -179,10 +179,10 @@ func TestOutputResult(t *testing.T) {
 				},
 				options: &ske.ProviderOptions{
 					VolumeTypes: &[]ske.VolumeType{
-						ske.VolumeType{
+						{
 							Name: utils.Ptr("type1"),
 						},
-						ske.VolumeType{
+						{
 							Name: utils.Ptr("type2"),
 						},
 					},

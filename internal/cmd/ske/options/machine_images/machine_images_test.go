@@ -180,12 +180,12 @@ func TestOutputResult(t *testing.T) {
 				},
 				options: &ske.ProviderOptions{
 					MachineImages: &[]ske.MachineImage{
-						ske.MachineImage{
+						{
 							Name: utils.Ptr("image1"),
 							Versions: &[]ske.MachineImageVersion{
-								ske.MachineImageVersion{
+								{
 									Cri: &[]ske.CRI{
-										ske.CRI{
+										{
 											Name: ske.CRINAME_CONTAINERD.Ptr(),
 										},
 									},
@@ -195,7 +195,7 @@ func TestOutputResult(t *testing.T) {
 								},
 							},
 						},
-						ske.MachineImage{
+						{
 							Name: utils.Ptr("zone2"),
 						},
 					},

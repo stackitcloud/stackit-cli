@@ -179,10 +179,10 @@ func TestOutputResult(t *testing.T) {
 				},
 				options: &ske.ProviderOptions{
 					AvailabilityZones: &[]ske.AvailabilityZone{
-						ske.AvailabilityZone{
+						{
 							Name: utils.Ptr("zone1"),
 						},
-						ske.AvailabilityZone{
+						{
 							Name: utils.Ptr("zone2"),
 						},
 					},

@@ -179,14 +179,14 @@ func TestOutputResult(t *testing.T) {
 				},
 				options: &ske.ProviderOptions{
 					MachineTypes: &[]ske.MachineType{
-						ske.MachineType{
+						{
 							Architecture: utils.Ptr("amd64"),
 							Cpu:          utils.Ptr(int64(2)),
 							Gpu:          utils.Ptr(int64(0)),
 							Memory:       utils.Ptr(int64(16)),
 							Name:         utils.Ptr("type1"),
 						},
-						ske.MachineType{
+						{
 							Architecture: utils.Ptr("amd64"),
 							Cpu:          utils.Ptr(int64(2)),
 							Gpu:          utils.Ptr(int64(0)),

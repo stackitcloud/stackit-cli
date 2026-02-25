@@ -200,7 +200,7 @@ func TestOutputResult(t *testing.T) {
 				},
 				options: &ske.ProviderOptions{
 					KubernetesVersions: &[]ske.KubernetesVersion{
-						ske.KubernetesVersion{
+						{
 							FeatureGates: &map[string]string{
 								"featureGate1": "foo",
 								"featureGate2": "bar",
@@ -208,7 +208,7 @@ func TestOutputResult(t *testing.T) {
 							State:   utils.Ptr("supported"),
 							Version: utils.Ptr("0.00.0"),
 						},
-						ske.KubernetesVersion{
+						{
 							ExpirationDate: utils.Ptr(time.Now()),
 							State:          utils.Ptr("deprecated"),
 							Version:        utils.Ptr("0.00.0"),
