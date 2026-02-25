@@ -17,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/image"
 	keypair "github.com/stackitcloud/stackit-cli/internal/cmd/key-pair"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/kms"
 	loadbalancer "github.com/stackitcloud/stackit-cli/internal/cmd/load-balancer"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logs"
@@ -47,7 +48,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/kms"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
