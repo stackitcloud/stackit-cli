@@ -47,6 +47,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/kms"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -197,6 +198,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(quota.NewCmd(params))
 	cmd.AddCommand(affinityGroups.NewCmd(params))
 	cmd.AddCommand(git.NewCmd(params))
+	cmd.AddCommand(kms.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
