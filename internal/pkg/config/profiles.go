@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -434,7 +435,13 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 		return &errors.FileAlreadyExistsError{Filename: exportPath}
 	}
 
-	err = fileutils.CopyFile(configFile, exportPath)
+	_, err = os.Stat(configFile)
+	if os.IsNotExist(err) {
+		// viper.SafeWriteConfigAs would not overwrite the target, so we use WriteConfigAs for the same behavior as CopyFile
+		err = viper.WriteConfigAs(exportPath)
+	} else {
+		err = fileutils.CopyFile(configFile, exportPath)
+	}
 	if err != nil {
 		return fmt.Errorf("export config file to %q: %w", exportPath, err)
 	}
