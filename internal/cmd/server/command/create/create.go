@@ -119,14 +119,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		CommandTemplateName: flags.FlagToStringValue(p, cmd, commandTemplateNameFlag),
 		Params:              flags.FlagToStringToStringPointer(p, cmd, paramsFlag),
 	}
-	parsedParams, err := runcommandUtils.ParseScriptParams(*model.Params)
+
+	var err error
+	model.Params, err = runcommandUtils.ParseScriptParams(model.Params)
 	if err != nil {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    paramsFlag,
 			Details: err.Error(),
 		}
 	}
-	model.Params = &parsedParams
 
 	p.DebugInputModel(model)
 	return &model, nil
