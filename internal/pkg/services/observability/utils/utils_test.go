@@ -89,7 +89,7 @@ func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigR
 
 func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeConfigPayload)) *observability.UpdateScrapeConfigPayload {
 	payload := &observability.UpdateScrapeConfigPayload{
-		BasicAuth: &observability.CreateScrapeConfigPayloadBasicAuth{
+		BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
 			Username: utils.Ptr("username"),
 			Password: utils.Ptr("password"),
 		},
@@ -97,9 +97,9 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeCo
 		HonorLabels:     utils.Ptr(true),
 		HonorTimeStamps: utils.Ptr(true),
 		MetricsPath:     utils.Ptr("/metrics"),
-		MetricsRelabelConfigs: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+		MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
 			{
-				Action:       utils.Ptr(observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInnerAction("replace")),
+				Action:       observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInnerGetActionAttributeType(utils.Ptr("replace")),
 				Modulus:      utils.Ptr(1.0),
 				Regex:        utils.Ptr("regex"),
 				Replacement:  utils.Ptr("replacement"),
@@ -125,7 +125,7 @@ func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeCo
 				Targets: &[]string{"target"},
 			},
 		},
-		TlsConfig: &observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+		TlsConfig: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
 			InsecureSkipVerify: utils.Ptr(true),
 		},
 	}
@@ -426,7 +426,7 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 	tests := []struct {
 		description string
 		config      *[]observability.MetricsRelabelConfig
-		expected    *[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
+		expected    *[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner
 	}{
 		{
 			description: "base case",
@@ -441,9 +441,9 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 					TargetLabel:  utils.Ptr("targetLabel"),
 				},
 			},
-			expected: &[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
+			expected: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
 				{
-					Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+					Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
 					Modulus:      utils.Float64Ptr(1.0),
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
@@ -540,7 +540,7 @@ func TestMapBasicAuth(t *testing.T) {
 	tests := []struct {
 		description string
 		auth        *observability.BasicAuth
-		expected    *observability.CreateScrapeConfigPayloadBasicAuth
+		expected    *observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth
 	}{
 		{
 			description: "base case",
@@ -548,7 +548,7 @@ func TestMapBasicAuth(t *testing.T) {
 				Username: utils.Ptr("username"),
 				Password: utils.Ptr("password"),
 			},
-			expected: &observability.CreateScrapeConfigPayloadBasicAuth{
+			expected: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
 				Username: utils.Ptr("username"),
 				Password: utils.Ptr("password"),
 			},
@@ -556,7 +556,7 @@ func TestMapBasicAuth(t *testing.T) {
 		{
 			description: "empty data",
 			auth:        &observability.BasicAuth{},
-			expected:    &observability.CreateScrapeConfigPayloadBasicAuth{},
+			expected:    &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{},
 		},
 		{
 			description: "nil",
@@ -585,21 +585,21 @@ func TestMapTlsConfig(t *testing.T) {
 	tests := []struct {
 		description string
 		config      *observability.TLSConfig
-		expected    *observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig
+		expected    *observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig
 	}{
 		{
 			description: "base case",
 			config: &observability.TLSConfig{
 				InsecureSkipVerify: utils.Ptr(true),
 			},
-			expected: &observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+			expected: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
 				InsecureSkipVerify: utils.Ptr(true),
 			},
 		},
 		{
 			description: "empty data",
 			config:      &observability.TLSConfig{},
-			expected:    &observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{},
+			expected:    &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{},
 		},
 		{
 			description: "nil",

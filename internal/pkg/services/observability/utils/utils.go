@@ -21,7 +21,7 @@ type ObservabilityClient interface {
 }
 
 var (
-	defaultStaticConfigs = []observability.CreateScrapeConfigPayloadStaticConfigsInner{
+	defaultStaticConfigs = []observability.PartialUpdateScrapeConfigsRequestInnerStaticConfigsInner{
 		{
 			Targets: utils.Ptr([]string{
 				"url-target",
@@ -120,14 +120,14 @@ func MapToUpdateScrapeConfigPayload(resp *observability.GetScrapeConfigResponse)
 	return &payload, nil
 }
 
-func mapMetricsRelabelConfig(metricsRelabelConfigs *[]observability.MetricsRelabelConfig) *[]observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner {
+func mapMetricsRelabelConfig(metricsRelabelConfigs *[]observability.MetricsRelabelConfig) *[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner {
 	if metricsRelabelConfigs == nil {
 		return nil
 	}
-	var mappedConfigs []observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner
+	var mappedConfigs []observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner
 	for _, config := range *metricsRelabelConfigs {
-		mappedConfig := observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
-			Action:       observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInnerGetActionAttributeType(config.Action),
+		mappedConfig := observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
+			Action:       observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInnerGetActionAttributeType(config.Action),
 			Modulus:      utils.ConvertInt64PToFloat64P(config.Modulus),
 			Regex:        config.Regex,
 			Replacement:  config.Replacement,
@@ -160,23 +160,23 @@ func mapStaticConfig(staticConfigs *[]observability.StaticConfigs) *[]observabil
 	return &mappedConfigs
 }
 
-func mapBasicAuth(basicAuth *observability.BasicAuth) *observability.CreateScrapeConfigPayloadBasicAuth {
+func mapBasicAuth(basicAuth *observability.BasicAuth) *observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth {
 	if basicAuth == nil {
 		return nil
 	}
 
-	return &observability.CreateScrapeConfigPayloadBasicAuth{
+	return &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
 		Password: basicAuth.Password,
 		Username: basicAuth.Username,
 	}
 }
 
-func mapTlsConfig(tlsConfig *observability.TLSConfig) *observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig {
+func mapTlsConfig(tlsConfig *observability.TLSConfig) *observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig {
 	if tlsConfig == nil {
 		return nil
 	}
 
-	return &observability.CreateScrapeConfigPayloadHttpSdConfigsInnerOauth2TlsConfig{
+	return &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
 		InsecureSkipVerify: tlsConfig.InsecureSkipVerify,
 	}
 }
