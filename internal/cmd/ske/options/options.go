@@ -16,7 +16,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -47,24 +46,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
 		Short: "Lists SKE provider options",
-		Long: fmt.Sprintf("%s\n%s",
+		Long: fmt.Sprintf("%s\n%s\n%s",
+			"Command \"options\" is deprecated, use the subcommands instead.",
 			"Lists STACKIT Kubernetes Engine (SKE) provider options (availability zones, Kubernetes versions, machine images and types, volume types).",
 			"Pass one or more flags to filter what categories are shown.",
 		),
-		Deprecated: "splitted in separate subcommands, use them instead.",
-		Args:       args.NoArgs,
-		Example: examples.Build(
-			examples.NewExample(
-				`List SKE options for all categories`,
-				"$ stackit ske options"),
-			examples.NewExample(
-				`List SKE options regarding Kubernetes versions only`,
-				"$ stackit ske options --kubernetes-versions"),
-			examples.NewExample(
-				`List SKE options regarding Kubernetes versions and machine images`,
-				"$ stackit ske options --kubernetes-versions --machine-images"),
-		),
+		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			params.Printer.Info("Command \"options\" is deprecated, use the subcommands instead.\n")
+
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
@@ -106,6 +96,12 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(machineImagesFlag, false, "Lists supported machine images")
 	cmd.Flags().Bool(machineTypesFlag, false, "Lists supported machine types")
 	cmd.Flags().Bool(volumeTypesFlag, false, "Lists supported volume types")
+
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(availabilityZonesFlag, "This flag is deprecated and will be removed on 2026-09-26. Use the availability-zone subcommand instead."))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(kubernetesVersionsFlag, "This flag is deprecated and will be removed on 2026-09-26. Use the kubernetes-versions subcommand instead."))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(machineImagesFlag, "This flag is deprecated and will be removed on 2026-09-26. Use the machine-images subcommand instead."))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(machineTypesFlag, "This flag is deprecated and will be removed on 2026-09-26. Use the machine-types subcommand instead."))
+	cobra.CheckErr(cmd.Flags().MarkDeprecated(volumeTypesFlag, "This flag is deprecated and will be removed on 2026-09-26. Use the volume-types subcommand instead."))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
