@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -224,6 +225,33 @@ func TestOutputResult(t *testing.T) {
 			name:    "nil",
 			args:    args{},
 			wantErr: true,
+		},
+		{
+			name: "valid value",
+			args: args{
+				resp: &iaas.Image{
+					Id:          utils.Ptr(uuid.NewString()),
+					Name:        utils.Ptr("Image"),
+					Status:      utils.Ptr("STATUS"),
+					DiskFormat:  utils.Ptr("format"),
+					MinDiskSize: utils.Ptr(int64(0)),
+					MinRam:      utils.Ptr(int64(0)),
+					Config: &iaas.ImageConfig{
+						Architecture:           utils.Ptr("architecture"),
+						OperatingSystem:        utils.Ptr("os"),
+						OperatingSystemDistro:  iaas.NewNullableString(utils.Ptr("os distro")),
+						OperatingSystemVersion: iaas.NewNullableString(utils.Ptr("0.00.0")),
+						Uefi:                   utils.Ptr(true),
+					},
+					Labels: utils.Ptr(map[string]any{
+						"label1": true,
+						"label2": false,
+						"label3": 42,
+						"foo":    "bar",
+					}),
+				},
+			},
+			wantErr: false,
 		},
 	}
 	p := print.NewPrinter()
