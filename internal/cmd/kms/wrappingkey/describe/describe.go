@@ -39,7 +39,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Describe a KMS wrapping key with ID xxx of keyring yyy`,
-				`$ stackit kms wrappingkey describe xxx --keyring-id yyy`,
+				`$ stackit kms wrapping-key describe xxx --keyring-id yyy`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

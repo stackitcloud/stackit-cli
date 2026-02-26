@@ -14,7 +14,7 @@ stackit kms wrapping-key describe WRAPPING_KEY_ID [flags]
 
 ```
   Describe a KMS wrapping key with ID xxx of keyring yyy
-  $ stackit kms wrappingkey describe xxx --keyring-id yyy
+  $ stackit kms wrapping-key describe xxx --keyring-id yyy
 ```
 
 ### Options
