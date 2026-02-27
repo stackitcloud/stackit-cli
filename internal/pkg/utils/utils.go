@@ -191,6 +191,7 @@ type Base64PatchedServer struct {
 	UpdatedAt           *time.Time              `json:"updatedAt,omitempty"`
 	UserData            *Base64Bytes            `json:"userData,omitempty"`
 	Volumes             *[]string               `json:"volumes,omitempty"`
+	Agent               *iaas.ServerAgent       `json:"agent,omitempty"`
 }
 
 // ConvertToBase64PatchedServer converts an iaas.Server to Base64PatchedServer
@@ -231,6 +232,7 @@ func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 		UpdatedAt:           server.UpdatedAt,
 		UserData:            userData,
 		Volumes:             server.Volumes,
+		Agent:               server.Agent,
 	}
 }
 

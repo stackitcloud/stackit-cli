@@ -165,7 +165,7 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 		return nil
 	default:
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Machine Type", "Availability Zones", "Nic IPv4", "Public IPs")
+		table.SetHeader("ID", "Name", "Status", "Machine Type", "Availability Zones", "Nic IPv4", "Public IPs", "Agent")
 
 		for i := range servers {
 			server := servers[i]
@@ -186,6 +186,11 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 				}
 			}
 
+			agent := ""
+			if server.Agent != nil {
+				agent = utils.PtrString(server.Agent.Provisioned)
+			}
+
 			table.AddRow(
 				utils.PtrString(server.Id),
 				utils.PtrString(server.Name),
@@ -194,6 +199,7 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 				utils.PtrString(server.AvailabilityZone),
 				nicIPv4,
 				publicIPs,
+				agent,
 			)
 		}
 
