@@ -1,12 +1,12 @@
-package runner
+package user
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -14,9 +14,9 @@ import (
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "runner",
-		Short: "Provides functionality for Intake Runners",
-		Long:  "Provides functionality for Intake Runners.",
+		Use:   "user",
+		Short: "Provides functionality for Intake Users",
+		Long:  "Provides functionality for Intake Users.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
