@@ -95,9 +95,15 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	var port int
 	for i := range configuredPortRange {
 		port = defaultPort + i
-		portString := fmt.Sprintf(":%s", strconv.Itoa(port))
+		addr4 := fmt.Sprintf("127.0.0.1:%d", port)
+		addr6 := fmt.Sprintf("[::1]:%d", port)
 		p.Debug(print.DebugLevel, "trying to bind port %d for login redirect", port)
-		listener, listenerErr = net.Listen("tcp", portString)
+		ipv6Listener, ipv6ListenerErr := net.Listen("tcp6", addr6)
+		if ipv6ListenerErr != nil {
+			continue
+		}
+		_ = ipv6Listener.Close()
+		listener, listenerErr = net.Listen("tcp4", addr4)
 		if listenerErr == nil {
 			redirectURL = fmt.Sprintf("http://localhost:%d", port)
 			p.Debug(print.DebugLevel, "bound port %d for login redirect", port)
@@ -106,7 +112,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "unable to bind port %d for login redirect: %s", port, listenerErr)
 	}
 	if listenerErr != nil {
-		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", defaultPort, port, err)
+		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", defaultPort, port, listenerErr)
 	}
 
 	conf := &oauth2.Config{
