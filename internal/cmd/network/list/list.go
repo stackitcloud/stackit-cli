@@ -141,7 +141,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network) error {
 	return p.OutputResult(outputFormat, networks, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED")
+		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED", "ROUTING TABLE ID")
 
 		for _, network := range networks {
 			var publicIp, prefixes string
@@ -162,6 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, networks []iaas.Network
 				publicIp,
 				prefixes,
 				routed,
+				utils.PtrString(network.RoutingTableId),
 			)
 			table.AddSeparator()
 		}

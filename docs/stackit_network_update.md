@@ -24,6 +24,9 @@ stackit network update NETWORK_ID [flags]
 
   Update IPv6 network with ID "xxx" with new name "network-1-new", new gateway and new DNS name servers
   $ stackit network update xxx --name network-1-new --ipv6-dns-name-servers "2001:4860:4860::8888" --ipv6-gateway "2001:4860:4860::8888"
+
+  Update network with ID "xxx" with new routing-table id "xxx"
+  $ stackit network update xxx --routing-table-id xxx
 ```
 
 ### Options
@@ -38,6 +41,7 @@ stackit network update NETWORK_ID [flags]
   -n, --name string                     Network name
       --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
       --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
+      --routing-table-id string         The ID of the routing-table for the network
 ```
 
 ### Options inherited from parent commands

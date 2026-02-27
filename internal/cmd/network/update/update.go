@@ -32,6 +32,7 @@ const (
 	ipv6GatewayFlag        = "ipv6-gateway"
 	noIpv4GatewayFlag      = "no-ipv4-gateway"
 	noIpv6GatewayFlag      = "no-ipv6-gateway"
+	routingTableIdFlag     = "routing-table-id"
 	labelFlag              = "labels"
 )
 
@@ -45,6 +46,7 @@ type inputModel struct {
 	IPv6Gateway        *string
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
+	RoutingTableId     *string
 	Labels             *map[string]string
 }
 
@@ -70,6 +72,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Update IPv6 network with ID "xxx" with new name "network-1-new", new gateway and new DNS name servers`,
 				`$ stackit network update xxx --name network-1-new --ipv6-dns-name-servers "2001:4860:4860::8888" --ipv6-gateway "2001:4860:4860::8888"`,
+			),
+			examples.NewExample(
+				`Update network with ID "xxx" with new routing-table id "xxx"`,
+				`$ stackit network update xxx --routing-table-id xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -138,6 +144,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(ipv6GatewayFlag, "", "The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().Bool(noIpv4GatewayFlag, false, "If set to true, the network doesn't have an IPv4 gateway")
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
+	cmd.Flags().Var(flags.UUIDFlag(), routingTableIdFlag, "The ID of the routing-table for the network")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...'")
 }
 
@@ -159,6 +166,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
+		RoutingTableId:     flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
 		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
 
@@ -196,10 +204,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	payload := iaas.PartialUpdateNetworkPayload{
-		Name:   model.Name,
-		Ipv4:   payloadIPv4,
-		Ipv6:   payloadIPv6,
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Name:           model.Name,
+		Ipv4:           payloadIPv4,
+		Ipv6:           payloadIPv6,
+		Labels:         utils.ConvertStringMapToInterfaceMap(model.Labels),
+		RoutingTableId: model.RoutingTableId,
 	}
 
 	return req.PartialUpdateNetworkPayload(payload)
