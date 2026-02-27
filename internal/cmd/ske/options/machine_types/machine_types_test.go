@@ -1,10 +1,11 @@
-package options
+package machine_types
 
 import (
 	"context"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -24,11 +25,6 @@ const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		availabilityZonesFlag:  "false",
-		kubernetesVersionsFlag: "false",
-		machineImagesFlag:      "false",
-		machineTypesFlag:       "false",
-		volumeTypesFlag:        "false",
 		globalflags.RegionFlag: testRegion,
 	}
 	for _, mod := range mods {
@@ -37,29 +33,12 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		GlobalFlagModel:    globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
-		AvailabilityZones:  false,
-		KubernetesVersions: false,
-		MachineImages:      false,
-		MachineTypes:       false,
-		VolumeTypes:        false,
-	}
-	for _, mod := range mods {
-		mod(model)
-	}
-	return model
-}
-
-func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
-	model := &inputModel{
-		GlobalFlagModel:    globalflags.GlobalFlagModel{Region: testRegion, Verbosity: globalflags.VerbosityDefault},
-		AvailabilityZones:  true,
-		KubernetesVersions: true,
-		MachineImages:      true,
-		MachineTypes:       true,
-		VolumeTypes:        true,
+		GlobalFlagModel: globalflags.GlobalFlagModel{
+			Region:    testRegion,
+			Verbosity: globalflags.VerbosityDefault,
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,50 +58,13 @@ func TestParseInput(t *testing.T) {
 			description:   "base",
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
-			expectedModel: fixtureInputModelAllTrue(),
+			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "no values",
 			flagValues:  map[string]string{},
 			isValid:     true,
-			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
-				model.Region = ""
-			}),
-		},
-		{
-			description: "some values 1",
-			flagValues: map[string]string{
-				availabilityZonesFlag:  "true",
-				kubernetesVersionsFlag: "false",
-			},
-			isValid: true,
-			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
-				model.AvailabilityZones = true
-				model.Region = ""
-			}),
-		},
-		{
-			description: "some values 2",
-			flagValues: map[string]string{
-				kubernetesVersionsFlag: "true",
-				machineImagesFlag:      "false",
-				machineTypesFlag:       "true",
-			},
-			isValid: true,
-			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
-				model.KubernetesVersions = true
-				model.MachineTypes = true
-				model.Region = ""
-			}),
-		},
-		{
-			description: "some values 3",
-			flagValues: map[string]string{
-				kubernetesVersionsFlag: "false",
-				machineTypesFlag:       "false",
-			},
-			isValid: true,
-			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
+			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Region = ""
 			}),
 		},
@@ -138,17 +80,19 @@ func TestParseInput(t *testing.T) {
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
+		inputModel      *inputModel
 		expectedRequest ske.ApiListProviderOptionsRequest
 	}{
 		{
 			description:     "base",
+			inputModel:      fixtureInputModel(),
 			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, testClient, fixtureInputModelAllTrue())
+			request := buildRequest(testCtx, testClient, tt.inputModel)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -174,13 +118,6 @@ func TestOutputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: true,
-		},
-		{
-			name: "missing model",
-			args: args{
-				options: &ske.ProviderOptions{},
-			},
 			wantErr: true,
 		},
 		{
@@ -210,36 +147,54 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
-	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
-				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestOutputResultAsTable(t *testing.T) {
-	type args struct {
-		options *ske.ProviderOptions
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
 		{
-			name:    "empty",
-			args:    args{},
-			wantErr: true,
+			name: "empty values",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: globalflags.GlobalFlagModel{},
+				},
+				options: &ske.ProviderOptions{
+					MachineTypes: &[]ske.MachineType{},
+				},
+			},
+			wantErr: false,
 		},
 		{
-			name: "empty options",
+			name: "empty value in values",
 			args: args{
-				options: &ske.ProviderOptions{},
+				model: &inputModel{
+					GlobalFlagModel: globalflags.GlobalFlagModel{},
+				},
+				options: &ske.ProviderOptions{
+					MachineTypes: &[]ske.MachineType{{}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid values",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: globalflags.GlobalFlagModel{},
+				},
+				options: &ske.ProviderOptions{
+					MachineTypes: &[]ske.MachineType{
+						{
+							Architecture: utils.Ptr("amd64"),
+							Cpu:          utils.Ptr(int64(2)),
+							Gpu:          utils.Ptr(int64(0)),
+							Memory:       utils.Ptr(int64(16)),
+							Name:         utils.Ptr("type1"),
+						},
+						{
+							Architecture: utils.Ptr("amd64"),
+							Cpu:          utils.Ptr(int64(2)),
+							Gpu:          utils.Ptr(int64(0)),
+							Memory:       utils.Ptr(int64(16)),
+							Name:         utils.Ptr("type2"),
+						},
+					},
+				},
 			},
 			wantErr: false,
 		},
@@ -248,8 +203,8 @@ func TestOutputResultAsTable(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResultAsTable(p, tt.args.options); (err != nil) != tt.wantErr {
-				t.Errorf("outputResultAsTable() error = %v, wantErr %v", err, tt.wantErr)
+			if err := outputResult(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
