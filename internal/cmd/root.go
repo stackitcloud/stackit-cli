@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -216,8 +218,9 @@ func Execute(version, date string) {
 	// In this case Printer.AssumeYes isn't set either, but `false` as default is acceptable
 	p.Cmd = cmd
 	p.Verbosity = print.InfoLevel
-
-	err := cmd.Execute()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer cancel()
+	err := cmd.ExecuteContext(ctx)
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err)
 		p.Debug(print.ErrorLevel, "execute command: %v", err)
