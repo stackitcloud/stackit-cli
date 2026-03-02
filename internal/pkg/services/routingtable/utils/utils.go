@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -47,11 +46,11 @@ func ExtractRouteDetails(route iaas.Route) RouteDetails {
 	}
 
 	if route.Labels != nil && len(*route.Labels) > 0 {
-		var labels []string
+		stringMap := make(map[string]string)
 		for key, value := range *route.Labels {
-			labels = append(labels, fmt.Sprintf("%s: %s", key, value))
+			stringMap[key] = fmt.Sprintf("%v", value)
 		}
-		routeDetails.Labels = strings.Join(labels, "\n")
+		routeDetails.Labels = utils.JoinStringMap(stringMap, ": ", "\n")
 	}
 
 	if route.CreatedAt != nil {

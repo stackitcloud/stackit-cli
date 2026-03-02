@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -12,7 +11,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -147,40 +145,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.RoutingTable) error {
+	if routingTable == nil {
+		return fmt.Errorf("routing-table is nil")
+	}
+
+	if routingTable.Id == nil {
+		return fmt.Errorf("create routing-table id is empty")
+	}
+
 	return p.OutputResult(outputFormat, routingTable, func() error {
-		if routingTable == nil {
-			return fmt.Errorf("create routing-table response is empty")
-		}
-
-		if routingTable.Id == nil {
-			return fmt.Errorf("create routing-table id is empty")
-		}
-
-		var labels []string
-		if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
-			for key, value := range *routingTable.Labels {
-				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
-			}
-		}
-
-		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
-		table.AddRow(
-			utils.PtrString(routingTable.Id),
-			utils.PtrString(routingTable.Name),
-			utils.PtrString(routingTable.Description),
-			utils.PtrString(routingTable.Default),
-			strings.Join(labels, "\n"),
-			utils.PtrString(routingTable.SystemRoutes),
-			utils.PtrString(routingTable.DynamicRoutes),
-			utils.ConvertTimePToDateTimeString(routingTable.CreatedAt),
-			utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt),
-		)
-
-		err := table.Display(p)
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
+		p.Outputf("Created Routing-Table with ID %q\n", utils.PtrString(routingTable.Id))
 		return nil
 	})
 }

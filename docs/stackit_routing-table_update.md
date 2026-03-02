@@ -23,10 +23,10 @@ stackit routing-table update ROUTING_TABLE_ID [flags]
   $ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz
 
   Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --disable-dynamic-routes
+  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --dynamic-routes=false
 
   Disables the system routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --disable-system-routes
+  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --system-routes=false
 ```
 
 ### Options
