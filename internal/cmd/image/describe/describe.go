@@ -96,11 +96,14 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 		table := tables.NewTable()
 		if id := resp.Id; id != nil {
 			table.AddRow("ID", *id)
+			table.AddSeparator()
 		}
-		table.AddSeparator()
-
 		if name := resp.Name; name != nil {
 			table.AddRow("NAME", *name)
+			table.AddSeparator()
+		}
+		if status := resp.Status; status != nil {
+			table.AddRow("STATUS", *status)
 			table.AddSeparator()
 		}
 		if format := resp.DiskFormat; format != nil {
