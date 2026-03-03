@@ -27,6 +27,7 @@ stackit config unset [flags]
 
 ```
       --allowed-url-domain                                  Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
+      --assume-yes                                          If set, skips all confirmation prompts
       --async                                               Configuration option to run commands asynchronously
       --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
       --cdn-custom-endpoint                                 Custom CDN endpoint URL. If unset, uses the default base URL
@@ -65,12 +66,6 @@ stackit config unset [flags]
       --sqlserverflex-custom-endpoint                       SQLServer Flex API base URL. If unset, uses the default base URL
       --token-custom-endpoint                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
       --verbosity                                           Verbosity of the CLI
-```
-
-### Options inherited from parent commands
-
-```
-  -y, --assume-yes   If set, skips all confirmation prompts
 ```
 
 ### SEE ALSO

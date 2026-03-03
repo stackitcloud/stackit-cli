@@ -22,6 +22,7 @@ const (
 	projectIdFlag    = globalflags.ProjectIdFlag
 	regionFlag       = globalflags.RegionFlag
 	verbosityFlag    = globalflags.VerbosityFlag
+	assumeYesFlag    = globalflags.AssumeYesFlag
 
 	sessionTimeLimitFlag                             = "session-time-limit"
 	identityProviderCustomWellKnownConfigurationFlag = "identity-provider-custom-well-known-configuration"
@@ -65,6 +66,7 @@ type inputModel struct {
 	ProjectId    bool
 	Region       bool
 	Verbosity    bool
+	AssumeYes    bool
 
 	SessionTimeLimit               bool
 	IdentityProviderCustomEndpoint bool
@@ -136,6 +138,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.Verbosity {
 				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
+			}
+			if model.AssumeYes {
+				viper.Set(config.AssumeYesKey, config.AssumeYesDefault)
 			}
 
 			if model.SessionTimeLimit {
@@ -256,6 +261,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(regionFlag, false, "Region")
 	cmd.Flags().Bool(outputFormatFlag, false, "Output format")
 	cmd.Flags().Bool(verbosityFlag, false, "Verbosity of the CLI")
+	cmd.Flags().Bool(assumeYesFlag, false, "If set, skips all confirmation prompts")
 
 	cmd.Flags().Bool(sessionTimeLimitFlag, false, fmt.Sprintf("Maximum time before authentication is required again. If unset, defaults to %s", config.SessionTimeLimitDefault))
 	cmd.Flags().Bool(identityProviderCustomWellKnownConfigurationFlag, false, "Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider")
@@ -300,6 +306,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		ProjectId:    flags.FlagToBoolValue(p, cmd, projectIdFlag),
 		Region:       flags.FlagToBoolValue(p, cmd, regionFlag),
 		Verbosity:    flags.FlagToBoolValue(p, cmd, verbosityFlag),
+		AssumeYes:    flags.FlagToBoolValue(p, cmd, assumeYesFlag),
 
 		SessionTimeLimit:               flags.FlagToBoolValue(p, cmd, sessionTimeLimitFlag),
 		IdentityProviderCustomEndpoint: flags.FlagToBoolValue(p, cmd, identityProviderCustomWellKnownConfigurationFlag),
