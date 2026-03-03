@@ -60,6 +60,10 @@ func Configure(flagSet *pflag.FlagSet) error {
 	}
 
 	flagSet.BoolP(AssumeYesFlag, "y", false, "If set, skips all confirmation prompts")
+	err = viper.BindPFlag(config.AssumeYesKey, flagSet.Lookup(AssumeYesFlag))
+	if err != nil {
+		return fmt.Errorf("bind --%s flag to config: %w", AssumeYesFlag, err)
+	}
 
 	flagSet.Var(flags.EnumFlag(true, VerbosityDefault, verbosityFlagOptions...), VerbosityFlag, fmt.Sprintf("Verbosity of the CLI, one of %q", verbosityFlagOptions))
 	err = viper.BindPFlag(config.VerbosityKey, flagSet.Lookup(VerbosityFlag))
@@ -79,7 +83,7 @@ func Configure(flagSet *pflag.FlagSet) error {
 func Parse(p *print.Printer, cmd *cobra.Command) *GlobalFlagModel {
 	return &GlobalFlagModel{
 		Async:        viper.GetBool(config.AsyncKey),
-		AssumeYes:    flags.FlagToBoolValue(p, cmd, AssumeYesFlag),
+		AssumeYes:    viper.GetBool(config.AssumeYesKey),
 		OutputFormat: viper.GetString(config.OutputFormatKey),
 		ProjectId:    viper.GetString(config.ProjectIdKey),
 		Region:       viper.GetString(config.RegionKey),
