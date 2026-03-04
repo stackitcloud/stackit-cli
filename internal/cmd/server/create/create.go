@@ -153,7 +153,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -322,12 +322,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateServerPayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, server *iaas.Server) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, server *iaas.Server) error {
 	if server == nil {
 		return fmt.Errorf("server response is empty")
 	}
 	return p.OutputResult(outputFormat, server, func() error {
-		p.Outputf("Created server for project %q.\nServer ID: %s\n", projectLabel, utils.PtrString(server.Id))
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s server for project %q.\nServer ID: %s\n", operationState, projectLabel, utils.PtrString(server.Id))
 		return nil
 	})
 }
