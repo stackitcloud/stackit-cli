@@ -5,8 +5,8 @@ Login plugin for kubernetes clients
 ### Synopsis
 
 Login plugin for kubernetes clients, that creates short-lived credentials to authenticate against a STACKIT Kubernetes Engine (SKE) cluster.
-First you need to obtain a kubeconfig for use with the login command (first example).
-Secondly you use the kubeconfig with your chosen Kubernetes client (second example), the client will automatically retrieve the credentials via the STACKIT CLI.
+First you need to obtain a kubeconfig for use with the login command (first or second example).
+Secondly you use the kubeconfig with your chosen Kubernetes client (third example), the client will automatically retrieve the credentials via the STACKIT CLI.
 
 ```
 stackit ske kubeconfig login [flags]
@@ -15,8 +15,11 @@ stackit ske kubeconfig login [flags]
 ### Examples
 
 ```
-  Get a login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
+  Get an admin, login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid admin credentials via the `stackit ske kubeconfig login` command.
   $ stackit ske kubeconfig create my-cluster --login
+
+  Get an IDP kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
+  $ stackit ske kubeconfig create my-cluster --idp
 
   Use the previously saved kubeconfig to authenticate to the SKE cluster, in this case with kubectl.
   $ kubectl cluster-info
@@ -27,6 +30,7 @@ stackit ske kubeconfig login [flags]
 
 ```
   -h, --help   Help for "stackit ske kubeconfig login"
+      --idp    Use the STACKIT IdP for authentication to the cluster.
 ```
 
 ### Options inherited from parent commands

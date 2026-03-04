@@ -724,6 +724,8 @@ func TestGetDefaultKubeconfigPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			// prevent test from failing if user has set the environment variable
+			t.Setenv("KUBECONFIG", "")
 			output, err := GetDefaultKubeconfigPath()
 
 			if err != nil {
