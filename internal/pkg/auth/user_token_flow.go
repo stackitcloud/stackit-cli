@@ -15,7 +15,7 @@ import (
 
 type userTokenFlow struct {
 	printer                *print.Printer
-	reauthorizeUserRoutine func(p *print.Printer, isReauthentication bool) error // Called if the user needs to login again
+	reauthorizeUserRoutine func(p *print.Printer, isReauthentication UserAuthConfig) error // Called if the user needs to login again
 	client                 *http.Client
 	authFlow               AuthFlow
 	accessToken            string
@@ -95,7 +95,12 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 }
 
 func reauthenticateUser(utf *userTokenFlow) error {
-	err := utf.reauthorizeUserRoutine(utf.printer, true)
+	err := utf.reauthorizeUserRoutine(
+		utf.printer,
+		UserAuthConfig{
+			IsReauthentication: true,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("authenticate user: %w", err)
 	}

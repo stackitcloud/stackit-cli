@@ -76,6 +76,20 @@ func FlagToStringToStringPointer(p *print.Printer, cmd *cobra.Command, flag stri
 }
 
 // Returns a pointer to the flag's value.
+// Returns nil if the flag is not set, if its value can not be converted to int, or if the flag does not exist.
+func FlagToIntPointer(p *print.Printer, cmd *cobra.Command, flag string) *int {
+	value, err := cmd.Flags().GetInt(flag)
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag to Uint64 pointer: %v", err)
+		return nil
+	}
+	if cmd.Flag(flag).Changed {
+		return &value
+	}
+	return nil
+}
+
+// Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to int64, or if the flag does not exist.
 func FlagToInt64Pointer(p *print.Printer, cmd *cobra.Command, flag string) *int64 {
 	value, err := cmd.Flags().GetInt64(flag)

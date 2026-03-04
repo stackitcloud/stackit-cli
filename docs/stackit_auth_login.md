@@ -21,7 +21,9 @@ stackit auth login [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit auth login"
+  -h, --help       Help for "stackit auth login"
+      --port int   The port on which the callback server will listen to. By default, it tries to bind a port between 8000 and 8020.
+                   When a value is specified, it will only try to use the specified port. Valid values are within the range of 8000 to 8020.
 ```
 
 ### Options inherited from parent commands

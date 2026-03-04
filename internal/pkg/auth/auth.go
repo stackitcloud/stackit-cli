@@ -25,7 +25,7 @@ type tokenClaims struct {
 //
 // If the user was logged in and the user session expired, reauthorizeUserRoutine is called to reauthenticate the user again.
 // If the environment variable STACKIT_ACCESS_TOKEN is set this token is used instead.
-func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print.Printer, _ bool) error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
+func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print.Printer, _ UserAuthConfig) error) (authCfgOption sdkConfig.ConfigurationOption, err error) {
 	// Get access token from env and use this if present
 	accessToken := os.Getenv(envAccessTokenName)
 	if accessToken != "" {
@@ -70,7 +70,10 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	case AUTH_FLOW_USER_TOKEN:
 		p.Debug(print.DebugLevel, "authenticating using user token")
 		if userSessionExpired {
-			err = reauthorizeUserRoutine(p, true)
+			err = reauthorizeUserRoutine(p, UserAuthConfig{
+				IsReauthentication: true,
+				Port:               nil,
+			})
 			if err != nil {
 				return nil, fmt.Errorf("user login: %w", err)
 			}
