@@ -11,8 +11,15 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
+func overwriteCacheDir(t *testing.T) func() {
+	cacheDirOverwrite = t.TempDir()
+	return func() {
+		cacheDirOverwrite = ""
+	}
+}
+
 func TestGetObjectErrors(t *testing.T) {
-	defer OverwriteCacheDir(t)()
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -52,7 +59,7 @@ func TestGetObjectErrors(t *testing.T) {
 	}
 }
 func TestPutObject(t *testing.T) {
-	defer OverwriteCacheDir(t)()
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -131,7 +138,7 @@ func TestPutObject(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
-	defer OverwriteCacheDir(t)()
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -218,7 +225,7 @@ func TestWriteAndRead(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			defer OverwriteCacheDir(t)()
+			defer overwriteCacheDir(t)()
 			if tt.clearKeys {
 				clearKeys(t)
 			}
@@ -247,7 +254,7 @@ func TestWriteAndRead(t *testing.T) {
 }
 
 func TestCacheCleanup(t *testing.T) {
-	defer OverwriteCacheDir(t)()
+	defer overwriteCacheDir(t)()
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}

@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"testing"
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -29,13 +28,6 @@ var (
 const (
 	cacheKeyMaxAge = 90 * 24 * time.Hour
 )
-
-func OverwriteCacheDir(t *testing.T) func() {
-	cacheDirOverwrite = t.TempDir()
-	return func() {
-		cacheDirOverwrite = ""
-	}
-}
 
 func Init() error {
 	var cacheDir string

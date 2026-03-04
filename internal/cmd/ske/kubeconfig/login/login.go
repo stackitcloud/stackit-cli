@@ -8,12 +8,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -326,24 +323,21 @@ func getAccessToken(params *types.CmdParams) (string, error) {
 }
 
 func retrieveTokenFromIDP(ctx context.Context, idpClient *http.Client, accessToken string, clusterConfig *clusterConfig) (string, error) {
-	tokenEndpoint, err := auth.GetAuthField(auth.IDP_TOKEN_ENDPOINT)
-	if err != nil {
-		return "", fmt.Errorf("get idp token endpoint: %w", err)
-	}
+	resource := resourceForCluster(clusterConfig)
 
 	cachedToken := getCachedToken(clusterConfig.cacheKey)
 	if cachedToken == "" {
-		return exchangeToken(ctx, idpClient, tokenEndpoint, accessToken, clusterConfig)
+		return exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
 	}
 
 	expiry, err := auth.TokenExpirationTime(cachedToken)
 	if err != nil {
 		// token is expired or invalid, request new
 		_ = cache.DeleteObject(clusterConfig.cacheKey)
-		return exchangeToken(ctx, idpClient, tokenEndpoint, accessToken, clusterConfig)
+		return exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
 	} else if time.Now().Add(refreshTokenBeforeDuration).After(expiry) {
 		// token expires soon -> refresh
-		token, err := exchangeToken(ctx, idpClient, tokenEndpoint, accessToken, clusterConfig)
+		token, err := exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
 		// try to get a new one but use cache on failure
 		if err != nil {
 			return cachedToken, nil
@@ -352,69 +346,6 @@ func retrieveTokenFromIDP(ctx context.Context, idpClient *http.Client, accessTok
 	}
 	// cached token is valid and won't expire soon
 	return cachedToken, nil
-}
-
-func getCachedToken(key string) string {
-	token, err := cache.GetObject(key)
-	if err != nil {
-		return ""
-	}
-	return string(token)
-}
-
-func exchangeToken(ctx context.Context, idpClient *http.Client, tokenEndpoint, accessToken string, config *clusterConfig) (string, error) {
-	req, err := buildRequestToExchangeTokens(ctx, tokenEndpoint, accessToken, config)
-	if err != nil {
-		return "", fmt.Errorf("build request: %w", err)
-	}
-	resp, err := idpClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("call API: %w", err)
-	}
-	defer func() {
-		tempErr := resp.Body.Close()
-		if tempErr != nil {
-			err = fmt.Errorf("close response body: %w", tempErr)
-		}
-	}()
-
-	clusterToken, err := parseTokenExchangeResponse(resp)
-	if err != nil {
-		return "", fmt.Errorf("parse API response: %w", err)
-	}
-	if err = cache.PutObject(config.cacheKey, []byte(clusterToken)); err != nil {
-		return "", fmt.Errorf("cache token: %w", err)
-	}
-	return clusterToken, err
-}
-
-func buildRequestToExchangeTokens(ctx context.Context, tokenEndpoint, accessToken string, config *clusterConfig) (*http.Request, error) {
-	idpClientID, err := auth.GetIDPClientID()
-	if err != nil {
-		return nil, err
-	}
-
-	form := url.Values{}
-	form.Set("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
-	form.Set("client_id", idpClientID)
-	form.Set("subject_token_type", "urn:ietf:params:oauth:token-type:access_token")
-	form.Set("requested_token_type", "urn:ietf:params:oauth:token-type:id_token")
-	form.Set("scope", "openid profile email groups")
-	form.Set("subject_token", accessToken)
-	form.Set("resource", resourceForCluster(config))
-
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
-		tokenEndpoint,
-		strings.NewReader(form.Encode()),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("build exchange request: %w", err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	return req, nil
 }
 
 func resourceForCluster(config *clusterConfig) string {
@@ -427,26 +358,23 @@ func resourceForCluster(config *clusterConfig) string {
 	)
 }
 
-func parseTokenExchangeResponse(resp *http.Response) (accessToken string, err error) {
-	respBody, err := io.ReadAll(resp.Body)
+func getCachedToken(key string) string {
+	token, err := cache.GetObject(key)
 	if err != nil {
-		return "", fmt.Errorf("read body: %w", err)
+		return ""
 	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non-OK %d status: %s", resp.StatusCode, string(respBody))
-	}
+	return string(token)
+}
 
-	respContent := struct {
-		AccessToken string `json:"access_token"`
-	}{}
-	err = json.Unmarshal(respBody, &respContent)
+func exchangeAndCacheToken(ctx context.Context, idpClient *http.Client, accessToken, resource, cacheKey string) (string, error) {
+	clusterToken, err := auth.ExchangeToken(ctx, idpClient, accessToken, resource)
 	if err != nil {
-		return "", fmt.Errorf("unmarshal body: %w", err)
+		return "", err
 	}
-	if respContent.AccessToken == "" {
-		return "", fmt.Errorf("no access token found")
+	if err = cache.PutObject(cacheKey, []byte(clusterToken)); err != nil {
+		return "", fmt.Errorf("cache token: %w", err)
 	}
-	return respContent.AccessToken, nil
+	return clusterToken, err
 }
 
 func outputTokenKubeconfig(p *print.Printer, cacheKey, token string) error {

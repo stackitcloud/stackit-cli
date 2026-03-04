@@ -33,7 +33,7 @@ func getIDPWellKnownConfigURL() (wellKnownConfigURL string, err error) {
 	return wellKnownConfigURL, nil
 }
 
-func GetIDPClientID() (string, error) {
+func getIDPClientID() (string, error) {
 	idpClientID := defaultCLIClientID
 
 	customIDPClientID := viper.GetString(config.IdentityProviderCustomClientIdKey)

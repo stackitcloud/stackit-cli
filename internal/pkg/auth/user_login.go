@@ -56,7 +56,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		return err
 	}
 
-	idpClientID, err := GetIDPClientID()
+	idpClientID, err := getIDPClientID()
 	if err != nil {
 		return err
 	}

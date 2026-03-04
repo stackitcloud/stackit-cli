@@ -168,7 +168,7 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 }
 
 func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
-	idpClientID, err := GetIDPClientID()
+	idpClientID, err := getIDPClientID()
 	if err != nil {
 		return nil, err
 	}
