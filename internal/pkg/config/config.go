@@ -17,6 +17,7 @@ const (
 	RegionKey           = "region"
 	SessionTimeLimitKey = "session_time_limit"
 	VerbosityKey        = "verbosity"
+	AssumeYesKey        = "assume_yes"
 
 	IdentityProviderCustomWellKnownConfigurationKey = "identity_provider_custom_well_known_configuration"
 	IdentityProviderCustomClientIdKey               = "identity_provider_custom_client_id"
@@ -58,6 +59,7 @@ const (
 	DefaultProfileName = "default"
 
 	AsyncDefault            = false
+	AssumeYesDefault        = false
 	RegionDefault           = "eu01"
 	SessionTimeLimitDefault = "12h"
 
@@ -82,6 +84,7 @@ var ConfigKeys = []string{
 	RegionKey,
 	SessionTimeLimitKey,
 	VerbosityKey,
+	AssumeYesKey,
 
 	IdentityProviderCustomWellKnownConfigurationKey,
 	IdentityProviderCustomClientIdKey,

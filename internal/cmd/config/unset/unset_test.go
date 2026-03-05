@@ -17,6 +17,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		outputFormatFlag: true,
 		projectIdFlag:    true,
 		verbosityFlag:    true,
+		assumeYesFlag:    true,
 
 		sessionTimeLimitFlag:                             true,
 		identityProviderCustomWellKnownConfigurationFlag: true,
@@ -62,6 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		OutputFormat: true,
 		ProjectId:    true,
 		Verbosity:    true,
+		AssumeYes:    true,
 
 		SessionTimeLimit:               true,
 		IdentityProviderCustomEndpoint: true,
@@ -123,6 +125,7 @@ func TestParseInput(t *testing.T) {
 				model.OutputFormat = false
 				model.ProjectId = false
 				model.Verbosity = false
+				model.AssumeYes = false
 
 				model.SessionTimeLimit = false
 				model.IdentityProviderCustomEndpoint = false

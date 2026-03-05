@@ -3,8 +3,10 @@ package auth
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/zalando/go-keyring"
 )
 
 func TestGetWellKnownConfig(t *testing.T) {
@@ -114,6 +116,86 @@ func TestGetIDPClientID(t *testing.T) {
 
 			if got != tt.expected {
 				t.Fatalf("expected idp client ID %q, got %q", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestParseWellKnownConfig(t *testing.T) {
+	tests := []struct {
+		name        string
+		getFails    bool
+		getResponse string
+		isValid     bool
+		expected    *wellKnownConfig
+	}{
+		{
+			name:        "success",
+			getFails:    false,
+			getResponse: `{"issuer":"issuer","authorization_endpoint":"auth","token_endpoint":"token"}`,
+			isValid:     true,
+			expected: &wellKnownConfig{
+				Issuer:                "issuer",
+				AuthorizationEndpoint: "auth",
+				TokenEndpoint:         "token",
+			},
+		},
+		{
+			name:        "get_fails",
+			getFails:    true,
+			getResponse: "",
+			isValid:     false,
+			expected:    nil,
+		},
+		{
+			name:        "empty_response",
+			getFails:    true,
+			getResponse: "",
+			isValid:     false,
+			expected:    nil,
+		},
+		{
+			name:        "missing_issuer",
+			getFails:    true,
+			getResponse: `{"authorization_endpoint":"auth","token_endpoint":"token"}`,
+			isValid:     false,
+			expected:    nil,
+		},
+		{
+			name:        "missing_authorization",
+			getFails:    true,
+			getResponse: `{"issuer":"issuer","token_endpoint":"token"}`,
+			isValid:     false,
+			expected:    nil,
+		},
+		{
+			name:        "missing_token",
+			getFails:    true,
+			getResponse: `{"issuer":"issuer","authorization_endpoint":"auth"}`,
+			isValid:     false,
+			expected:    nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keyring.MockInit()
+
+			testClient := apiClientMocked{
+				tt.getFails,
+				tt.getResponse,
+			}
+
+			got, err := parseWellKnownConfiguration(&testClient, "")
+
+			if tt.isValid && err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if !tt.isValid && err == nil {
+				t.Fatalf("expected error, got none")
+			}
+
+			if tt.isValid && !cmp.Equal(*got, *tt.expected) {
+				t.Fatalf("expected %v, got %v", tt.expected, got)
 			}
 		})
 	}

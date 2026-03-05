@@ -80,6 +80,8 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		return "", "", fmt.Errorf("compute session expiration timestamp: %w", err)
 	}
 	authFields[SESSION_EXPIRES_AT_UNIX] = sessionExpiresAtUnix
+	// clear idp token endpoint as it is not set by default for service accounts
+	authFields[IDP_TOKEN_ENDPOINT] = ""
 
 	if !disableWriting {
 		err = SetAuthFlow(authFlowType)
