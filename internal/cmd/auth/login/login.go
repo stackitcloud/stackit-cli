@@ -67,7 +67,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	port := flags.FlagToIntPointer(p, cmd, portFlag)
 	// For the CLI client only callback URLs with localhost:[8000-8020] are valid. Additional callbacks must be enabled in the backend.
-	if port != nil && (*port < 8000 || *port > 8020) {
+	if port != nil && (*port < 8000 || 8020 < *port) {
 		return nil, fmt.Errorf("port must be between 8000 and 8020")
 	}
 
