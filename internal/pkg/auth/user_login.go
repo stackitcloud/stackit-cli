@@ -45,12 +45,19 @@ type InputValues struct {
 	Logo  string
 }
 
+type UserAuthConfig struct {
+	// IsReauthentication defines if an expired user session should be renewed
+	IsReauthentication bool
+	// Port defines which port should be used for the UserAuthFlow callback
+	Port *int
+}
+
 type apiClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
 // AuthorizeUser implements the PKCE OAuth2 flow.
-func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
+func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	idpWellKnownConfig, err := retrieveIDPWellKnownConfig(p)
 	if err != nil {
 		return err
@@ -68,7 +75,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		}
 	}
 
-	if isReauthentication {
+	if authConfig.IsReauthentication {
 		err := p.PromptForEnter("Your session has expired, press Enter to login again...")
 		if err != nil {
 			return err
@@ -79,8 +86,14 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 	var listener net.Listener
 	var listenerErr error
 	var port int
-	for i := range configuredPortRange {
-		port = defaultPort + i
+	startingPort := defaultPort
+	portRange := configuredPortRange
+	if authConfig.Port != nil {
+		startingPort = *authConfig.Port
+		portRange = 1
+	}
+	for i := range portRange {
+		port = startingPort + i
 		portString := fmt.Sprintf(":%s", strconv.Itoa(port))
 		p.Debug(print.DebugLevel, "trying to bind port %d for login redirect", port)
 		listener, listenerErr = net.Listen("tcp", portString)
@@ -92,7 +105,7 @@ func AuthorizeUser(p *print.Printer, isReauthentication bool) error {
 		p.Debug(print.DebugLevel, "unable to bind port %d for login redirect: %s", port, listenerErr)
 	}
 	if listenerErr != nil {
-		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", defaultPort, port, err)
+		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", defaultPort, port, listenerErr)
 	}
 
 	conf := &oauth2.Config{
