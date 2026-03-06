@@ -8,6 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/runner"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/user"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -28,6 +29,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(runner.NewCmd(params))
+	cmd.AddCommand(user.NewCmd(params))
 
 	// Intake instance subcommands
 	cmd.AddCommand(create.NewCmd(params))
