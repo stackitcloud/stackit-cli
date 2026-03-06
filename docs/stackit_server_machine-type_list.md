@@ -4,7 +4,7 @@ Get list of all machine types available in a project
 
 ### Synopsis
 
-Get list of all machine types available in a project.
+Get list of all machine types available in a project. Supports filtering by minimum vCPU and RAM (GB).
 
 ```
 stackit server machine-type list [flags]
@@ -21,13 +21,18 @@ stackit server machine-type list [flags]
 
   List the first 10 machine types
   $ stackit server machine-type list --limit=10
+
+  Filter for machines with at least 8 vCPUs and 16GB RAM
+  $ stackit server machine-type list --min-vcpu 8 --min-ram 16
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit server machine-type list"
-      --limit int   Limit the output to the first n elements
+  -h, --help           Help for "stackit server machine-type list"
+      --limit int      Limit the output to the first n elements
+      --min-ram int    Filter by minimum RAM amount in GB
+      --min-vcpu int   Filter by minimum number of vCPUs
 ```
 
 ### Options inherited from parent commands

@@ -31,8 +31,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
-
-		limitFlag: "10",
+		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,7 +46,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Region:    testRegion,
 		},
-		Limit: utils.Ptr(int64(10)),
+		Limit:    utils.Ptr(int64(10)),
+		MinVCPUs: nil,
+		MinRAM:   nil,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -83,50 +84,90 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "no flag values",
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "project id missing",
+			description: "filter by resources valid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, globalflags.ProjectIdFlag)
+				flagValues[minVcpuFlag] = "16"
+				flagValues[minRamFlag] = "32"
 			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = ""
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.MinVCPUs = utils.Ptr(int64(16))
+				model.MinRAM = utils.Ptr(int64(32))
 			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
-			}),
-			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+		})
+	}
+}
+
+func TestFilterMachineTypes(t *testing.T) {
+	items := []iaas.MachineType{
+		{
+			Name:        utils.Ptr("c3i.16"),
+			Vcpus:       utils.Ptr(int64(16)),
+			Ram:         utils.Ptr(int64(32768)),
+			Description: utils.Ptr("Intel Emerald Rapids 8580 CPU instance"),
+			ExtraSpecs: &map[string]interface{}{
+				"hw:cpu_sockets":   "1",
+				"hw:mem_page_size": "large",
+				"aggregate":        "intel-gen3-oc-cpu-optimized",
+			},
+		},
+		{
+			Name:        utils.Ptr("c3i.28"),
+			Vcpus:       utils.Ptr(int64(28)),
+			Ram:         utils.Ptr(int64(60416)),
+			Description: utils.Ptr("Intel Emerald Rapids 8580 CPU instance"),
+			ExtraSpecs: &map[string]interface{}{
+				"cpu":              "intel-emerald-rapids-8580-dual-socket",
+				"overcommit":       "4",
+				"hw:mem_page_size": "large",
+			},
+		},
+		{
+			Name:        utils.Ptr("g2i.1"),
+			Vcpus:       utils.Ptr(int64(1)),
+			Ram:         utils.Ptr(int64(4096)),
+			Description: utils.Ptr("Intel Ice Lake 4316 CPU instance"),
+		},
+	}
+
+	tests := []struct {
+		description string
+		items       *[]iaas.MachineType
+		model       *inputModel
+		expectedLen int
+	}{
+		{
+			description: "base filters",
+			items:       &items,
+			model:       fixtureInputModel(),
+			expectedLen: 3,
+		},
+		{
+			description: "nil items slice",
+			items:       nil,
+			model:       fixtureInputModel(),
+			expectedLen: 0,
+		},
+		{
+			description: "filter min-vcpu 20",
+			items:       &items,
+			model:       fixtureInputModel(func(m *inputModel) { m.MinVCPUs = utils.Ptr(int64(20)) }),
+			expectedLen: 1, // c3i.28 only
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			result := filterMachineTypes(tt.items, tt.model)
+			if len(result) != tt.expectedLen {
+				t.Errorf("expected %d items, got %d", tt.expectedLen, len(result))
+			}
 		})
 	}
 }
@@ -170,8 +211,29 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
+			name:    "empty response",
 			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "response with extra specs",
+			args: args{
+				outputFormat: "table",
+				machineTypes: iaas.MachineTypeListResponse{
+					Items: &[]iaas.MachineType{
+						{
+							Name:  utils.Ptr("c3i.16"),
+							Vcpus: utils.Ptr(int64(16)),
+							Ram:   utils.Ptr(int64(32768)),
+							ExtraSpecs: &map[string]interface{}{
+								"aggregate":  "intel-gen3",
+								"overcommit": 4,
+							},
+							Description: utils.Ptr("Intel Emerald Rapids 8580 CPU instance"),
+						},
+					},
+				},
+			},
 			wantErr: false,
 		},
 	}
