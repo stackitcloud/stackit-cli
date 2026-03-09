@@ -108,7 +108,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					s.Stop()
 				}
 
-				params.Printer.Outputf("Restored instance %q with backup %q\n", model.InstanceId, model.BackupId)
+				operationState := "Restored"
+				if model.Async {
+					operationState = "Triggered restore of"
+				}
+				params.Printer.Outputf("%s instance %q with backup %q\n", operationState, model.InstanceId, model.BackupId)
 				return nil
 			}
 
@@ -129,7 +133,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			params.Printer.Outputf("Cloned instance %q from backup with timestamp %q\n", model.InstanceId, model.Timestamp)
+			operationState := "Cloned"
+			if model.Async {
+				operationState = "Triggered clone of"
+			}
+			params.Printer.Outputf("%s instance %q from backup with timestamp %q\n", operationState, model.InstanceId, model.Timestamp)
 			return nil
 		},
 	}
