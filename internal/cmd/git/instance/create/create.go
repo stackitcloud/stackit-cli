@@ -153,7 +153,18 @@ func outputResult(p *print.Printer, model *inputModel, resp *git.Instance) error
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created instance %q with id %s\n", model.Name, utils.PtrString(model.Id))
+		if resp == nil {
+			return nil
+		}
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		id := utils.PtrString(model.Id)
+		if resp.Id != nil {
+			id = *resp.Id
+		}
+		p.Outputf("%s instance %q with id %s\n", operationState, model.Name, id)
 		return nil
 	})
 }

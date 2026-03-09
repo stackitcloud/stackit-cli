@@ -194,7 +194,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty input",
 			args: args{
-				model: &inputModel{},
+				model: fixtureInputModel(),
 				resp:  &git.Instance{},
 			},
 			wantErr: false,
