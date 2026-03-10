@@ -109,7 +109,7 @@ The available performance class values can be obtained by running:
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -170,13 +170,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *sfs.CreateResourcePoolResponse) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, resp *sfs.CreateResourcePoolResponse) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || resp.ResourcePool == nil {
 			p.Outputln("Resource pool response is empty")
 			return nil
 		}
-		p.Outputf("Created resource pool for project %q. Resource pool ID: %s\n", projectLabel, utils.PtrString(resp.ResourcePool.Id))
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s resource pool for project %q. Resource pool ID: %s\n", operationState, projectLabel, utils.PtrString(resp.ResourcePool.Id))
 		return nil
 	})
 }
