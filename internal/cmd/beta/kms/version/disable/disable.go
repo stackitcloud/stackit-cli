@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "get key version: %v", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)
 		},
 	}
 
@@ -133,7 +133,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, resp *kms.Version) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
@@ -154,7 +154,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 		p.Outputln(string(details))
 
 	default:
-		p.Outputf("Disabled version %d of the key %q\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		operationState := "Disabled"
+		if async {
+			operationState = "Triggered disable of"
+		}
+		p.Outputf("%s version %d of the key %q\n", operationState, utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
 	}
 
 	return nil
