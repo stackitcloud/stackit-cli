@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 var (
@@ -63,28 +63,7 @@ users:
 `
 )
 
-type skeClientMocked struct {
-	listClustersFails        bool
-	listClustersResp         *ske.ListClustersResponse
-	listProviderOptionsFails bool
-	listProviderOptionsResp  *ske.ProviderOptions
-}
-
 const testRegion = "eu01"
-
-func (m *skeClientMocked) ListClustersExecute(_ context.Context, _, _ string) (*ske.ListClustersResponse, error) {
-	if m.listClustersFails {
-		return nil, fmt.Errorf("could not list clusters")
-	}
-	return m.listClustersResp, nil
-}
-
-func (m *skeClientMocked) ListProviderOptionsExecute(_ context.Context, _ string) (*ske.ProviderOptions, error) {
-	if m.listProviderOptionsFails {
-		return nil, fmt.Errorf("could not list provider options")
-	}
-	return m.listProviderOptionsResp, nil
-}
 
 func TestClusterExists(t *testing.T) {
 	tests := []struct {
@@ -96,19 +75,19 @@ func TestClusterExists(t *testing.T) {
 	}{
 		{
 			description:     "cluster exists",
-			getClustersResp: &ske.ListClustersResponse{Items: &[]ske.Cluster{{Name: utils.Ptr(testClusterName)}}},
+			getClustersResp: &ske.ListClustersResponse{Items: []ske.Cluster{{Name: utils.Ptr(testClusterName)}}},
 			isValid:         true,
 			expectedExists:  true,
 		},
 		{
 			description:     "cluster exists 2",
-			getClustersResp: &ske.ListClustersResponse{Items: &[]ske.Cluster{{Name: utils.Ptr("some-cluster")}, {Name: utils.Ptr("some-other-cluster")}, {Name: utils.Ptr(testClusterName)}}},
+			getClustersResp: &ske.ListClustersResponse{Items: []ske.Cluster{{Name: utils.Ptr("some-cluster")}, {Name: utils.Ptr("some-other-cluster")}, {Name: utils.Ptr(testClusterName)}}},
 			isValid:         true,
 			expectedExists:  true,
 		},
 		{
 			description:     "cluster does not exist",
-			getClustersResp: &ske.ListClustersResponse{Items: &[]ske.Cluster{{Name: utils.Ptr("some-cluster")}, {Name: utils.Ptr("some-other-cluster")}}},
+			getClustersResp: &ske.ListClustersResponse{Items: []ske.Cluster{{Name: utils.Ptr("some-cluster")}, {Name: utils.Ptr("some-other-cluster")}}},
 			isValid:         true,
 			expectedExists:  false,
 		},
@@ -121,9 +100,13 @@ func TestClusterExists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &skeClientMocked{
-				listClustersFails: tt.getClustersFails,
-				listClustersResp:  tt.getClustersResp,
+			client := &ske.DefaultAPIServiceMock{
+				ListClustersExecuteMock: utils.Ptr(func(_ ske.ApiListClustersRequest) (*ske.ListClustersResponse, error) {
+					if tt.getClustersFails {
+						return nil, fmt.Errorf("could not list clusters")
+					}
+					return tt.getClustersResp, nil
+				}),
 			}
 
 			exists, err := ClusterExists(context.Background(), client, testProjectId, testRegion, testClusterName)
@@ -146,18 +129,18 @@ func TestClusterExists(t *testing.T) {
 
 func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOptions {
 	providerOptions := &ske.ProviderOptions{
-		AvailabilityZones: &[]ske.AvailabilityZone{
+		AvailabilityZones: []ske.AvailabilityZone{
 			{Name: utils.Ptr("eu01-m")},
 			{Name: utils.Ptr("eu01-1")},
 			{Name: utils.Ptr("eu01-2")},
 			{Name: utils.Ptr("eu01-3")},
 		},
-		MachineTypes: &[]ske.MachineType{
+		MachineTypes: []ske.MachineType{
 			{
 				Name: utils.Ptr("b1.2"),
 			},
 		},
-		KubernetesVersions: &[]ske.KubernetesVersion{
+		KubernetesVersions: []ske.KubernetesVersion{
 			{
 				State:   utils.Ptr("supported"),
 				Version: utils.Ptr("1.2.3"),
@@ -171,31 +154,31 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 				Version: utils.Ptr("4.4.4"),
 			},
 		},
-		MachineImages: &[]ske.MachineImage{
+		MachineImages: []ske.MachineImage{
 			{
 				Name: utils.Ptr("flatcar"),
-				Versions: &[]ske.MachineImageVersion{
+				Versions: []ske.MachineImageVersion{
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("1.2.3"),
-						Cri: &[]ske.CRI{
+						Cri: []ske.CRI{
 							{
-								Name: ske.CRINAME_DOCKER.Ptr(),
+								Name: utils.Ptr("docker"),
 							},
 							{
-								Name: ske.CRINAME_CONTAINERD.Ptr(),
+								Name: utils.Ptr("containerd"),
 							},
 						},
 					},
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("3.2.1"),
-						Cri: &[]ske.CRI{
+						Cri: []ske.CRI{
 							{
-								Name: ske.CRINAME_DOCKER.Ptr(),
+								Name: utils.Ptr("docker"),
 							},
 							{
-								Name: ske.CRINAME_CONTAINERD.Ptr(),
+								Name: utils.Ptr("containerd"),
 							},
 						},
 					},
@@ -203,13 +186,13 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 			},
 			{
 				Name: utils.Ptr("not-flatcar"),
-				Versions: &[]ske.MachineImageVersion{
+				Versions: []ske.MachineImageVersion{
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: &[]ske.CRI{
+						Cri: []ske.CRI{
 							{
-								Name: ske.CRINAME_CONTAINERD.Ptr(),
+								Name: utils.Ptr("containerd"),
 							},
 						},
 					},
@@ -217,7 +200,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 			},
 			{
 				Name: utils.Ptr("flatcar"),
-				Versions: &[]ske.MachineImageVersion{
+				Versions: []ske.MachineImageVersion{
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
@@ -226,13 +209,13 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 			},
 			{
 				Name: utils.Ptr("flatcar"),
-				Versions: &[]ske.MachineImageVersion{
+				Versions: []ske.MachineImageVersion{
 					{
 						State:   utils.Ptr("not-supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: &[]ske.CRI{
+						Cri: []ske.CRI{
 							{
-								Name: ske.CRINAME_CONTAINERD.Ptr(),
+								Name: utils.Ptr("containerd"),
 							},
 						},
 					},
@@ -240,13 +223,13 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 			},
 			{
 				Name: utils.Ptr("flatcar"),
-				Versions: &[]ske.MachineImageVersion{
+				Versions: []ske.MachineImageVersion{
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: &[]ske.CRI{
+						Cri: []ske.CRI{
 							{
-								Name: ske.CRINAME_DOCKER.Ptr(),
+								Name: utils.Ptr("docker"),
 							},
 						},
 					},
@@ -264,38 +247,38 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 	payload := &ske.CreateOrUpdateClusterPayload{
 		Extensions: &ske.Extension{
 			Acl: &ske.ACL{
-				AllowedCidrs: &[]string{},
-				Enabled:      utils.Ptr(false),
+				AllowedCidrs: []string{},
+				Enabled:      false,
 			},
 		},
-		Kubernetes: &ske.Kubernetes{
-			Version: utils.Ptr("3.2.1"),
+		Kubernetes: ske.Kubernetes{
+			Version: "3.2.1",
 		},
-		Nodepools: &[]ske.Nodepool{
+		Nodepools: []ske.Nodepool{
 			{
-				AvailabilityZones: &[]string{
+				AvailabilityZones: []string{
 					"eu01-1",
 					"eu01-2",
 					"eu01-3",
 				},
 				Cri: &ske.CRI{
-					Name: ske.CRINAME_CONTAINERD.Ptr(),
+					Name: utils.Ptr("containerd"),
 				},
-				Machine: &ske.Machine{
-					Type: utils.Ptr("b1.2"),
-					Image: &ske.Image{
-						Version: utils.Ptr("3.2.1"),
-						Name:    utils.Ptr("flatcar"),
+				Machine: ske.Machine{
+					Type: "b1.2",
+					Image: ske.Image{
+						Version: "3.2.1",
+						Name:    "flatcar",
 					},
 				},
-				MaxSurge:       utils.Ptr(int64(3)),
-				MaxUnavailable: utils.Ptr(int64(0)),
-				Maximum:        utils.Ptr(int64(3)),
-				Minimum:        utils.Ptr(int64(1)),
-				Name:           utils.Ptr("pool-default"),
-				Volume: &ske.Volume{
+				MaxSurge:       utils.Ptr(int32(3)),
+				MaxUnavailable: utils.Ptr(int32(0)),
+				Maximum:        int32(3),
+				Minimum:        int32(1),
+				Name:           "pool-default",
+				Volume: ske.Volume{
 					Type: utils.Ptr("storage_premium_perf2"),
-					Size: utils.Ptr(int64(50)),
+					Size: int32(50),
 				},
 			},
 		},
@@ -335,7 +318,7 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no availability zones",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.AvailabilityZones = &[]ske.AvailabilityZone{}
+				po.AvailabilityZones = []ske.AvailabilityZone{}
 			}),
 			isValid: false,
 		},
@@ -349,7 +332,7 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no machine types",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.MachineTypes = &[]ske.MachineType{}
+				po.MachineTypes = []ske.MachineType{}
 			}),
 			isValid: false,
 		},
@@ -363,14 +346,14 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no Kubernetes versions 2",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.KubernetesVersions = &[]ske.KubernetesVersion{}
+				po.KubernetesVersions = []ske.KubernetesVersion{}
 			}),
 			isValid: false,
 		},
 		{
 			description: "no supported Kubernetes versions",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.KubernetesVersions = &[]ske.KubernetesVersion{
+				po.KubernetesVersions = []ske.KubernetesVersion{
 					{
 						State:   utils.Ptr("not-supported"),
 						Version: utils.Ptr("1.2.3"),
@@ -382,7 +365,7 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no machine images 1",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.MachineImages = &[]ske.MachineImage{}
+				po.MachineImages = []ske.MachineImage{}
 			}),
 			isValid: false,
 		},
@@ -396,7 +379,7 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no machine image versions 1",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.MachineImages = &[]ske.MachineImage{
+				po.MachineImages = []ske.MachineImage{
 					{
 						Name:     utils.Ptr("image-1"),
 						Versions: nil,
@@ -408,10 +391,10 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no machine image versions 2",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.MachineImages = &[]ske.MachineImage{
+				po.MachineImages = []ske.MachineImage{
 					{
 						Name:     utils.Ptr("image-1"),
-						Versions: &[]ske.MachineImageVersion{},
+						Versions: []ske.MachineImageVersion{},
 					},
 				}
 			}),
@@ -420,10 +403,10 @@ func TestGetDefaultPayload(t *testing.T) {
 		{
 			description: "no supported machine image versions",
 			listProviderOptionsResp: fixtureProviderOptions(func(po *ske.ProviderOptions) {
-				po.MachineImages = &[]ske.MachineImage{
+				po.MachineImages = []ske.MachineImage{
 					{
 						Name: utils.Ptr("image-1"),
-						Versions: &[]ske.MachineImageVersion{
+						Versions: []ske.MachineImageVersion{
 							{
 								State:   utils.Ptr("not-supported"),
 								Version: utils.Ptr("1.2.3"),
@@ -438,9 +421,13 @@ func TestGetDefaultPayload(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &skeClientMocked{
-				listProviderOptionsFails: tt.listProviderOptionsFails,
-				listProviderOptionsResp:  tt.listProviderOptionsResp,
+			client := &ske.DefaultAPIServiceMock{
+				ListProviderOptionsExecuteMock: utils.Ptr(func(_ ske.ApiListProviderOptionsRequest) (*ske.ProviderOptions, error) {
+					if tt.listProviderOptionsFails {
+						return nil, fmt.Errorf("could not list provider options")
+					}
+					return tt.listProviderOptionsResp, nil
+				}),
 			}
 
 			output, err := GetDefaultPayload(context.Background(), client, testRegion)

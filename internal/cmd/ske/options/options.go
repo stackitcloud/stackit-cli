@@ -22,7 +22,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (
@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiListProviderOptionsRequest {
-	req := apiClient.ListProviderOptions(ctx, model.Region)
+	req := apiClient.DefaultAPI.ListProviderOptions(ctx, model.Region)
 	return req
 }
 
@@ -178,11 +178,11 @@ func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 	}
 
 	content := []tables.Table{}
-	if options.AvailabilityZones != nil && len(*options.AvailabilityZones) != 0 {
+	if len(options.AvailabilityZones) != 0 {
 		content = append(content, buildAvailabilityZonesTable(options))
 	}
 
-	if options.KubernetesVersions != nil && len(*options.KubernetesVersions) != 0 {
+	if len(options.KubernetesVersions) != 0 {
 		kubernetesVersionsTable, err := buildKubernetesVersionsTable(options)
 		if err != nil {
 			return fmt.Errorf("build Kubernetes versions table: %w", err)
@@ -190,15 +190,15 @@ func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 		content = append(content, kubernetesVersionsTable)
 	}
 
-	if options.MachineImages != nil && len(*options.MachineImages) != 0 {
+	if len(options.MachineImages) != 0 {
 		content = append(content, buildMachineImagesTable(options))
 	}
 
-	if options.MachineTypes != nil && len(*options.MachineTypes) != 0 {
+	if len(options.MachineTypes) != 0 {
 		content = append(content, buildMachineTypesTable(options))
 	}
 
-	if options.VolumeTypes != nil && len(*options.VolumeTypes) != 0 {
+	if len(options.VolumeTypes) != 0 {
 		content = append(content, buildVolumeTypesTable(options))
 	}
 
@@ -211,7 +211,7 @@ func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 }
 
 func buildAvailabilityZonesTable(resp *ske.ProviderOptions) tables.Table {
-	zones := *resp.AvailabilityZones
+	zones := resp.AvailabilityZones
 
 	table := tables.NewTable()
 	table.SetTitle("Availability Zones")
@@ -224,7 +224,7 @@ func buildAvailabilityZonesTable(resp *ske.ProviderOptions) tables.Table {
 }
 
 func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, error) {
-	versions := *resp.KubernetesVersions
+	versions := resp.KubernetesVersions
 
 	table := tables.NewTable()
 	table.SetTitle("Kubernetes Versions")
@@ -249,19 +249,19 @@ func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, erro
 }
 
 func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
-	images := *resp.MachineImages
+	images := resp.MachineImages
 
 	table := tables.NewTable()
 	table.SetTitle("Machine Images")
 	table.SetHeader("NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
 	for i := range images {
 		image := images[i]
-		versions := *image.Versions
+		versions := image.Versions
 		for j := range versions {
 			version := versions[j]
 			criNames := make([]string, 0)
-			for i := range *version.Cri {
-				cri := (*version.Cri)[i]
+			for i := range version.Cri {
+				cri := version.Cri[i]
 				criNames = append(criNames, string(*cri.Name))
 			}
 			criNamesString := strings.Join(criNames, ", ")
@@ -284,7 +284,7 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 }
 
 func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
-	machineTypes := *resp.MachineTypes
+	machineTypes := resp.MachineTypes
 
 	table := tables.NewTable()
 	table.SetTitle("Machine Types")
@@ -301,7 +301,7 @@ func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 }
 
 func buildVolumeTypesTable(resp *ske.ProviderOptions) tables.Table {
-	volumeTypes := *resp.VolumeTypes
+	volumeTypes := resp.VolumeTypes
 
 	table := tables.NewTable()
 	table.SetTitle("Volume Types")

@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -17,7 +16,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -25,51 +24,51 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testClusterName = "cluster"
 
 const testRegion = "eu01"
 
 var testPayload = &ske.CreateOrUpdateClusterPayload{
-	Kubernetes: &ske.Kubernetes{
-		Version: utils.Ptr("1.25.15"),
+	Kubernetes: ske.Kubernetes{
+		Version: "1.25.15",
 	},
-	Nodepools: &[]ske.Nodepool{
+	Nodepools: []ske.Nodepool{
 		{
-			Name: utils.Ptr("np-name"),
-			Machine: &ske.Machine{
-				Image: &ske.Image{
-					Name:    utils.Ptr("flatcar"),
-					Version: utils.Ptr("3760.2.1"),
+			Name: "np-name",
+			Machine: ske.Machine{
+				Image: ske.Image{
+					Name:    "flatcar",
+					Version: "3760.2.1",
 				},
-				Type: utils.Ptr("b1.2"),
+				Type: "b1.2",
 			},
-			Minimum:  utils.Ptr(int64(1)),
-			Maximum:  utils.Ptr(int64(2)),
-			MaxSurge: utils.Ptr(int64(1)),
-			Volume: &ske.Volume{
+			Minimum:  int32(1),
+			Maximum:  int32(2),
+			MaxSurge: utils.Ptr(int32(1)),
+			Volume: ske.Volume{
 				Type: utils.Ptr("storage_premium_perf0"),
-				Size: utils.Ptr(int64(40)),
+				Size: int32(40),
 			},
-			AvailabilityZones: &[]string{"eu01-3"},
-			Cri:               &ske.CRI{Name: ske.CRINAME_DOCKER.Ptr()},
+			AvailabilityZones: []string{"eu01-3"},
+			Cri:               &ske.CRI{Name: utils.Ptr("containerd")},
 		},
 	},
 	Extensions: &ske.Extension{
 		Acl: &ske.ACL{
-			Enabled:      utils.Ptr(true),
-			AllowedCidrs: &[]string{"0.0.0.0/0"},
+			Enabled:      true,
+			AllowedCidrs: []string{"0.0.0.0/0"},
 		},
 	},
 	Maintenance: &ske.Maintenance{
-		AutoUpdate: &ske.MaintenanceAutoUpdate{
+		AutoUpdate: ske.MaintenanceAutoUpdate{
 			KubernetesVersion:   utils.Ptr(true),
 			MachineImageVersion: utils.Ptr(true),
 		},
-		TimeWindow: &ske.TimeWindow{
-			End:   utils.Ptr(time.Date(0, 1, 1, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60))),
-			Start: utils.Ptr(time.Date(0, 1, 1, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60))),
+		TimeWindow: ske.TimeWindow{
+			End:   time.Date(0, 1, 1, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
+			Start: time.Date(0, 1, 1, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
 		},
 	},
 }
@@ -88,7 +87,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
-		payloadFlag: fmt.Sprintf(`{
+		payloadFlag: `{
 			"name": "cli-jp",
 			"kubernetes": {
 			  "version": "1.25.15"
@@ -107,7 +106,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				"maximum": 2,
 				"maxSurge": 1,
 				"volume": { "type": "storage_premium_perf0", "size": 40 },
-				"cri": { "name": "%s" },
+				"cri": { "name": "containerd" },
 				"availabilityZones": ["eu01-3"]
 			  }
 			],
@@ -122,7 +121,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 				  "start": "0000-01-01T03:00:00+02:00"
 				}
 			  }
-		  }`, ske.CRINAME_DOCKER),
+		  }`,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -147,7 +146,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiCreateOrUpdateClusterRequest)) ske.ApiCreateOrUpdateClusterRequest {
-	request := testClient.CreateOrUpdateCluster(testCtx, testProjectId, testRegion, fixtureInputModel().ClusterName)
+	request := testClient.DefaultAPI.CreateOrUpdateCluster(testCtx, testProjectId, testRegion, fixtureInputModel().ClusterName)
 	request = request.CreateOrUpdateClusterPayload(*testPayload)
 	for _, mod := range mods {
 		mod(&request)
@@ -262,6 +261,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

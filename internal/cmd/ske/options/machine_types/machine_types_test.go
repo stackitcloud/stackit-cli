@@ -13,13 +13,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 
 const testRegion = "eu01"
 
@@ -86,7 +86,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			inputModel:      fixtureInputModel(),
-			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion),
+			expectedRequest: testClient.DefaultAPI.ListProviderOptions(testCtx, testRegion),
 		},
 	}
 
@@ -97,6 +97,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -154,7 +155,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineTypes: &[]ske.MachineType{},
+					MachineTypes: []ske.MachineType{},
 				},
 			},
 			wantErr: false,
@@ -166,7 +167,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineTypes: &[]ske.MachineType{{}},
+					MachineTypes: []ske.MachineType{{}},
 				},
 			},
 			wantErr: false,
@@ -178,19 +179,19 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineTypes: &[]ske.MachineType{
+					MachineTypes: []ske.MachineType{
 						{
 							Architecture: utils.Ptr("amd64"),
-							Cpu:          utils.Ptr(int64(2)),
-							Gpu:          utils.Ptr(int64(0)),
-							Memory:       utils.Ptr(int64(16)),
+							Cpu:          utils.Ptr(int32(2)),
+							Gpu:          utils.Ptr(int32(0)),
+							Memory:       utils.Ptr(int32(16)),
 							Name:         utils.Ptr("type1"),
 						},
 						{
 							Architecture: utils.Ptr("amd64"),
-							Cpu:          utils.Ptr(int64(2)),
-							Gpu:          utils.Ptr(int64(0)),
-							Memory:       utils.Ptr(int64(16)),
+							Cpu:          utils.Ptr(int32(2)),
+							Gpu:          utils.Ptr(int32(0)),
+							Memory:       utils.Ptr(int32(16)),
 							Name:         utils.Ptr("type2"),
 						},
 					},

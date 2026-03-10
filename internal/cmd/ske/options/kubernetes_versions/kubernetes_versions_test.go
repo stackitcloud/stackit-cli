@@ -14,13 +14,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 
 const testRegion = "eu01"
 
@@ -100,14 +100,14 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			inputModel:      fixtureInputModel(),
-			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion),
+			expectedRequest: testClient.DefaultAPI.ListProviderOptions(testCtx, testRegion),
 		},
 		{
 			description: "base",
 			inputModel: fixtureInputModel(func(model *inputModel) {
 				model.Supported = true
 			}),
-			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion).VersionState("SUPPORTED"),
+			expectedRequest: testClient.DefaultAPI.ListProviderOptions(testCtx, testRegion).VersionState("SUPPORTED"),
 		},
 	}
 
@@ -118,6 +118,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -175,7 +176,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					KubernetesVersions: &[]ske.KubernetesVersion{},
+					KubernetesVersions: []ske.KubernetesVersion{},
 				},
 			},
 			wantErr: false,
@@ -187,7 +188,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					KubernetesVersions: &[]ske.KubernetesVersion{{}},
+					KubernetesVersions: []ske.KubernetesVersion{{}},
 				},
 			},
 			wantErr: false,
@@ -199,7 +200,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					KubernetesVersions: &[]ske.KubernetesVersion{
+					KubernetesVersions: []ske.KubernetesVersion{
 						{
 							FeatureGates: &map[string]string{
 								"featureGate1": "foo",

@@ -14,7 +14,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -22,7 +22,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testClusterName = "cluster"
 
@@ -65,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiGetClusterRequest)) ske.ApiGetClusterRequest {
-	request := testClient.GetCluster(testCtx, testProjectId, testRegion, testClusterName)
+	request := testClient.DefaultAPI.GetCluster(testCtx, testProjectId, testRegion, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,6 +160,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -197,7 +198,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
@@ -215,7 +216,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
@@ -241,7 +242,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code: utils.Ptr("SKE_FETCHING_ERRORS_NOT_POSSIBLE"),
 							},
@@ -271,7 +272,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{},
+						Errors: []ske.ClusterError{},
 					},
 				},
 			},
@@ -294,7 +295,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
@@ -312,7 +313,7 @@ func TestOutputResult(t *testing.T) {
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
@@ -329,11 +330,11 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: "",
 				cluster: &ske.Cluster{
 					Name: utils.Ptr("test-cluster"),
-					Kubernetes: &ske.Kubernetes{
-						Version: utils.Ptr("1.28.0"),
+					Kubernetes: ske.Kubernetes{
+						Version: "1.28.0",
 					},
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
@@ -352,12 +353,12 @@ func TestOutputResult(t *testing.T) {
 					Name: utils.Ptr("test-cluster"),
 					Extensions: &ske.Extension{
 						Acl: &ske.ACL{
-							AllowedCidrs: &[]string{"10.0.0.0/8"},
-							Enabled:      utils.Ptr(true),
+							AllowedCidrs: []string{"10.0.0.0/8"},
+							Enabled:      true,
 						},
 					},
 					Status: &ske.ClusterStatus{
-						Errors: &[]ske.ClusterError{
+						Errors: []ske.ClusterError{
 							{
 								Code:    utils.Ptr("SKE_INFRA_SNA_NETWORK_NOT_FOUND"),
 								Message: utils.Ptr("Network configuration not found"),
