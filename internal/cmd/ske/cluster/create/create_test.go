@@ -88,7 +88,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		payloadFlag: `{
-			"name": "cli-jp",
 			"kubernetes": {
 			  "version": "1.25.15"
 			},
