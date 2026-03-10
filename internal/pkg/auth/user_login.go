@@ -295,7 +295,7 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 	req, _ := http.NewRequest("POST", idpWellKnownConfig.TokenEndpoint, payload)
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
 	httpClient := &http.Client{}
-	res, err := httpClient.Do(req)
+	res, err := httpClient.Do(req) //nolint:gosec // URL from well known
 	if err != nil {
 		return "", "", fmt.Errorf("call access token endpoint: %w", err)
 	}
