@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				serverLabel = model.ServerId
 			}
 
-			prompt := fmt.Sprintf("Are your sure you want to detach service account %q from a server %q?", model.ServiceAccMail, serverLabel)
+			prompt := fmt.Sprintf("Are you sure you want to detach service account %q from a server %q?", model.ServiceAccMail, serverLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
