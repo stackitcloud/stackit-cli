@@ -23,11 +23,13 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Limit *int64
+	Limit  *int64
+	Filter *string
 }
 
 const (
-	limitFlag = "limit"
+	limitFlag  = "limit"
+	filterFlag = "filter"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -48,6 +50,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`List the first 10 machine types`,
 				`$ stackit server machine-type list --limit=10`,
+			),
+			examples.NewExample(
+				`List machine types with exactly 2 vCPUs`,
+				`$ stackit server machine-type list --filter="vcpus==2"`,
+			),
+			examples.NewExample(
+				`List machine types with at least 2 vCPUs and 2048 MB RAM`,
+				`$ stackit server machine-type list --filter="vcpus >= 2 && ram >= 2048"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,6 +105,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
+	cmd.Flags().String(filterFlag, "", "Filter resources by fields. A subset of expr-lang is supported. See https://expr-lang.org/docs/language-definition for usage details")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -113,7 +124,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		Limit:           limit,
+		Filter:          flags.FlagToStringPointer(p, cmd, filterFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -121,18 +133,39 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListMachineTypesRequest {
-	return apiClient.ListMachineTypes(ctx, model.ProjectId, model.Region)
+	req := apiClient.ListMachineTypes(ctx, model.ProjectId, model.Region)
+	if model.Filter != nil {
+		req = req.Filter(*model.Filter)
+	}
+	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineTypes iaas.MachineTypeListResponse) error {
 	return p.OutputResult(outputFormat, machineTypes, func() error {
 		table := tables.NewTable()
 		table.SetTitle("Machine-Types")
-
-		table.SetHeader("NAME", "DESCRIPTION")
+		table.SetHeader("NAME", "VCPUS", "RAM (GB)", "DESCRIPTION", "EXTRA SPECS")
 		if items := machineTypes.GetItems(); len(items) > 0 {
 			for _, machineType := range items {
-				table.AddRow(*machineType.Name, utils.PtrString(machineType.Description))
+				extraSpecMap := make(map[string]string)
+				if machineType.ExtraSpecs != nil && len(*machineType.ExtraSpecs) > 0 {
+					for key, value := range *machineType.ExtraSpecs {
+						extraSpecMap[key] = fmt.Sprintf("%v", value)
+					}
+				}
+				ramGB := int64(0)
+				if machineType.Ram != nil {
+					ramGB = *machineType.Ram / 1024
+				}
+
+				table.AddRow(
+					utils.PtrString(machineType.Name),
+					utils.PtrValue(machineType.Vcpus),
+					ramGB,
+					utils.PtrString(machineType.Description),
+					utils.JoinStringMap(extraSpecMap, ": ", "\n"),
+				)
+				table.AddSeparator()
 			}
 		}
 
