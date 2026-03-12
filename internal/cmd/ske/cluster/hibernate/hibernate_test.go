@@ -11,7 +11,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type testCtxKey struct{}
@@ -22,7 +22,7 @@ const (
 )
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiTriggerHibernateRequest)) ske.ApiTriggerHibernateRequest {
-	request := testClient.TriggerHibernate(testCtx, testProjectId, testRegion, testClusterName)
+	request := testClient.DefaultAPI.TriggerHibernate(testCtx, testProjectId, testRegion, testClusterName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -177,6 +177,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmpopts.EquateComparable(testCtx),
 				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("request mismatch:\n%s", diff)

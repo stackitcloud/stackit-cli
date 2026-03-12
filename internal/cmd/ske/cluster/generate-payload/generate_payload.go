@@ -18,7 +18,7 @@ import (
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			var payload *ske.CreateOrUpdateClusterPayload
 			if model.ClusterName == nil {
-				payload, err = skeUtils.GetDefaultPayload(ctx, apiClient, model.Region)
+				payload, err = skeUtils.GetDefaultPayload(ctx, apiClient.DefaultAPI, model.Region)
 				if err != nil {
 					return err
 				}
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.ProjectId, model.Region, *model.ClusterName)
+	req := apiClient.DefaultAPI.GetCluster(ctx, model.ProjectId, model.Region, *model.ClusterName)
 	return req
 }
 
