@@ -33,13 +33,13 @@ stackit routing-table update ROUTING_TABLE_ID [flags]
 
 ```
       --description string       Description of the routing-table
-      --dynamic-routes           If set to false, prevents dynamic routes from propagating to the routing table. (default true)
+      --dynamic-routes           If set to false, prevents dynamic routes from propagating to the routing table.
   -h, --help                     Help for "stackit routing-table update"
       --labels stringToString    Key=value labels (default [])
       --name string              Name of the routing-table
       --network-area-id string   Network-Area ID
       --organization-id string   Organization ID
-      --system-routes            If set to false, disables routes for project-to-project communication. (default true)
+      --system-routes            If set to false, disables routes for project-to-project communication.
 ```
 
 ### Options inherited from parent commands

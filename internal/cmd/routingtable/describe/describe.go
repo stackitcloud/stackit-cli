@@ -107,26 +107,40 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 	}
 
 	return p.OutputResult(outputFormat, routingTable, func() error {
-		var labels []string
+		table := tables.NewTable()
+
+		table.AddRow("ID", utils.PtrString(routingTable.Id))
+		table.AddSeparator()
+
+		table.AddRow("NAME", utils.PtrString(routingTable.Name))
+		table.AddSeparator()
+
+		table.AddRow("DESCRIPTION", utils.PtrString(routingTable.Description))
+		table.AddSeparator()
+
+		table.AddRow("DEFAULT", utils.PtrString(routingTable.Default))
+		table.AddSeparator()
+
 		if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
+			var labels []string
 			for key, value := range *routingTable.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+			table.AddRow("LABELS", strings.Join(labels, "\n"))
+			table.AddSeparator()
 		}
 
-		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
-		table.AddRow(
-			utils.PtrString(routingTable.Id),
-			utils.PtrString(routingTable.Name),
-			utils.PtrString(routingTable.Description),
-			utils.PtrString(routingTable.Default),
-			strings.Join(labels, "\n"),
-			utils.PtrString(routingTable.SystemRoutes),
-			utils.PtrString(routingTable.DynamicRoutes),
-			utils.ConvertTimePToDateTimeString(routingTable.CreatedAt),
-			utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt),
-		)
+		table.AddRow("SYSTEM ROUTES", utils.PtrString(routingTable.SystemRoutes))
+		table.AddSeparator()
+
+		table.AddRow("DYNAMIC ROUTES", utils.PtrString(routingTable.DynamicRoutes))
+		table.AddSeparator()
+
+		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(routingTable.CreatedAt))
+		table.AddSeparator()
+
+		table.AddRow("UPDATED AT", utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt))
+		table.AddSeparator()
 
 		err := table.Display(p)
 		if err != nil {

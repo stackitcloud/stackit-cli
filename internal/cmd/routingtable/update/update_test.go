@@ -67,9 +67,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		NetworkAreaId:  testNetworkAreaId,
 		Name:           utils.Ptr(testRoutingTableName),
 		Description:    utils.Ptr(testRoutingTableDescription),
-		SystemRoutes:   testSystemRoutesFlag,
-		DynamicRoutes:  testDynamicRoutesFlag,
-		Labels:         utils.Ptr(*testLabels),
+		SystemRoutes:   utils.Ptr(testSystemRoutesFlag),
+		DynamicRoutes:  utils.Ptr(testDynamicRoutesFlag),
+		Labels:         testLabels,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -137,7 +137,7 @@ func TestParseInput(t *testing.T) {
 			argValues: fixtureArgValues(),
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DynamicRoutes = false
+				model.DynamicRoutes = utils.Ptr(false)
 				model.RoutingTableId = testRoutingTableId
 			}),
 		},
@@ -149,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			argValues: fixtureArgValues(),
 			isValid:   true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.SystemRoutes = false
+				model.SystemRoutes = utils.Ptr(false)
 				model.RoutingTableId = testRoutingTableId
 			}),
 		},
@@ -164,6 +164,22 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, networkAreaIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "dynamic-route-flag missing",
+			argValues:   []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, dynamicRoutesFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "system-routes-flag missing",
+			argValues:   []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, systemRoutesFlag)
 			}),
 			isValid: false,
 		},
@@ -277,7 +293,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "dynamic routes disabled",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.RoutingTableId = testRoutingTableId
-				model.DynamicRoutes = false
+				model.DynamicRoutes = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
@@ -293,7 +309,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "system routes disabled",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.RoutingTableId = testRoutingTableId
-				model.DynamicRoutes = false
+				model.DynamicRoutes = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{

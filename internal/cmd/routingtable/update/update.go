@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -31,8 +32,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	OrganizationId string
 	NetworkAreaId  string
-	DynamicRoutes  bool
-	SystemRoutes   bool
+	DynamicRoutes  *bool
+	SystemRoutes   *bool
 	RoutingTableId string
 	Description    *string
 	Labels         *map[string]string
@@ -80,7 +81,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to update routing-table %q?", model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+				routingTableLabel = model.RoutingTableId
+			} else if routingTableLabel == "" {
+				routingTableLabel = model.RoutingTableId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to update the routing-table %q?", routingTableLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -104,11 +113,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Name of the routing-table")
 	cmd.Flags().StringToString(labelFlag, nil, "Key=value labels")
 	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "Network-Area ID")
-	cmd.Flags().Bool(dynamicRoutesFlag, true, "If set to false, prevents dynamic routes from propagating to the routing table.")
-	cmd.Flags().Bool(systemRoutesFlag, true, "If set to false, disables routes for project-to-project communication.")
+	cmd.Flags().Bool(dynamicRoutesFlag, false, "If set to false, prevents dynamic routes from propagating to the routing table.")
+	cmd.Flags().Bool(systemRoutesFlag, false, "If set to false, disables routes for project-to-project communication.")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 
-	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
+	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, dynamicRoutesFlag, systemRoutesFlag, nameFlag)
 	cobra.CheckErr(err)
 }
 
@@ -123,8 +132,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
-		SystemRoutes:    flags.FlagToBoolValue(p, cmd, systemRoutesFlag),
-		DynamicRoutes:   flags.FlagToBoolValue(p, cmd, dynamicRoutesFlag),
+		SystemRoutes:    flags.FlagToBoolPointer(p, cmd, systemRoutesFlag),
+		DynamicRoutes:   flags.FlagToBoolPointer(p, cmd, dynamicRoutesFlag),
 		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		RoutingTableId:  routeTableId,
 	}
@@ -161,8 +170,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
 		Name:          model.Name,
 		Description:   model.Description,
-		DynamicRoutes: &model.DynamicRoutes,
-		SystemRoutes:  &model.SystemRoutes,
+		DynamicRoutes: model.DynamicRoutes,
+		SystemRoutes:  model.SystemRoutes,
 	}
 
 	return req.UpdateRoutingTableOfAreaPayload(payload)
