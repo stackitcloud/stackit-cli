@@ -20,7 +20,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (
@@ -83,7 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get SKE clusters: %w", err)
 			}
-			clusters := *resp.Items
+			clusters := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(clusters) > int(*model.Limit) {
@@ -134,7 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiListClustersRequest {
-	req := apiClient.ListClusters(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListClusters(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -150,19 +150,17 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, clusters 
 		for i := range clusters {
 			c := clusters[i]
 			monitoring := "Disabled"
-			if c.Extensions != nil && c.Extensions.Observability != nil && *c.Extensions.Observability.Enabled {
+			if c.Extensions != nil && c.Extensions.Observability != nil && c.Extensions.Observability.Enabled {
 				monitoring = "Enabled"
 			}
-			statusAggregated, kubernetesVersion := "", ""
+			statusAggregated := ""
 			if c.HasStatus() {
 				statusAggregated = utils.PtrString(c.Status.Aggregated)
 			}
-			if c.Kubernetes != nil {
-				kubernetesVersion = utils.PtrString(c.Kubernetes.Version)
-			}
+			kubernetesVersion := c.Kubernetes.Version
 			countNodepools := 0
 			if c.Nodepools != nil {
-				countNodepools = len(*c.Nodepools)
+				countNodepools = len(c.Nodepools)
 			}
 			table.AddRow(
 				utils.PtrString(c.Name),

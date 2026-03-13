@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type inputModel struct {
@@ -72,7 +72,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiListProviderOptionsRequest {
-	req := apiClient.ListProviderOptions(ctx, model.Region)
+	req := apiClient.DefaultAPI.ListProviderOptions(ctx, model.Region)
 	return req
 }
 
@@ -87,18 +87,18 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 	options.VolumeTypes = nil
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		images := utils.PtrValue(options.MachineImages)
+		images := options.MachineImages
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
 		for i := range images {
 			image := images[i]
-			versions := utils.PtrValue(image.Versions)
+			versions := image.Versions
 			for j := range versions {
 				version := versions[j]
 				criNames := make([]string, 0)
-				for i := range utils.PtrValue(version.Cri) {
-					cri := utils.PtrValue(version.Cri)[i]
+				for i := range version.Cri {
+					cri := version.Cri[i]
 					criNames = append(criNames, utils.PtrString(cri.Name))
 				}
 				criNamesString := strings.Join(criNames, ", ")

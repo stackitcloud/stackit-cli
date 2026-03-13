@@ -15,8 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske/wait"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api/wait"
 )
 
 const (
@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Performing cluster maintenance")
-				_, err = wait.TriggerClusterMaintenanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				_, err = wait.TriggerClusterMaintenanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster maintenance to complete: %w", err)
 				}
@@ -110,6 +110,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiTriggerMaintenanceRequest {
-	req := apiClient.TriggerMaintenance(ctx, model.ProjectId, model.Region, model.ClusterName)
+	req := apiClient.DefaultAPI.TriggerMaintenance(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }
