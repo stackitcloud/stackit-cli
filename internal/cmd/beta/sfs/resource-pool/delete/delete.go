@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resourcePoolName, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, resourcePoolName, resp)
 		},
 	}
 	return cmd
@@ -110,9 +110,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, resourcePoolName string, response map[string]interface{}) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoolName string, response map[string]interface{}) error {
 	return p.OutputResult(outputFormat, response, func() error {
-		p.Outputf("Deleted resource pool %q\n", resourcePoolName)
+		operationState := "Deleted"
+		if async {
+			operationState = "Triggered deletion of"
+		}
+		p.Outputf("%s resource pool %q\n", operationState, resourcePoolName)
 		return nil
 	})
 }
