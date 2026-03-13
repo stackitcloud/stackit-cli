@@ -15,13 +15,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 const (
-	serverIdArg = "SERVER_ID"
-
+	serverIdFlag        = "server-id"
 	securityGroupIdFlag = "security-group-id"
 )
 
@@ -33,14 +31,14 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("detach %s", serverIdArg),
+		Use:   "detach",
 		Short: "Detaches a security group from a server",
 		Long:  "Detaches a security group from a server.",
-		Args:  args.SingleArg(serverIdArg, utils.ValidateUUID),
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Detach a security group with ID "xxx" from a server with ID "yyy"`,
-				`$ stackit server security-group detach yyy --security-group-id xxx`,
+				`$ stackit server security-group detach --server-id yyy --security-group-id xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -92,14 +90,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Var(flags.UUIDFlag(), serverIdFlag, "Server ID")
 	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, "Security Group ID")
 
-	err := flags.MarkFlagsRequired(cmd, securityGroupIdFlag)
+	err := flags.MarkFlagsRequired(cmd, serverIdFlag, securityGroupIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	serverId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -107,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ServerId:        serverId,
+		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
 		SecurityGroupId: flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
 	}
 

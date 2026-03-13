@@ -26,21 +26,12 @@ var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testSecurityGroupId = uuid.NewString()
 
-func fixtureArgValues(mods ...func(argValues []string)) []string {
-	argValues := []string{
-		testServerId,
-	}
-	for _, mod := range mods {
-		mod(argValues)
-	}
-	return argValues
-}
-
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
+		serverIdFlag:        testServerId,
 		securityGroupIdFlag: testSecurityGroupId,
 	}
 	for _, mod := range mods {
@@ -76,14 +67,12 @@ func fixtureRequest(mods ...func(request *iaas.ApiRemoveSecurityGroupFromServerR
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
-		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
 	}{
 		{
 			description:   "base",
-			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
@@ -95,7 +84,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id missing",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
@@ -103,7 +91,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
@@ -111,7 +98,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
@@ -119,7 +105,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id missing",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, securityGroupIdFlag)
 			}),
@@ -127,7 +112,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id invalid 1",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[securityGroupIdFlag] = ""
 			}),
@@ -135,16 +119,31 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "security group id invalid 2",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[securityGroupIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "server id argument missing",
-			argValues:   []string{},
-			isValid:     false,
+			description: "server id flag missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, serverIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "server id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[serverIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "server id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[serverIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
 		},
 	}
 
@@ -167,14 +166,6 @@ func TestParseInput(t *testing.T) {
 				}
 			}
 
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing args: %v", err)
-			}
-
 			err = cmd.ValidateRequiredFlags()
 			if err != nil {
 				if !tt.isValid {
@@ -183,7 +174,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd, tt.argValues)
+			model, err := parseInput(p, cmd, []string{})
 			if err != nil {
 				if !tt.isValid {
 					return
