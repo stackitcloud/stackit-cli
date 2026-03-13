@@ -4,9 +4,9 @@ Creates or update a kubeconfig for a SKE cluster
 
 ### Synopsis
 
-Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster, if the config exists in the kubeconfig file the information will be updated.
+Creates a kubeconfig for a STACKIT Kubernetes Engine (SKE) cluster. By default an admin kubeconfig is created. Use the `--idp` option to create an IDP kubeconfig that authenticates via the STACKIT IDP.
 
-By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.
+If the config exists in the kubeconfig file the information will be updated. By default, the kubeconfig information of the SKE cluster is merged into the default kubeconfig file of the current user. If the kubeconfig file doesn't exist, a new one will be created.
 You can override this behavior by specifying a custom filepath using the --filepath flag or by setting the KUBECONFIG env variable (fallback).
 
 An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 1h.
@@ -20,25 +20,28 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 ### Examples
 
 ```
-  Create or update a kubeconfig for the SKE cluster with name "my-cluster. If the config exits in the kubeconfig file the information will be updated."
-  $ stackit ske kubeconfig create my-cluster
-
-  Get a login kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid credentials via the `stackit ske kubeconfig login` command.
+  Get a short-lived admin kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not contain any credentials and instead obtains valid admin credentials via the `stackit ske kubeconfig login` command.
   $ stackit ske kubeconfig create my-cluster --login
 
-  Create a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days. If the config exits in the kubeconfig file the information will be updated.
+  Get an IDP kubeconfig for the SKE cluster with name "my-cluster". This kubeconfig does not grant permissions in the cluster by default and obtains credentials on-demand via the `stackit ske kubeconfig login` command.
+  $ stackit ske kubeconfig create my-cluster --idp
+
+  Create or update a short-lived admin kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath. If the config exits in the kubeconfig file the information will be updated.
+  $ stackit ske kubeconfig create my-cluster --login --filepath /path/to/config
+
+  Create or update an admin kubeconfig for the SKE cluster with name "my-cluster". If the config exits in the kubeconfig file the information will be updated."
+  $ stackit ske kubeconfig create my-cluster
+
+  Create an admin kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 30 days. If the config exits in the kubeconfig file the information will be updated.
   $ stackit ske kubeconfig create my-cluster --expiration 30d
 
-  Create or update a kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 2 months. If the config exits in the kubeconfig file the information will be updated.
+  Create or update an admin kubeconfig for the SKE cluster with name "my-cluster" and set the expiration time to 2 months. If the config exits in the kubeconfig file the information will be updated.
   $ stackit ske kubeconfig create my-cluster --expiration 2M
 
-  Create or update a kubeconfig for the SKE cluster with name "my-cluster" in a custom filepath. If the config exits in the kubeconfig file the information will be updated.
-  $ stackit ske kubeconfig create my-cluster --filepath /path/to/config
-
-  Get a kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json
+  Get an admin kubeconfig for the SKE cluster with name "my-cluster" without writing it to a file and format the output as json
   $ stackit ske kubeconfig create my-cluster --disable-writing --output-format json
 
-  Create a kubeconfig for the SKE cluster with name "my-cluster. It will OVERWRITE your current kubeconfig file."
+  Create an admin kubeconfig for the SKE cluster with name "my-cluster". It will OVERWRITE your current kubeconfig file.
   $ stackit ske kubeconfig create my-cluster --overwrite true
 ```
 
@@ -49,7 +52,8 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
   -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
       --filepath string     Path to create the kubeconfig file. Will fall back to KUBECONFIG env variable if not set. In case both aren't set, the kubeconfig is created as file named 'config' in the .kube folder in the user's home directory.
   -h, --help                Help for "stackit ske kubeconfig create"
-  -l, --login               Create a login kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
+      --idp                 Create a non-admin kubeconfig that uses the STACKIT IDP to obtain credentials.
+  -l, --login               Create a short-lived admin kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
       --overwrite           Overwrite the kubeconfig file.
 ```
 
