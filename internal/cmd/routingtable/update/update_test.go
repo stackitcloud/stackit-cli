@@ -168,28 +168,43 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "dynamic-route-flag missing",
-			argValues:   []string{testRoutingTableId},
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, dynamicRoutesFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "system-routes-flag missing",
-			argValues:   []string{testRoutingTableId},
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, systemRoutesFlag)
-			}),
-			isValid: false,
-		},
-		{
 			description: "org-id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, organizationIdFlag)
 			}),
 			isValid: false,
+		},
+		{
+			description: "all required flags missing",
+			argValues:   []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, dynamicRoutesFlag)
+				delete(flagValues, systemRoutesFlag)
+				delete(flagValues, nameFlag)
+				delete(flagValues, labelFlag)
+				delete(flagValues, descriptionFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "all except one required flag missing (description flag)",
+			argValues:   []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, dynamicRoutesFlag)
+				delete(flagValues, systemRoutesFlag)
+				delete(flagValues, nameFlag)
+				delete(flagValues, labelFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.RoutingTableId = testRoutingTableId
+				model.DynamicRoutes = nil
+				model.SystemRoutes = nil
+				model.Labels = nil
+				model.Name = nil
+				model.Description = utils.Ptr(testRoutingTableDescription)
+			}),
+			isValid: true,
 		},
 		{
 			description:   "arg value missing",

@@ -117,7 +117,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(systemRoutesFlag, false, "If set to false, disables routes for project-to-project communication.")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 
-	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, dynamicRoutesFlag, systemRoutesFlag, nameFlag)
+	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
+	cmd.MarkFlagsOneRequired(dynamicRoutesFlag, systemRoutesFlag, nameFlag, descriptionFlag, labelFlag)
 	cobra.CheckErr(err)
 }
 
