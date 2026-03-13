@@ -46,6 +46,7 @@ stackit server [flags]
 * [stackit server reboot](./stackit_server_reboot.md)	 - Reboots a server
 * [stackit server rescue](./stackit_server_rescue.md)	 - Rescues an existing server
 * [stackit server resize](./stackit_server_resize.md)	 - Resizes the server to the given machine type
+* [stackit server security-group](./stackit_server_security-group.md)	 - Allows attaching/detaching security groups to servers
 * [stackit server service-account](./stackit_server_service-account.md)	 - Allows attaching/detaching service accounts to servers
 * [stackit server start](./stackit_server_start.md)	 - Starts an existing server or allocates the server if deallocated
 * [stackit server stop](./stackit_server_stop.md)	 - Stops an existing server
