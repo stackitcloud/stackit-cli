@@ -78,6 +78,16 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "with filter",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[filterFlag] = "vcpus >= 2 && ram >= 2048"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Filter = utils.Ptr("vcpus >= 2 && ram >= 2048")
+			}),
+		},
+		{
 			description: "no values",
 			flagValues:  map[string]string{},
 			isValid:     false,
@@ -142,6 +152,15 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
+		{
+			description: "with filter",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Filter = utils.Ptr("vcpus==2")
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiListMachineTypesRequest) {
+				*request = (*request).Filter("vcpus==2")
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -172,6 +191,33 @@ func TestOutputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "with populated data",
+			args: args{
+				outputFormat: "table",
+				machineTypes: iaas.MachineTypeListResponse{
+					Items: &[]iaas.MachineType{
+						{
+							Name:        utils.Ptr("c1.2"),
+							Vcpus:       utils.Ptr(int64(2)),
+							Ram:         utils.Ptr(int64(2048)), // Should display as 2 GB
+							Description: utils.Ptr("Compute optimized 2 vCPU"),
+							ExtraSpecs: &map[string]interface{}{
+								"cpu": "intel-icelake-generic",
+							},
+						},
+						{
+							Name:        utils.Ptr("m1.2"),
+							Vcpus:       utils.Ptr(int64(2)),
+							Ram:         utils.Ptr(int64(8192)), // Should display as 8 GB
+							Description: utils.Ptr("Memory optimized 2 vCPU"),
+							// No ExtraSpecs provided to test nil safety
+						},
+					},
+				},
+			},
 			wantErr: false,
 		},
 	}
