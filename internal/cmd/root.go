@@ -35,6 +35,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/quota"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable"
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
@@ -164,39 +165,40 @@ func configureFlags(cmd *cobra.Command) error {
 }
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(affinityGroups.NewCmd(params))
 	cmd.AddCommand(auth.NewCmd(params))
-	cmd.AddCommand(configCmd.NewCmd(params))
 	cmd.AddCommand(beta.NewCmd(params))
+	cmd.AddCommand(configCmd.NewCmd(params))
 	cmd.AddCommand(curl.NewCmd(params))
 	cmd.AddCommand(dns.NewCmd(params))
+	cmd.AddCommand(git.NewCmd(params))
+	cmd.AddCommand(image.NewCmd(params))
+	cmd.AddCommand(keypair.NewCmd(params))
 	cmd.AddCommand(loadbalancer.NewCmd(params))
 	cmd.AddCommand(logme.NewCmd(params))
 	cmd.AddCommand(logs.NewCmd(params))
 	cmd.AddCommand(mariadb.NewCmd(params))
 	cmd.AddCommand(mongodbflex.NewCmd(params))
-	cmd.AddCommand(objectstorage.NewCmd(params))
+	cmd.AddCommand(network.NewCmd(params))
+	cmd.AddCommand(networkArea.NewCmd(params))
+	cmd.AddCommand(networkinterface.NewCmd(params))
 	cmd.AddCommand(observability.NewCmd(params))
+	cmd.AddCommand(objectstorage.NewCmd(params))
 	cmd.AddCommand(opensearch.NewCmd(params))
 	cmd.AddCommand(organization.NewCmd(params))
 	cmd.AddCommand(postgresflex.NewCmd(params))
 	cmd.AddCommand(project.NewCmd(params))
+	cmd.AddCommand(publicip.NewCmd(params))
+	cmd.AddCommand(quota.NewCmd(params))
 	cmd.AddCommand(rabbitmq.NewCmd(params))
 	cmd.AddCommand(redis.NewCmd(params))
+	cmd.AddCommand(routingtable.NewCmd(params))
+	cmd.AddCommand(securitygroup.NewCmd(params))
 	cmd.AddCommand(secretsmanager.NewCmd(params))
+	cmd.AddCommand(server.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
 	cmd.AddCommand(ske.NewCmd(params))
-	cmd.AddCommand(server.NewCmd(params))
-	cmd.AddCommand(networkArea.NewCmd(params))
-	cmd.AddCommand(network.NewCmd(params))
 	cmd.AddCommand(volume.NewCmd(params))
-	cmd.AddCommand(networkinterface.NewCmd(params))
-	cmd.AddCommand(publicip.NewCmd(params))
-	cmd.AddCommand(securitygroup.NewCmd(params))
-	cmd.AddCommand(keypair.NewCmd(params))
-	cmd.AddCommand(image.NewCmd(params))
-	cmd.AddCommand(quota.NewCmd(params))
-	cmd.AddCommand(affinityGroups.NewCmd(params))
-	cmd.AddCommand(git.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
