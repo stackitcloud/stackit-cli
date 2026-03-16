@@ -14,7 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type inputModel struct {
@@ -70,7 +70,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputModel) ske.ApiListProviderOptionsRequest {
-	req := apiClient.ListProviderOptions(ctx, model.Region)
+	req := apiClient.DefaultAPI.ListProviderOptions(ctx, model.Region)
 	return req
 }
 
@@ -85,7 +85,7 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 	options.MachineTypes = nil
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
-		volumeTypes := utils.PtrValue(options.VolumeTypes)
+		volumeTypes := options.VolumeTypes
 
 		table := tables.NewTable()
 		table.SetHeader("TYPE")

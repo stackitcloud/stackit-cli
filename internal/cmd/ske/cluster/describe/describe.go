@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (
@@ -85,7 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClient) ske.ApiGetClusterRequest {
-	req := apiClient.GetCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
+	req := apiClient.DefaultAPI.GetCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
 	return req
 }
 
@@ -97,11 +97,11 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 	return p.OutputResult(outputFormat, cluster, func() error {
 		acl := []string{}
 		if cluster.Extensions != nil && cluster.Extensions.Acl != nil {
-			acl = *cluster.Extensions.Acl.AllowedCidrs
+			acl = cluster.Extensions.Acl.AllowedCidrs
 		}
 
 		table := tables.NewTable()
-		table.AddRow("NAME", utils.PtrString(cluster.Name))
+		table.AddRow("NAME", cluster.Name)
 		table.AddSeparator()
 		if cluster.HasStatus() {
 			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
@@ -110,8 +110,8 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 				handleClusterErrors(clusterErrs, &table)
 			}
 		}
-		if cluster.Kubernetes != nil {
-			table.AddRow("VERSION", utils.PtrString(cluster.Kubernetes.Version))
+		if cluster.Kubernetes.Version != "" {
+			table.AddRow("VERSION", cluster.Kubernetes.Version)
 			table.AddSeparator()
 		}
 
@@ -131,7 +131,7 @@ func handleClusterErrors(clusterErrs []ske.ClusterError, table *tables.Table) {
 		b := new(strings.Builder)
 		fmt.Fprint(b, e.GetCode())
 		if msg, ok := e.GetMessageOk(); ok {
-			fmt.Fprintf(b, ": %s", msg)
+			fmt.Fprintf(b, ": %s", *msg)
 		}
 		errs = append(errs, b.String())
 	}

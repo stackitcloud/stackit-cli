@@ -35,6 +35,7 @@ stackit [flags]
 * [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
 * [stackit image](./stackit_image.md)	 - Manage server images
 * [stackit key-pair](./stackit_key-pair.md)	 - Provides functionality for SSH key pairs
+* [stackit kms](./stackit_kms.md)	 - Provides functionality for KMS
 * [stackit load-balancer](./stackit_load-balancer.md)	 - Provides functionality for Load Balancer
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
 * [stackit logs](./stackit_logs.md)	 - Provides functionality for Logs

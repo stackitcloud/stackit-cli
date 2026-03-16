@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (
@@ -221,7 +221,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequestCreate(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiCreateKubeconfigRequest, error) {
-	req := apiClient.CreateKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName)
+	req := apiClient.DefaultAPI.CreateKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName)
 
 	payload := ske.CreateKubeconfigPayload{}
 
@@ -233,7 +233,7 @@ func buildRequestCreate(ctx context.Context, model *inputModel, apiClient *ske.A
 }
 
 func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.APIClient) (ske.ApiGetLoginKubeconfigRequest, error) {
-	return apiClient.GetLoginKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName), nil
+	return apiClient.DefaultAPI.GetLoginKubeconfig(ctx, model.ProjectId, model.Region, model.ClusterName), nil
 }
 
 func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig) error {

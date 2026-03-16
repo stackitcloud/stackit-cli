@@ -14,13 +14,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &ske.APIClient{}
+var testClient = &ske.APIClient{DefaultAPI: &ske.DefaultAPIService{}}
 
 const testRegion = "eu01"
 
@@ -87,7 +87,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description:     "base",
 			inputModel:      fixtureInputModel(),
-			expectedRequest: testClient.ListProviderOptions(testCtx, testRegion),
+			expectedRequest: testClient.DefaultAPI.ListProviderOptions(testCtx, testRegion),
 		},
 	}
 
@@ -98,6 +98,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -155,7 +156,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineImages: &[]ske.MachineImage{},
+					MachineImages: []ske.MachineImage{},
 				},
 			},
 			wantErr: false,
@@ -167,7 +168,7 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineImages: &[]ske.MachineImage{{}},
+					MachineImages: []ske.MachineImage{{}},
 				},
 			},
 			wantErr: false,
@@ -179,14 +180,14 @@ func TestOutputResult(t *testing.T) {
 					GlobalFlagModel: globalflags.GlobalFlagModel{},
 				},
 				options: &ske.ProviderOptions{
-					MachineImages: &[]ske.MachineImage{
+					MachineImages: []ske.MachineImage{
 						{
 							Name: utils.Ptr("image1"),
-							Versions: &[]ske.MachineImageVersion{
+							Versions: []ske.MachineImageVersion{
 								{
-									Cri: &[]ske.CRI{
+									Cri: []ske.CRI{
 										{
-											Name: ske.CRINAME_CONTAINERD.Ptr(),
+											Name: utils.Ptr("containerd"),
 										},
 									},
 									ExpirationDate: utils.Ptr(time.Now()),

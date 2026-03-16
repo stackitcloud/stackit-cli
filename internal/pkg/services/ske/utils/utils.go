@@ -12,12 +12,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/ske"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 	"golang.org/x/mod/semver"
 )
 
 const (
-	defaultNodepoolCRI              = ske.CRINAME_CONTAINERD
+	defaultNodepoolCRI              = "containerd"
 	defaultNodepoolMachineImageName = "flatcar"
 	defaultNodepoolMaxUnavailable   = 0
 	defaultNodepoolMinimum          = 1
@@ -28,17 +28,12 @@ const (
 	supportedState = "supported"
 )
 
-type SKEClient interface {
-	ListClustersExecute(ctx context.Context, projectId, region string) (*ske.ListClustersResponse, error)
-	ListProviderOptionsExecute(ctx context.Context, region string) (*ske.ProviderOptions, error)
-}
-
-func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, region, clusterName string) (bool, error) {
-	clusters, err := apiClient.ListClustersExecute(ctx, projectId, region)
+func ClusterExists(ctx context.Context, apiClient ske.DefaultAPI, projectId, region, clusterName string) (bool, error) {
+	clusters, err := apiClient.ListClusters(ctx, projectId, region).Execute()
 	if err != nil {
 		return false, fmt.Errorf("list SKE clusters: %w", err)
 	}
-	for _, cl := range *clusters.Items {
+	for _, cl := range clusters.Items {
 		if cl.Name != nil && *cl.Name == clusterName {
 			return true, nil
 		}
@@ -46,8 +41,8 @@ func ClusterExists(ctx context.Context, apiClient SKEClient, projectId, region, 
 	return false, nil
 }
 
-func GetDefaultPayload(ctx context.Context, apiClient SKEClient, region string) (*ske.CreateOrUpdateClusterPayload, error) {
-	resp, err := apiClient.ListProviderOptionsExecute(ctx, region)
+func GetDefaultPayload(ctx context.Context, apiClient ske.DefaultAPI, region string) (*ske.CreateOrUpdateClusterPayload, error) {
+	resp, err := apiClient.ListProviderOptions(ctx, region).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("get SKE provider options: %w", err)
 	}
@@ -64,86 +59,91 @@ func GetDefaultPayload(ctx context.Context, apiClient SKEClient, region string) 
 	payload := &ske.CreateOrUpdateClusterPayload{
 		Extensions: &ske.Extension{
 			Acl: &ske.ACL{
-				AllowedCidrs: &[]string{},
-				Enabled:      utils.Ptr(false),
+				AllowedCidrs: []string{},
+				Enabled:      false,
 			},
 		},
 		Kubernetes: payloadKubernetes,
-		Nodepools: &[]ske.Nodepool{
+		Nodepools: []ske.Nodepool{
 			*payloadNodepool,
 		},
 	}
 	return payload, nil
 }
 
-func getDefaultPayloadKubernetes(resp *ske.ProviderOptions) (*ske.Kubernetes, error) {
-	output := &ske.Kubernetes{}
+func getDefaultPayloadKubernetes(resp *ske.ProviderOptions) (ske.Kubernetes, error) {
+	output := ske.Kubernetes{}
 
 	if resp.KubernetesVersions == nil {
-		return nil, fmt.Errorf("no supported Kubernetes version found")
+		return ske.Kubernetes{}, fmt.Errorf("no supported Kubernetes version found")
 	}
 	foundKubernetesVersion := false
-	versions := *resp.KubernetesVersions
+	versions := resp.KubernetesVersions
 	for i := range versions {
 		version := versions[i]
 		if *version.State != supportedState {
 			continue
 		}
-		if output.Version != nil {
-			oldSemVer := fmt.Sprintf("v%s", *output.Version)
-			newSemVer := fmt.Sprintf("v%s", *version.Version)
+		if output.Version != "" {
+			oldSemVer := fmt.Sprintf("v%s", output.Version)
+			newSemVer := fmt.Sprintf("v%s", version.GetVersion())
 			if semver.Compare(newSemVer, oldSemVer) != 1 {
 				continue
 			}
 		}
 
 		foundKubernetesVersion = true
-		output.Version = version.Version
+		output.Version = version.GetVersion()
 	}
 	if !foundKubernetesVersion {
-		return nil, fmt.Errorf("no supported Kubernetes version found")
+		return ske.Kubernetes{}, fmt.Errorf("no supported Kubernetes version found")
 	}
 	return output, nil
 }
 
 func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error) {
-	if resp.AvailabilityZones == nil || len(*resp.AvailabilityZones) == 0 {
+	if len(resp.AvailabilityZones) == 0 {
 		return nil, fmt.Errorf("no availability zones found")
 	}
 	var availabilityZones []string
-	for i := range *resp.AvailabilityZones {
-		azName := (*resp.AvailabilityZones)[i].GetName()
+	for i := range resp.AvailabilityZones {
+		azName := resp.AvailabilityZones[i].GetName()
 		// don't include availability zones like eu01-m, eu02-m, not all flavors are available there
 		if !regexp.MustCompile(`\w{2}\d{2}-m`).MatchString(azName) {
 			availabilityZones = append(availabilityZones, azName)
 		}
 	}
 
-	if resp.MachineTypes == nil || len(*resp.MachineTypes) == 0 {
+	if len(resp.MachineTypes) == 0 {
 		return nil, fmt.Errorf("no machine types found")
 	}
-	machineType := (*resp.MachineTypes)[0].GetName()
+	azLen := len(availabilityZones)
+	if azLen > 1000 {
+		// check against a very large number to avoid gosec warning
+		return nil, fmt.Errorf("invalid number of availability zones")
+	}
+	machineType := resp.MachineTypes[0].GetName()
 
 	output := &ske.Nodepool{
-		AvailabilityZones: &availabilityZones,
+		AvailabilityZones: availabilityZones,
 		Cri: &ske.CRI{
 			Name: utils.Ptr(defaultNodepoolCRI),
 		},
-		Machine: &ske.Machine{
-			Type: &machineType,
-			Image: &ske.Image{
-				Name: utils.Ptr(defaultNodepoolMachineImageName),
+		Machine: ske.Machine{
+			Type: machineType,
+			Image: ske.Image{
+				Name: defaultNodepoolMachineImageName,
 			},
 		},
 		// there must be as many nodes as availability zones are given
-		MaxSurge:       utils.Ptr(int64(len(availabilityZones))),
-		MaxUnavailable: utils.Ptr(int64(defaultNodepoolMaxUnavailable)),
-		Maximum:        utils.Ptr(int64(len(availabilityZones))),
-		Minimum:        utils.Ptr(int64(defaultNodepoolMinimum)),
-		Name:           utils.Ptr(defaultNodepoolName),
-		Volume: &ske.Volume{
+		MaxSurge:       utils.Ptr(int32(azLen)),
+		MaxUnavailable: utils.Ptr(int32(defaultNodepoolMaxUnavailable)),
+		Maximum:        int32(azLen),
+		Minimum:        int32(defaultNodepoolMinimum),
+		Name:           defaultNodepoolName,
+		Volume: ske.Volume{
 			Type: utils.Ptr(defaultNodepoolVolumeType),
-			Size: utils.Ptr(int64(defaultNodepoolVolumeSize)),
+			Size: int32(defaultNodepoolVolumeSize),
 		},
 	}
 
@@ -152,7 +152,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 		return nil, fmt.Errorf("no supported image versions found")
 	}
 	foundImageVersion := false
-	images := *resp.MachineImages
+	images := resp.MachineImages
 	for i := range images {
 		image := images[i]
 		if *image.Name != defaultNodepoolMachineImageName {
@@ -161,7 +161,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 		if image.Versions == nil {
 			continue
 		}
-		versions := *image.Versions
+		versions := image.Versions
 		for j := range versions {
 			version := versions[j]
 			if *version.State != supportedState {
@@ -169,12 +169,12 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			}
 
 			// Check if default CRI is supported
-			if version.Cri == nil || len(*version.Cri) == 0 {
+			if len(version.Cri) == 0 {
 				continue
 			}
 			criSupported := false
-			for k := range *version.Cri {
-				cri := (*version.Cri)[k]
+			for k := range version.Cri {
+				cri := version.Cri[k]
 				if *cri.Name == defaultNodepoolCRI {
 					criSupported = true
 					break
@@ -184,8 +184,8 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 				continue
 			}
 
-			if output.Machine.Image.Version != nil {
-				oldSemVer := fmt.Sprintf("v%s", *output.Machine.Image.Version)
+			if output.Machine.Image.Version != "" {
+				oldSemVer := fmt.Sprintf("v%s", output.Machine.Image.Version)
 				newSemVer := fmt.Sprintf("v%s", *version.Version)
 				if semver.Compare(newSemVer, oldSemVer) != 1 {
 					continue
@@ -193,7 +193,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			}
 
 			foundImageVersion = true
-			output.Machine.Image.Version = version.Version
+			output.Machine.Image.Version = version.GetVersion()
 		}
 	}
 	if !foundImageVersion {
