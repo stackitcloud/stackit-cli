@@ -131,6 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 }
+
 func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.RoutingTable, orgId string) error {
 	if routingTables == nil {
 		return fmt.Errorf("list routing-table items are nil")

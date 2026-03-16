@@ -1,10 +1,13 @@
 package list
 
 import (
+	"context"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -26,6 +29,10 @@ var testLabels = &map[string]string{
 	"key2": "value2",
 }
 
+type testCtxKey struct{}
+
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testClient = &iaas.APIClient{}
 var testLimitFlag = int64(10)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -40,6 +47,16 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		mod(flagValues)
 	}
 	return flagValues
+}
+
+func fixtureRequest(mods ...func(request *iaas.ApiListRoutingTablesOfAreaRequest)) iaas.ApiListRoutingTablesOfAreaRequest {
+	request := testClient.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+	request = request.LabelSelector(testLabelSelectorFlag)
+
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
@@ -222,6 +239,41 @@ func TestOutputResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(p, tt.outputFormat, tt.routingTable, "dummy-org-id"); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestBuildRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest iaas.ApiListRoutingTablesOfAreaRequest
+	}{
+		{
+			description:     "valid input with label selector",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "missing label selector",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.LabelSelector = nil
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiListRoutingTablesOfAreaRequest) {
+				*request = testClient.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildRequest(testCtx, tt.model, testClient)
+
+			if diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx)); diff != "" {
+				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
 			}
 		})
 	}
