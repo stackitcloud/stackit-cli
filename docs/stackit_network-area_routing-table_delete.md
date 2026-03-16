@@ -14,7 +14,7 @@ stackit network-area routing-table delete ROUTING_TABLE_ID [flags]
 
 ```
   Delete a routing-table with ID "xxx"
-  $ stackit routing-table delete xxx --organization-id yyy --network-area-id zzz
+  $ stackit network-area routing-table delete xxx --organization-id yyy --network-area-id zzz
 ```
 
 ### Options

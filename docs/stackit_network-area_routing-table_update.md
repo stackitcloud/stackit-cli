@@ -14,19 +14,19 @@ stackit network-area routing-table update ROUTING_TABLE_ID [flags]
 
 ```
   Updates the label(s) of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --labels key=value,foo=bar --organization-id yyy --network-area-id zzz
+  $ stackit network-area routing-table update xxx --labels key=value,foo=bar --organization-id yyy --network-area-id zzz
 
   Updates the name of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --name foo --organization-id yyy --network-area-id zzz
+  $ stackit network-area routing-table update xxx --name foo --organization-id yyy --network-area-id zzz
 
   Updates the description of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz
+  $ stackit network-area routing-table update xxx --description foo --organization-id yyy --network-area-id zzz
 
   Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --dynamic-routes=false
+  $ stackit network-area routing-table update xxx --organization-id yyy --network-area-id zzz --dynamic-routes=false
 
   Disables the system routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"
-  $ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --system-routes=false
+  $ stackit network-area routing-table update xxx --organization-id yyy --network-area-id zzz --system-routes=false
 ```
 
 ### Options
