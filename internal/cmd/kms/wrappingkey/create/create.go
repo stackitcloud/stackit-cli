@@ -2,12 +2,10 @@ package create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -144,30 +142,14 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.WrappingKey) er
 		return fmt.Errorf("response is nil")
 	}
 
-	switch model.OutputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal KMS wrapping key: %w", err)
-		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal KMS wrapping key: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s wrapping key. Wrapping key ID: %s\n", operationState, utils.PtrString(resp.Id))
-	}
-
-	return nil
+		return nil
+	})
 }
 
 func configureFlags(cmd *cobra.Command) {

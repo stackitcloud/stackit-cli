@@ -3,12 +3,10 @@ package importKey
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -148,26 +146,10 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 		return fmt.Errorf("response is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal KMS key: %w", err)
-		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal KMS key: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Imported a new version for the key %q inside the key ring %q\n", keyName, keyRingName)
-	}
-
-	return nil
+		return nil
+	})
 }
 
 func configureFlags(cmd *cobra.Command) {

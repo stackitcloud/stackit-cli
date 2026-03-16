@@ -2,12 +2,10 @@ package rotate
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -120,24 +118,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 		return fmt.Errorf("response is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal KMS key version: %w", err)
-		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal KMS key version: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Rotated key %s\n", utils.PtrString(resp.KeyId))
-	}
-
-	return nil
+		return nil
+	})
 }
