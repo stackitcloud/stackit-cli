@@ -40,7 +40,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Describe a routing-table`,
-				`$ stackit routing-table describe xxx --organization-id xxx --network-area-id yyy`,
+				`$ stackit network-area routing-table describe xxx --organization-id xxx --network-area-id yyy`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

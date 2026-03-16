@@ -36,7 +36,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/quota"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/routingtable"
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
@@ -187,7 +186,6 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(secretsmanager.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
 	cmd.AddCommand(ske.NewCmd(params))
-	cmd.AddCommand(routingtable.NewCmd(params))
 	cmd.AddCommand(server.NewCmd(params))
 	cmd.AddCommand(networkArea.NewCmd(params))
 	cmd.AddCommand(network.NewCmd(params))

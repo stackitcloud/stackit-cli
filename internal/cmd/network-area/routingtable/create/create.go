@@ -46,19 +46,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a routing-table with name "rt"`,
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt"`,
+				`$ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt"`,
 			),
 			examples.NewExample(
 				`Create a routing-table with name "rt" and description "some description"`,
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"`,
+				`$ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"`,
 			),
 			examples.NewExample(
 				`Create a routing-table with name "rt" with system routes disabled`,
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false`,
+				`$ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false`,
 			),
 			examples.NewExample(
 				`Create a routing-table with name "rt" with dynamic routes disabled`,
-				`stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false`,
+				`$ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {

@@ -1,4 +1,4 @@
-## stackit routing-table describe
+## stackit network-area routing-table describe
 
 Describes a routing-table
 
@@ -7,7 +7,7 @@ Describes a routing-table
 Describes a routing-table
 
 ```
-stackit routing-table describe ROUTING_TABLE_ID [flags]
+stackit network-area routing-table describe ROUTING_TABLE_ID [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ stackit routing-table describe ROUTING_TABLE_ID [flags]
 ### Options
 
 ```
-  -h, --help                     Help for "stackit routing-table describe"
+  -h, --help                     Help for "stackit network-area routing-table describe"
       --network-area-id string   Network-Area ID
       --organization-id string   Organization ID
 ```
@@ -38,5 +38,5 @@ stackit routing-table describe ROUTING_TABLE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit routing-table](./stackit_routing-table.md)	 - Manage routing-tables and its according routes
+* [stackit network-area routing-table](./stackit_network-area_routing-table.md)	 - Manage routing-tables and its according routes
 

@@ -43,15 +43,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all routing-tables`,
-				`$ stackit routing-table list --organization-id xxx --network-area-id yyy`,
+				`$ stackit network-area routing-table list --organization-id xxx --network-area-id yyy`,
 			),
 			examples.NewExample(
 				`List all routing-tables with labels`,
-				`$ stackit routing-table list --label-selector env=dev,env=rc --organization-id xxx --network-area-id yyy`,
+				`$ stackit network-area routing-table list --label-selector env=dev,env=rc --organization-id xxx --network-area-id yyy`,
 			),
 			examples.NewExample(
 				`List all routing-tables with labels and set limit to 10`,
-				`$ stackit routing-table list --label-selector env=dev,env=rc --limit 10 --organization-id xxx --network-area-id yyy`,
+				`$ stackit network-area routing-table list --label-selector env=dev,env=rc --limit 10 --organization-id xxx --network-area-id yyy`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
