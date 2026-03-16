@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListRoutingTablesOfAreaRequest {
 	request := apiClient.ListRoutingTablesOfArea(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 	if model.LabelSelector != nil {
-		request.LabelSelector(*model.LabelSelector)
+		request = request.LabelSelector(*model.LabelSelector)
 	}
 
 	return request
