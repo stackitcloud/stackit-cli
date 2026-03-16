@@ -13,32 +13,34 @@ import (
 var _ IaaSClient = &IaaSClientMocked{}
 
 type IaaSClientMocked struct {
-	GetSecurityGroupRuleFails bool
-	GetSecurityGroupRuleResp  *iaas.SecurityGroupRule
-	GetSecurityGroupFails     bool
-	GetSecurityGroupResp      *iaas.SecurityGroup
-	GetPublicIpFails          bool
-	GetPublicIpResp           *iaas.PublicIp
-	GetServerFails            bool
-	GetServerResp             *iaas.Server
-	GetVolumeFails            bool
-	GetVolumeResp             *iaas.Volume
-	GetNetworkFails           bool
-	GetNetworkResp            *iaas.Network
-	GetNetworkAreaFails       bool
-	GetNetworkAreaResp        *iaas.NetworkArea
-	GetAttachedProjectsFails  bool
-	GetAttachedProjectsResp   *iaas.ProjectListResponse
-	GetNetworkAreaRangeFails  bool
-	GetNetworkAreaRangeResp   *iaas.NetworkRange
-	GetImageFails             bool
-	GetImageResp              *iaas.Image
-	GetAffinityGroupsFails    bool
-	GetAffinityGroupResp      *iaas.AffinityGroup
-	GetBackupFails            bool
-	GetBackupResp             *iaas.Backup
-	GetSnapshotFails          bool
-	GetSnapshotResp           *iaas.Snapshot
+	GetSecurityGroupRuleFails  bool
+	GetSecurityGroupRuleResp   *iaas.SecurityGroupRule
+	GetSecurityGroupFails      bool
+	GetSecurityGroupResp       *iaas.SecurityGroup
+	GetPublicIpFails           bool
+	GetPublicIpResp            *iaas.PublicIp
+	GetServerFails             bool
+	GetServerResp              *iaas.Server
+	GetVolumeFails             bool
+	GetVolumeResp              *iaas.Volume
+	GetNetworkFails            bool
+	GetNetworkResp             *iaas.Network
+	GetRoutingTableOfAreaFails bool
+	GetRoutingTableOfAreaResp  *iaas.RoutingTable
+	GetNetworkAreaFails        bool
+	GetNetworkAreaResp         *iaas.NetworkArea
+	GetAttachedProjectsFails   bool
+	GetAttachedProjectsResp    *iaas.ProjectListResponse
+	GetNetworkAreaRangeFails   bool
+	GetNetworkAreaRangeResp    *iaas.NetworkRange
+	GetImageFails              bool
+	GetImageResp               *iaas.Image
+	GetAffinityGroupsFails     bool
+	GetAffinityGroupResp       *iaas.AffinityGroup
+	GetBackupFails             bool
+	GetBackupResp              *iaas.Backup
+	GetSnapshotFails           bool
+	GetSnapshotResp            *iaas.Snapshot
 }
 
 func (m *IaaSClientMocked) GetAffinityGroupExecute(_ context.Context, _, _, _ string) (*iaas.AffinityGroup, error) {
@@ -88,6 +90,13 @@ func (m *IaaSClientMocked) GetNetworkExecute(_ context.Context, _, _, _ string) 
 		return nil, fmt.Errorf("could not get network")
 	}
 	return m.GetNetworkResp, nil
+}
+
+func (m *IaaSClientMocked) GetRoutingTableOfAreaExecute(_ context.Context, _, _, _, _ string) (*iaas.RoutingTable, error) {
+	if m.GetRoutingTableOfAreaFails {
+		return nil, fmt.Errorf("could not get routing table")
+	}
+	return m.GetRoutingTableOfAreaResp, nil
 }
 
 func (m *IaaSClientMocked) GetNetworkAreaExecute(_ context.Context, _, _ string) (*iaas.NetworkArea, error) {
@@ -1089,6 +1098,74 @@ func TestGetAffinityGroupName(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetAffinityGroupName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetRoutingTableOfAreaName(t *testing.T) {
+	type args struct {
+		getInstanceFails bool
+		getInstanceResp  *iaas.RoutingTable
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "base",
+			args: args{
+				getInstanceResp: &iaas.RoutingTable{
+					Name: utils.Ptr("test"),
+				},
+			},
+			want: "test",
+		},
+		{
+			name: "get routing table fails",
+			args: args{
+				getInstanceFails: true,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "response is nil",
+			args: args{
+				getInstanceResp:  nil,
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+		{
+			name: "name in response is nil",
+			args: args{
+				getInstanceResp: &iaas.RoutingTable{
+					Name: nil,
+				},
+				getInstanceFails: false,
+			},
+			wantErr: true,
+			want:    "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &IaaSClientMocked{
+				GetRoutingTableOfAreaFails: tt.args.getInstanceFails,
+				GetRoutingTableOfAreaResp:  tt.args.getInstanceResp,
+			}
+
+			got, err := GetRoutingTableOfAreaName(context.Background(), m, "", "", "", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetRoutingTableOfAreaName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetRoutingTableOfAreaName() = %v, want %v", got, tt.want)
 			}
 		})
 	}
