@@ -8,6 +8,7 @@ import (
 	networkrange "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/network-range"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-area/region"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-area/route"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-area/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -34,6 +35,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(networkrange.NewCmd(params))
+	cmd.AddCommand(routingtable.NewCmd(params))
 	cmd.AddCommand(region.NewCmd(params))
 	cmd.AddCommand(route.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))

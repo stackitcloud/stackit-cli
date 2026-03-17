@@ -1,4 +1,4 @@
-## stackit routing-table create
+## stackit network-area routing-table create
 
 Creates a routing-table
 
@@ -7,23 +7,23 @@ Creates a routing-table
 Creates a routing-table.
 
 ```
-stackit routing-table create [flags]
+stackit network-area routing-table create [flags]
 ```
 
 ### Examples
 
 ```
   Create a routing-table with name "rt"
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt"
+  $ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt"
 
   Create a routing-table with name "rt" and description "some description"
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"
+  $ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --description "some description"
 
   Create a routing-table with name "rt" with system routes disabled
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false
+  $ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --system-routes=false
 
   Create a routing-table with name "rt" with dynamic routes disabled
-  stackit routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false
+  $ stackit network-area routing-table create --organization-id xxx --network-area-id yyy --name "rt" --dynamic-routes=false
 ```
 
 ### Options
@@ -31,7 +31,7 @@ stackit routing-table create [flags]
 ```
       --description string       Description of the routing-table
       --dynamic-routes           If set to false, prevents dynamic routes from propagating to the routing table. (default true)
-  -h, --help                     Help for "stackit routing-table create"
+  -h, --help                     Help for "stackit network-area routing-table create"
       --labels stringToString    Key=value labels (default [])
       --name string              Name of the routing-table
       --network-area-id string   Network-Area ID
@@ -52,5 +52,5 @@ stackit routing-table create [flags]
 
 ### SEE ALSO
 
-* [stackit routing-table](./stackit_routing-table.md)	 - Manage routing-tables and its according routes
+* [stackit network-area routing-table](./stackit_network-area_routing-table.md)	 - Manage routing-tables and its according routes
 

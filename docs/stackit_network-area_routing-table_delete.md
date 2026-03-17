@@ -1,4 +1,4 @@
-## stackit routing-table delete
+## stackit network-area routing-table delete
 
 Deletes a routing-table
 
@@ -7,20 +7,20 @@ Deletes a routing-table
 Deletes a routing-table
 
 ```
-stackit routing-table delete ROUTING_TABLE_ID [flags]
+stackit network-area routing-table delete ROUTING_TABLE_ID [flags]
 ```
 
 ### Examples
 
 ```
   Delete a routing-table with ID "xxx"
-  $ stackit routing-table delete xxx --organization-id yyy --network-area-id zzz
+  $ stackit network-area routing-table delete xxx --organization-id yyy --network-area-id zzz
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit routing-table delete"
+  -h, --help                     Help for "stackit network-area routing-table delete"
       --network-area-id string   Network-Area ID
       --organization-id string   Organization ID
 ```
@@ -38,5 +38,5 @@ stackit routing-table delete ROUTING_TABLE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit routing-table](./stackit_routing-table.md)	 - Manage routing-tables and its according routes
+* [stackit network-area routing-table](./stackit_network-area_routing-table.md)	 - Manage routing-tables and its according routes
 

@@ -49,23 +49,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Updates the label(s) of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
-				"$ stackit routing-table update xxx --labels key=value,foo=bar --organization-id yyy --network-area-id zzz",
+				"$ stackit network-area routing-table update xxx --labels key=value,foo=bar --organization-id yyy --network-area-id zzz",
 			),
 			examples.NewExample(
 				`Updates the name of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
-				"$ stackit routing-table update xxx --name foo --organization-id yyy --network-area-id zzz",
+				"$ stackit network-area routing-table update xxx --name foo --organization-id yyy --network-area-id zzz",
 			),
 			examples.NewExample(
 				`Updates the description of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
-				"$ stackit routing-table update xxx --description foo --organization-id yyy --network-area-id zzz",
+				"$ stackit network-area routing-table update xxx --description foo --organization-id yyy --network-area-id zzz",
 			),
 			examples.NewExample(
 				`Disables the dynamic routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
-				"$ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --dynamic-routes=false",
+				"$ stackit network-area routing-table update xxx --organization-id yyy --network-area-id zzz --dynamic-routes=false",
 			),
 			examples.NewExample(
 				`Disables the system routes of a routing-table with ID "xxx" in organization with ID "yyy" and network-area with ID "zzz"`,
-				"$ stackit routing-table update xxx --organization-id yyy --network-area-id zzz --system-routes=false",
+				"$ stackit network-area routing-table update xxx --organization-id yyy --network-area-id zzz --system-routes=false",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

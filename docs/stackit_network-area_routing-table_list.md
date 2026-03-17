@@ -1,4 +1,4 @@
-## stackit routing-table list
+## stackit network-area routing-table list
 
 Lists all routing-tables
 
@@ -7,26 +7,26 @@ Lists all routing-tables
 Lists all routing-tables
 
 ```
-stackit routing-table list [flags]
+stackit network-area routing-table list [flags]
 ```
 
 ### Examples
 
 ```
   List all routing-tables
-  $ stackit routing-table list --organization-id xxx --network-area-id yyy
+  $ stackit network-area routing-table list --organization-id xxx --network-area-id yyy
 
   List all routing-tables with labels
-  $ stackit routing-table list --label-selector env=dev,env=rc --organization-id xxx --network-area-id yyy
+  $ stackit network-area routing-table list --label-selector env=dev,env=rc --organization-id xxx --network-area-id yyy
 
   List all routing-tables with labels and set limit to 10
-  $ stackit routing-table list --label-selector env=dev,env=rc --limit 10 --organization-id xxx --network-area-id yyy
+  $ stackit network-area routing-table list --label-selector env=dev,env=rc --limit 10 --organization-id xxx --network-area-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help                     Help for "stackit routing-table list"
+  -h, --help                     Help for "stackit network-area routing-table list"
       --label-selector string    Filter by label
       --limit int                Maximum number of entries to list
       --network-area-id string   Network-Area ID
@@ -46,5 +46,5 @@ stackit routing-table list [flags]
 
 ### SEE ALSO
 
-* [stackit routing-table](./stackit_routing-table.md)	 - Manage routing-tables and its according routes
+* [stackit network-area routing-table](./stackit_network-area_routing-table.md)	 - Manage routing-tables and its according routes
 

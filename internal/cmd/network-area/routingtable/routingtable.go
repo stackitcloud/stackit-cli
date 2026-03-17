@@ -2,11 +2,11 @@ package routingtable
 
 import (
 	"github.com/spf13/cobra"
-	rtCreate "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/create"
-	rtDelete "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/delete"
-	rtDescribe "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/describe"
-	rtList "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/list"
-	rtUpdate "github.com/stackitcloud/stackit-cli/internal/cmd/routingtable/update"
+	rtCreate "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/create"
+	rtDelete "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/delete"
+	rtDescribe "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/describe"
+	rtList "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/list"
+	rtUpdate "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

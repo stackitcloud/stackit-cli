@@ -38,7 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a routing-table with ID "xxx"`,
-				`$ stackit routing-table delete xxx --organization-id yyy --network-area-id zzz`,
+				`$ stackit network-area routing-table delete xxx --organization-id yyy --network-area-id zzz`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
