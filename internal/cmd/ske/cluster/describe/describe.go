@@ -101,7 +101,7 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		}
 
 		table := tables.NewTable()
-		table.AddRow("NAME", cluster.Name)
+		table.AddRow("NAME", utils.PtrString(cluster.Name))
 		table.AddSeparator()
 		if cluster.HasStatus() {
 			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
