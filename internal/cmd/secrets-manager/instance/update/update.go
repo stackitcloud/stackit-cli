@@ -25,6 +25,11 @@ const (
 	instanceIdArg = "INSTANCE_ID"
 
 	aclFlag = "acl"
+
+	kmsKeyIdFlag               = "kms-key-id"
+	kmsKeyringIdFlag           = "kms-keyring-id"
+	kmsKeyVersionFlag          = "kms-key-version"
+	kmsServiceAccountEmailFlag = "kms-service-account-email"
 )
 
 type inputModel struct {
@@ -32,6 +37,11 @@ type inputModel struct {
 	InstanceId string
 
 	Acls *[]string
+
+	KmsKeyId               *string
+	KmsKeyringId           *string
+	KmsKeyVersion          *int64
+	KmsServiceAccountEmail *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -87,6 +97,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
+
+	cmd.Flags().String(kmsKeyIdFlag, "", "ID of the KMS key to use for encryption")
+	cmd.Flags().String(kmsKeyringIdFlag, "", "ID of the KMS key ring")
+	cmd.Flags().Int64(kmsKeyVersionFlag, 0, "Version of the KMS key")
+	cmd.Flags().String(kmsServiceAccountEmailFlag, "", "Service account email for KMS access")
+
+	cmd.MarkFlagsRequiredTogether(kmsKeyIdFlag, kmsKeyringIdFlag, kmsKeyVersionFlag, kmsServiceAccountEmailFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -98,15 +115,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	acls := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
+	kmsKeyId := flags.FlagToStringPointer(p, cmd, kmsKeyIdFlag)
 
-	if acls == nil {
+	if acls == nil && kmsKeyId == nil {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		InstanceId:      instanceId,
-		Acls:            acls,
+		GlobalFlagModel:        globalFlags,
+		InstanceId:             instanceId,
+		Acls:                   acls,
+		KmsKeyId:               flags.FlagToStringPointer(p, cmd, kmsKeyIdFlag),
+		KmsKeyringId:           flags.FlagToStringPointer(p, cmd, kmsKeyringIdFlag),
+		KmsKeyVersion:          flags.FlagToInt64Pointer(p, cmd, kmsKeyVersionFlag),
+		KmsServiceAccountEmail: flags.FlagToStringPointer(p, cmd, kmsServiceAccountEmailFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -114,6 +136,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
+	// TODO: implement API integration for KMS key updates.
+
 	req := apiClient.UpdateACLs(ctx, model.ProjectId, model.InstanceId)
 
 	cidrs := []secretsmanager.UpdateACLPayload{}
