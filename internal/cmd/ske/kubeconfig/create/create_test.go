@@ -72,6 +72,14 @@ func fixtureRequest(mods ...func(request *ske.ApiCreateKubeconfigRequest)) ske.A
 	return request
 }
 
+func fixtureRequestLogin() ske.ApiGetLoginKubeconfigRequest {
+	return testClient.DefaultAPI.GetLoginKubeconfig(testCtx, testProjectId, testRegion, testClusterName)
+}
+
+func fixtureRequestIDP() ske.ApiGetIDPKubeconfigRequest {
+	return testClient.DefaultAPI.GetIDPKubeconfig(testCtx, testProjectId, testRegion, testClusterName)
+}
+
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
@@ -107,6 +115,17 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Login = true
+			}),
+		},
+		{
+			description: "idp",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["idp"] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.IDP = true
 			}),
 		},
 		{
@@ -238,17 +257,35 @@ func TestBuildRequestCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request, _ := buildRequestCreate(testCtx, tt.model, testClient)
-
-			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-				cmpopts.EquateComparable(testClient.DefaultAPI),
-			)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			assertNoDiff(t, request, tt.expectedRequest)
 		})
 	}
+}
+
+func assertNoDiff(t *testing.T, actual, expected any) {
+	t.Helper()
+	diff := cmp.Diff(actual, expected,
+		cmp.AllowUnexported(expected),
+		cmpopts.EquateComparable(testCtx),
+		cmpopts.EquateComparable(testClient.DefaultAPI),
+	)
+	if diff != "" {
+		t.Fatalf("Data does not match: %s", diff)
+	}
+}
+
+func TestBuildRequestLogin(t *testing.T) {
+	model := fixtureInputModel()
+	expectedRequest := fixtureRequestLogin()
+	request, _ := buildRequestLogin(testCtx, model, testClient)
+	assertNoDiff(t, request, expectedRequest)
+}
+
+func TestBuildRequestIDP(t *testing.T) {
+	model := fixtureInputModel()
+	expectedRequest := fixtureRequestIDP()
+	request, _ := buildRequestIDP(testCtx, model, testClient)
+	assertNoDiff(t, request, expectedRequest)
 }
 
 func Test_outputResult(t *testing.T) {
@@ -258,6 +295,7 @@ func Test_outputResult(t *testing.T) {
 		kubeconfigPath string
 		respKubeconfig *ske.Kubeconfig
 		respLogin      *ske.LoginKubeconfig
+		respIDP        *ske.IDPKubeconfig
 	}
 	tests := []struct {
 		name    string
@@ -283,12 +321,19 @@ func Test_outputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "missing idp",
+			args: args{
+				respIDP: &ske.IDPKubeconfig{},
+			},
+			wantErr: false,
+		},
 	}
 	p := print.NewPrinter()
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.clusterName, tt.args.kubeconfigPath, tt.args.respKubeconfig, tt.args.respLogin); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.clusterName, tt.args.kubeconfigPath, tt.args.respKubeconfig, tt.args.respLogin, tt.args.respIDP); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
