@@ -147,10 +147,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateInstanceRequest {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
-	req = req.CreateInstancePayload(secretsmanager.CreateInstancePayload{
+	payload := secretsmanager.CreateInstancePayload{
 		Name: model.InstanceName,
-		// TODO: Add KMS config here when implementing API integration
-	})
+	}
+
+	if model.KmsKeyId != nil {
+		payload.KmsKey = &secretsmanager.KmsKeyPayload{
+			KeyId:               model.KmsKeyId,
+			KeyRingId:           model.KmsKeyringId,
+			KeyVersion:          model.KmsKeyVersion,
+			ServiceAccountEmail: model.KmsServiceAccountEmail,
+		}
+	}
+
+	req = req.CreateInstancePayload(payload)
 
 	return req
 }

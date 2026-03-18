@@ -82,7 +82,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			err = req.Execute()
+			switch request := req.(type) {
+			case secretsmanager.ApiUpdateInstanceRequest:
+				err = request.Execute()
+			case secretsmanager.ApiUpdateACLsRequest:
+				err = request.Execute()
+			default:
+				err = fmt.Errorf("unknown request type")
+			}
 			if err != nil {
 				return fmt.Errorf("update Secrets Manager instance: %w", err)
 			}
@@ -135,9 +142,32 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
-	// TODO: implement API integration for KMS key updates.
+func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) interface{ Execute() error } {
+	if model.KmsKeyId != nil {
+		return buildUpdateInstanceRequest(ctx, model, apiClient)
+	}
 
+	return buildUpdateACLsRequest(ctx, model, apiClient)
+}
+
+func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateInstanceRequest {
+	req := apiClient.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
+
+	payload := secretsmanager.UpdateInstancePayload{
+		KmsKey: &secretsmanager.KmsKeyPayload{
+			KeyId:               model.KmsKeyId,
+			KeyRingId:           model.KmsKeyringId,
+			KeyVersion:          model.KmsKeyVersion,
+			ServiceAccountEmail: model.KmsServiceAccountEmail,
+		},
+	}
+
+	req = req.UpdateInstancePayload(payload)
+
+	return req
+}
+
+func buildUpdateACLsRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
 	req := apiClient.UpdateACLs(ctx, model.ProjectId, model.InstanceId)
 
 	cidrs := []secretsmanager.UpdateACLPayload{}
