@@ -111,6 +111,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(kmsServiceAccountEmailFlag, "", "Service account email for KMS access")
 
 	cmd.MarkFlagsRequiredTogether(kmsKeyIdFlag, kmsKeyringIdFlag, kmsKeyVersionFlag, kmsServiceAccountEmailFlag)
+	cmd.MarkFlagsMutuallyExclusive(aclFlag, kmsKeyIdFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
