@@ -31,6 +31,13 @@ var (
 	testInstanceId = uuid.NewString()
 )
 
+const (
+	testKmsKeyId               = "key-id"
+	testKmsKeyringId           = "keyring-id"
+	testKmsKeyVersion          = int64(1)
+	testKmsServiceAccountEmail = "my-service-account-1234567@sa.stackit.cloud"
+)
+
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
 		testInstanceId,
@@ -73,6 +80,23 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) 
 		Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
 			{Cidr: utils.Ptr(testACL1)},
 		})})
+
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func fixtureUpdateInstanceRequest(mods ...func(request *secretsmanager.ApiUpdateInstanceRequest)) secretsmanager.ApiUpdateInstanceRequest {
+	request := testClient.UpdateInstance(testCtx, testProjectId, testInstanceId)
+	request = request.UpdateInstancePayload(secretsmanager.UpdateInstancePayload{
+		KmsKey: &secretsmanager.KmsKeyPayload{
+			KeyId:               utils.Ptr(testKmsKeyId),
+			KeyRingId:           utils.Ptr(testKmsKeyringId),
+			KeyVersion:          utils.Ptr(testKmsKeyVersion),
+			ServiceAccountEmail: utils.Ptr(testKmsServiceAccountEmail),
+		},
+	})
 
 	for _, mod := range mods {
 		mod(&request)
@@ -209,6 +233,25 @@ func TestParseInput(t *testing.T) {
 				)
 			}),
 		},
+		{
+			description: "kms flags",
+			argValues:   fixtureArgValues(),
+			flagValues: map[string]string{
+				projectIdFlag:              testProjectId,
+				kmsKeyIdFlag:               testKmsKeyId,
+				kmsKeyringIdFlag:           testKmsKeyringId,
+				kmsKeyVersionFlag:          "1",
+				kmsServiceAccountEmailFlag: testKmsServiceAccountEmail,
+			},
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = nil
+				model.KmsKeyId = utils.Ptr(testKmsKeyId)
+				model.KmsKeyringId = utils.Ptr(testKmsKeyringId)
+				model.KmsKeyVersion = utils.Ptr(testKmsKeyVersion)
+				model.KmsServiceAccountEmail = utils.Ptr(testKmsServiceAccountEmail)
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -246,8 +289,12 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
+			aclRequest, ok := request.(secretsmanager.ApiUpdateACLsRequest)
+			if !ok {
+				t.Fatalf("expected ACL update request, got %T", request)
+			}
 
-			diff := cmp.Diff(request, tt.expectedRequest,
+			diff := cmp.Diff(aclRequest, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
 			)
@@ -255,5 +302,30 @@ func TestBuildRequest(t *testing.T) {
 				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
+	}
+}
+
+func TestBuildRequestKms(t *testing.T) {
+	model := fixtureInputModel(func(model *inputModel) {
+		model.Acls = nil
+		model.KmsKeyId = utils.Ptr(testKmsKeyId)
+		model.KmsKeyringId = utils.Ptr(testKmsKeyringId)
+		model.KmsKeyVersion = utils.Ptr(testKmsKeyVersion)
+		model.KmsServiceAccountEmail = utils.Ptr(testKmsServiceAccountEmail)
+	})
+
+	request := buildRequest(testCtx, model, testClient)
+	updateRequest, ok := request.(secretsmanager.ApiUpdateInstanceRequest)
+	if !ok {
+		t.Fatalf("expected instance update request, got %T", request)
+	}
+
+	expectedRequest := fixtureUpdateInstanceRequest()
+	diff := cmp.Diff(updateRequest, expectedRequest,
+		cmp.AllowUnexported(expectedRequest),
+		cmpopts.EquateComparable(testCtx),
+	)
+	if diff != "" {
+		t.Fatalf("Data does not match: %s", diff)
 	}
 }

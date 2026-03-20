@@ -25,6 +25,13 @@ var testClient = &secretsmanager.APIClient{}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
+const (
+	testKmsKeyId               = "key-id"
+	testKmsKeyringId           = "keyring-id"
+	testKmsKeyVersion          = int64(1)
+	testKmsServiceAccountEmail = "my-service-account-1234567@sa.stackit.cloud"
+)
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:    testProjectId,
@@ -163,6 +170,24 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "kms flags",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, aclFlag)
+				flagValues[kmsKeyIdFlag] = testKmsKeyId
+				flagValues[kmsKeyringIdFlag] = testKmsKeyringId
+				flagValues[kmsKeyVersionFlag] = "1"
+				flagValues[kmsServiceAccountEmailFlag] = testKmsServiceAccountEmail
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acls = nil
+				model.KmsKeyId = utils.Ptr(testKmsKeyId)
+				model.KmsKeyringId = utils.Ptr(testKmsKeyringId)
+				model.KmsKeyVersion = utils.Ptr(testKmsKeyVersion)
+				model.KmsServiceAccountEmail = utils.Ptr(testKmsServiceAccountEmail)
+			}),
+		},
+		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, projectIdFlag)
@@ -204,6 +229,28 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "with kms",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Acls = nil
+				model.KmsKeyId = utils.Ptr(testKmsKeyId)
+				model.KmsKeyringId = utils.Ptr(testKmsKeyringId)
+				model.KmsKeyVersion = utils.Ptr(testKmsKeyVersion)
+				model.KmsServiceAccountEmail = utils.Ptr(testKmsServiceAccountEmail)
+			}),
+			expectedRequest: fixtureRequest(func(request *secretsmanager.ApiCreateInstanceRequest) {
+				payload := secretsmanager.CreateInstancePayload{
+					Name: utils.Ptr("example"),
+					KmsKey: &secretsmanager.KmsKeyPayload{
+						KeyId:               utils.Ptr(testKmsKeyId),
+						KeyRingId:           utils.Ptr(testKmsKeyringId),
+						KeyVersion:          utils.Ptr(testKmsKeyVersion),
+						ServiceAccountEmail: utils.Ptr(testKmsServiceAccountEmail),
+					},
+				}
+				*request = (*request).CreateInstancePayload(payload)
+			}),
 		},
 	}
 
