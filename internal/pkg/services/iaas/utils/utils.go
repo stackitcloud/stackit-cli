@@ -21,6 +21,7 @@ type IaaSClient interface {
 	GetServerExecute(ctx context.Context, projectId, region, serverId string) (*iaas.Server, error)
 	GetVolumeExecute(ctx context.Context, projectId, region, volumeId string) (*iaas.Volume, error)
 	GetNetworkExecute(ctx context.Context, projectId, region, networkId string) (*iaas.Network, error)
+	GetRoutingTableOfAreaExecute(ctx context.Context, organizationId, areaId, region, routingTableId string) (*iaas.RoutingTable, error)
 	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
 	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
 	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, region, networkRangeId string) (*iaas.NetworkRange, error)
@@ -87,6 +88,18 @@ func GetNetworkName(ctx context.Context, apiClient IaaSClient, projectId, region
 	resp, err := apiClient.GetNetworkExecute(ctx, projectId, region, networkId)
 	if err != nil {
 		return "", fmt.Errorf("get network: %w", err)
+	} else if resp == nil {
+		return "", ErrResponseNil
+	} else if resp.Name == nil {
+		return "", ErrNameNil
+	}
+	return *resp.Name, nil
+}
+
+func GetRoutingTableOfAreaName(ctx context.Context, apiClient IaaSClient, organizationId, areaId, region, routingTableId string) (string, error) {
+	resp, err := apiClient.GetRoutingTableOfAreaExecute(ctx, organizationId, areaId, region, routingTableId)
+	if err != nil {
+		return "", fmt.Errorf("get routing-table: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
 	} else if resp.Name == nil {

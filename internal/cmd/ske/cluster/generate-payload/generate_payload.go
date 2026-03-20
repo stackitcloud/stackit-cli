@@ -82,10 +82,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("read SKE cluster: %w", err)
 				}
 				payload = &ske.CreateOrUpdateClusterPayload{
+					Access:      resp.Access,
 					Extensions:  resp.Extensions,
 					Hibernation: resp.Hibernation,
 					Kubernetes:  resp.Kubernetes,
 					Maintenance: resp.Maintenance,
+					Network:     resp.Network,
 					Nodepools:   resp.Nodepools,
 					Status:      resp.Status,
 				}
