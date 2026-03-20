@@ -4,10 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -111,13 +109,7 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "no flag values",
-			argValues:   fixtureArgValues(),
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "required flags only (no values to update)",
+			description: "no update flags",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
 				projectIdFlag: testProjectId,
@@ -173,6 +165,28 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "kms key id without other required kms flags",
+			argValues:   fixtureArgValues(),
+			flagValues: map[string]string{
+				projectIdFlag: testProjectId,
+				kmsKeyIdFlag:  "key-id",
+			},
+			isValid: false,
+		},
+		{
+			description: "acl flag conflicts with kms flags",
+			argValues:   fixtureArgValues(),
+			flagValues: map[string]string{
+				projectIdFlag:              testProjectId,
+				aclFlag:                    testACL1,
+				kmsKeyIdFlag:               "key-id",
+				kmsKeyringIdFlag:           "keyring-id",
+				kmsKeyVersionFlag:          "1",
+				kmsServiceAccountEmailFlag: "svc@example.com",
+			},
+			isValid: false,
+		},
+		{
 			description: "repeated acl flags",
 			argValues:   fixtureArgValues(),
 			flagValues:  fixtureFlagValues(),
@@ -199,64 +213,9 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&types.CmdParams{Printer: p})
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			for _, value := range tt.aclValues {
-				err := cmd.Flags().Set(aclFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
-				}
-			}
-
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating args: %v", err)
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(p, cmd, tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInputWithAdditionalFlags(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, map[string][]string{
+				aclFlag: tt.aclValues,
+			}, tt.isValid)
 		})
 	}
 }

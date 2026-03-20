@@ -112,6 +112,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.MarkFlagsRequiredTogether(kmsKeyIdFlag, kmsKeyringIdFlag, kmsKeyVersionFlag, kmsServiceAccountEmailFlag)
 	cmd.MarkFlagsMutuallyExclusive(aclFlag, kmsKeyIdFlag)
+	cmd.MarkFlagsOneRequired(aclFlag, kmsKeyIdFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -123,11 +124,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	acls := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
-	kmsKeyId := flags.FlagToStringPointer(p, cmd, kmsKeyIdFlag)
-
-	if acls == nil && kmsKeyId == nil {
-		return nil, &cliErr.EmptyUpdateError{}
-	}
 
 	model := inputModel{
 		GlobalFlagModel:        globalFlags,
