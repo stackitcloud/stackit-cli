@@ -161,6 +161,11 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			table.AddSeparator()
 		}
 
+		if server.Agent != nil && server.Agent.Provisioned != nil {
+			table.AddRow("AGENT", *server.Agent.Provisioned)
+			table.AddSeparator()
+		}
+
 		if server.MachineType != nil {
 			table.AddRow("MACHINE TYPE", *server.MachineType)
 			table.AddSeparator()

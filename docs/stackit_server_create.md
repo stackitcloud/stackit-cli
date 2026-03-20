@@ -39,12 +39,16 @@ stackit server create [flags]
 
   Create a server with user data (cloud-init)
   $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
+
+  Create a server with provisioned agent
+  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-id yyy --agent-provisioned=true
 ```
 
 ### Options
 
 ```
       --affinity-group string                  The affinity group the server is assigned to
+      --agent-provisioned                      Whether to provision an agent on server creation
       --availability-zone string               The availability zone of the server
       --boot-volume-delete-on-termination      Delete the volume during the termination of the server. Defaults to false
       --boot-volume-performance-class string   Boot volume performance class
