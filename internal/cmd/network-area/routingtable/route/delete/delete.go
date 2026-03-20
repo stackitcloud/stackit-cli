@@ -11,6 +11,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -55,7 +56,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to delete the route %q in routing-table %q for network area id %q?", model.RouteID, model.RoutingTableId, model.NetworkAreaId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+				routingTableLabel = model.RoutingTableId
+			} else if routingTableLabel == "" {
+				routingTableLabel = model.RoutingTableId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to delete the route %q in routing-table %q for network area id %q?", model.RouteID, routingTableLabel, model.NetworkAreaId)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err

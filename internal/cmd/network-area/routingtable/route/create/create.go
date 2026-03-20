@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
@@ -59,22 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample("Create a route with CIDRv4 destination and IPv4 nexthop",
-				`stackit network-area routing-table route create  \ 
---routing-table-id xxx --organization-id yyy --network-area-id zzz \
---destination-type cidrv4 --destination-value <ipv4-cidr> \
---nexthop-type ipv4 --nexthop-value <ipv4-address>`),
+				`$ stackit network-area routing-table route create  --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv4 --destination-value <ipv4-cidr> --nexthop-type ipv4 --nexthop-value <ipv4-address>`),
 
 			examples.NewExample("Create a route with CIDRv6 destination and IPv6 nexthop",
-				`stackit network-area routing-table route create \
---routing-table-id xxx --organization-id yyy --network-area-id zzz \
---destination-type cidrv6 --destination-value <ipv6-cidr> \
---nexthop-type ipv6 --nexthop-value <ipv6-address>`),
+				`$ stackit network-area routing-table route create --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv6 --destination-value <ipv6-cidr> --nexthop-type ipv6 --nexthop-value <ipv6-address>`),
 
 			examples.NewExample("Create a route with CIDRv6 destination and Nexthop Internet",
-				`stackit network-area routing-table route create \
---routing-table-id xxx --organization-id yyy --network-area-id zzz \
---destination-type cidrv6 --destination-value <ipv6-cidr> \
---nexthop-type internet`),
+				`$ stackit network-area routing-table route create --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv6 --destination-value <ipv6-cidr> --nexthop-type internet`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -88,7 +80,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+				routingTableLabel = model.RoutingTableId
+			} else if routingTableLabel == "" {
+				routingTableLabel = model.RoutingTableId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", routingTableLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
