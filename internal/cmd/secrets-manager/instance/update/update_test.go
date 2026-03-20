@@ -182,7 +182,7 @@ func TestParseInput(t *testing.T) {
 				kmsKeyIdFlag:               "key-id",
 				kmsKeyringIdFlag:           "keyring-id",
 				kmsKeyVersionFlag:          "1",
-				kmsServiceAccountEmailFlag: "svc@example.com",
+				kmsServiceAccountEmailFlag: "my-service-account-1234567@sa.stackit.cloud",
 			},
 			isValid: false,
 		},
