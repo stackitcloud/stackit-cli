@@ -80,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("attach security group to server: %w", err)
 			}
 
-			params.Printer.Info("Attached security group %q to server %q\n", securityGroupLabel, serverLabel)
+			params.Printer.Outputf("Attached security group %q to server %q\n", securityGroupLabel, serverLabel)
 
 			return nil
 		},

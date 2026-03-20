@@ -80,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("detach security group from server: %w", err)
 			}
 
-			params.Printer.Info("Detached security group %q from server %q\n", securityGroupLabel, serverLabel)
+			params.Printer.Outputf("Detached security group %q from server %q\n", securityGroupLabel, serverLabel)
 
 			return nil
 		},
