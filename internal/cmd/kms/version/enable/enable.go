@@ -2,13 +2,11 @@ package enable
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -87,7 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Debug(print.ErrorLevel, "get key version: %v", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)
 		},
 	}
 
@@ -133,29 +131,17 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, resp *kms.Version) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(resp, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal KMS key: %w", err)
+	return p.OutputResult(outputFormat, resp, func() error {
+		operationState := "Enabled"
+		if async {
+			operationState = "Triggered enable of"
 		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(resp, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal KMS key: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
-		p.Outputf("Enabled version %d of the key %q\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
-	}
-
-	return nil
+		p.Outputf("%s version %d of the key %q\n", operationState, utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		return nil
+	})
 }

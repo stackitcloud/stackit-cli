@@ -117,7 +117,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Region, networkAreaLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Region, networkAreaLabel, *resp)
 		},
 	}
 	configureFlags(cmd)
@@ -186,9 +186,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req.CreateNetworkAreaRegionPayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, region, networkAreaLabel string, regionalArea iaas.RegionalArea) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, region, networkAreaLabel string, regionalArea iaas.RegionalArea) error {
 	return p.OutputResult(outputFormat, regionalArea, func() error {
-		p.Outputf("Create region configuration for SNA %q.\nRegion: %s\n", networkAreaLabel, region)
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s region configuration for SNA %q.\nRegion: %s\n", operationState, networkAreaLabel, region)
 		return nil
 	})
 }

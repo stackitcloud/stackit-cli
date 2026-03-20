@@ -2,12 +2,10 @@ package list
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -106,22 +104,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 
 	keys := *resp.Keys
 
-	switch outputFormat {
-	case print.JSONOutputFormat:
-		details, err := json.MarshalIndent(keys, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal KMS Keys list: %w", err)
-		}
-		p.Outputln(string(details))
-
-	case print.YAMLOutputFormat:
-		details, err := yaml.MarshalWithOptions(keys, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
-		if err != nil {
-			return fmt.Errorf("marshal KMS Keys list: %w", err)
-		}
-		p.Outputln(string(details))
-
-	default:
+	return p.OutputResult(outputFormat, keys, func() error {
 		if len(keys) == 0 {
 			p.Outputf("No keys found for project %q under the key ring %q\n", projectId, keyRingId)
 			return nil
@@ -144,6 +127,6 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-	}
-	return nil
+		return nil
+	})
 }

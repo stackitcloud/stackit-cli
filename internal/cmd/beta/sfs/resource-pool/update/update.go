@@ -110,7 +110,7 @@ The available performance class values can be obtained by running:
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -165,13 +165,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat string, resp *sfs.UpdateResourcePoolResponse) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, resp *sfs.UpdateResourcePoolResponse) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || resp.ResourcePool == nil {
 			p.Outputln("Resource pool response is empty")
 			return nil
 		}
-		p.Outputf("Updated resource pool %s\n", utils.PtrString(resp.ResourcePool.Name))
+		operationState := "Updated"
+		if async {
+			operationState = "Triggered update of"
+		}
+		p.Outputf("%s resource pool %s\n", operationState, utils.PtrString(resp.ResourcePool.Name))
 		return nil
 	})
 }

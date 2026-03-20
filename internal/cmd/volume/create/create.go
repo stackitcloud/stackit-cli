@@ -184,7 +184,11 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, volu
 		return fmt.Errorf("volume response is empty")
 	}
 	return p.OutputResult(model.OutputFormat, volume, func() error {
-		p.Outputf("Created volume for project %q.\nVolume ID: %s\n", projectLabel, utils.PtrString(volume.Id))
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s volume for project %q.\nVolume ID: %s\n", operationState, projectLabel, utils.PtrString(volume.Id))
 		return nil
 	})
 }

@@ -282,6 +282,7 @@ func TestOutputResult(t *testing.T) {
 		description  string
 		wantErr      bool
 		outputFormat string
+		async        bool
 		resp         *kms.Version
 	}{
 		{
@@ -312,7 +313,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.outputFormat, tt.resp)
+			err := outputResult(p, tt.outputFormat, tt.async, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
