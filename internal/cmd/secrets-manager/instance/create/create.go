@@ -55,6 +55,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a Secrets Manager instance with name "my-instance" and specify IP range which is allowed to access it`,
 				`$ stackit secrets-manager instance create --name my-instance --acl 1.2.3.0/24`),
+			examples.NewExample(
+				`Create a Secrets Manager instance with name "my-instance" and configure KMS key options`,
+				`$ stackit secrets-manager instance create --name my-instance --kms-key-id key-id --kms-keyring-id keyring-id --kms-key-version 1 --kms-service-account-email my-service-account-1234567@sa.stackit.cloud`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
