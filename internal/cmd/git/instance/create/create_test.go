@@ -178,7 +178,6 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		async        bool
 		instanceName string
-		modelId      string
 		resp         *git.Instance
 	}
 	tests := []struct {
@@ -192,7 +191,6 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: "",
 				async:        false,
 				instanceName: "",
-				modelId:      "",
 				resp:         nil,
 			},
 			wantErr: true,
@@ -203,8 +201,7 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: "",
 				async:        false,
 				instanceName: "",
-				modelId:      "",
-				resp:         &git.Instance{},
+				resp:         &git.Instance{Id: utils.Ptr(uuid.NewString())},
 			},
 			wantErr: false,
 		},
@@ -214,8 +211,7 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: print.JSONOutputFormat,
 				async:        true,
 				instanceName: testName,
-				modelId:      uuid.NewString(),
-				resp:         &git.Instance{},
+				resp:         &git.Instance{Id: utils.Ptr(uuid.NewString())},
 			},
 			wantErr: false,
 		},
@@ -224,7 +220,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.instanceName, tt.args.modelId, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.instanceName, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
