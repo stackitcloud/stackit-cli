@@ -93,7 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model, result)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Name, model.Id, result)
 		},
 	}
 
@@ -143,28 +143,21 @@ func createPayload(model *inputModel) git.CreateInstancePayload {
 	}
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *git.Instance) error {
-	if model == nil {
-		return fmt.Errorf("input model is nil")
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceName string, modelId *string, resp *git.Instance) error {
+	if resp == nil {
+		return fmt.Errorf("API resp is nil")
 	}
-	var outputFormat string
-	if model.GlobalFlagModel != nil {
-		outputFormat = model.OutputFormat
+	id := utils.PtrString(modelId)
+	if resp.Id != nil {
+		id = *resp.Id
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		if resp == nil {
-			return fmt.Errorf("API resp is nil")
-		}
 		operationState := "Created"
-		if model.Async {
+		if async {
 			operationState = "Triggered creation of"
 		}
-		id := utils.PtrString(model.Id)
-		if resp.Id != nil {
-			id = *resp.Id
-		}
-		p.Outputf("%s instance %q with id %s\n", operationState, model.Name, id)
+		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, id)
 		return nil
 	})
 }
