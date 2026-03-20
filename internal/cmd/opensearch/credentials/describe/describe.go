@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -121,6 +122,13 @@ func outputResult(p *print.Printer, outputFormat string, credentials *opensearch
 			table.AddRow("PASSWORD", utils.PtrString(credentials.Raw.Credentials.Password))
 			table.AddSeparator()
 			table.AddRow("URI", utils.PtrString(credentials.Raw.Credentials.Uri))
+			table.AddSeparator()
+			table.AddRow("HOST", utils.PtrString(credentials.Raw.Credentials.Host))
+			hosts := credentials.Raw.Credentials.Hosts
+			if hosts != nil && len(*hosts) > 0 {
+				table.AddSeparator()
+				table.AddRow("HOSTS", strings.Join(*hosts, "\n"))
+			}
 		}
 		err := table.Display(p)
 		if err != nil {
