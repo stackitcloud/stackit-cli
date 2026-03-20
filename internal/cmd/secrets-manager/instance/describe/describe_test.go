@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -244,6 +245,21 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				instance: &secretsmanager.Instance{},
 				aclList:  &secretsmanager.ListACLsResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "instance with kms key",
+			args: args{
+				instance: &secretsmanager.Instance{
+					KmsKey: &secretsmanager.KmsKeyPayload{
+						KeyId:               utils.Ptr("key-id"),
+						KeyRingId:           utils.Ptr("keyring-id"),
+						KeyVersion:          utils.Ptr(int64(1)),
+						ServiceAccountEmail: utils.Ptr("my-service-account-1234567@sa.stackit.cloud"),
+					},
+				},
+				aclList: &secretsmanager.ListACLsResponse{},
 			},
 			wantErr: false,
 		},
