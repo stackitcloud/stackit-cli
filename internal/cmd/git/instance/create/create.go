@@ -154,7 +154,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *git.Instance) error
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil {
-			return nil
+			return fmt.Errorf("API resp is nil")
 		}
 		operationState := "Created"
 		if model.Async {
