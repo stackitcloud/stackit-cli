@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/git/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/git"
 	"github.com/stackitcloud/stackit-sdk-go/services/git/wait"
 )
@@ -93,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Name, model.Id, result)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Name, *model.Id, result)
 		},
 	}
 
@@ -143,13 +142,9 @@ func createPayload(model *inputModel) git.CreateInstancePayload {
 	}
 }
 
-func outputResult(p *print.Printer, outputFormat string, async bool, instanceName string, modelId *string, resp *git.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceName, modelId string, resp *git.Instance) error {
 	if resp == nil {
 		return fmt.Errorf("API resp is nil")
-	}
-	id := utils.PtrString(modelId)
-	if resp.Id != nil {
-		id = *resp.Id
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
@@ -157,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceNam
 		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, id)
+		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, modelId)
 		return nil
 	})
 }
