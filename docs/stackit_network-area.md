@@ -37,5 +37,6 @@ stackit network-area [flags]
 * [stackit network-area network-range](./stackit_network-area_network-range.md)	 - Provides functionality for network ranges in STACKIT Network Areas
 * [stackit network-area region](./stackit_network-area_region.md)	 - Provides functionality for regional configuration of STACKIT Network Area (SNA)
 * [stackit network-area route](./stackit_network-area_route.md)	 - Provides functionality for static routes in STACKIT Network Areas
+* [stackit network-area routing-table](./stackit_network-area_routing-table.md)	 - Manage routing-tables and its according routes
 * [stackit network-area update](./stackit_network-area_update.md)	 - Updates a STACKIT Network Area (SNA)
 

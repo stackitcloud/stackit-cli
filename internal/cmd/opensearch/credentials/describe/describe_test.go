@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -219,6 +220,35 @@ func TestOutputResult(t *testing.T) {
 				credentials: &opensearch.CredentialsResponse{},
 			},
 			wantErr: false,
+		},
+		{
+			name: "host and hosts",
+			args: args{
+				credentials: &opensearch.CredentialsResponse{
+					Raw: &opensearch.RawCredentials{
+						Credentials: &opensearch.Credentials{
+							Host: utils.Ptr("host"),
+							Hosts: utils.Ptr([]string{
+								"hosts-a",
+								"hosts-b",
+							}),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "raw credentials nil host & hosts",
+			args: args{
+				credentials: &opensearch.CredentialsResponse{
+					Raw: &opensearch.RawCredentials{
+						Credentials: &opensearch.Credentials{
+							Host:  nil,
+							Hosts: nil,
+						},
+					},
+				},
+			},
 		},
 	}
 	p := print.NewPrinter()

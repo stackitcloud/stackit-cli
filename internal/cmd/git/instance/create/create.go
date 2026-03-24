@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/git/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/git"
 	"github.com/stackitcloud/stackit-sdk-go/services/git/wait"
 )
@@ -28,7 +27,6 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Id     *string
 	Name   string
 	Flavor string
 	Acl    []string
@@ -80,20 +78,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create stackit git instance: %w", err)
 			}
-			model.Id = result.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating stackit git instance")
-				_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, *model.Id).WaitWithContext(ctx)
+				_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, *result.Id).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for stackit git Instance creation: %w", err)
 				}
 				s.Stop()
 			}
 
-			return outputResult(params.Printer, model, result)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Name, result)
 		},
 	}
 
@@ -143,17 +140,20 @@ func createPayload(model *inputModel) git.CreateInstancePayload {
 	}
 }
 
-func outputResult(p *print.Printer, model *inputModel, resp *git.Instance) error {
-	if model == nil {
-		return fmt.Errorf("input model is nil")
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceName string, resp *git.Instance) error {
+	if resp == nil {
+		return fmt.Errorf("API resp is nil")
 	}
-	var outputFormat string
-	if model.GlobalFlagModel != nil {
-		outputFormat = model.OutputFormat
+	if resp.Id == nil {
+		return fmt.Errorf("API resp is missing instance id")
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created instance %q with id %s\n", model.Name, utils.PtrString(model.Id))
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, *resp.Id)
 		return nil
 	})
 }
