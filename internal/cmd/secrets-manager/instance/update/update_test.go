@@ -32,6 +32,7 @@ var (
 )
 
 const (
+	testInstanceName           = "test-instance"
 	testKmsKeyId               = "key-id"
 	testKmsKeyringId           = "keyring-id"
 	testKmsKeyVersion          = int64(1)
@@ -90,6 +91,7 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) 
 func fixtureUpdateInstanceRequest(mods ...func(request *secretsmanager.ApiUpdateInstanceRequest)) secretsmanager.ApiUpdateInstanceRequest {
 	request := testClient.UpdateInstance(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateInstancePayload(secretsmanager.UpdateInstancePayload{
+		Name: utils.Ptr(testInstanceName),
 		KmsKey: &secretsmanager.KmsKeyPayload{
 			KeyId:               utils.Ptr(testKmsKeyId),
 			KeyRingId:           utils.Ptr(testKmsKeyringId),
@@ -288,7 +290,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testInstanceName, testClient)
 			aclRequest, ok := request.(secretsmanager.ApiUpdateACLsRequest)
 			if !ok {
 				t.Fatalf("expected ACL update request, got %T", request)
@@ -314,7 +316,7 @@ func TestBuildRequestKms(t *testing.T) {
 		model.KmsServiceAccountEmail = utils.Ptr(testKmsServiceAccountEmail)
 	})
 
-	request := buildRequest(testCtx, model, testClient)
+	request := buildRequest(testCtx, model, testInstanceName, testClient)
 	updateRequest, ok := request.(secretsmanager.ApiUpdateInstanceRequest)
 	if !ok {
 		t.Fatalf("expected instance update request, got %T", request)

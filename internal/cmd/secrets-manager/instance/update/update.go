@@ -75,6 +75,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
+				if model.KmsKeyId != nil {
+					return fmt.Errorf("get instance name: %w", err)
+				}
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
@@ -84,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, instanceLabel, apiClient)
 			switch request := req.(type) {
 			case secretsmanager.ApiUpdateInstanceRequest:
 				err = request.Execute()
@@ -142,18 +145,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) interface{ Execute() error } {
+func buildRequest(ctx context.Context, model *inputModel, instanceName string, apiClient *secretsmanager.APIClient) interface{ Execute() error } {
 	if model.KmsKeyId != nil {
-		return buildUpdateInstanceRequest(ctx, model, apiClient)
+		return buildUpdateInstanceRequest(ctx, model, instanceName, apiClient)
 	}
 
 	return buildUpdateACLsRequest(ctx, model, apiClient)
 }
 
-func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateInstanceRequest {
+func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, instanceName string, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateInstanceRequest {
 	req := apiClient.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	payload := secretsmanager.UpdateInstancePayload{
+		Name: &instanceName,
 		KmsKey: &secretsmanager.KmsKeyPayload{
 			KeyId:               model.KmsKeyId,
 			KeyRingId:           model.KmsKeyringId,
