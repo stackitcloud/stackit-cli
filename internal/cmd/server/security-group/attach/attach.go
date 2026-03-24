@@ -1,4 +1,4 @@
-package detach
+package attach
 
 import (
 	"context"
@@ -6,41 +6,39 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
-
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL"
-
-	serverIdFlag = "server-id"
+	serverIdFlag        = "server-id"
+	securityGroupIdFlag = "security-group-id"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ServerId       string
-	ServiceAccMail string
+	ServerId        string
+	SecurityGroupId string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("detach %s", serviceAccMailArg),
-		Short: "Detach a service account from a server",
-		Long:  "Detach a service account from a server",
-		Args:  args.SingleArg(serviceAccMailArg, nil),
+		Use:   "attach",
+		Short: "Attaches a security group to a server",
+		Long:  "Attaches a security group to a server.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"`,
-				"$ stackit server service-account detach xxx@sa.stackit.cloud --server-id yyy",
+				`Attach a security group with ID "xxx" to a server with ID "yyy"`,
+				`$ stackit server security-group attach --server-id yyy --security-group-id xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -55,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
@@ -63,7 +62,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				serverLabel = model.ServerId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to detach service account %q from a server %q?", model.ServiceAccMail, serverLabel)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
+				securityGroupLabel = model.SecurityGroupId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to attach security group %q to server %q?", securityGroupLabel, serverLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -71,12 +76,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
-			if err != nil {
-				return fmt.Errorf("detach service account request: %w", err)
+			if err := req.Execute(); err != nil {
+				return fmt.Errorf("attach security group to server: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ServiceAccMail, serverLabel, *resp)
+			params.Printer.Outputf("Attached security group %q to server %q\n", securityGroupLabel, serverLabel)
+
+			return nil
 		},
 	}
 	configureFlags(cmd)
@@ -84,37 +90,30 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server id")
+	cmd.Flags().Var(flags.UUIDFlag(), serverIdFlag, "Server ID")
+	cmd.Flags().Var(flags.UUIDFlag(), securityGroupIdFlag, "Security Group ID")
 
-	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
+	err := flags.MarkFlagsRequired(cmd, serverIdFlag, securityGroupIdFlag)
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	serviceAccMail := inputArgs[0]
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ServerId:        flags.FlagToStringValue(p, cmd, serverIdFlag),
-		ServiceAccMail:  serviceAccMail,
+		SecurityGroupId: flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRemoveServiceAccountFromServerRequest {
-	req := apiClient.RemoveServiceAccountFromServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddSecurityGroupToServerRequest {
+	req := apiClient.AddSecurityGroupToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.SecurityGroupId)
 	return req
-}
-
-func outputResult(p *print.Printer, outputFormat, serviceAccMail, serverLabel string, service iaas.ServiceAccountMailListResponse) error {
-	return p.OutputResult(outputFormat, service, func() error {
-		p.Outputf("Detached service account %q from server %q\n", serviceAccMail, serverLabel)
-		return nil
-	})
 }

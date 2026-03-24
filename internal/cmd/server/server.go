@@ -17,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/reboot"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/rescue"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/resize"
+	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/server/security-group"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/server/service-account"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/start"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server/stop"
@@ -51,6 +52,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(publicip.NewCmd(params))
+	cmd.AddCommand(securitygroup.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(volume.NewCmd(params))
