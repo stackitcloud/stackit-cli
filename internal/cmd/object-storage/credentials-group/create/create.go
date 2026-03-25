@@ -6,6 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,10 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -95,24 +93,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateCredentialsGroupRequest {
-	req := apiClient.CreateCredentialsGroup(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateCredentialsGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateCredentialsGroupPayload(objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(model.CredentialsGroupName),
+		DisplayName: model.CredentialsGroupName,
 	})
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *objectstorage.CreateCredentialsGroupResponse) error {
-	if resp == nil || resp.CredentialsGroup == nil {
-		return fmt.Errorf("create createndials group response is empty")
-	}
-
 	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			return fmt.Errorf("create credentials group response is empty")
+		}
+
 		p.Outputf("Created credentials group %q. Credentials group ID: %s\n\n",
-			utils.PtrString(resp.CredentialsGroup.DisplayName),
-			utils.PtrString(resp.CredentialsGroup.CredentialsGroupId),
+			resp.CredentialsGroup.DisplayName,
+			resp.CredentialsGroup.CredentialsGroupId,
 		)
-		p.Outputf("URN: %s\n", utils.PtrString(resp.CredentialsGroup.Urn))
+		p.Outputf("URN: %s\n", resp.CredentialsGroup.Urn)
 		return nil
 	})
 }

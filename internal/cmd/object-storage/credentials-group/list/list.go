@@ -15,8 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -105,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiListCredentialsGroupsRequest {
-	req := apiClient.ListCredentialsGroups(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListCredentialsGroups(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -121,9 +120,9 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 		for i := range credentialsGroups {
 			c := credentialsGroups[i]
 			table.AddRow(
-				utils.PtrString(c.CredentialsGroupId),
-				utils.PtrString(c.DisplayName),
-				utils.PtrString(c.Urn),
+				c.CredentialsGroupId,
+				c.DisplayName,
+				c.Urn,
 			)
 		}
 		err := table.Display(p)

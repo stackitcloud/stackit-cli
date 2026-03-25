@@ -10,13 +10,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &objectstorage.APIClient{}
+var testClient = &objectstorage.APIClient{DefaultAPI: &objectstorage.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testCredentialsGroupId = uuid.NewString()
 
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiDeleteCredentialsGroupRequest)) objectstorage.ApiDeleteCredentialsGroupRequest {
-	request := testClient.DeleteCredentialsGroup(testCtx, testProjectId, testRegion, testCredentialsGroupId)
+	request := testClient.DefaultAPI.DeleteCredentialsGroup(testCtx, testProjectId, testRegion, testCredentialsGroupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -162,7 +162,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, objectstorage.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

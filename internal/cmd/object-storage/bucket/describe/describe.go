@@ -13,10 +13,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -61,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read Object Storage bucket: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Bucket)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -85,24 +84,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiGetBucketRequest {
-	req := apiClient.GetBucket(ctx, model.ProjectId, model.Region, model.BucketName)
+	req := apiClient.DefaultAPI.GetBucket(ctx, model.ProjectId, model.Region, model.BucketName)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, bucket *objectstorage.Bucket) error {
-	if bucket == nil {
-		return fmt.Errorf("bucket is empty")
+func outputResult(p *print.Printer, outputFormat string, resp *objectstorage.GetBucketResponse) error {
+	if resp == nil {
+		return fmt.Errorf("response is nil")
 	}
 
-	return p.OutputResult(outputFormat, bucket, func() error {
+	return p.OutputResult(outputFormat, resp.Bucket, func() error {
 		table := tables.NewTable()
-		table.AddRow("Name", utils.PtrString(bucket.Name))
+		table.AddRow("Name", resp.Bucket.Name)
 		table.AddSeparator()
-		table.AddRow("Region", utils.PtrString(bucket.Region))
+		table.AddRow("Region", resp.Bucket.Region)
 		table.AddSeparator()
-		table.AddRow("URL (Path Style)", utils.PtrString(bucket.UrlPathStyle))
+		table.AddRow("URL (Path Style)", resp.Bucket.UrlPathStyle)
 		table.AddSeparator()
-		table.AddRow("URL (Virtual Hosted Style)", utils.PtrString(bucket.UrlVirtualHostedStyle))
+		table.AddRow("URL (Virtual Hosted Style)", resp.Bucket.UrlVirtualHostedStyle)
 		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {

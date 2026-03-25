@@ -16,8 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage/wait"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api/wait"
 )
 
 const (
@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Check if the project is enabled before trying to create
-			enabled, err := utils.ProjectEnabled(ctx, apiClient, model.ProjectId, model.Region)
+			enabled, err := utils.ProjectEnabled(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
 			if err != nil {
 				return fmt.Errorf("check if Object Storage is enabled: %w", err)
 			}
@@ -81,7 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Creating bucket")
-				_, err = wait.CreateBucketWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
+				_, err = wait.CreateBucketWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for Object Storage bucket creation: %w", err)
 				}
@@ -112,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateBucketRequest {
-	req := apiClient.CreateBucket(ctx, model.ProjectId, model.Region, model.BucketName)
+	req := apiClient.DefaultAPI.CreateBucket(ctx, model.ProjectId, model.Region, model.BucketName)
 	return req
 }
 

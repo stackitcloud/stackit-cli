@@ -16,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -69,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			credentials := resp.GetAccessKeys()
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
@@ -119,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiListAccessKeysRequest {
-	req := apiClient.ListAccessKeys(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListAccessKeys(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	return req
 }
@@ -136,8 +135,11 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 		for i := range credentials {
 			c := credentials[i]
 
-			expiresAt := utils.PtrStringDefault(c.Expires, "Never")
-			table.AddRow(utils.PtrString(c.KeyId), utils.PtrString(c.DisplayName), expiresAt)
+			expiresAt := "Never"
+			if c.Expires != "" {
+				expiresAt = c.Expires
+			}
+			table.AddRow(c.KeyId, c.DisplayName, expiresAt)
 		}
 		err := table.Display(p)
 		if err != nil {

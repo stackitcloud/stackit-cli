@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -52,7 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
@@ -96,6 +96,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteCredentialsGroupRequest {
-	req := apiClient.DeleteCredentialsGroup(ctx, model.ProjectId, model.Region, model.CredentialsGroupId)
+	req := apiClient.DefaultAPI.DeleteCredentialsGroup(ctx, model.ProjectId, model.Region, model.CredentialsGroupId)
 	return req
 }

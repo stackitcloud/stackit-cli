@@ -16,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -114,7 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiListBucketsRequest {
-	req := apiClient.ListBuckets(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListBuckets(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -134,10 +133,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, buckets [
 		for i := range buckets {
 			bucket := buckets[i]
 			table.AddRow(
-				utils.PtrString(bucket.Name),
-				utils.PtrString(bucket.Region),
-				utils.PtrString(bucket.UrlPathStyle),
-				utils.PtrString(bucket.UrlVirtualHostedStyle),
+				bucket.Name,
+				bucket.Region,
+				bucket.UrlPathStyle,
+				bucket.UrlVirtualHostedStyle,
 			)
 		}
 		err := table.Display(p)

@@ -6,21 +6,19 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &objectstorage.APIClient{}
+var testClient = &objectstorage.APIClient{DefaultAPI: &objectstorage.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 const (
@@ -57,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPayload)) objectstorage.CreateCredentialsGroupPayload {
 	payload := objectstorage.CreateCredentialsGroupPayload{
-		DisplayName: utils.Ptr(testCredentialsGroupName),
+		DisplayName: testCredentialsGroupName,
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -66,7 +64,7 @@ func fixturePayload(mods ...func(payload *objectstorage.CreateCredentialsGroupPa
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiCreateCredentialsGroupRequest)) objectstorage.ApiCreateCredentialsGroupRequest {
-	request := testClient.CreateCredentialsGroup(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateCredentialsGroup(testCtx, testProjectId, testRegion)
 	request = request.CreateCredentialsGroupPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -148,7 +146,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, objectstorage.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -178,13 +176,13 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				createCredentialsGroupResponse: &objectstorage.CreateCredentialsGroupResponse{},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "set create credentials group response",
 			args: args{
 				createCredentialsGroupResponse: &objectstorage.CreateCredentialsGroupResponse{
-					CredentialsGroup: &objectstorage.CredentialsGroup{},
+					CredentialsGroup: objectstorage.CredentialsGroup{},
 				},
 			},
 			wantErr: false,

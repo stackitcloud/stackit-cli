@@ -16,8 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -60,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
@@ -119,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateAccessKeyRequest {
-	req := apiClient.CreateAccessKey(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateAccessKey(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
 		Expires: model.ExpireDate,
@@ -134,13 +133,13 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		expireDate := "Never"
-		if resp.Expires != nil && resp.Expires.IsSet() && *resp.Expires.Get() != "" {
+		if resp.Expires.IsSet() && *resp.Expires.Get() != "" {
 			expireDate = *resp.Expires.Get()
 		}
 
-		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, utils.PtrString(resp.KeyId))
-		p.Outputf("Access Key ID: %s\n", utils.PtrString(resp.AccessKey))
-		p.Outputf("Secret Access Key: %s\n", utils.PtrString(resp.SecretAccessKey))
+		p.Outputf("Created credentials in group %q. Credentials ID: %s\n\n", credentialsGroupLabel, resp.KeyId)
+		p.Outputf("Access Key ID: %s\n", resp.AccessKey)
+		p.Outputf("Secret Access Key: %s\n", resp.SecretAccessKey)
 		p.Outputf("Expire Date: %s\n", expireDate)
 
 		return nil

@@ -13,13 +13,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &objectstorage.APIClient{}
+var testClient = &objectstorage.APIClient{DefaultAPI: &objectstorage.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 const (
@@ -64,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *objectstorage.ApiGetBucketRequest)) objectstorage.ApiGetBucketRequest {
-	request := testClient.GetBucket(testCtx, testProjectId, testRegion, testBucketName)
+	request := testClient.DefaultAPI.GetBucket(testCtx, testProjectId, testRegion, testBucketName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -161,7 +161,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, objectstorage.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -174,7 +174,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		bucket       *objectstorage.Bucket
+		resp         *objectstorage.GetBucketResponse
 	}
 	tests := []struct {
 		name    string
@@ -187,9 +187,9 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "set empty bucket",
+			name: "set empty response",
 			args: args{
-				bucket: &objectstorage.Bucket{},
+				resp: &objectstorage.GetBucketResponse{},
 			},
 			wantErr: false,
 		},
@@ -198,7 +198,7 @@ func TestOutputResult(t *testing.T) {
 	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.bucket); (err != nil) != tt.wantErr {
+			if err := outputResult(p, tt.args.outputFormat, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

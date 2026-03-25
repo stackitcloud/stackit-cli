@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 	objectStorageUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 const (
@@ -53,13 +53,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.Region)
+			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
-			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient, model.ProjectId, model.CredentialsGroupId, model.CredentialsId, model.Region)
+			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.CredentialsId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials name: %v", err)
 				credentialsLabel = model.CredentialsId
@@ -112,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteAccessKeyRequest {
-	req := apiClient.DeleteAccessKey(ctx, model.ProjectId, model.Region, model.CredentialsId)
+	req := apiClient.DefaultAPI.DeleteAccessKey(ctx, model.ProjectId, model.Region, model.CredentialsId)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	return req
 }
