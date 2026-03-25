@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				routingTableLabel = model.RoutingTableId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table with id %q?", routingTableLabel)
+			prompt := fmt.Sprintf("Are you sure you want to create a route for routing-table %q?", routingTableLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err

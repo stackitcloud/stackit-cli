@@ -144,7 +144,7 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, or
 
 	return p.OutputResult(outputFormat, routes, func() error {
 		if len(routes) == 0 {
-			p.Outputf("No routes found for routing-table %q in organization %q \n", routeTableId, orgId)
+			p.Outputf("No routes found for routing-table %q in organization %q\n", routeTableId, orgId)
 			return nil
 		}
 
