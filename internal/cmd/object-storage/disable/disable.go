@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 type inputModel struct {
@@ -91,6 +91,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDisableServiceRequest {
-	req := apiClient.DisableService(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.DisableService(ctx, model.ProjectId, model.Region)
 	return req
 }

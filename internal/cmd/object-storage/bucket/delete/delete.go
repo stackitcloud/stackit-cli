@@ -15,8 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage/wait"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api/wait"
 )
 
 const (
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if !model.Async {
 				s := spinner.New(params.Printer)
 				s.Start("Deleting bucket")
-				_, err = wait.DeleteBucketWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
+				_, err = wait.DeleteBucketWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait for Object Storage bucket deletion: %w", err)
 				}
@@ -105,6 +105,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteBucketRequest {
-	req := apiClient.DeleteBucket(ctx, model.ProjectId, model.Region, model.BucketName)
+	req := apiClient.DefaultAPI.DeleteBucket(ctx, model.ProjectId, model.Region, model.BucketName)
 	return req
 }

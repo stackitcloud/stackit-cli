@@ -2,59 +2,68 @@ package utils
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
-	"github.com/stackitcloud/stackit-sdk-go/services/objectstorage"
+	objectstorage "github.com/stackitcloud/stackit-sdk-go/services/objectstorage/v2api"
 )
 
 var (
 	testProjectId          = uuid.NewString()
 	testCredentialsGroupId = uuid.NewString()
-	testCredentialsId      = "credentialsID" //nolint:gosec // linter false positive
-	testRegion             = "eu01"
 )
 
 const (
 	testCredentialsGroupName = "testGroup"
 	testCredentialsName      = "testCredential"
+	testCredentialsId        = "credentialsID" //nolint:gosec // linter false positive
+	testRegion               = "eu01"
 )
 
-type objectStorageClientMocked struct {
-	serviceDisabled            bool
-	getServiceStatusFails      bool
+type mockSettings struct {
+	serviceDisabled       bool
+	getServiceStatusFails bool
+
 	listCredentialsGroupsFails bool
 	listCredentialsGroupsResp  *objectstorage.ListCredentialsGroupsResponse
-	listAccessKeysReq          objectstorage.ApiListAccessKeysRequest
+
+	listAccessKeysFails bool
+	listAccessKeysResp  *objectstorage.ListAccessKeysResponse
 }
 
-func (m *objectStorageClientMocked) GetServiceStatusExecute(_ context.Context, _, _ string) (*objectstorage.ProjectStatus, error) {
-	if m.getServiceStatusFails {
-		return nil, fmt.Errorf("could not get service status")
-	}
-	if m.serviceDisabled {
-		return nil, &oapierror.GenericOpenAPIError{StatusCode: 404}
-	}
-	return &objectstorage.ProjectStatus{}, nil
-}
+func newAPIMock(settings *mockSettings) objectstorage.DefaultAPI {
+	return &objectstorage.DefaultAPIServiceMock{
+		GetServiceStatusExecuteMock: utils.Ptr(func(_ objectstorage.ApiGetServiceStatusRequest) (*objectstorage.ProjectStatus, error) {
+			if settings.getServiceStatusFails {
+				return nil, fmt.Errorf("could not get service status")
+			}
 
-func (m *objectStorageClientMocked) ListCredentialsGroupsExecute(_ context.Context, _, _ string) (*objectstorage.ListCredentialsGroupsResponse, error) {
-	if m.listCredentialsGroupsFails {
-		return nil, fmt.Errorf("could not list credentials groups")
-	}
-	return m.listCredentialsGroupsResp, nil
-}
+			if settings.serviceDisabled {
+				return nil, &oapierror.GenericOpenAPIError{StatusCode: http.StatusNotFound}
+			}
 
-func (m *objectStorageClientMocked) ListAccessKeys(_ context.Context, _, _ string) objectstorage.ApiListAccessKeysRequest {
-	return m.listAccessKeysReq
+			return &objectstorage.ProjectStatus{}, nil
+		}),
+		ListCredentialsGroupsExecuteMock: utils.Ptr(func(_ objectstorage.ApiListCredentialsGroupsRequest) (*objectstorage.ListCredentialsGroupsResponse, error) {
+			if settings.listCredentialsGroupsFails {
+				return nil, fmt.Errorf("could not list credentials groups")
+			}
+
+			return settings.listCredentialsGroupsResp, nil
+		}),
+		ListAccessKeysExecuteMock: utils.Ptr(func(_ objectstorage.ApiListAccessKeysRequest) (*objectstorage.ListAccessKeysResponse, error) {
+			if settings.listAccessKeysFails {
+				return nil, &oapierror.GenericOpenAPIError{StatusCode: http.StatusBadGateway}
+			}
+
+			return settings.listAccessKeysResp, nil
+		}),
+	}
 }
 
 func TestProjectEnabled(t *testing.T) {
@@ -85,10 +94,10 @@ func TestProjectEnabled(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &objectStorageClientMocked{
+			client := newAPIMock(&mockSettings{
 				serviceDisabled:       tt.serviceDisabled,
 				getServiceStatusFails: tt.getProjectFails,
-			}
+			})
 
 			output, err := ProjectEnabled(context.Background(), client, testProjectId, testRegion)
 
@@ -120,10 +129,10 @@ func TestGetCredentialsGroupName(t *testing.T) {
 		{
 			description: "base",
 			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
-				CredentialsGroups: &[]objectstorage.CredentialsGroup{
+				CredentialsGroups: []objectstorage.CredentialsGroup{
 					{
-						CredentialsGroupId: utils.Ptr(testCredentialsGroupId),
-						DisplayName:        utils.Ptr(testCredentialsGroupName),
+						CredentialsGroupId: testCredentialsGroupId,
+						DisplayName:        testCredentialsGroupName,
 					},
 				},
 			},
@@ -138,14 +147,14 @@ func TestGetCredentialsGroupName(t *testing.T) {
 		{
 			description: "multiple credentials groups",
 			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
-				CredentialsGroups: &[]objectstorage.CredentialsGroup{
+				CredentialsGroups: []objectstorage.CredentialsGroup{
 					{
-						CredentialsGroupId: utils.Ptr("test-UUID"),
-						DisplayName:        utils.Ptr("test-name"),
+						CredentialsGroupId: "test-UUID",
+						DisplayName:        "test-name",
 					},
 					{
-						CredentialsGroupId: utils.Ptr(testCredentialsGroupId),
-						DisplayName:        utils.Ptr(testCredentialsGroupName),
+						CredentialsGroupId: testCredentialsGroupId,
+						DisplayName:        testCredentialsGroupName,
 					},
 				},
 			},
@@ -160,23 +169,11 @@ func TestGetCredentialsGroupName(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "nil credentials group id",
+			description: "empty credentials group id",
 			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
-				CredentialsGroups: &[]objectstorage.CredentialsGroup{
+				CredentialsGroups: []objectstorage.CredentialsGroup{
 					{
-						CredentialsGroupId: nil,
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "nil credentials group name",
-			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
-				CredentialsGroups: &[]objectstorage.CredentialsGroup{
-					{
-						CredentialsGroupId: utils.Ptr(testCredentialsGroupId),
-						DisplayName:        nil,
+						CredentialsGroupId: "",
 					},
 				},
 			},
@@ -185,10 +182,10 @@ func TestGetCredentialsGroupName(t *testing.T) {
 		{
 			description: "empty credentials group name",
 			listCredentialsGroupsResp: &objectstorage.ListCredentialsGroupsResponse{
-				CredentialsGroups: &[]objectstorage.CredentialsGroup{
+				CredentialsGroups: []objectstorage.CredentialsGroup{
 					{
-						CredentialsGroupId: utils.Ptr(testCredentialsGroupId),
-						DisplayName:        utils.Ptr(""),
+						CredentialsGroupId: testCredentialsGroupId,
+						DisplayName:        "",
 					},
 				},
 			},
@@ -198,10 +195,10 @@ func TestGetCredentialsGroupName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &objectStorageClientMocked{
+			client := newAPIMock(&mockSettings{
 				listCredentialsGroupsFails: tt.listCredentialsGroupsFails,
 				listCredentialsGroupsResp:  tt.listCredentialsGroupsResp,
-			}
+			})
 
 			output, err := GetCredentialsGroupName(context.Background(), client, testProjectId, testCredentialsGroupId, testRegion)
 
@@ -232,10 +229,10 @@ func TestGetCredentialsName(t *testing.T) {
 		{
 			description: "base",
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
-				AccessKeys: &[]objectstorage.AccessKey{
+				AccessKeys: []objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr(testCredentialsId),
-						DisplayName: utils.Ptr(testCredentialsName),
+						KeyId:       testCredentialsId,
+						DisplayName: testCredentialsName,
 					},
 				},
 			},
@@ -250,14 +247,14 @@ func TestGetCredentialsName(t *testing.T) {
 		{
 			description: "multiple credentials",
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
-				AccessKeys: &[]objectstorage.AccessKey{
+				AccessKeys: []objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr("test-UUID"),
-						DisplayName: utils.Ptr("test-name"),
+						KeyId:       "test-UUID",
+						DisplayName: "test-name",
 					},
 					{
-						KeyId:       utils.Ptr(testCredentialsId),
-						DisplayName: utils.Ptr(testCredentialsName),
+						KeyId:       testCredentialsId,
+						DisplayName: testCredentialsName,
 					},
 				},
 			},
@@ -272,23 +269,11 @@ func TestGetCredentialsName(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "nil credentials id",
+			description: "empty credentials id",
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
-				AccessKeys: &[]objectstorage.AccessKey{
+				AccessKeys: []objectstorage.AccessKey{
 					{
-						KeyId: nil,
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "nil credentials name",
-			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
-				AccessKeys: &[]objectstorage.AccessKey{
-					{
-						KeyId:       utils.Ptr(testCredentialsId),
-						DisplayName: nil,
+						KeyId: "",
 					},
 				},
 			},
@@ -297,10 +282,10 @@ func TestGetCredentialsName(t *testing.T) {
 		{
 			description: "empty credentials name",
 			listAccessKeysResp: &objectstorage.ListAccessKeysResponse{
-				AccessKeys: &[]objectstorage.AccessKey{
+				AccessKeys: []objectstorage.AccessKey{
 					{
-						KeyId:       utils.Ptr(testCredentialsId),
-						DisplayName: utils.Ptr(""),
+						KeyId:       testCredentialsId,
+						DisplayName: "",
 					},
 				},
 			},
@@ -310,37 +295,10 @@ func TestGetCredentialsName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			mockedRespBytes, err := json.Marshal(tt.listAccessKeysResp)
-			if err != nil {
-				t.Fatalf("Failed to marshal mocked response: %v", err)
-			}
-
-			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				if tt.getCredentialsNameFails {
-					w.WriteHeader(http.StatusBadGateway)
-					w.Header().Set("Content-Type", "application/json")
-					_, err := w.Write([]byte("{\"message\": \"Something bad happened\""))
-					if err != nil {
-						t.Errorf("Failed to write bad response: %v", err)
-					}
-					return
-				}
-
-				_, err := w.Write(mockedRespBytes)
-				if err != nil {
-					t.Errorf("Failed to write response: %v", err)
-				}
+			client := newAPIMock(&mockSettings{
+				listAccessKeysFails: tt.getCredentialsNameFails,
+				listAccessKeysResp:  tt.listAccessKeysResp,
 			})
-			mockedServer := httptest.NewServer(handler)
-			defer mockedServer.Close()
-			client, err := objectstorage.NewAPIClient(
-				config.WithEndpoint(mockedServer.URL),
-				config.WithoutAuthentication(),
-			)
-			if err != nil {
-				t.Fatalf("Failed to initialize client: %v", err)
-			}
 
 			output, err := GetCredentialsName(context.Background(), client, testProjectId, testCredentialsGroupId, testCredentialsId, testRegion)
 
