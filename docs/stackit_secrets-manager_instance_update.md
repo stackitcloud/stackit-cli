@@ -13,11 +13,17 @@ stackit secrets-manager instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
+  Update the name of a Secrets Manager instance with ID "xxx"
+  $ stackit secrets-manager instance update xxx --name my-new-name
+
   Update the range of IPs allowed to access a Secrets Manager instance with ID "xxx"
   $ stackit secrets-manager instance update xxx --acl 1.2.3.0/24
 
+  Update the name and ACLs of a Secrets Manager instance with ID "xxx"
+  $ stackit secrets-manager instance update xxx --name my-new-name --acl 1.2.3.0/24
+
   Update the KMS key settings of a Secrets Manager instance with ID "xxx"
-  $ stackit secrets-manager instance update xxx --kms-key-id key-id --kms-keyring-id keyring-id --kms-key-version 1 --kms-service-account-email my-service-account-1234567@sa.stackit.cloud
+  $ stackit secrets-manager instance update xxx --name my-instance --kms-key-id key-id --kms-keyring-id keyring-id --kms-key-version 1 --kms-service-account-email my-service-account-1234567@sa.stackit.cloud
 ```
 
 ### Options
@@ -29,6 +35,7 @@ stackit secrets-manager instance update INSTANCE_ID [flags]
       --kms-key-version int                Version of the KMS key
       --kms-keyring-id string              ID of the KMS key ring
       --kms-service-account-email string   Service account email for KMS access
+  -n, --name string                        Instance name
 ```
 
 ### Options inherited from parent commands
