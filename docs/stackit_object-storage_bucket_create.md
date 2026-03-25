@@ -15,12 +15,16 @@ stackit object-storage bucket create BUCKET_NAME [flags]
 ```
   Create an Object Storage bucket with name "my-bucket"
   $ stackit object-storage bucket create my-bucket
+
+  Create an Object Storage bucket with enabled object-lock
+  $ stackit object-storage bucket create my-bucket --object-lock-enabled
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit object-storage bucket create"
+  -h, --help                  Help for "stackit object-storage bucket create"
+      --object-lock-enabled   is the object-lock enabled for the bucket
 ```
 
 ### Options inherited from parent commands

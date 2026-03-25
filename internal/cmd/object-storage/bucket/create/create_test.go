@@ -55,7 +55,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		BucketName: testBucketName,
+		BucketName:        testBucketName,
+		ObjectLockEnabled: false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -63,10 +64,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *objectstorage.ApiCreateBucketRequest)) objectstorage.ApiCreateBucketRequest {
-	request := testClient.DefaultAPI.CreateBucket(testCtx, testProjectId, testRegion, testBucketName)
+func fixtureRequest(mods ...func(request objectstorage.ApiCreateBucketRequest) objectstorage.ApiCreateBucketRequest) objectstorage.ApiCreateBucketRequest {
+	request := testClient.DefaultAPI.CreateBucket(testCtx, testProjectId, testRegion, testBucketName).ObjectLockEnabled(false)
 	for _, mod := range mods {
-		mod(&request)
+		request = mod(request)
 	}
 	return request
 }
@@ -134,6 +135,17 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
+		{
+			description: "enable object-lock",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[objectLockEnabledFlag] = "true"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ObjectLockEnabled = true
+			}),
+			isValid: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -153,6 +165,15 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "object-lock enabled",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ObjectLockEnabled = true
+			}),
+			expectedRequest: fixtureRequest(func(request objectstorage.ApiCreateBucketRequest) objectstorage.ApiCreateBucketRequest {
+				return request.ObjectLockEnabled(true)
+			}),
 		},
 	}
 
