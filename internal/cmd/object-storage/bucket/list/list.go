@@ -129,7 +129,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, buckets [
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("NAME", "REGION", "URL (PATH STYLE)", "URL (VIRTUAL HOSTED STYLE)")
+		table.SetHeader("NAME", "REGION", "URL (PATH STYLE)", "URL (VIRTUAL HOSTED STYLE)", "OBJECT LOCK ENABLED")
 		for i := range buckets {
 			bucket := buckets[i]
 			table.AddRow(
@@ -137,6 +137,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, buckets [
 				bucket.Region,
 				bucket.UrlPathStyle,
 				bucket.UrlVirtualHostedStyle,
+				bucket.ObjectLockEnabled,
 			)
 		}
 		err := table.Display(p)

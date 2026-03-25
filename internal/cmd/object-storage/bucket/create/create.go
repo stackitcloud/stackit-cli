@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -21,12 +22,14 @@ import (
 )
 
 const (
-	bucketNameArg = "BUCKET_NAME"
+	bucketNameArg         = "BUCKET_NAME"
+	objectLockEnabledFlag = "object-lock-enabled"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	BucketName string
+	BucketName        string
+	ObjectLockEnabled bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -39,6 +42,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create an Object Storage bucket with name "my-bucket"`,
 				"$ stackit object-storage bucket create my-bucket"),
+			examples.NewExample(
+				`Create an Object Storage bucket with enabled object-lock`,
+				`$ stackit object-storage bucket create my-bucket --object-lock-enabled`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -91,7 +97,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.Async, model.BucketName, resp)
 		},
 	}
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Bool(objectLockEnabledFlag, false, "is the object-lock enabled for the bucket")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -103,8 +114,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		BucketName:      bucketName,
+		GlobalFlagModel:   globalFlags,
+		BucketName:        bucketName,
+		ObjectLockEnabled: flags.FlagToBoolValue(p, cmd, objectLockEnabledFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -112,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateBucketRequest {
-	req := apiClient.DefaultAPI.CreateBucket(ctx, model.ProjectId, model.Region, model.BucketName)
+	req := apiClient.DefaultAPI.CreateBucket(ctx, model.ProjectId, model.Region, model.BucketName).ObjectLockEnabled(model.ObjectLockEnabled)
 	return req
 }
 

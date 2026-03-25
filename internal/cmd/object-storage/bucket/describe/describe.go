@@ -103,6 +103,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *objectstorage.Get
 		table.AddSeparator()
 		table.AddRow("URL (Virtual Hosted Style)", resp.Bucket.UrlVirtualHostedStyle)
 		table.AddSeparator()
+		table.AddRow("Object Lock Enabled", resp.Bucket.ObjectLockEnabled)
+		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
