@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete route from routing-table: %w", err)
 			}
 
-			params.Printer.Outputf("Route %q from routing-table %q deleted.", model.RouteID, model.RoutingTableId)
+			params.Printer.Outputf("Route %q from routing-table %q deleted.\n", model.RouteID, model.RoutingTableId)
 			return nil
 		},
 	}

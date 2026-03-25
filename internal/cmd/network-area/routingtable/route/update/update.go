@@ -131,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat, routingTableId, networkAreaId 
 			return fmt.Errorf("update route response has empty id")
 		}
 
-		p.Outputf("Updated route %q for routing-table %q in network-area %q.", *route.Id, routingTableId, networkAreaId)
+		p.Outputf("Updated route %q for routing-table %q in network-area %q.\n", *route.Id, routingTableId, networkAreaId)
 		return nil
 	})
 }

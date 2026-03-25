@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample("Create a route with CIDRv4 destination and IPv4 nexthop",
-				`$ stackit network-area routing-table route create  --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv4 --destination-value <ipv4-cidr> --nexthop-type ipv4 --nexthop-value <ipv4-address>`),
+				`$ stackit network-area routing-table route create --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv4 --destination-value <ipv4-cidr> --nexthop-type ipv4 --nexthop-value <ipv4-address>`),
 
 			examples.NewExample("Create a route with CIDRv6 destination and IPv6 nexthop",
 				`$ stackit network-area routing-table route create --routing-table-id xxx --organization-id yyy --network-area-id zzz --destination-type cidrv6 --destination-value <ipv6-cidr> --nexthop-type ipv6 --nexthop-value <ipv6-address>`),
