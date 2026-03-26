@@ -115,13 +115,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating backup")
-				resp, err = wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+				resp, err = spinner.Run2(params.Printer, "Creating backup", func() (*iaas.Backup, error) {
+					return wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+				})
 				if err != nil {
 					return fmt.Errorf("wait for backup creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, sourceLabel, projectLabel, resp)

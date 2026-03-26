@@ -110,25 +110,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			operationState := "Triggered deletion of"
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting instance")
-				// Determine identifier and waiter to use
-				waiterFactory, err := getWaiterFactory(ctx, model)
-				if err != nil {
+				err := spinner.Run(params.Printer, "Deleting instance", func() error {
+					// Determine identifier and waiter to use
+					waiterFactory, err := getWaiterFactory(ctx, model)
+					if err != nil {
+						return err
+					}
+					// The waiter factory needs a concrete concreteClient type. We can safely cast here as the real implementation will always match.
+					concreteClient, ok := apiClient.(*edge.APIClient)
+					if !ok {
+						return fmt.Errorf("failed to configure API concreteClient")
+					}
+					waiter := waiterFactory(concreteClient)
+					_, err = waiter.WaitWithContext(ctx)
 					return err
-				}
-				// The waiter factory needs a concrete client type. We can safely cast here as the real implementation will always match.
-				client, ok := apiClient.(*edge.APIClient)
-				if !ok {
-					return fmt.Errorf("failed to configure API client")
-				}
-				waiter := waiterFactory(client)
+				})
 
-				if _, err = waiter.WaitWithContext(ctx); err != nil {
+				if err != nil {
 					return fmt.Errorf("wait for edge instance deletion: %w", err)
 				}
 				operationState = "Deleted"
-				s.Stop()
 			}
 
 			params.Printer.Info("%s instance with %q %q of project %q.\n", operationState, model.identifier.Flag, model.identifier.Value, projectLabel)

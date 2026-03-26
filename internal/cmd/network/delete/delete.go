@@ -81,13 +81,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting network")
-				_, err = wait.DeleteNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting network", func() error {
+					_, err = wait.DeleteNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for network deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

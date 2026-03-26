@@ -67,13 +67,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting cluster")
-				_, err = wait.DeleteClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting cluster", func() error {
+					_, err = wait.DeleteClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

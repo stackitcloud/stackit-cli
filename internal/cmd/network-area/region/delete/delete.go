@@ -82,13 +82,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Delete network area region")
-				_, err = wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Delete network area region", func() error {
+					_, err = wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for network area region deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			params.Printer.Outputf("Delete regional network area %q for %q\n", model.Region, networkAreaName)

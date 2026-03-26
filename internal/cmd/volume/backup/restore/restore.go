@@ -86,13 +86,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Restoring backup")
-				_, err = wait.RestoreBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Restoring backup", func() error {
+					_, err = wait.RestoreBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for backup restore: %w", err)
 				}
-				s.Stop()
 			}
 
 			if model.Async {

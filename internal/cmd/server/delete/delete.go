@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
 
+	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,9 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -81,13 +80,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting server")
-				_, err = wait.DeleteServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting server", func() error {
+					_, err = wait.DeleteServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for server deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

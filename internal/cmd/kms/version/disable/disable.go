@@ -70,13 +70,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Disabling key version")
-				_, err = wait.DisableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Disabling key version", func() error {
+					_, err = wait.DisableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for key version to be disabled: %w", err)
 				}
-				s.Stop()
 			}
 
 			// Get the key version in its state afterwards

@@ -101,13 +101,13 @@ The available performance class values can be obtained by running:
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Update resource pool")
-				_, err = wait.UpdateResourcePoolWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Update resource pool", func() error {
+					_, err = wait.UpdateResourcePoolWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for resource pool update: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)

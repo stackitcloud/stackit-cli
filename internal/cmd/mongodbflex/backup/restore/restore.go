@@ -99,13 +99,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 
 				if !model.Async {
-					s := spinner.New(params.Printer)
-					s.Start("Restoring instance")
-					_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId, model.Region).WaitWithContext(ctx)
+					err := spinner.Run(params.Printer, "Restoring instance", func() error {
+						_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId, model.Region).WaitWithContext(ctx)
+						return err
+					})
 					if err != nil {
 						return fmt.Errorf("wait for MongoDB Flex instance restoration: %w", err)
 					}
-					s.Stop()
 				}
 
 				operationState := "Restored"
@@ -124,13 +124,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Cloning instance")
-				_, err = wait.CloneInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Cloning instance", func() error {
+					_, err = wait.CloneInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for MongoDB Flex instance cloning: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Cloned"

@@ -79,13 +79,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting volume")
-				_, err = wait.DeleteVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting volume", func() error {
+					_, err = wait.DeleteVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for volume deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

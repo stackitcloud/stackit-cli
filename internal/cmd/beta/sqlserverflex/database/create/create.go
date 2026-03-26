@@ -68,14 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			s := spinner.New(params.Printer)
-			s.Start("Creating database")
-			resp, err := req.Execute()
+			resp, err := spinner.Run2(params.Printer, "Creating database", func() (*sqlserverflex.CreateDatabaseResponse, error) {
+				return req.Execute()
+			})
 			if err != nil {
-				s.StopWithError()
 				return fmt.Errorf("create SQLServer Flex database: %w", err)
 			}
-			s.Stop()
 
 			return outputResult(params.Printer, model.OutputFormat, model.DatabaseName, resp)
 		},

@@ -70,13 +70,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Disabling SKE")
-				_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.Region, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Disabling SKE", func() error {
+					_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.Region, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for SKE disabling: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Disabled"

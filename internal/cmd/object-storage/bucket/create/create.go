@@ -85,13 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating bucket")
-				_, err = wait.CreateBucketWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating bucket", func() error {
+					_, err = wait.CreateBucketWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BucketName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for Object Storage bucket creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, model.BucketName, resp)

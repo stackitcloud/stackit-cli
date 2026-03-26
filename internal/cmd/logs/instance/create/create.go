@@ -102,13 +102,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating instance")
-				_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating instance", func() error {
+					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for logs instance creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model, projectLabel, resp)

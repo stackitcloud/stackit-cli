@@ -133,13 +133,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating cluster")
-				_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, name).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating cluster", func() error {
+					_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, name).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)

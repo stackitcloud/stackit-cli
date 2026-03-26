@@ -100,13 +100,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Updating zone")
-				_, err = wait.PartialUpdateZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Updating zone", func() error {
+					_, err = wait.PartialUpdateZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for DNS zone update: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Updated"
