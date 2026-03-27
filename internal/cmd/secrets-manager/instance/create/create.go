@@ -23,6 +23,11 @@ import (
 const (
 	instanceNameFlag = "name"
 	aclFlag          = "acl"
+
+	kmsKeyIdFlag               = "kms-key-id"
+	kmsKeyringIdFlag           = "kms-keyring-id"
+	kmsKeyVersionFlag          = "kms-key-version"
+	kmsServiceAccountEmailFlag = "kms-service-account-email"
 )
 
 type inputModel struct {
@@ -30,6 +35,11 @@ type inputModel struct {
 
 	InstanceName *string
 	Acls         *[]string
+
+	KmsKeyId               *string
+	KmsKeyringId           *string
+	KmsKeyVersion          *int64
+	KmsServiceAccountEmail *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -45,6 +55,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a Secrets Manager instance with name "my-instance" and specify IP range which is allowed to access it`,
 				`$ stackit secrets-manager instance create --name my-instance --acl 1.2.3.0/24`),
+			examples.NewExample(
+				`Create a Secrets Manager instance with name "my-instance" and configure KMS key options`,
+				`$ stackit secrets-manager instance create --name my-instance --kms-key-id key-id --kms-keyring-id keyring-id --kms-key-version 1 --kms-service-account-email my-service-account-1234567@sa.stackit.cloud`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -103,8 +116,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 
+	cmd.Flags().String(kmsKeyIdFlag, "", "ID of the KMS key to use for encryption")
+	cmd.Flags().String(kmsKeyringIdFlag, "", "ID of the KMS key ring")
+	cmd.Flags().Int64(kmsKeyVersionFlag, 0, "Version of the KMS key")
+	cmd.Flags().String(kmsServiceAccountEmailFlag, "", "Service account email for KMS access")
+
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
 	cobra.CheckErr(err)
+
+	cmd.MarkFlagsRequiredTogether(kmsKeyIdFlag, kmsKeyringIdFlag, kmsKeyVersionFlag, kmsServiceAccountEmailFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -114,9 +134,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
-		Acls:            flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		GlobalFlagModel:        globalFlags,
+		InstanceName:           flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		Acls:                   flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		KmsKeyId:               flags.FlagToStringPointer(p, cmd, kmsKeyIdFlag),
+		KmsKeyringId:           flags.FlagToStringPointer(p, cmd, kmsKeyringIdFlag),
+		KmsKeyVersion:          flags.FlagToInt64Pointer(p, cmd, kmsKeyVersionFlag),
+		KmsServiceAccountEmail: flags.FlagToStringPointer(p, cmd, kmsServiceAccountEmailFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -126,9 +150,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateInstanceRequest {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
-	req = req.CreateInstancePayload(secretsmanager.CreateInstancePayload{
+	payload := secretsmanager.CreateInstancePayload{
 		Name: model.InstanceName,
-	})
+	}
+
+	if model.KmsKeyId != nil {
+		payload.KmsKey = &secretsmanager.KmsKeyPayload{
+			KeyId:               model.KmsKeyId,
+			KeyRingId:           model.KmsKeyringId,
+			KeyVersion:          model.KmsKeyVersion,
+			ServiceAccountEmail: model.KmsServiceAccountEmail,
+		}
+	}
+
+	req = req.CreateInstancePayload(payload)
 
 	return req
 }

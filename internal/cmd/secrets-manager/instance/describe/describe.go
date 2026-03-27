@@ -128,6 +128,17 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 		table.AddSeparator()
 		table.AddRow("CREATION DATE", utils.PtrString(instance.CreationStartDate))
 		table.AddSeparator()
+		kmsKey := instance.KmsKey
+		showKms := kmsKey != nil && (kmsKey.KeyId != nil || kmsKey.KeyRingId != nil || kmsKey.KeyVersion != nil || kmsKey.ServiceAccountEmail != nil)
+		if showKms {
+			table.AddRow("KMS KEY ID", utils.PtrString(kmsKey.KeyId))
+			table.AddSeparator()
+			table.AddRow("KMS KEYRING ID", utils.PtrString(kmsKey.KeyRingId))
+			table.AddSeparator()
+			table.AddRow("KMS KEY VERSION", utils.PtrString(kmsKey.KeyVersion))
+			table.AddSeparator()
+			table.AddRow("KMS SERVICE ACCOUNT EMAIL", utils.PtrString(kmsKey.ServiceAccountEmail))
+		}
 		// Only show ACL if it's present and not empty
 		if aclList.Acls != nil && len(*aclList.Acls) > 0 {
 			var cidrs []string
@@ -136,6 +147,9 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 				cidrs = append(cidrs, *acl.Cidr)
 			}
 
+			if showKms {
+				table.AddSeparator()
+			}
 			table.AddRow("ACL", strings.Join(cidrs, ","))
 		}
 		err := table.Display(p)
