@@ -78,13 +78,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting scrape config")
-				_, err = wait.DeleteScrapeConfigWaitHandler(ctx, apiClient, model.InstanceId, model.JobName, model.ProjectId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting scrape config", func() error {
+					_, err = wait.DeleteScrapeConfigWaitHandler(ctx, apiClient, model.InstanceId, model.JobName, model.ProjectId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for scrape config deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

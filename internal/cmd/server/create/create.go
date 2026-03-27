@@ -144,13 +144,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating server")
-				_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating server", func() error {
+					_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for server creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)

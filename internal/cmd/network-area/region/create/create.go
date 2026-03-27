@@ -108,13 +108,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Create network area region")
-				_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Create network area region", func() error {
+					_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for network area region creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Region, networkAreaLabel, *resp)

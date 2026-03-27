@@ -81,13 +81,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating stackit git instance")
-				_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, *result.Id).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating STACKIT git instance", func() error {
+					_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, *result.Id).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for stackit git Instance creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, model.Name, result)

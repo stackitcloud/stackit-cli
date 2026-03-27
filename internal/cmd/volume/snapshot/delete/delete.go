@@ -76,13 +76,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting snapshot")
-				_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting snapshot", func() error {
+					_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for snapshot deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

@@ -87,13 +87,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Starting credentials rotation")
-				_, err = wait.StartCredentialsRotationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Starting credentials rotation", func() error {
+					_, err = wait.StartCredentialsRotationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for start SKE credentials rotation %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Rotation of credentials is ready to be completed"

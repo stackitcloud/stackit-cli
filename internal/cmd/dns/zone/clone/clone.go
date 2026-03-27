@@ -91,13 +91,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Cloning zone")
-				_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Cloning zone", func() error {
+					_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for DNS zone cloning: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model, zoneLabel, resp)

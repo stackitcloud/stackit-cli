@@ -78,13 +78,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Stopping server")
-				_, err = wait.StopServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Stopping server", func() error {
+					_, err = wait.StopServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for server stopping: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Stopped"

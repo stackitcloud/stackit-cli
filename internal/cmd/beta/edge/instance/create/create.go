@@ -87,19 +87,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating instance")
-				// The waiter handler needs a concrete client type. We can safely cast here as the real implementation will always match.
-				client, ok := apiClient.(*edge.APIClient)
-				if !ok {
-					return fmt.Errorf("failed to configure API client")
-				}
-				_, err = wait.CreateOrUpdateInstanceWaitHandler(ctx, client, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
-
+				err := spinner.Run(params.Printer, "Creating instance", func() error {
+					// The waiter handler needs a concrete concreteClient type. We can safely cast here as the real implementation will always match.
+					concreteClient, ok := apiClient.(*edge.APIClient)
+					if !ok {
+						return fmt.Errorf("failed to configure API concreteClient")
+					}
+					_, err = wait.CreateOrUpdateInstanceWaitHandler(ctx, concreteClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for edge instance creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			// Handle output to printer

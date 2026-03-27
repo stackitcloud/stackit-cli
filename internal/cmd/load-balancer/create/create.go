@@ -93,13 +93,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating load balancer")
-				_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *model.Payload.Name).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating load balancer", func() error {
+					_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *model.Payload.Name).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for load balancer creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Created"

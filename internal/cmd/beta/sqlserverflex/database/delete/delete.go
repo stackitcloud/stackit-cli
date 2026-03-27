@@ -66,14 +66,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			s := spinner.New(params.Printer)
-			s.Start("Deleting database")
-			err = req.Execute()
+			err = spinner.Run(params.Printer, "Deleting database", func() error {
+				err := req.Execute()
+				return err
+			})
 			if err != nil {
-				s.StopWithError()
 				return fmt.Errorf("delete SQLServer Flex database: %w", err)
 			}
-			s.Stop()
 
 			params.Printer.Info("Deleted database %q\n", model.DatabaseName)
 			return nil

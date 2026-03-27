@@ -80,13 +80,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting share")
-				_, err = wait.DeleteShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting share", func() error {
+					_, err = wait.DeleteShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("waiting for share deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operation := "Deleted"

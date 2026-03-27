@@ -94,13 +94,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating snapshot")
-				resp, err = wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
+				resp, err = spinner.Run2(params.Printer, "Creating snapshot", func() (*iaas.Snapshot, error) {
+					return wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
+				})
 				if err != nil {
 					return fmt.Errorf("wait for snapshot creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Created"

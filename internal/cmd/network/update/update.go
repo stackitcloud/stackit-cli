@@ -115,15 +115,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Updating network")
-				_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Updating network", func() error {
+					_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for network update: %w", err)
 				}
-				s.Stop()
 			}
-
 			operationState := "Updated"
 			if model.Async {
 				operationState = "Triggered update of"

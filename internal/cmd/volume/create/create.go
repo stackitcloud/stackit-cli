@@ -104,13 +104,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating volume")
-				_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating volume", func() error {
+					_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for volume creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model, projectLabel, resp)

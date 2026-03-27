@@ -84,13 +84,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating key ring")
-				_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating key ring", func() error {
+					_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for KMS key ring creation: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model, keyRing)

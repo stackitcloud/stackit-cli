@@ -72,13 +72,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Performing cluster maintenance")
-				_, err = wait.TriggerClusterMaintenanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Performing cluster maintenance", func() error {
+					_, err = wait.TriggerClusterMaintenanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster maintenance to complete: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Performed maintenance for"

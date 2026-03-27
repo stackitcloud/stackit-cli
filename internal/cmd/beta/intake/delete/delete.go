@@ -68,13 +68,13 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p.Printer)
-				s.Start("Deleting STACKIT Intake instance")
-				_, err = wait.DeleteIntakeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId).WaitWithContext(ctx)
+				err := spinner.Run(p.Printer, "Deleting STACKIT Intake instance", func() error {
+					_, err = wait.DeleteIntakeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Instance deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

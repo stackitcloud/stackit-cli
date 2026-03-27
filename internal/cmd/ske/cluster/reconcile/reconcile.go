@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Performing cluster reconciliation")
-				_, err = wait.TriggerClusterReconciliationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Performing cluster reconciliation", func() error {
+					_, err = wait.TriggerClusterReconciliationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for SKE cluster reconciliation: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Performed reconciliation for"

@@ -134,15 +134,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Creating network")
-				_, err = wait.CreateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating network", func() error {
+					_, err = wait.CreateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for network creation: %w", err)
 				}
-				s.Stop()
 			}
-
 			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}

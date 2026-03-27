@@ -66,13 +66,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Deleting load balancer")
-				_, err = wait.DeleteLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.LoadBalancerName).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting load balancer", func() error {
+					_, err = wait.DeleteLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.LoadBalancerName).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for load balancer deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

@@ -96,13 +96,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(params.Printer)
-				s.Start("Updating share")
-				_, err = wait.UpdateShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Updating share", func() error {
+					_, err = wait.UpdateShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("waiting for share update: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, model.Async, resourcePoolLabel, resp)
