@@ -70,13 +70,13 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p.Printer)
-				s.Start("Deleting STACKIT Intake User")
-				_, err = wait.DeleteIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+				err := spinner.Run(p.Printer, "Deleting STACKIT Intake User", func() error {
+					_, err = wait.DeleteIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+					return err
+				})
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User deletion: %w", err)
 				}
-				s.Stop()
 			}
 
 			operationState := "Deleted"

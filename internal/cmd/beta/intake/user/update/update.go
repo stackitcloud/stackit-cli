@@ -77,13 +77,14 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				s := spinner.New(p.Printer)
-				s.Start("Updating STACKIT Intake User")
-				_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+				err := spinner.Run(p.Printer, "Updating STACKIT Intake User", func() error {
+					_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+					return err
+				})
+
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User update: %w", err)
 				}
-				s.Stop()
 			}
 
 			return outputResult(p.Printer, model, resp)
