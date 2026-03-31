@@ -98,7 +98,6 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 }
 
 func authorizeUserWithPKCE(p *print.Printer, idpWellKnownConfig *wellKnownConfig, idpClientID string, authConfig UserAuthConfig) error {
-
 	var redirectURL string
 	var listener net.Listener
 	var listenerErr error
