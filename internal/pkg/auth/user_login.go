@@ -26,6 +26,7 @@ import (
 const (
 	defaultWellKnownConfig = "https://accounts.stackit.cloud/.well-known/openid-configuration"
 	defaultCLIClientID     = "stackit-cli-0000-0000-000000000001"
+	scope                  = "openid groups offline_access email"
 
 	loginSuccessPath = "/login-successful"
 
@@ -129,7 +130,7 @@ func authorizeUserWithPKCE(p *print.Printer, idpWellKnownConfig *wellKnownConfig
 		Endpoint: oauth2.Endpoint{
 			AuthURL: idpWellKnownConfig.AuthorizationEndpoint,
 		},
-		Scopes:      []string{"openid offline_access email"},
+		Scopes:      []string{scope},
 		RedirectURL: redirectURL,
 	}
 
@@ -360,7 +361,7 @@ type deviceAuthorizationResponse struct {
 func getDeviceAuthorizationData(deviceAuthorizationEndpoint, clientID string) (*deviceAuthorizationResponse, error) {
 	form := url.Values{}
 	form.Set("client_id", clientID)
-	form.Set("scope", "openid offline_access email")
+	form.Set("scope", scope)
 
 	req, err := http.NewRequest("POST", deviceAuthorizationEndpoint, strings.NewReader(form.Encode()))
 	if err != nil {
