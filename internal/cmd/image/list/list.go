@@ -24,11 +24,13 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector *string
 	Limit         *int64
+	All           *bool
 }
 
 const (
 	labelSelectorFlag = "label-selector"
 	limitFlag         = "limit"
+	allFlag           = "all"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -102,6 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
+	cmd.Flags().Bool(allFlag, false, "List all images available")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -122,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 		Limit:           limit,
+		All:             flags.FlagToBoolPointer(p, cmd, allFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -133,9 +137,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
+	if model.All != nil {
+		request = request.All(*model.All)
+	}
 
 	return request
 }
+
 func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) error {
 	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
