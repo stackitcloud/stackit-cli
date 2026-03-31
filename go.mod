@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.5.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.8
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.6
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.3.5
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.6.1
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.18.5
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.4.3
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.14.3
