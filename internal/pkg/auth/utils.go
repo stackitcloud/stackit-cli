@@ -13,9 +13,11 @@ import (
 )
 
 type wellKnownConfig struct {
-	Issuer                string `json:"issuer"`
-	AuthorizationEndpoint string `json:"authorization_endpoint"`
-	TokenEndpoint         string `json:"token_endpoint"`
+	Issuer                      string   `json:"issuer"`
+	AuthorizationEndpoint       string   `json:"authorization_endpoint"`
+	TokenEndpoint               string   `json:"token_endpoint"`
+	DeviceAuthorizationEndpoint string   `json:"device_authorization_endpoint"`
+	GrantTypesSupported         []string `json:"grant_types_supported"`
 }
 
 func getIDPWellKnownConfigURL() (wellKnownConfigURL string, err error) {

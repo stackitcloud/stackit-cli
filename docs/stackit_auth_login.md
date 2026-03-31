@@ -5,7 +5,7 @@ Logs in to the STACKIT CLI
 ### Synopsis
 
 Logs in to the STACKIT CLI using a user account.
-The authentication is done via a web-based authorization flow, where the command will open a browser window in which you can login to your STACKIT account.
+By default, the authentication uses a web-based authorization flow and opens a browser window where you can login to your STACKIT account. You can alternatively use the OAuth 2.0 device flow for environments where receiving a local callback is not possible.
 
 ```
 stackit auth login [flags]
@@ -16,6 +16,9 @@ stackit auth login [flags]
 ```
   Login to the STACKIT CLI. This command will open a browser window where you can login to your STACKIT account
   $ stackit auth login
+
+  Login to the STACKIT CLI using OAuth 2.0 device flow
+  $ stackit auth login --use-device-flow
 ```
 
 ### Options
@@ -24,6 +27,7 @@ stackit auth login [flags]
   -h, --help       Help for "stackit auth login"
       --port int   The port on which the callback server will listen to. By default, it tries to bind a port between 8000 and 8020.
                    When a value is specified, it will only try to use the specified port. Valid values are within the range of 8000 to 8020.
+      --use-device-flow   Use OAuth 2.0 device authorization grant (device flow) instead of the browser callback flow.
 ```
 
 ### Options inherited from parent commands

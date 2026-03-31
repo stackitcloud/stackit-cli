@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -32,6 +33,10 @@ const (
 	// so we configure a range of ports from 8000 to 8020
 	defaultPort         = 8000
 	configuredPortRange = 20
+
+	deviceCodeGrantType       = "urn:ietf:params:oauth:grant-type:device_code"
+	defaultDevicePollInterval = 5 * time.Second
+	devicePollSlowDownStep    = 5 * time.Second
 )
 
 //go:embed templates/login-successful.html
@@ -50,13 +55,15 @@ type UserAuthConfig struct {
 	IsReauthentication bool
 	// Port defines which port should be used for the UserAuthFlow callback
 	Port *int
+	// UseDeviceFlow defines if the login should use OAuth 2.0 device flow
+	UseDeviceFlow bool
 }
 
 type apiClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// AuthorizeUser implements the PKCE OAuth2 flow.
+// AuthorizeUser performs user login using either PKCE or OAuth 2.0 device flow.
 func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	idpWellKnownConfig, err := retrieveIDPWellKnownConfig(p)
 	if err != nil {
@@ -81,6 +88,15 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 			return err
 		}
 	}
+
+	if authConfig.UseDeviceFlow {
+		return authorizeUserWithDeviceFlow(p, idpWellKnownConfig, idpClientID)
+	}
+
+	return authorizeUserWithPKCE(p, idpWellKnownConfig, idpClientID, authConfig)
+}
+
+func authorizeUserWithPKCE(p *print.Printer, idpWellKnownConfig *wellKnownConfig, idpClientID string, authConfig UserAuthConfig) error {
 
 	var redirectURL string
 	var listener net.Listener
@@ -266,6 +282,238 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	}
 
 	return nil
+}
+
+func authorizeUserWithDeviceFlow(p *print.Printer, idpWellKnownConfig *wellKnownConfig, idpClientID string) error {
+	if idpWellKnownConfig.DeviceAuthorizationEndpoint == "" {
+		return fmt.Errorf("IDP does not provide a device authorization endpoint")
+	}
+	if len(idpWellKnownConfig.GrantTypesSupported) > 0 && !containsString(idpWellKnownConfig.GrantTypesSupported, deviceCodeGrantType) {
+		return fmt.Errorf("IDP does not advertise support for grant type %q", deviceCodeGrantType)
+	}
+
+	p.Debug(print.DebugLevel, "using device authorization endpoint %s", idpWellKnownConfig.DeviceAuthorizationEndpoint)
+	p.Debug(print.DebugLevel, "using token endpoint %s", idpWellKnownConfig.TokenEndpoint)
+	p.Debug(print.DebugLevel, "using client ID %s for authentication ", idpClientID)
+
+	deviceAuthorization, err := getDeviceAuthorizationData(idpWellKnownConfig.DeviceAuthorizationEndpoint, idpClientID)
+	if err != nil {
+		return fmt.Errorf("request device authorization: %w", err)
+	}
+
+	verificationURL := deviceAuthorization.VerificationURIComplete
+	if verificationURL == "" {
+		verificationURL = deviceAuthorization.VerificationURI
+	}
+
+	p.Info("To complete login with device flow:\n")
+	p.Info("1. Open this URL in your browser:\n")
+	p.Info("%s\n\n", verificationURL)
+	p.Info("2. Enter this code when prompted: %s\n\n", deviceAuthorization.UserCode)
+
+	if verificationURL != "" {
+		err = openBrowser(verificationURL)
+		if err != nil {
+			p.Warn("Could not open browser automatically: %v\n", err)
+		}
+	}
+
+	accessToken, refreshToken, err := waitForDeviceFlowTokens(idpWellKnownConfig.TokenEndpoint, idpClientID, deviceAuthorization)
+	if err != nil {
+		return fmt.Errorf("retrieve tokens: %w", err)
+	}
+
+	sessionExpiresAtUnix, err := getStartingSessionExpiresAtUnix()
+	if err != nil {
+		return fmt.Errorf("compute session expiration timestamp: %w", err)
+	}
+
+	err = SetAuthFlow(AUTH_FLOW_USER_TOKEN)
+	if err != nil {
+		return fmt.Errorf("set auth flow type: %w", err)
+	}
+
+	email, err := getEmailFromToken(accessToken)
+	if err != nil {
+		return fmt.Errorf("get email from access token: %w", err)
+	}
+
+	p.Debug(print.DebugLevel, "user %s logged in successfully via device flow", email)
+
+	err = LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix)
+	if err != nil {
+		return fmt.Errorf("set in auth storage: %w", err)
+	}
+
+	return nil
+}
+
+type deviceAuthorizationResponse struct {
+	DeviceCode              string `json:"device_code"`
+	UserCode                string `json:"user_code"`
+	VerificationURI         string `json:"verification_uri"`
+	VerificationURIComplete string `json:"verification_uri_complete"`
+	ExpiresIn               int    `json:"expires_in"`
+	Interval                int    `json:"interval"`
+}
+
+func getDeviceAuthorizationData(deviceAuthorizationEndpoint, clientID string) (*deviceAuthorizationResponse, error) {
+	form := url.Values{}
+	form.Set("client_id", clientID)
+	form.Set("scope", "openid offline_access email")
+
+	req, err := http.NewRequest("POST", deviceAuthorizationEndpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Add("content-type", "application/x-www-form-urlencoded")
+
+	httpClient := &http.Client{}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("call device authorization endpoint: %w", err)
+	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+
+	responseData := deviceAuthorizationResponse{}
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal response: %w", err)
+	}
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("unexpected status code %d", res.StatusCode)
+	}
+	if responseData.DeviceCode == "" {
+		return nil, fmt.Errorf("found no device code")
+	}
+	if responseData.UserCode == "" {
+		return nil, fmt.Errorf("found no user code")
+	}
+	if responseData.VerificationURI == "" && responseData.VerificationURIComplete == "" {
+		return nil, fmt.Errorf("found no verification URI")
+	}
+	if responseData.ExpiresIn <= 0 {
+		return nil, fmt.Errorf("found invalid expiration")
+	}
+
+	return &responseData, nil
+}
+
+type tokenEndpointResponse struct {
+	AccessToken      string `json:"access_token"`
+	RefreshToken     string `json:"refresh_token"`
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+func waitForDeviceFlowTokens(tokenEndpoint, clientID string, deviceAuthorization *deviceAuthorizationResponse) (accessToken, refreshToken string, err error) {
+	pollInterval := defaultDevicePollInterval
+	if deviceAuthorization.Interval > 0 {
+		pollInterval = time.Duration(deviceAuthorization.Interval) * time.Second
+	}
+	deadline := time.Now().Add(time.Duration(deviceAuthorization.ExpiresIn) * time.Second)
+
+	for {
+		if time.Now().After(deadline) {
+			return "", "", fmt.Errorf("device authorization expired before login was completed")
+		}
+
+		accessToken, refreshToken, tokenError, tokenErrorDescription, err := getTokensWithDeviceCode(tokenEndpoint, clientID, deviceAuthorization.DeviceCode)
+		if err != nil {
+			return "", "", err
+		}
+
+		switch tokenError {
+		case "":
+			if accessToken == "" {
+				return "", "", fmt.Errorf("found no access token")
+			}
+			if refreshToken == "" {
+				return "", "", fmt.Errorf("found no refresh token")
+			}
+			return accessToken, refreshToken, nil
+		case "authorization_pending":
+			// Keep polling until the user confirms authorization or the device code expires.
+		case "slow_down":
+			pollInterval += devicePollSlowDownStep
+		case "access_denied":
+			if tokenErrorDescription == "" {
+				return "", "", fmt.Errorf("device authorization was denied by the user")
+			}
+			return "", "", fmt.Errorf("device authorization denied: %s", tokenErrorDescription)
+		case "expired_token":
+			if tokenErrorDescription == "" {
+				return "", "", fmt.Errorf("device authorization expired")
+			}
+			return "", "", fmt.Errorf("device authorization expired: %s", tokenErrorDescription)
+		default:
+			if tokenErrorDescription == "" {
+				return "", "", fmt.Errorf("token endpoint returned error %q", tokenError)
+			}
+			return "", "", fmt.Errorf("token endpoint returned error %q: %s", tokenError, tokenErrorDescription)
+		}
+
+		time.Sleep(pollInterval)
+	}
+}
+
+func getTokensWithDeviceCode(tokenEndpoint, clientID, deviceCode string) (accessToken, refreshToken, tokenError, tokenErrorDescription string, err error) {
+	form := url.Values{}
+	form.Set("grant_type", deviceCodeGrantType)
+	form.Set("client_id", clientID)
+	form.Set("device_code", deviceCode)
+
+	req, err := http.NewRequest("POST", tokenEndpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Add("content-type", "application/x-www-form-urlencoded")
+
+	httpClient := &http.Client{}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("call access token endpoint: %w", err)
+	}
+	defer func() {
+		closeErr := res.Body.Close()
+		if closeErr != nil && err == nil {
+			err = fmt.Errorf("close response body: %w", closeErr)
+		}
+	}()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("read response body: %w", err)
+	}
+
+	responseData := tokenEndpointResponse{}
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("unmarshal response: %w", err)
+	}
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
+		if responseData.Error == "" {
+			return "", "", "", "", fmt.Errorf("token endpoint returned status code %d", res.StatusCode)
+		}
+	}
+
+	return responseData.AccessToken, responseData.RefreshToken, responseData.Error, responseData.ErrorDescription, nil
+}
+
+func containsString(values []string, expected string) bool {
+	for _, value := range values {
+		if value == expected {
+			return true
+		}
+	}
+	return false
 }
 
 // getUserAccessAndRefreshTokens trades the authorization code retrieved from the first OAuth2 leg for an access token and a refresh token
