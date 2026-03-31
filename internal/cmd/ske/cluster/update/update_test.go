@@ -31,45 +31,59 @@ const testRegion = "eu01"
 
 var testPayload = ske.CreateOrUpdateClusterPayload{
 	Kubernetes: ske.Kubernetes{
-		Version: "1.25.15",
+		Version:              "1.25.15",
+		AdditionalProperties: map[string]any{},
 	},
 	Nodepools: []ske.Nodepool{
 		{
 			Name: "np-name",
 			Machine: ske.Machine{
 				Image: ske.Image{
-					Name:    "flatcar",
-					Version: "3760.2.1",
+					Name:                 "flatcar",
+					Version:              "3760.2.1",
+					AdditionalProperties: map[string]any{},
 				},
-				Type: "b1.2",
+				Type:                 "b1.2",
+				AdditionalProperties: map[string]any{},
 			},
 			Minimum:  int32(1),
 			Maximum:  int32(2),
 			MaxSurge: utils.Ptr(int32(1)),
 			Volume: ske.Volume{
-				Type: utils.Ptr("storage_premium_perf0"),
-				Size: int32(40),
+				Type:                 utils.Ptr("storage_premium_perf0"),
+				Size:                 int32(40),
+				AdditionalProperties: map[string]any{},
 			},
 			AvailabilityZones: []string{"eu01-3"},
-			Cri:               &ske.CRI{Name: utils.Ptr("containerd")},
+			Cri: &ske.CRI{
+				Name:                 utils.Ptr("containerd"),
+				AdditionalProperties: map[string]any{},
+			},
+			AdditionalProperties: map[string]any{},
 		},
 	},
 	Extensions: &ske.Extension{
 		Acl: &ske.ACL{
-			Enabled:      true,
-			AllowedCidrs: []string{"0.0.0.0/0"},
+			Enabled:              true,
+			AllowedCidrs:         []string{"0.0.0.0/0"},
+			AdditionalProperties: map[string]any{},
 		},
+		AdditionalProperties: map[string]any{},
 	},
 	Maintenance: &ske.Maintenance{
 		AutoUpdate: ske.MaintenanceAutoUpdate{
-			KubernetesVersion:   utils.Ptr(true),
-			MachineImageVersion: utils.Ptr(true),
+			KubernetesVersion:    utils.Ptr(true),
+			MachineImageVersion:  utils.Ptr(true),
+			AdditionalProperties: map[string]any{},
 		},
 		TimeWindow: ske.TimeWindow{
-			End:   time.Date(0, 1, 1, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
-			Start: time.Date(0, 1, 1, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
+			End:                  time.Date(0, 1, 1, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
+			Start:                time.Date(0, 1, 1, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
+			AdditionalProperties: map[string]any{},
 		},
+		AdditionalProperties: map[string]any{},
 	},
+	AdditionalProperties: map[string]any{},
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
