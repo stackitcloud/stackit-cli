@@ -13,7 +13,7 @@ stackit image list [flags]
 ### Examples
 
 ```
-  List all images
+  List images in your project
   $ stackit image list
 
   List images with label
@@ -21,11 +21,15 @@ stackit image list [flags]
 
   List the first 10 images
   $ stackit image list --limit=10
+
+  List all images
+  $ stackit image list --all
 ```
 
 ### Options
 
 ```
+      --all                     List all images available
   -h, --help                    Help for "stackit image list"
       --label-selector string   Filter by label
       --limit int               Limit the output to the first n elements
