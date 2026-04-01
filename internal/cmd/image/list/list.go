@@ -41,7 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all images`,
+				`List images in your project`,
 				`$ stackit image list`,
 			),
 			examples.NewExample(
@@ -51,6 +51,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`List the first 10 images`,
 				`$ stackit image list --limit=10`,
+			),
+			examples.NewExample(
+				`List all images`,
+				`$ stackit image list --all`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
