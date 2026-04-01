@@ -151,7 +151,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) error {
 	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "LABELS")
+		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "SCOPE", "OWNER", "LABELS")
 		for i := range items {
 			item := items[i]
 			var (
@@ -159,6 +159,8 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 				os           = "n/a"
 				distro       = "n/a"
 				version      = "n/a"
+				owner        = "n/a"
+				scope        = "n/a"
 			)
 			if cfg := item.Config; cfg != nil {
 				if v := cfg.Architecture; v != nil {
@@ -174,12 +176,21 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 					version = *v.Get()
 				}
 			}
+			if v := item.GetOwner(); v != "" {
+				owner = v
+			}
+			if v := item.GetScope(); v != "" {
+				scope = v
+			}
+
 			table.AddRow(utils.PtrString(item.Id),
 				utils.PtrString(item.Name),
 				os,
 				architecture,
 				distro,
 				version,
+				scope,
+				owner,
 				utils.JoinStringKeysPtr(*item.Labels, ","))
 		}
 		err := table.Display(p)
