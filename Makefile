@@ -9,7 +9,7 @@ build:
 
 fmt:
 	@gofmt -s -w .
-	@go tool goimports -w .
+	@go tool golangci-lint fmt --config=${GOLANG_CI_YAML_PATH}
 
 # Lint
 lint-golangci-lint:
