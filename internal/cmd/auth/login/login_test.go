@@ -9,7 +9,8 @@ import (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		portFlag: "8010",
+		portFlag:          "8010",
+		useDeviceFlowFlag: "false",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -19,7 +20,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
-		Port: utils.Ptr(8010),
+		Port:          utils.Ptr(8010),
+		UseDeviceFlow: false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -46,7 +48,19 @@ func TestParseInput(t *testing.T) {
 			flagValues:  map[string]string{},
 			isValid:     true,
 			expectedModel: &inputModel{
-				Port: nil,
+				Port:          nil,
+				UseDeviceFlow: false,
+			},
+		},
+		{
+			description: "device flow enabled",
+			flagValues: map[string]string{
+				useDeviceFlowFlag: "true",
+			},
+			isValid: true,
+			expectedModel: &inputModel{
+				Port:          nil,
+				UseDeviceFlow: true,
 			},
 		},
 		{
@@ -56,7 +70,8 @@ func TestParseInput(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &inputModel{
-				Port: utils.Ptr(8000),
+				Port:          utils.Ptr(8000),
+				UseDeviceFlow: false,
 			},
 		},
 		{
@@ -73,7 +88,8 @@ func TestParseInput(t *testing.T) {
 			},
 			isValid: true,
 			expectedModel: &inputModel{
-				Port: utils.Ptr(8020),
+				Port:          utils.Ptr(8020),
+				UseDeviceFlow: false,
 			},
 		},
 		{
