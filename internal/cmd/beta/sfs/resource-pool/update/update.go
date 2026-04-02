@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,8 +20,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
 )
 
 const (

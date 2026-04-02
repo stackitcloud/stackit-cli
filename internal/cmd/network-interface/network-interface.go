@@ -2,6 +2,7 @@ package networkinterface
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-interface/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-interface/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network-interface/describe"

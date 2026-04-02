@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestSetGetAuthField(t *testing.T) {

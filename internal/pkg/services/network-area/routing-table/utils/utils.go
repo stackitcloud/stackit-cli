@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type RouteDetails struct {

@@ -16,8 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"golang.org/x/oauth2"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )

@@ -9,9 +9,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 type testCtxKey struct{}

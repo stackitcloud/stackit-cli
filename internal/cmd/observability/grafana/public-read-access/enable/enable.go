@@ -15,8 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+
+	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 )
 
 const (

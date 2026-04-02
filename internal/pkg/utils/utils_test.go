@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
 	"github.com/spf13/viper"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 

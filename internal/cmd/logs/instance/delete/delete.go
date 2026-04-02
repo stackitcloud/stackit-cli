@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,9 +19,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
+	"github.com/stackitcloud/stackit-sdk-go/services/logs/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 	logsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/logs/wait"
 )
 
 const (

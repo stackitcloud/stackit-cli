@@ -8,6 +8,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+	"github.com/stackitcloud/stackit-sdk-go/services/edge/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -20,8 +23,6 @@ import (
 	commonValidation "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/validation"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge/wait"
 )
 
 // Struct to model user input (arguments and/or flags)

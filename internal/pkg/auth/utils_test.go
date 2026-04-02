@@ -5,8 +5,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
 
 func TestGetWellKnownConfig(t *testing.T) {

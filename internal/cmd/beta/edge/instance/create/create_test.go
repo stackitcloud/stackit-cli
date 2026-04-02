@@ -11,6 +11,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -19,7 +21,6 @@ import (
 	commonInstance "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/instance"
 	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
 )
 
 type testCtxKey struct{}

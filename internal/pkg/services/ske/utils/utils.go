@@ -9,8 +9,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 	"golang.org/x/mod/semver"

@@ -9,11 +9,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag

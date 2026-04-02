@@ -8,6 +8,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -21,8 +24,6 @@ import (
 	skeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api/wait"
 )
 
 const (

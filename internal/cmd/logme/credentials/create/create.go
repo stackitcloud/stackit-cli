@@ -7,6 +7,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/client"
 	logmeUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logme/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
 )
 
 const (

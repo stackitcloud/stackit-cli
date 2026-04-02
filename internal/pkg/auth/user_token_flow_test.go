@@ -10,8 +10,9 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 const (

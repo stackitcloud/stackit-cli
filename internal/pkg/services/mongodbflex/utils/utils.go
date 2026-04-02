@@ -7,8 +7,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"golang.org/x/mod/semver"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
 	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
 )

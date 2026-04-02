@@ -5,6 +5,7 @@ package edge
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge/kubeconfig"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge/plans"

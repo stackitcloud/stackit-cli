@@ -6,9 +6,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/spf13/viper"
+	"github.com/zalando/go-keyring"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/zalando/go-keyring"
 )
 
 var testTokenCustomEndpoint = "token_url"

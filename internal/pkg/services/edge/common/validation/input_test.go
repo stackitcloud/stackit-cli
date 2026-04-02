@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	commonErr "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/error"
 	commonInstance "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/instance"

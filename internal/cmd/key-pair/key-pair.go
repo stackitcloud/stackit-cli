@@ -2,6 +2,7 @@ package keypair
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/key-pair/create"

@@ -2,6 +2,7 @@ package snapshot
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/snapshot/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/snapshot/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume/snapshot/describe"
