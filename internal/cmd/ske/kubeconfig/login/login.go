@@ -21,6 +21,8 @@ import (
 	"k8s.io/client-go/tools/auth/exec"
 	"k8s.io/client-go/tools/clientcmd"
 
+	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/cache"
@@ -31,7 +33,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/ske/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 )
 
 const (

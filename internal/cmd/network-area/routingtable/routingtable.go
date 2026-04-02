@@ -2,6 +2,7 @@ package routingtable
 
 import (
 	"github.com/spf13/cobra"
+
 	rtCreate "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/create"
 	rtDelete "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/delete"
 	rtDescribe "github.com/stackitcloud/stackit-cli/internal/cmd/network-area/routingtable/describe"

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 

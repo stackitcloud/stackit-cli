@@ -11,9 +11,10 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/client-go/tools/clientcmd"
+
 	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (

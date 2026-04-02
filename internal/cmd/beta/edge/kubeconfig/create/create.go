@@ -10,6 +10,10 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/core/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+	"github.com/stackitcloud/stackit-sdk-go/services/edge/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -22,9 +26,6 @@ import (
 	commonKubeconfig "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/kubeconfig"
 	commonValidation "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/validation"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge/wait"
 )
 
 type inputModel struct {

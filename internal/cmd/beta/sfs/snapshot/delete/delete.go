@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/client"
 	sfsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
 )
 
 const (

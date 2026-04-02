@@ -2,6 +2,7 @@ package intake
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake/describe"

@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
+	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,8 +19,6 @@ import (
 	cdnUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 )
 
 const (

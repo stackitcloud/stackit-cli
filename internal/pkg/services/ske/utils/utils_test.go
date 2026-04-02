@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"

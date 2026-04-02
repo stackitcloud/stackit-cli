@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+
 	pkgErrors "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 )
 

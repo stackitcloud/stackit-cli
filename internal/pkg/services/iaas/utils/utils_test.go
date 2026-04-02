@@ -6,8 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var _ IaaSClient = &IaaSClientMocked{}
