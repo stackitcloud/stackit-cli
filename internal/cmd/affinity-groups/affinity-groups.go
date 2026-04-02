@@ -2,6 +2,7 @@ package affinity_groups
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups/describe"

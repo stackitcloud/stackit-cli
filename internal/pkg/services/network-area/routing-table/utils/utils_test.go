@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const ipv4 = "ipv4"

@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager/user/describe"

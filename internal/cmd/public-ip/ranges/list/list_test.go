@@ -8,10 +8,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 )
 
 func TestParseInput(t *testing.T) {

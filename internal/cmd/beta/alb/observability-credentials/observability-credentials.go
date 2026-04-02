@@ -2,6 +2,7 @@ package credentials
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	add "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb/observability-credentials/add"

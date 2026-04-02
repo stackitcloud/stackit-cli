@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/spf13/viper"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/fileutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"

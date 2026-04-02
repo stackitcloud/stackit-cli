@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/git"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type GitClientMocked struct {

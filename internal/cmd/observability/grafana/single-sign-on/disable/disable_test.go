@@ -12,8 +12,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+
+	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
