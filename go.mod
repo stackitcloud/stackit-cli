@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.23.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.10.0
@@ -36,7 +36,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.7
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.4.3
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.6.2
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.33.0
 	golang.org/x/oauth2 v0.35.0
