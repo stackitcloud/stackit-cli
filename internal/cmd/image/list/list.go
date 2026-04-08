@@ -25,11 +25,13 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector *string
 	Limit         *int64
+	All           *bool
 }
 
 const (
 	labelSelectorFlag = "label-selector"
 	limitFlag         = "limit"
+	allFlag           = "all"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -40,7 +42,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all images`,
+				`List images in your project`,
 				`$ stackit image list`,
 			),
 			examples.NewExample(
@@ -50,6 +52,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`List the first 10 images`,
 				`$ stackit image list --limit=10`,
+			),
+			examples.NewExample(
+				`List all images`,
+				`$ stackit image list --all`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -103,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
+	cmd.Flags().Bool(allFlag, false, "List all images available")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -123,6 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 		Limit:           limit,
+		All:             flags.FlagToBoolPointer(p, cmd, allFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -134,13 +142,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
+	if model.All != nil {
+		request = request.All(*model.All)
+	}
 
 	return request
 }
+
 func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) error {
 	return p.OutputResult(outputFormat, items, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "LABELS")
+		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "SCOPE", "OWNER", "LABELS")
 		for i := range items {
 			item := items[i]
 			var (
@@ -148,6 +160,8 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 				os           = "n/a"
 				distro       = "n/a"
 				version      = "n/a"
+				owner        = "n/a"
+				scope        = "n/a"
 			)
 			if cfg := item.Config; cfg != nil {
 				if v := cfg.Architecture; v != nil {
@@ -163,12 +177,21 @@ func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) err
 					version = *v.Get()
 				}
 			}
+			if v := item.GetOwner(); v != "" {
+				owner = v
+			}
+			if v := item.GetScope(); v != "" {
+				scope = v
+			}
+
 			table.AddRow(utils.PtrString(item.Id),
 				utils.PtrString(item.Name),
 				os,
 				architecture,
 				distro,
 				version,
+				scope,
+				owner,
 				utils.JoinStringKeysPtr(*item.Labels, ","))
 		}
 		err := table.Display(p)
