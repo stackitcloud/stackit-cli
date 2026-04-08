@@ -15,12 +15,12 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.23.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.17.6
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.4.3
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.8.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.10.3
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.3.5
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.4.4
