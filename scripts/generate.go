@@ -47,7 +47,7 @@ func main() {
 	)
 	params := &types.CmdParams{
 		Printer: printer,
-		Args: os.Args,
+		Args:    os.Args,
 	}
 	err = doc.GenMarkdownTreeCustom(cmd.NewRootCmd(params), docsDir, filePrepender, linkHandler)
 	if err != nil {
