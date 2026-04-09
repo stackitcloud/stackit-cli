@@ -9,7 +9,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -57,11 +56,9 @@ func TestOutputf(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 			viper.Reset()
@@ -129,11 +126,9 @@ func TestOutputln(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 			viper.Reset()
@@ -194,11 +189,9 @@ func TestPagerDisplay(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 			viper.Reset()
@@ -294,13 +287,11 @@ func TestDebug(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
 			slog.SetDefault(logger)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 
@@ -358,11 +349,9 @@ func TestInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 
@@ -418,11 +407,9 @@ func TestWarn(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
 
@@ -478,12 +465,11 @@ func TestError(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
-			cmd := &cobra.Command{}
-			cmd.SetOut(&buf)
-			cmd.SetErr(&buf)
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buf,
+				StdErr:    &buf,
 				Verbosity: tt.verbosity,
+				ErrPrefix: "Error:",
 			}
 
 			p.Error("%s", tt.message)
@@ -666,13 +652,10 @@ func TestPromptForConfirmation(t *testing.T) {
 				t.Fatalf("failed to initialize mock input: %v", err)
 			}
 
-			cmd := &cobra.Command{}
-			cmd.SetOut(io.Discard) // Suppresses console prints
-			cmd.SetErr(io.Discard)
-			cmd.SetIn(buffer)
-
 			p := &Printer{
-				Cmd:       cmd,
+				StdIn:     buffer,
+				StdOut:    io.Discard,
+				StdErr:    io.Discard,
 				Verbosity: tt.verbosity,
 				AssumeYes: tt.assumeYes,
 			}
@@ -724,9 +707,8 @@ func TestIsVerbosityDebug(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			// TODO ask team if we really need this test
 			p := &Printer{
-				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
 
@@ -768,9 +750,8 @@ func TestIsVerbosityInfo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			// TODO ask team if we really need this test
 			p := &Printer{
-				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
 
@@ -812,9 +793,8 @@ func TestIsVerbosityWarning(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			// TODO ask team if we really need this test
 			p := &Printer{
-				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
 
@@ -856,9 +836,8 @@ func TestIsVerbosityError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			// TODO ask team if we really need this test
 			p := &Printer{
-				Cmd:       cmd,
 				Verbosity: tt.verbosity,
 			}
 
@@ -934,9 +913,9 @@ func TestOutputResult(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := &cobra.Command{}
+			var buffer bytes.Buffer
 			p := &Printer{
-				Cmd:       cmd,
+				StdOut:    &buffer,
 				Verbosity: ErrorLevel,
 			}
 
@@ -963,15 +942,15 @@ func TestPromptForPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			cmd := &cobra.Command{}
 			r, w := io.Pipe()
 			defer func() {
 				r.Close() //nolint:errcheck // ignore error on close
 				w.Close() //nolint:errcheck // ignore error on close
 			}()
-			cmd.SetIn(r)
 			p := &Printer{
-				Cmd:       cmd,
+				StdIn:     r,
+				StdErr:    &bytes.Buffer{},
+				StdOut:    &bytes.Buffer{},
 				Verbosity: ErrorLevel,
 			}
 			var pw string

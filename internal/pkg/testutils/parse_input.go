@@ -8,6 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -68,13 +70,10 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 		t.Fatalf("parse input case %q missing ParseInputFunc", tc.Name)
 	}
 
-	printer := print.NewPrinter()
-	cmd := tc.CmdFactory(&types.CmdParams{Printer: printer})
+	params := testparams.NewTestParams()
+	cmd := tc.CmdFactory(params.CmdParams)
 	if cmd == nil {
 		t.Fatalf("parse input case %q produced nil command", tc.Name)
-	}
-	if printer.Cmd == nil {
-		printer.Cmd = cmd
 	}
 
 	if err := globalflags.Configure(cmd.Flags()); err != nil {
@@ -118,7 +117,7 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	}
 
 	// Test parse input function.
-	got, err := tc.ParseInputFunc(printer, cmd, tc.Args)
+	got, err := tc.ParseInputFunc(params.Printer, cmd, tc.Args)
 	if !AssertError(t, err, tc.WantErr) {
 		return
 	}

@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
@@ -14,6 +12,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -218,8 +217,8 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			p := print.NewPrinter()
-			model, err := parseInput(p, cmd)
+			params := testparams.NewTestParams()
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -316,11 +315,11 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.model, tt.key)
+			err := outputResult(params.Printer, tt.model, tt.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

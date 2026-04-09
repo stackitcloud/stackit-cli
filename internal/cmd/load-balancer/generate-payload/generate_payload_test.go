@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -12,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -294,11 +293,10 @@ func TestOutputCreateResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputCreateResult(p, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
+			if err := outputCreateResult(params.Printer, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
 				t.Errorf("outputCreateResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -328,11 +326,10 @@ func TestOutputUpdateResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputUpdateResult(p, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
+			if err := outputUpdateResult(params.Printer, tt.args.filePath, tt.args.payload); (err != nil) != tt.wantErr {
 				t.Errorf("outputUpdateResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

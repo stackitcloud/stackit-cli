@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -182,8 +181,6 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(cmd.Flags().MarkDeprecated(defaultPrefixLengthFlag, deprecationMessage))
 	cobra.CheckErr(cmd.Flags().MarkDeprecated(maxPrefixLengthFlag, deprecationMessage))
 	cobra.CheckErr(cmd.Flags().MarkDeprecated(minPrefixLengthFlag, deprecationMessage))
-	// Set the output for deprecation warnings to stderr
-	cmd.Flags().SetOutput(os.Stderr)
 
 	cmd.MarkFlagsRequiredTogether(networkRangesFlag, transferNetworkFlag)
 

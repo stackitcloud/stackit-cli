@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 func TestParseGeofencing(t *testing.T) {
@@ -39,10 +39,10 @@ func TestParseGeofencing(t *testing.T) {
 			},
 		},
 	}
-	printer := print.NewPrinter()
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ParseGeofencing(printer, tt.input)
+			got := ParseGeofencing(params.Printer, tt.input)
 			if !reflect.DeepEqual(got, &tt.want) {
 				t.Errorf("ParseGeofencing() = %v, want %v", got, tt.want)
 			}
@@ -82,10 +82,10 @@ func TestParseOriginRequestHeaders(t *testing.T) {
 			},
 		},
 	}
-	printer := print.NewPrinter()
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ParseOriginRequestHeaders(printer, tt.input)
+			got := ParseOriginRequestHeaders(params.Printer, tt.input)
 			if !reflect.DeepEqual(got, &tt.want) {
 				t.Errorf("ParseOriginRequestHeaders() = %v, want %v", got, tt.want)
 			}

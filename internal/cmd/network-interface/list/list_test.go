@@ -4,10 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -255,11 +254,10 @@ func TestOutputProjectResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputProjectResult(p, tt.args.outputFormat, tt.args.nics, ""); (err != nil) != tt.wantErr {
+			if err := outputProjectResult(params.Printer, tt.args.outputFormat, tt.args.nics, ""); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -300,11 +298,10 @@ func TestOutputNetworkResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputNetworkResult(p, tt.args.outputFormat, tt.args.nics, ""); (err != nil) != tt.wantErr {
+			if err := outputNetworkResult(params.Printer, tt.args.outputFormat, tt.args.nics, ""); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

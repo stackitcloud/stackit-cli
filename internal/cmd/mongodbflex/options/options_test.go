@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -254,16 +252,14 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := &print.Printer{}
-			cmd := NewCmd(&types.CmdParams{Printer: p})
-			p.Cmd = cmd
+			params := testparams.NewTestParams()
 			client := &mongoDBFlexClientMocked{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listVersionsFails: tt.listVersionsFails,
 				listStoragesFails: tt.listStoragesFails,
 			}
 
-			err := buildAndExecuteRequest(testCtx, p, tt.model, client)
+			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, client)
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
@@ -369,11 +365,10 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.inputModel, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.inputModel, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -418,11 +413,10 @@ func TestOutputResultAsTable(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResultAsTable(p, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
+			if err := outputResultAsTable(params.Printer, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
 				t.Errorf("outputResultAsTable() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -4,15 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 )
 
 type testCtxKey struct{}
@@ -98,8 +97,8 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&types.CmdParams{Printer: p})
+			params := testparams.NewTestParams()
+			cmd := NewCmd(params.CmdParams)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -131,7 +130,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model, err := parseInput(p, cmd, tt.argValues)
+			model, err := parseInput(params.Printer, cmd, tt.argValues)
 			if err != nil {
 				if !tt.isValid {
 					return
