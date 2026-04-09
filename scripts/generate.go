@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra/doc"
 )
@@ -38,7 +40,16 @@ func main() {
 	linkHandler := func(filename string) string {
 		return fmt.Sprintf("./%s", filename)
 	}
-	err = doc.GenMarkdownTreeCustom(cmd.NewRootCmd("", "", nil), docsDir, filePrepender, linkHandler)
+	printer := print.NewPrinter(
+		os.Stdin,
+		os.Stdout,
+		os.Stderr,
+	)
+	params := &types.CmdParams{
+		Printer: printer,
+		Args:    os.Args,
+	}
+	err = doc.GenMarkdownTreeCustom(cmd.NewRootCmd(params), docsDir, filePrepender, linkHandler)
 	if err != nil {
 		log.Fatalf("Error generating documentation: %v", err)
 	}

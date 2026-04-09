@@ -1,7 +1,6 @@
 package list
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,10 +15,10 @@ import (
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -454,18 +453,15 @@ func TestOutputResult(t *testing.T) {
 			expected:     "No CDN distributions found\n",
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			buffer := &bytes.Buffer{}
-			p.Cmd.SetOut(buffer)
-			if err := outputResult(p, tt.outputFormat, tt.distributions); err != nil {
+			params := testparams.NewTestParams()
+			if err := outputResult(params.Printer, tt.outputFormat, tt.distributions); err != nil {
 				t.Fatalf("outputResult: %v", err)
 			}
-			if buffer.String() != tt.expected {
-				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, buffer.String())
+			if params.Out.String() != tt.expected {
+				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}
 		})
 	}

@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -81,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err := yaml.Unmarshal([]byte(template), &target); err != nil {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
-				encoder := json.NewEncoder(os.Stdout)
+				encoder := json.NewEncoder(params.Printer.StdOut)
 				if err := encoder.Encode(target); err != nil {
 					return fmt.Errorf("cannot marshal template to yaml: %w", err)
 				}

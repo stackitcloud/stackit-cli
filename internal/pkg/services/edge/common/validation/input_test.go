@@ -8,7 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	commonErr "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/error"
 	commonInstance "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/instance"
 	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -66,11 +67,11 @@ func TestGetValidatedInstanceIdentifier(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			printer := print.NewPrinter()
+			params := testparams.NewTestParams()
 			cmd := &cobra.Command{Use: "test"}
 			tt.setup(cmd)
 
-			got, err := GetValidatedInstanceIdentifier(printer, cmd)
+			got, err := GetValidatedInstanceIdentifier(params.Printer, cmd)
 			if !testUtils.AssertError(t, err, tt.wantErr) {
 				return
 			}

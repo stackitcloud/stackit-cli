@@ -1,13 +1,10 @@
 package describe
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -15,7 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/kms"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -206,16 +203,14 @@ func TestOutputResult(t *testing.T) {
 			),
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			var buf bytes.Buffer
-			p.Cmd.SetOut(&buf)
-			if err := outputResult(p, tt.outputFmt, tt.keyRing); (err != nil) != tt.wantErr {
+			params := testparams.NewTestParams()
+			if err := outputResult(params.Printer, tt.outputFmt, tt.keyRing); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			diff := cmp.Diff(buf.String(), tt.expected)
+			diff := cmp.Diff(params.Out.String(), tt.expected)
 			if diff != "" {
 				t.Fatalf("outputResult() output mismatch (-want +got):\n%s", diff)
 			}

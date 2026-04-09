@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -17,10 +16,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
@@ -200,11 +200,9 @@ func TestAuthenticationConfig(t *testing.T) {
 				return nil
 			}
 
-			cmd := &cobra.Command{}
-			cmd.SetOut(io.Discard) // Suppresses console prints
-			p := &print.Printer{Cmd: cmd}
+			params := testparams.NewTestParams()
 
-			authCfgOption, err := AuthenticationConfig(p, reauthenticateUser)
+			authCfgOption, err := AuthenticationConfig(params.Printer, reauthenticateUser)
 
 			if !tt.isValid {
 				if err == nil {

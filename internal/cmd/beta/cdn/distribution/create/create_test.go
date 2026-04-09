@@ -1,7 +1,6 @@
 package create
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -14,10 +13,10 @@ import (
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 	"k8s.io/utils/ptr"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -525,18 +524,14 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
-
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			buffer := &bytes.Buffer{}
-			p.Cmd.SetOut(buffer)
-			if err := outputResult(p, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
+			params := testparams.NewTestParams()
+			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult: %v", err)
 			}
-			if buffer.String() != tt.expected {
-				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, buffer.String())
+			if params.Out.String() != tt.expected {
+				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}
 		})
 	}

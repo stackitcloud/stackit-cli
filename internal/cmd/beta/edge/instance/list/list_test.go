@@ -16,8 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -397,10 +397,9 @@ func TestOutputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := print.NewPrinter()
-			p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+			params := testparams.NewTestParams()
 
-			err := outputResult(p, tt.args.model.OutputFormat, tt.args.projectLabel, tt.args.instances)
+			err := outputResult(params.Printer, tt.args.model.OutputFormat, tt.args.projectLabel, tt.args.instances)
 			testUtils.AssertError(t, err, tt.wantErr)
 		})
 	}
