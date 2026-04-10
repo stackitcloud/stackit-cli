@@ -176,7 +176,7 @@ func TestBuildRequest(t *testing.T) {
 				payload := intake.UpdateIntakeUserPayload{
 					Description: utils.Ptr("new-desc"),
 				}
-				*request = (*request).UpdateIntakeUserPayload(payload)
+				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
 		{
@@ -197,7 +197,7 @@ func TestBuildRequest(t *testing.T) {
 					Type:        &userType,
 					Password:    utils.Ptr("Secret123!"),
 				}
-				*request = (*request).UpdateIntakeUserPayload(payload)
+				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
 	}

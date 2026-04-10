@@ -131,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat string, intk *intake.IntakeResp
 			table.AddRow("Catalog Table Name", tableName)
 		}
 		table.AddRow("Catalog Partitioning", catalog.GetPartitioning())
-		if partitionBy := catalog.GetPartitionBy(); partitionBy != nil && len(partitionBy) > 0 {
+		if partitionBy := catalog.GetPartitionBy(); len(partitionBy) > 0 {
 			table.AddRow("Catalog Partition By", strings.Join(partitionBy, ", "))
 		}
 

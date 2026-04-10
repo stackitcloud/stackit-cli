@@ -167,7 +167,7 @@ func TestBuildRequest(t *testing.T) {
 					Description: utils.Ptr("new-desc"),
 					Labels:      map[string]string{"key": "value"},
 				}
-				*request = (*request).UpdateIntakeRunnerPayload(payload)
+				*request = request.UpdateIntakeRunnerPayload(payload)
 			}),
 		},
 		{
@@ -187,7 +187,7 @@ func TestBuildRequest(t *testing.T) {
 					Description:        utils.Ptr("final-desc"),
 					Labels:             map[string]string{"a": "b"},
 				}
-				*request = (*request).UpdateIntakeRunnerPayload(payload)
+				*request = request.UpdateIntakeRunnerPayload(payload)
 			}),
 		},
 	}

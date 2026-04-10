@@ -201,7 +201,7 @@ func TestBuildRequest(t *testing.T) {
 				model.UserType = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeUserRequest) {
-				*request = (*request).CreateIntakeUserPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeUserPayload) {
+				*request = request.CreateIntakeUserPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeUserPayload) {
 					payload.Description = nil
 					payload.Labels = nil
 					payload.Type = nil
