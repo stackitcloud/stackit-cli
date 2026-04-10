@@ -7,6 +7,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 const (

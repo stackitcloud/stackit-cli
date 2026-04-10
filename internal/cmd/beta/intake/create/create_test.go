@@ -8,12 +8,13 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 // Define a unique key for the context to avoid collisions
