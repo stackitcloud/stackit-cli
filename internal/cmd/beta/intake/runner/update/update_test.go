@@ -9,12 +9,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 type testCtxKey struct{}
@@ -24,8 +23,10 @@ const (
 )
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &intake.APIClient{}
+	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testRunnerId  = uuid.NewString()
 )
@@ -69,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeRunnerRequest)) intake.ApiUpdateIntakeRunnerRequest {
-	request := testClient.UpdateIntakeRunner(testCtx, testProjectId, testRegion, testRunnerId)
+	request := testClient.DefaultAPI.UpdateIntakeRunner(testCtx, testProjectId, testRegion, testRunnerId)
 	payload := intake.UpdateIntakeRunnerPayload{
 		DisplayName: utils.Ptr("new-runner-name"),
 	}
@@ -115,8 +116,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.MaxMessageSizeKiB = utils.Ptr(int64(2048))
-				model.MaxMessagesPerHour = utils.Ptr(int64(10000))
+				model.MaxMessageSizeKiB = utils.Ptr(int32(2048))
+				model.MaxMessagesPerHour = utils.Ptr(int32(10000))
 				model.Description = utils.Ptr("new description")
 				model.Labels = utils.Ptr(map[string]string{"env": "prod", "team": "sre"})
 			}),
@@ -165,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(func(request *intake.ApiUpdateIntakeRunnerRequest) {
 				payload := intake.UpdateIntakeRunnerPayload{
 					Description: utils.Ptr("new-desc"),
-					Labels:      utils.Ptr(map[string]string{"key": "value"}),
+					Labels:      map[string]string{"key": "value"},
 				}
 				*request = (*request).UpdateIntakeRunnerPayload(payload)
 			}),
@@ -174,18 +175,18 @@ func TestBuildRequest(t *testing.T) {
 			description: "update all fields",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.DisplayName = utils.Ptr("another-name")
-				model.MaxMessageSizeKiB = utils.Ptr(int64(4096))
-				model.MaxMessagesPerHour = utils.Ptr(int64(20000))
+				model.MaxMessageSizeKiB = utils.Ptr(int32(4096))
+				model.MaxMessagesPerHour = utils.Ptr(int32(20000))
 				model.Description = utils.Ptr("final-desc")
 				model.Labels = utils.Ptr(map[string]string{"a": "b"})
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiUpdateIntakeRunnerRequest) {
 				payload := intake.UpdateIntakeRunnerPayload{
 					DisplayName:        utils.Ptr("another-name"),
-					MaxMessageSizeKiB:  utils.Ptr(int64(4096)),
-					MaxMessagesPerHour: utils.Ptr(int64(20000)),
+					MaxMessageSizeKiB:  utils.Ptr(int32(4096)),
+					MaxMessagesPerHour: utils.Ptr(int32(20000)),
 					Description:        utils.Ptr("final-desc"),
-					Labels:             utils.Ptr(map[string]string{"a": "b"}),
+					Labels:             map[string]string{"a": "b"},
 				}
 				*request = (*request).UpdateIntakeRunnerPayload(payload)
 			}),
@@ -199,6 +200,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -223,7 +225,7 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				model:        fixtureInputModel(),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp:         &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},
@@ -234,7 +236,7 @@ func TestOutputResult(t *testing.T) {
 					model.Async = true
 				}),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp:         &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},
@@ -244,7 +246,7 @@ func TestOutputResult(t *testing.T) {
 				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.JSONOutputFormat
 				}),
-				resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp: &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},

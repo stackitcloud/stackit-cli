@@ -5,9 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -19,6 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 )
 
 const (
@@ -90,7 +89,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Creating STACKIT Intake User", func() error {
-					_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *model.IntakeId, resp.GetId()).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.IntakeId, resp.GetId()).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -138,7 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiCreateIntakeUserRequest {
-	req := apiClient.CreateIntakeUser(ctx, model.ProjectId, model.Region, *model.IntakeId)
+	req := apiClient.DefaultAPI.CreateIntakeUser(ctx, model.ProjectId, model.Region, *model.IntakeId)
 
 	var userType *intake.UserType
 	if model.UserType != nil {
@@ -146,11 +145,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	}
 
 	payload := intake.CreateIntakeUserPayload{
-		DisplayName: model.DisplayName,
-		Password:    model.Password,
+		DisplayName: utils.PtrString(model.DisplayName),
+		Password:    utils.PtrString(model.Password),
 		Type:        userType,
 		Description: model.Description,
-		Labels:      model.Labels,
+		Labels:      utils.PtrValue(model.Labels),
 	}
 
 	req = req.CreateIntakeUserPayload(payload)
@@ -168,7 +167,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s Intake User for project %q. User ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s Intake User for project %q. User ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

@@ -8,13 +8,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 // Define a unique key for the context to avoid collisions
@@ -41,7 +40,9 @@ var (
 	// testCtx dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	// testClient mock API client
-	testClient    = &intake.APIClient{}
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testRunnerId  = uuid.NewString()
 
@@ -107,22 +108,22 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakePayload)) int
 	authType := intake.CatalogAuthType(testCatalogAuthType)
 	testPartitioningType := intake.PartitioningType(testCatalogPartitioning)
 	payload := intake.CreateIntakePayload{
-		DisplayName:    utils.Ptr(testDisplayName),
-		IntakeRunnerId: utils.Ptr(testRunnerId),
+		DisplayName:    testDisplayName,
+		IntakeRunnerId: testRunnerId,
 		Description:    utils.Ptr(testDescription),
-		Labels:         utils.Ptr(testLabels),
-		Catalog: &intake.IntakeCatalog{
-			Uri:          utils.Ptr(testCatalogURI),
-			Warehouse:    utils.Ptr(testCatalogWarehouse),
+		Labels:         testLabels,
+		Catalog: intake.IntakeCatalog{
+			Uri:          testCatalogURI,
+			Warehouse:    testCatalogWarehouse,
 			Namespace:    utils.Ptr(testCatalogNamespace),
 			TableName:    utils.Ptr(testCatalogTableName),
 			Partitioning: &testPartitioningType,
-			PartitionBy:  utils.Ptr(testCatalogPartitionBy),
+			PartitionBy:  testCatalogPartitionBy,
 			Auth: &intake.CatalogAuth{
-				Type: &authType,
+				Type: authType,
 				Dremio: &intake.DremioAuth{
-					TokenEndpoint:       utils.Ptr(testDremioTokenEndpoint),
-					PersonalAccessToken: utils.Ptr(testDremioToken),
+					TokenEndpoint:       testDremioTokenEndpoint,
+					PersonalAccessToken: testDremioToken,
 				},
 			},
 		},
@@ -135,7 +136,7 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakePayload)) int
 
 // fixtureRequest generates an API request for tests
 func fixtureRequest(mods ...func(request *intake.ApiCreateIntakeRequest)) intake.ApiCreateIntakeRequest {
-	request := testClient.CreateIntake(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateIntake(testCtx, testProjectId, testRegion)
 	request = request.CreateIntakePayload(fixtureCreatePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -269,7 +270,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRequest) {
 				*request = (*request).CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
 					authType := intake.CatalogAuthType("none")
-					payload.Catalog.Auth.Type = &authType
+					payload.Catalog.Auth.Type = authType
 					payload.Catalog.Auth.Dremio = nil
 				}))
 			}),
@@ -282,6 +283,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -306,7 +308,7 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				model:        fixtureInputModel(),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeResponse{Id: utils.Ptr("intake-id-123")},
+				resp:         &intake.IntakeResponse{Id: "intake-id-123"},
 			},
 			wantErr: false,
 		},
@@ -317,7 +319,7 @@ func TestOutputResult(t *testing.T) {
 					model.Async = true
 				}),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeResponse{Id: utils.Ptr("intake-id-123")},
+				resp:         &intake.IntakeResponse{Id: "intake-id-123"},
 			},
 			wantErr: false,
 		},
@@ -327,7 +329,7 @@ func TestOutputResult(t *testing.T) {
 				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.JSONOutputFormat
 				}),
-				resp: &intake.IntakeResponse{Id: utils.Ptr("intake-id-123")},
+				resp: &intake.IntakeResponse{Id: "intake-id-123"},
 			},
 			wantErr: false,
 		},

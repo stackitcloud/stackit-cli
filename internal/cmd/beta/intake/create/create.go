@@ -5,9 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -19,6 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 )
 
 const (
@@ -113,7 +112,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Creating STACKIT Intake instance", func() error {
-					_, err = wait.CreateOrUpdateIntakeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, resp.GetId()).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateIntakeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.GetId()).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -185,19 +184,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiCreateIntakeRequest {
-	req := apiClient.CreateIntake(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateIntake(ctx, model.ProjectId, model.Region)
 
 	// Build catalog authentication
 	var catalogAuth *intake.CatalogAuth
 	if model.CatalogAuthType != nil {
 		authType := intake.CatalogAuthType(*model.CatalogAuthType)
 		catalogAuth = &intake.CatalogAuth{
-			Type: &authType,
+			Type: authType,
 		}
 		if *model.CatalogAuthType == "dremio" {
 			catalogAuth.Dremio = &intake.DremioAuth{
-				TokenEndpoint:       model.DremioTokenEndpoint,
-				PersonalAccessToken: model.DremioToken,
+				TokenEndpoint:       utils.PtrString(model.DremioTokenEndpoint),
+				PersonalAccessToken: utils.PtrString(model.DremioToken),
 			}
 		}
 	}
@@ -209,22 +208,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 	// Build catalog
 	catalogPayload := intake.IntakeCatalog{
-		Uri:          model.CatalogURI,
-		Warehouse:    model.CatalogWarehouse,
+		Uri:          utils.PtrString(model.CatalogURI),
+		Warehouse:    utils.PtrString(model.CatalogWarehouse),
 		Namespace:    model.CatalogNamespace,
 		TableName:    model.CatalogTableName,
 		Partitioning: partitioning,
-		PartitionBy:  model.CatalogPartitionBy,
+		PartitionBy:  utils.PtrValue(model.CatalogPartitionBy),
 		Auth:         catalogAuth,
 	}
 
 	// Build main payload
 	payload := intake.CreateIntakePayload{
-		DisplayName:    model.DisplayName,
-		IntakeRunnerId: model.RunnerId,
+		DisplayName:    utils.PtrString(model.DisplayName),
+		IntakeRunnerId: utils.PtrString(model.RunnerId),
 		Description:    model.Description,
-		Labels:         model.Labels,
-		Catalog:        &catalogPayload,
+		Labels:         utils.PtrValue(model.Labels),
+		Catalog:        catalogPayload,
 	}
 	req = req.CreateIntakePayload(payload)
 
@@ -242,7 +241,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s Intake for project %q. Intake ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s Intake for project %q. Intake ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

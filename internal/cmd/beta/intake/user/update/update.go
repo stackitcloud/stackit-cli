@@ -5,9 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 )
 
 const (
@@ -79,7 +78,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Updating STACKIT Intake User", func() error {
-					_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
 
@@ -135,13 +134,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeUserRequest {
-	req := apiClient.UpdateIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
+	req := apiClient.DefaultAPI.UpdateIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
 
 	payload := intake.UpdateIntakeUserPayload{
 		DisplayName: model.DisplayName,
 		Description: model.Description,
 		Password:    model.Password,
-		Labels:      model.Labels,
+		Labels:      utils.PtrValue(model.Labels),
 	}
 
 	if model.UserType != nil {
@@ -164,7 +163,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserRe
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, utils.PtrString(resp.Id))
+		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, resp.Id)
 		return nil
 	})
 }

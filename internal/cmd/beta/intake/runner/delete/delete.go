@@ -7,9 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 )
 
 const (
@@ -70,7 +69,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Deleting STACKIT Intake Runner", func() error {
-					_, err = wait.DeleteIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
+					_, err = wait.DeleteIntakeRunnerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -110,6 +109,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 // buildRequest creates the API request to delete an Intake Runner
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiDeleteIntakeRunnerRequest {
-	req := apiClient.DeleteIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
+	req := apiClient.DefaultAPI.DeleteIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
 	return req
 }

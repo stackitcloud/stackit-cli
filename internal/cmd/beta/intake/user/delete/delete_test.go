@@ -7,10 +7,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 // Define a unique key for the context to avoid collisions
@@ -24,7 +23,9 @@ var (
 	// testCtx is a dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	// testClient is a mock API client
-	testClient    = &intake.APIClient{}
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testIntakeId  = uuid.NewString()
 	testUserId    = uuid.NewString()
@@ -73,7 +74,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // fixtureRequest generates an API request for tests
 func fixtureRequest(mods ...func(request *intake.ApiDeleteIntakeUserRequest)) intake.ApiDeleteIntakeUserRequest {
-	request := testClient.DeleteIntakeUser(testCtx, testProjectId, testRegion, testIntakeId, testUserId)
+	request := testClient.DefaultAPI.DeleteIntakeUser(testCtx, testProjectId, testRegion, testIntakeId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -166,6 +167,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
