@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 const (
@@ -127,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 // buildRequest creates the API request to list Intake Users
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiListIntakeUsersRequest {
-	req := apiClient.ListIntakeUsers(ctx, model.ProjectId, model.Region, *model.IntakeId)
+	req := apiClient.DefaultAPI.ListIntakeUsers(ctx, model.ProjectId, model.Region, *model.IntakeId)
 	return req
 }
 
@@ -145,7 +143,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, intakeId string,
 			table.AddRow(
 				user.GetId(),
 				user.GetDisplayName(),
-				utils.PtrString(user.Type),
+				user.Type,
 				user.GetState(),
 			)
 		}

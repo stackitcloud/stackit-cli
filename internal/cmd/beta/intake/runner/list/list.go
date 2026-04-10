@@ -7,8 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/intake/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 const (
@@ -120,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 // buildRequest creates the API request to list Intake Runners
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiListIntakeRunnersRequest {
-	req := apiClient.ListIntakeRunners(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListIntakeRunners(ctx, model.ProjectId, model.Region)
 	// Note: we do support API pagination, but for consistency with other services, we fetch all items and apply
 	// client-side limit.
 	// A more advanced implementation could use the --limit flag to set the API's PageSize.

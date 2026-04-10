@@ -7,13 +7,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 )
 
 type testCtxKey struct{}
@@ -23,8 +23,10 @@ const (
 )
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &intake.APIClient{}
+	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testIntakeId  = uuid.NewString()
 )
@@ -66,7 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *intake.ApiGetIntakeRequest)) intake.ApiGetIntakeRequest {
-	request := testClient.GetIntake(testCtx, testProjectId, testRegion, testIntakeId)
+	request := testClient.DefaultAPI.GetIntake(testCtx, testProjectId, testRegion, testIntakeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -143,6 +145,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -163,17 +166,17 @@ func TestOutputResult(t *testing.T) {
 	}{
 		{
 			name:    "default output",
-			args:    args{outputFormat: "default", intakeResp: &intake.IntakeResponse{Catalog: &intake.IntakeCatalog{}}},
+			args:    args{outputFormat: "default", intakeResp: &intake.IntakeResponse{Catalog: intake.IntakeCatalog{}}},
 			wantErr: false,
 		},
 		{
 			name:    "json output",
-			args:    args{outputFormat: print.JSONOutputFormat, intakeResp: &intake.IntakeResponse{Catalog: &intake.IntakeCatalog{}}},
+			args:    args{outputFormat: print.JSONOutputFormat, intakeResp: &intake.IntakeResponse{Catalog: intake.IntakeCatalog{}}},
 			wantErr: false,
 		},
 		{
 			name:    "yaml output",
-			args:    args{outputFormat: print.YAMLOutputFormat, intakeResp: &intake.IntakeResponse{Catalog: &intake.IntakeCatalog{}}},
+			args:    args{outputFormat: print.YAMLOutputFormat, intakeResp: &intake.IntakeResponse{Catalog: intake.IntakeCatalog{}}},
 			wantErr: false,
 		},
 		{
