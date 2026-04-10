@@ -249,7 +249,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DremioToken = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRequest) {
-				*request = (*request).CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
+				*request = request.CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
 					payload.Description = nil
 					payload.Labels = nil
 					payload.Catalog.Namespace = nil
@@ -268,7 +268,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DremioToken = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRequest) {
-				*request = (*request).CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
+				*request = request.CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
 					authType := intake.CatalogAuthType("none")
 					payload.Catalog.Auth.Type = authType
 					payload.Catalog.Auth.Dremio = nil

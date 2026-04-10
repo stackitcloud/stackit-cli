@@ -202,7 +202,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRunnerRequest) {
-				*request = (*request).CreateIntakeRunnerPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeRunnerPayload) {
+				*request = request.CreateIntakeRunnerPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeRunnerPayload) {
 					payload.Description = nil
 					payload.Labels = nil
 				}))
