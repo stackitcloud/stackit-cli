@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -119,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 // buildRequest creates the API request to list Intakes
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiListIntakesRequest {
-	req := apiClient.ListIntakes(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListIntakes(ctx, model.ProjectId, model.Region)
 	return req
 }
 

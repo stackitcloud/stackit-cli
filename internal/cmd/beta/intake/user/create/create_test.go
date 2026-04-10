@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -33,7 +33,9 @@ var (
 	// testCtx dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	// testClient mock API client
-	testClient    = &intake.APIClient{}
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testIntakeId  = uuid.NewString()
 
@@ -83,11 +85,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakeUserPayload)) intake.CreateIntakeUserPayload {
 	userType := intake.UserType(testUserType)
 	payload := intake.CreateIntakeUserPayload{
-		DisplayName: utils.Ptr(testDisplayName),
-		Password:    utils.Ptr(testPassword),
+		DisplayName: testDisplayName,
+		Password:    testPassword,
 		Type:        &userType,
 		Description: utils.Ptr(testDescription),
-		Labels:      utils.Ptr(testLabels),
+		Labels:      testLabels,
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -97,7 +99,7 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakeUserPayload))
 
 // fixtureRequest generates an API request for tests
 func fixtureRequest(mods ...func(request *intake.ApiCreateIntakeUserRequest)) intake.ApiCreateIntakeUserRequest {
-	request := testClient.CreateIntakeUser(testCtx, testProjectId, testRegion, testIntakeId)
+	request := testClient.DefaultAPI.CreateIntakeUser(testCtx, testProjectId, testRegion, testIntakeId)
 	request = request.CreateIntakeUserPayload(fixtureCreatePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -199,7 +201,7 @@ func TestBuildRequest(t *testing.T) {
 				model.UserType = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeUserRequest) {
-				*request = (*request).CreateIntakeUserPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeUserPayload) {
+				*request = request.CreateIntakeUserPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeUserPayload) {
 					payload.Description = nil
 					payload.Labels = nil
 					payload.Type = nil
@@ -214,6 +216,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -238,7 +241,7 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				model:        fixtureInputModel(),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeUserResponse{Id: utils.Ptr("user-id-123")},
+				resp:         &intake.IntakeUserResponse{Id: "user-id-123"},
 			},
 			wantErr: false,
 		},
@@ -249,7 +252,7 @@ func TestOutputResult(t *testing.T) {
 					model.Async = true
 				}),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeUserResponse{Id: utils.Ptr("user-id-123")},
+				resp:         &intake.IntakeUserResponse{Id: "user-id-123"},
 			},
 			wantErr: false,
 		},
@@ -259,7 +262,7 @@ func TestOutputResult(t *testing.T) {
 				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.JSONOutputFormat
 				}),
-				resp: &intake.IntakeUserResponse{Id: utils.Ptr("user-id-123")},
+				resp: &intake.IntakeUserResponse{Id: "user-id-123"},
 			},
 			wantErr: false,
 		},

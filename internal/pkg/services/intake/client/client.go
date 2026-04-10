@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	genericclient "github.com/stackitcloud/stackit-cli/internal/pkg/generic-client"

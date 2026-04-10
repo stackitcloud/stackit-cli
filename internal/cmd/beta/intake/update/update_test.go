@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -23,8 +23,10 @@ const (
 )
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &intake.APIClient{}
+	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testIntakeId  = uuid.NewString()
 	testRunnerId  = uuid.NewString()
@@ -160,9 +162,9 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "base",
 			model:       fixtureInputModel(),
-			expectedReq: testClient.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
+			expectedReq: testClient.DefaultAPI.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
 				UpdateIntakePayload(intake.UpdateIntakePayload{
-					IntakeRunnerId: utils.Ptr(testRunnerId),
+					IntakeRunnerId: testRunnerId,
 					DisplayName:    utils.Ptr("new-display-name"),
 				}),
 		},
@@ -173,9 +175,9 @@ func TestBuildRequest(t *testing.T) {
 				model.Description = utils.Ptr("new-desc")
 				model.CatalogURI = utils.Ptr("new-uri")
 			}),
-			expectedReq: testClient.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
+			expectedReq: testClient.DefaultAPI.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
 				UpdateIntakePayload(intake.UpdateIntakePayload{
-					IntakeRunnerId: utils.Ptr(testRunnerId),
+					IntakeRunnerId: testRunnerId,
 					Description:    utils.Ptr("new-desc"),
 					Catalog: &intake.IntakeCatalogPatch{
 						Uri: utils.Ptr("new-uri"),
@@ -196,12 +198,12 @@ func TestBuildRequest(t *testing.T) {
 				model.DremioTokenEndpoint = utils.Ptr("final-endpoint")
 				model.DremioToken = utils.Ptr("final-token")
 			}),
-			expectedReq: testClient.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
+			expectedReq: testClient.DefaultAPI.UpdateIntake(testCtx, testProjectId, testRegion, testIntakeId).
 				UpdateIntakePayload(intake.UpdateIntakePayload{
-					IntakeRunnerId: utils.Ptr(testRunnerId),
+					IntakeRunnerId: testRunnerId,
 					DisplayName:    utils.Ptr("another-name"),
 					Description:    utils.Ptr("final-desc"),
-					Labels:         utils.Ptr(map[string]string{"a": "b"}),
+					Labels:         map[string]string{"a": "b"},
 					Catalog: &intake.IntakeCatalogPatch{
 						Uri:       utils.Ptr("final-uri"),
 						Warehouse: utils.Ptr("final-warehouse"),
@@ -226,6 +228,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(tt.expectedReq, request,
 				cmp.AllowUnexported(request),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -253,12 +256,12 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:    "json output",
-			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeResponse{Id: utils.Ptr("intake-id-123")}},
+			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeResponse{Id: "intake-id-123"}},
 			wantErr: false,
 		},
 		{
 			name:    "yaml output",
-			args:    args{outputFormat: print.YAMLOutputFormat, resp: &intake.IntakeResponse{Id: utils.Ptr("runner-id-123")}},
+			args:    args{outputFormat: print.YAMLOutputFormat, resp: &intake.IntakeResponse{Id: "runner-id-123"}},
 			wantErr: false,
 		},
 		{

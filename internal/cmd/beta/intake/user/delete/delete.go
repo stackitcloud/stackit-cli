@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -72,7 +72,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Deleting STACKIT Intake User", func() error {
-					_, err = wait.DeleteIntakeUserWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
+					_, err = wait.DeleteIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -121,6 +121,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 // buildRequest creates the API request to delete an Intake User
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiDeleteIntakeUserRequest {
-	req := apiClient.DeleteIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
+	req := apiClient.DefaultAPI.DeleteIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
 	return req
 }

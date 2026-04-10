@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -107,7 +107,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Updating STACKIT Intake Runner instance", func() error {
-					_, err = wait.CreateOrUpdateIntakeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.IntakeId).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateIntakeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -181,13 +181,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeRequest {
-	req := apiClient.UpdateIntake(ctx, model.ProjectId, model.Region, model.IntakeId)
+	req := apiClient.DefaultAPI.UpdateIntake(ctx, model.ProjectId, model.Region, model.IntakeId)
 
 	payload := intake.UpdateIntakePayload{
-		IntakeRunnerId: model.RunnerId, // This is required by the API
+		IntakeRunnerId: utils.PtrString(model.RunnerId), // This is required by the API
 		DisplayName:    model.DisplayName,
 		Description:    model.Description,
-		Labels:         model.Labels,
+		Labels:         utils.PtrValue(model.Labels),
 	}
 
 	// Build catalog patch payload only if catalog-related flags are set
@@ -261,7 +261,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake for project %q. Intake ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s Intake for project %q. Intake ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

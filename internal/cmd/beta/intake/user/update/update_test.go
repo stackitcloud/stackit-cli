@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -23,8 +23,10 @@ const (
 )
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &intake.APIClient{}
+	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 	testIntakeId  = uuid.NewString()
 	testUserId    = uuid.NewString()
@@ -69,7 +71,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeUserRequest)) intake.ApiUpdateIntakeUserRequest {
-	request := testClient.UpdateIntakeUser(testCtx, testProjectId, testRegion, testIntakeId, testUserId)
+	request := testClient.DefaultAPI.UpdateIntakeUser(testCtx, testProjectId, testRegion, testIntakeId, testUserId)
 	payload := intake.UpdateIntakeUserPayload{
 		DisplayName: utils.Ptr("new-display-name"),
 	}
@@ -174,7 +176,7 @@ func TestBuildRequest(t *testing.T) {
 				payload := intake.UpdateIntakeUserPayload{
 					Description: utils.Ptr("new-desc"),
 				}
-				*request = (*request).UpdateIntakeUserPayload(payload)
+				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
 		{
@@ -191,11 +193,11 @@ func TestBuildRequest(t *testing.T) {
 				payload := intake.UpdateIntakeUserPayload{
 					DisplayName: utils.Ptr("another-name"),
 					Description: utils.Ptr("final-desc"),
-					Labels:      utils.Ptr(map[string]string{"a": "b"}),
+					Labels:      map[string]string{"a": "b"},
 					Type:        &userType,
 					Password:    utils.Ptr("Secret123!"),
 				}
-				*request = (*request).UpdateIntakeUserPayload(payload)
+				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
 	}
@@ -207,6 +209,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(tt.expectedReq, request,
 				cmp.AllowUnexported(request),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreUnexported(intake.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -234,7 +237,7 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:    "json output",
-			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeUserResponse{Id: utils.Ptr("user-id-123")}},
+			args:    args{outputFormat: print.JSONOutputFormat, resp: &intake.IntakeUserResponse{Id: "user-id-123"}},
 			wantErr: false,
 		},
 		{

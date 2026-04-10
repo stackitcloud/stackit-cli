@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -97,7 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiGetIntakeUserRequest {
-	req := apiClient.GetIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
+	req := apiClient.DefaultAPI.GetIntakeUser(ctx, model.ProjectId, model.Region, model.IntakeId, model.UserId)
 	return req
 }
 
@@ -113,10 +113,7 @@ func outputResult(p *print.Printer, outputFormat string, user *intake.IntakeUser
 		table.AddRow("ID", user.GetId())
 		table.AddRow("Name", user.GetDisplayName())
 		table.AddRow("State", user.GetState())
-
-		if user.Type != nil {
-			table.AddRow("Type", *user.Type)
-		}
+		table.AddRow("Type", user.Type)
 
 		table.AddRow("Username", user.GetUser())
 		table.AddRow("Created", user.GetCreateTime())
