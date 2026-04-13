@@ -142,7 +142,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, projectLabel string, servers []iaas.Server) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, servers []iaas.Server) error {
 	if len(servers) == 0 {
 		p.Info("No servers found for project %q\n", projectLabel)
 	}
