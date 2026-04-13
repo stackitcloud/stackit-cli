@@ -83,8 +83,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
-			} else if projectLabel == "" {
-				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
