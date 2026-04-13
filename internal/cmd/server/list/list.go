@@ -165,7 +165,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, servers [
 		return nil
 	default:
 		if len(servers) == 0 {
-			p.Info("No servers found for project %q\n", projectLabel)
+			p.Outputf("No servers found for project %q\n", projectLabel)
 			return nil
 		}
 		table := tables.NewTable()
