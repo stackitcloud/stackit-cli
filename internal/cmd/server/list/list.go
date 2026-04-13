@@ -141,9 +141,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, servers []iaas.Server) error {
-	if len(servers) == 0 {
-		p.Info("No servers found for project %q\n", projectLabel)
-	}
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(servers, "", "  ")
@@ -167,6 +164,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, servers [
 
 		return nil
 	default:
+		if len(servers) == 0 {
+			p.Info("No servers found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Machine Type", "Availability Zones", "Nic IPv4", "Public IPs")
 
