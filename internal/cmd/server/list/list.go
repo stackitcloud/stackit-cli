@@ -78,11 +78,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list servers: %w", err)
 			}
 
-			var items []iaas.Server
-			if resp.Items == nil {
+			items := resp.GetItems()
+			if items == nil {
 				items = []iaas.Server{}
-			} else {
-				items = *resp.Items
 			}
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
