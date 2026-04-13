@@ -80,31 +80,30 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list network areas: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				var orgLabel string
-				rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
-				if err == nil {
-					orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
-					if err != nil {
-						params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
-						orgLabel = *model.OrganizationId
-					} else if orgLabel == "" {
-						orgLabel = *model.OrganizationId
-					}
-				} else {
-					params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
+			items := resp.GetItems()
+
+			var orgLabel string
+			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
+			if err == nil {
+				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+					orgLabel = *model.OrganizationId
 				}
-				params.Printer.Info("No STACKIT Network Areas found for organization %q\n", orgLabel)
-				return nil
+			} else {
+				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
+			}
+
+			if orgLabel == "" {
+				orgLabel = *model.OrganizationId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, orgLabel, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)
@@ -149,8 +148,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkAreas []iaas.NetworkArea) error {
+func outputResult(p *print.Printer, orgLabel, outputFormat string, networkAreas []iaas.NetworkArea) error {
 	return p.OutputResult(outputFormat, networkAreas, func() error {
+		if len(networkAreas) == 0 {
+			p.Outputf("No STACKIT Network Areas found for organization %q\n", orgLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "# Attached Projects")
 
