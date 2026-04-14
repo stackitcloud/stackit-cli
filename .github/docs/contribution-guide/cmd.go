@@ -22,8 +22,9 @@ import (
 
 // Define consts for command flags
 const (
-	someArg  = "MY_ARG"
-	someFlag = "my-flag"
+	someArg    = "MY_ARG"
+	someFlag   = "my-flag"
+	secretFlag = "secret"
 )
 
 // Struct to model user input (arguments and/or flags)
@@ -31,6 +32,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	MyArg  string
 	MyFlag *string
+	Secret *string
 }
 
 // "bar" command constructor
@@ -85,8 +87,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 // Configure command flags (type, default value, and description)
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().StringP(someFlag, "shorthand", "defaultValue", "My flag description")
+	secret := flags.SecretFlag(secretFlag, params)
+	cmd.Flags().Var(secret, secretFlag, secret.Usage())
 }
 
 // Parse user input (arguments and/or flags)
@@ -102,6 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		MyArg:           myArg,
 		MyFlag:          flags.FlagToStringPointer(p, cmd, someFlag),
+		Secret:          flags.SecretFlagToStringPointer(p, cmd, secretFlag),
 	}
 
 	// Write the input model to the debug logs
