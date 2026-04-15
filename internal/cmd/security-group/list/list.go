@@ -25,10 +25,12 @@ import (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector *string
+	Limit         *int64
 }
 
 const (
 	labelSelectorFlag = "label-selector"
+	limitFlag         = "limit"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -38,8 +40,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Lists security groups by its internal ID.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(`List all groups`, `$ stackit security-group list`),
-			examples.NewExample(`List groups with labels`, `$ stackit security-group list --label-selector label1=value1,label2=value2`),
+			examples.NewExample(`Lists all security groups`, `$ stackit security-group list`),
+			examples.NewExample(`Lists security groups with labels`, `$ stackit security-group list --label-selector label1=value1,label2=value2`),
+			examples.NewExample(
+				`Lists all security groups in JSON format`,
+				"$ stackit security-group list --output-format json",
+			),
+			examples.NewExample(
+				`Lists up to 10 security groups`,
+				"$ stackit security-group list --limit 10",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -70,6 +80,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			// Truncate output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = items[:*model.Limit]
+			}
+
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 
 		},
@@ -81,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -89,9 +105,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)

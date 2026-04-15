@@ -34,6 +34,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 
 		labelSelectorFlag: testLabels,
+		limitFlag:         "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -49,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		LabelSelector: utils.Ptr(testLabels),
+		Limit:         utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -124,6 +126,20 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.LabelSelector = utils.Ptr("foo=bar")
 			}),
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
 		},
 	}
 
