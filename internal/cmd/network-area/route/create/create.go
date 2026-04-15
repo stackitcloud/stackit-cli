@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"os"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -163,8 +162,6 @@ func configureFlags(cmd *cobra.Command) {
 
 	cobra.CheckErr(cmd.Flags().MarkDeprecated(nexthopFlag, fmt.Sprintf("The flag %q is deprecated and will be removed after April 2026. Use instead %q to configure a IPv4 next hop.", nexthopFlag, nexthopBlackholeFlag)))
 	cobra.CheckErr(cmd.Flags().MarkDeprecated(prefixFlag, fmt.Sprintf("The flag %q is deprecated and will be removed after April 2026. Use instead %q to configure a destination.", prefixFlag, destinationFlag)))
-	// Set the output for deprecation warnings to stderr
-	cmd.Flags().SetOutput(os.Stderr)
 
 	destinationFlags := []string{prefixFlag, destinationFlag}
 	nexthopFlags := []string{nexthopFlag, nexthopIPv4Flag, nexthopIPv6Flag, nexthopBlackholeFlag, nexthopInternetFlag}

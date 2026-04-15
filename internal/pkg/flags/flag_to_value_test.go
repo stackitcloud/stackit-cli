@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -43,7 +43,7 @@ func TestFlagToStringToStringPointer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := print.NewPrinter()
+			params := testparams.NewTestParams()
 			// create a new, simple test command with a string-to-string flag
 			cmd := func() *cobra.Command {
 				cmd := &cobra.Command{
@@ -66,7 +66,7 @@ func TestFlagToStringToStringPointer(t *testing.T) {
 				}
 			}
 
-			if got := FlagToStringToStringPointer(p, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
+			if got := FlagToStringToStringPointer(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FlagToStringToStringPointer() = %v, want %v", got, tt.want)
 			}
 		})
@@ -108,7 +108,7 @@ func TestFlagToStringArrayValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := print.NewPrinter()
+			params := testparams.NewTestParams()
 			cmd := func() *cobra.Command {
 				cmd := &cobra.Command{
 					Use:   "greet",
@@ -131,7 +131,7 @@ func TestFlagToStringArrayValue(t *testing.T) {
 				}
 			}
 
-			if got := FlagToStringArrayValue(p, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
+			if got := FlagToStringArrayValue(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FlagToStringArrayValue() = %v, want %v", got, tt.want)
 			}
 		})
@@ -158,7 +158,7 @@ func TestFlagToInt32Pointer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := print.NewPrinter()
+			params := testparams.NewTestParams()
 			cmd := func() *cobra.Command {
 				cmd := &cobra.Command{
 					Use:   "greet",
@@ -179,7 +179,7 @@ func TestFlagToInt32Pointer(t *testing.T) {
 				}
 			}
 
-			if got := FlagToInt32Pointer(p, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
+			if got := FlagToInt32Pointer(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FlagToInt32Pointer() = %v, want %v", got, tt.want)
 			}
 		})

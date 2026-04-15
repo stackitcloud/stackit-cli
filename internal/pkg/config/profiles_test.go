@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 //go:embed template/test_profile.json
@@ -157,8 +158,8 @@ func TestImportProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			err := ImportProfile(p, tt.profile, tt.config, tt.setAsActive)
+			params := testparams.NewTestParams()
+			err := ImportProfile(params.Printer, tt.profile, tt.config, tt.setAsActive)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -172,8 +173,8 @@ func TestImportProfile(t *testing.T) {
 		})
 
 		t.Cleanup(func() {
-			p := print.NewPrinter()
-			err := DeleteProfile(p, tt.profile)
+			params := testparams.NewTestParams()
+			err := DeleteProfile(params.Printer, tt.profile)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -208,9 +209,9 @@ func TestExportProfile(t *testing.T) {
 	}
 
 	// Create prerequisite profile
-	p := print.NewPrinter()
+	params := testparams.NewTestParams()
 	profileName := "export-profile-test"
-	err = CreateProfile(p, profileName, true, false, false)
+	err = CreateProfile(params.Printer, profileName, true, false, false)
 	if err != nil {
 		t.Fatalf("could not create prerequisite profile, %v", err)
 	}
@@ -220,7 +221,7 @@ func TestExportProfile(t *testing.T) {
 			if err != nil {
 				fmt.Printf("could not clean up prerequisite profile %q, %v", profileName, err)
 			}
-		}(p, profileName)
+		}(params.Printer, profileName)
 	})
 
 	tests := []struct {
@@ -256,8 +257,7 @@ func TestExportProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			err := ExportProfile(p, tt.profile, tt.filePath)
+			err := ExportProfile(params.Printer, tt.profile, tt.filePath)
 			if err != nil {
 				if !tt.isValid {
 					return

@@ -3,6 +3,7 @@ package testutils
 import (
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/google/go-cmp/cmp"
@@ -34,8 +35,8 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		}
 	}
 
-	p := print.NewPrinter()
-	cmd := cmdFactory(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
+	cmd := cmdFactory(params.CmdParams)
 	err := globalflags.Configure(cmd.Flags())
 	if err != nil {
 		t.Fatalf("configure global flags: %v", err)
@@ -104,7 +105,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		t.Fatalf("error validating flags: %v", err)
 	}
 
-	model, err := parseInputFunc(p, cmd, argValues)
+	model, err := parseInputFunc(params.Printer, cmd, argValues)
 	if err != nil {
 		if !isValid {
 			return

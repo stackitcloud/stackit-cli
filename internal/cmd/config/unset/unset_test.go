@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool {
@@ -363,8 +361,8 @@ func TestParseInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			p := print.NewPrinter()
-			cmd := NewCmd(&types.CmdParams{Printer: p})
+			params := testparams.NewTestParams()
+			cmd := NewCmd(params.CmdParams)
 
 			for flag, value := range tt.flagValues {
 				stringBool := fmt.Sprintf("%v", value)
@@ -385,7 +383,7 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model := parseInput(p, cmd)
+			model := parseInput(params.Printer, cmd)
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")

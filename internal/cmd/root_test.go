@@ -58,7 +58,7 @@ func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
 	setupCmd()
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			actualError := beautifyUnknownAndMissingCommandsError(cmd, tt.inputError)
+			actualError := beautifyUnknownAndMissingCommandsError(cmd, tt.inputError, []string{"--something"})
 
 			if tt.isNotUnknownFlagError {
 				if actualError.Error() != tt.expectedMsg {

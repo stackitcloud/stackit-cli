@@ -6,17 +6,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/goccy/go-yaml"
-
 	"github.com/fatih/color"
+	"github.com/goccy/go-yaml"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-colorable"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"golang.org/x/term"
@@ -49,20 +48,32 @@ var (
 )
 
 type Printer struct {
-	Cmd       *cobra.Command
 	AssumeYes bool
 	Verbosity Level
+	StdIn     io.Reader
+	StdOut    io.Writer
+	StdErr    io.Writer
+	ErrPrefix string
 }
 
 // NewPrinter creates a new printer, including setting up the default logger.
-func NewPrinter() *Printer {
-	w := os.Stderr
+func NewPrinter(stdIn io.Reader, stdOut, stdErr io.Writer) *Printer {
+	logW := stdErr
+	if f, ok := stdErr.(*os.File); ok {
+		logW = colorable.NewColorable(f)
+	}
 	logger := slog.New(
-		tint.NewHandler(colorable.NewColorable(w), &tint.Options{AddSource: false, Level: slog.LevelDebug}),
+		tint.NewHandler(logW, &tint.Options{AddSource: false, Level: slog.LevelDebug}),
 	)
 	slog.SetDefault(logger)
 
-	return &Printer{}
+	return &Printer{
+		StdIn:     stdIn,
+		StdOut:    stdOut,
+		StdErr:    stdErr,
+		ErrPrefix: "Error:",
+		Verbosity: InfoLevel,
+	}
 }
 
 // Print an output using Printf to the defined output (falling back to Stderr if not set).
@@ -72,7 +83,7 @@ func (p *Printer) Outputf(msg string, args ...any) {
 	if outputFormat == NoneOutputFormat {
 		return
 	}
-	p.Cmd.Printf(msg, args...)
+	mustPrint(fmt.Fprintf(p.StdOut, msg, args...))
 }
 
 // Print an output using Println to the defined output (falling back to Stderr if not set).
@@ -82,7 +93,7 @@ func (p *Printer) Outputln(msg string) {
 	if outputFormat == NoneOutputFormat {
 		return
 	}
-	p.Cmd.Println(msg)
+	mustPrint(fmt.Fprintln(p.StdOut, msg))
 }
 
 // Print a Debug level log through the "slog" package.
@@ -110,7 +121,7 @@ func (p *Printer) Info(msg string, args ...any) {
 	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() {
 		return
 	}
-	p.Cmd.PrintErrf(msg, args...)
+	mustPrint(fmt.Fprintf(p.StdErr, msg, args...))
 }
 
 // Print a Warn level output to the defined Err output (falling back to Stderr if not set).
@@ -120,13 +131,13 @@ func (p *Printer) Warn(msg string, args ...any) {
 		return
 	}
 	warning := fmt.Sprintf(msg, args...)
-	p.Cmd.PrintErrf("%s %s", YellowBold("Warning:"), warning)
+	mustPrint(fmt.Fprintf(p.StdErr, "%s %s", YellowBold("Warning:"), warning))
 }
 
 // Print an Error level output to the defined Err output (falling back to Stderr if not set).
 func (p *Printer) Error(msg string, args ...any) {
 	err := fmt.Sprintf(msg, args...)
-	p.Cmd.PrintErrln(RedBold(p.Cmd.ErrPrefix()), err)
+	mustPrint(fmt.Fprintln(p.StdErr, RedBold(p.ErrPrefix), err))
 }
 
 // Prompts the user for confirmation.
@@ -139,9 +150,9 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 		return nil
 	}
 	question := fmt.Sprintf("%s [y/N] ", prompt)
-	reader := bufio.NewReader(p.Cmd.InOrStdin())
+	reader := bufio.NewReader(p.StdIn)
 	for i := 0; i < 3; i++ {
-		p.Cmd.PrintErr(question)
+		mustPrint(fmt.Fprint(p.StdErr, question))
 		answer, err := reader.ReadString('\n')
 		if err != nil {
 			continue
@@ -165,8 +176,8 @@ func (p *Printer) PromptForEnter(prompt string) error {
 		p.Warn("Auto-confirming prompt: %q", prompt)
 		return nil
 	}
-	reader := bufio.NewReader(p.Cmd.InOrStdin())
-	p.Cmd.PrintErr(prompt)
+	reader := bufio.NewReader(p.StdIn)
+	mustPrint(fmt.Fprint(p.StdErr, prompt))
 	_, err := reader.ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("read user response: %w", err)
@@ -178,20 +189,22 @@ func (p *Printer) PromptForEnter(prompt string) error {
 //
 // Returns the password that was given, otherwise returns error
 func (p *Printer) PromptForPassword(prompt string) (string, error) {
-	p.Cmd.PrintErr(prompt)
+	mustPrint(fmt.Fprint(p.StdErr, prompt))
 	defer p.Outputln("")
 
-	fd := int(os.Stdin.Fd())
-	if term.IsTerminal(fd) {
-		bytePassword, err := term.ReadPassword(fd)
-		if err != nil {
-			return "", fmt.Errorf("read password: %w", err)
+	if f, ok := p.StdIn.(*os.File); ok {
+		fd := int(f.Fd())
+		if term.IsTerminal(fd) {
+			bytePassword, err := term.ReadPassword(fd)
+			if err != nil {
+				return "", fmt.Errorf("read password: %w", err)
+			}
+			return string(bytePassword), nil
 		}
-		return string(bytePassword), nil
 	}
 
 	// Fallback for non-terminal environments
-	reader := bufio.NewReader(p.Cmd.InOrStdin())
+	reader := bufio.NewReader(p.StdIn)
 	pw, err := reader.ReadString('\n')
 	if err != nil {
 		return "", fmt.Errorf("read password from non-terminal: %w", err)
@@ -221,7 +234,7 @@ func (p *Printer) PagerDisplay(content string) error {
 	}
 
 	pagerCmd.Stdin = strings.NewReader(content)
-	pagerCmd.Stdout = p.Cmd.OutOrStdout()
+	pagerCmd.Stdout = p.StdOut
 
 	p.Debug(DebugLevel, "using pager: %s", pagerCmd.Args[0])
 	err := pagerCmd.Run()
@@ -289,5 +302,11 @@ func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc
 		return nil
 	default:
 		return prettyOutputFunc()
+	}
+}
+
+func mustPrint(_ int, err error) {
+	if err != nil {
+		panic(err)
 	}
 }

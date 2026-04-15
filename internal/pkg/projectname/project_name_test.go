@@ -8,8 +8,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 var testProjectId = uuid.NewString()
@@ -40,10 +41,10 @@ func TestGetProjectName(t *testing.T) {
 			viper.Set(config.ProjectNameKey, tt.projectName)
 			viper.Set(config.ProjectIdKey, tt.projectId)
 			defer viper.Reset()
-			p := print.NewPrinter()
+			params := testparams.NewTestParams()
 			cmd := &cobra.Command{}
 
-			projectName, err := GetProjectName(context.Background(), p, "0.0.0-dummy", cmd)
+			projectName, err := GetProjectName(context.Background(), params.Printer, "0.0.0-dummy", cmd)
 			if err != nil {
 				if tt.isValid {
 					t.Fatalf("unexpected error: %v", err)

@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/cobra"
 	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
@@ -283,10 +284,8 @@ func TestRoundTrip(t *testing.T) {
 				return reauthorizeUser(authorizeUserContext)
 			}
 
-			cmd := &cobra.Command{}
-			cmd.SetOut(io.Discard) // Suppresses console prints
-
-			p := &print.Printer{Cmd: cmd}
+			params := testparams.NewTestParams()
+			p := params.Printer
 
 			// Test RoundTripper
 			rt := userTokenFlow{

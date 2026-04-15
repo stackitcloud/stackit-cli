@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -53,7 +52,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
+func NewRootCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "stackit",
 		Short:             "Manage STACKIT resources using the command line",
@@ -63,12 +62,12 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-			p.Cmd = cmd
+			p := params.Printer
 			globalFlags := globalflags.Parse(p, cmd)
 			p.Verbosity = print.Level(globalFlags.Verbosity)
 			p.AssumeYes = globalFlags.AssumeYes
 
-			argsString := print.BuildDebugStrFromSlice(os.Args)
+			argsString := print.BuildDebugStrFromSlice(params.Args)
 			p.Debug(print.DebugLevel, "arguments: %s", argsString)
 
 			configFilePath := viper.ConfigFileUsed()
@@ -101,36 +100,41 @@ func NewRootCmd(version, date string, p *print.Printer) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			p := params.Printer
 			if flags.FlagToBoolValue(p, cmd, "version") {
 				p.Outputf("STACKIT CLI\n")
 
-				parsedDate, err := time.Parse(time.RFC3339, date)
+				parsedDate, err := time.Parse(time.RFC3339, params.Date)
 				if err != nil {
-					p.Outputf("Version: %s\n", version)
+					p.Outputf("Version: %s\n", params.CliVersion)
 					return nil
 				}
-				p.Outputf("Version: %s (%s)\n", version, parsedDate.Format(time.DateOnly))
+				p.Outputf("Version: %s (%s)\n", params.CliVersion, parsedDate.Format(time.DateOnly))
 				return nil
 			}
 
 			return cmd.Help()
 		},
 	}
-	cmd.SetOut(os.Stdout)
+	cmd.SetOut(params.Printer.StdOut)
 
 	err := configureFlags(cmd)
 	cobra.CheckErr(err)
 
-	addSubcommands(cmd, &types.CmdParams{
-		Printer:    p,
-		CliVersion: version,
-	})
+	addSubcommands(cmd, params)
 
-	// Cobra creates the help flag with "help for <command>" as the description
-	// We want to override that message by capitalizing the first letter to match the other flag descriptions
-	// See spf13/cobra#480
 	traverseCommands(cmd, func(c *cobra.Command) {
+		// Cobra creates the help flag with "help for <command>" as the description
+		// We want to override that message by capitalizing the first letter to match the other flag descriptions
+		// See spf13/cobra#480
 		c.Flags().BoolP("help", "h", false, fmt.Sprintf("Help for %q", c.CommandPath()))
+
+		c.SetArgs(params.Args)
+		c.SetIn(params.Printer.StdIn)
+		c.SetOut(params.Printer.StdOut)
+		c.SetErr(params.Printer.StdErr)
+
+		c.Flags().SetOutput(params.Printer.StdErr)
 	})
 
 	beautifyUsageTemplate(cmd)
@@ -209,34 +213,30 @@ func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
 	}
 }
 
-func Execute(version, date string) {
-	p := print.NewPrinter()
-	cmd := NewRootCmd(version, date, p)
+// Execute executes the RootCmd and returns true on success and false on failure.
+func Execute(params *types.CmdParams) bool {
+	cmd := NewRootCmd(params)
 
-	// We need to set the printer and verbosity here because the
-	// PersistentPreRun is not called when the command is wrongly called
-	// In this case Printer.AssumeYes isn't set either, but `false` as default is acceptable
-	p.Cmd = cmd
-	p.Verbosity = print.InfoLevel
-
+	p := params.Printer
 	err := cmd.Execute()
 	if err != nil {
-		err := beautifyUnknownAndMissingCommandsError(cmd, err)
+		err := beautifyUnknownAndMissingCommandsError(cmd, err, params.Args)
 		p.Debug(print.ErrorLevel, "execute command: %v", err)
 		p.Error("%s", err.Error())
-		os.Exit(1)
+		return false
 	}
+	return true
 }
 
 // Returns a more user-friendly error if the input error is due to unknown/missing subcommands (issue: https://github.com/spf13/cobra/issues/706)
 //
 // Otherwise, returns the input error unchanged
-func beautifyUnknownAndMissingCommandsError(rootCmd *cobra.Command, cmdErr error) error {
+func beautifyUnknownAndMissingCommandsError(rootCmd *cobra.Command, cmdErr error, args []string) error { // nolint:gocritic // args is a nice name despite shadowing
 	if !strings.HasPrefix(cmdErr.Error(), "unknown flag") {
 		return cmdErr
 	}
 
-	cmd, unparsedInputs, err := rootCmd.Traverse(os.Args[1:])
+	cmd, unparsedInputs, err := rootCmd.Traverse(args)
 	if err != nil {
 		return cmdErr
 	}

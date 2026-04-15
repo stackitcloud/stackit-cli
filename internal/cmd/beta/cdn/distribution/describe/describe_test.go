@@ -1,7 +1,6 @@
 package describe
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"testing"
@@ -12,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -392,16 +391,14 @@ func TestOutputResult(t *testing.T) {
 `, testDistributionID, testTime, testTime, testProjectID),
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			var buf bytes.Buffer
-			p.Cmd.SetOut(&buf)
-			if err := outputResult(p, tt.format, tt.distribution); (err != nil) != tt.wantErr {
+			params := testparams.NewTestParams()
+			if err := outputResult(params.Printer, tt.format, tt.distribution); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			diff := cmp.Diff(buf.String(), tt.expected)
+			diff := cmp.Diff(params.Out.String(), tt.expected)
 			if diff != "" {
 				t.Fatalf("outputResult() output mismatch (-want +got):\n%s", diff)
 			}

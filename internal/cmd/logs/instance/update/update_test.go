@@ -6,8 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-sdk-go/services/logs"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -294,11 +294,11 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(p, tt.model, "label", tt.instance)
+			err := outputResult(params.Printer, tt.model, "label", tt.instance)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

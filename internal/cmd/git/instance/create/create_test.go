@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -217,11 +216,11 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	p := print.NewPrinter()
-	p.Cmd = NewCmd(&types.CmdParams{Printer: p})
+	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(p, tt.args.outputFormat, tt.args.async, tt.args.instanceName, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.async, tt.args.instanceName, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
