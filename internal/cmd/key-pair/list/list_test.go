@@ -153,6 +153,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		projectLabel string
 		keyPairs     []iaas.Keypair
 	}
 	tests := []struct {
@@ -176,7 +177,7 @@ func Test_outputResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			params := testparams.NewTestParams()
 
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.keyPairs); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.keyPairs); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
