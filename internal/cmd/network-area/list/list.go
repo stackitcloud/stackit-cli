@@ -103,7 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, orgLabel, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, orgLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -148,7 +148,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, orgLabel, outputFormat string, networkAreas []iaas.NetworkArea) error {
+func outputResult(p *print.Printer, outputFormat, orgLabel string, networkAreas []iaas.NetworkArea) error {
 	return p.OutputResult(outputFormat, networkAreas, func() error {
 		if len(networkAreas) == 0 {
 			p.Outputf("No STACKIT Network Areas found for organization %q\n", orgLabel)
