@@ -141,23 +141,26 @@ func TestBuildRequest(t *testing.T) {
 }
 
 func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		projectLabel string
+		instances    []iaas.AffinityGroup
+	}
 	tests := []struct {
 		description string
-		model       inputModel
-		response    []iaas.AffinityGroup
+		args        args
 		isValid     bool
 	}{
 		{
 			description: "empty",
-			model:       inputModel{},
-			response:    []iaas.AffinityGroup{},
+			args:        args{},
 			isValid:     true,
 		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			err := outputResult(params.Printer, tt.model, tt.response)
+			err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.instances)
 			if err != nil {
 				if !tt.isValid {
 					return
