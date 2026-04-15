@@ -14,7 +14,7 @@ stackit beta alb observability-credentials add [flags]
 
 ```
   Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag
-  $ stackit beta alb observability-credentials add --username xxx --password @./password.txt --display-name yyy
+  $ stackit beta alb observability-credentials add --username xxx --password @./password.txt --displayname yyy
 ```
 
 ### Options
@@ -22,7 +22,7 @@ stackit beta alb observability-credentials add [flags]
 ```
   -d, --displayname string   Displayname for the credentials
   -h, --help                 Help for "stackit beta alb observability-credentials add"
-      --password string      Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).
+      --password string      password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
   -u, --username string      Username for the credentials
 ```
 
