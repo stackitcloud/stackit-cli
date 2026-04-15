@@ -54,12 +54,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
 
@@ -68,15 +62,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list security group: %w", err)
 			}
 
-			if items := response.GetItems(); len(items) == 0 {
-				params.Printer.Info("No security groups found for project %q", projectLabel)
-			} else {
-				if err := outputResult(params.Printer, model.OutputFormat, items); err != nil {
-					return fmt.Errorf("output security groups: %w", err)
-				}
+			items := response.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
+
 		},
 	}
 
@@ -111,8 +106,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGroup) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []iaas.SecurityGroup) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No security groups found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATEFUL", "DESCRIPTION", "LABELS")
 		for _, item := range items {
