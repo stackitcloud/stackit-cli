@@ -707,7 +707,6 @@ func TestIsVerbosityDebug(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			// TODO ask team if we really need this test
 			p := &Printer{
 				Verbosity: tt.verbosity,
 			}
@@ -750,7 +749,6 @@ func TestIsVerbosityInfo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			// TODO ask team if we really need this test
 			p := &Printer{
 				Verbosity: tt.verbosity,
 			}
@@ -793,7 +791,6 @@ func TestIsVerbosityWarning(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			// TODO ask team if we really need this test
 			p := &Printer{
 				Verbosity: tt.verbosity,
 			}
@@ -836,7 +833,6 @@ func TestIsVerbosityError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			// TODO ask team if we really need this test
 			p := &Printer{
 				Verbosity: tt.verbosity,
 			}
