@@ -6,6 +6,7 @@ import (
 	"testing/fstest"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -80,7 +81,7 @@ func TestSecretFlag(t *testing.T) {
 			t.Parallel()
 			params := testparams.NewTestParams()
 			if tt.file != nil {
-				params.CmdParams.Fs = fstest.MapFS{
+				params.Fs = fstest.MapFS{
 					tt.file.path: &fstest.MapFile{
 						Data: []byte(tt.file.content),
 					},

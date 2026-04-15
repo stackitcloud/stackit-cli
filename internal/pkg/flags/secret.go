@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
 type secretFlag struct {
@@ -18,7 +18,6 @@ type secretFlag struct {
 	value   string
 	name    string
 }
-
 
 func SecretFlag(name string, params *types.CmdParams) *secretFlag {
 	f := &secretFlag{
