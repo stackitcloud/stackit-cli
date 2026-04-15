@@ -73,7 +73,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				return fmt.Errorf("list key pairs: %w", err)
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Call API
