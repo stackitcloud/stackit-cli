@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -70,6 +71,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				return fmt.Errorf("list key pairs: %w", err)
+			}
+
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -77,17 +83,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list key pairs: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				params.Printer.Info("No key pairs found\n")
-				return nil
-			}
+			items := resp.GetItems()
 
-			items := *resp.Items
+			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -128,8 +131,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, keyPairs []iaas.Keypair) error {
 	return p.OutputResult(outputFormat, keyPairs, func() error {
+		if len(keyPairs) == 0 {
+			p.Outputf("No key pairs found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("KEY PAIR NAME", "LABELS", "FINGERPRINT", "CREATED AT", "UPDATED AT")
 
