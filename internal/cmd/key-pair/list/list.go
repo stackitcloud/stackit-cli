@@ -71,12 +71,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
@@ -85,6 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			items := resp.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
 
 			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
