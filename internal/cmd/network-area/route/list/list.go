@@ -74,24 +74,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list static routes: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				var networkAreaLabel string
-				networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
-					networkAreaLabel = *model.NetworkAreaId
-				}
-				params.Printer.Info("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
-				return nil
+			items := resp.GetItems()
+
+			var networkAreaLabel string
+			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -132,8 +129,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, routes []iaas.Route) error {
 	return p.OutputResult(outputFormat, routes, func() error {
+		if len(routes) == 0 {
+			p.Outputf("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("Static Route ID", "Next Hop", "Next Hop Type", "Destination")
 
