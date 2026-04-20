@@ -135,7 +135,7 @@ func TestParseWellKnownConfig(t *testing.T) {
 			getFails:    false,
 			getResponse: `{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/enpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
 			isValid:     true,
-			expected: &wellKnownConfig{
+			expected: &wellKnownConfig{ //nolint:gosec // just a testcase; no credentials
 				Issuer:                "https://issuer.stackit.cloud/endpoint",
 				AuthorizationEndpoint: "https://auth.stackit.cloud/enpoint",
 				TokenEndpoint:         "https://token.stackit.cloud/endpoint",

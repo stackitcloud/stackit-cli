@@ -351,14 +351,14 @@ func openBrowser(pageUrl string) (err error) {
 		// We need to use the windows way on WSL, otherwise we do not pass query
 		// parameters correctly. https://github.com/microsoft/WSL/issues/3832
 		if _, ok := os.LookupEnv("WSL_DISTRO_NAME"); !ok {
-			err = exec.Command("xdg-open", pageUrl).Start()
+			err = exec.Command("xdg-open", pageUrl).Start() //nolint:gosec // url is validated
 			break
 		}
 		fallthrough
 	case "windows":
-		err = exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", pageUrl).Start()
+		err = exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", pageUrl).Start() //nolint:gosec // url is validated
 	case "darwin":
-		err = exec.Command("open", pageUrl).Start()
+		err = exec.Command("open", pageUrl).Start() //nolint:gosec // url is validated
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}
