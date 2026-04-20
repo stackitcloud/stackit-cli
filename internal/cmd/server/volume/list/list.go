@@ -71,11 +71,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server volumes: %w", err)
 			}
-			volumes := *resp.Items
-			if len(volumes) == 0 {
-				params.Printer.Info("No volumes found for server %s\n", serverLabel)
-				return nil
-			}
+
+			volumes := resp.GetItems()
 
 			// get volume names
 			var volumeNames []string
@@ -124,6 +121,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeNames []string, volumes []iaas.VolumeAttachment) error {
 	return p.OutputResult(outputFormat, volumes, func() error {
+		if len(volumes) == 0 {
+			p.Outputf("No volumes found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
 		for i := range volumes {
