@@ -78,16 +78,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server commands: %w", err)
 			}
-			if commands := resp.Items; commands == nil || len(*commands) == 0 {
-				params.Printer.Info("No commands found for server %s\n", serverLabel)
-				return nil
-			}
-			commands := *resp.Items
+
+			commands := resp.GetItems()
+
 			// Truncate output
 			if model.Limit != nil && len(commands) > int(*model.Limit) {
 				commands = commands[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, commands)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, commands)
 		},
 	}
 	configureFlags(cmd)
@@ -131,8 +129,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, commands []runcommand.Commands) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, commands []runcommand.Commands) error {
 	return p.OutputResult(outputFormat, commands, func() error {
+		if len(commands) == 0 {
+			p.Outputf("No commands found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "TEMPLATE NAME", "TEMPLATE TITLE", "STATUS", "STARTED_AT", "FINISHED_AT")
 		for i := range commands {
