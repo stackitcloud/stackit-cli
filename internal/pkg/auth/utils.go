@@ -99,19 +99,19 @@ func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string
 		return nil, fmt.Errorf("found no issuer")
 	}
 	if utils.ValidateURLDomain(wellKnownConfig.Issuer) != nil {
-		return nil, err
+		return nil, fmt.Errorf("issuer is invalid")
 	}
 	if wellKnownConfig.AuthorizationEndpoint == "" {
 		return nil, fmt.Errorf("found no authorization endpoint")
 	}
 	if utils.ValidateURLDomain(wellKnownConfig.AuthorizationEndpoint) != nil {
-		return nil, err
+		return nil, fmt.Errorf("authorization endpoint is invalid")
 	}
 	if wellKnownConfig.TokenEndpoint == "" {
 		return nil, fmt.Errorf("found no token endpoint")
 	}
 	if utils.ValidateURLDomain(wellKnownConfig.TokenEndpoint) != nil {
-		return nil, err
+		return nil, fmt.Errorf("token endpoint is invalid")
 	}
 
 	err = SetAuthField(IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
