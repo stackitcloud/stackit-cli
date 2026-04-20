@@ -340,8 +340,12 @@ func cleanup(server *http.Server) {
 	}()
 }
 
-func openBrowser(pageUrl string) error {
-	var err error
+func openBrowser(pageUrl string) (err error) {
+	err = utils.ValidateURLDomain(pageUrl)
+	if err != nil {
+		return err
+	}
+
 	switch runtime.GOOS {
 	case "freebsd", "linux":
 		// We need to use the windows way on WSL, otherwise we do not pass query

@@ -133,12 +133,12 @@ func TestParseWellKnownConfig(t *testing.T) {
 		{
 			name:        "success",
 			getFails:    false,
-			getResponse: `{"issuer":"issuer","authorization_endpoint":"auth","token_endpoint":"token"}`,
+			getResponse: `{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/enpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
 			isValid:     true,
 			expected: &wellKnownConfig{
-				Issuer:                "issuer",
-				AuthorizationEndpoint: "auth",
-				TokenEndpoint:         "token",
+				Issuer:                "https://issuer.stackit.cloud/endpoint",
+				AuthorizationEndpoint: "https://auth.stackit.cloud/enpoint",
+				TokenEndpoint:         "https://token.stackit.cloud/endpoint",
 			},
 		},
 		{
@@ -158,21 +158,21 @@ func TestParseWellKnownConfig(t *testing.T) {
 		{
 			name:        "missing_issuer",
 			getFails:    true,
-			getResponse: `{"authorization_endpoint":"auth","token_endpoint":"token"}`,
+			getResponse: `{"authorization_endpoint":"https://auth.stackit.cloud/enpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
 			isValid:     false,
 			expected:    nil,
 		},
 		{
 			name:        "missing_authorization",
 			getFails:    true,
-			getResponse: `{"issuer":"issuer","token_endpoint":"token"}`,
+			getResponse: `{"issuer":"https://issuer.stackit.cloud/endpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
 			isValid:     false,
 			expected:    nil,
 		},
 		{
 			name:        "missing_token",
 			getFails:    true,
-			getResponse: `{"issuer":"issuer","authorization_endpoint":"auth"}`,
+			getResponse: `{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/enpoint"}`,
 			isValid:     false,
 			expected:    nil,
 		},
