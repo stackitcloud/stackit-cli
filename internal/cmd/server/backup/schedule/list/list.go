@@ -78,17 +78,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server backup schedules: %w", err)
 			}
-			schedules := *resp.Items
-			if len(schedules) == 0 {
-				params.Printer.Info("No backup schedules found for server %s\n", serverLabel)
-				return nil
-			}
+			schedules := resp.GetItems()
 
 			// Truncate output
 			if model.Limit != nil && len(schedules) > int(*model.Limit) {
 				schedules = schedules[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, schedules)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, schedules)
 		},
 	}
 	configureFlags(cmd)
@@ -132,8 +128,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, schedules []serverbackup.BackupSchedule) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules []serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, schedules, func() error {
+		if len(schedules) == 0 {
+			p.Outputf("No backup schedules found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "BACKUP NAME", "BACKUP RETENTION DAYS", "BACKUP VOLUME IDS")
 		for i := range schedules {
