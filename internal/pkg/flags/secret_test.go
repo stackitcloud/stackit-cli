@@ -1,7 +1,9 @@
 package flags
 
 import (
+	"fmt"
 	"io"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -118,6 +120,42 @@ func TestSecretFlag(t *testing.T) {
 				if message != tt.wantStdErr {
 					t.Fatalf("unexpected stderr: got %q, want %q", message, tt.wantStdErr)
 				}
+			}
+		})
+	}
+}
+
+func TestSecretFlag_Usage(t *testing.T) {
+	t.Parallel()
+	tests := []struct{
+		in string
+		want string
+	} {
+		{
+			in: "password",
+			want: "Password",
+		},
+		{
+			in: "Password",
+			want: "Password",
+		},
+		{
+			in: "",
+			want: "",
+		},
+		{
+			in: "secret-key",
+			want: "Secret-Key",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%q -> %q", tt.in, tt.want), func(t *testing.T) {
+			t.Parallel()
+			params := testparams.NewTestParams()
+			flag := SecretFlag(tt.in, params.CmdParams)
+			got := flag.Usage()
+			if !strings.HasPrefix(got, tt.want) {
+				t.Fatalf("unexpected usage: got %q, want %q", got, tt.want)
 			}
 		})
 	}

@@ -22,7 +22,7 @@ stackit beta alb observability-credentials add [flags]
 ```
   -d, --displayname string   Displayname for the credentials
   -h, --help                 Help for "stackit beta alb observability-credentials add"
-      --password string      password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
+      --password string      Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
   -u, --username string      Username for the credentials
 ```
 

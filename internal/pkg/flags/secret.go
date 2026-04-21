@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -54,7 +56,8 @@ func (f *secretFlag) Type() string {
 }
 
 func (f *secretFlag) Usage() string {
-	return fmt.Sprintf("%s. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.", f.name)
+	name := cases.Title(language.AmericanEnglish).String(f.name)
+	return fmt.Sprintf("%s. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.", name)
 }
 
 func SecretFlagToStringPointer(p *print.Printer, cmd *cobra.Command, flag string) *string {
