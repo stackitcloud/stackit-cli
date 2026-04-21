@@ -388,17 +388,17 @@ func TestTokenExpired(t *testing.T) {
 		token    string
 		expected bool
 	}{
-		{
+		{ //nolint:gosec // not a real token, just a testcase
 			desc:     "token without exp",
 			token:    `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`,
 			expected: false,
 		},
-		{
+		{ //nolint:gosec // not a real token, just a testcase
 			desc:     "exp 0",
 			token:    `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjB9.rIhVGrtR0B0gUYPZDnB6LZ_w7zckH_9qFZBWG4rCkRY`,
 			expected: true,
 		},
-		{
+		{ //nolint:gosec // not a real token, just a testcase
 			desc:     "exp 9007199254740991",
 			token:    `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjIyNTc2MDkwNzExMTExMTExfQ.aStshPjoSKTIcBeESbLJWvbMVuw-XWInXcf1P7tiWaE`,
 			expected: false,

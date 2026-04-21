@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"os"
 	"os/exec"
 	"strings"
@@ -193,7 +194,11 @@ func (p *Printer) PromptForPassword(prompt string) (string, error) {
 	defer p.Outputln("")
 
 	if f, ok := p.StdIn.(*os.File); ok {
-		fd := int(f.Fd())
+		uint_fd := f.Fd()
+		if uint_fd > math.MaxInt {
+			return "", fmt.Errorf("uint_fd is too large")
+		}
+		fd := int(uint_fd)
 		if term.IsTerminal(fd) {
 			bytePassword, err := term.ReadPassword(fd)
 			if err != nil {

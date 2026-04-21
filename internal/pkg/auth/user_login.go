@@ -295,7 +295,7 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 	req, _ := http.NewRequest("POST", idpWellKnownConfig.TokenEndpoint, payload)
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
 	httpClient := &http.Client{}
-	res, err := httpClient.Do(req)
+	res, err := httpClient.Do(req) //nolint:gosec // URL from well known
 	if err != nil {
 		return "", "", fmt.Errorf("call access token endpoint: %w", err)
 	}
@@ -340,21 +340,25 @@ func cleanup(server *http.Server) {
 	}()
 }
 
-func openBrowser(pageUrl string) error {
-	var err error
+func openBrowser(pageUrl string) (err error) {
+	err = utils.ValidateURLDomain(pageUrl)
+	if err != nil {
+		return err
+	}
+
 	switch runtime.GOOS {
 	case "freebsd", "linux":
 		// We need to use the windows way on WSL, otherwise we do not pass query
 		// parameters correctly. https://github.com/microsoft/WSL/issues/3832
 		if _, ok := os.LookupEnv("WSL_DISTRO_NAME"); !ok {
-			err = exec.Command("xdg-open", pageUrl).Start()
+			err = exec.Command("xdg-open", pageUrl).Start() //nolint:gosec // url is validated
 			break
 		}
 		fallthrough
 	case "windows":
-		err = exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", pageUrl).Start()
+		err = exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", pageUrl).Start() //nolint:gosec // url is validated
 	case "darwin":
-		err = exec.Command("open", pageUrl).Start()
+		err = exec.Command("open", pageUrl).Start() //nolint:gosec // url is validated
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}

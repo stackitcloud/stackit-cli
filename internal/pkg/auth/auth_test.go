@@ -293,7 +293,7 @@ func TestInitKeyFlow(t *testing.T) {
 					ExpiresIn:   3600,
 					TokenType:   "Bearer",
 				}
-				jsonResp, err := json.Marshal(resp)
+				jsonResp, err := json.Marshal(resp) //nolint:gosec // not a real access token, just a testcase
 				if err != nil {
 					t.Fatalf("Failed to marshal json: %v", err)
 				}
