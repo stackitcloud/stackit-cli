@@ -82,14 +82,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "Username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "Displayname for the credentials")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, displaynameFlag, usernameFlag))
 }
@@ -116,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
 		CredentialsRef:  &inputArgs[0],
-		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
+		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 	}
 
 	p.DebugInputModel(model)

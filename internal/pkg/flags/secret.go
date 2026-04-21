@@ -79,3 +79,11 @@ func SecretFlagToStringPointer(p *print.Printer, cmd *cobra.Command, flag string
 	}
 	return nil
 }
+
+func SecretFlagToString(p *print.Printer, cmd *cobra.Command, flag string) string {
+	pointer := SecretFlagToStringPointer(p, cmd, flag)
+	if pointer == nil {
+		return ""
+	}
+	return *pointer
+}

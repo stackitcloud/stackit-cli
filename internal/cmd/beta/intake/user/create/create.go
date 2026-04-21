@@ -101,14 +101,15 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			return outputResult(p.Printer, model, projectLabel, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, p)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "The UUID of the Intake to associate the user with")
-	cmd.Flags().String(passwordFlag, "", "Password for the user. Must contain lower, upper, number, and special characters (min 12 chars)")
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
 	cmd.Flags().String(userTypeFlag, string(intake.USERTYPE_INTAKE), "Type of user. One of 'intake' (default) or 'dead-letter'")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringToString(labelsFlag, nil, "Labels in key=value format, separated by commas")
@@ -127,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		IntakeId:        flags.FlagToStringPointer(p, cmd, intakeIdFlag),
-		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
+		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),

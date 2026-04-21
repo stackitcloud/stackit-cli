@@ -24,6 +24,7 @@ stackit beta cdn distribution update [flags]
       --blocked-ips strings                       Comma-separated list of IPv4 addresses to block (e.g., '10.0.0.8,127.0.0.1')
       --bucket                                    Use Object Storage backend
       --bucket-credentials-access-key-id string   Access Key ID for Object Storage backend
+      --bucket-password string                    Bucket-Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --bucket-region string                      Region for Object Storage backend
       --bucket-url string                         Bucket URL for Object Storage backend
       --default-cache-duration string             ISO8601 duration string for default cache duration (e.g., 'PT1H30M' for 1 hour and 30 minutes)
@@ -33,6 +34,7 @@ stackit beta cdn distribution update [flags]
       --http-origin-request-headers strings       Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!
       --http-origin-url string                    Origin URL for HTTP backend
       --loki                                      Enable Loki log sink for the CDN distribution
+      --loki-password string                      Loki-Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --loki-push-url string                      Push URL for log sink
       --loki-username string                      Username for log sink
       --monthly-limit-bytes int                   Monthly limit in bytes for the CDN distribution

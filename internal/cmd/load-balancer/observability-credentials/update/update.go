@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,10 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 	loadBalancerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
 )
 
 const (
@@ -86,15 +85,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				credentialsLabel = model.CredentialsRef
 			}
 
-			// Prompt for password if not passed in as a flag
-			if model.Password == nil {
-				pwd, err := params.Printer.PromptForPassword("Enter new password: ")
-				if err != nil {
-					return fmt.Errorf("prompt for password: %w", err)
-				}
-				model.Password = utils.Ptr(pwd)
-			}
-
 			prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
@@ -116,14 +106,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return nil
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials name")
 	cmd.Flags().String(usernameFlag, "", "Username")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage())
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -136,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	displayName := flags.FlagToStringPointer(p, cmd, displayNameFlag)
 	username := flags.FlagToStringPointer(p, cmd, usernameFlag)
-	password := flags.FlagToStringPointer(p, cmd, passwordFlag)
+	password := flags.SecretFlagToStringPointer(p, cmd, passwordFlag)
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
