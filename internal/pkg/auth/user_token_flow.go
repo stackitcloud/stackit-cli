@@ -70,7 +70,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", utf.accessToken))
-	return utf.client.Do(req)
+	return utf.client.Do(req) //nolint:gosec // URL is request specific
 }
 
 func loadVarsFromStorage(utf *userTokenFlow) error {

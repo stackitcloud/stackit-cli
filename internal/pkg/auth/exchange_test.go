@@ -50,7 +50,7 @@ func fixtureTokenExchangeResponse() string {
 		IssuedTokeType string `json:"issued_token_type"`
 		TokenType      string `json:"token_type"`
 	}
-	response, _ := json.Marshal(exchangeReponse{
+	response, _ := json.Marshal(exchangeReponse{ //nolint:gosec // just a testcase, no valid credentials
 		AccessToken:    testExchangedToken,
 		IssuedTokeType: "urn:ietf:params:oauth:token-type:id_token",
 		TokenType:      "Bearer",
