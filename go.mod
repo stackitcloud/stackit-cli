@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.23.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.10.0
@@ -271,7 +271,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.26.0
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.6
+	github.com/stackitcloud/stackit-sdk-go/services/redis v0.28.1
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.4.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
