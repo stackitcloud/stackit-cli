@@ -127,24 +127,24 @@ func TestSecretFlag(t *testing.T) {
 
 func TestSecretFlag_Usage(t *testing.T) {
 	t.Parallel()
-	tests := []struct{
-		in string
+	tests := []struct {
+		in   string
 		want string
-	} {
+	}{
 		{
-			in: "password",
+			in:   "password",
 			want: "Password",
 		},
 		{
-			in: "Password",
+			in:   "Password",
 			want: "Password",
 		},
 		{
-			in: "",
+			in:   "",
 			want: "",
 		},
 		{
-			in: "secret-key",
+			in:   "secret-key",
 			want: "Secret-Key",
 		},
 	}
