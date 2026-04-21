@@ -76,6 +76,13 @@ For prints that are specific to a certain log level, you can use the methods def
 
 For command outputs that should always be displayed, no matter the defined verbosity, you should use the `print` methods `Outputf` and `Outputln`. These should only be used for the actual output of the commands, which can usually be described by "I ran the command to see _this_".
 
+#### Handling secrets
+
+If your command needs secrets as input, please make sure to use `flags.SecretFlag()` and `flags.SecretFlagToStringPointer()`.
+These functions implement reading from stdin or a file.
+
+They also support reading the secret value as a command line argument (deprecated, marked for removal in Oct 2026).
+
 ### Onboarding a new STACKIT service
 
 If you want to add a command that uses a STACKIT service `foo` that was not yet used by the CLI, you will first need to implement a few extra steps to configure the new service:
