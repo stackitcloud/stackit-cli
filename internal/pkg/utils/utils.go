@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -82,9 +83,17 @@ func ValidateURLDomain(value string) error {
 	if err != nil {
 		return fmt.Errorf("parse url: %w", err)
 	}
+
 	urlHost := urlStruct.Hostname()
 	if urlHost == "" {
 		return fmt.Errorf("bad url")
+	}
+
+	allowedSchemes := []string{
+		"https",
+	}
+	if !slices.Contains(allowedSchemes, urlStruct.Scheme) {
+		return fmt.Errorf("unsupported protocol: %s", urlStruct.Scheme)
 	}
 
 	allowedUrlDomain := viper.GetString(config.AllowedUrlDomainKey)

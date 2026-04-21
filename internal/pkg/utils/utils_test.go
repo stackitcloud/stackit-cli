@@ -97,6 +97,21 @@ func TestValidateURLDomain(t *testing.T) {
 			input:   "",
 			isValid: false,
 		},
+		{
+			name:    "invalid protocol",
+			input:   "http://example.stackit.cloud",
+			isValid: false,
+		},
+		{
+			name:    "no protocol",
+			input:   "example.stackit.cloud",
+			isValid: false,
+		},
+		{
+			name:    "valid endpoint",
+			input:   "https://service-account.api.stackit.cloud/token",
+			isValid: true,
+		},
 	}
 
 	for _, tt := range tests {
