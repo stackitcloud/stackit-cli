@@ -68,15 +68,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			// Prompt for password if not passed in as a flag
-			if model.Password == nil {
-				pwd, err := params.Printer.PromptForPassword("Enter user password: ")
-				if err != nil {
-					return fmt.Errorf("prompt for password: %w", err)
-				}
-				model.Password = utils.Ptr(pwd)
-			}
-
 			prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
@@ -93,14 +84,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials display name")
 	cmd.Flags().String(usernameFlag, "", "Username")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), passwordFlag, `Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).`)
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
 	err := flags.MarkFlagsRequired(cmd, displayNameFlag, usernameFlag)
 	cobra.CheckErr(err)
@@ -116,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Password:        flags.FlagToStringPointer(p, cmd, passwordFlag),
+		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 	}
 
 	p.DebugInputModel(model)

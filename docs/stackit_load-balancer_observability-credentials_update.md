@@ -25,7 +25,7 @@ stackit load-balancer observability-credentials update CREDENTIALS_REF [flags]
 ```
       --display-name string   Credentials name
   -h, --help                  Help for "stackit load-balancer observability-credentials update"
-      --password string       Password. Can be a string or a file path, if prefixed with "@" (example: @./password.txt).
+      --password string       Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --username string       Username
 ```
 

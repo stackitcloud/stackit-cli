@@ -30,12 +30,14 @@ const (
 	flagBucket                       = "bucket"
 	flagBucketURL                    = "bucket-url"
 	flagBucketCredentialsAccessKeyID = "bucket-credentials-access-key-id" //nolint:gosec // linter false positive
+	flagBucketPassword               = "bucket-password"
 	flagBucketRegion                 = "bucket-region"
 	flagBlockedCountries             = "blocked-countries"
 	flagBlockedIPs                   = "blocked-ips"
 	flagDefaultCacheDuration         = "default-cache-duration"
 	flagLoki                         = "loki"
 	flagLokiUsername                 = "loki-username"
+	flagLokiPassword                 = "loki-password"
 	flagLokiPushURL                  = "loki-push-url"
 	flagMonthlyLimitBytes            = "monthly-limit-bytes"
 	flagOptimizer                    = "optimizer"
@@ -119,20 +121,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if model.Bucket != nil {
-				pw, err := params.Printer.PromptForPassword("enter your secret access key for the object storage bucket: ")
-				if err != nil {
-					return fmt.Errorf("reading secret access key: %w", err)
-				}
-				model.Bucket.Password = pw
-			}
-			if model.Loki != nil {
-				pw, err := params.Printer.PromptForPassword("enter your password for the loki log sink: ")
-				if err != nil {
-					return fmt.Errorf("reading loki password: %w", err)
-				}
-				model.Loki.Password = pw
-			}
 
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -161,11 +149,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegion, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", cdn.AllowedRegionEnumValues))
 	cmd.Flags().Bool(flagHTTP, false, "Use HTTP backend")
 	cmd.Flags().String(flagHTTPOriginURL, "", "Origin URL for HTTP backend")
@@ -174,12 +162,16 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flagBucket, false, "Use Object Storage backend")
 	cmd.Flags().String(flagBucketURL, "", "Bucket URL for Object Storage backend")
 	cmd.Flags().String(flagBucketCredentialsAccessKeyID, "", "Access Key ID for Object Storage backend")
+	bucketPassword := flags.SecretFlag(flagBucketPassword, params)
+	cmd.Flags().Var(bucketPassword, flagBucketPassword, bucketPassword.Usage())
 	cmd.Flags().String(flagBucketRegion, "", "Region for Object Storage backend")
 	cmd.Flags().StringSlice(flagBlockedCountries, []string{}, "Comma-separated list of ISO 3166-1 alpha-2 country codes to block (e.g., 'US,DE,FR')")
 	cmd.Flags().StringSlice(flagBlockedIPs, []string{}, "Comma-separated list of IPv4 addresses to block (e.g., '10.0.0.8,127.0.0.1')")
 	cmd.Flags().String(flagDefaultCacheDuration, "", "ISO8601 duration string for default cache duration (e.g., 'PT1H30M' for 1 hour and 30 minutes)")
 	cmd.Flags().Bool(flagLoki, false, "Enable Loki log sink for the CDN distribution")
 	cmd.Flags().String(flagLokiUsername, "", "Username for log sink")
+	lokiPassword := flags.SecretFlag(flagLokiPassword, params)
+	cmd.Flags().Var(lokiPassword, flagLokiPassword, lokiPassword.Usage())
 	cmd.Flags().String(flagLokiPushURL, "", "Push URL for log sink")
 	cmd.Flags().Int64(flagMonthlyLimitBytes, 0, "Monthly limit in bytes for the CDN distribution")
 	cmd.Flags().Bool(flagOptimizer, false, "Enable optimizer for the CDN distribution (paid feature).")
@@ -229,11 +221,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
 		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
 		region := flags.FlagToStringValue(p, cmd, flagBucketRegion)
+		password := flags.SecretFlagToString(p, cmd, flagBucketPassword)
 
 		bucket = &bucketInputModel{
 			URL:         bucketURL,
 			AccessKeyID: accessKeyID,
-			Password:    "",
+			Password:    password,
 			Region:      region,
 		}
 	}
@@ -248,7 +241,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		loki = &lokiInputModel{
 			Username: flags.FlagToStringValue(p, cmd, flagLokiUsername),
 			PushURL:  flags.FlagToStringValue(p, cmd, flagLokiPushURL),
-			Password: "",
+			Password: flags.SecretFlagToString(p, cmd, flagLokiPassword),
 		}
 	}
 
