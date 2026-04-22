@@ -39,7 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		OrganizationId: &testOrganizationId,
+		OrganizationId: testOrganizationId,
 		Limit:          utils.Ptr(int64(10)),
 		LabelSelector:  utils.Ptr(testLabelSelector),
 	}
