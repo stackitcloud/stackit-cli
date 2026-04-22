@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -80,18 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			items := resp.GetItems()
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
+			return outputResult(params.Printer, model.OutputFormat, items)
 		},
 	}
 	configureFlags(cmd)
@@ -132,7 +125,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, keyPairs []iaas.Keypair) error {
+func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair) error {
 	return p.OutputResult(outputFormat, keyPairs, func() error {
 		if len(keyPairs) == 0 {
 			p.Outputf("No key pairs found\n")
