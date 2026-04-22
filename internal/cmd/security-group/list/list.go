@@ -86,7 +86,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
-
 		},
 	}
 
