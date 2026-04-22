@@ -132,7 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRanges []iaas.NetworkRange) error {
 	return p.OutputResult(outputFormat, networkRanges, func() error {
 		if len(networkRanges) == 0 {
-			p.Outputf("No network ranges found for SNA %q\n", networkAreaLabel)
+			p.Outputf("No network ranges found for STACKIT network area %q\n", networkAreaLabel)
 			return nil
 		}
 		table := tables.NewTable()
