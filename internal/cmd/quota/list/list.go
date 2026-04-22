@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list quotas: %w", err)
 			}
-
+			response.Quotas = nil
 			if items := response.Quotas; items == nil {
 				params.Printer.Info("No quotas found for project %q", projectLabel)
 			} else {
