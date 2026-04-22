@@ -30,8 +30,8 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit          *int64
-	OrganizationId *string
-	NetworkAreaId  *string
+	OrganizationId string
+	NetworkAreaId  string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -77,10 +77,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			items := resp.GetItems()
 
 			var networkAreaLabel string
-			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
-				networkAreaLabel = *model.NetworkAreaId
+				networkAreaLabel = model.NetworkAreaId
 			}
 
 			// Truncate output
@@ -117,8 +117,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRoutesRequest {
-	return apiClient.ListNetworkAreaRoutes(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
+	return apiClient.ListNetworkAreaRoutes(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, routes []iaas.Route) error {
