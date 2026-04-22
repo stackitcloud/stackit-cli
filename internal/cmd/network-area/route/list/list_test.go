@@ -46,8 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		OrganizationId: &testOrganizationId,
-		NetworkAreaId:  &testNetworkAreaId,
+		OrganizationId: testOrganizationId,
+		NetworkAreaId:  testNetworkAreaId,
 		Limit:          utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
