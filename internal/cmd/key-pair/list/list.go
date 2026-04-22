@@ -135,7 +135,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat, projectLabel string, keyPairs []iaas.Keypair) error {
 	return p.OutputResult(outputFormat, keyPairs, func() error {
 		if len(keyPairs) == 0 {
-			p.Outputf("No key pairs found for project %q\n", projectLabel)
+			p.Outputf("No key pairs found\n")
 			return nil
 		}
 
