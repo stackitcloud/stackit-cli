@@ -77,8 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			items := resp.GetItems()
 
-			var networkAreaLabel string
-			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
