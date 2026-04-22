@@ -32,7 +32,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit          *int64
-	OrganizationId *string
+	OrganizationId string
 	LabelSelector  *string
 }
 
@@ -85,17 +85,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			var orgLabel string
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
-				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, *model.OrganizationId)
+				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, model.OrganizationId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
-					orgLabel = *model.OrganizationId
+					orgLabel = model.OrganizationId
 				}
 			} else {
 				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
 			}
 
 			if orgLabel == "" {
-				orgLabel = *model.OrganizationId
+				orgLabel = model.OrganizationId
 			}
 
 			// Truncate output
@@ -132,7 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
 	}
 
@@ -141,7 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreasRequest {
-	req := apiClient.ListNetworkAreas(ctx, *model.OrganizationId)
+	req := apiClient.ListNetworkAreas(ctx, model.OrganizationId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
