@@ -156,6 +156,20 @@ func TestOutputResult(t *testing.T) {
 			args:        args{},
 			isValid:     true,
 		},
+		{
+			description: "empty slice",
+			args: args{
+				instances: []iaas.AffinityGroup{},
+			},
+			isValid: true,
+		},
+		{
+			description: "empty affinity group in slice",
+			args: args{
+				instances: []iaas.AffinityGroup{{}},
+			},
+			isValid: true,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
