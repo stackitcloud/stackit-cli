@@ -66,6 +66,18 @@ linters:
         - name: atomic
         - name: empty-lines
         - name: early-return
+    staticcheck:
+      checks:
+        # default from https://golangci-lint.run/docs/linters/configuration/#staticcheck
+        - all
+        - "-ST1000"
+        - "-ST1003"
+        - "-ST1016"
+        - "-ST1020"
+        - "-ST1021"
+        - "-ST1022"
+        # customizations
+        - "-SA1019" # disable deprecation errors while we switch over to the SDK structure with multi API version support
   exclusions:
     generated: lax
     paths:
