@@ -7,6 +7,10 @@ updates:
     cooldown:
         default-days: 7
         exclude: ["github.com/stackitcloud*"]
+    groups:
+        stackit:
+          patterns:
+            - "github.com/stackitcloud/stackit-sdk-go/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
