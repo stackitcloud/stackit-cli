@@ -96,8 +96,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("filter credentials: %w", err)
 			}
-			if filteredCredentials == nil { // lbUtils.FilterCredentials can return nil with no error, if credentials is an empty slice and filterOp is not 0 (if either the --used or the --unused is set)
-				filteredCredentials = credentials
+			if filteredCredentials != nil { // lbUtils.FilterCredentials can return nil with no error, if credentials is an empty slice and filterOp is not 0 (if either the --used or the --unused is set)
+				credentials = filteredCredentials
 			}
 
 			// Truncate output
