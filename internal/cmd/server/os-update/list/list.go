@@ -67,27 +67,24 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server os-update: %w", err)
 			}
-			updates := *resp.Items
-			if len(updates) == 0 {
-				serverLabel := model.ServerId
-				// Get server name
-				if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
-					serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
-					if err != nil {
-						params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-					} else if serverName != "" {
-						serverLabel = serverName
-					}
+			updates := resp.GetItems()
+
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
 				}
-				params.Printer.Info("No os-updates found for server %s\n", serverLabel)
-				return nil
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(updates) > int(*model.Limit) {
 				updates = updates[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, updates)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, updates)
 		},
 	}
 	configureFlags(cmd)
@@ -131,8 +128,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, updates []serverupdate.Update) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, updates []serverupdate.Update) error {
 	return p.OutputResult(outputFormat, updates, func() error {
+		if len(updates) == 0 {
+			p.Outputf("No os-updates found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "STATUS", "INSTALLED UPDATES", "FAILED UPDATES", "START DATE", "END DATE")
 		for i := range updates {

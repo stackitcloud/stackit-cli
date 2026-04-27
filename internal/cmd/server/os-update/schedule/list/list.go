@@ -67,27 +67,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server os-update schedules: %w", err)
 			}
-			schedules := *resp.Items
-			if len(schedules) == 0 {
-				serverLabel := model.ServerId
-				// Get server name
-				if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
-					serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
-					if err != nil {
-						params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-					} else if serverName != "" {
-						serverLabel = serverName
-					}
+
+			schedules := resp.GetItems()
+
+			serverLabel := model.ServerId
+			// Get server name
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
 				}
-				params.Printer.Info("No os-update schedules found for server %s\n", serverLabel)
-				return nil
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(schedules) > int(*model.Limit) {
 				schedules = schedules[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, schedules)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, schedules)
 		},
 	}
 	configureFlags(cmd)
@@ -131,8 +129,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, schedules []serverupdate.UpdateSchedule) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules []serverupdate.UpdateSchedule) error {
 	return p.OutputResult(outputFormat, schedules, func() error {
+		if len(schedules) == 0 {
+			p.Outputf("No os-update schedules found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "MAINTENANCE WINDOW")
 		for i := range schedules {
