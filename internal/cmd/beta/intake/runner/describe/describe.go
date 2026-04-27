@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 // buildRequest creates the API request to get a single Intake Runner
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiGetIntakeRunnerRequest {
-	req := apiClient.GetIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
+	req := apiClient.DefaultAPI.GetIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
 	return req
 }
 

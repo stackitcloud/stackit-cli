@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -86,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiGetIntakeRequest {
-	req := apiClient.GetIntake(ctx, model.ProjectId, model.Region, model.IntakeId)
+	req := apiClient.DefaultAPI.GetIntake(ctx, model.ProjectId, model.Region, model.IntakeId)
 	return req
 }
 
@@ -131,8 +131,8 @@ func outputResult(p *print.Printer, outputFormat string, intk *intake.IntakeResp
 			table.AddRow("Catalog Table Name", tableName)
 		}
 		table.AddRow("Catalog Partitioning", catalog.GetPartitioning())
-		if partitionBy := catalog.GetPartitionBy(); partitionBy != nil && len(*partitionBy) > 0 {
-			table.AddRow("Catalog Partition By", strings.Join(*partitionBy, ", "))
+		if partitionBy := catalog.GetPartitionBy(); len(partitionBy) > 0 {
+			table.AddRow("Catalog Partition By", strings.Join(partitionBy, ", "))
 		}
 
 		err := table.Display(p)

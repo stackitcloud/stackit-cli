@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake/wait"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -39,8 +39,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	RunnerId           string
 	DisplayName        *string
-	MaxMessageSizeKiB  *int64
-	MaxMessagesPerHour *int64
+	MaxMessageSizeKiB  *int32
+	MaxMessagesPerHour *int32
 	Description        *string
 	Labels             *map[string]string
 }
@@ -88,7 +88,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Updating STACKIT Intake Runner", func() error {
-					_, err = wait.CreateOrUpdateIntakeRunnerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateIntakeRunnerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.RunnerId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -105,8 +105,8 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
-	cmd.Flags().Int64(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB. Note: Overall message capacity cannot be decreased.")
-	cmd.Flags().Int64(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.")
+	cmd.Flags().Int32(maxMessageSizeKiBFlag, 0, "Maximum message size in KiB. Note: Overall message capacity cannot be decreased.")
+	cmd.Flags().Int32(maxMessagesPerHourFlag, 0, "Maximum number of messages per hour. Note: Overall message capacity cannot be decreased.")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringToString(labelFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 }
@@ -123,8 +123,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel:    globalFlags,
 		RunnerId:           runnerId,
 		DisplayName:        flags.FlagToStringPointer(p, cmd, displayNameFlag),
-		MaxMessageSizeKiB:  flags.FlagToInt64Pointer(p, cmd, maxMessageSizeKiBFlag),
-		MaxMessagesPerHour: flags.FlagToInt64Pointer(p, cmd, maxMessagesPerHourFlag),
+		MaxMessageSizeKiB:  flags.FlagToInt32Pointer(p, cmd, maxMessageSizeKiBFlag),
+		MaxMessagesPerHour: flags.FlagToInt32Pointer(p, cmd, maxMessagesPerHourFlag),
 		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
 	}
@@ -138,7 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeRunnerRequest {
-	req := apiClient.UpdateIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
+	req := apiClient.DefaultAPI.UpdateIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
 
 	payload := intake.UpdateIntakeRunnerPayload{}
 	if model.DisplayName != nil {
@@ -154,7 +154,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 		payload.Description = model.Description
 	}
 	if model.Labels != nil {
-		payload.Labels = model.Labels
+		payload.Labels = utils.PtrValue(model.Labels)
 	}
 
 	req = req.UpdateIntakeRunnerPayload(payload)
@@ -172,7 +172,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake Runner for project %q. Runner ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s Intake Runner for project %q. Runner ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

@@ -23,12 +23,12 @@ stackit beta intake runner create [flags]
 ### Options
 
 ```
-      --description string          Description
-      --display-name string         Display name
-  -h, --help                        Help for "stackit beta intake runner create"
-      --labels stringToString       Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2" (default [])
-      --max-message-size-kib int    Maximum message size in KiB
-      --max-messages-per-hour int   Maximum number of messages per hour
+      --description string            Description
+      --display-name string           Display name
+  -h, --help                          Help for "stackit beta intake runner create"
+      --labels stringToString         Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2" (default [])
+      --max-message-size-kib int32    Maximum message size in KiB
+      --max-messages-per-hour int32   Maximum number of messages per hour
 ```
 
 ### Options inherited from parent commands

@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/intake"
+	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -23,8 +23,8 @@ type testCtxKey struct{}
 const (
 	testRegion             = "eu01"
 	testDisplayName        = "testrunner"
-	testMaxMessageSizeKiB  = int64(1024)
-	testMaxMessagesPerHour = int64(10000)
+	testMaxMessageSizeKiB  = int32(1024)
+	testMaxMessagesPerHour = int32(10000)
 	testDescription        = "This is a test runner"
 	testLabelsString       = "env=test,team=dev"
 )
@@ -33,7 +33,9 @@ var (
 	// testCtx dummy context for testing purposes
 	testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	// testClient mock API client
-	testClient    = &intake.APIClient{}
+	testClient = &intake.APIClient{
+		DefaultAPI: &intake.DefaultAPIService{},
+	}
 	testProjectId = uuid.NewString()
 
 	testLabels = map[string]string{"env": "test", "team": "dev"}
@@ -79,11 +81,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 // fixtureCreatePayload generates a CreateIntakeRunnerPayload for tests
 func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakeRunnerPayload)) intake.CreateIntakeRunnerPayload {
 	payload := intake.CreateIntakeRunnerPayload{
-		DisplayName:        utils.Ptr(testDisplayName),
-		MaxMessageSizeKiB:  utils.Ptr(testMaxMessageSizeKiB),
-		MaxMessagesPerHour: utils.Ptr(testMaxMessagesPerHour),
+		DisplayName:        testDisplayName,
+		MaxMessageSizeKiB:  testMaxMessageSizeKiB,
+		MaxMessagesPerHour: testMaxMessagesPerHour,
 		Description:        utils.Ptr(testDescription),
-		Labels:             utils.Ptr(testLabels),
+		Labels:             testLabels,
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -93,7 +95,7 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakeRunnerPayload
 
 // fixtureRequest generates an API request for tests
 func fixtureRequest(mods ...func(request *intake.ApiCreateIntakeRunnerRequest)) intake.ApiCreateIntakeRunnerRequest {
-	request := testClient.CreateIntakeRunner(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateIntakeRunner(testCtx, testProjectId, testRegion)
 	request = request.CreateIntakeRunnerPayload(fixtureCreatePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -200,7 +202,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRunnerRequest) {
-				*request = (*request).CreateIntakeRunnerPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeRunnerPayload) {
+				*request = request.CreateIntakeRunnerPayload(fixtureCreatePayload(func(payload *intake.CreateIntakeRunnerPayload) {
 					payload.Description = nil
 					payload.Labels = nil
 				}))
@@ -214,6 +216,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -238,7 +241,7 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				model:        fixtureInputModel(),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp:         &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},
@@ -249,7 +252,7 @@ func TestOutputResult(t *testing.T) {
 					model.Async = true
 				}),
 				projectLabel: "my-project",
-				resp:         &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp:         &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},
@@ -259,7 +262,7 @@ func TestOutputResult(t *testing.T) {
 				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.JSONOutputFormat
 				}),
-				resp: &intake.IntakeRunnerResponse{Id: utils.Ptr("runner-id-123")},
+				resp: &intake.IntakeRunnerResponse{Id: "runner-id-123"},
 			},
 			wantErr: false,
 		},
