@@ -67,23 +67,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get load balancers: %w", err)
 			}
 
-			if resp.LoadBalancers == nil || (resp.LoadBalancers != nil && len(*resp.LoadBalancers) == 0) {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No load balancers found for project %q\n", projectLabel)
-				return nil
+			loadBalancers := utils.GetSliceFromPointer(resp.LoadBalancers)
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			loadBalancers := *resp.LoadBalancers
 			// Truncate output
 			if model.Limit != nil && len(loadBalancers) > int(*model.Limit) {
 				loadBalancers = loadBalancers[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, loadBalancers)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, loadBalancers)
 		},
 	}
 
@@ -123,8 +120,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, loadBalancers []loadbalancer.LoadBalancer) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, loadBalancers []loadbalancer.LoadBalancer) error {
 	return p.OutputResult(outputFormat, loadBalancers, func() error {
+		if len(loadBalancers) == 0 {
+			p.Outputf("No load balancers found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE", "IP ADDRESS", "LISTENERS", "TARGET POOLS")
 		for i := range loadBalancers {
