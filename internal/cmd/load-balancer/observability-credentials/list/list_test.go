@@ -232,6 +232,8 @@ func TestGetFilterOp(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		opLabel      string
+		projectLabel string
 		credentials  []loadbalancer.CredentialsResponse
 	}
 	tests := []struct {
@@ -255,7 +257,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.credentials); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.opLabel, tt.args.credentials); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
