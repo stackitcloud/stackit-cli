@@ -32,7 +32,6 @@ stackit beta sfs [flags]
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta sfs export-policy](./stackit_beta_sfs_export-policy.md)	 - Provides functionality for SFS export policies
 * [stackit beta sfs performance-class](./stackit_beta_sfs_performance-class.md)	 - Provides functionality for SFS performance classes
-* [stackit beta sfs project-lock](./stackit_beta_sfs_project-lock.md)	 - Provides functionality for SFS project locks
 * [stackit beta sfs resource-pool](./stackit_beta_sfs_resource-pool.md)	 - Provides functionality for SFS resource pools
 * [stackit beta sfs share](./stackit_beta_sfs_share.md)	 - Provides functionality for SFS shares
 * [stackit beta sfs snapshot](./stackit_beta_sfs_snapshot.md)	 - Provides functionality for SFS snapshots
