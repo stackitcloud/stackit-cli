@@ -82,10 +82,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(projects) == 0 {
-				params.Printer.Info("No projects found matching the criteria\n")
-				return nil
-			}
 
 			return outputResult(params.Printer, model.OutputFormat, projects)
 		},
@@ -192,7 +188,7 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 		if err != nil {
 			return nil, fmt.Errorf("get projects: %w", err)
 		}
-		respProjects := *resp.Items
+		respProjects := resp.GetItems()
 		if len(respProjects) == 0 {
 			break
 		}
@@ -214,6 +210,10 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 
 func outputResult(p *print.Printer, outputFormat string, projects []resourcemanager.Project) error {
 	return p.OutputResult(outputFormat, projects, func() error {
+		if len(projects) == 0 {
+			p.Outputf("No projects found matching the criteria\n")
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
 		for i := range projects {
