@@ -69,15 +69,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get scrape configurations: %w", err)
 			}
-			configs := *resp.Data
-			if len(configs) == 0 {
-				instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = model.InstanceId
-				}
-				params.Printer.Info("No scrape configurations found for instance %q\n", instanceLabel)
-				return nil
+
+			configs := resp.GetData()
+
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
 			}
 
 			// Truncate output
@@ -85,7 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				configs = configs[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, configs)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, configs)
 		},
 	}
 
@@ -127,8 +125,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, configs []observability.Job) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, configs []observability.Job) error {
 	return p.OutputResult(outputFormat, configs, func() error {
+		if len(configs) == 0 {
+			p.Outputf("No scrape configurations found for instance %q\n", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "TARGETS", "SCRAPE INTERVAL")
 		for i := range configs {
