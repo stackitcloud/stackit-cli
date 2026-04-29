@@ -24,6 +24,9 @@ stackit curl URL [flags]
 
   Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, with header "Authorization: Bearer yyy", fail if server returns error (such as 403 Forbidden)
   $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail
+
+  Get all the DNS zones via GET with detailed information about the request and the response
+  $ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones --verbose
 ```
 
 ### Options
@@ -36,6 +39,7 @@ stackit curl URL [flags]
       --include          If set, response headers are added to the output
       --output string    Writes output to provided file instead of printing to console
   -X, --request string   HTTP method, defaults to GET
+  -v, --verbose          Prints the full HTTP request and response for debugging
 ```
 
 ### Options inherited from parent commands
