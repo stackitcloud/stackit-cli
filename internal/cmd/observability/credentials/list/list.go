@@ -68,22 +68,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Observability credentials: %w", err)
 			}
-			credentials := *resp.Credentials
-			if len(credentials) == 0 {
-				instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = model.InstanceId
-				}
-				params.Printer.Info("No credentials found for instance %q\n", instanceLabel)
-				return nil
+
+			credentials := resp.GetCredentials()
+
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, credentials)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -124,8 +122,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []observability.ServiceKeysList) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, credentials []observability.ServiceKeysList) error {
 	return p.OutputResult(outputFormat, credentials, func() error {
+		if len(credentials) == 0 {
+			p.Outputf("No credentials found for instance %q\n", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("USERNAME")
 		for i := range credentials {

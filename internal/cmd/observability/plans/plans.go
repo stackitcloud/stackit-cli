@@ -66,15 +66,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Observability service plans: %w", err)
 			}
-			plans := *resp.Plans
-			if len(plans) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No plans found for project %q\n", projectLabel)
-				return nil
+
+			plans := resp.GetPlans()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -82,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				plans = plans[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, plans)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, plans)
 		},
 	}
 
@@ -122,8 +120,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *observabili
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, plans []observability.Plan) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []observability.Plan) error {
 	return p.OutputResult(outputFormat, plans, func() error {
+		if len(plans) == 0 {
+			p.Outputf("No plans found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "PLAN NAME", "DESCRIPTION")
 		for i := range plans {
