@@ -31,6 +31,7 @@ const (
 	includeResponseHeadersFlag = "include"
 	failOnHTTPErrorFlag        = "fail"
 	outputFileFlag             = "output"
+	verboseFlag                = "verbose"
 )
 
 const (
@@ -45,6 +46,7 @@ type inputModel struct {
 	IncludeResponseHeaders bool
 	FailOnHTTPError        bool
 	OutputFile             *string
+	Verbose                bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -69,6 +71,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Get all the DNS zones for project with ID xxx via GET request to https://dns.api.stackit.cloud/v1/projects/xxx/zones, with header "Authorization: Bearer yyy", fail if server returns error (such as 403 Forbidden)`,
 				`$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones -X POST -H "Authorization: Bearer yyy" --fail`,
 			),
+			examples.NewExample(
+				"Get all the DNS zones via GET with detailed information about the request and the response",
+				"$ stackit curl https://dns.api.stackit.cloud/v1/projects/xxx/zones --verbose",
+			),
 		),
 		Args: args.SingleArg(urlArg, utils.ValidateURLDomain),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -87,6 +93,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
+			if model.Verbose {
+				requestDump, _ := httputil.DumpRequest(req, true)
+				requestDumpStr := strings.ReplaceAll(string(requestDump), "\r", "")
+				for _, line := range strings.Split(strings.TrimSuffix(requestDumpStr, "\n"), "\n") {
+					params.Printer.Info("> %s\n", line)
+				}
+			}
+
 			client := http.Client{
 				Timeout: 30 * time.Second,
 			}
@@ -94,6 +108,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("do request: %w", err)
 			}
+
+			if model.Verbose {
+				responseDump, _ := httputil.DumpResponse(resp, false)
+				responseDumpStr := strings.ReplaceAll(string(responseDump), "\r", "")
+				for _, line := range strings.Split(strings.TrimSuffix(responseDumpStr, "\n"), "\n") {
+					params.Printer.Info("< %s\n", line)
+				}
+			}
+
 			defer func() {
 				closeErr := resp.Body.Close()
 				if closeErr != nil {
@@ -136,6 +159,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(includeResponseHeadersFlag, false, "If set, response headers are added to the output")
 	cmd.Flags().Bool(failOnHTTPErrorFlag, false, "If set, exits with error 22 if response code is 4XX or 5XX")
 	cmd.Flags().String(outputFileFlag, "", "Writes output to provided file instead of printing to console")
+	cmd.Flags().BoolP(verboseFlag, "v", false, "Prints the full HTTP request and response for debugging")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -153,6 +177,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		IncludeResponseHeaders: flags.FlagToBoolValue(p, cmd, includeResponseHeadersFlag),
 		FailOnHTTPError:        flags.FlagToBoolValue(p, cmd, failOnHTTPErrorFlag),
 		OutputFile:             flags.FlagToStringPointer(p, cmd, outputFileFlag),
+		Verbose:                flags.FlagToBoolValue(p, cmd, verboseFlag),
 	}
 
 	p.DebugInputModel(model)
