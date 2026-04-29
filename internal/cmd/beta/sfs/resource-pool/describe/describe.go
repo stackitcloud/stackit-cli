@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiGetResourcePoolRequest {
-	req := apiClient.GetResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.GetResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	return req
 }
 
@@ -97,7 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel string, resourcePool *sfs.GetResourcePoolResponseResourcePool) error {
+func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel string, resourcePool *sfs.ResourcePool) error {
 	return p.OutputResult(outputFormat, resourcePool, func() error {
 		if resourcePool == nil {
 			p.Outputf("Resource pool %q not found in project %q\n", resourcePoolId, projectLabel)
@@ -108,7 +108,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 		// convert the string slice to a comma separated list
 		var ipAclStr string
 		if resourcePool.IpAcl != nil {
-			ipAclStr = strings.Join(*resourcePool.IpAcl, ", ")
+			ipAclStr = strings.Join(resourcePool.IpAcl, ", ")
 		}
 
 		table.AddRow("ID", utils.PtrString(resourcePool.Id))
@@ -129,16 +129,16 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 		}
 		table.AddRow("SNAPSHOTS ARE VISIBLE", utils.PtrString(resourcePool.SnapshotsAreVisible))
 		table.AddSeparator()
-		table.AddRow("NEXT PERFORMANCE CLASS DOWNGRADE TIME", utils.PtrString(resourcePool.PerformanceClassDowngradableAt))
+		table.AddRow("NEXT PERFORMANCE CLASS DOWNGRADE TIME", resourcePool.PerformanceClassDowngradableAt)
 		table.AddSeparator()
-		table.AddRow("NEXT SIZE REDUCTION TIME", utils.PtrString(resourcePool.SizeReducibleAt))
+		table.AddRow("NEXT SIZE REDUCTION TIME", resourcePool.SizeReducibleAt)
 		table.AddSeparator()
 		if resourcePool.HasSpace() {
 			table.AddRow("TOTAL SIZE (GB)", utils.PtrString(resourcePool.Space.SizeGigabytes))
 			table.AddSeparator()
-			table.AddRow("AVAILABLE SIZE (GB)", utils.PtrString(resourcePool.Space.AvailableGigabytes))
+			table.AddRow("AVAILABLE SIZE (GB)", utils.PtrString(resourcePool.Space.AvailableGigabytes.Get()))
 			table.AddSeparator()
-			table.AddRow("USED SIZE (GB)", utils.PtrString(resourcePool.Space.UsedGigabytes))
+			table.AddRow("USED SIZE (GB)", utils.PtrString(resourcePool.Space.UsedGigabytes.Get()))
 			table.AddSeparator()
 		}
 		table.AddRow("STATE", utils.PtrString(resourcePool.State))

@@ -4,17 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 )
 
-type SfsClient interface {
-	GetShareExportPolicyExecute(ctx context.Context, projectId string, region string, policyId string) (*sfs.GetShareExportPolicyResponse, error)
-	GetShareExecute(ctx context.Context, projectId, region, resourcePoolId, shareId string) (*sfs.GetShareResponse, error)
-	GetResourcePoolExecute(ctx context.Context, projectId, region, resourcePoolId string) (*sfs.GetResourcePoolResponse, error)
-}
-
-func GetShareName(ctx context.Context, client SfsClient, projectId, region, resourcePoolId, shareId string) (string, error) {
-	resp, err := client.GetShareExecute(ctx, projectId, region, resourcePoolId, shareId)
+func GetShareName(ctx context.Context, client sfs.DefaultAPI, projectId, region, resourcePoolId, shareId string) (string, error) {
+	resp, err := client.GetShare(ctx, projectId, region, resourcePoolId, shareId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get share: %w", err)
 	}
@@ -24,8 +18,8 @@ func GetShareName(ctx context.Context, client SfsClient, projectId, region, reso
 	return "", nil
 }
 
-func GetExportPolicyName(ctx context.Context, apiClient SfsClient, projectId, region, policyId string) (string, error) {
-	resp, err := apiClient.GetShareExportPolicyExecute(ctx, projectId, region, policyId)
+func GetExportPolicyName(ctx context.Context, apiClient sfs.DefaultAPI, projectId, region, policyId string) (string, error) {
+	resp, err := apiClient.GetShareExportPolicy(ctx, projectId, region, policyId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get share export policy: %w", err)
 	}
@@ -35,8 +29,8 @@ func GetExportPolicyName(ctx context.Context, apiClient SfsClient, projectId, re
 	return "", nil
 }
 
-func GetResourcePoolName(ctx context.Context, client SfsClient, projectId, region, resourcePoolId string) (string, error) {
-	resp, err := client.GetResourcePoolExecute(ctx, projectId, region, resourcePoolId)
+func GetResourcePoolName(ctx context.Context, client sfs.DefaultAPI, projectId, region, resourcePoolId string) (string, error) {
+	resp, err := client.GetResourcePool(ctx, projectId, region, resourcePoolId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get resource pool: %w", err)
 	}

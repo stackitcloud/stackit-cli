@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(resp.ResourcePoolSnapshots)
+			items := utils.GetSliceFromPointer(&resp.ResourcePoolSnapshots)
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -84,7 +84,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListResourcePoolSnapshotsRequest {
-	req := apiClient.ListResourcePoolSnapshots(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.ListResourcePoolSnapshots(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	return req
 }
 
@@ -130,7 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, resp []sfs.ResourcePool
 
 		for _, snap := range resp {
 			var comment string
-			if snap.Comment != nil {
+			if snap.Comment.IsSet() && snap.Comment.Get() != nil {
 				comment = utils.PtrString(snap.Comment.Get())
 			}
 			table.AddRow(

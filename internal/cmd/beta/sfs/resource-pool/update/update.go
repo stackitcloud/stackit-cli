@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -32,9 +32,9 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	SizeGigabytes    *int64
+	SizeGigabytes    *int32
 	PerformanceClass *string
-	IpAcl            *[]string
+	IpAcl            []string
 	ResourcePoolId   string
 	SnapshotsVisible *bool
 }
@@ -82,7 +82,7 @@ The available performance class values can be obtained by running:
 				projectLabel = model.ProjectId
 			}
 
-			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolName = model.ResourcePoolId
@@ -103,7 +103,7 @@ The available performance class values can be obtained by running:
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Update resource pool", func() error {
-					_, err = wait.UpdateResourcePoolWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
+					_, err = wait.UpdateResourcePoolWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -119,18 +119,18 @@ The available performance class values can be obtained by running:
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(sizeFlag, 0, "Size of the pool in Gigabytes")
+	cmd.Flags().Int32(sizeFlag, 0, "Size of the pool in Gigabytes")
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), ipAclFlag, "List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly")
 	cmd.Flags().Bool(snapshotsVisibleFlag, false, "Set snapshots visible and accessible to users")
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiUpdateResourcePoolRequest {
-	req := apiClient.UpdateResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.UpdateResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	req = req.UpdateResourcePoolPayload(sfs.UpdateResourcePoolPayload{
 		IpAcl:               model.IpAcl,
 		PerformanceClass:    model.PerformanceClass,
-		SizeGigabytes:       model.SizeGigabytes,
+		SizeGigabytes:       *sfs.NewNullableInt32(model.SizeGigabytes),
 		SnapshotsAreVisible: model.SnapshotsVisible,
 	})
 	return req
@@ -145,8 +145,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	performanceClass := flags.FlagToStringPointer(p, cmd, performanceClassFlag)
-	size := flags.FlagToInt64Pointer(p, cmd, sizeFlag)
-	ipAcls := flags.FlagToStringSlicePointer(p, cmd, ipAclFlag)
+	size := flags.FlagToInt32Pointer(p, cmd, sizeFlag)
+	ipAcls := flags.FlagToStringSliceValue(p, cmd, ipAclFlag)
 	snapshotsVisible := flags.FlagToBoolPointer(p, cmd, snapshotsVisibleFlag)
 
 	if performanceClass == nil && size == nil && ipAcls == nil && snapshotsVisible == nil {

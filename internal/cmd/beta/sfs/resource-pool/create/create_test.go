@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -20,13 +20,13 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sfs.APIClient{}
+var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var (
 	testProjectId                          = uuid.NewString()
 	testRegion                             = "eu02"
 	testResourcePoolPerformanceClass       = "Standard"
-	testResourcePoolSizeInGB         int64 = 50
+	testResourcePoolSizeInGB         int32 = 50
 	testResourcePoolAvailabilityZone       = "eu02-m"
 	testResourcePoolName                   = "sfs-resource-pool-01"
 	testResourcePoolIpAcl                  = []string{"10.88.135.144/28", "250.81.87.224/32"}
@@ -38,7 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		performanceClassFlag:      testResourcePoolPerformanceClass,
-		sizeFlag:                  strconv.FormatInt(testResourcePoolSizeInGB, 10),
+		sizeFlag:                  strconv.FormatInt(int64(testResourcePoolSizeInGB), 10),
 		ipAclFlag:                 strings.Join(testResourcePoolIpAcl, ","),
 		availabilityZoneFlag:      testResourcePoolAvailabilityZone,
 		nameFlag:                  testResourcePoolName,
@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		PerformanceClass: testResourcePoolPerformanceClass,
 		AvailabilityZone: testResourcePoolAvailabilityZone,
 		Name:             testResourcePoolName,
-		SizeInGB:         testResourcePoolSizeInGB,
+		SizeInGB:         &testResourcePoolSizeInGB,
 		IpAcl:            testResourcePoolIpAcl,
 		SnapshotsVisible: testSnapshotsVisible,
 	}
@@ -71,13 +71,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiCreateResourcePoolRequest)) sfs.ApiCreateResourcePoolRequest {
-	request := testClient.CreateResourcePool(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateResourcePool(testCtx, testProjectId, testRegion)
 	request = request.CreateResourcePoolPayload(sfs.CreateResourcePoolPayload{
-		Name:                &testResourcePoolName,
-		PerformanceClass:    &testResourcePoolPerformanceClass,
-		AvailabilityZone:    &testResourcePoolAvailabilityZone,
-		IpAcl:               &testResourcePoolIpAcl,
-		SizeGigabytes:       &testResourcePoolSizeInGB,
+		Name:                testResourcePoolName,
+		PerformanceClass:    testResourcePoolPerformanceClass,
+		AvailabilityZone:    testResourcePoolAvailabilityZone,
+		IpAcl:               testResourcePoolIpAcl,
+		SizeGigabytes:       testResourcePoolSizeInGB,
 		SnapshotsAreVisible: &testSnapshotsVisible,
 	})
 	for _, mod := range mods {
@@ -240,7 +240,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -278,7 +278,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set response",
 			args: args{
 				resp: &sfs.CreateResourcePoolResponse{
-					ResourcePool: &sfs.CreateResourcePoolResponseResourcePool{},
+					ResourcePool: &sfs.ResourcePool{},
 				},
 			},
 			wantErr: false,

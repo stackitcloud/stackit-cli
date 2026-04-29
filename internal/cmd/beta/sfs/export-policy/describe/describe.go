@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -29,12 +29,12 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", exportPolicyIdArg),
-		Short: "Shows details of a export policy",
-		Long:  "Shows details of a export policy.",
+		Short: "Shows details of an export policy",
+		Long:  "Shows details of an export policy.",
 		Args:  args.SingleArg(exportPolicyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Describe a export policy with ID "xxx"`,
+				`Describe an export policy with ID "xxx"`,
 				"$ stackit beta sfs export-policy describe xxx",
 			),
 		),
@@ -91,7 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiGetShareExportPolicyRequest {
-	return apiClient.GetShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
+	return apiClient.DefaultAPI.GetShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
 }
 
 func outputResult(p *print.Printer, outputFormat, exportPolicyId, projectLabel string, exportPolicy *sfs.GetShareExportPolicyResponse) error {
@@ -117,25 +117,25 @@ func outputResult(p *print.Printer, outputFormat, exportPolicyId, projectLabel s
 
 		content = append(content, table)
 
-		if policy.Rules != nil && len(*policy.Rules) > 0 {
+		if len(policy.Rules) > 0 {
 			rulesTable := tables.NewTable()
 			rulesTable.SetTitle("Rules")
 
 			rulesTable.SetHeader("ID", "ORDER", "DESCRIPTION", "IP ACL", "READ ONLY", "SET UUID", "SUPER USER", "CREATED AT")
 
-			for _, rule := range *policy.Rules {
+			for _, rule := range policy.Rules {
 				var description string
-				if rule.Description != nil {
-					description = utils.PtrString(rule.Description.Get())
+				if rule.Description.IsSet() && *rule.Description.Get() != "" {
+					description = *rule.Description.Get()
 				}
 				rulesTable.AddRow(
-					utils.PtrString(rule.Id),
-					utils.PtrString(rule.Order),
+					rule.Id,
+					rule.Order,
 					description,
-					utils.JoinStringPtr(rule.IpAcl, ", "),
-					utils.PtrString(rule.ReadOnly),
-					utils.PtrString(rule.SetUuid),
-					utils.PtrString(rule.SuperUser),
+					utils.JoinStringPtr(&rule.IpAcl, ", "),
+					rule.ReadOnly,
+					rule.SetUuid,
+					rule.SuperUser,
 					utils.ConvertTimePToDateTimeString(rule.CreatedAt),
 				)
 				rulesTable.AddSeparator()

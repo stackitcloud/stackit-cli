@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	genericclient "github.com/stackitcloud/stackit-cli/internal/pkg/generic-client"

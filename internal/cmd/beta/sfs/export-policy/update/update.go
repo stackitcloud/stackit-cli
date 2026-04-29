@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -37,16 +37,16 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", exportPolicyArg),
-		Short: "Updates a export policy",
-		Long:  "Updates a export policy.",
+		Short: "Updates an export policy",
+		Long:  "Updates an export policy.",
 		Args:  args.SingleArg(exportPolicyArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update a export policy with ID "xxx" and with rules from file "./rules.json"`,
+				`Update an export policy with ID "xxx" and with rules from file "./rules.json"`,
 				"$ stackit beta sfs export-policy update xxx --rules @./rules.json",
 			),
 			examples.NewExample(
-				`Update a export policy with ID "xxx" and remove the rules`,
+				`Update an export policy with ID "xxx" and remove the rules`,
 				"$ stackit beta sfs export-policy update XXX --remove-rules",
 			),
 		),
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient, model.ProjectId, model.Region, model.ExportPolicyId)
+			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ExportPolicyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get export policy name: %v", err)
 				exportPolicyLabel = model.ExportPolicyId
@@ -109,10 +109,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiUpdateShareExportPolicyRequest {
-	req := apiClient.UpdateShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
+	req := apiClient.DefaultAPI.UpdateShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
 
 	payload := sfs.UpdateShareExportPolicyPayload{
-		Rules: model.Rules,
+		Rules: *model.Rules,
 	}
 	return req.UpdateShareExportPolicyPayload(payload)
 }

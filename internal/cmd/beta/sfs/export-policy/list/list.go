@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(resp.ShareExportPolicies)
+			items := utils.GetSliceFromPointer(&resp.ShareExportPolicies)
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListShareExportPoliciesRequest {
-	return apiClient.ListShareExportPolicies(ctx, model.ProjectId, model.Region)
+	return apiClient.DefaultAPI.ListShareExportPolicies(ctx, model.ProjectId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, exportPolicies []sfs.ShareExportPolicy) error {
@@ -132,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, exportPol
 		for _, exportPolicy := range exportPolicies {
 			amountRules := "-"
 			if exportPolicy.Rules != nil {
-				amountRules = strconv.Itoa(len(*exportPolicy.Rules))
+				amountRules = strconv.Itoa(len(exportPolicy.Rules))
 			}
 			table.AddRow(
 				utils.PtrString(exportPolicy.Id),

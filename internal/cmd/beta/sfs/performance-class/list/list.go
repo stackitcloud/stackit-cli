@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			performanceClasses := utils.GetSliceFromPointer(resp.PerformanceClasses)
+			performanceClasses := utils.GetSliceFromPointer(&resp.PerformanceClasses)
 
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, performanceClasses)
 		},
@@ -86,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, apiClient *sfs.APIClient) sfs.ApiListPerformanceClassesRequest {
-	return apiClient.ListPerformanceClasses(ctx)
+	return apiClient.DefaultAPI.ListPerformanceClasses(ctx)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, performanceClasses []sfs.PerformanceClass) error {

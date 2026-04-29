@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -78,7 +78,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiGetResourcePoolSnapshotRequest {
-	return apiClient.GetResourcePoolSnapshot(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.SnapshotName)
+	return apiClient.DefaultAPI.GetResourcePoolSnapshot(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.SnapshotName)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -111,7 +111,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *sfs.GetResourcePo
 		snap := *resp.ResourcePoolSnapshot
 		table.AddRow("NAME", utils.PtrString(snap.SnapshotName))
 		table.AddSeparator()
-		if snap.Comment != nil {
+		if snap.Comment.IsSet() && snap.Comment.Get() != nil {
 			table.AddRow("COMMENT", utils.PtrString(snap.Comment.Get()))
 			table.AddSeparator()
 		}

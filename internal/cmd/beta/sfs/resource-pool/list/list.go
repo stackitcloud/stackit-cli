@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list SFS resource pools: %w", err)
 			}
 
-			resourcePools := utils.GetSliceFromPointer(resp.ResourcePools)
+			resourcePools := utils.GetSliceFromPointer(&resp.ResourcePools)
 
 			// Truncate output
 			if model.Limit != nil && len(resourcePools) > int(*model.Limit) {
@@ -94,7 +94,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListResourcePoolsRequest {
-	req := apiClient.ListResourcePools(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListResourcePools(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -133,7 +133,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 			totalSizeGigabytes, usedSizeGigabytes := "", ""
 			if resourcePool.HasSpace() {
 				totalSizeGigabytes = utils.PtrString(resourcePool.Space.SizeGigabytes)
-				usedSizeGigabytes = utils.PtrString(resourcePool.Space.UsedGigabytes)
+				usedSizeGigabytes = utils.PtrString(resourcePool.Space.UsedGigabytes.Get())
 			}
 			table.AddRow(
 				utils.PtrString(resourcePool.Id),
