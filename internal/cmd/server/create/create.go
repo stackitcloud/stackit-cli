@@ -28,6 +28,7 @@ const (
 	machineTypeFlag                   = "machine-type"
 	affinityGroupFlag                 = "affinity-group"
 	availabilityZoneFlag              = "availability-zone"
+	agentProvisioningPolicyFlag       = "agent-provisioning-policy"
 	bootVolumeSourceIdFlag            = "boot-volume-source-id"
 	bootVolumeSourceTypeFlag          = "boot-volume-source-type"
 	bootVolumeSizeFlag                = "boot-volume-size"
@@ -50,6 +51,7 @@ type inputModel struct {
 	MachineType                   *string
 	AffinityGroup                 *string
 	AvailabilityZone              *string
+	AgentProvisioningPolicy       *string
 	BootVolumeSourceId            *string
 	BootVolumeSourceType          *string
 	BootVolumeSize                *int64
@@ -109,6 +111,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Create a server with user data (cloud-init)`,
 				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml`,
 			),
+			examples.NewExample(
+				`Create a server with provisioned agent`,
+				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-id yyy --agent-provisioning-policy ALWAYS`,
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -162,6 +168,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	agentProvisioningPolicyOptions := []string{"ALWAYS", "NEVER", "INHERIT"}
+	cmd.Flags().Var(flags.EnumFlag(false, "INHERIT", agentProvisioningPolicyOptions...), agentProvisioningPolicyFlag, fmt.Sprintf("Whether to provision an agent on server creation, one of %q", agentProvisioningPolicyOptions))
 	cmd.Flags().StringP(nameFlag, "n", "", "Server name")
 	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/")
 	cmd.Flags().String(affinityGroupFlag, "", "The affinity group the server is assigned to")
@@ -250,6 +258,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		MachineType:                   flags.FlagToStringPointer(p, cmd, machineTypeFlag),
 		AffinityGroup:                 flags.FlagToStringPointer(p, cmd, affinityGroupFlag),
 		AvailabilityZone:              flags.FlagToStringPointer(p, cmd, availabilityZoneFlag),
+		AgentProvisioningPolicy:       flags.FlagToStringPointer(p, cmd, agentProvisioningPolicyFlag),
 		BootVolumeSourceId:            flags.FlagToStringPointer(p, cmd, bootVolumeSourceIdFlag),
 		BootVolumeSourceType:          flags.FlagToStringPointer(p, cmd, bootVolumeSourceTypeFlag),
 		BootVolumeSize:                flags.FlagToInt64Pointer(p, cmd, bootVolumeSizeFlag),
@@ -291,6 +300,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		UserData:            userData,
 		Volumes:             model.Volumes,
 		Labels:              utils.ConvertStringMapToInterfaceMap(model.Labels),
+	}
+
+	if model.AgentProvisioningPolicy != nil {
+		switch *model.AgentProvisioningPolicy {
+		case "ALWAYS":
+			payload.Agent = &iaas.ServerAgent{Provisioned: utils.Ptr(true)}
+		case "NEVER":
+			payload.Agent = &iaas.ServerAgent{Provisioned: utils.Ptr(false)}
+		}
 	}
 
 	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {
