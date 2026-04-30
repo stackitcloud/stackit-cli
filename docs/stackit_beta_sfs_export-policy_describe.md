@@ -1,10 +1,10 @@
 ## stackit beta sfs export-policy describe
 
-Shows details of a export policy
+Shows details of an export policy
 
 ### Synopsis
 
-Shows details of a export policy.
+Shows details of an export policy.
 
 ```
 stackit beta sfs export-policy describe EXPORT_POLICY_ID [flags]
@@ -13,7 +13,7 @@ stackit beta sfs export-policy describe EXPORT_POLICY_ID [flags]
 ### Examples
 
 ```
-  Describe a export policy with ID "xxx"
+  Describe an export policy with ID "xxx"
   $ stackit beta sfs export-policy describe xxx
 ```
 

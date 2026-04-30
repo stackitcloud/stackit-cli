@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,7 +28,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Name  string
-	Rules *[]sfs.CreateShareExportPolicyRequestRule
+	Rules []sfs.CreateShareExportPolicyRequestRule
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -102,15 +102,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	rulesString := flags.FlagToStringPointer(p, cmd, rulesFlag)
-	var rules *[]sfs.CreateShareExportPolicyRequestRule
-	if rulesString != nil && *rulesString != "" {
+	rulesString := flags.FlagToStringValue(p, cmd, rulesFlag)
+	var rules []sfs.CreateShareExportPolicyRequestRule
+	if rulesString != "" {
 		var r []sfs.CreateShareExportPolicyRequestRule
-		err := json.Unmarshal([]byte(*rulesString), &r)
+		err := json.Unmarshal([]byte(rulesString), &r)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse rules: %w", err)
 		}
-		rules = &r
+		rules = r
 	}
 
 	model := inputModel{
@@ -124,10 +124,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateShareExportPolicyRequest {
-	req := apiClient.CreateShareExportPolicy(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateShareExportPolicy(ctx, model.ProjectId, model.Region)
 	req = req.CreateShareExportPolicyPayload(
 		sfs.CreateShareExportPolicyPayload{
-			Name:  utils.Ptr(model.Name),
+			Name:  model.Name,
 			Rules: model.Rules,
 		},
 	)

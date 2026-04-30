@@ -35,7 +35,7 @@ stackit beta sfs resource-pool update [flags]
   -h, --help                       Help for "stackit beta sfs resource-pool update"
       --ip-acl strings             List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
       --performance-class string   Performance class
-      --size int                   Size of the pool in Gigabytes
+      --size int32                 Size of the pool in Gigabytes
       --snapshots-visible          Set snapshots visible and accessible to users
 ```
 

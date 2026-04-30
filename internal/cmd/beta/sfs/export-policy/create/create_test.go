@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -21,13 +21,13 @@ var regionFlag = globalflags.RegionFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sfs.APIClient{}
+var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testRegion = "eu01"
 var testName = "test-name"
 var testRulesString = "[]"
-var testRules = &[]sfs.CreateShareExportPolicyRequestRule{}
+var testRules = []sfs.CreateShareExportPolicyRequestRule{}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -59,18 +59,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sfs.ApiCreateShareExportPolicyRequest)) sfs.ApiCreateShareExportPolicyRequest {
-	request := testClient.CreateShareExportPolicy(testCtx, testProjectId, testRegion)
+func fixtureRequest(mods ...func(request sfs.ApiCreateShareExportPolicyRequest)) sfs.ApiCreateShareExportPolicyRequest {
+	request := testClient.DefaultAPI.CreateShareExportPolicy(testCtx, testProjectId, testRegion)
 	request = request.CreateShareExportPolicyPayload(fixturePayload())
 	for _, mod := range mods {
-		mod(&request)
+		mod(request)
 	}
 	return request
 }
 
 func fixturePayload(mods ...func(payload *sfs.CreateShareExportPolicyPayload)) sfs.CreateShareExportPolicyPayload {
 	payload := sfs.CreateShareExportPolicyPayload{
-		Name:  utils.Ptr(testName),
+		Name:  testName,
 		Rules: testRules,
 	}
 	for _, mod := range mods {
@@ -110,20 +110,20 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Rules = &[]sfs.CreateShareExportPolicyRequestRule{
+				model.Rules = []sfs.CreateShareExportPolicyRequestRule{
 					{
-						Description: sfs.NewNullableString(
-							utils.Ptr("first rule"),
-						),
-						IpAcl:     utils.Ptr([]string{"192.168.2.0/24"}),
-						Order:     utils.Ptr(int64(1)),
-						SetUuid:   utils.Ptr(true),
-						SuperUser: utils.Ptr(false),
+						Description:          *sfs.NewNullableString(utils.Ptr("first rule")),
+						IpAcl:                []string{"192.168.2.0/24"},
+						Order:                utils.Ptr(int32(1)),
+						SetUuid:              utils.Ptr(true),
+						SuperUser:            utils.Ptr(false),
+						AdditionalProperties: map[string]any{},
 					},
 					{
-						IpAcl:    utils.Ptr([]string{"192.168.2.0/24", "127.0.0.1/32"}),
-						Order:    utils.Ptr(int64(2)),
-						ReadOnly: utils.Ptr(true),
+						IpAcl:                []string{"192.168.2.0/24", "127.0.0.1/32"},
+						Order:                utils.Ptr(int32(2)),
+						ReadOnly:             utils.Ptr(true),
+						AdditionalProperties: map[string]any{"readonly": true},
 					},
 				}
 			}),
@@ -157,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -194,7 +194,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty export policy",
 			args: args{
 				exportPolicy: &sfs.CreateShareExportPolicyResponse{
-					ShareExportPolicy: &sfs.CreateShareExportPolicyResponseShareExportPolicy{},
+					ShareExportPolicy: &sfs.ShareExportPolicy{},
 				},
 			},
 			wantErr: false,

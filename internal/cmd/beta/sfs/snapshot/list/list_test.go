@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ var regionFlag = globalflags.RegionFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sfs.APIClient{}
+var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testRegion = "eu01"
@@ -56,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiListResourcePoolSnapshotsRequest)) sfs.ApiListResourcePoolSnapshotsRequest {
-	request := testClient.ListResourcePoolSnapshots(testCtx, testProjectId, testRegion, testResourcePoolId)
+	request := testClient.DefaultAPI.ListResourcePoolSnapshots(testCtx, testProjectId, testRegion, testResourcePoolId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -121,7 +121,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
