@@ -80,14 +80,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read machine-types: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No machine-types found for project %q\n", projectLabel)
-				return nil
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// limit output
@@ -95,7 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				*resp.Items = (*resp.Items)[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, *resp)
 		},
 	}
 
@@ -140,8 +136,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, machineTypes iaas.MachineTypeListResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTypes iaas.MachineTypeListResponse) error {
 	return p.OutputResult(outputFormat, machineTypes, func() error {
+		if machineTypes.Items == nil || len(*machineTypes.Items) == 0 {
+			p.Outputf("No machine-types found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetTitle("Machine-Types")
 		table.SetHeader("NAME", "VCPUS", "RAM (GB)", "DESCRIPTION", "EXTRA SPECS")

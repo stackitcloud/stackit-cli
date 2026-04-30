@@ -77,12 +77,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list key pairs: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				params.Printer.Info("No key pairs found\n")
-				return nil
-			}
+			items := resp.GetItems()
 
-			items := *resp.Items
+			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -130,6 +127,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair) error {
 	return p.OutputResult(outputFormat, keyPairs, func() error {
+		if len(keyPairs) == 0 {
+			p.Outputf("No key pairs found\n")
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("KEY PAIR NAME", "LABELS", "FINGERPRINT", "CREATED AT", "UPDATED AT")
 

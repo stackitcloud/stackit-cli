@@ -78,23 +78,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list servers: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No servers found for project %q\n", projectLabel)
-				return nil
+			items := resp.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -140,7 +137,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, servers []iaas.Server) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(servers, "", "  ")
@@ -164,6 +161,10 @@ func outputResult(p *print.Printer, outputFormat string, servers []iaas.Server) 
 
 		return nil
 	default:
+		if len(servers) == 0 {
+			p.Outputf("No servers found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Machine Type", "Availability Zones", "Nic IPv4", "Public IPs")
 

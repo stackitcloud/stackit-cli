@@ -74,29 +74,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list security group rules: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
-					securityGroupLabel = model.SecurityGroupId
-				}
+			items := resp.GetItems()
 
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No rules found in security group %q for project %q\n", securityGroupLabel, projectLabel)
-				return nil
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
+				securityGroupLabel = model.SecurityGroupId
+			}
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, securityGroupLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -139,8 +136,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, securityGroupRules []iaas.SecurityGroupRule) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLabel string, securityGroupRules []iaas.SecurityGroupRule) error {
 	return p.OutputResult(outputFormat, securityGroupRules, func() error {
+		if len(securityGroupRules) == 0 {
+			p.Outputf("No rules found in security group %q for project %q\n", securityGroupLabel, projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 

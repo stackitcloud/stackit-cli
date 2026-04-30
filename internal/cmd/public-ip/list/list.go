@@ -77,25 +77,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list public IPs: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				} else if projectLabel == "" {
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No public IPs found for project %q\n", projectLabel)
-				return nil
+			items := resp.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -140,8 +135,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, publicIps []iaas.PublicIp) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, publicIps []iaas.PublicIp) error {
 	return p.OutputResult(outputFormat, publicIps, func() error {
+		if len(publicIps) == 0 {
+			p.Outputf("No public IPs found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "IP ADDRESS", "USED BY")
 
