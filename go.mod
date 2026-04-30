@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.23.0
+	github.com/stackitcloud/stackit-sdk-go/core v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.10.0
@@ -24,7 +24,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.10.3
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.3.5
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1
-	github.com/stackitcloud/stackit-sdk-go/services/logs v0.5.2
+	github.com/stackitcloud/stackit-sdk-go/services/logs v0.8.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.8
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.6
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.3.5
