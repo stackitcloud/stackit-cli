@@ -84,37 +84,35 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
-			credentialsPtr := resp.Credentials
 
-			var credentials []loadbalancer.CredentialsResponse
-			if credentialsPtr != nil && len(*credentialsPtr) > 0 {
-				credentials = *credentialsPtr
-				filterOp, err := getFilterOp(model.Used, model.Unused)
-				if err != nil {
-					return err
-				}
-				credentials, err = lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Region, filterOp)
-				if err != nil {
-					return fmt.Errorf("filter credentials: %w", err)
-				}
+			credentials := utils.GetSliceFromPointer(resp.Credentials)
+
+			filterOp, err := getFilterOp(model.Used, model.Unused)
+			if err != nil {
+				return err
 			}
 
-			if len(credentials) == 0 {
-				opLabel := "No "
-				if model.Used {
-					opLabel += "used"
-				} else if model.Unused {
-					opLabel += "unused"
-				}
-				params.Printer.Info("%s observability credentials found for Load Balancer on project %q\n", opLabel, projectLabel)
-				return nil
+			filteredCredentials, err := lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Region, filterOp)
+			if err != nil {
+				return fmt.Errorf("filter credentials: %w", err)
+			}
+			if filteredCredentials != nil { // lbUtils.FilterCredentials can return nil with no error, if credentials is an empty slice and filterOp is not 0 (if either the --used or the --unused is set)
+				credentials = filteredCredentials
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, credentials)
+
+			opLabel := "No"
+			if model.Used {
+				opLabel += " used"
+			} else if model.Unused {
+				opLabel += " unused"
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, opLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
@@ -159,8 +157,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, credentials []loadbalancer.CredentialsResponse) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel, opLabel string, credentials []loadbalancer.CredentialsResponse) error {
 	return p.OutputResult(outputFormat, credentials, func() error {
+		if len(credentials) == 0 {
+			p.Outputf("%s observability credentials found for Load Balancer on project %q\n", opLabel, projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("REFERENCE", "DISPLAY NAME", "USERNAME")
 		for i := range credentials {

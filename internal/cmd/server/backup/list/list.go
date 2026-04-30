@@ -67,27 +67,24 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server backups: %w", err)
 			}
-			backups := *resp.Items
-			if len(backups) == 0 {
-				serverLabel := model.ServerId
-				// Get server name
-				if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
-					serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
-					if err != nil {
-						params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-					} else if serverName != "" {
-						serverLabel = serverName
-					}
+			backups := resp.GetItems()
+
+			// Get server name
+			serverLabel := model.ServerId
+			if iaasApiClient, err := iaasClient.ConfigureClient(params.Printer, params.CliVersion); err == nil {
+				serverName, err := iaasUtils.GetServerName(ctx, iaasApiClient, model.ProjectId, model.Region, model.ServerId)
+				if err != nil {
+					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+				} else if serverName != "" {
+					serverLabel = serverName
 				}
-				params.Printer.Info("No backups found for server %s\n", serverLabel)
-				return nil
 			}
 
 			// Truncate output
 			if model.Limit != nil && len(backups) > int(*model.Limit) {
 				backups = backups[:*model.Limit]
 			}
-			return outputResult(params.Printer, model.OutputFormat, backups)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, backups)
 		},
 	}
 	configureFlags(cmd)
@@ -131,8 +128,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []serverbackup.Backup) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, backups []serverbackup.Backup) error {
 	return p.OutputResult(outputFormat, backups, func() error {
+		if len(backups) == 0 {
+			p.Outputf("No backups found for server %s\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE (GB)", "STATUS", "CREATED AT", "EXPIRES AT", "LAST RESTORED AT", "VOLUME BACKUPS")
 		for i := range backups {

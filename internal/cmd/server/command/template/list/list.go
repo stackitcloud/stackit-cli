@@ -62,11 +62,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list server command templates: %w", err)
 			}
-			if templates := resp.Items; templates == nil || len(*templates) == 0 {
-				params.Printer.Info("No commands templates found\n")
-				return nil
-			}
-			templates := *resp.Items
+
+			templates := resp.GetItems()
 
 			// Truncate output
 			if model.Limit != nil && len(templates) > int(*model.Limit) {
@@ -113,6 +110,10 @@ func buildRequest(ctx context.Context, _ *inputModel, apiClient *runcommand.APIC
 
 func outputResult(p *print.Printer, outputFormat string, templates []runcommand.CommandTemplate) error {
 	return p.OutputResult(outputFormat, templates, func() error {
+		if len(templates) == 0 {
+			p.Outputf("No commands templates found\n")
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
 		for i := range templates {
