@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -21,7 +21,7 @@ var regionFlag = globalflags.RegionFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sfs.APIClient{}
+var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testRegion = "eu01"
@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiCreateResourcePoolSnapshotRequest)) sfs.ApiCreateResourcePoolSnapshotRequest {
-	request := testClient.CreateResourcePoolSnapshot(testCtx, testProjectId, testRegion, testResourcePoolId)
+	request := testClient.DefaultAPI.CreateResourcePoolSnapshot(testCtx, testProjectId, testRegion, testResourcePoolId)
 	request = request.CreateResourcePoolSnapshotPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -74,7 +74,7 @@ func fixtureRequest(mods ...func(request *sfs.ApiCreateResourcePoolSnapshotReque
 func fixturePayload(mods ...func(request *sfs.CreateResourcePoolSnapshotPayload)) sfs.CreateResourcePoolSnapshotPayload {
 	payload := sfs.CreateResourcePoolSnapshotPayload{
 		Name: utils.Ptr(testName),
-		Comment: sfs.NewNullableString(
+		Comment: *sfs.NewNullableString(
 			utils.Ptr(testComment),
 		),
 	}
@@ -161,9 +161,9 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
-				cmp.AllowUnexported(sfs.NullableString{}),
+				cmp.AllowUnexported(sfs.NullableString{}, sfs.NullableInt32{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -200,7 +200,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty snapshot",
 			args: args{
 				resp: &sfs.CreateResourcePoolSnapshotResponse{
-					ResourcePoolSnapshot: &sfs.CreateResourcePoolSnapshotResponseResourcePoolSnapshot{},
+					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{},
 				},
 			},
 			wantErr: false,

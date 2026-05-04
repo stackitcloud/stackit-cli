@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -32,7 +32,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	SizeInGB         int64
+	SizeInGB         *int32
 	PerformanceClass string
 	IpAcl            []string
 	Name             string
@@ -102,7 +102,7 @@ The available performance class values can be obtained by running:
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Create resource pool", func() error {
-					_, err = wait.CreateResourcePoolWaitHandler(ctx, apiClient, model.ProjectId, model.Region, resourcePoolId).WaitWithContext(ctx)
+					_, err = wait.CreateResourcePoolWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resourcePoolId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -118,7 +118,7 @@ The available performance class values can be obtained by running:
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Int64(sizeFlag, 0, "Size of the pool in Gigabytes")
+	cmd.Flags().Int32(sizeFlag, 0, "Size of the pool in Gigabytes")
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), ipAclFlag, "List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly")
 	cmd.Flags().String(availabilityZoneFlag, "", "Availability zone")
@@ -132,13 +132,13 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateResourcePoolRequest {
-	req := apiClient.CreateResourcePool(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateResourcePool(ctx, model.ProjectId, model.Region)
 	req = req.CreateResourcePoolPayload(sfs.CreateResourcePoolPayload{
-		AvailabilityZone:    &model.AvailabilityZone,
-		IpAcl:               &model.IpAcl,
-		Name:                &model.Name,
-		PerformanceClass:    &model.PerformanceClass,
-		SizeGigabytes:       &model.SizeInGB,
+		AvailabilityZone:    model.AvailabilityZone,
+		IpAcl:               model.IpAcl,
+		Name:                model.Name,
+		PerformanceClass:    model.PerformanceClass,
+		SizeGigabytes:       *model.SizeInGB,
 		SnapshotsAreVisible: &model.SnapshotsVisible,
 	})
 	return req
@@ -151,16 +151,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	performanceClass := flags.FlagToStringValue(p, cmd, performanceClassFlag)
-	size := flags.FlagWithDefaultToInt64Value(p, cmd, sizeFlag)
+	size := flags.FlagToInt32Pointer(p, cmd, sizeFlag)
 	availabilityZone := flags.FlagToStringValue(p, cmd, availabilityZoneFlag)
-	ipAcls := flags.FlagToStringSlicePointer(p, cmd, ipAclFlag)
+	ipAcls := flags.FlagToStringSliceValue(p, cmd, ipAclFlag)
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 	snapshotsVisible := flags.FlagToBoolValue(p, cmd, snapshotsVisibleFlag)
 
 	model := inputModel{
 		GlobalFlagModel:  globalFlags,
 		SizeInGB:         size,
-		IpAcl:            *ipAcls,
+		IpAcl:            ipAcls,
 		PerformanceClass: performanceClass,
 		AvailabilityZone: availabilityZone,
 		Name:             name,

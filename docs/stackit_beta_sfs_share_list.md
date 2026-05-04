@@ -14,10 +14,10 @@ stackit beta sfs share list [flags]
 
 ```
   List all shares from resource pool with ID "xxx"
-  $ stackit beta sfs export-policy list --resource-pool-id xxx
+  $ stackit beta sfs share list --resource-pool-id xxx
 
   List up to 10 shares from resource pool with ID "xxx"
-  $ stackit beta sfs export-policy list --resource-pool-id xxx --limit 10
+  $ stackit beta sfs share list --resource-pool-id xxx --limit 10
 ```
 
 ### Options

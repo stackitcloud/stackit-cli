@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -22,14 +22,14 @@ var regionFlag = globalflags.RegionFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sfs.APIClient{}
+var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testRegion = "eu01"
 
 var testResourcePoolId = uuid.NewString()
 var testShareId = uuid.NewString()
-var testHardLimit int64 = 10
+var testHardLimit int32 = 10
 var testExportPolicy = "test-export-policy"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -38,7 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		regionFlag:    testRegion,
 
 		resourcePoolIdFlag:   testResourcePoolId,
-		hardLimitFlag:        strconv.FormatInt(testHardLimit, 10),
+		hardLimitFlag:        strconv.FormatInt(int64(testHardLimit), 10),
 		exportPolicyNameFlag: testExportPolicy,
 	}
 	for _, mod := range mods {
@@ -76,7 +76,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiUpdateShareRequest)) sfs.ApiUpdateShareRequest {
-	request := testClient.UpdateShare(testCtx, testProjectId, testRegion, testResourcePoolId, testShareId)
+	request := testClient.DefaultAPI.UpdateShare(testCtx, testProjectId, testRegion, testResourcePoolId, testShareId)
 	request = request.UpdateSharePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -86,8 +86,8 @@ func fixtureRequest(mods ...func(request *sfs.ApiUpdateShareRequest)) sfs.ApiUpd
 
 func fixturePayload(mods ...func(payload *sfs.UpdateSharePayload)) sfs.UpdateSharePayload {
 	payload := sfs.UpdateSharePayload{
-		ExportPolicyName:        sfs.NewNullableString(utils.Ptr(testExportPolicy)),
-		SpaceHardLimitGigabytes: utils.Ptr(testHardLimit),
+		ExportPolicyName:        *sfs.NewNullableString(utils.Ptr(testExportPolicy)),
+		SpaceHardLimitGigabytes: *sfs.NewNullableInt32(utils.Ptr(testHardLimit)),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -210,7 +210,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest, sfs.NullableString{}),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}, sfs.NullableString{}, sfs.NullableInt32{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -248,7 +248,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty share",
 			args: args{
 				item: &sfs.UpdateShareResponse{
-					Share: &sfs.UpdateShareResponseShare{},
+					Share: &sfs.Share{},
 				},
 			},
 			wantErr: false,

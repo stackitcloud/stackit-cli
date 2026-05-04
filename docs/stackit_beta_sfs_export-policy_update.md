@@ -1,10 +1,10 @@
 ## stackit beta sfs export-policy update
 
-Updates a export policy
+Updates an export policy
 
 ### Synopsis
 
-Updates a export policy.
+Updates an export policy.
 
 ```
 stackit beta sfs export-policy update EXPORT_POLICY_ID [flags]
@@ -13,10 +13,10 @@ stackit beta sfs export-policy update EXPORT_POLICY_ID [flags]
 ### Examples
 
 ```
-  Update a export policy with ID "xxx" and with rules from file "./rules.json"
+  Update an export policy with ID "xxx" and with rules from file "./rules.json"
   $ stackit beta sfs export-policy update xxx --rules @./rules.json
 
-  Update a export policy with ID "xxx" and remove the rules
+  Update an export policy with ID "xxx" and remove the rules
   $ stackit beta sfs export-policy update XXX --remove-rules
 ```
 
