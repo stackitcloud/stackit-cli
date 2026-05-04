@@ -3,6 +3,7 @@ package sfs
 import (
 	exportpolicy "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/export-policy"
 	performanceclass "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/performance-class"
+	projectlock "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/project-lock"
 	resourcepool "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/resource-pool"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/share"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/snapshot"
@@ -31,4 +32,5 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(exportpolicy.NewCmd(params))
 	cmd.AddCommand(snapshot.NewCmd(params))
 	cmd.AddCommand(performanceclass.NewCmd(params))
+	cmd.AddCommand(projectlock.NewCmd(params))
 }
