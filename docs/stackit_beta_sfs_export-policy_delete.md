@@ -13,7 +13,7 @@ stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
 ### Examples
 
 ```
-  Delete a export policy with ID "xxx"
+  Delete an export policy with ID "xxx"
   $ stackit beta sfs export-policy delete xxx
 ```
 

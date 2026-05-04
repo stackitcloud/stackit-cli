@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -33,7 +33,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(exportPolicyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a export policy with ID "xxx"`,
+				`Delete an export policy with ID "xxx"`,
 				"$ stackit beta sfs export-policy delete xxx",
 			),
 		),
@@ -49,7 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient, model.ProjectId, model.Region, model.ExportPolicyId)
+			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ExportPolicyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get export policy name: %v", err)
 				exportPolicyLabel = model.ExportPolicyId
@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiDeleteShareExportPolicyRequest {
-	return apiClient.DeleteShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
+	return apiClient.DefaultAPI.DeleteShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

@@ -24,7 +24,7 @@ stackit beta sfs share update SHARE_ID [flags]
 
 ```
       --export-policy-name string   The export policy the share is assigned to
-      --hard-limit int              The space hard limit for the share
+      --hard-limit int32            The space hard limit for the share
   -h, --help                        Help for "stackit beta sfs share update"
       --resource-pool-id string     The resource pool the share is assigned to
 ```

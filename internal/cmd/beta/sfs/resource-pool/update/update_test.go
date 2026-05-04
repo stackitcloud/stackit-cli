@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -26,13 +26,13 @@ const (
 
 var (
 	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient = &sfs.APIClient{}
+	testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 	testProjectId                          = uuid.NewString()
 	testResourcePoolId                     = uuid.NewString()
 	testResourcePoolIpAcl                  = []string{"10.88.135.144/28", "250.81.87.224/32"}
 	testResourcePoolPerformanceClass       = "Standard"
-	testResourcePoolSizeInGB         int64 = 50
+	testResourcePoolSizeInGB         int32 = 50
 	testSnapshotsVisible                   = true
 )
 
@@ -51,7 +51,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		performanceClassFlag:      testResourcePoolPerformanceClass,
-		sizeFlag:                  strconv.FormatInt(testResourcePoolSizeInGB, 10),
+		sizeFlag:                  strconv.FormatInt(int64(testResourcePoolSizeInGB), 10),
 		ipAclFlag:                 strings.Join(testResourcePoolIpAcl, ","),
 		snapshotsVisibleFlag:      strconv.FormatBool(testSnapshotsVisible),
 	}
@@ -73,7 +73,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ResourcePoolId:   testResourcePoolId,
 		SizeGigabytes:    &testResourcePoolSizeInGB,
 		PerformanceClass: &testResourcePoolPerformanceClass,
-		IpAcl:            &ipAclClone,
+		IpAcl:            ipAclClone,
 		SnapshotsVisible: &testSnapshotsVisible,
 	}
 	for _, mod := range mods {
@@ -83,11 +83,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolRequest)) sfs.ApiUpdateResourcePoolRequest {
-	request := testClient.UpdateResourcePool(testCtx, testProjectId, testRegion, testResourcePoolId)
+	request := testClient.DefaultAPI.UpdateResourcePool(testCtx, testProjectId, testRegion, testResourcePoolId)
 	request = request.UpdateResourcePoolPayload(sfs.UpdateResourcePoolPayload{
-		IpAcl:               &testResourcePoolIpAcl,
+		IpAcl:               testResourcePoolIpAcl,
 		PerformanceClass:    &testResourcePoolPerformanceClass,
-		SizeGigabytes:       &testResourcePoolSizeInGB,
+		SizeGigabytes:       *sfs.NewNullableInt32(&testResourcePoolSizeInGB),
 		SnapshotsAreVisible: &testSnapshotsVisible,
 	})
 	for _, mod := range mods {
@@ -248,9 +248,9 @@ func TestParseInput(t *testing.T) {
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				if model.IpAcl == nil {
-					model.IpAcl = &[]string{}
+					model.IpAcl = []string{}
 				}
-				*model.IpAcl = append(*model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
+				model.IpAcl = append(model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 		{
@@ -261,9 +261,9 @@ func TestParseInput(t *testing.T) {
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				if model.IpAcl == nil {
-					model.IpAcl = &[]string{}
+					model.IpAcl = []string{}
 				}
-				*model.IpAcl = append(*model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
+				model.IpAcl = append(model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 	}
@@ -295,8 +295,9 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.AllowUnexported(sfs.NullableInt32{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -332,7 +333,7 @@ func TestOutputResult(t *testing.T) {
 			name: "valid response with empty resource pool",
 			args: args{
 				resp: &sfs.UpdateResourcePoolResponse{
-					ResourcePool: &sfs.UpdateResourcePoolResponseResourcePool{},
+					ResourcePool: &sfs.ResourcePool{},
 				},
 			},
 			wantErr: false,
@@ -341,7 +342,7 @@ func TestOutputResult(t *testing.T) {
 			name: "valid response with name",
 			args: args{
 				resp: &sfs.UpdateResourcePoolResponse{
-					ResourcePool: &sfs.UpdateResourcePoolResponseResourcePool{
+					ResourcePool: &sfs.ResourcePool{
 						Name: utils.Ptr("example name"),
 					},
 				},

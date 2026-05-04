@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -15,7 +15,6 @@ const (
 	testShareName        = "share-name"
 	testResourcePoolName = "resource-pool-name"
 	testExportPolicyName = "export-policy-name"
-	testSnapshotName     = "snapshot-name"
 	testRegion           = "eu01"
 )
 
@@ -24,34 +23,41 @@ var (
 	testProjectId = uuid.NewString()
 )
 
-type sfsClientMocked struct {
-	getShareFails        bool
-	getShareResp         *sfs.GetShareResponse
+type mockSettings struct {
+	getShareFails bool
+	getShareResp  *sfs.GetShareResponse
+
 	getResourcePoolFails bool
 	getResourcePoolResp  *sfs.GetResourcePoolResponse
+
 	getExportPolicyFails bool
 	getExportPolicyResp  *sfs.GetShareExportPolicyResponse
 }
 
-func (s *sfsClientMocked) GetShareExecute(_ context.Context, _, _, _, _ string) (*sfs.GetShareResponse, error) {
-	if s.getShareFails {
-		return nil, fmt.Errorf("could not get share")
-	}
-	return s.getShareResp, nil
-}
+func newAPIMock(settings *mockSettings) sfs.DefaultAPI {
+	return &sfs.DefaultAPIServiceMock{
+		GetShareExecuteMock: utils.Ptr(func(_ sfs.ApiGetShareRequest) (*sfs.GetShareResponse, error) {
+			if settings.getShareFails {
+				return nil, fmt.Errorf("could not get share details")
+			}
 
-func (s *sfsClientMocked) GetResourcePoolExecute(_ context.Context, _, _, _ string) (*sfs.GetResourcePoolResponse, error) {
-	if s.getResourcePoolFails {
-		return nil, fmt.Errorf("could not get resource pool")
-	}
-	return s.getResourcePoolResp, nil
-}
+			return settings.getShareResp, nil
+		}),
+		GetShareExportPolicyExecuteMock: utils.Ptr(func(_ sfs.ApiGetShareExportPolicyRequest) (*sfs.GetShareExportPolicyResponse, error) {
+			if settings.getExportPolicyFails {
+				return nil, fmt.Errorf("could not get export policy details")
+			}
 
-func (s *sfsClientMocked) GetShareExportPolicyExecute(_ context.Context, _, _, _ string) (*sfs.GetShareExportPolicyResponse, error) {
-	if s.getExportPolicyFails {
-		return nil, fmt.Errorf("could not get export policy")
+			return settings.getExportPolicyResp, nil
+		}),
+		GetResourcePoolExecuteMock: utils.Ptr(func(_ sfs.ApiGetResourcePoolRequest) (*sfs.GetResourcePoolResponse, error) {
+			if settings.getResourcePoolFails {
+				return nil, fmt.Errorf("could not get resource pool details")
+			}
+
+			return settings.getResourcePoolResp, nil
+		}),
 	}
-	return s.getExportPolicyResp, nil
 }
 
 func TestGetExportPolicyName(t *testing.T) {
@@ -65,7 +71,7 @@ func TestGetExportPolicyName(t *testing.T) {
 		{
 			description: "base",
 			getExportPolicyResp: &sfs.GetShareExportPolicyResponse{
-				ShareExportPolicy: &sfs.GetShareExportPolicyResponseShareExportPolicy{
+				ShareExportPolicy: &sfs.ShareExportPolicy{
 					Name: utils.Ptr(testExportPolicyName),
 				},
 			},
@@ -81,10 +87,10 @@ func TestGetExportPolicyName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sfsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getExportPolicyFails: tt.getExportPolicyFails,
 				getExportPolicyResp:  tt.getExportPolicyResp,
-			}
+			})
 
 			output, err := GetExportPolicyName(context.Background(), client, testProjectId, testRegion, testPolicyId)
 
@@ -115,7 +121,7 @@ func TestGetShareName(t *testing.T) {
 		{
 			description: "base",
 			getShareResp: &sfs.GetShareResponse{
-				Share: &sfs.GetShareResponseShare{
+				Share: &sfs.Share{
 					Name: utils.Ptr(testShareName),
 				},
 			},
@@ -132,10 +138,10 @@ func TestGetShareName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sfsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getShareFails: tt.getShareFails,
 				getShareResp:  tt.getShareResp,
-			}
+			})
 
 			output, err := GetShareName(context.Background(), client, testProjectId, testRegion, "", "")
 
@@ -166,7 +172,7 @@ func TestGetResourcePoolName(t *testing.T) {
 		{
 			description: "base",
 			getResourcePoolResp: &sfs.GetResourcePoolResponse{
-				ResourcePool: &sfs.GetResourcePoolResponseResourcePool{
+				ResourcePool: &sfs.ResourcePool{
 					Name: utils.Ptr(testResourcePoolName),
 				},
 			},
@@ -183,10 +189,10 @@ func TestGetResourcePoolName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sfsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getResourcePoolResp:  tt.getResourcePoolResp,
 				getResourcePoolFails: tt.getResourcePoolFails,
-			}
+			})
 
 			output, err := GetResourcePoolName(context.Background(), client, testProjectId, testRegion, "")
 

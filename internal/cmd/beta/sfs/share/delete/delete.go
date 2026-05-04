@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get share name: %v", err)
 				shareLabel = model.ShareId
@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting share", func() error {
-					_, err = wait.DeleteShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+					_, err = wait.DeleteShareWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -129,5 +129,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiDeleteShareRequest {
-	return apiClient.DeleteShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+	return apiClient.DefaultAPI.DeleteShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 }

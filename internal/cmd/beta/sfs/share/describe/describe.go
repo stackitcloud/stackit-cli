@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -41,7 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Describe a shares with ID "xxx" from resource pool with ID "yyy"`,
-				"$ stackit beta sfs export-policy describe xxx --resource-pool-id yyy",
+				"$ stackit beta sfs share describe xxx --resource-pool-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe SFS share: %w", err)
 			}
 
-			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolLabel = model.ResourcePoolId
@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiGetShareRequest {
-	return apiClient.GetShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+	return apiClient.DefaultAPI.GetShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 }
 
 func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId string, share *sfs.GetShareResponse) error {
@@ -156,22 +156,22 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId str
 
 			content = append(content, policyTable)
 
-			if policy.Rules != nil && len(*policy.Rules) > 0 {
+			if len(policy.Rules) > 0 {
 				ruleTable := tables.NewTable()
 				ruleTable.SetTitle("Export Policy - Rules")
 
 				ruleTable.SetHeader("ID", "ORDER", "DESCRIPTION", "IP ACL", "READ ONLY", "SET UUID", "SUPER USER", "CREATED AT")
 
-				for _, rule := range *policy.Rules {
+				for _, rule := range policy.Rules {
 					var description string
-					if rule.Description != nil {
+					if rule.Description.IsSet() && *rule.Description.Get() != "" {
 						description = utils.PtrString(rule.Description.Get())
 					}
 					ruleTable.AddRow(
 						utils.PtrString(rule.Id),
 						utils.PtrString(rule.Order),
 						description,
-						utils.JoinStringPtr(rule.IpAcl, ", "),
+						utils.JoinStringPtr(&rule.IpAcl, ", "),
 						utils.PtrString(rule.ReadOnly),
 						utils.PtrString(rule.SetUuid),
 						utils.PtrString(rule.SuperUser),

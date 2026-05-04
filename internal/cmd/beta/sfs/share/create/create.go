@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -33,7 +33,7 @@ type inputModel struct {
 	Name             string
 	ExportPolicyName *string
 	ResourcePoolId   string
-	HardLimit        *int64
+	HardLimit        *int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolLabel = model.ResourcePoolId
@@ -93,7 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating share", func() error {
-					_, err = wait.CreateShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, shareId).WaitWithContext(ctx)
+					_, err = wait.CreateShareWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, shareId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -112,7 +112,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Share name")
 	cmd.Flags().Var(flags.UUIDFlag(), resourcePoolIdFlag, "The resource pool the share is assigned to")
 	cmd.Flags().String(exportPolicyNameFlag, "", "The export policy the share is assigned to")
-	cmd.Flags().Int64(hardLimitFlag, 0, "The space hard limit for the share")
+	cmd.Flags().Int32(hardLimitFlag, 0, "The space hard limit for the share")
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag, resourcePoolIdFlag, hardLimitFlag)
 	cobra.CheckErr(err)
@@ -124,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	hardLimit := flags.FlagToInt64Pointer(p, cmd, hardLimitFlag)
+	hardLimit := flags.FlagToInt32Pointer(p, cmd, hardLimitFlag)
 	if hardLimit != nil {
 		if *hardLimit < 0 {
 			return nil, &errors.FlagValidationError{
@@ -147,12 +147,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateShareRequest {
-	req := apiClient.CreateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.CreateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	req = req.CreateSharePayload(
 		sfs.CreateSharePayload{
-			Name:                    utils.Ptr(model.Name),
-			ExportPolicyName:        sfs.NewNullableString(model.ExportPolicyName),
-			SpaceHardLimitGigabytes: model.HardLimit,
+			Name:                    model.Name,
+			ExportPolicyName:        *sfs.NewNullableString(model.ExportPolicyName),
+			SpaceHardLimitGigabytes: *model.HardLimit,
 		},
 	)
 	return req

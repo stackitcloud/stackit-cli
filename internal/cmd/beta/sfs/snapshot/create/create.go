@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolLabel = model.ResourcePoolId
@@ -99,10 +99,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateResourcePoolSnapshotRequest {
-	req := apiClient.CreateResourcePoolSnapshot(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.CreateResourcePoolSnapshot(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	req = req.CreateResourcePoolSnapshotPayload(sfs.CreateResourcePoolSnapshotPayload{
 		Name:    utils.Ptr(model.Name),
-		Comment: sfs.NewNullableString(model.Comment),
+		Comment: *sfs.NewNullableString(model.Comment),
 	})
 	return req
 }

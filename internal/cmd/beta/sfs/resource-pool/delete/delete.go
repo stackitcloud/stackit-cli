@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -54,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolName = model.ResourcePoolId
@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Delete resource pool", func() error {
-					_, err = wait.DeleteResourcePoolWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
+					_, err = wait.DeleteResourcePoolWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -90,7 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiDeleteResourcePoolRequest {
-	req := apiClient.DeleteResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	req := apiClient.DefaultAPI.DeleteResourcePool(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	return req
 }
 

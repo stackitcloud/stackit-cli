@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs/wait"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -34,7 +34,7 @@ type inputModel struct {
 	ShareId          string
 	ResourcePoolId   string
 	ExportPolicyName *string
-	HardLimit        *int64
+	HardLimit        *int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get share name: %v", err)
 				shareLabel = model.ShareId
@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				shareLabel = model.ShareId
 			}
 
-			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolLabel = model.ResourcePoolId
@@ -98,7 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating share", func() error {
-					_, err = wait.UpdateShareWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
+					_, err = wait.UpdateShareWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -116,7 +116,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), resourcePoolIdFlag, "The resource pool the share is assigned to")
 	cmd.Flags().String(exportPolicyNameFlag, "", "The export policy the share is assigned to")
-	cmd.Flags().Int64(hardLimitFlag, 0, "The space hard limit for the share")
+	cmd.Flags().Int32(hardLimitFlag, 0, "The space hard limit for the share")
 
 	err := flags.MarkFlagsRequired(cmd, resourcePoolIdFlag)
 	cobra.CheckErr(err)
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &errors.ProjectIdError{}
 	}
 
-	hardLimit := flags.FlagToInt64Pointer(p, cmd, hardLimitFlag)
+	hardLimit := flags.FlagToInt32Pointer(p, cmd, hardLimitFlag)
 	if hardLimit != nil && *hardLimit < 0 {
 		return nil, &errors.FlagValidationError{
 			Flag:    hardLimitFlag,
@@ -150,10 +150,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiUpdateShareRequest {
-	req := apiClient.UpdateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+	req := apiClient.DefaultAPI.UpdateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 	req = req.UpdateSharePayload(sfs.UpdateSharePayload{
-		ExportPolicyName:        sfs.NewNullableString(model.ExportPolicyName),
-		SpaceHardLimitGigabytes: model.HardLimit,
+		ExportPolicyName:        *sfs.NewNullableString(model.ExportPolicyName),
+		SpaceHardLimitGigabytes: *sfs.NewNullableInt32(model.HardLimit),
 	})
 	return req
 }

@@ -14,7 +14,7 @@ stackit beta sfs share describe SHARE_ID [flags]
 
 ```
   Describe a shares with ID "xxx" from resource pool with ID "yyy"
-  $ stackit beta sfs export-policy describe xxx --resource-pool-id yyy
+  $ stackit beta sfs share describe xxx --resource-pool-id yyy
 ```
 
 ### Options

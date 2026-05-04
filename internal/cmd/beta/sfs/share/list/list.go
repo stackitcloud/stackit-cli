@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sfs"
+	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -40,11 +40,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all shares from resource pool with ID "xxx"`,
-				"$ stackit beta sfs export-policy list --resource-pool-id xxx",
+				"$ stackit beta sfs share list --resource-pool-id xxx",
 			),
 			examples.NewExample(
 				`List up to 10 shares from resource pool with ID "xxx"`,
-				"$ stackit beta sfs export-policy list --resource-pool-id xxx --limit 10",
+				"$ stackit beta sfs share list --resource-pool-id xxx --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list SFS share: %w", err)
 			}
 
-			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient, model.ProjectId, model.Region, model.ResourcePoolId)
+			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
 				resourcePoolLabel = model.ResourcePoolId
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(resp.Shares)
+			items := utils.GetSliceFromPointer(&resp.Shares)
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListSharesRequest {
-	return apiClient.ListShares(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+	return apiClient.DefaultAPI.ListShares(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 }
 
 func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shares []sfs.Share) error {
@@ -136,11 +136,11 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shar
 
 		for _, share := range shares {
 			var policy string
-			if share.ExportPolicy != nil {
+			if share.ExportPolicy.IsSet() && (share.ExportPolicy.Get().GetId() != "" || share.ExportPolicy.Get().GetName() != "") {
 				if name, ok := share.ExportPolicy.Get().GetNameOk(); ok {
-					policy = name
+					policy = *name
 				} else if id, ok := share.ExportPolicy.Get().GetIdOk(); ok {
-					policy = id
+					policy = *id
 				}
 			}
 			table.AddRow(
