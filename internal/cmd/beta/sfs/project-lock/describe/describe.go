@@ -2,6 +2,7 @@ package describe
 
 import (
 	"context"
+	sysErrors "errors"
 	"fmt"
 	"net/http"
 
@@ -62,11 +63,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				oapiErr, _ := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
-				if oapiErr.StatusCode == http.StatusNotFound {
-					fmt.Printf("No active lock found for project %s\n", projectLabel)
-					return nil
+				var oApiErr *oapierror.GenericOpenAPIError
+				if sysErrors.As(err, &oApiErr) {
+					if oApiErr.StatusCode == http.StatusNotFound {
+						params.Printer.Info("No active lock found for project %s\n", projectLabel)
+						return err
+					}
 				}
+
 				return fmt.Errorf("get lock status for project: %w", err)
 			}
 

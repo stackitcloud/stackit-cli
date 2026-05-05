@@ -17,8 +17,8 @@ import (
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sfs",
-		Short: "Provides functionality for SFS (stackit file storage)",
-		Long:  "Provides functionality for SFS (stackit file storage).",
+		Short: "Provides functionality for SFS (STACKIT File Storage)",
+		Long:  "Provides functionality for SFS (STACKIT File Storage).",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

@@ -28,8 +28,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", exportPolicyIdArg),
-		Short: "Deletes a export policy",
-		Long:  "Deletes a export policy.",
+		Short: "Deletes an export policy",
+		Long:  "Deletes an export policy.",
 		Args:  args.SingleArg(exportPolicyIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

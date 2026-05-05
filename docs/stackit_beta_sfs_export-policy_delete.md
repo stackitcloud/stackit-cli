@@ -1,10 +1,10 @@
 ## stackit beta sfs export-policy delete
 
-Deletes a export policy
+Deletes an export policy
 
 ### Synopsis
 
-Deletes a export policy.
+Deletes an export policy.
 
 ```
 stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]

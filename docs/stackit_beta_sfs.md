@@ -1,10 +1,10 @@
 ## stackit beta sfs
 
-Provides functionality for SFS (stackit file storage)
+Provides functionality for SFS (STACKIT File Storage)
 
 ### Synopsis
 
-Provides functionality for SFS (stackit file storage).
+Provides functionality for SFS (STACKIT File Storage).
 
 ```
 stackit beta sfs [flags]

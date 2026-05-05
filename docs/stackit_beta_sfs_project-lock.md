@@ -29,7 +29,7 @@ stackit beta sfs project-lock [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs project-lock describe](./stackit_beta_sfs_project-lock_describe.md)	 - Get lock status for a project
 * [stackit beta sfs project-lock lock](./stackit_beta_sfs_project-lock_lock.md)	 - Enables lock for a project
 * [stackit beta sfs project-lock unlock](./stackit_beta_sfs_project-lock_unlock.md)	 - Clean up lock for a project
