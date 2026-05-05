@@ -98,7 +98,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *sfs
 			return fmt.Errorf("enable project lock response is empty")
 		}
 
-		p.Outputf("Project \"%s\" is successfully locked.\n", projectLabel)
+		p.Outputf("Project %q is successfully locked.\n", projectLabel)
 		return nil
 	})
 }
