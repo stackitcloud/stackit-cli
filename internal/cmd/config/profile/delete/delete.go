@@ -71,14 +71,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			err = config.DeleteProfile(params.Printer, model.Profile)
-			if err != nil {
-				return fmt.Errorf("delete profile: %w", err)
-			}
-
 			err = auth.DeleteProfileAuth(model.Profile)
 			if err != nil {
 				return fmt.Errorf("delete profile authentication: %w", err)
+			}
+
+			err = config.DeleteProfile(params.Printer, model.Profile)
+			if err != nil {
+				return fmt.Errorf("delete profile: %w", err)
 			}
 
 			params.Printer.Info("Successfully deleted profile %q\n", model.Profile)

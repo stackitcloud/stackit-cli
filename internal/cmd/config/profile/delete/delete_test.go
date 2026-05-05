@@ -1,9 +1,16 @@
 package delete
 
 import (
+	"fmt"
+	"os"
 	"testing"
+	"time"
 
+	"github.com/zalando/go-keyring"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
@@ -79,5 +86,35 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
+	}
+}
+
+func TestDeleteProfileWithoutKeyring(t *testing.T) {
+	params := testparams.NewTestParams()
+	params.Printer.AssumeYes = true
+	profile := fmt.Sprintf("test-profile-%s", time.Now().Format("20060102150405"))
+	path := config.GetProfileFolderPath(profile)
+	t.Cleanup(func() {
+		err := os.RemoveAll(path)
+		if err != nil {
+			t.Fatalf("cleanup: remove profile folder at path %q: %v", path, err)
+		}
+	})
+	err := config.ValidateProfile(profile)
+	if err != nil {
+		t.Fatalf("validate profile %q: %v", profile, err)
+	}
+	err = config.CreateProfile(params.Printer, profile, true, false, true)
+	if err != nil {
+		t.Fatalf("create profile %q: %v", profile, err)
+	}
+	keyring.MockInitWithError(keyring.ErrUnsupportedPlatform)
+	deleteCmd := NewCmd(params.CmdParams)
+	err = deleteCmd.RunE(deleteCmd, []string{profile})
+	if err != nil {
+		t.Fatalf("run cmd: %v", err)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("expected profile folder to be deleted, but it still exists at path %q", path)
 	}
 }
