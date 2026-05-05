@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("disable project lock: %w", err)
 			}
 
-			params.Printer.Outputf("Project \"%s\" is successfully unlocked.\n", projectLabel)
+			params.Printer.Outputf("Project %q is successfully unlocked.\n", projectLabel)
 
 			return nil
 		},
