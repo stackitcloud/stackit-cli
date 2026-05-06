@@ -144,6 +144,7 @@ func TestOutputResult(t *testing.T) {
 			name: "empty",
 			args: args{
 				outputFormat: print.PrettyOutputFormat,
+				complianceLock: nil,
 			},
 			wantErr: true,
 		},
