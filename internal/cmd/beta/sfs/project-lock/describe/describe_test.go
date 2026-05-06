@@ -141,7 +141,7 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "empty",
+			name: "complianceLock is nil",
 			args: args{
 				outputFormat: print.PrettyOutputFormat,
 				complianceLock: nil,
