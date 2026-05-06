@@ -132,8 +132,8 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat   string
-		complianceLock *sfs.GetLockResponse
+		outputFormat string
+		projectLock  *sfs.GetLockResponse
 	}
 	tests := []struct {
 		name    string
@@ -141,19 +141,18 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "complianceLock is nil",
+			name: "projectLock is nil",
 			args: args{
 				outputFormat: print.PrettyOutputFormat,
-				complianceLock: nil,
-				complianceLock: nil,
+				projectLock:  nil,
 			},
 			wantErr: true,
 		},
 		{
 			name: "set empty project lock",
 			args: args{
-				outputFormat:   print.PrettyOutputFormat,
-				complianceLock: &sfs.GetLockResponse{},
+				outputFormat: print.PrettyOutputFormat,
+				projectLock:  &sfs.GetLockResponse{},
 			},
 			wantErr: false,
 		},
@@ -161,7 +160,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set filled lock",
 			args: args{
 				outputFormat: print.PrettyOutputFormat,
-				complianceLock: &sfs.GetLockResponse{
+				projectLock: &sfs.GetLockResponse{
 					LockId: utils.Ptr(uuid.New().String()),
 				},
 			},
@@ -171,7 +170,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.complianceLock); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLock); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -100,7 +100,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiEnableLockRequest {
 	return apiClient.DefaultAPI.EnableLock(ctx, model.Region, model.ProjectId)
-	return req
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *sfs.EnableLockResponse) error {

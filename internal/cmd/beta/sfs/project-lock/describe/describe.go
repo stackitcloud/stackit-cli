@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				var oApiErr *oapierror.GenericOpenAPIError
 				if sysErrors.As(err, &oApiErr) {
 					if oApiErr.StatusCode == http.StatusNotFound {
-						params.Printer.Info("No active lock found for project %s\n", projectLabel)
+						params.Printer.Outputf("No active lock found for project %s\n", projectLabel)
 						return err
 					}
 				}
