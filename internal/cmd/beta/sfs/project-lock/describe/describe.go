@@ -9,7 +9,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -45,14 +44,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
-			}
-
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			} else if projectLabel == "" {
-				projectLabel = model.ProjectId
 			}
 
 			// Call API
