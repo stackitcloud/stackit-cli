@@ -2,11 +2,7 @@ package describe
 
 import (
 	"context"
-	sysErrors "errors"
 	"fmt"
-	"net/http"
-
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -63,14 +59,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				var oApiErr *oapierror.GenericOpenAPIError
-				if sysErrors.As(err, &oApiErr) {
-					if oApiErr.StatusCode == http.StatusNotFound {
-						params.Printer.Outputf("No active lock found for project %s\n", projectLabel)
-						return err
-					}
-				}
-
 				return fmt.Errorf("get lock status for project: %w", err)
 			}
 

@@ -2,12 +2,9 @@ package lock
 
 import (
 	"context"
-	sysErrors "errors"
 	"fmt"
-	"net/http"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
 	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -67,14 +64,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				var oApiErr *oapierror.GenericOpenAPIError
-				if sysErrors.As(err, &oApiErr) {
-					if oApiErr.StatusCode == http.StatusConflict {
-						params.Printer.Info("There is already an active lock for project %s\n", projectLabel)
-						return err
-					}
-				}
-
 				return fmt.Errorf("enable SFS project lock: %w", err)
 			}
 
