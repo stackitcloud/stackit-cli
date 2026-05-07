@@ -35,4 +35,5 @@ stackit beta sfs [flags]
 * [stackit beta sfs resource-pool](./stackit_beta_sfs_resource-pool.md)	 - Provides functionality for SFS resource pools
 * [stackit beta sfs share](./stackit_beta_sfs_share.md)	 - Provides functionality for SFS shares
 * [stackit beta sfs snapshot](./stackit_beta_sfs_snapshot.md)	 - Provides functionality for SFS snapshots
+* [stackit beta sfs snapshot-policy](./stackit_beta_sfs_snapshot-policy.md)	 - Provides functionality for SFS snapshot policies
 
