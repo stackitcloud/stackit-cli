@@ -28,6 +28,7 @@ var testRegion = "eu01"
 
 var testName = "test-name"
 var testComment = "test-comment"
+var testSnaplockRetentionHours int32 = 24
 var testResourcePoolId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -35,9 +36,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		projectIdFlag: testProjectId,
 		regionFlag:    testRegion,
 
-		nameFlag:           testName,
-		resourcePoolIdFlag: testResourcePoolId,
-		commentFlag:        testComment,
+		nameFlag:                   testName,
+		resourcePoolIdFlag:         testResourcePoolId,
+		commentFlag:                testComment,
+		snaplockRetentionHoursFlag: "24",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -52,9 +54,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		Name:           testName,
-		ResourcePoolId: testResourcePoolId,
-		Comment:        utils.Ptr(testComment),
+		Name:                   testName,
+		ResourcePoolId:         testResourcePoolId,
+		Comment:                utils.Ptr(testComment),
+		SnaplockRetentionHours: utils.Ptr(testSnaplockRetentionHours),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -76,6 +79,9 @@ func fixturePayload(mods ...func(request *sfs.CreateResourcePoolSnapshotPayload)
 		Name: utils.Ptr(testName),
 		Comment: *sfs.NewNullableString(
 			utils.Ptr(testComment),
+		),
+		SnaplockRetentionHours: *sfs.NewNullableInt32(
+			utils.Ptr(testSnaplockRetentionHours),
 		),
 	}
 	for _, mod := range mods {
@@ -102,10 +108,12 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, commentFlag)
+				delete(flagValues, snaplockRetentionHoursFlag)
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Comment = nil
+				model.SnaplockRetentionHours = nil
 			}),
 		},
 		{

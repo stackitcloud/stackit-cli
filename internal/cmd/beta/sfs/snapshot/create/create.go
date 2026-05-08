@@ -20,16 +20,18 @@ import (
 )
 
 const (
-	resourcePoolIdFlag = "resource-pool-id"
-	nameFlag           = "name"
-	commentFlag        = "comment"
+	resourcePoolIdFlag         = "resource-pool-id"
+	nameFlag                   = "name"
+	commentFlag                = "comment"
+	snaplockRetentionHoursFlag = "snaplock-retention-hours"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ResourcePoolId string
-	Name           string
-	Comment        *string
+	ResourcePoolId         string
+	Name                   string
+	Comment                *string
+	SnaplockRetentionHours *int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -46,6 +48,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a new snapshot with name "snapshot-name" and comment "snapshot-comment" of a resource pool with ID "xxx"`,
 				`$ stackit beta sfs snapshot create --name snapshot-name --resource-pool-id xxx --comment "snapshot-comment"`,
+			),
+			examples.NewExample(
+				`Create a new snapshot with name "snapshot-name" and snaplock retention hours "24" of a resource pool with ID "xxx"`,
+				`$ stackit beta sfs snapshot create --name snapshot-name --resource-pool-id xxx --snaplock-retention-hours 24`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -92,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Snapshot name")
 	cmd.Flags().String(commentFlag, "", "A comment to add more information to the snapshot")
+	cmd.Flags().Int32(snaplockRetentionHoursFlag, 0, "Retention hours for the snaplock")
 	cmd.Flags().Var(flags.UUIDFlag(), resourcePoolIdFlag, "The resource pool from which the snapshot should be created")
 
 	err := flags.MarkFlagsRequired(cmd, resourcePoolIdFlag, nameFlag)
@@ -101,8 +108,9 @@ func configureFlags(cmd *cobra.Command) {
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateResourcePoolSnapshotRequest {
 	req := apiClient.DefaultAPI.CreateResourcePoolSnapshot(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
 	req = req.CreateResourcePoolSnapshotPayload(sfs.CreateResourcePoolSnapshotPayload{
-		Name:    utils.Ptr(model.Name),
-		Comment: *sfs.NewNullableString(model.Comment),
+		Name:                   utils.Ptr(model.Name),
+		Comment:                *sfs.NewNullableString(model.Comment),
+		SnaplockRetentionHours: *sfs.NewNullableInt32(model.SnaplockRetentionHours),
 	})
 	return req
 }
@@ -114,10 +122,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	model := inputModel{
-		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
-		ResourcePoolId:  flags.FlagToStringValue(p, cmd, resourcePoolIdFlag),
-		Comment:         flags.FlagToStringPointer(p, cmd, commentFlag),
+		GlobalFlagModel:        globalFlags,
+		Name:                   flags.FlagToStringValue(p, cmd, nameFlag),
+		ResourcePoolId:         flags.FlagToStringValue(p, cmd, resourcePoolIdFlag),
+		Comment:                flags.FlagToStringPointer(p, cmd, commentFlag),
+		SnaplockRetentionHours: flags.FlagToInt32Pointer(p, cmd, snaplockRetentionHoursFlag),
 	}
 
 	p.DebugInputModel(model)
