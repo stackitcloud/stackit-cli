@@ -192,7 +192,7 @@ If you encounter any issues or have suggestions for improvements, please open an
 
 ## Contribute
 
-Your contribution is welcome! For more details on how to contribute, refer to our [contribution guide](./CONTRIBUTION.md).
+Your contribution is welcome! For more details on how to contribute, refer to our [contribution guide](./CONTRIBUTING.md).
 
 ## Release creation
 
