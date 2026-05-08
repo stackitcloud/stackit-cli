@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -194,6 +195,24 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty response",
 			args: args{
 				resp: &sfs.ResourcePool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "full response",
+			args: args{
+				resp: &sfs.ResourcePool{
+					Id:               utils.Ptr("id"),
+					Name:             utils.Ptr("name"),
+					AvailabilityZone: utils.Ptr("az"),
+					State:            utils.Ptr("state"),
+					Space: &sfs.ResourcePoolSpace{
+						SizeGigabytes:            utils.Ptr(int32(100)),
+						AvailableGigabytes:       *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
+						UsedGigabytes:            *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
+						UsedBySnapshotsGigabytes: *sfs.NewNullableFloat64(utils.Ptr(float64(10))),
+					},
+				},
 			},
 			wantErr: false,
 		},
