@@ -65,7 +65,7 @@ The available performance class values can be obtained by running:
 				"$ stackit beta sfs resource-pool update xxx --snapshots-visible=false"),
 			examples.NewExample(
 				`Update the SFS resource pool with ID "xxx" to set snapshot policy id to "YYY"`,
-				"$ stackit beta sfs resource-pool update xxx --snapshot-policy-id=YYY"),
+				"$ stackit beta sfs resource-pool update xxx --snapshot-policy-id YYY"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

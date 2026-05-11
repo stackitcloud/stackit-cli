@@ -128,16 +128,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "AVAILABILITY ZONE", "STATE", "TOTAL SIZE (GB)", "USED SIZE (GB), SNAPSHOT POLICY ID")
+		table.SetHeader("ID", "NAME", "AVAILABILITY ZONE", "STATE", "TOTAL SIZE (GB)", "USED SIZE (GB)")
 		for _, resourcePool := range resourcePools {
 			totalSizeGigabytes, usedSizeGigabytes := "", ""
 			if resourcePool.HasSpace() {
 				totalSizeGigabytes = utils.PtrString(resourcePool.Space.SizeGigabytes)
 				usedSizeGigabytes = utils.PtrString(resourcePool.Space.UsedGigabytes.Get())
-			}
-			var snapshotPolicyId string
-			if resourcePool.SnapshotPolicy.Get() != nil {
-				snapshotPolicyId = *resourcePool.SnapshotPolicy.Get().Id
 			}
 			table.AddRow(
 				utils.PtrString(resourcePool.Id),
@@ -146,7 +142,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 				utils.PtrString(resourcePool.State),
 				totalSizeGigabytes,
 				usedSizeGigabytes,
-				snapshotPolicyId,
 			)
 		}
 		err := table.Display(p)

@@ -29,7 +29,7 @@ stackit beta sfs resource-pool update [flags]
   $ stackit beta sfs resource-pool update xxx --snapshots-visible=false
 
   Update the SFS resource pool with ID "xxx" to set snapshot policy id to "YYY"
-  $ stackit beta sfs resource-pool update xxx --snapshot-policy-id=YYY
+  $ stackit beta sfs resource-pool update xxx --snapshot-policy-id YYY
 ```
 
 ### Options
