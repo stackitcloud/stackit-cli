@@ -29,7 +29,7 @@ stackit beta sfs snapshot-policy [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs snapshot-policy describe](./stackit_beta_sfs_snapshot-policy_describe.md)	 - Shows details of a snapshot policy
 * [stackit beta sfs snapshot-policy list](./stackit_beta_sfs_snapshot-policy_list.md)	 - Lists all snapshot policies of a project
 
