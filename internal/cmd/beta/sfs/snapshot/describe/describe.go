@@ -109,6 +109,10 @@ func outputResult(p *print.Printer, outputFormat string, resp *sfs.GetResourcePo
 		table := tables.NewTable()
 
 		snap := *resp.ResourcePoolSnapshot
+		var snaplockExpiryTime string
+		if snap.SnaplockExpiryTime.IsSet() && snap.SnaplockExpiryTime.Get() != nil {
+			snaplockExpiryTime = utils.ConvertTimePToDateTimeString(snap.SnaplockExpiryTime.Get())
+		}
 		table.AddRow("NAME", utils.PtrString(snap.SnapshotName))
 		table.AddSeparator()
 		if snap.Comment.IsSet() && snap.Comment.Get() != nil {
@@ -122,6 +126,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *sfs.GetResourcePo
 		table.AddRow("LOGICAL SIZE (GB)", utils.PtrString(snap.LogicalSizeGigabytes))
 		table.AddSeparator()
 		table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(snap.CreatedAt))
+		table.AddSeparator()
+		table.AddRow("SNAPLOCK EXPIRY TIME", snaplockExpiryTime)
 		table.AddSeparator()
 
 		p.Outputln(table.Render())

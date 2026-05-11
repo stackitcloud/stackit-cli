@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -12,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -157,6 +159,22 @@ func TestOutputResult(t *testing.T) {
 			name: "set empty snapshot",
 			args: args{
 				resp: []sfs.ResourcePoolSnapshot{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set full snapshot",
+			args: args{
+				resp: []sfs.ResourcePoolSnapshot{
+					{
+						SnapshotName:         utils.Ptr("name"),
+						ResourcePoolId:       utils.Ptr("rp-id"),
+						SizeGigabytes:        utils.Ptr(int32(10)),
+						LogicalSizeGigabytes: utils.Ptr(int32(8)),
+						CreatedAt:            utils.Ptr(time.Now()),
+						SnaplockExpiryTime:   *sfs.NewNullableTime(utils.Ptr(time.Now().Add(time.Hour))),
+					},
+				},
 			},
 			wantErr: false,
 		},
