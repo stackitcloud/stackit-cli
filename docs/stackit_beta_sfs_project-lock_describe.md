@@ -1,26 +1,26 @@
-## stackit beta sfs export-policy delete
+## stackit beta sfs project-lock describe
 
-Deletes an export policy
+Get lock status for a project
 
 ### Synopsis
 
-Deletes an export policy.
+Get lock status for a project.
 
 ```
-stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
+stackit beta sfs project-lock describe [flags]
 ```
 
 ### Examples
 
 ```
-  Delete an export policy with ID "xxx"
-  $ stackit beta sfs export-policy delete xxx
+  Get lock status for project
+  $ stackit beta sfs project-lock describe
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sfs export-policy delete"
+  -h, --help   Help for "stackit beta sfs project-lock describe"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs export-policy](./stackit_beta_sfs_export-policy.md)	 - Provides functionality for SFS export policies
+* [stackit beta sfs project-lock](./stackit_beta_sfs_project-lock.md)	 - Provides functionality for SFS project locks
 

@@ -1,19 +1,19 @@
-## stackit beta sfs snapshot
+## stackit beta sfs project-lock
 
-Provides functionality for SFS snapshots
+Provides functionality for SFS project locks
 
 ### Synopsis
 
-Provides functionality for SFS snapshots.
+Provides functionality for SFS project locks.
 
 ```
-stackit beta sfs snapshot [flags]
+stackit beta sfs project-lock [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sfs snapshot"
+  -h, --help   Help for "stackit beta sfs project-lock"
 ```
 
 ### Options inherited from parent commands
@@ -30,8 +30,7 @@ stackit beta sfs snapshot [flags]
 ### SEE ALSO
 
 * [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
-* [stackit beta sfs snapshot create](./stackit_beta_sfs_snapshot_create.md)	 - Creates a new snapshot of a resource pool
-* [stackit beta sfs snapshot delete](./stackit_beta_sfs_snapshot_delete.md)	 - Deletes a snapshot
-* [stackit beta sfs snapshot describe](./stackit_beta_sfs_snapshot_describe.md)	 - Shows details of a snapshot
-* [stackit beta sfs snapshot list](./stackit_beta_sfs_snapshot_list.md)	 - Lists all snapshots of a resource pool
+* [stackit beta sfs project-lock describe](./stackit_beta_sfs_project-lock_describe.md)	 - Get lock status for a project
+* [stackit beta sfs project-lock lock](./stackit_beta_sfs_project-lock_lock.md)	 - Enables lock for a project
+* [stackit beta sfs project-lock unlock](./stackit_beta_sfs_project-lock_unlock.md)	 - Clean up lock for a project
 
