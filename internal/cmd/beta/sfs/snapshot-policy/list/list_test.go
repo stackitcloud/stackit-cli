@@ -105,11 +105,41 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "immutable snapshot policies",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[immutableFlag] = "true"
+				flagValues[immutableFlag] = "immutable-only"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Immutable = true
+				model.Immutable = utils.Ptr("immutable-only")
+			}),
+		},
+		{
+			description: "mutable snapshot policies",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[immutableFlag] = "mutable-only"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = utils.Ptr("mutable-only")
+			}),
+		},
+		{
+			description: "all snapshot policies",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[immutableFlag] = "all"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = utils.Ptr("all")
+			}),
+		},
+		{
+			description: "all snapshot policies - without immutable flag",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, immutableFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = nil
 			}),
 		},
 	}
@@ -132,11 +162,32 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 		{
-			description: "immutable snapshot policies",
+			description: "only immutable snapshot policies",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Immutable = true
+				model.Immutable = utils.Ptr("immutable-only")
 			}),
 			expectedRequest: fixtureRequest().Immutable(true),
+		},
+		{
+			description: "only mutable snapshot policies",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = utils.Ptr("mutable-only")
+			}),
+			expectedRequest: fixtureRequest().Immutable(false),
+		},
+		{
+			description: "all snapshot policies",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = utils.Ptr("all")
+			}),
+			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "all snapshot policies - without immutable flag",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Immutable = nil
+			}),
+			expectedRequest: fixtureRequest(),
 		},
 	}
 

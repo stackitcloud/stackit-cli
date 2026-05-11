@@ -16,8 +16,11 @@ stackit beta sfs snapshot-policy list [flags]
   List all snapshot policies
   $ stackit beta sfs snapshot-policy list
 
-  List all immutable snapshot policies
-  $ stackit beta sfs snapshot-policy list --immutable
+  List only mutable snapshot policies
+  $ stackit beta sfs snapshot-policy list --immutable mutable-only
+
+  List only immutable snapshot policies
+  $ stackit beta sfs snapshot-policy list --immutable immutable-only
 
   List up to 10 snapshot policies
   $ stackit beta sfs snapshot-policy list --limit 10
@@ -26,9 +29,9 @@ stackit beta sfs snapshot-policy list [flags]
 ### Options
 
 ```
-  -h, --help        Help for "stackit beta sfs snapshot-policy list"
-      --immutable   Immutable snapshot policy
-      --limit int   Maximum number of entries to list
+  -h, --help               Help for "stackit beta sfs snapshot-policy list"
+      --immutable string   Immutable snapshot policy, one of ["all" "immutable-only" "mutable-only"] (default "all")
+      --limit int          Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands

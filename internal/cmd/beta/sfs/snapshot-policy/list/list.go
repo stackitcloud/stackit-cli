@@ -29,7 +29,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit     *int64
-	Immutable bool
+	Immutable *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -44,8 +44,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit beta sfs snapshot-policy list",
 			),
 			examples.NewExample(
-				`List all immutable snapshot policies`,
-				"$ stackit beta sfs snapshot-policy list --immutable",
+				`List only mutable snapshot policies`,
+				"$ stackit beta sfs snapshot-policy list --immutable mutable-only",
+			),
+			examples.NewExample(
+				`List only immutable snapshot policies`,
+				"$ stackit beta sfs snapshot-policy list --immutable immutable-only",
 			),
 			examples.NewExample(
 				`List up to 10 snapshot policies`,
@@ -95,8 +99,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	immutableOptions := []string{"all", "immutable-only", "mutable-only"}
+	cmd.Flags().Var(flags.EnumFlag(true, "all", immutableOptions...), immutableFlag, fmt.Sprintf("Immutable snapshot policy, one of %q", immutableOptions))
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Bool(immutableFlag, false, "Immutable snapshot policy")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -116,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		Immutable:       flags.FlagToBoolValue(p, cmd, immutableFlag),
+		Immutable:       flags.FlagToStringPointer(p, cmd, immutableFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -125,8 +130,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListSnapshotPoliciesRequest {
 	req := apiClient.DefaultAPI.ListSnapshotPolicies(ctx, model.ProjectId)
-	if model.Immutable {
-		req = req.Immutable(true)
+
+	if model.Immutable != nil {
+		switch *model.Immutable {
+		case "all":
+			return req
+		case "mutable-only":
+			req = req.Immutable(false)
+		case "immutable-only":
+			req = req.Immutable(true)
+		}
 	}
 	return req
 }
