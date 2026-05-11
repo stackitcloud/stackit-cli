@@ -142,6 +142,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, ipAclFlag)
 				delete(flagValues, performanceClassFlag)
 				delete(flagValues, snapshotsVisibleFlag)
+				delete(flagValues, snapshotPolicyIdFlag)
 			}),
 			isValid: false,
 		},

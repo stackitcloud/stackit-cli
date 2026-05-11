@@ -157,7 +157,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	snapshotsVisible := flags.FlagToBoolPointer(p, cmd, snapshotsVisibleFlag)
 	snapshotPolicyId := flags.FlagToStringPointer(p, cmd, snapshotPolicyIdFlag)
 
-	if performanceClass == nil && size == nil && ipAcls == nil && snapshotsVisible == nil {
+	if performanceClass == nil && size == nil && ipAcls == nil && snapshotsVisible == nil && snapshotPolicyId == nil {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
