@@ -28,6 +28,7 @@ const (
 	availabilityZoneFlag = "availability-zone"
 	nameFlag             = "name"
 	snapshotsVisibleFlag = "snapshots-visible"
+	snapshotPolicyIdFlag = "snapshot-policy-id"
 )
 
 type inputModel struct {
@@ -38,6 +39,7 @@ type inputModel struct {
 	Name             string
 	AvailabilityZone string
 	SnapshotsVisible bool
+	SnapshotPolicyId string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -62,6 +64,9 @@ The available performance class values can be obtained by running:
 			examples.NewExample(
 				`Create a SFS resource pool with visible snapshots`,
 				"$ stackit beta sfs resource-pool create --availability-zone eu01-m --ip-acl 10.88.135.144/28 --performance-class Standard --size 500 --name resource-pool-01 --snapshots-visible"),
+			examples.NewExample(
+				`Create a SFS resource pool with specific snapshot policy`,
+				"$ stackit beta sfs resource-pool create --availability-zone eu01-m --ip-acl 10.88.135.144/28 --performance-class Standard --size 500 --name resource-pool-01 --snapshot-policy-id XXX"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -124,6 +129,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(availabilityZoneFlag, "", "Availability zone")
 	cmd.Flags().String(nameFlag, "", "Name")
 	cmd.Flags().Bool(snapshotsVisibleFlag, false, "Set snapshots visible and accessible to users")
+	cmd.Flags().String(snapshotPolicyIdFlag, "", "Set snapshot policy ID")
 
 	for _, flag := range []string{sizeFlag, performanceClassFlag, ipAclFlag, availabilityZoneFlag, nameFlag} {
 		err := flags.MarkFlagsRequired(cmd, flag)
@@ -140,6 +146,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 		PerformanceClass:    model.PerformanceClass,
 		SizeGigabytes:       *model.SizeInGB,
 		SnapshotsAreVisible: &model.SnapshotsVisible,
+		SnapshotPolicyId:    &model.SnapshotPolicyId,
 	})
 	return req
 }
@@ -156,6 +163,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	ipAcls := flags.FlagToStringSliceValue(p, cmd, ipAclFlag)
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 	snapshotsVisible := flags.FlagToBoolValue(p, cmd, snapshotsVisibleFlag)
+	snapshotPolicyId := flags.FlagToStringValue(p, cmd, snapshotPolicyIdFlag)
 
 	model := inputModel{
 		GlobalFlagModel:  globalFlags,
@@ -165,6 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		AvailabilityZone: availabilityZone,
 		Name:             name,
 		SnapshotsVisible: snapshotsVisible,
+		SnapshotPolicyId: snapshotPolicyId,
 	}
 
 	p.DebugInputModel(model)

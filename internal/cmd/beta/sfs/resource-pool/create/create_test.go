@@ -31,6 +31,7 @@ var (
 	testResourcePoolName                   = "sfs-resource-pool-01"
 	testResourcePoolIpAcl                  = []string{"10.88.135.144/28", "250.81.87.224/32"}
 	testSnapshotsVisible                   = true
+	testSnapshotPolicyId                   = uuid.NewString()
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -43,6 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		availabilityZoneFlag:      testResourcePoolAvailabilityZone,
 		nameFlag:                  testResourcePoolName,
 		snapshotsVisibleFlag:      strconv.FormatBool(testSnapshotsVisible),
+		snapshotPolicyIdFlag:      testSnapshotPolicyId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -63,6 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		SizeInGB:         &testResourcePoolSizeInGB,
 		IpAcl:            testResourcePoolIpAcl,
 		SnapshotsVisible: testSnapshotsVisible,
+		SnapshotPolicyId: testSnapshotPolicyId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,6 +82,7 @@ func fixtureRequest(mods ...func(request *sfs.ApiCreateResourcePoolRequest)) sfs
 		IpAcl:               testResourcePoolIpAcl,
 		SizeGigabytes:       testResourcePoolSizeInGB,
 		SnapshotsAreVisible: &testSnapshotsVisible,
+		SnapshotPolicyId:    &testSnapshotPolicyId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -210,6 +214,16 @@ func TestParseInput(t *testing.T) {
 				flagValues[ipAclFlag] = "192.168.178.255/32,"
 			}),
 			isValid: false,
+		},
+		{
+			description: "snapshot policy id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, snapshotPolicyIdFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.SnapshotPolicyId = ""
+			}),
+			isValid: true,
 		},
 	}
 

@@ -28,6 +28,7 @@ const (
 	sizeFlag             = "size"
 	ipAclFlag            = "ip-acl"
 	snapshotsVisibleFlag = "snapshots-visible"
+	snapshotPolicyIdFlag = "snapshot-policy-id"
 )
 
 type inputModel struct {
@@ -37,6 +38,7 @@ type inputModel struct {
 	IpAcl            []string
 	ResourcePoolId   string
 	SnapshotsVisible *bool
+	SnapshotPolicyId *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -61,6 +63,9 @@ The available performance class values can be obtained by running:
 			examples.NewExample(
 				`Update the SFS resource pool with ID "xxx", set snapshots visible to false`,
 				"$ stackit beta sfs resource-pool update xxx --snapshots-visible=false"),
+			examples.NewExample(
+				`Update the SFS resource pool with ID "xxx" to set snapshot policy id to "YYY"`,
+				"$ stackit beta sfs resource-pool update xxx --snapshot-policy-id=YYY"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -123,6 +128,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(performanceClassFlag, "", "Performance class")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), ipAclFlag, "List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly")
 	cmd.Flags().Bool(snapshotsVisibleFlag, false, "Set snapshots visible and accessible to users")
+	cmd.Flags().String(snapshotPolicyIdFlag, "", "Set snapshot policy ID")
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiUpdateResourcePoolRequest {
@@ -132,6 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 		PerformanceClass:    model.PerformanceClass,
 		SizeGigabytes:       *sfs.NewNullableInt32(model.SizeGigabytes),
 		SnapshotsAreVisible: model.SnapshotsVisible,
+		SnapshotPolicyId:    model.SnapshotPolicyId,
 	})
 	return req
 }
@@ -148,6 +155,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	size := flags.FlagToInt32Pointer(p, cmd, sizeFlag)
 	ipAcls := flags.FlagToStringSliceValue(p, cmd, ipAclFlag)
 	snapshotsVisible := flags.FlagToBoolPointer(p, cmd, snapshotsVisibleFlag)
+	snapshotPolicyId := flags.FlagToStringPointer(p, cmd, snapshotPolicyIdFlag)
 
 	if performanceClass == nil && size == nil && ipAcls == nil && snapshotsVisible == nil {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -160,6 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		PerformanceClass: performanceClass,
 		ResourcePoolId:   resourcePoolId,
 		SnapshotsVisible: snapshotsVisible,
+		SnapshotPolicyId: snapshotPolicyId,
 	}
 
 	p.DebugInputModel(model)

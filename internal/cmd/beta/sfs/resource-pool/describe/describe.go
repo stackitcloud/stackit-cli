@@ -111,6 +111,11 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 			ipAclStr = strings.Join(resourcePool.IpAcl, ", ")
 		}
 
+		var snapshotPolicyId string
+		if resourcePool.SnapshotPolicy.Get() != nil {
+			snapshotPolicyId = *resourcePool.SnapshotPolicy.Get().Id
+		}
+
 		table.AddRow("ID", utils.PtrString(resourcePool.Id))
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(resourcePool.Name))
@@ -128,6 +133,8 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 			table.AddSeparator()
 		}
 		table.AddRow("SNAPSHOTS ARE VISIBLE", utils.PtrString(resourcePool.SnapshotsAreVisible))
+		table.AddSeparator()
+		table.AddRow("SNAPSHOT POLICY ID", snapshotPolicyId)
 		table.AddSeparator()
 		table.AddRow("NEXT PERFORMANCE CLASS DOWNGRADE TIME", resourcePool.PerformanceClassDowngradableAt)
 		table.AddSeparator()
