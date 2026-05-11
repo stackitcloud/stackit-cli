@@ -29,7 +29,7 @@ stackit beta sfs resource-pool [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs resource-pool create](./stackit_beta_sfs_resource-pool_create.md)	 - Creates a SFS resource pool
 * [stackit beta sfs resource-pool delete](./stackit_beta_sfs_resource-pool_delete.md)	 - Deletes a SFS resource pool
 * [stackit beta sfs resource-pool describe](./stackit_beta_sfs_resource-pool_describe.md)	 - Shows details of a SFS resource pool

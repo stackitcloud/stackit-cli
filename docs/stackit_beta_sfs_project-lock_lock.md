@@ -1,26 +1,26 @@
-## stackit beta sfs export-policy delete
+## stackit beta sfs project-lock lock
 
-Deletes an export policy
+Enables lock for a project
 
 ### Synopsis
 
-Deletes an export policy.
+Enables lock for a project. Necessary for immutable snapshots and to prevent accidental deletion of resources.
 
 ```
-stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
+stackit beta sfs project-lock lock [flags]
 ```
 
 ### Examples
 
 ```
-  Delete an export policy with ID "xxx"
-  $ stackit beta sfs export-policy delete xxx
+  Enable lock for project
+  $ stackit beta sfs project-lock lock
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sfs export-policy delete"
+  -h, --help   Help for "stackit beta sfs project-lock lock"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs export-policy](./stackit_beta_sfs_export-policy.md)	 - Provides functionality for SFS export policies
+* [stackit beta sfs project-lock](./stackit_beta_sfs_project-lock.md)	 - Provides functionality for SFS project locks
 

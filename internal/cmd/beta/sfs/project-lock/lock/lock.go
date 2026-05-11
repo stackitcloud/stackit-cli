@@ -1,4 +1,4 @@
-package delete
+package lock
 
 import (
 	"context"
@@ -12,29 +12,25 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/client"
-	sfsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
-
-const exportPolicyIdArg = "EXPORT_POLICY_ID"
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ExportPolicyId string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", exportPolicyIdArg),
-		Short: "Deletes an export policy",
-		Long:  "Deletes an export policy.",
-		Args:  args.SingleArg(exportPolicyIdArg, utils.ValidateUUID),
+		Use:   "lock",
+		Short: "Enables lock for a project",
+		Long:  "Enables lock for a project. Necessary for immutable snapshots and to prevent accidental deletion of resources.",
+		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete an export policy with ID "xxx"`,
-				"$ stackit beta sfs export-policy delete xxx",
+				`Enable lock for project`,
+				"$ stackit beta sfs project-lock lock",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -43,21 +39,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ExportPolicyId)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get export policy name: %v", err)
-				exportPolicyLabel = model.ExportPolicyId
-			} else if exportPolicyLabel == "" {
-				exportPolicyLabel = model.ExportPolicyId
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to delete export policy %q? (This cannot be undone)", exportPolicyLabel)
+			prompt := fmt.Sprintf("Are you sure you want to enable SFS lock for project %s?", projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -65,25 +62,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			_, err = req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete export policy: %w", err)
+				return fmt.Errorf("enable SFS project lock: %w", err)
 			}
 
-			params.Printer.Outputf("Deleted export policy %q\n", exportPolicyLabel)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
 	return cmd
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiDeleteShareExportPolicyRequest {
-	return apiClient.DefaultAPI.DeleteShareExportPolicy(ctx, model.ProjectId, model.Region, model.ExportPolicyId)
-}
-
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	exportPolicyId := inputArgs[0]
-
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -91,9 +81,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ExportPolicyId:  exportPolicyId,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiEnableLockRequest {
+	return apiClient.DefaultAPI.EnableLock(ctx, model.Region, model.ProjectId)
+}
+
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *sfs.EnableLockResponse) error {
+	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			return fmt.Errorf("enable project lock response is empty")
+		}
+
+		p.Outputf("Project %q is successfully locked.\n", projectLabel)
+		return nil
+	})
 }

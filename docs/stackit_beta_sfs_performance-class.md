@@ -29,6 +29,6 @@ stackit beta sfs performance-class [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs performance-class list](./stackit_beta_sfs_performance-class_list.md)	 - Lists all performances classes available
 
