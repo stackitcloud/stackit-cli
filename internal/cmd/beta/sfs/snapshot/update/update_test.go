@@ -1,4 +1,4 @@
-package describe
+package update
 
 import (
 	"context"
@@ -9,12 +9,14 @@ import (
 	"github.com/google/uuid"
 	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
+
+var projectIdFlag = globalflags.ProjectIdFlag
+var regionFlag = globalflags.RegionFlag
 
 type testCtxKey struct{}
 
@@ -22,12 +24,16 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
+var testRegion = "eu01"
+
+var testSnapshotName = "test-snapshot-name"
+var testNewName = "test-new-name"
+var testComment = "test-comment"
 var testResourcePoolId = uuid.NewString()
-var testRegion = "eu02"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testResourcePoolId,
+		testSnapshotName,
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -37,8 +43,12 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegion,
+		projectIdFlag: testProjectId,
+		regionFlag:    testRegion,
+
+		newSnapshotNameFlag: testNewName,
+		resourcePoolIdFlag:  testResourcePoolId,
+		commentFlag:         testComment,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,10 +60,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		ResourcePoolId: testResourcePoolId,
+		SnapshotName:    testSnapshotName,
+		NewSnapshotName: testNewName,
+		ResourcePoolId:  testResourcePoolId,
+		Comment:         utils.Ptr(testComment),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,12 +74,26 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sfs.ApiGetResourcePoolRequest)) sfs.ApiGetResourcePoolRequest {
-	request := testClient.DefaultAPI.GetResourcePool(testCtx, testProjectId, testRegion, testResourcePoolId)
+func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolSnapshotRequest)) sfs.ApiUpdateResourcePoolSnapshotRequest {
+	request := testClient.DefaultAPI.UpdateResourcePoolSnapshot(testCtx, testProjectId, testRegion, testResourcePoolId, testSnapshotName)
+	request = request.UpdateResourcePoolSnapshotPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
 	return request
+}
+
+func fixturePayload(mods ...func(request *sfs.UpdateResourcePoolSnapshotPayload)) sfs.UpdateResourcePoolSnapshotPayload {
+	payload := sfs.UpdateResourcePoolSnapshotPayload{
+		Name: *sfs.NewNullableString(utils.Ptr(testNewName)),
+		Comment: *sfs.NewNullableString(
+			utils.Ptr(testComment),
+		),
+	}
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
 }
 
 func TestParseInput(t *testing.T) {
@@ -85,61 +112,61 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no values",
-			argValues:   []string{},
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "no flag values",
-			argValues:   fixtureArgValues(),
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "project id missing",
+			description: "either name or comment (only name set)",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, globalflags.ProjectIdFlag)
+				delete(flagValues, commentFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Comment = nil
+			}),
+		},
+		{
+			description: "either name or comment (only comment set)",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, newSnapshotNameFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.NewSnapshotName = ""
+			}),
+		},
+		{
+			description: "missing both name and comment (at least one required)",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, newSnapshotNameFlag)
+				delete(flagValues, commentFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "project id invalid 1",
+			description: "missing required resourcePoolId",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = ""
+				delete(flagValues, resourcePoolIdFlag)
 			}),
 			isValid: false,
 		},
 		{
-			description: "project id invalid 2",
+			description: "invalid resource pool id 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+				flagValues[resourcePoolIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
-			description: "resource pool id invalid 1",
-			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "resource pool id invalid 2",
-			argValues:   []string{"invalid-uuid"},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			description: "invalid resource pool id 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[resourcePoolIdFlag] = "invalid-resource-pool-id"
+			}),
+			isValid: false,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
@@ -151,7 +178,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sfs.ApiGetResourcePoolRequest
+		expectedRequest sfs.ApiUpdateResourcePoolSnapshotRequest
 	}{
 		{
 			description:     "base",
@@ -159,7 +186,6 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
@@ -167,6 +193,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.AllowUnexported(sfs.NullableString{}, sfs.NullableInt32{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -177,10 +204,10 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat   string
-		resourcePoolId string
-		projectLabel   string
-		resp           *sfs.ResourcePool
+		outputFormat      string
+		snapshotLabel     string
+		resourcePoolLabel string
+		resp              *sfs.UpdateResourcePoolSnapshotResponse
 	}
 	tests := []struct {
 		name    string
@@ -195,35 +222,25 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "set empty response",
 			args: args{
-				resp: &sfs.ResourcePool{},
+				resp: &sfs.UpdateResourcePoolSnapshotResponse{},
 			},
 			wantErr: false,
 		},
 		{
-			name: "full response",
+			name: "set empty snapshot",
 			args: args{
-				resp: &sfs.ResourcePool{
-					Id:               utils.Ptr("id"),
-					Name:             utils.Ptr("name"),
-					AvailabilityZone: utils.Ptr("az"),
-					State:            utils.Ptr("state"),
-					Space: &sfs.ResourcePoolSpace{
-						SizeGigabytes:            utils.Ptr(int32(100)),
-						AvailableGigabytes:       *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
-						UsedGigabytes:            *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
-						UsedBySnapshotsGigabytes: *sfs.NewNullableFloat64(utils.Ptr(float64(10))),
-					},
+				resp: &sfs.UpdateResourcePoolSnapshotResponse{
+					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{},
 				},
 			},
 			wantErr: false,
 		},
 	}
-
 	params := testparams.NewTestParams()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.resourcePoolId, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.snapshotLabel, tt.args.resourcePoolLabel, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
