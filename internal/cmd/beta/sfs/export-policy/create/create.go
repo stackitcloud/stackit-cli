@@ -34,8 +34,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a export policy",
-		Long:  "Creates a export policy.",
+		Short: "Creates an export policy",
+		Long:  "Creates an export policy.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

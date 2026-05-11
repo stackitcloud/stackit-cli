@@ -29,7 +29,7 @@ stackit beta sfs share [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs share create](./stackit_beta_sfs_share_create.md)	 - Creates a share
 * [stackit beta sfs share delete](./stackit_beta_sfs_share_delete.md)	 - Deletes a share
 * [stackit beta sfs share describe](./stackit_beta_sfs_share_describe.md)	 - Shows details of a shares
