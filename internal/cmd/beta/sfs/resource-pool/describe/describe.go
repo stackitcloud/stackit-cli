@@ -140,6 +140,8 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 			table.AddSeparator()
 			table.AddRow("USED SIZE (GB)", utils.PtrString(resourcePool.Space.UsedGigabytes.Get()))
 			table.AddSeparator()
+			table.AddRow("USED BY SNAPSHOTS (GB)", utils.PtrString(resourcePool.Space.UsedBySnapshotsGigabytes.Get()))
+			table.AddSeparator()
 		}
 		table.AddRow("STATE", utils.PtrString(resourcePool.State))
 		table.AddSeparator()

@@ -185,6 +185,26 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "values",
+			args: args{
+				resourcePools: []sfs.ResourcePool{
+					{
+						Id:               utils.Ptr("id"),
+						Name:             utils.Ptr("name"),
+						AvailabilityZone: utils.Ptr("az"),
+						State:            utils.Ptr("state"),
+						Space: &sfs.ResourcePoolSpace{
+							SizeGigabytes:            utils.Ptr(int32(100)),
+							AvailableGigabytes:       *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
+							UsedGigabytes:            *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
+							UsedBySnapshotsGigabytes: *sfs.NewNullableFloat64(utils.Ptr(float64(10))),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 
 	params := testparams.NewTestParams()
