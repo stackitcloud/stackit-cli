@@ -136,6 +136,11 @@ func outputResult(p *print.Printer, outputFormat, snapshotLabel, resourcePoolLab
 			snapshotLabel,
 			resourcePoolLabel,
 		)
+
+		if resp.ResourcePoolSnapshot.SnaplockExpiryTime.IsSet() && resp.ResourcePoolSnapshot.SnaplockExpiryTime.Get() != nil {
+			p.Outputf("Snaplock expiry time: %s\n", utils.ConvertTimePToDateTimeString(resp.ResourcePoolSnapshot.SnaplockExpiryTime.Get()))
+		}
+
 		return nil
 	})
 }

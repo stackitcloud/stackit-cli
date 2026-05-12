@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -231,6 +232,17 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				resp: &sfs.UpdateResourcePoolSnapshotResponse{
 					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set snaplock expiry time",
+			args: args{
+				resp: &sfs.UpdateResourcePoolSnapshotResponse{
+					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{
+						SnaplockExpiryTime: *sfs.NewNullableTime(utils.Ptr(time.Now())),
+					},
 				},
 			},
 			wantErr: false,
