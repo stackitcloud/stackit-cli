@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -39,7 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameFlag:                   testName,
 		resourcePoolIdFlag:         testResourcePoolId,
 		commentFlag:                testComment,
-		snaplockRetentionHoursFlag: "24",
+		snaplockRetentionHoursFlag: strconv.Itoa(int(testSnaplockRetentionHours)),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
