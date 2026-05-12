@@ -27,16 +27,20 @@ stackit beta sfs resource-pool update [flags]
 
   Update the SFS resource pool with ID "xxx", set snapshots visible to false
   $ stackit beta sfs resource-pool update xxx --snapshots-visible=false
+
+  Update the SFS resource pool with ID "xxx" to set snapshot policy id to "YYY"
+  $ stackit beta sfs resource-pool update xxx --snapshot-policy-id YYY
 ```
 
 ### Options
 
 ```
-  -h, --help                       Help for "stackit beta sfs resource-pool update"
-      --ip-acl strings             List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
-      --performance-class string   Performance class
-      --size int32                 Size of the pool in Gigabytes
-      --snapshots-visible          Set snapshots visible and accessible to users
+  -h, --help                        Help for "stackit beta sfs resource-pool update"
+      --ip-acl strings              List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
+      --performance-class string    Performance class
+      --size int32                  Size of the pool in Gigabytes
+      --snapshot-policy-id string   Set snapshot policy ID
+      --snapshots-visible           Set snapshots visible and accessible to users
 ```
 
 ### Options inherited from parent commands
