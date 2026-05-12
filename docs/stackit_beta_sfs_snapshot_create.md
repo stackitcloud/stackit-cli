@@ -18,15 +18,19 @@ stackit beta sfs snapshot create [flags]
 
   Create a new snapshot with name "snapshot-name" and comment "snapshot-comment" of a resource pool with ID "xxx"
   $ stackit beta sfs snapshot create --name snapshot-name --resource-pool-id xxx --comment "snapshot-comment"
+
+  Create a new snapshot with name "snapshot-name" and snaplock retention hours "24" of a resource pool with ID "xxx"
+  $ stackit beta sfs snapshot create --name snapshot-name --resource-pool-id xxx --snaplock-retention-hours 24
 ```
 
 ### Options
 
 ```
-      --comment string            A comment to add more information to the snapshot
-  -h, --help                      Help for "stackit beta sfs snapshot create"
-      --name string               Snapshot name
-      --resource-pool-id string   The resource pool from which the snapshot should be created
+      --comment string                   A comment to add more information to the snapshot
+  -h, --help                             Help for "stackit beta sfs snapshot create"
+      --name string                      Snapshot name
+      --resource-pool-id string          The resource pool from which the snapshot should be created
+      --snaplock-retention-hours int32   Retention hours for the snaplock
 ```
 
 ### Options inherited from parent commands
