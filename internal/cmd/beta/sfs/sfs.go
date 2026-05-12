@@ -7,6 +7,7 @@ import (
 	resourcepool "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/resource-pool"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/share"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/snapshot"
+	snapshotpolicy "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs/snapshot-policy"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,6 +32,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(share.NewCmd(params))
 	cmd.AddCommand(exportpolicy.NewCmd(params))
 	cmd.AddCommand(snapshot.NewCmd(params))
+	cmd.AddCommand(snapshotpolicy.NewCmd(params))
 	cmd.AddCommand(performanceclass.NewCmd(params))
 	cmd.AddCommand(projectlock.NewCmd(params))
 }
