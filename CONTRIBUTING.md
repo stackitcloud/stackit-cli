@@ -125,7 +125,7 @@ To make your contribution, follow these steps:
 1. Check open or recently closed [Pull Requests](https://github.com/stackitcloud/stackit-cli/pulls) and [Issues](https://github.com/stackitcloud/stackit-cli/issues) to make sure the contribution you are making has not been already tackled by someone else.
 2. Fork the repo.
 3. Make your changes in a branch that is up-to-date with the original repo's `main` branch.
-4. Commit your changes including a descriptive message
+4. Commit your changes including a descriptive message (see our [commit message guide](https://github.com/stackitcloud/terraform-provider-stackit/blob/main/CONTRIBUTING.md#commit-messages) in the STACKIT Terraform provider repository).
 5. Create a pull request with your changes.
 6. The pull request will be reviewed by the repo maintainers. If you need to make further changes, make additional commits to keep commit history. When the PR is merged, commits will be squashed.
 
