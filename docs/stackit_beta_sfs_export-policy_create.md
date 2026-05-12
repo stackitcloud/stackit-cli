@@ -1,10 +1,10 @@
 ## stackit beta sfs export-policy create
 
-Creates a export policy
+Creates an export policy
 
 ### Synopsis
 
-Creates a export policy.
+Creates an export policy.
 
 ```
 stackit beta sfs export-policy create [flags]

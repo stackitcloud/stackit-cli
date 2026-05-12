@@ -29,9 +29,9 @@ stackit beta sfs export-policy [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
-* [stackit beta sfs export-policy create](./stackit_beta_sfs_export-policy_create.md)	 - Creates a export policy
-* [stackit beta sfs export-policy delete](./stackit_beta_sfs_export-policy_delete.md)	 - Deletes a export policy
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
+* [stackit beta sfs export-policy create](./stackit_beta_sfs_export-policy_create.md)	 - Creates an export policy
+* [stackit beta sfs export-policy delete](./stackit_beta_sfs_export-policy_delete.md)	 - Deletes an export policy
 * [stackit beta sfs export-policy describe](./stackit_beta_sfs_export-policy_describe.md)	 - Shows details of an export policy
 * [stackit beta sfs export-policy list](./stackit_beta_sfs_export-policy_list.md)	 - Lists all export policies of a project
 * [stackit beta sfs export-policy update](./stackit_beta_sfs_export-policy_update.md)	 - Updates an export policy

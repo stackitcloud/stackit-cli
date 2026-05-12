@@ -27,18 +27,22 @@ stackit beta sfs resource-pool create [flags]
 
   Create a SFS resource pool with visible snapshots
   $ stackit beta sfs resource-pool create --availability-zone eu01-m --ip-acl 10.88.135.144/28 --performance-class Standard --size 500 --name resource-pool-01 --snapshots-visible
+
+  Create a SFS resource pool with specific snapshot policy
+  $ stackit beta sfs resource-pool create --availability-zone eu01-m --ip-acl 10.88.135.144/28 --performance-class Standard --size 500 --name resource-pool-01 --snapshot-policy-id XXX
 ```
 
 ### Options
 
 ```
-      --availability-zone string   Availability zone
-  -h, --help                       Help for "stackit beta sfs resource-pool create"
-      --ip-acl strings             List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
-      --name string                Name
-      --performance-class string   Performance class
-      --size int32                 Size of the pool in Gigabytes
-      --snapshots-visible          Set snapshots visible and accessible to users
+      --availability-zone string    Availability zone
+  -h, --help                        Help for "stackit beta sfs resource-pool create"
+      --ip-acl strings              List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
+      --name string                 Name
+      --performance-class string    Performance class
+      --size int32                  Size of the pool in Gigabytes
+      --snapshot-policy-id string   Set snapshot policy ID
+      --snapshots-visible           Set snapshots visible and accessible to users
 ```
 
 ### Options inherited from parent commands

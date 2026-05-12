@@ -45,6 +45,6 @@ stackit beta [flags]
 * [stackit beta cdn](./stackit_beta_cdn.md)	 - Manage CDN resources
 * [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
 * [stackit beta intake](./stackit_beta_intake.md)	 - Provides functionality for intake
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 

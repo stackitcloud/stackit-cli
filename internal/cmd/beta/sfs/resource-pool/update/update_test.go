@@ -34,6 +34,7 @@ var (
 	testResourcePoolPerformanceClass       = "Standard"
 	testResourcePoolSizeInGB         int32 = 50
 	testSnapshotsVisible                   = true
+	testSnapshotPolicyId                   = uuid.NewString()
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -54,6 +55,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		sizeFlag:                  strconv.FormatInt(int64(testResourcePoolSizeInGB), 10),
 		ipAclFlag:                 strings.Join(testResourcePoolIpAcl, ","),
 		snapshotsVisibleFlag:      strconv.FormatBool(testSnapshotsVisible),
+		snapshotPolicyIdFlag:      testSnapshotPolicyId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -75,6 +77,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		PerformanceClass: &testResourcePoolPerformanceClass,
 		IpAcl:            ipAclClone,
 		SnapshotsVisible: &testSnapshotsVisible,
+		SnapshotPolicyId: &testSnapshotPolicyId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -89,6 +92,7 @@ func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolRequest)) sfs
 		PerformanceClass:    &testResourcePoolPerformanceClass,
 		SizeGigabytes:       *sfs.NewNullableInt32(&testResourcePoolSizeInGB),
 		SnapshotsAreVisible: &testSnapshotsVisible,
+		SnapshotPolicyId:    &testSnapshotPolicyId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -138,6 +142,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, ipAclFlag)
 				delete(flagValues, performanceClassFlag)
 				delete(flagValues, snapshotsVisibleFlag)
+				delete(flagValues, snapshotPolicyIdFlag)
 			}),
 			isValid: false,
 		},
@@ -265,6 +270,17 @@ func TestParseInput(t *testing.T) {
 				}
 				model.IpAcl = append(model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
 			}),
+		},
+		{
+			description: "snapshot policy id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, snapshotPolicyIdFlag)
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.SnapshotPolicyId = nil
+			}),
+			isValid: true,
 		},
 	}
 

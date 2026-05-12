@@ -1,19 +1,19 @@
-## stackit beta sfs performance-class
+## stackit beta sfs snapshot-policy
 
-Provides functionality for SFS performance classes
+Provides functionality for SFS snapshot policies
 
 ### Synopsis
 
-Provides functionality for SFS performance classes.
+Provides functionality for SFS snapshot policies.
 
 ```
-stackit beta sfs performance-class [flags]
+stackit beta sfs snapshot-policy [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sfs performance-class"
+  -h, --help   Help for "stackit beta sfs snapshot-policy"
 ```
 
 ### Options inherited from parent commands
@@ -30,5 +30,6 @@ stackit beta sfs performance-class [flags]
 ### SEE ALSO
 
 * [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
-* [stackit beta sfs performance-class list](./stackit_beta_sfs_performance-class_list.md)	 - Lists all performances classes available
+* [stackit beta sfs snapshot-policy describe](./stackit_beta_sfs_snapshot-policy_describe.md)	 - Shows details of a snapshot policy
+* [stackit beta sfs snapshot-policy list](./stackit_beta_sfs_snapshot-policy_list.md)	 - Lists all snapshot policies of a project
 

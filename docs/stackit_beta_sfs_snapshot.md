@@ -29,9 +29,10 @@ stackit beta sfs snapshot [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (stackit file storage)
+* [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit beta sfs snapshot create](./stackit_beta_sfs_snapshot_create.md)	 - Creates a new snapshot of a resource pool
 * [stackit beta sfs snapshot delete](./stackit_beta_sfs_snapshot_delete.md)	 - Deletes a snapshot
 * [stackit beta sfs snapshot describe](./stackit_beta_sfs_snapshot_describe.md)	 - Shows details of a snapshot
 * [stackit beta sfs snapshot list](./stackit_beta_sfs_snapshot_list.md)	 - Lists all snapshots of a resource pool
+* [stackit beta sfs snapshot update](./stackit_beta_sfs_snapshot_update.md)	 - Updates a new snapshot of a resource pool
 

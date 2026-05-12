@@ -1,4 +1,4 @@
-package list
+package unlock
 
 import (
 	"context"
@@ -10,9 +10,7 @@ import (
 	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -20,13 +18,15 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &sfs.APIClient{DefaultAPI: &sfs.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegion = "eu02"
+
+const (
+	testRegion = "eu01"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
-		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,7 +41,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,8 +48,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sfs.ApiListResourcePoolsRequest)) sfs.ApiListResourcePoolsRequest {
-	request := testClient.DefaultAPI.ListResourcePools(testCtx, testProjectId, testRegion)
+func fixtureRequest(mods ...func(request *sfs.ApiDisableLockRequest)) sfs.ApiDisableLockRequest {
+	request := testClient.DefaultAPI.DisableLock(testCtx, testRegion, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -60,7 +59,6 @@ func fixtureRequest(mods ...func(request *sfs.ApiListResourcePoolsRequest)) sfs.
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		description   string
-		argValues     []string
 		flagValues    map[string]string
 		isValid       bool
 		expectedModel *inputModel
@@ -70,11 +68,6 @@ func TestParseInput(t *testing.T) {
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
-		},
-		{
-			description: "no values",
-			flagValues:  map[string]string{},
-			isValid:     false,
 		},
 		{
 			description: "project id missing",
@@ -97,32 +90,11 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
-		{
-			description: "limit invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 3",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "-5"
-			}),
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, nil, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -131,7 +103,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sfs.ApiListResourcePoolsRequest
+		expectedRequest sfs.ApiDisableLockRequest
 	}{
 		{
 			description:     "base",
@@ -150,69 +122,6 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
-			}
-		})
-	}
-}
-
-func TestOutputResult(t *testing.T) {
-	type args struct {
-		outputFormat  string
-		resourcePools []sfs.ResourcePool
-		projectLabel  string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "empty",
-			args:    args{},
-			wantErr: false,
-		},
-		{
-			name: "set empty resource pools slice",
-			args: args{
-				resourcePools: []sfs.ResourcePool{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "set empty resource pool in resource pools slice",
-			args: args{
-				resourcePools: []sfs.ResourcePool{{}},
-			},
-			wantErr: false,
-		},
-		{
-			name: "values",
-			args: args{
-				resourcePools: []sfs.ResourcePool{
-					{
-						Id:               utils.Ptr("id"),
-						Name:             utils.Ptr("name"),
-						AvailabilityZone: utils.Ptr("az"),
-						State:            utils.Ptr("state"),
-						Space: &sfs.ResourcePoolSpace{
-							SizeGigabytes:            utils.Ptr(int32(100)),
-							AvailableGigabytes:       *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
-							UsedGigabytes:            *sfs.NewNullableFloat64(utils.Ptr(float64(50))),
-							UsedBySnapshotsGigabytes: *sfs.NewNullableFloat64(utils.Ptr(float64(10))),
-						},
-					},
-				},
-			},
-			wantErr: false,
-		},
-	}
-
-	params := testparams.NewTestParams()
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.resourcePools); (err != nil) != tt.wantErr {
-				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

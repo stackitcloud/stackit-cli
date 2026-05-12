@@ -1,26 +1,26 @@
-## stackit beta sfs export-policy delete
+## stackit beta sfs snapshot-policy describe
 
-Deletes an export policy
+Shows details of a snapshot policy
 
 ### Synopsis
 
-Deletes an export policy.
+Shows details of a snapshot policy.
 
 ```
-stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
+stackit beta sfs snapshot-policy describe SNAPSHOT_POLICY_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Delete an export policy with ID "xxx"
-  $ stackit beta sfs export-policy delete xxx
+  Describe a snapshot policy with ID "xxx"
+  $ stackit beta sfs snapshot-policy describe xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta sfs export-policy delete"
+  -h, --help   Help for "stackit beta sfs snapshot-policy describe"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit beta sfs export-policy delete EXPORT_POLICY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta sfs export-policy](./stackit_beta_sfs_export-policy.md)	 - Provides functionality for SFS export policies
+* [stackit beta sfs snapshot-policy](./stackit_beta_sfs_snapshot-policy.md)	 - Provides functionality for SFS snapshot policies
 

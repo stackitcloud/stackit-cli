@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -210,6 +211,17 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				resp: &sfs.CreateResourcePoolSnapshotResponse{
 					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "set full snapshot",
+			args: args{
+				resp: &sfs.CreateResourcePoolSnapshotResponse{
+					ResourcePoolSnapshot: &sfs.ResourcePoolSnapshot{
+						SnaplockExpiryTime: *sfs.NewNullableTime(utils.Ptr(time.Now().Add(time.Hour))),
+					},
 				},
 			},
 			wantErr: false,
