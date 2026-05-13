@@ -4,6 +4,16 @@
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/stackit-cli.svg?columns=1)](https://repology.org/project/stackit-cli/versions)
 
+### Platform independent
+
+#### mise
+
+The STACKIT CLI is available on all major platforms via [mise](https://mise.jdx.dev/):
+
+```shell
+mise u -g github:/stackitcloud/stackit-cli
+```
+
 ### macOS
 
 The STACKIT CLI can be installed through the [Homebrew](https://brew.sh/) package manager.
