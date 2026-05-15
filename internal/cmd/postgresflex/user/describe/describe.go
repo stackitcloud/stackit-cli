@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get MongoDB Flex user: %w", err)
+				return fmt.Errorf("get postgresflex user: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, *resp.Item)
