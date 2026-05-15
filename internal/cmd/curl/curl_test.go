@@ -42,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		includeResponseHeadersFlag: "true",
 		failOnHTTPErrorFlag:        "true",
 		outputFileFlag:             "./output.txt",
+		verboseFlag:                "false",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -58,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IncludeResponseHeaders: true,
 		FailOnHTTPError:        true,
 		OutputFile:             utils.Ptr("./output.txt"),
+		Verbose:                false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -211,6 +213,17 @@ func TestParseInput(t *testing.T) {
 					"Test-header-2: Test value 2",
 					"Test-header-3: Test value 3",
 				)
+			}),
+		},
+		{
+			description: "verbose flag",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[verboseFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Verbose = true
 			}),
 		},
 	}
