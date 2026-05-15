@@ -13,11 +13,17 @@ stackit security-group list [flags]
 ### Examples
 
 ```
-  List all groups
+  Lists all security groups
   $ stackit security-group list
 
-  List groups with labels
+  Lists security groups with labels
   $ stackit security-group list --label-selector label1=value1,label2=value2
+
+  Lists all security groups in JSON format
+  $ stackit security-group list --output-format json
+
+  Lists up to 10 security groups
+  $ stackit security-group list --limit 10
 ```
 
 ### Options
@@ -25,6 +31,7 @@ stackit security-group list [flags]
 ```
   -h, --help                    Help for "stackit security-group list"
       --label-selector string   Filter by label
+      --limit int               Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands

@@ -72,25 +72,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list snapshots: %w", err)
 			}
 
-			// Check if response is empty
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No snapshots found for project %q\n", projectLabel)
-				return nil
+			snapshots := resp.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			snapshots := *resp.Items
-
-			// Apply limit if specified
+			// Truncate output
 			if model.Limit != nil && int(*model.Limit) < len(snapshots) {
 				snapshots = snapshots[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, snapshots)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, snapshots)
 		},
 	}
 
@@ -137,12 +132,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, snapshots []iaas.Snapshot) error {
-	if snapshots == nil {
-		return fmt.Errorf("list snapshots response is empty")
-	}
-
+func outputResult(p *print.Printer, outputFormat, projectLabel string, snapshots []iaas.Snapshot) error {
 	return p.OutputResult(outputFormat, snapshots, func() error {
+		if len(snapshots) == 0 {
+			p.Outputf("No snapshots found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "VOLUME ID", "LABELS", "CREATED AT", "UPDATED AT")
 

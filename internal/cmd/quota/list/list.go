@@ -65,15 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list quotas: %w", err)
 			}
 
-			if items := response.Quotas; items == nil {
-				params.Printer.Info("No quotas found for project %q", projectLabel)
-			} else {
-				if err := outputResult(params.Printer, model.OutputFormat, items); err != nil {
-					return fmt.Errorf("output quotas: %w", err)
-				}
-			}
-
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, response.Quotas)
 		},
 	}
 
@@ -100,11 +92,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList) error {
-	if quotas == nil {
-		return fmt.Errorf("quotas is nil")
-	}
+func outputResult(p *print.Printer, outputFormat, projectLabel string, quotas *iaas.QuotaList) error {
 	return p.OutputResult(outputFormat, quotas, func() error {
+		if quotas == nil {
+			p.Outputf("No quotas found for project %q", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "LIMIT", "CURRENT USAGE", "PERCENT")
 		if val := quotas.BackupGigabytes; val != nil {

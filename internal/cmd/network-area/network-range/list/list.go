@@ -31,8 +31,8 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit          *int64
-	OrganizationId *string
-	NetworkAreaId  *string
+	OrganizationId string
+	NetworkAreaId  string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -75,24 +75,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list network ranges: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				var networkAreaLabel string
-				networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
-					networkAreaLabel = *model.NetworkAreaId
-				}
-				params.Printer.Info("No network ranges found for SNA %q\n", networkAreaLabel)
-				return nil
+			items := resp.GetItems()
+
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+				networkAreaLabel = model.NetworkAreaId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items)
+			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -121,8 +117,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
-		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
+		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -130,11 +126,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRangesRequest {
-	return apiClient.ListNetworkAreaRanges(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
+	return apiClient.ListNetworkAreaRanges(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat string, networkRanges []iaas.NetworkRange) error {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRanges []iaas.NetworkRange) error {
 	return p.OutputResult(outputFormat, networkRanges, func() error {
+		if len(networkRanges) == 0 {
+			p.Outputf("No network ranges found for STACKIT network area %q\n", networkAreaLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "Network Range")
 

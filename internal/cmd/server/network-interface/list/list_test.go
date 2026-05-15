@@ -180,6 +180,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		serverId     string
+		serverLabel  string
 		serverNics   []iaas.NIC
 	}
 	tests := []struct {
@@ -205,7 +206,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.serverId, tt.args.serverNics); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.serverId, tt.args.serverLabel, tt.args.serverNics); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
