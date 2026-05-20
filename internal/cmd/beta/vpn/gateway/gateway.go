@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/gateway/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/gateway/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/gateway/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/gateway/list"
@@ -26,5 +27,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
 }
