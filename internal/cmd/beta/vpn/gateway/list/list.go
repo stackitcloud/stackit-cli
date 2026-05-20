@@ -123,9 +123,9 @@ func outputResult(p *print.Printer, outputFormat string, gateways []vpn.GatewayR
 
 		for _, gateway := range gateways {
 			table.AddRow(
-				gateway.Id,
+				utils.PtrString(gateway.Id),
 				gateway.DisplayName,
-				gateway.State,
+				utils.PtrString(gateway.State),
 			)
 		}
 		p.Outputln(table.Render())

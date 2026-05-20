@@ -105,7 +105,17 @@ func outputResult(p *print.Printer, outputFormat, gatewayId, projectLabel string
 		table.AddSeparator()
 		table.AddRow("NAME", gateway.DisplayName)
 		table.AddSeparator()
+		table.AddRow("Labels", gateway.Labels)
+		table.AddSeparator()
 		table.AddRow("STATE", utils.PtrString(gateway.State))
+		table.AddSeparator()
+		table.AddRow("Plan ID", gateway.PlanId)
+		table.AddSeparator()
+		table.AddRow("Routing Type", gateway.RoutingType)
+		table.AddSeparator()
+		table.AddRow("Availability Zones Tunnel 1", gateway.AvailabilityZones.Tunnel1)
+		table.AddSeparator()
+		table.AddRow("Availability Zones Tunnel 2", gateway.AvailabilityZones.Tunnel2)
 
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render tables: %w", err)
