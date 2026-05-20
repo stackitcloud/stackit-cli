@@ -58,6 +58,7 @@ const (
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
+	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
 )
 
 type inputModel struct {
@@ -102,6 +103,7 @@ type inputModel struct {
 	IntakeCustomEndpoint            bool
 	LogsCustomEndpoint              bool
 	CDNCustomEndpoint               bool
+	VpnCustomEndpoint               bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -243,6 +245,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.CDNCustomEndpoint {
 				viper.Set(config.CDNCustomEndpointKey, "")
 			}
+			if model.VpnCustomEndpoint {
+				viper.Set(config.VpnCustomEndpointKey, "")
+			}
 
 			err := config.Write()
 			if err != nil {
@@ -297,6 +302,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(logsCustomEndpointFlag, false, "Logs API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(cdnCustomEndpointFlag, false, "Custom CDN endpoint URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(vpnCustomEndpointFlag, false, "VPN API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -342,6 +348,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 		LogsCustomEndpoint:              flags.FlagToBoolValue(p, cmd, logsCustomEndpointFlag),
 		CDNCustomEndpoint:               flags.FlagToBoolValue(p, cmd, cdnCustomEndpointFlag),
+		VpnCustomEndpoint:               flags.FlagToBoolValue(p, cmd, vpnCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)

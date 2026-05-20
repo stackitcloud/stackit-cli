@@ -54,6 +54,7 @@ const (
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
+	VpnCustomEndpointKey               = "vpn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -121,6 +122,7 @@ var ConfigKeys = []string{
 	ServiceEnablementCustomEndpointKey,
 	SfsCustomEndpointKey,
 	TokenCustomEndpointKey,
+	VpnCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -212,6 +214,7 @@ func setConfigDefaults() {
 	viper.SetDefault(AlbCustomEndpoint, "")
 	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
+	viper.SetDefault(VpnCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {
