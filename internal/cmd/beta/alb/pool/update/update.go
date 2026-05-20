@@ -23,7 +23,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 const (
@@ -121,7 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	if payload.Name == nil {
 		return req, fmt.Errorf("update target pool: no poolname provided")
 	}
-	req = apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *payload.Name)
+	req = apiClient.DefaultAPI.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *payload.Name)
 	return req.UpdateTargetPoolPayload(payload), nil
 }
 

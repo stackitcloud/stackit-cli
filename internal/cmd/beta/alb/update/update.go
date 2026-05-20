@@ -24,8 +24,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb/wait"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/alb/v2api/wait"
 )
 
 const (
@@ -92,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "updating loadbalancer", func() error {
-					_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).
+					_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *resp.Name).
 						WaitWithContext(ctx)
 					return err
 				})
@@ -141,7 +141,7 @@ func getCurrentAlbVersion(ctx context.Context, apiClient *alb.APIClient, model *
 	if err != nil {
 		return nil, err
 	}
-	resp, err := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, *updatePayload.Name).Execute()
+	resp, err := apiClient.DefaultAPI.GetLoadBalancer(ctx, model.ProjectId, model.Region, *updatePayload.Name).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 		return req, fmt.Errorf("no name found in loadbalancer configuration")
 	}
 	payload.Version = model.Version
-	req = apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, *payload.Name)
+	req = apiClient.DefaultAPI.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, *payload.Name)
 	return req.UpdateLoadBalancerPayload(payload), nil
 }
 

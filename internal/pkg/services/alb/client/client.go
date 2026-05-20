@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*alb.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.AlbCustomEndpoint), true, genericclient.CreateApiClient[*alb.APIClient](alb.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.AlbCustomEndpoint), false, genericclient.CreateApiClient[*alb.APIClient](alb.NewAPIClient))
 }
