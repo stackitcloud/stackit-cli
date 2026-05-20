@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -27,7 +27,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &alb.APIClient{}
+var testClient = &alb.APIClient{DefaultAPI: &alb.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testRegion = "eu01"
 var testConfig = "testdata/testconfig.json"
@@ -69,7 +69,7 @@ func fixturePayload(mods ...func(payload *alb.CreateLoadBalancerPayload)) (paylo
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiCreateLoadBalancerRequest)) alb.ApiCreateLoadBalancerRequest {
-	request := testClient.CreateLoadBalancer(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateLoadBalancer(testCtx, testProjectId, testRegion)
 
 	request = request.CreateLoadBalancerPayload(fixturePayload())
 	for _, mod := range mods {
@@ -163,7 +163,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 				Configuration: &testConfig,
 			},
-			expectedRequest: testClient.
+			expectedRequest: testClient.DefaultAPI.
 				CreateLoadBalancer(testCtx, testProjectId, testRegion).
 				CreateLoadBalancerPayload(fixturePayload()),
 		},
@@ -177,7 +177,7 @@ func TestBuildRequest(t *testing.T) {
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, alb.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

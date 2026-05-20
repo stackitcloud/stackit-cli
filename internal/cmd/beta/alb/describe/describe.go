@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 const (
@@ -85,7 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) alb.ApiGetLoadBalancerRequest {
-	return apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.Name)
+	return apiClient.DefaultAPI.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.Name)
 }
 
 func outputResult(p *print.Printer, outputFormat string, loadbalancer *alb.LoadBalancer) error {
@@ -95,11 +95,11 @@ func outputResult(p *print.Printer, outputFormat string, loadbalancer *alb.LoadB
 		content = append(content, buildLoadBalancerTable(loadbalancer))
 
 		if loadbalancer.Listeners != nil {
-			content = append(content, buildListenersTable(*loadbalancer.Listeners))
+			content = append(content, buildListenersTable(loadbalancer.Listeners))
 		}
 
 		if loadbalancer.TargetPools != nil {
-			content = append(content, buildTargetPoolsTable(*loadbalancer.TargetPools))
+			content = append(content, buildTargetPoolsTable(loadbalancer.TargetPools))
 		}
 
 		err := tables.DisplayTables(p, content)
@@ -116,7 +116,7 @@ func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	privateAccessOnly := false
 	if loadbalancer.Options != nil {
 		if loadbalancer.Options.AccessControl != nil && loadbalancer.Options.AccessControl.AllowedSourceRanges != nil {
-			acl = *loadbalancer.Options.AccessControl.AllowedSourceRanges
+			acl = loadbalancer.Options.AccessControl.AllowedSourceRanges
 		}
 
 		if loadbalancer.Options.PrivateNetworkOnly != nil {
@@ -125,16 +125,16 @@ func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	}
 
 	networkId := "-"
-	if loadbalancer.Networks != nil && len(*loadbalancer.Networks) > 0 {
-		networks := *loadbalancer.Networks
+	if len(loadbalancer.Networks) > 0 {
+		networks := loadbalancer.Networks
 		networkId = *networks[0].NetworkId
 	}
 
 	externalAddress := utils.PtrStringDefault(loadbalancer.ExternalAddress, "-")
 
 	errorDescriptions := []string{}
-	if loadbalancer.Errors != nil && len((*loadbalancer.Errors)) > 0 {
-		for _, err := range *loadbalancer.Errors {
+	if len(loadbalancer.Errors) > 0 {
+		for _, err := range loadbalancer.Errors {
 			errorDescriptions = append(errorDescriptions, *err.Description)
 		}
 	}
@@ -179,7 +179,7 @@ func buildTargetPoolsTable(targetPools []alb.TargetPool) tables.Table {
 	table.SetTitle("Target Pools")
 	table.SetHeader("NAME", "PORT", "TARGETS")
 	for _, targetPool := range targetPools {
-		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(*targetPool.Targets))
+		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(targetPool.Targets))
 	}
 	return table
 }

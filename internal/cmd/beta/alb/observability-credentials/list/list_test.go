@@ -13,14 +13,14 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 type testCtxKey struct{}
 
 var (
 	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "test")
-	testClient = &alb.APIClient{}
+	testClient = &alb.APIClient{DefaultAPI: &alb.DefaultAPIService{}}
 
 	testProjectId = uuid.NewString()
 	testRegion    = "eu01"
@@ -55,7 +55,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiListCredentialsRequest)) alb.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -144,7 +144,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, alb.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

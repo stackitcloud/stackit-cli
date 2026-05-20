@@ -4,7 +4,7 @@ externalAddress: 123.123.123.123
 
 # public listening interfaces of the loadbalancer
 listeners:
-  - displayName: listener1
+  - name: listener1
     # for plain http the https block must be removed
     # http: {}
     https:
@@ -16,27 +16,28 @@ listeners:
     port: 443
     # protocal may be PROTOCOL_HTTPS or PROTOCOL_HTTP
     protocol: PROTOCOL_HTTPS
-    rules:
-      # fqdn of the virtual host of the load balancer
-      - host: front.facing.host
-        http:
-          subRules:
+    http:
+      hosts:
+        # fqdn of the virtual host of the load balancer
+        - host: front.facing.host
+          rules:
             - cookiePersistence:
                 name: cookie1
                 ttl: 120s
               headers:
-                - name: testheader1
-                  exactMatch: X-test-header1
-                - name: testheader2
-                  exactMatch: X-test-header2
-                - name: testheader3
-                  exactMatch: X-test-header3
-              pathPrefix: /foo
+                - exactMatch: X-test-header1
+                  name: testheader1
+                - exactMatch: X-test-header2
+                  name: testheader2
+                - exactMatch: X-test-header3
+                  name: testheader3
+              path:
+                prefix: /foo
               queryParameters:
-                - name: query-param
-                  exactMatch: q
-                - name: region
-                  exactMatch: region
+                - exactMatch: q
+                  name: query-param
+                - exactMatch: region
+                  name: region
               targetPool: my-target-pool
               webSocket: false
 networks:
@@ -50,7 +51,7 @@ options:
     allowedSourceRanges:
       - 10.100.42.0/24
   ephemeralAddress: true
-  privateNetworkOnly: true
+  privateNetworkOnly: false
 
   # Enable observability features. Appropriate credentials must be made
   # available using the credentials endpoint

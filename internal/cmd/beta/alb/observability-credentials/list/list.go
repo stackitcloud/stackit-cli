@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 const (
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) alb.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region)
 	return req
 }
 

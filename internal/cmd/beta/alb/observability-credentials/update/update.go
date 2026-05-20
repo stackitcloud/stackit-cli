@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 const (
@@ -96,7 +96,7 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiUpdateCredentialsRequest, err error) {
-	req = apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, *model.CredentialsRef)
+	req = apiClient.DefaultAPI.UpdateCredentials(ctx, model.ProjectId, model.Region, *model.CredentialsRef)
 
 	payload := alb.UpdateCredentialsPayload{
 		DisplayName: model.Displayname,

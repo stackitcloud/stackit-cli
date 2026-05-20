@@ -24,8 +24,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb/wait"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/alb/v2api/wait"
 )
 
 const (
@@ -86,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating loadbalancer", func() error {
-					_, err := wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Name).WaitWithContext(ctx)
+					_, err := wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *resp.Name).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) (req alb.ApiCreateLoadBalancerRequest, err error) {
-	req = apiClient.CreateLoadBalancer(ctx, model.ProjectId, model.Region)
+	req = apiClient.DefaultAPI.CreateLoadBalancer(ctx, model.ProjectId, model.Region)
 	payload, err := readPayload(ctx, model)
 	if err != nil {
 		return req, err

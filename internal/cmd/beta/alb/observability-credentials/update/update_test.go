@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -16,7 +16,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &alb.APIClient{}
+var testClient = &alb.APIClient{DefaultAPI: &alb.DefaultAPIService{}}
 
 var (
 	testProjectId     = uuid.NewString()
@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) inputModel {
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiUpdateCredentialsRequest)) alb.ApiUpdateCredentialsRequest {
-	request := testClient.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialRef)
+	request := testClient.DefaultAPI.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialRef)
 	request = request.UpdateCredentialsPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -185,7 +185,7 @@ func TestBuildRequest(t *testing.T) {
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, alb.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 				cmp.AllowUnexported(alb.NullableString{}),
 			)

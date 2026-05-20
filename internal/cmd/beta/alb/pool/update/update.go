@@ -23,7 +23,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 )
 
 const (
@@ -46,7 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update an application target pool from a configuration file (the name of the pool is read from the file)`,
-				"$ stackit beta alb update --configuration my-target-pool.json --name my-load-balancer"),
+				"$ stackit beta alb pool update --configuration my-target-pool.json --name my-load-balancer"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -92,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(configurationFlag, "c", "", "Filename of the input configuration file")
-	cmd.Flags().StringP(albNameFlag, "n", "", "Name of the target pool name to update")
+	cmd.Flags().StringP(albNameFlag, "n", "", "Name of the application load balancer")
 	err := flags.MarkFlagsRequired(cmd, configurationFlag, albNameFlag)
 	cobra.CheckErr(err)
 }
@@ -121,7 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	if payload.Name == nil {
 		return req, fmt.Errorf("update target pool: no poolname provided")
 	}
-	req = apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *payload.Name)
+	req = apiClient.DefaultAPI.UpdateTargetPool(ctx, model.ProjectId, model.Region, *model.AlbName, *payload.Name)
 	return req.UpdateTargetPoolPayload(payload), nil
 }
 
