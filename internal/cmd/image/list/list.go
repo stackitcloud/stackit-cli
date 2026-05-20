@@ -81,21 +81,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
-
 			response, err := request.Execute()
 			if err != nil {
 				return fmt.Errorf("list images: %w", err)
 			}
+			items := response.GetItems()
 
-			if items := response.GetItems(); len(items) == 0 {
-				params.Printer.Info("No images found for project %q", projectLabel)
-			} else {
-				if model.Limit != nil && len(items) > int(*model.Limit) {
-					items = (items)[:*model.Limit]
-				}
-				if err := outputResult(params.Printer, model.OutputFormat, items); err != nil {
-					return fmt.Errorf("output images: %w", err)
-				}
+			// Truncate output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = (items)[:*model.Limit]
+			}
+			if err := outputResult(params.Printer, model.OutputFormat, projectLabel, items); err != nil {
+				return fmt.Errorf("output images: %w", err)
 			}
 
 			return nil
@@ -149,8 +146,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat string, items []iaas.Image) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []iaas.Image) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No images found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "SCOPE", "OWNER", "LABELS")
 		for i := range items {

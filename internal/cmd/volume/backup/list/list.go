@@ -72,23 +72,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No backups found for project %s\n", projectLabel)
-				return nil
+
+			backups := resp.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
-			backups := *resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(backups) > int(*model.Limit) {
 				backups = backups[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backups)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, backups)
 		},
 	}
 
@@ -137,12 +135,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []iaas.Backup) error {
-	if backups == nil {
-		return fmt.Errorf("backups is empty")
-	}
-
+func outputResult(p *print.Printer, outputFormat, projectLabel string, backups []iaas.Backup) error {
 	return p.OutputResult(outputFormat, backups, func() error {
+		if len(backups) == 0 {
+			p.Outputf("No backups found for project %s\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE", "STATUS", "SNAPSHOT ID", "VOLUME ID", "AVAILABILITY ZONE", "LABELS", "CREATED AT", "UPDATED AT")
 

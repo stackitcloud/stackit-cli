@@ -18,6 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 )
 
@@ -63,16 +64,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list affinity groups: %w", err)
 			}
+			items := result.GetItems()
 
-			if items := result.Items; items != nil {
-				if model.Limit != nil && len(*items) > int(*model.Limit) {
-					*items = (*items)[:*model.Limit]
-				}
-				return outputResult(params.Printer, *model, *items)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			params.Printer.Outputln("No affinity groups found")
-			return nil
+			// Truncate Output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = items[:*model.Limit]
+			}
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -110,13 +114,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func outputResult(p *print.Printer, model inputModel, items []iaas.AffinityGroup) error {
-	var outputFormat string
-	if model.GlobalFlagModel != nil {
-		outputFormat = model.OutputFormat
-	}
-
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []iaas.AffinityGroup) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No affinity groups found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "POLICY")
 		for _, item := range items {

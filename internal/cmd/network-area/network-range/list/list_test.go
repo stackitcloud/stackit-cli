@@ -46,8 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		OrganizationId: &testOrganizationId,
-		NetworkAreaId:  &testNetworkAreaId,
+		OrganizationId: testOrganizationId,
+		NetworkAreaId:  testNetworkAreaId,
 		Limit:          utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
@@ -183,8 +183,9 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat  string
-		networkRanges []iaas.NetworkRange
+		outputFormat     string
+		networkAreaLabel string
+		networkRanges    []iaas.NetworkRange
 	}
 	tests := []struct {
 		name    string
@@ -214,7 +215,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkRanges); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, tt.args.networkRanges); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

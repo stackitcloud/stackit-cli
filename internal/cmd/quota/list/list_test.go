@@ -138,6 +138,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
+		projectLabel string
 		quotas       *iaas.QuotaList
 	}
 	tests := []struct {
@@ -148,7 +149,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "set quota empty",
@@ -161,7 +162,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.quotas); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.quotas); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

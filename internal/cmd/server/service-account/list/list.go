@@ -78,10 +78,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list service accounts: %w", err)
 			}
 			serviceAccounts := *resp.Items
-			if len(serviceAccounts) == 0 {
-				params.Printer.Info("No service accounts found for server %s\n", serverName)
-				return nil
-			}
 
 			if model.Limit != nil && len(serviceAccounts) > int(*model.Limit) {
 				serviceAccounts = serviceAccounts[:int(*model.Limit)]
@@ -133,6 +129,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, serverId, serverName string, serviceAccounts []string) error {
 	return p.OutputResult(outputFormat, serviceAccounts, func() error {
+		if len(serviceAccounts) == 0 {
+			p.Info("No service accounts found for server %s\n", serverName)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "SERVICE ACCOUNT")
 		for i := range serviceAccounts {
@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverName string, s
 		}
 		err := table.Display(p)
 		if err != nil {
-			return fmt.Errorf("rednder table: %w", err)
+			return fmt.Errorf("render table: %w", err)
 		}
 		return nil
 	})

@@ -72,25 +72,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list attached network interfaces: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
-					serverLabel = model.ServerId
-				} else if serverLabel == "" {
-					serverLabel = model.ServerId
-				}
-				params.Printer.Info("No attached network interfaces found for server %q\n", serverLabel)
-				return nil
+			items := resp.GetItems()
+
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+				serverLabel = model.ServerId
+			} else if serverLabel == "" {
+				serverLabel = model.ServerId
 			}
 
 			// Truncate output
-			items := *resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ServerId, items)
+			return outputResult(params.Printer, model.OutputFormat, model.ServerId, serverLabel, items)
 		},
 	}
 	configureFlags(cmd)
@@ -133,8 +130,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return apiClient.ListServerNICs(ctx, model.ProjectId, model.Region, model.ServerId)
 }
 
-func outputResult(p *print.Printer, outputFormat, serverId string, serverNics []iaas.NIC) error {
+func outputResult(p *print.Printer, outputFormat, serverId, serverLabel string, serverNics []iaas.NIC) error {
 	return p.OutputResult(outputFormat, serverNics, func() error {
+		if len(serverNics) == 0 {
+			p.Outputf("No attached network interfaces found for server %q\n", serverLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("NIC ID", "SERVER ID")
 

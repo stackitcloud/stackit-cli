@@ -25,10 +25,12 @@ import (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	LabelSelector *string
+	Limit         *int64
 }
 
 const (
 	labelSelectorFlag = "label-selector"
+	limitFlag         = "limit"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -38,8 +40,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Lists security groups by its internal ID.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(`List all groups`, `$ stackit security-group list`),
-			examples.NewExample(`List groups with labels`, `$ stackit security-group list --label-selector label1=value1,label2=value2`),
+			examples.NewExample(`Lists all security groups`, `$ stackit security-group list`),
+			examples.NewExample(`Lists security groups with labels`, `$ stackit security-group list --label-selector label1=value1,label2=value2`),
+			examples.NewExample(
+				`Lists all security groups in JSON format`,
+				"$ stackit security-group list --output-format json",
+			),
+			examples.NewExample(
+				`Lists up to 10 security groups`,
+				"$ stackit security-group list --limit 10",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -54,12 +64,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
 
@@ -68,15 +72,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list security group: %w", err)
 			}
 
-			if items := response.GetItems(); len(items) == 0 {
-				params.Printer.Info("No security groups found for project %q", projectLabel)
-			} else {
-				if err := outputResult(params.Printer, model.OutputFormat, items); err != nil {
-					return fmt.Errorf("output security groups: %w", err)
-				}
+			items := response.GetItems()
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
-			return nil
+			// Truncate output
+			if model.Limit != nil && len(items) > int(*model.Limit) {
+				items = items[:*model.Limit]
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
 		},
 	}
 
@@ -86,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(labelSelectorFlag, "", "Filter by label")
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -94,9 +104,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		LabelSelector:   flags.FlagToStringPointer(p, cmd, labelSelectorFlag),
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)
@@ -111,8 +130,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	return request
 }
-func outputResult(p *print.Printer, outputFormat string, items []iaas.SecurityGroup) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []iaas.SecurityGroup) error {
 	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No security groups found for project %q\n", projectLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATEFUL", "DESCRIPTION", "LABELS")
 		for _, item := range items {
