@@ -14,7 +14,7 @@ stackit beta alb pool update [flags]
 
 ```
   Update an application target pool from a configuration file (the name of the pool is read from the file)
-  $ stackit beta alb update --configuration my-target-pool.json --name my-load-balancer
+  $ stackit beta alb pool update --configuration my-target-pool.json --name my-load-balancer
 ```
 
 ### Options
@@ -22,7 +22,7 @@ stackit beta alb pool update [flags]
 ```
   -c, --configuration string   Filename of the input configuration file
   -h, --help                   Help for "stackit beta alb pool update"
-  -n, --name string            Name of the target pool name to update
+  -n, --name string            Name of the application load balancer
 ```
 
 ### Options inherited from parent commands

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -21,7 +21,7 @@ var (
 	testCtx           = context.WithValue(context.Background(), testCtxKey{}, "test")
 	testProjectId     = uuid.NewString()
 	testRegion        = "eu01"
-	testClient        = &alb.APIClient{}
+	testClient        = &alb.APIClient{DefaultAPI: &alb.DefaultAPIService{}}
 	testCredentialRef = "credential-12345"
 )
 
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiDeleteCredentialsRequest)) alb.ApiDeleteCredentialsRequest {
-	request := testClient.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialRef)
+	request := testClient.DefaultAPI.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialRef)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -183,7 +183,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, alb.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

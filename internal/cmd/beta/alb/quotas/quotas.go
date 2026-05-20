@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/alb"
+	alb "github.com/stackitcloud/stackit-sdk-go/services/alb/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClient) alb.ApiGetQuotaRequest {
-	request := apiClient.GetQuota(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.GetQuota(ctx, model.ProjectId, model.Region)
 
 	return request
 }
