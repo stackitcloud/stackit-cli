@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 	"k8s.io/utils/ptr"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -23,7 +23,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &cdn.APIClient{}
+var testClient = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 const testRegions = cdn.REGION_EU
@@ -129,10 +129,10 @@ func modelLoki() func(model *inputModel) {
 
 func fixturePayload(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.CreateDistributionPayload {
 	payload := *cdn.NewCreateDistributionPayload(
-		cdn.CreateDistributionPayloadGetBackendArgType{
+		cdn.CreateDistributionPayloadBackend{
 			HttpBackendCreate: &cdn.HttpBackendCreate{
-				Type:      utils.Ptr("http"),
-				OriginUrl: utils.Ptr("https://http-backend.example.com"),
+				Type:      "http",
+				OriginUrl: "https://http-backend.example.com",
 			},
 		},
 		[]cdn.Region{testRegions},
@@ -145,18 +145,18 @@ func fixturePayload(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.Cr
 
 func payloadRegions(regions ...cdn.Region) func(payload *cdn.CreateDistributionPayload) {
 	return func(payload *cdn.CreateDistributionPayload) {
-		payload.Regions = &regions
+		payload.Regions = regions
 	}
 }
 
 func payloadBucketBackend() func(payload *cdn.CreateDistributionPayload) {
 	return func(payload *cdn.CreateDistributionPayload) {
-		payload.Backend = &cdn.CreateDistributionPayloadGetBackendArgType{
+		payload.Backend = cdn.CreateDistributionPayloadBackend{
 			BucketBackendCreate: &cdn.BucketBackendCreate{
-				Type:      utils.Ptr("bucket"),
-				BucketUrl: utils.Ptr("https://bucket-backend.example.com"),
-				Region:    utils.Ptr("eu"),
-				Credentials: cdn.NewBucketCredentials(
+				Type:      "bucket",
+				BucketUrl: "https://bucket-backend.example.com",
+				Region:    "eu",
+				Credentials: *cdn.NewBucketCredentials(
 					"access-key-id",
 					"",
 				),
@@ -167,18 +167,16 @@ func payloadBucketBackend() func(payload *cdn.CreateDistributionPayload) {
 
 func payloadLoki() func(payload *cdn.CreateDistributionPayload) {
 	return func(payload *cdn.CreateDistributionPayload) {
-		payload.LogSink = &cdn.CreateDistributionPayloadGetLogSinkArgType{
-			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
-				Type:        utils.Ptr("loki"),
-				PushUrl:     utils.Ptr("https://loki.example.com"),
-				Credentials: cdn.NewLokiLogSinkCredentials("", "loki-user"),
-			},
+		payload.LogSink = &cdn.LokiLogSinkCreate{
+			Type:        "loki",
+			PushUrl:     "https://loki.example.com",
+			Credentials: *cdn.NewLokiLogSinkCredentials("", "loki-user"),
 		}
 	}
 }
 
 func fixtureRequest(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.ApiCreateDistributionRequest {
-	req := testClient.CreateDistribution(testCtx, testProjectId)
+	req := testClient.DefaultAPI.CreateDistribution(testCtx, testProjectId)
 	req = req.CreateDistributionPayload(fixturePayload(mods...))
 	return req
 }
@@ -466,11 +464,11 @@ func TestBuildRequest(t *testing.T) {
 			expected: fixtureRequest(
 				func(payload *cdn.CreateDistributionPayload) {
 					payload.MonthlyLimitBytes = utils.Ptr[int64](5368709120)
-					payload.Optimizer = &cdn.CreateDistributionPayloadGetOptimizerArgType{
-						Enabled: utils.Ptr(true),
+					payload.Optimizer = &cdn.Optimizer{
+						Enabled: true,
 					}
-					payload.BlockedCountries = &[]string{"DE", "AT"}
-					payload.BlockedIps = &[]string{"127.0.0.1"}
+					payload.BlockedCountries = []string{"DE", "AT"}
+					payload.BlockedIps = []string{"127.0.0.1"}
 					payload.DefaultCacheDuration = utils.Ptr("PT2H")
 				},
 			),
@@ -488,7 +486,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expected,
-				cmp.AllowUnexported(tt.expected),
+				cmp.AllowUnexported(tt.expected, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -516,8 +514,8 @@ func TestOutputResult(t *testing.T) {
 			description:  "table output",
 			outputFormat: "table",
 			response: &cdn.CreateDistributionResponse{
-				Distribution: &cdn.Distribution{
-					Id: ptr.To("dist-1234"),
+				Distribution: cdn.Distribution{
+					Id: "dist-1234",
 				},
 			},
 			expected: fmt.Sprintf("Created CDN distribution for %q. ID: dist-1234\n", testProjectId),

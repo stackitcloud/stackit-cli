@@ -8,8 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
-	"k8s.io/utils/ptr"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -23,7 +22,7 @@ const testCacheDuration = "P1DT12H"
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &cdn.APIClient{}
+var testClient = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testDistributionID = uuid.NewString()
 
@@ -55,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(payload *cdn.PatchDistributionPayload)) cdn.ApiPatchDistributionRequest {
-	req := testClient.PatchDistribution(testCtx, testProjectId, testDistributionID)
+	req := testClient.DefaultAPI.PatchDistribution(testCtx, testProjectId, testDistributionID)
 	if payload := fixturePayload(mods...); payload != nil {
 		req = req.PatchDistributionPayload(*fixturePayload(mods...))
 	}
@@ -240,17 +239,18 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expected: fixtureRequest(
 				func(payload *cdn.PatchDistributionPayload) {
-					payload.Config.Regions = &[]cdn.Region{cdn.REGION_EU, cdn.REGION_US}
-					payload.Config.BlockedCountries = &[]string{"DE", "AT", "CH"}
-					payload.Config.BlockedIps = &[]string{"127.0.0.1", "10.0.0.8"}
-					payload.Config.DefaultCacheDuration = cdn.NewNullableString(utils.Ptr(testCacheDuration))
-					payload.Config.MonthlyLimitBytes = utils.Ptr(testMonthlyLimitBytes)
-					payload.Config.LogSink = cdn.NewNullableConfigPatchLogSink(&cdn.ConfigPatchLogSink{
-						LokiLogSinkPatch: &cdn.LokiLogSinkPatch{
+					payload.Config.Regions = []cdn.Region{cdn.REGION_EU, cdn.REGION_US}
+					payload.Config.BlockedCountries = []string{"DE", "AT", "CH"}
+					payload.Config.BlockedIps = []string{"127.0.0.1", "10.0.0.8"}
+					payload.Config.DefaultCacheDuration = *cdn.NewNullableString(utils.Ptr(testCacheDuration))
+					monthlyLimitBytes := testMonthlyLimitBytes
+					payload.Config.MonthlyLimitBytes = *cdn.NewNullableInt64(&monthlyLimitBytes)
+					payload.Config.LogSink = *cdn.NewNullableLokiLogSinkPatch(
+						&cdn.LokiLogSinkPatch{
 							Credentials: cdn.NewLokiLogSinkCredentials("loki-pass", "loki-user"),
 							PushUrl:     utils.Ptr("https://loki.example.com"),
 						},
-					})
+					)
 					payload.Config.Optimizer = &cdn.OptimizerPatch{
 						Enabled: utils.Ptr(true),
 					}
@@ -277,7 +277,7 @@ func TestBuildRequest(t *testing.T) {
 								"X-Another-Header": "another-value",
 							},
 							OriginUrl: utils.Ptr("https://http-backend.example.com"),
-							Type:      utils.Ptr("http"),
+							Type:      "http",
 						},
 					}
 				}),
@@ -300,7 +300,7 @@ func TestBuildRequest(t *testing.T) {
 							BucketUrl:   utils.Ptr("https://bucket.example.com"),
 							Credentials: cdn.NewBucketCredentials("bucket-access-key-id", "bucket-pass"),
 							Region:      utils.Ptr("EU"),
-							Type:        utils.Ptr("bucket"),
+							Type:        "bucket",
 						},
 					}
 				}),
@@ -311,7 +311,13 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, testClient, tt.model)
 
 			diff := cmp.Diff(request, tt.expected,
-				cmp.AllowUnexported(tt.expected, cdn.NullableString{}, cdn.NullableConfigPatchLogSink{}),
+				cmp.AllowUnexported(
+					cdn.ApiPatchDistributionRequest{},
+					cdn.NullableString{},
+					cdn.NullableInt64{},
+					cdn.NullableLokiLogSinkPatch{},
+					cdn.DefaultAPIService{},
+				),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -339,8 +345,8 @@ func TestOutputResult(t *testing.T) {
 			description:  "table output",
 			outputFormat: "table",
 			response: &cdn.PatchDistributionResponse{
-				Distribution: &cdn.Distribution{
-					Id: ptr.To("dist-1234"),
+				Distribution: cdn.Distribution{
+					Id: "dist-1234",
 				},
 			},
 			expected: fmt.Sprintf("Updated CDN distribution for %q. ID: dist-1234\n", testProjectId),

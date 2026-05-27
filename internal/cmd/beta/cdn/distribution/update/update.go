@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -127,7 +127,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
-	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegions, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", cdn.AllowedRegionEnumValues))
+	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegions, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...)))
 	cmd.Flags().Bool(flagHTTP, false, "Use HTTP backend")
 	cmd.Flags().String(flagHTTPOriginURL, "", "Origin URL for HTTP backend")
 	cmd.Flags().StringSlice(flagHTTPOriginRequestHeaders, []string{}, "Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!")
@@ -241,16 +241,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputModel) cdn.ApiPatchDistributionRequest {
-	req := apiClient.PatchDistribution(ctx, model.ProjectId, model.DistributionID)
+	req := apiClient.DefaultAPI.PatchDistribution(ctx, model.ProjectId, model.DistributionID)
 	payload := cdn.NewPatchDistributionPayload()
 	cfg := &cdn.ConfigPatch{}
 	payload.Config = cfg
 	if len(model.Regions) > 0 {
-		cfg.Regions = &model.Regions
+		cfg.Regions = model.Regions
 	}
 	if model.Bucket != nil {
 		bucket := &cdn.BucketBackendPatch{
-			Type: utils.Ptr("bucket"),
+			Type: "bucket",
 		}
 		cfg.Backend = &cdn.ConfigPatchBackend{
 			BucketBackendPatch: bucket,
@@ -269,7 +269,7 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 		}
 	} else if model.HTTP != nil {
 		http := &cdn.HttpBackendPatch{
-			Type: utils.Ptr("http"),
+			Type: "http",
 		}
 		cfg.Backend = &cdn.ConfigPatchBackend{
 			HttpBackendPatch: http,
@@ -285,22 +285,20 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 		}
 	}
 	if len(model.BlockedCountries) > 0 {
-		cfg.BlockedCountries = &model.BlockedCountries
+		cfg.BlockedCountries = model.BlockedCountries
 	}
 	if len(model.BlockedIPs) > 0 {
-		cfg.BlockedIps = &model.BlockedIPs
+		cfg.BlockedIps = model.BlockedIPs
 	}
 	if model.DefaultCacheDuration != "" {
-		cfg.DefaultCacheDuration = cdn.NewNullableString(&model.DefaultCacheDuration)
+		cfg.DefaultCacheDuration = *cdn.NewNullableString(&model.DefaultCacheDuration)
 	}
 	if model.MonthlyLimitBytes != nil && *model.MonthlyLimitBytes > 0 {
-		cfg.MonthlyLimitBytes = model.MonthlyLimitBytes
+		cfg.MonthlyLimitBytes = *cdn.NewNullableInt64(model.MonthlyLimitBytes)
 	}
 	if model.Loki != nil {
 		loki := &cdn.LokiLogSinkPatch{}
-		cfg.LogSink = cdn.NewNullableConfigPatchLogSink(&cdn.ConfigPatchLogSink{
-			LokiLogSinkPatch: loki,
-		})
+		cfg.LogSink = *cdn.NewNullableLokiLogSinkPatch(loki)
 		if model.Loki.PushURL != "" {
 			loki.PushUrl = utils.Ptr(model.Loki.PushURL)
 		}
@@ -325,7 +323,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *cdn
 		return fmt.Errorf("update distribution response is empty")
 	}
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Updated CDN distribution for %q. ID: %s\n", projectLabel, utils.PtrString(resp.Distribution.Id))
+		p.Outputf("Updated CDN distribution for %q. ID: %s\n", projectLabel, resp.Distribution.Id)
 		return nil
 	})
 }
