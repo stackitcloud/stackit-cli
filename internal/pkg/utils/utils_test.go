@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
@@ -269,8 +270,8 @@ func TestConvertStringMapToInterfaceMap(t *testing.T) {
 
 func TestConvertToBase64PatchedServer(t *testing.T) {
 	now := time.Now()
-	userData := []byte("test")
-	emptyUserData := []byte("")
+	userData := "test"
+	emptyUserData := ""
 
 	tests := []struct {
 		name     string
@@ -286,10 +287,10 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 			name: "server with user data",
 			input: &iaas.Server{
 				Id:               Ptr("server-123"),
-				Name:             Ptr("test-server"),
+				Name:             "test-server",
 				Status:           Ptr("ACTIVE"),
 				AvailabilityZone: Ptr("eu01-1"),
-				MachineType:      Ptr("t1.1"),
+				MachineType:      "t1.1",
 				UserData:         &userData,
 				CreatedAt:        &now,
 				PowerStatus:      Ptr("RUNNING"),
@@ -315,10 +316,10 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 			name: "server with empty user data",
 			input: &iaas.Server{
 				Id:               Ptr("server-456"),
-				Name:             Ptr("test-server-2"),
+				Name:             "test-server-2",
 				Status:           Ptr("STOPPED"),
 				AvailabilityZone: Ptr("eu01-2"),
-				MachineType:      Ptr("t1.2"),
+				MachineType:      "t1.2",
 				UserData:         &emptyUserData,
 			},
 			expected: &Base64PatchedServer{
@@ -334,10 +335,10 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 			name: "server without user data",
 			input: &iaas.Server{
 				Id:               Ptr("server-789"),
-				Name:             Ptr("test-server-3"),
+				Name:             "test-server-3",
 				Status:           Ptr("CREATING"),
 				AvailabilityZone: Ptr("eu01-3"),
-				MachineType:      Ptr("t1.3"),
+				MachineType:      "t1.3",
 				UserData:         nil,
 			},
 			expected: &Base64PatchedServer{
@@ -353,10 +354,10 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 			name: "server with agent",
 			input: &iaas.Server{
 				Id:               Ptr("server-456"),
-				Name:             Ptr("test-server-2"),
+				Name:             "test-server-2",
 				Status:           Ptr("STOPPED"),
 				AvailabilityZone: Ptr("eu01-2"),
-				MachineType:      Ptr("t1.2"),
+				MachineType:      "t1.2",
 				UserData:         &emptyUserData,
 				Agent:            &iaas.ServerAgent{Provisioned: Ptr(true)},
 			},
@@ -376,17 +377,8 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ConvertToBase64PatchedServer(tt.input)
 
-			if result == nil && tt.expected == nil {
-				return
-			}
-
-			if (result == nil && tt.expected != nil) || (result != nil && tt.expected == nil) {
-				t.Errorf("ConvertToBase64PatchedServer() = %v, want %v", result, tt.expected)
-				return
-			}
-
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("ConvertToBase64PatchedServer() = %v, want %v", result, tt.expected)
+			if diff := cmp.Diff(tt.expected, result); diff != "" {
+				t.Errorf("ConvertToBase64PatchedServer() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -394,9 +386,9 @@ func TestConvertToBase64PatchedServer(t *testing.T) {
 
 func TestConvertToBase64PatchedServers(t *testing.T) {
 	now := time.Now()
-	userData1 := []byte("test1")
-	userData2 := []byte("test2")
-	emptyUserData := []byte("")
+	userData1 := "test1"
+	userData2 := "test2"
+	emptyUserData := ""
 
 	tests := []struct {
 		name     string
@@ -418,9 +410,9 @@ func TestConvertToBase64PatchedServers(t *testing.T) {
 			input: []iaas.Server{
 				{
 					Id:               Ptr("server-1"),
-					Name:             Ptr("test-server-1"),
+					Name:             "test-server-1",
 					Status:           Ptr("ACTIVE"),
-					MachineType:      Ptr("t1.1"),
+					MachineType:      "t1.1",
 					AvailabilityZone: Ptr("eu01-1"),
 					UserData:         &userData1,
 					CreatedAt:        &now,
@@ -443,34 +435,34 @@ func TestConvertToBase64PatchedServers(t *testing.T) {
 			input: []iaas.Server{
 				{
 					Id:               Ptr("server-1"),
-					Name:             Ptr("test-server-1"),
+					Name:             "test-server-1",
 					Status:           Ptr("ACTIVE"),
-					MachineType:      Ptr("t1.1"),
+					MachineType:      "t1.1",
 					AvailabilityZone: Ptr("eu01-1"),
 					UserData:         &userData1,
 					CreatedAt:        &now,
 				},
 				{
 					Id:               Ptr("server-2"),
-					Name:             Ptr("test-server-2"),
+					Name:             "test-server-2",
 					Status:           Ptr("STOPPED"),
-					MachineType:      Ptr("t1.2"),
+					MachineType:      "t1.2",
 					AvailabilityZone: Ptr("eu01-2"),
 					UserData:         &userData2,
 				},
 				{
 					Id:               Ptr("server-3"),
-					Name:             Ptr("test-server-3"),
+					Name:             "test-server-3",
 					Status:           Ptr("CREATING"),
-					MachineType:      Ptr("t1.3"),
+					MachineType:      "t1.3",
 					AvailabilityZone: Ptr("eu01-3"),
 					UserData:         &emptyUserData,
 				},
 				{
 					Id:               Ptr("server-4"),
-					Name:             Ptr("test-server-4"),
+					Name:             "test-server-4",
 					Status:           Ptr("ERROR"),
-					MachineType:      Ptr("t1.4"),
+					MachineType:      "t1.4",
 					AvailabilityZone: Ptr("eu01-4"),
 					UserData:         nil,
 				},
