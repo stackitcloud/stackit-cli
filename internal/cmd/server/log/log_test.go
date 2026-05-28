@@ -66,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetServerLogRequest)) iaas.ApiGetServerLogRequest {
-	request := testClient.GetServerLog(testCtx, testProjectId, testRegion, testServerId)
+	request := testClient.DefaultAPI.GetServerLog(testCtx, testProjectId, testRegion, testServerId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -171,7 +171,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequestDetach(mods ...func(request *iaas.ApiRemoveNicFromServerRequest)) iaas.ApiRemoveNicFromServerRequest {
-	request := testClient.RemoveNicFromServer(testCtx, testProjectId, testRegion, testServerId, testNicId)
+	request := testClient.DefaultAPI.RemoveNicFromServer(testCtx, testProjectId, testRegion, testServerId, testNicId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -67,7 +67,7 @@ func fixtureRequestDetach(mods ...func(request *iaas.ApiRemoveNicFromServerReque
 }
 
 func fixtureRequestDetachAndDelete(mods ...func(request *iaas.ApiRemoveNetworkFromServerRequest)) iaas.ApiRemoveNetworkFromServerRequest {
-	request := testClient.RemoveNetworkFromServer(testCtx, testProjectId, testRegion, testServerId, testNetworkId)
+	request := testClient.DefaultAPI.RemoveNetworkFromServer(testCtx, testProjectId, testRegion, testServerId, testNetworkId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -228,7 +228,7 @@ func TestBuildRequestDetach(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -260,7 +260,7 @@ func TestBuildRequestDetachAndDelete(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

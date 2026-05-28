@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdatePublicIPRequest)) iaas.ApiUpdatePublicIPRequest {
-	request := testClient.UpdatePublicIP(testCtx, testProjectId, testRegion, testPublicIpId)
+	request := testClient.DefaultAPI.UpdatePublicIP(testCtx, testProjectId, testRegion, testPublicIpId)
 	request = request.UpdatePublicIPPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -73,7 +73,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdatePublicIPRequest)) iaas.A
 
 func fixturePayload(mods ...func(payload *iaas.UpdatePublicIPPayload)) iaas.UpdatePublicIPPayload {
 	payload := iaas.UpdatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(nil),
+		NetworkInterface: *iaas.NewNullableString(nil),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -213,7 +213,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

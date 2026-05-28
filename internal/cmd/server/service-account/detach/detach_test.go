@@ -67,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiRemoveServiceAccountFromServerRequest)) iaas.ApiRemoveServiceAccountFromServerRequest {
-	request := testClient.RemoveServiceAccountFromServer(testCtx, testProjectId, testRegion, testServerId, testServiceAccount)
+	request := testClient.DefaultAPI.RemoveServiceAccountFromServer(testCtx, testProjectId, testRegion, testServerId, testServiceAccount)
 	for _, mod := range mods {
 		mod(&request)
 	}

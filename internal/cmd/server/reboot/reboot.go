@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRebootServerRequest {
-	req := apiClient.RebootServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.RebootServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	// if hard reboot is set the action must be set (soft is default)
 	if model.HardReboot {
 		req = req.Action(hardRebootAction)

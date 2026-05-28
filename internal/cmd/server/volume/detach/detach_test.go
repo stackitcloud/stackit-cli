@@ -66,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiRemoveVolumeFromServerRequest)) iaas.ApiRemoveVolumeFromServerRequest {
-	request := testClient.RemoveVolumeFromServer(testCtx, testProjectId, testRegion, testServerId, testVolumeId)
+	request := testClient.DefaultAPI.RemoveVolumeFromServer(testCtx, testProjectId, testRegion, testServerId, testVolumeId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -221,7 +221,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

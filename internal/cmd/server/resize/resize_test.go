@@ -4,13 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
@@ -56,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 		},
 		ServerId:    testServerId,
-		MachineType: utils.Ptr("t1.2"),
+		MachineType: "t1.2",
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -65,9 +63,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiResizeServerRequest)) iaas.ApiResizeServerRequest {
-	request := testClient.ResizeServer(testCtx, testProjectId, testRegion, testServerId)
+	request := testClient.DefaultAPI.ResizeServer(testCtx, testProjectId, testRegion, testServerId)
 	request = request.ResizeServerPayload(iaas.ResizeServerPayload{
-		MachineType: utils.Ptr("t1.2"),
+		MachineType: "t1.2",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -172,7 +170,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

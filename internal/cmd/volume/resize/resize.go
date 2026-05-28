@@ -30,7 +30,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	VolumeId string
-	Size     *int64
+	Size     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Size:            flags.FlagToInt64Pointer(p, cmd, sizeFlag),
+		Size:            *flags.FlagToInt64Pointer(p, cmd, sizeFlag),
 		VolumeId:        volumeId,
 	}
 
@@ -111,7 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiResizeVolumeRequest {
-	req := apiClient.ResizeVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
+	req := apiClient.DefaultAPI.ResizeVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 
 	payload := iaas.ResizeVolumePayload{
 		Size: model.Size,
