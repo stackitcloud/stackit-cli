@@ -66,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiAddPublicIpToServerRequest)) iaas.ApiAddPublicIpToServerRequest {
-	request := testClient.AddPublicIpToServer(testCtx, testProjectId, testRegion, testServerId, testPublicIpId)
+	request := testClient.DefaultAPI.AddPublicIpToServer(testCtx, testProjectId, testRegion, testServerId, testPublicIpId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -222,7 +222,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				serverLabel = model.ServerId
 			}
 
-			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = model.SecurityGroupId
@@ -115,6 +115,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddSecurityGroupToServerRequest {
-	req := apiClient.AddSecurityGroupToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.SecurityGroupId)
+	req := apiClient.DefaultAPI.AddSecurityGroupToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.SecurityGroupId)
 	return req
 }
