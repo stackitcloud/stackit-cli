@@ -17,7 +17,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "test")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testKeyPairName = "key-pair-name"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {

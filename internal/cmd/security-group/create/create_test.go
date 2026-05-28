@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient      = &iaas.APIClient{}
+	testClient      = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId   = uuid.NewString()
 	testName        = "new-security-group"
 	testDescription = "a test description"
