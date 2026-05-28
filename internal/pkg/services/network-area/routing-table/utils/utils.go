@@ -22,33 +22,29 @@ type RouteDetails struct {
 func ExtractRouteDetails(route iaas.Route) RouteDetails {
 	var routeDetails RouteDetails
 
-	if route.Destination != nil {
-		if route.Destination.DestinationCIDRv4 != nil {
-			routeDetails.DestType = utils.PtrString(route.Destination.DestinationCIDRv4.Type)
-			routeDetails.DestValue = utils.PtrString(route.Destination.DestinationCIDRv4.Value)
-		} else if route.Destination.DestinationCIDRv6 != nil {
-			routeDetails.DestType = utils.PtrString(route.Destination.DestinationCIDRv6.Type)
-			routeDetails.DestValue = utils.PtrString(route.Destination.DestinationCIDRv6.Value)
-		}
+	if route.Destination.DestinationCIDRv4 != nil {
+		routeDetails.DestType = route.Destination.DestinationCIDRv4.Type
+		routeDetails.DestValue = route.Destination.DestinationCIDRv4.Value
+	} else if route.Destination.DestinationCIDRv6 != nil {
+		routeDetails.DestType = route.Destination.DestinationCIDRv6.Type
+		routeDetails.DestValue = route.Destination.DestinationCIDRv6.Value
 	}
 
-	if route.Nexthop != nil {
-		if route.Nexthop.NexthopIPv4 != nil {
-			routeDetails.HopType = utils.PtrString(route.Nexthop.NexthopIPv4.Type)
-			routeDetails.HopValue = utils.PtrString(route.Nexthop.NexthopIPv4.Value)
-		} else if route.Nexthop.NexthopIPv6 != nil {
-			routeDetails.HopType = utils.PtrString(route.Nexthop.NexthopIPv6.Type)
-			routeDetails.HopValue = utils.PtrString(route.Nexthop.NexthopIPv6.Value)
-		} else if route.Nexthop.NexthopInternet != nil {
-			routeDetails.HopType = utils.PtrString(route.Nexthop.NexthopInternet.Type)
-		} else if route.Nexthop.NexthopBlackhole != nil {
-			routeDetails.HopType = utils.PtrString(route.Nexthop.NexthopBlackhole.Type)
-		}
+	if route.Nexthop.NexthopIPv4 != nil {
+		routeDetails.HopType = route.Nexthop.NexthopIPv4.Type
+		routeDetails.HopValue = route.Nexthop.NexthopIPv4.Value
+	} else if route.Nexthop.NexthopIPv6 != nil {
+		routeDetails.HopType = route.Nexthop.NexthopIPv6.Type
+		routeDetails.HopValue = route.Nexthop.NexthopIPv6.Value
+	} else if route.Nexthop.NexthopInternet != nil {
+		routeDetails.HopType = route.Nexthop.NexthopInternet.Type
+	} else if route.Nexthop.NexthopBlackhole != nil {
+		routeDetails.HopType = route.Nexthop.NexthopBlackhole.Type
 	}
 
-	if route.Labels != nil && len(*route.Labels) > 0 {
+	if route.Labels != nil && len(route.Labels) > 0 {
 		stringMap := make(map[string]string)
-		for key, value := range *route.Labels {
+		for key, value := range route.Labels {
 			stringMap[key] = fmt.Sprintf("%v", value)
 		}
 		routeDetails.Labels = utils.JoinStringMap(stringMap, ": ", "\n")
