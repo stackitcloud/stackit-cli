@@ -10,6 +10,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth/oidc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -59,11 +60,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Only print the corresponding access token by using the service account token. This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands.`,
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token",
 			),
+			examples.NewExample(
+				`Authenticate via Workload Identity Federation (OIDC) and print the short-lived access token. Set STACKIT_USE_OIDC=1 and STACKIT_SERVICE_ACCOUNT_EMAIL; no service account key file is required.`,
+				"$ STACKIT_USE_OIDC=1 STACKIT_SERVICE_ACCOUNT_EMAIL=ci@sa.stackit.cloud stackit auth activate-service-account --only-print-access-token",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
+			}
+
+			// use workload identity federation (OIDC) if enabled; no key file required
+			if oidc.IsEnabled() {
+				return runOIDCMode(params, model)
 			}
 
 			tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
@@ -132,4 +142,51 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func storeCustomEndpoint(tokenCustomEndpoint string) error {
 	return auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint)
+}
+
+func runOIDCMode(params *types.CmdParams, model *inputModel) error {
+	email := oidc.ServiceAccountEmail()
+	if email == "" {
+		return fmt.Errorf(
+			"env var %s must be set when %s is enabled",
+			oidc.EnvServiceAccountEmail, oidc.EnvUseOIDC,
+		)
+	}
+
+	tokenFunc, err := oidc.TokenFunc()
+	if err != nil {
+		return err
+	}
+
+	tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
+
+	wifCfg := &sdkConfig.Configuration{
+		WorkloadIdentityFederation:       true,
+		ServiceAccountEmail:              email,
+		ServiceAccountFederatedTokenFunc: tokenFunc,
+		TokenCustomUrl:                   tokenCustomEndpoint,
+	}
+
+	rt, err := sdkAuth.SetupAuth(wifCfg)
+	if err != nil {
+		params.Printer.Debug(print.ErrorLevel, "setup workload identity federation auth: %v", err)
+		return &cliErr.ActivateServiceAccountError{}
+	}
+
+	// credentials are never written to disk in OIDC mode
+	saEmail, accessToken, err := auth.AuthenticateServiceAccount(params.Printer, rt, true)
+	if err != nil {
+		var activateErr *cliErr.ActivateServiceAccountError
+		if !errors.As(err, &activateErr) {
+			return fmt.Errorf("authenticate service account via workload identity federation: %w", err)
+		}
+		return err
+	}
+
+	if model.OnlyPrintAccessToken {
+		params.Printer.Outputf("%s\n", accessToken)
+	} else {
+		params.Printer.Outputf("Authenticated via Workload Identity Federation.\nService account email: %s\n", saEmail)
+	}
+	return nil
 }
