@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list quotas: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, response.Quotas)
+			return outputResult(params.Printer, model.OutputFormat, response.Quotas)
 		},
 	}
 
@@ -87,55 +87,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListQuotasRequest {
-	request := apiClient.ListQuotas(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.ListQuotas(ctx, model.ProjectId, model.Region)
 
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, quotas *iaas.QuotaList) error {
+func outputResult(p *print.Printer, outputFormat string, quotas iaas.QuotaList) error {
 	return p.OutputResult(outputFormat, quotas, func() error {
-		if quotas == nil {
-			p.Outputf("No quotas found for project %q", projectLabel)
-			return nil
-		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "LIMIT", "CURRENT USAGE", "PERCENT")
-		if val := quotas.BackupGigabytes; val != nil {
-			table.AddRow("Total size in GiB of backups [GiB]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Backups; val != nil {
-			table.AddRow("Number of backups [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Gigabytes; val != nil {
-			table.AddRow("Total size in GiB of volumes and snapshots [GiB]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Networks; val != nil {
-			table.AddRow("Number of networks [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Nics; val != nil {
-			table.AddRow("Number of network interfaces (nics) [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.PublicIps; val != nil {
-			table.AddRow("Number of public IP addresses [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Ram; val != nil {
-			table.AddRow("Amount of server RAM in MiB [MiB]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.SecurityGroupRules; val != nil {
-			table.AddRow("Number of security group rules [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.SecurityGroups; val != nil {
-			table.AddRow("Number of security groups [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Snapshots; val != nil {
-			table.AddRow("Number of snapshots [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Vcpu; val != nil {
-			table.AddRow("Number of server cores (vcpu) [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
-		if val := quotas.Volumes; val != nil {
-			table.AddRow("Number of volumes [Count]", conv(val.Limit), conv(val.Usage), percentage(val))
-		}
+		table.AddRow(quotaRow("Total size in GiB of backups [GiB]", quotas.BackupGigabytes)...)
+		table.AddRow(quotaRow("Number of backups [Count]", quotas.Backups)...)
+		table.AddRow(quotaRow("Total size in GiB of volumes and snapshots [GiB]", quotas.Gigabytes)...)
+		table.AddRow(quotaRow("Number of networks [Count]", quotas.Networks)...)
+		table.AddRow(quotaRow("Number of network interfaces (nics) [Count]", quotas.Nics)...)
+		table.AddRow(quotaRow("Number of public IP addresses [Count]", quotas.PublicIps)...)
+		table.AddRow(quotaRow("Amount of server RAM in MiB [MiB]", quotas.Ram)...)
+		table.AddRow(quotaRow("Number of security group rules [Count]", quotas.SecurityGroupRules)...)
+		table.AddRow(quotaRow("Number of security groups [Count]", quotas.SecurityGroups)...)
+		table.AddRow(quotaRow("Number of snapshots [Count]", quotas.Snapshots)...)
+		table.AddRow(quotaRow("Number of server cores (vcpu) [Count]", quotas.Vcpu)...)
+		table.AddRow(quotaRow("Number of volumes [Count]", quotas.Volumes)...)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -145,11 +117,17 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, quotas *i
 	})
 }
 
-func conv(n *int64) string {
-	if n != nil {
-		return strconv.FormatInt(*n, 10)
-	}
-	return "n/a"
+func quotaRow(description string, quota iaas.Quota) []interface{} {
+	result := make([]interface{}, 0, 4)
+	result = append(result, description)
+	result = append(result, conv(quota.Limit))
+	result = append(result, conv(quota.Usage))
+	result = append(result, fmt.Sprintf("%3.1f%%", 100.0/float64(quota.Limit)*float64(quota.Usage)))
+	return result
+}
+
+func conv(n int64) string {
+	return strconv.FormatInt(n, 10)
 }
 
 func percentage(val interface {

@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			items := resp.GetItems()
 
 			var networkAreaLabel string
-			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.NetworkAreaId
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRoutesRequest {
-	return apiClient.ListNetworkAreaRoutes(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	return apiClient.DefaultAPI.ListNetworkAreaRoutes(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, routes []iaas.Route) error {
@@ -142,26 +142,24 @@ func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route
 			var nextHop string
 			var nextHopType string
 			var destination string
-			if routeDest := route.Destination; routeDest != nil {
-				if routeDest.DestinationCIDRv4 != nil {
-					destination = *routeDest.DestinationCIDRv4.Value
-				}
-				if routeDest.DestinationCIDRv6 != nil {
-					destination = *routeDest.DestinationCIDRv6.Value
-				}
+			routeDest := route.Destination
+			if routeDest.DestinationCIDRv4 != nil {
+				destination = routeDest.DestinationCIDRv4.Value
 			}
-			if routeNexthop := route.Nexthop; routeNexthop != nil {
-				if routeNexthop.NexthopIPv4 != nil {
-					nextHop = *routeNexthop.NexthopIPv4.Value
-					nextHopType = *routeNexthop.NexthopIPv4.Type
-				} else if routeNexthop.NexthopIPv6 != nil {
-					nextHop = *routeNexthop.NexthopIPv6.Value
-					nextHopType = *routeNexthop.NexthopIPv6.Type
-				} else if routeNexthop.NexthopBlackhole != nil {
-					nextHopType = *routeNexthop.NexthopBlackhole.Type
-				} else if routeNexthop.NexthopInternet != nil {
-					nextHopType = *routeNexthop.NexthopInternet.Type
-				}
+			if routeDest.DestinationCIDRv6 != nil {
+				destination = routeDest.DestinationCIDRv6.Value
+			}
+			routeNexthop := route.Nexthop
+			if routeNexthop.NexthopIPv4 != nil {
+				nextHop = routeNexthop.NexthopIPv4.Value
+				nextHopType = routeNexthop.NexthopIPv4.Type
+			} else if routeNexthop.NexthopIPv6 != nil {
+				nextHop = routeNexthop.NexthopIPv6.Value
+				nextHopType = routeNexthop.NexthopIPv6.Type
+			} else if routeNexthop.NexthopBlackhole != nil {
+				nextHopType = routeNexthop.NexthopBlackhole.Type
+			} else if routeNexthop.NexthopInternet != nil {
+				nextHopType = routeNexthop.NexthopInternet.Type
 			}
 
 			table.AddRow(

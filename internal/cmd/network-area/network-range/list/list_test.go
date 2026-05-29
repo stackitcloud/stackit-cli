@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRangesRequest)) iaas.ApiListNetworkAreaRangesRequest {
-	request := testClient.ListNetworkAreaRanges(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
+	request := testClient.DefaultAPI.ListNetworkAreaRanges(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -172,7 +172,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

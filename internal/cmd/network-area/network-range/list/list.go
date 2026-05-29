@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			items := resp.GetItems()
 
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
 				networkAreaLabel = model.NetworkAreaId
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRangesRequest {
-	return apiClient.ListNetworkAreaRanges(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	return apiClient.DefaultAPI.ListNetworkAreaRanges(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, networkRanges []iaas.NetworkRange) error {
@@ -139,7 +139,7 @@ func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, netwo
 		table.SetHeader("ID", "Network Range")
 
 		for _, networkRange := range networkRanges {
-			table.AddRow(utils.PtrString(networkRange.Id), utils.PtrString(networkRange.Prefix))
+			table.AddRow(utils.PtrString(networkRange.Id), networkRange.Prefix)
 		}
 
 		p.Outputln(table.Render())

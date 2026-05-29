@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListVolumesRequest {
-	req := apiClient.ListVolumes(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListVolumes(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -150,7 +150,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, volumes [
 				utils.PtrString(volume.Name),
 				utils.PtrString(volume.Status),
 				utils.PtrString(volume.ServerId),
-				utils.PtrString(volume.AvailabilityZone),
+				volume.AvailabilityZone,
 				utils.PtrString(volume.Size),
 			)
 			table.AddSeparator()

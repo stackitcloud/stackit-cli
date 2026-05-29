@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListSnapshotsInProjectRequest)) iaas.ApiListSnapshotsInProjectRequest {
-	request := testClient.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
 	request = request.LabelSelector("key1=value1")
 	for _, mod := range mods {
 		mod(&request)
@@ -158,7 +158,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListSnapshotsInProjectRequest) {
-				*request = testClient.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
+				*request = testClient.DefaultAPI.ListSnapshotsInProject(testCtx, testProjectId, testRegion)
 			}),
 		},
 	}
@@ -169,7 +169,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

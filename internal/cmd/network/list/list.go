@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -127,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworksRequest {
-	req := apiClient.ListNetworks(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListNetworks(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -148,7 +149,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 			var publicIp, prefixes string
 			if ipv4 := network.Ipv4; ipv4 != nil {
 				publicIp = utils.PtrString(ipv4.PublicIp)
-				prefixes = utils.JoinStringPtr(ipv4.Prefixes, ", ")
+				prefixes = strings.Join(ipv4.Prefixes, ", ")
 			}
 
 			routed := false
@@ -157,9 +158,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 			}
 
 			table.AddRow(
-				utils.PtrString(network.Id),
-				utils.PtrString(network.Name),
-				utils.PtrString(network.Status),
+				network.Id,
+				network.Name,
+				network.Status,
 				publicIp,
 				prefixes,
 				routed,

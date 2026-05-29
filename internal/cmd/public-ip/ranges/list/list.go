@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -62,12 +61,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := apiClient.ListPublicIPRanges(ctx)
+			req := apiClient.DefaultAPI.ListPublicIPRanges(ctx)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list public IP ranges: %w", err)
 			}
-			publicIpRanges := utils.GetSliceFromPointer(resp.Items)
+			publicIpRanges := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(publicIpRanges) > int(*model.Limit) {
@@ -114,8 +113,8 @@ func outputResult(p *print.Printer, outputFormat string, publicIpRanges []iaas.P
 		}
 
 		for _, item := range publicIpRanges {
-			if item.Cidr != nil && *item.Cidr != "" {
-				p.Outputln(*item.Cidr)
+			if item.Cidr != "" {
+				p.Outputln(item.Cidr)
 			}
 		}
 

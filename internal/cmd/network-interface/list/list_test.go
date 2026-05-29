@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureProjectRequest(mods ...func(request *iaas.ApiListProjectNICsRequest)) iaas.ApiListProjectNICsRequest {
-	request := testClient.ListProjectNICs(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListProjectNICs(testCtx, testProjectId, testRegion)
 	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
 		mod(&request)
@@ -70,7 +70,7 @@ func fixtureProjectRequest(mods ...func(request *iaas.ApiListProjectNICsRequest)
 }
 
 func fixtureNetworkRequest(mods ...func(request *iaas.ApiListNicsRequest)) iaas.ApiListNicsRequest {
-	request := testClient.ListNics(testCtx, testProjectId, testRegion, testNetworkId)
+	request := testClient.DefaultAPI.ListNics(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
 		mod(&request)
@@ -175,7 +175,7 @@ func TestBuildProjectRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -203,7 +203,7 @@ func TestBuildNetworkRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

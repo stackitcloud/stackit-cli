@@ -141,7 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreasRequest {
-	req := apiClient.ListNetworkAreas(ctx, model.OrganizationId)
+	req := apiClient.DefaultAPI.ListNetworkAreas(ctx, model.OrganizationId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -161,7 +161,7 @@ func outputResult(p *print.Printer, outputFormat, orgLabel string, networkAreas 
 		for _, networkArea := range networkAreas {
 			table.AddRow(
 				utils.PtrString(networkArea.Id),
-				utils.PtrString(networkArea.Name),
+				networkArea.Name,
 				utils.PtrString(networkArea.ProjectCount),
 			)
 			table.AddSeparator()

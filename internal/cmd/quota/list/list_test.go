@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListQuotasRequest)) iaas.ApiListQuotasRequest {
-	request := testClient.ListQuotas(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListQuotas(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -126,7 +126,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -139,7 +139,7 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		projectLabel string
-		quotas       *iaas.QuotaList
+		quotas       iaas.QuotaList
 	}
 	tests := []struct {
 		name    string
@@ -154,7 +154,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name: "set quota empty",
 			args: args{
-				quotas: &iaas.QuotaList{},
+				quotas: iaas.QuotaList{},
 			},
 			wantErr: false,
 		},
@@ -162,7 +162,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.quotas); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.quotas); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListImagesRequest {
-	request := apiClient.ListImages(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.ListImages(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
@@ -171,10 +171,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 				if v := cfg.OperatingSystem; v != nil {
 					os = *v
 				}
-				if v := cfg.OperatingSystemDistro; v != nil && v.IsSet() {
+				if v := cfg.OperatingSystemDistro; v.IsSet() {
 					distro = *v.Get()
 				}
-				if v := cfg.OperatingSystemVersion; v != nil && v.IsSet() {
+				if v := cfg.OperatingSystemVersion; v.IsSet() {
 					version = *v.Get()
 				}
 			}
@@ -186,14 +186,14 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 			}
 
 			table.AddRow(utils.PtrString(item.Id),
-				utils.PtrString(item.Name),
+				item.Name,
 				os,
 				architecture,
 				distro,
 				version,
 				scope,
 				owner,
-				utils.JoinStringKeysPtr(*item.Labels, ","))
+				utils.JoinStringKeysPtr(item.Labels, ","))
 		}
 		err := table.Display(p)
 		if err != nil {

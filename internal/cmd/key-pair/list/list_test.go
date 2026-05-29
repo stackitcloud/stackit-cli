@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListKeyPairsRequest)) iaas.ApiListKeyPairsRequest {
-	request := testClient.ListKeyPairs(testCtx)
+	request := testClient.DefaultAPI.ListKeyPairs(testCtx)
 	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
 		mod(&request)
@@ -141,7 +141,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("request does not match: %s", diff)

@@ -105,7 +105,7 @@ func TestOutputResult(t *testing.T) {
 			name:         "JSON output single",
 			outputFormat: "json",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -113,8 +113,8 @@ func TestOutputResult(t *testing.T) {
 			name:         "JSON output multiple",
 			outputFormat: "json",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
-				{Cidr: utils.Ptr("192.167.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
+				{Cidr: "192.167.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -122,7 +122,7 @@ func TestOutputResult(t *testing.T) {
 			name:         "YAML output single",
 			outputFormat: "yaml",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -130,8 +130,8 @@ func TestOutputResult(t *testing.T) {
 			name:         "YAML output multiple",
 			outputFormat: "yaml",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
-				{Cidr: utils.Ptr("192.167.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
+				{Cidr: "192.167.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -139,7 +139,7 @@ func TestOutputResult(t *testing.T) {
 			name:         "pretty output single",
 			outputFormat: "pretty",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -147,8 +147,8 @@ func TestOutputResult(t *testing.T) {
 			name:         "pretty output multiple",
 			outputFormat: "pretty",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
-				{Cidr: utils.Ptr("192.167.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
+				{Cidr: "192.167.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -156,7 +156,7 @@ func TestOutputResult(t *testing.T) {
 			name:         "default output",
 			outputFormat: "",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: utils.Ptr("192.168.0.0/24")},
+				{Cidr: "192.168.0.0/24"},
 			},
 			wantErr: false,
 		},
@@ -170,8 +170,8 @@ func TestOutputResult(t *testing.T) {
 			name:         "nil CIDR",
 			outputFormat: "pretty",
 			publicIpRanges: []iaas.PublicNetwork{
-				{Cidr: nil},
-				{Cidr: utils.Ptr("192.168.0.0/24")},
+				{Cidr: ""},
+				{Cidr: "192.168.0.0/24"},
 			},
 			wantErr: false,
 		},

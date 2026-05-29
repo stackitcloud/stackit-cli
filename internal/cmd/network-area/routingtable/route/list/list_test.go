@@ -23,7 +23,7 @@ var testRoutingTableId = uuid.NewString()
 
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -156,19 +156,19 @@ func TestParseInput(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	dummyRoute := iaas.Route{
 		Id: utils.Ptr("route-foo"),
-		Destination: &iaas.RouteDestination{
+		Destination: iaas.RouteDestination{
 			DestinationCIDRv4: &iaas.DestinationCIDRv4{
-				Type:  utils.Ptr("cidrv4"),
-				Value: utils.Ptr("10.0.0.0/24"),
+				Type:  "cidrv4",
+				Value: "10.0.0.0/24",
 			},
 		},
-		Nexthop: &iaas.RouteNexthop{
+		Nexthop: iaas.RouteNexthop{
 			NexthopIPv4: &iaas.NexthopIPv4{
-				Type:  utils.Ptr("ipv4"),
-				Value: utils.Ptr("10.0.0.1"),
+				Type:  "ipv4",
+				Value: "10.0.0.1",
 			},
 		},
-		Labels:    utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:    testLabels,
 		CreatedAt: utils.Ptr(time.Now()),
 		UpdatedAt: utils.Ptr(time.Now()),
 	}

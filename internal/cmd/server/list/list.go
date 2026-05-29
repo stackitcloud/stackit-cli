@@ -128,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServersRequest {
-	req := apiClient.ListServers(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListServers(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -173,13 +173,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, servers [
 
 			nicIPv4 := ""
 			publicIPs := ""
-			if server.Nics != nil && len(*server.Nics) > 0 {
-				for i, nic := range *server.Nics {
+			if server.Nics != nil && len(server.Nics) > 0 {
+				for i, nic := range server.Nics {
 					if nic.Ipv4 != nil || nic.PublicIp != nil {
 						nicIPv4 += utils.PtrString(nic.Ipv4)
 						publicIPs += utils.PtrString(nic.PublicIp)
 
-						if i != len(*server.Nics)-1 {
+						if i != len(server.Nics)-1 {
 							publicIPs += "\n"
 							nicIPv4 += "\n"
 						}
@@ -194,9 +194,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, servers [
 
 			table.AddRow(
 				utils.PtrString(server.Id),
-				utils.PtrString(server.Name),
+				server.Name,
 				utils.PtrString(server.Status),
-				utils.PtrString(server.MachineType),
+				server.MachineType,
 				utils.PtrString(server.AvailabilityZone),
 				nicIPv4,
 				publicIPs,

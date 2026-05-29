@@ -87,8 +87,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// limit output
-			if model.Limit != nil && len(*resp.Items) > int(*model.Limit) {
-				*resp.Items = (*resp.Items)[:*model.Limit]
+			if model.Limit != nil && len(resp.Items) > int(*model.Limit) {
+				resp.Items = (resp.Items)[:*model.Limit]
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, *resp)
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListMachineTypesRequest {
-	req := apiClient.ListMachineTypes(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListMachineTypes(ctx, model.ProjectId, model.Region)
 	if model.Filter != nil {
 		req = req.Filter(*model.Filter)
 	}
@@ -138,7 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTypes iaas.MachineTypeListResponse) error {
 	return p.OutputResult(outputFormat, machineTypes, func() error {
-		if machineTypes.Items == nil || len(*machineTypes.Items) == 0 {
+		if machineTypes.Items == nil || len(machineTypes.Items) == 0 {
 			p.Outputf("No machine-types found for project %q\n", projectLabel)
 			return nil
 		}
@@ -148,19 +148,16 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTy
 		if items := machineTypes.GetItems(); len(items) > 0 {
 			for _, machineType := range items {
 				extraSpecMap := make(map[string]string)
-				if machineType.ExtraSpecs != nil && len(*machineType.ExtraSpecs) > 0 {
-					for key, value := range *machineType.ExtraSpecs {
+				if machineType.ExtraSpecs != nil && len(machineType.ExtraSpecs) > 0 {
+					for key, value := range machineType.ExtraSpecs {
 						extraSpecMap[key] = fmt.Sprintf("%v", value)
 					}
 				}
-				ramGB := int64(0)
-				if machineType.Ram != nil {
-					ramGB = *machineType.Ram / 1024
-				}
+				ramGB := machineType.Ram / 1024
 
 				table.AddRow(
-					utils.PtrString(machineType.Name),
-					utils.PtrValue(machineType.Vcpus),
+					machineType.Name,
+					machineType.Vcpus,
 					ramGB,
 					utils.PtrString(machineType.Description),
 					utils.JoinStringMap(extraSpecMap, ": ", "\n"),

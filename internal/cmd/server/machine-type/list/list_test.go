@@ -54,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListMachineTypesRequest)) iaas.ApiListMachineTypesRequest {
-	request := testClient.ListMachineTypes(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListMachineTypes(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -167,7 +167,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -197,20 +197,20 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				outputFormat: "table",
 				machineTypes: iaas.MachineTypeListResponse{
-					Items: &[]iaas.MachineType{
+					Items: []iaas.MachineType{
 						{
-							Name:        utils.Ptr("c1.2"),
-							Vcpus:       utils.Ptr(int64(2)),
-							Ram:         utils.Ptr(int64(2048)), // Should display as 2 GB
+							Name:        "c1.2",
+							Vcpus:       int64(2),
+							Ram:         int64(2048), // Should display as 2 GB
 							Description: utils.Ptr("Compute optimized 2 vCPU"),
-							ExtraSpecs: &map[string]interface{}{
+							ExtraSpecs: map[string]interface{}{
 								"cpu": "intel-icelake-generic",
 							},
 						},
 						{
-							Name:        utils.Ptr("m1.2"),
-							Vcpus:       utils.Ptr(int64(2)),
-							Ram:         utils.Ptr(int64(8192)), // Should display as 8 GB
+							Name:        "m1.2",
+							Vcpus:       int64(2),
+							Ram:         int64(8192), // Should display as 8 GB
 							Description: utils.Ptr("Memory optimized 2 vCPU"),
 							// No ExtraSpecs provided to test nil safety
 						},

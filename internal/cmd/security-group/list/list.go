@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupsRequest {
-	request := apiClient.ListSecurityGroups(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.ListSecurityGroups(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
@@ -142,7 +142,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 			var labelsString string
 			if item.Labels != nil {
 				var labels []string
-				for key, value := range *item.Labels {
+				for key, value := range item.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
 				labelsString = strings.Join(labels, ", ")
@@ -150,7 +150,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 
 			table.AddRow(
 				utils.PtrString(item.Id),
-				utils.PtrString(item.Name),
+				item.Name,
 				utils.PtrString(item.Stateful),
 				utils.PtrString(item.Description),
 				labelsString,

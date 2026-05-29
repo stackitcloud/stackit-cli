@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			request := apiClient.ListRoutesOfRoutingTable(
+			request := apiClient.DefaultAPI.ListRoutesOfRoutingTable(
 				ctx,
 				model.OrganizationId,
 				model.NetworkAreaId,
@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routes: %w", err)
 			}
 
-			routes := utils.GetSliceFromPointer(response.Items)
+			routes := response.Items
 
 			// Truncate output
 			if model.Limit != nil && len(routes) > int(*model.Limit) {

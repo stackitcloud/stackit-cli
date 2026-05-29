@@ -12,7 +12,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -51,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRegionsRequest)) iaas.ApiListNetworkAreaRegionsRequest {
-	request := testClient.ListNetworkAreaRegions(testCtx, testOrgId, testAreaId)
+	request := testClient.DefaultAPI.ListNetworkAreaRegions(testCtx, testOrgId, testAreaId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -147,7 +146,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -192,7 +191,7 @@ func Test_outputResult(t *testing.T) {
 			name: "set empty map for regions map in response",
 			args: args{
 				regionalArea: iaas.RegionalAreaListResponse{
-					Regions: utils.Ptr(map[string]iaas.RegionalArea{}),
+					Regions: map[string]iaas.RegionalArea{},
 				},
 			},
 			wantErr: false,
@@ -201,9 +200,9 @@ func Test_outputResult(t *testing.T) {
 			name: "set empty region in response",
 			args: args{
 				regionalArea: iaas.RegionalAreaListResponse{
-					Regions: utils.Ptr(map[string]iaas.RegionalArea{
+					Regions: map[string]iaas.RegionalArea{
 						"eu01": {},
-					}),
+					},
 				},
 			},
 			wantErr: false,
