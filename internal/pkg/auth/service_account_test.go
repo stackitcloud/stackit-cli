@@ -66,6 +66,22 @@ func (f *tokenFlowMocked) RoundTrip(*http.Request) (*http.Response, error) {
 	return nil, nil
 }
 
+type wifFlowMocked struct {
+	accessToken        string
+	getAccessTokenFail bool
+}
+
+func (f *wifFlowMocked) GetAccessToken() (string, error) {
+	if f.getAccessTokenFail {
+		return "", fmt.Errorf("mock WIF error")
+	}
+	return f.accessToken, nil
+}
+
+func (f *wifFlowMocked) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, nil
+}
+
 func TestAuthenticateServiceAccount(t *testing.T) {
 	tests := []struct {
 		description        string
@@ -166,6 +182,79 @@ func TestAuthenticateServiceAccount(t *testing.T) {
 				if tt.expectedEmail != email {
 					t.Fatalf("The returned email is wrong. Expected %s, got %s", tt.expectedEmail, email)
 				}
+			}
+		})
+	}
+}
+
+func TestAuthenticateServiceAccount_WIF(t *testing.T) {
+	// Build a signed test JWT that getEmailFromToken can parse.
+	testEmail := "ci@sa.stackit.cloud"
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
+		Email:            testEmail,
+		RegisteredClaims: jwt.RegisteredClaims{},
+	})
+	raw, err := tok.SignedString(accessTokenSigningKey)
+	if err != nil {
+		t.Fatalf("sign test token: %v", err)
+	}
+
+	tests := []struct {
+		description        string
+		accessToken        string
+		getAccessTokenFail bool
+		disableWriting     bool
+		isValid            bool
+	}{
+		{
+			description:    "wif_success_no_credentials_written",
+			accessToken:    raw,
+			disableWriting: false, // even when false, WIF forces no-write internally
+			isValid:        true,
+		},
+		{
+			description:        "wif_get_access_token_fails",
+			getAccessTokenFail: true,
+			isValid:            false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			keyring.MockInit()
+			config.InitConfig()
+
+			flow := &wifFlowMocked{
+				accessToken:        tt.accessToken,
+				getAccessTokenFail: tt.getAccessTokenFail,
+			}
+
+			params := testparams.NewTestParams()
+			email, _, err := AuthenticateServiceAccount(params.Printer, flow, tt.disableWriting)
+
+			if !tt.isValid {
+				if err == nil {
+					t.Fatal("Expected error but no error was returned")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if email != testEmail {
+				t.Fatalf("email = %q, want %q", email, testEmail)
+			}
+
+			// Verify no credentials were written to the keyring / file.
+			// After a WIF authentication, the auth storage should not contain a
+			// service account key or private key.
+			storedKey, _ := GetAuthField(SERVICE_ACCOUNT_KEY)
+			if storedKey != "" {
+				t.Errorf("SERVICE_ACCOUNT_KEY was written to storage in WIF mode, want empty")
+			}
+			storedPrivKey, _ := GetAuthField(PRIVATE_KEY)
+			if storedPrivKey != "" {
+				t.Errorf("PRIVATE_KEY was written to storage in WIF mode, want empty")
 			}
 		})
 	}

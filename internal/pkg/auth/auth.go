@@ -7,11 +7,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth/oidc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
+	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 )
 
@@ -31,6 +33,38 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	if accessToken != "" {
 		authCfgOption = sdkConfig.WithToken(accessToken)
 		return authCfgOption, nil
+	}
+
+	// use workload identity federation (OIDC) if enabled; takes priority over stored flows
+	if oidc.IsEnabled() {
+		p.Debug(print.DebugLevel, "authenticating using workload identity federation (OIDC)")
+
+		email := oidc.ServiceAccountEmail()
+		if email == "" {
+			return nil, fmt.Errorf(
+				"env var %s must be set when %s is enabled",
+				oidc.EnvServiceAccountEmail, oidc.EnvUseOIDC,
+			)
+		}
+
+		tokenFunc, err := oidc.TokenFunc()
+		if err != nil {
+			return nil, err
+		}
+
+		wifCfg := &sdkConfig.Configuration{
+			WorkloadIdentityFederation:       true,
+			ServiceAccountEmail:              email,
+			ServiceAccountFederatedTokenFunc: tokenFunc,
+			TokenCustomUrl:                   viper.GetString(config.TokenCustomEndpointKey),
+		}
+
+		rt, err := sdkAuth.WorkloadIdentityFederationAuth(wifCfg)
+		if err != nil {
+			return nil, fmt.Errorf("initialize workload identity federation: %w", err)
+		}
+
+		return sdkConfig.WithCustomAuth(rt), nil
 	}
 
 	flow, err := GetAuthFlow()
