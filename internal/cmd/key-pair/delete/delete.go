@@ -86,5 +86,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteKeyPairRequest {
-	return apiClient.DeleteKeyPair(ctx, model.KeyPairName)
+	return apiClient.DefaultAPI.DeleteKeyPair(ctx, model.KeyPairName)
 }

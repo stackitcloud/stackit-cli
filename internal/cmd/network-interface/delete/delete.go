@@ -99,6 +99,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNicRequest {
-	req := apiClient.DeleteNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
+	req := apiClient.DefaultAPI.DeleteNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 	return req
 }

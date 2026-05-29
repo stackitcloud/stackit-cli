@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiDeleteBackupRequest)) iaas.ApiDeleteBackupRequest {
-	request := testClient.DeleteBackup(testCtx, testProjectId, testRegion, testBackupId)
+	request := testClient.DefaultAPI.DeleteBackup(testCtx, testProjectId, testRegion, testBackupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -139,7 +139,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

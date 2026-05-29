@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiDeleteNetworkRequest)) iaas.ApiDeleteNetworkRequest {
-	request := testClient.DeleteNetwork(testCtx, testProjectId, testRegion, testNetworkId)
+	request := testClient.DefaultAPI.DeleteNetwork(testCtx, testProjectId, testRegion, testNetworkId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -165,7 +165,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

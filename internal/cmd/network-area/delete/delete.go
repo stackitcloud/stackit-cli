@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, model.AreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, model.AreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.AreaId
@@ -77,17 +77,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Check if the network area has a regional configuration
-			regionalArea, err := apiClient.GetNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
+			regionalArea, err := apiClient.DefaultAPI.GetNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get regional area: %v", err)
 			}
 			if regionalArea != nil {
 				params.Printer.Warn(deprecationMessage, model.Region, networkAreaLabel)
-				err = apiClient.DeleteNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
+				err = apiClient.DefaultAPI.DeleteNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
 				if err != nil {
 					return fmt.Errorf("delete network area region: %w", err)
 				}
-				_, err := wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient, *model.OrganizationId, model.AreaId, model.Region).WaitWithContext(ctx)
+				_, err := wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient.DefaultAPI, *model.OrganizationId, model.AreaId, model.Region).WaitWithContext(ctx)
 				if err != nil {
 					return fmt.Errorf("wait delete network area region: %w", err)
 				}
@@ -131,5 +131,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNetworkAreaRequest {
-	return apiClient.DeleteNetworkArea(ctx, *model.OrganizationId, model.AreaId)
+	return apiClient.DefaultAPI.DeleteNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 }

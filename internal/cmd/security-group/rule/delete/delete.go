@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = model.SecurityGroupId
 			}
 
-			securityGroupRuleLabel, err := iaasUtils.GetSecurityGroupRuleName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupRuleId, model.SecurityGroupId)
+			securityGroupRuleLabel, err := iaasUtils.GetSecurityGroupRuleName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupRuleId, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group rule name: %v", err)
 				securityGroupRuleLabel = model.SecurityGroupRuleId
@@ -119,5 +119,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSecurityGroupRuleRequest {
-	return apiClient.DeleteSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId, model.SecurityGroupRuleId)
+	return apiClient.DefaultAPI.DeleteSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId, model.SecurityGroupRuleId)
 }

@@ -59,12 +59,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
 			}
-			networkRangeLabel, err := iaasUtils.GetNetworkRangePrefix(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
+			networkRangeLabel, err := iaasUtils.GetNetworkRangePrefix(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network range prefix: %v", err)
 				networkRangeLabel = model.NetworkRangeId
@@ -118,6 +118,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNetworkAreaRangeRequest {
-	req := apiClient.DeleteNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
+	req := apiClient.DefaultAPI.DeleteNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.NetworkRangeId)
 	return req
 }
