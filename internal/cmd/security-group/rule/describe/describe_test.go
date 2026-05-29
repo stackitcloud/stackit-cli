@@ -66,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetSecurityGroupRuleRequest)) iaas.ApiGetSecurityGroupRuleRequest {
-	request := testClient.GetSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId, testSecurityGroupRuleId)
+	request := testClient.DefaultAPI.GetSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId, testSecurityGroupRuleId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -194,7 +194,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

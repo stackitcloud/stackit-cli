@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetKeyPairRequest {
-	return apiClient.GetKeyPair(ctx, model.KeyPairName)
+	return apiClient.DefaultAPI.GetKeyPair(ctx, model.KeyPairName)
 }
 
 func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool, keyPair iaas.Keypair) error {
@@ -113,7 +113,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		details, err := json.MarshalIndent(keyPair, "", "  ")
 		if showOnlyPublicKey {
 			onlyPublicKey := map[string]string{
-				"publicKey": *keyPair.PublicKey,
+				"publicKey": keyPair.PublicKey,
 			}
 			details, err = json.MarshalIndent(onlyPublicKey, "", "  ")
 		}
@@ -128,7 +128,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		details, err := yaml.MarshalWithOptions(keyPair, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if showOnlyPublicKey {
 			onlyPublicKey := map[string]string{
-				"publicKey": *keyPair.PublicKey,
+				"publicKey": keyPair.PublicKey,
 			}
 			details, err = yaml.MarshalWithOptions(onlyPublicKey, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		}
@@ -141,16 +141,16 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		return nil
 	default:
 		if showOnlyPublicKey {
-			p.Outputln(*keyPair.PublicKey)
+			p.Outputln(keyPair.PublicKey)
 			return nil
 		}
 		table := tables.NewTable()
 		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
 
-		if keyPair.Labels != nil && len(*keyPair.Labels) > 0 {
+		if keyPair.Labels != nil && len(keyPair.Labels) > 0 {
 			var labels []string
-			for key, value := range *keyPair.Labels {
+			for key, value := range keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
@@ -160,9 +160,9 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		table.AddRow("FINGERPRINT", utils.PtrString(keyPair.Fingerprint))
 		table.AddSeparator()
 
-		truncatedPublicKey := ""
-		if keyPair.PublicKey != nil {
-			truncatedPublicKey = (*keyPair.PublicKey)[:maxLengthPublicKey] + "..."
+		truncatedPublicKey := keyPair.PublicKey
+		if len(keyPair.PublicKey) > maxLengthPublicKey {
+			truncatedPublicKey = truncatedPublicKey[:maxLengthPublicKey] + "..."
 		}
 
 		table.AddRow("PUBLIC KEY", truncatedPublicKey)

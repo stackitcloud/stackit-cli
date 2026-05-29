@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetImageRequest {
-	request := apiClient.GetImage(ctx, model.ProjectId, model.Region, model.ImageId)
+	request := apiClient.DefaultAPI.GetImage(ctx, model.ProjectId, model.Region, model.ImageId)
 	return request
 }
 
@@ -99,18 +99,14 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			table.AddRow("ID", *id)
 			table.AddSeparator()
 		}
-		if name := resp.Name; name != nil {
-			table.AddRow("NAME", *name)
-			table.AddSeparator()
-		}
+		table.AddRow("NAME", resp.Name)
+		table.AddSeparator()
 		if status := resp.Status; status != nil {
 			table.AddRow("STATUS", *status)
 			table.AddSeparator()
 		}
-		if format := resp.DiskFormat; format != nil {
-			table.AddRow("FORMAT", *format)
-			table.AddSeparator()
-		}
+		table.AddRow("FORMAT", resp.DiskFormat)
+		table.AddSeparator()
 		if diskSize := resp.MinDiskSize; diskSize != nil {
 			table.AddRow("DISK SIZE", *diskSize)
 			table.AddSeparator()
@@ -128,11 +124,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 				table.AddRow("OPERATING SYSTEM", *os)
 				table.AddSeparator()
 			}
-			if distro := config.OperatingSystemDistro; distro != nil && distro.IsSet() {
+			if distro := config.OperatingSystemDistro; distro.IsSet() {
 				table.AddRow("OPERATING SYSTEM DISTRIBUTION", *distro.Get())
 				table.AddSeparator()
 			}
-			if version := config.OperatingSystemVersion; version != nil && version.IsSet() {
+			if version := config.OperatingSystemVersion; version.IsSet() {
 				table.AddRow("OPERATING SYSTEM VERSION", *version.Get())
 				table.AddSeparator()
 			}
@@ -142,9 +138,9 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			}
 		}
 
-		if resp.Labels != nil && len(*resp.Labels) > 0 {
+		if resp.Labels != nil && len(resp.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *resp.Labels {
+			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

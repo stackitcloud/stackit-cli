@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRouteRequest {
-	req := apiClient.GetNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
+	req := apiClient.DefaultAPI.GetNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
 	return req
 }
 
@@ -111,41 +111,39 @@ func outputResult(p *print.Printer, outputFormat string, route iaas.Route) error
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(route.Id))
 		table.AddSeparator()
-		if destination := route.Destination; destination != nil {
-			if destination.DestinationCIDRv4 != nil {
-				table.AddRow("DESTINATION TYPE", utils.PtrString(destination.DestinationCIDRv4.Type))
-				table.AddSeparator()
-				table.AddRow("DESTINATION", utils.PtrString(destination.DestinationCIDRv4.Value))
-				table.AddSeparator()
-			} else if destination.DestinationCIDRv6 != nil {
-				table.AddRow("DESTINATION TYPE", utils.PtrString(destination.DestinationCIDRv6.Type))
-				table.AddSeparator()
-				table.AddRow("DESTINATION", utils.PtrString(destination.DestinationCIDRv6.Value))
-				table.AddSeparator()
-			}
+		destination := route.Destination
+		if destination.DestinationCIDRv4 != nil {
+			table.AddRow("DESTINATION TYPE", destination.DestinationCIDRv4.Type)
+			table.AddSeparator()
+			table.AddRow("DESTINATION", destination.DestinationCIDRv4.Value)
+			table.AddSeparator()
+		} else if destination.DestinationCIDRv6 != nil {
+			table.AddRow("DESTINATION TYPE", destination.DestinationCIDRv6.Type)
+			table.AddSeparator()
+			table.AddRow("DESTINATION", destination.DestinationCIDRv6.Value)
+			table.AddSeparator()
 		}
-		if nexthop := route.Nexthop; nexthop != nil {
-			if nexthop.NexthopIPv4 != nil {
-				table.AddRow("NEXTHOP", utils.PtrString(nexthop.NexthopIPv4.Value))
-				table.AddSeparator()
-				table.AddRow("NEXTHOP TYPE", utils.PtrString(nexthop.NexthopIPv4.Type))
-				table.AddSeparator()
-			} else if nexthop.NexthopIPv6 != nil {
-				table.AddRow("NEXTHOP", utils.PtrString(nexthop.NexthopIPv6.Value))
-				table.AddSeparator()
-				table.AddRow("NEXTHOP TYPE", utils.PtrString(nexthop.NexthopIPv6.Type))
-				table.AddSeparator()
-			} else if nexthop.NexthopBlackhole != nil {
-				table.AddRow("NEXTHOP TYPE", utils.PtrString(nexthop.NexthopBlackhole.Type))
-				table.AddSeparator()
-			} else if nexthop.NexthopInternet != nil {
-				table.AddRow("NEXTHOP TYPE", utils.PtrString(nexthop.NexthopInternet.Type))
-				table.AddSeparator()
-			}
+		nexthop := route.Nexthop
+		if nexthop.NexthopIPv4 != nil {
+			table.AddRow("NEXTHOP", nexthop.NexthopIPv4.Value)
+			table.AddSeparator()
+			table.AddRow("NEXTHOP TYPE", nexthop.NexthopIPv4.Type)
+			table.AddSeparator()
+		} else if nexthop.NexthopIPv6 != nil {
+			table.AddRow("NEXTHOP", nexthop.NexthopIPv6.Value)
+			table.AddSeparator()
+			table.AddRow("NEXTHOP TYPE", nexthop.NexthopIPv6.Type)
+			table.AddSeparator()
+		} else if nexthop.NexthopBlackhole != nil {
+			table.AddRow("NEXTHOP TYPE", nexthop.NexthopBlackhole.Type)
+			table.AddSeparator()
+		} else if nexthop.NexthopInternet != nil {
+			table.AddRow("NEXTHOP TYPE", nexthop.NexthopInternet.Type)
+			table.AddSeparator()
 		}
-		if route.Labels != nil && len(*route.Labels) > 0 {
+		if route.Labels != nil && len(route.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *route.Labels {
+			for key, value := range route.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddSeparator()

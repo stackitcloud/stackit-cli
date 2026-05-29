@@ -88,7 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSnapshotRequest {
-	return apiClient.GetSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
+	return apiClient.DefaultAPI.GetSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot) error {
@@ -106,12 +106,12 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(snapshot.Status))
 		table.AddSeparator()
-		table.AddRow("VOLUME ID", utils.PtrString(snapshot.VolumeId))
+		table.AddRow("VOLUME ID", snapshot.VolumeId)
 		table.AddSeparator()
 
-		if snapshot.Labels != nil && len(*snapshot.Labels) > 0 {
+		if snapshot.Labels != nil && len(snapshot.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *snapshot.Labels {
+			for key, value := range snapshot.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

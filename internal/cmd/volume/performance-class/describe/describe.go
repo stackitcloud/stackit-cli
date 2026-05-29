@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumePerformanceClassRequest {
-	return apiClient.GetVolumePerformanceClass(ctx, model.ProjectId, model.Region, model.VolumePerformanceClass)
+	return apiClient.DefaultAPI.GetVolumePerformanceClass(ctx, model.ProjectId, model.Region, model.VolumePerformanceClass)
 }
 
 func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.VolumePerformanceClass) error {
@@ -99,7 +99,7 @@ func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.
 	}
 	return p.OutputResult(outputFormat, performanceClass, func() error {
 		table := tables.NewTable()
-		table.AddRow("NAME", utils.PtrString(performanceClass.Name))
+		table.AddRow("NAME", performanceClass.Name)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(performanceClass.Description))
 		table.AddSeparator()
@@ -108,9 +108,9 @@ func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.
 		table.AddRow("THROUGHPUT", utils.PtrString(performanceClass.Throughput))
 		table.AddSeparator()
 
-		if performanceClass.Labels != nil && len(*performanceClass.Labels) > 0 {
+		if performanceClass.Labels != nil && len(performanceClass.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *performanceClass.Labels {
+			for key, value := range performanceClass.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

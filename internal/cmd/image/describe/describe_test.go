@@ -55,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetImageRequest)) iaas.ApiGetImageRequest {
-	request := testClient.GetImage(testCtx, testProjectId, testRegion, testImageId[0])
+	request := testClient.DefaultAPI.GetImage(testCtx, testProjectId, testRegion, testImageId[0])
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -194,7 +194,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -230,24 +230,24 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				resp: &iaas.Image{
 					Id:          utils.Ptr(uuid.NewString()),
-					Name:        utils.Ptr("Image"),
+					Name:        "Image",
 					Status:      utils.Ptr("STATUS"),
-					DiskFormat:  utils.Ptr("format"),
+					DiskFormat:  "format",
 					MinDiskSize: utils.Ptr(int64(0)),
 					MinRam:      utils.Ptr(int64(0)),
 					Config: &iaas.ImageConfig{
 						Architecture:           utils.Ptr("architecture"),
 						OperatingSystem:        utils.Ptr("os"),
-						OperatingSystemDistro:  iaas.NewNullableString(utils.Ptr("os distro")),
-						OperatingSystemVersion: iaas.NewNullableString(utils.Ptr("0.00.0")),
+						OperatingSystemDistro:  *iaas.NewNullableString(utils.Ptr("os distro")),
+						OperatingSystemVersion: *iaas.NewNullableString(utils.Ptr("0.00.0")),
 						Uefi:                   utils.Ptr(true),
 					},
-					Labels: utils.Ptr(map[string]any{
+					Labels: map[string]any{
 						"label1": true,
 						"label2": false,
 						"label3": 42,
 						"foo":    "bar",
-					}),
+					},
 				},
 			},
 			wantErr: false,

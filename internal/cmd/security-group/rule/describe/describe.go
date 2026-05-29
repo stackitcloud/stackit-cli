@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRuleRequest {
-	return apiClient.GetSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId, model.SecurityGroupRuleId)
+	return apiClient.DefaultAPI.GetSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId, model.SecurityGroupRuleId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas.SecurityGroupRule) error {
@@ -126,19 +126,14 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 			}
 		}
 
-		table.AddRow("DIRECTION", utils.PtrString(securityGroupRule.Direction))
+		table.AddRow("DIRECTION", securityGroupRule.Direction)
 		table.AddSeparator()
 
 		if securityGroupRule.PortRange != nil {
-			if securityGroupRule.PortRange.Min != nil {
-				table.AddRow("START PORT", *securityGroupRule.PortRange.Min)
-				table.AddSeparator()
-			}
-
-			if securityGroupRule.PortRange.Max != nil {
-				table.AddRow("END PORT", *securityGroupRule.PortRange.Max)
-				table.AddSeparator()
-			}
+			table.AddRow("START PORT", securityGroupRule.PortRange.Min)
+			table.AddSeparator()
+			table.AddRow("END PORT", securityGroupRule.PortRange.Max)
+			table.AddSeparator()
 		}
 
 		if securityGroupRule.Ethertype != nil {

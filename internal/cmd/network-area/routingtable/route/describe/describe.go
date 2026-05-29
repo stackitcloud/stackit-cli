@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			request := apiClient.GetRouteOfRoutingTable(
+			request := apiClient.DefaultAPI.GetRouteOfRoutingTable(
 				ctx,
 				model.OrganizationId,
 				model.NetworkAreaId,
@@ -133,9 +133,9 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		table.AddRow("NEXTHOP VALUE", routeDetails.HopValue)
 		table.AddSeparator()
 
-		if route.Labels != nil && len(*route.Labels) > 0 {
+		if route.Labels != nil && len(route.Labels) > 0 {
 			var labels []string
-			for key, value := range *route.Labels {
+			for key, value := range route.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

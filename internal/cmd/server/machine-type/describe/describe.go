@@ -89,7 +89,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetMachineTypeRequest {
-	return apiClient.GetMachineType(ctx, model.ProjectId, model.Region, model.MachineType)
+	return apiClient.DefaultAPI.GetMachineType(ctx, model.ProjectId, model.Region, model.MachineType)
 }
 
 func outputResult(p *print.Printer, outputFormat string, machineType *iaas.MachineType) error {
@@ -98,13 +98,13 @@ func outputResult(p *print.Printer, outputFormat string, machineType *iaas.Machi
 	}
 	return p.OutputResult(outputFormat, machineType, func() error {
 		table := tables.NewTable()
-		table.AddRow("NAME", utils.PtrString(machineType.Name))
+		table.AddRow("NAME", machineType.Name)
 		table.AddSeparator()
-		table.AddRow("VCPUS", utils.PtrString(machineType.Vcpus))
+		table.AddRow("VCPUS", machineType.Vcpus)
 		table.AddSeparator()
-		table.AddRow("RAM (in MB)", utils.PtrString(machineType.Ram))
+		table.AddRow("RAM (in MB)", machineType.Ram)
 		table.AddSeparator()
-		table.AddRow("DISK SIZE (in GB)", utils.PtrString(machineType.Disk))
+		table.AddRow("DISK SIZE (in GB)", machineType.Disk)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(machineType.Description))
 		table.AddSeparator()
