@@ -62,9 +62,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:        utils.Ptr("example-volume-name"),
 		Description: utils.Ptr("example-volume-desc"),
 		VolumeId:    testVolumeId,
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -73,7 +73,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateVolumeRequest)) iaas.ApiUpdateVolumeRequest {
-	request := testClient.UpdateVolume(testCtx, testProjectId, testRegion, testVolumeId)
+	request := testClient.DefaultAPI.UpdateVolume(testCtx, testProjectId, testRegion, testVolumeId)
 	request = request.UpdateVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -85,9 +85,9 @@ func fixturePayload(mods ...func(payload *iaas.UpdateVolumePayload)) iaas.Update
 	payload := iaas.UpdateVolumePayload{
 		Name:        utils.Ptr("example-volume-name"),
 		Description: utils.Ptr("example-volume-desc"),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -173,7 +173,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"key": "value",
 				}
 			}),
@@ -253,7 +253,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

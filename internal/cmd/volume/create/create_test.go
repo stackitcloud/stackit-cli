@@ -59,8 +59,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Description:      utils.Ptr("example-volume-description"),
 		PerformanceClass: utils.Ptr("example-perf-class"),
 		Size:             utils.Ptr(int64(5)),
-		SourceId:         testSourceId,
-		SourceType:       "example-source-type",
+		SourceId:         &testSourceId,
+		SourceType:       utils.Ptr("example-source-type"),
 		Labels: map[string]any{
 			"key": "value",
 		},
@@ -144,8 +144,8 @@ func TestParseInput(t *testing.T) {
 				model.Labels = nil
 				model.PerformanceClass = nil
 				model.Size = nil
-				model.SourceType = ""
-				model.SourceId = ""
+				model.SourceType = nil
+				model.SourceId = nil
 			}),
 		},
 		{
@@ -201,8 +201,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.SourceId = testSourceId
-				model.SourceType = "example-source-type"
+				model.SourceId = &testSourceId
+				model.SourceType = utils.Ptr("example-source-type")
 			}),
 		},
 	}

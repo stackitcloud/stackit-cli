@@ -222,7 +222,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, labelFlag)
 			}),
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = map[string]any{}
+				model.Labels = nil
 			}),
 			isValid: true,
 		},

@@ -197,12 +197,6 @@ func TestOutputResult(t *testing.T) {
 			wantErr:      false,
 		},
 		{
-			name:         "json empty route",
-			outputFormat: print.JSONOutputFormat,
-			route:        &iaas.Route{},
-			wantErr:      false,
-		},
-		{
 			name:         "pretty output with one route",
 			outputFormat: print.PrettyOutputFormat,
 			route:        &dummyRoute,

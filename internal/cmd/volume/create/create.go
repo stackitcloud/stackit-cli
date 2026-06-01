@@ -42,8 +42,8 @@ type inputModel struct {
 	Labels           map[string]any
 	PerformanceClass *string
 	Size             *int64
-	SourceId         string
-	SourceType       string
+	SourceId         *string
+	SourceType       *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -149,8 +149,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Labels:           flags.FlagToStringToAny(p, cmd, labelFlag),
 		PerformanceClass: flags.FlagToStringPointer(p, cmd, performanceClassFlag),
 		Size:             flags.FlagToInt64Pointer(p, cmd, sizeFlag),
-		SourceId:         flags.FlagToStringValue(p, cmd, sourceIdFlag),
-		SourceType:       flags.FlagToStringValue(p, cmd, sourceTypeFlag),
+		SourceId:         flags.FlagToStringPointer(p, cmd, sourceIdFlag),
+		SourceType:       flags.FlagToStringPointer(p, cmd, sourceTypeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -159,10 +159,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateVolumeRequest {
 	req := apiClient.DefaultAPI.CreateVolume(ctx, model.ProjectId, model.Region)
-	source := &iaas.VolumeSource{
-		Id:   model.SourceId,
-		Type: model.SourceType,
-	}
 
 	payload := iaas.CreateVolumePayload{
 		AvailabilityZone: model.AvailabilityZone,
@@ -173,7 +169,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Size:             model.Size,
 	}
 
-	payload.Source = source
+	if model.SourceId != nil && model.SourceType != nil {
+		payload.Source = &iaas.VolumeSource{
+			Id:   *model.SourceId,
+			Type: *model.SourceType,
+		}
+	}
 
 	return req.CreateVolumePayload(payload)
 }
