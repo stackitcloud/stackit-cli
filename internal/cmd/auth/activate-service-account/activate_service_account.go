@@ -10,7 +10,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/auth/oidc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -72,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// use workload identity federation (OIDC) if enabled; no key file required
-			if oidc.IsEnabled() {
+			if auth.IsOIDCEnabled() {
 				return runOIDCMode(params, model)
 			}
 
@@ -145,15 +144,15 @@ func storeCustomEndpoint(tokenCustomEndpoint string) error {
 }
 
 func runOIDCMode(params *types.CmdParams, model *inputModel) error {
-	email := oidc.ServiceAccountEmail()
+	email := auth.OIDCServiceAccountEmail()
 	if email == "" {
 		return fmt.Errorf(
 			"env var %s must be set when %s is enabled",
-			oidc.EnvServiceAccountEmail, oidc.EnvUseOIDC,
+			auth.EnvServiceAccountEmail, auth.EnvUseOIDC,
 		)
 	}
 
-	tokenFunc, err := oidc.TokenFunc()
+	tokenFunc, err := auth.OIDCTokenFunc()
 	if err != nil {
 		return err
 	}
