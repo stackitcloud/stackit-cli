@@ -1,10 +1,9 @@
-package oidc
+package auth
 
 import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/stackitcloud/stackit-sdk-go/core/oidcadapters"
 )
@@ -19,15 +18,11 @@ const (
 	EnvAzureAccessToken             = "SYSTEM_ACCESSTOKEN" //nolint:gosec // linter false positive
 )
 
-// IsEnabled returns true if STACKIT_USE_OIDC is set to a truthy value
-// ("1", "true", or "yes", case-insensitive).
-func IsEnabled() bool {
-	return isTruthy(os.Getenv(EnvUseOIDC))
+func IsOIDCEnabled() bool {
+	return os.Getenv(EnvUseOIDC) == "1"
 }
 
-// ServiceAccountEmail returns the value of the STACKIT_SERVICE_ACCOUNT_EMAIL
-// environment variable.
-func ServiceAccountEmail() string {
+func OIDCServiceAccountEmail() string {
 	return os.Getenv(EnvServiceAccountEmail)
 }
 
@@ -36,7 +31,7 @@ func ServiceAccountEmail() string {
 // GitHub Actions (ACTIONS_ID_TOKEN_REQUEST_URL + ACTIONS_ID_TOKEN_REQUEST_TOKEN), and
 // Azure DevOps (SYSTEM_OIDCREQUESTURI + SYSTEM_ACCESSTOKEN).
 // Returns an error if no source is detected.
-func TokenFunc() (oidcadapters.OIDCTokenFunc, error) {
+func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 	// static token provided directly via env var
 	if token := os.Getenv(EnvServiceAccountFederatedToken); token != "" {
 		return func(_ context.Context) (string, error) {
@@ -66,13 +61,4 @@ func TokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 		EnvUseOIDC, EnvServiceAccountFederatedToken,
 		EnvGitHubRequestURL, EnvGitHubRequestToken,
 	)
-}
-
-// isTruthy returns true for "1", "true", "yes" (case-insensitive).
-func isTruthy(s string) bool {
-	switch strings.ToLower(strings.TrimSpace(s)) {
-	case "1", "true", "yes":
-		return true
-	}
-	return false
 }

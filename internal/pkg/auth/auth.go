@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/auth/oidc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
@@ -36,18 +35,18 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	}
 
 	// use workload identity federation (OIDC) if enabled; takes priority over stored flows
-	if oidc.IsEnabled() {
+	if IsOIDCEnabled() {
 		p.Debug(print.DebugLevel, "authenticating using workload identity federation (OIDC)")
 
-		email := oidc.ServiceAccountEmail()
+		email := OIDCServiceAccountEmail()
 		if email == "" {
 			return nil, fmt.Errorf(
 				"env var %s must be set when %s is enabled",
-				oidc.EnvServiceAccountEmail, oidc.EnvUseOIDC,
+				EnvServiceAccountEmail, EnvUseOIDC,
 			)
 		}
 
-		tokenFunc, err := oidc.TokenFunc()
+		tokenFunc, err := OIDCTokenFunc()
 		if err != nil {
 			return nil, err
 		}
