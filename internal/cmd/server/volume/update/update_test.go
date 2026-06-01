@@ -78,7 +78,7 @@ func fixturePayload(mods ...func(payload *iaas.UpdateAttachedVolumePayload)) iaa
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateAttachedVolumeRequest)) iaas.ApiUpdateAttachedVolumeRequest {
-	request := testClient.UpdateAttachedVolume(testCtx, testProjectId, testRegion, testServerId, testVolumeId)
+	request := testClient.DefaultAPI.UpdateAttachedVolume(testCtx, testProjectId, testRegion, testServerId, testVolumeId)
 	request = request.UpdateAttachedVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -245,7 +245,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -59,9 +59,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		Name:     utils.Ptr("example-server-name"),
 		ServerId: testServerId,
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -70,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateServerRequest)) iaas.ApiUpdateServerRequest {
-	request := testClient.UpdateServer(testCtx, testProjectId, testRegion, testServerId)
+	request := testClient.DefaultAPI.UpdateServer(testCtx, testProjectId, testRegion, testServerId)
 	request = request.UpdateServerPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -81,9 +81,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateServerRequest)) iaas.Api
 func fixturePayload(mods ...func(payload *iaas.UpdateServerPayload)) iaas.UpdateServerPayload {
 	payload := iaas.UpdateServerPayload{
 		Name: utils.Ptr("example-server-name"),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -167,7 +167,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"key": "value",
 				}
 			}),
@@ -247,7 +247,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

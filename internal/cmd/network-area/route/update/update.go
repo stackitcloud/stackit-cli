@@ -34,7 +34,7 @@ type inputModel struct {
 	OrganizationId *string
 	NetworkAreaId  *string
 	RouteId        string
-	Labels         *map[string]string
+	Labels         map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	routeId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelFlag)
 
 	if labels == nil {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -118,10 +118,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRouteRequest {
-	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
+	req := apiClient.DefaultAPI.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
 
 	payload := iaas.UpdateNetworkAreaRoutePayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 	req = req.UpdateNetworkAreaRoutePayload(payload)
 

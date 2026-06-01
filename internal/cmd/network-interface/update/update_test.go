@@ -68,13 +68,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 		},
 		NetworkId:        testNetworkId,
-		AllowedAddresses: utils.Ptr(allowedAddresses),
-		Labels: utils.Ptr(map[string]string{
+		AllowedAddresses: allowedAddresses,
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Name:           utils.Ptr("testNic"),
 		NicSecurity:    utils.Ptr(true),
-		SecurityGroups: utils.Ptr([]string{testSecurityGroup}),
+		SecurityGroups: []string{testSecurityGroup},
 		NicId:          testNicId,
 	}
 	for _, mod := range mods {
@@ -84,7 +84,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNicRequest)) iaas.ApiUpdateNicRequest {
-	request := testClient.UpdateNic(testCtx, testProjectId, testRegion, testNetworkId, testNicId)
+	request := testClient.DefaultAPI.UpdateNic(testCtx, testProjectId, testRegion, testNetworkId, testNicId)
 	request = request.UpdateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -99,13 +99,13 @@ func fixturePayload(mods ...func(payload *iaas.UpdateNicPayload)) iaas.UpdateNic
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
 	}
 	payload := iaas.UpdateNicPayload{
-		AllowedAddresses: utils.Ptr(allowedAddresses),
-		Labels: utils.Ptr(map[string]interface{}{
+		AllowedAddresses: allowedAddresses,
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Name:           utils.Ptr("testNic"),
 		NicSecurity:    utils.Ptr(true),
-		SecurityGroups: utils.Ptr([]string{testSecurityGroup}),
+		SecurityGroups: []string{testSecurityGroup},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -288,7 +288,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

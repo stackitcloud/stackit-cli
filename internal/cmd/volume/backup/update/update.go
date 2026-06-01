@@ -31,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	BackupId string
 	Name     *string
-	Labels   map[string]string
+	Labels   map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
 			}
@@ -101,16 +101,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
-		labels = &map[string]string{}
+		labels = map[string]any{}
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		BackupId:        backupId,
 		Name:            name,
-		Labels:          *labels,
+		Labels:          labels,
 	}
 
 	p.DebugInputModel(model)
@@ -118,11 +118,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateBackupRequest {
-	req := apiClient.UpdateBackup(ctx, model.ProjectId, model.Region, model.BackupId)
+	req := apiClient.DefaultAPI.UpdateBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 
 	payload := iaas.UpdateBackupPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels)),
+		Labels: model.Labels,
 	}
 
 	req = req.UpdateBackupPayload(payload)

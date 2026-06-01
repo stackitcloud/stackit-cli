@@ -33,7 +33,7 @@ type inputModel struct {
 	OrganizationId string
 	NetworkAreaId  string
 
-	IPv4DefaultNameservers  *[]string
+	IPv4DefaultNameservers  []string
 	IPv4DefaultPrefixLength *int64
 	IPv4MaxPrefixLength     *int64
 	IPv4MinPrefixLength     *int64
@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.NetworkAreaId
@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel:         globalFlags,
 		NetworkAreaId:           flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		OrganizationId:          flags.FlagToStringValue(p, cmd, organizationIdFlag),
-		IPv4DefaultNameservers:  flags.FlagToStringSlicePointer(p, cmd, ipv4DefaultNameservers),
+		IPv4DefaultNameservers:  flags.FlagToStringSliceValue(p, cmd, ipv4DefaultNameservers),
 		IPv4DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, ipv4DefaultPrefixLengthFlag),
 		IPv4MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, ipv4MaxPrefixLengthFlag),
 		IPv4MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, ipv4MinPrefixLengthFlag),
@@ -144,7 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRegionRequest {
-	req := apiClient.UpdateNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	req := apiClient.DefaultAPI.UpdateNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 
 	payload := iaas.UpdateNetworkAreaRegionPayload{
 		Ipv4: &iaas.UpdateRegionalAreaIPv4{

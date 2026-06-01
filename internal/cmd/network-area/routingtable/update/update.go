@@ -37,7 +37,7 @@ type inputModel struct {
 	SystemRoutes   *bool
 	RoutingTableId string
 	Description    *string
-	Labels         *map[string]string
+	Labels         map[string]any
 	Name           *string
 }
 
@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
 				routingTableLabel = model.RoutingTableId
@@ -131,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		SystemRoutes:    flags.FlagToBoolPointer(p, cmd, systemRoutesFlag),
@@ -160,7 +160,7 @@ func outputResult(p *print.Printer, outputFormat, networkAreaId string, routingT
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateRoutingTableOfAreaRequest {
-	req := apiClient.UpdateRoutingTableOfArea(
+	req := apiClient.DefaultAPI.UpdateRoutingTableOfArea(
 		ctx,
 		model.OrganizationId,
 		model.NetworkAreaId,
@@ -169,7 +169,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	)
 
 	payload := iaas.UpdateRoutingTableOfAreaPayload{
-		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:        model.Labels,
 		Name:          model.Name,
 		Description:   model.Description,
 		DynamicRoutes: model.DynamicRoutes,

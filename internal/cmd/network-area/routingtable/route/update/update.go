@@ -29,7 +29,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels         *map[string]string
+	Labels         map[string]any
 	NetworkAreaId  string
 	OrganizationId string
 	RouteId        string
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
 				routingTableLabel = model.RoutingTableId
@@ -103,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	routeId := inputArgs[0]
 
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelFlag)
 
 	if labels == nil {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -138,7 +138,7 @@ func outputResult(p *print.Printer, outputFormat, routingTableId, networkAreaId 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateRouteOfRoutingTableRequest {
-	req := apiClient.UpdateRouteOfRoutingTable(
+	req := apiClient.DefaultAPI.UpdateRouteOfRoutingTable(
 		ctx,
 		model.OrganizationId,
 		model.NetworkAreaId,
@@ -148,7 +148,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	)
 
 	payload := iaas.UpdateRouteOfRoutingTablePayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 
 	return req.UpdateRouteOfRoutingTablePayload(payload)

@@ -29,7 +29,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	PublicIpId string
-	Labels     *map[string]string
+	Labels     map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.Region, model.PublicIpId)
+			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelFlag)
 
 	if labels == nil {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -116,10 +116,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdatePublicIPRequest {
-	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
+	req := apiClient.DefaultAPI.UpdatePublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 
 	payload := iaas.UpdatePublicIPPayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 
 	return req.UpdatePublicIPPayload(payload)

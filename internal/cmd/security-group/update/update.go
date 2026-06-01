@@ -23,7 +23,7 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels          *map[string]string
+	Labels          map[string]any
 	Description     *string
 	Name            *string
 	SecurityGroupId string
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Warn("cannot retrieve groupname: %v", err)
 				groupLabel = model.SecurityGroupId
@@ -85,7 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update security group: %w", err)
 			}
-			params.Printer.Info("Updated security group \"%v\" for %q\n", utils.PtrString(resp.Name), projectLabel)
+			params.Printer.Info("Updated security group \"%v\" for %q\n", resp.Name, projectLabel)
 
 			return nil
 		},
@@ -109,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsArg),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelsArg),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionArg),
 		Name:            flags.FlagToStringPointer(p, cmd, nameArg),
 		SecurityGroupId: cliArgs[0],
@@ -124,10 +124,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateSecurityGroupRequest {
-	request := apiClient.UpdateSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
+	request := apiClient.DefaultAPI.UpdateSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	payload := iaas.NewUpdateSecurityGroupPayload()
 	payload.Description = model.Description
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(model.Labels)
+	payload.Labels = model.Labels
 	payload.Name = model.Name
 	request = request.UpdateSecurityGroupPayload(*payload)
 

@@ -69,9 +69,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		IPv4Gateway:        utils.Ptr("10.1.2.3"),
 		IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
 		IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
@@ -81,7 +81,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) iaas.ApiPartialUpdateNetworkRequest {
-	request := testClient.PartialUpdateNetwork(testCtx, testProjectId, testRegion, testNetworkId)
+	request := testClient.DefaultAPI.PartialUpdateNetwork(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.PartialUpdateNetworkPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -92,16 +92,16 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) 
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaas.PartialUpdateNetworkPayload {
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name: utils.Ptr("example-network-name"),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Ipv4: &iaas.UpdateNetworkIPv4Body{
-			Nameservers: utils.Ptr([]string{"1.1.1.0", "1.1.2.0"}),
-			Gateway:     iaas.NewNullableString(utils.Ptr("10.1.2.3")),
+			Nameservers: []string{"1.1.1.0", "1.1.2.0"},
+			Gateway:     *iaas.NewNullableString(utils.Ptr("10.1.2.3")),
 		},
 		Ipv6: &iaas.UpdateNetworkIPv6Body{
-			Nameservers: utils.Ptr([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"}),
-			Gateway:     iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
+			Nameservers: []string{"2001:4860:4860::8888", "2001:4860:4860::8844"},
+			Gateway:     *iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
 		},
 		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
@@ -328,7 +328,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmp.AllowUnexported(iaas.NullableString{}),
+				cmp.AllowUnexported(iaas.NullableString{}, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

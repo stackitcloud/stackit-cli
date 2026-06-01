@@ -41,11 +41,11 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NicId            string
 	NetworkId        string
-	AllowedAddresses *[]iaas.AllowedAddressesInner
-	Labels           *map[string]string
+	AllowedAddresses []iaas.AllowedAddressesInner
+	Labels           map[string]any
 	Name             *string // <= 63 characters + regex  ^[A-Za-z0-9]+((-|_|\s|\.)[A-Za-z0-9]+)*$
 	NicSecurity      *bool
-	SecurityGroups   *[]string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+	SecurityGroups   []string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -148,11 +148,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	// check security groups size and regex
-	securityGroups := flags.FlagToStringSlicePointer(p, cmd, securityGroupsFlag)
-	if securityGroups != nil && len(*securityGroups) > 0 {
+	securityGroups := flags.FlagToStringSliceValue(p, cmd, securityGroupsFlag)
+	if securityGroups != nil && len(securityGroups) > 0 {
 		securityGroupsRegex := regexp.MustCompile(securityGroupsRegex)
 		// iterate over them
-		for _, value := range *securityGroups {
+		for _, value := range securityGroups {
 			if len(value) != securityGroupLength {
 				return nil, &errors.FlagValidationError{
 					Flag:    securityGroupsFlag,
@@ -172,14 +172,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		NicId:           nicId,
 		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 		Name:            name,
 		NicSecurity:     flags.FlagToBoolPointer(p, cmd, nicSecurityFlag),
 		SecurityGroups:  securityGroups,
 	}
 
 	if allowedAddresses != nil {
-		model.AllowedAddresses = utils.Ptr(allowedAddressesInner)
+		model.AllowedAddresses = allowedAddressesInner
 	}
 
 	p.DebugInputModel(model)
@@ -187,11 +187,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNicRequest {
-	req := apiClient.UpdateNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
+	req := apiClient.DefaultAPI.UpdateNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 
 	payload := iaas.UpdateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
-		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:           model.Labels,
 		Name:             model.Name,
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,

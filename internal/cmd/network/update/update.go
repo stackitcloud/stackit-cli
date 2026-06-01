@@ -48,7 +48,7 @@ type inputModel struct {
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
 	RoutingTableId     *string
-	Labels             *map[string]string
+	Labels             map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -92,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, model.NetworkId)
+			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 				networkLabel = model.NetworkId
@@ -117,7 +117,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating network", func() error {
-					_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+					_, err = wait.UpdateNetworkWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -167,7 +167,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
 		RoutingTableId:     flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
-		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:             flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -175,31 +175,31 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkRequest {
-	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
+	req := apiClient.DefaultAPI.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
 	var payloadIPv4 *iaas.UpdateNetworkIPv4Body
 	var payloadIPv6 *iaas.UpdateNetworkIPv6Body
 
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		payloadIPv6 = &iaas.UpdateNetworkIPv6Body{
-			Nameservers: model.IPv6DnsNameServers,
+			Nameservers: *model.IPv6DnsNameServers,
 		}
 
 		if model.NoIPv6Gateway {
-			payloadIPv6.Gateway = iaas.NewNullableString(nil)
+			payloadIPv6.Gateway = *iaas.NewNullableString(nil)
 		} else if model.IPv6Gateway != nil {
-			payloadIPv6.Gateway = iaas.NewNullableString(model.IPv6Gateway)
+			payloadIPv6.Gateway = *iaas.NewNullableString(model.IPv6Gateway)
 		}
 	}
 
 	if model.IPv4DnsNameServers != nil || model.NoIPv4Gateway || model.IPv4Gateway != nil {
 		payloadIPv4 = &iaas.UpdateNetworkIPv4Body{
-			Nameservers: model.IPv4DnsNameServers,
+			Nameservers: *model.IPv4DnsNameServers,
 		}
 
 		if model.NoIPv4Gateway {
-			payloadIPv4.Gateway = iaas.NewNullableString(nil)
+			payloadIPv4.Gateway = *iaas.NewNullableString(nil)
 		} else if model.IPv4Gateway != nil {
-			payloadIPv4.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+			payloadIPv4.Gateway = *iaas.NewNullableString(model.IPv4Gateway)
 		}
 	}
 
@@ -207,7 +207,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		Name:           model.Name,
 		Ipv4:           payloadIPv4,
 		Ipv6:           payloadIPv6,
-		Labels:         utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:         model.Labels,
 		RoutingTableId: model.RoutingTableId,
 	}
 

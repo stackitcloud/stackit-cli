@@ -36,7 +36,7 @@ const testLabelSelectorFlag = "key1=value1,key2=value2"
 const testSystemRoutesFlag = true
 const testDynamicRoutesFlag = true
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -89,7 +89,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateRoutingTableOfAreaRequest)) iaas.ApiUpdateRoutingTableOfAreaRequest {
-	req := testClient.UpdateRoutingTableOfArea(
+	req := testClient.DefaultAPI.UpdateRoutingTableOfArea(
 		testCtx,
 		testOrgId,
 		testNetworkAreaId,
@@ -98,7 +98,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateRoutingTableOfAreaReques
 	)
 
 	payload := iaas.UpdateRoutingTableOfAreaPayload{
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:        testLabels,
 		Name:          utils.Ptr(testRoutingTableName),
 		Description:   utils.Ptr(testRoutingTableDescription),
 		DynamicRoutes: utils.Ptr(true),
@@ -281,7 +281,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
-					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Labels:        testLabels,
 					Name:          nil,
 					Description:   utils.Ptr(testRoutingTableDescription),
 					DynamicRoutes: utils.Ptr(true),
@@ -297,7 +297,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
-					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   nil,
 					DynamicRoutes: utils.Ptr(true),
@@ -313,7 +313,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
-					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
 					DynamicRoutes: utils.Ptr(false),
@@ -329,7 +329,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
 				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
-					Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
 					SystemRoutes:  utils.Ptr(true),
@@ -345,7 +345,7 @@ func TestBuildRequest(t *testing.T) {
 
 			if diff := cmp.Diff(req, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			); diff != "" {
 				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
 			}
@@ -356,11 +356,11 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	dummyRoutingTable := iaas.RoutingTable{
 		Id:            utils.Ptr("id-foo"),
-		Name:          utils.Ptr("route-table-foo"),
+		Name:          "route-table-foo",
 		Description:   utils.Ptr("description-foo"),
 		SystemRoutes:  utils.Ptr(true),
 		DynamicRoutes: utils.Ptr(true),
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:        testLabels,
 		CreatedAt:     utils.Ptr(time.Now()),
 		UpdatedAt:     utils.Ptr(time.Now()),
 	}
