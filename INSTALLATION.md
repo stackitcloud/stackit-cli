@@ -11,7 +11,7 @@
 The STACKIT CLI is available on all major platforms via [mise](https://mise.jdx.dev/):
 
 ```shell
-mise u -g github:/stackitcloud/stackit-cli
+mise u -g github:stackitcloud/stackit-cli
 ```
 
 ### macOS
