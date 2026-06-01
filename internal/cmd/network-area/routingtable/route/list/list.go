@@ -152,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, or
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
 		for _, route := range routes {
-			routeDetails := routeUtils.ExtractRouteDetails(route)
+			routeDetails := routeUtils.ExtractRouteDetails(&route)
 			table.AddRow(
 				utils.PtrString(route.Id),
 				routeDetails.DestType,

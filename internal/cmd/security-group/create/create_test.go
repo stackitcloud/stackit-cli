@@ -190,7 +190,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = (*request).CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
+				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      nil,
 					Name:        testName,
@@ -204,7 +204,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Stateful = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = (*request).CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
+				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      testLabels,
 					Name:        testName,
@@ -248,7 +248,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.name, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.name, &tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

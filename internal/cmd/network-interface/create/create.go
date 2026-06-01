@@ -156,7 +156,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	// check security groups size and regex
 	securityGroups := flags.FlagToStringSliceValue(p, cmd, securityGroupsFlag)
-	if securityGroups != nil && len(securityGroups) > 0 {
+	if len(securityGroups) > 0 {
 		securityGroupsRegex := regexp.MustCompile(securityGroupsRegex)
 		// iterate over them
 		for _, value := range securityGroups {

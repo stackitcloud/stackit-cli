@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create static route: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -128,7 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route *iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
 		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.Id))
 		return nil

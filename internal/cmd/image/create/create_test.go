@@ -308,7 +308,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
 					payload.Labels = nil
 				}))
 			}),
@@ -319,7 +319,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.CdromBus = utils.Ptr("foobar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
 					payload.Config.CdromBus = *iaas.NewNullableString(utils.Ptr("foobar"))
 				}))
 			}),
@@ -330,7 +330,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.Uefi = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
 					payload.Config.Uefi = utils.Ptr(false)
 				}))
 			}),

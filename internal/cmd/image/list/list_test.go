@@ -157,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = utils.Ptr("")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListImagesRequest) {
-				*request = (*request).LabelSelector("")
+				*request = request.LabelSelector("")
 			}),
 		},
 		{
@@ -166,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = utils.Ptr("foo=bar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListImagesRequest) {
-				*request = (*request).LabelSelector("foo=bar")
+				*request = request.LabelSelector("foo=bar")
 			}),
 		},
 	}

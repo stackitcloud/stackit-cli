@@ -138,7 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTypes iaas.MachineTypeListResponse) error {
 	return p.OutputResult(outputFormat, machineTypes, func() error {
-		if machineTypes.Items == nil || len(machineTypes.Items) == 0 {
+		if len(machineTypes.Items) == 0 {
 			p.Outputf("No machine-types found for project %q\n", projectLabel)
 			return nil
 		}
@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTy
 		if items := machineTypes.GetItems(); len(items) > 0 {
 			for _, machineType := range items {
 				extraSpecMap := make(map[string]string)
-				if machineType.ExtraSpecs != nil && len(machineType.ExtraSpecs) > 0 {
+				if len(machineType.ExtraSpecs) > 0 {
 					for key, value := range machineType.ExtraSpecs {
 						extraSpecMap[key] = fmt.Sprintf("%v", value)
 					}

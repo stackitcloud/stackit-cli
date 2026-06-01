@@ -264,7 +264,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
-				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+				*request = request.UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        nil,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
@@ -280,7 +280,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Name = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
-				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+				*request = request.UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        testLabels,
 					Name:          nil,
 					Description:   utils.Ptr(testRoutingTableDescription),
@@ -296,7 +296,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Description = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
-				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+				*request = request.UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   nil,
@@ -312,7 +312,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DynamicRoutes = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
-				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+				*request = request.UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),
@@ -328,7 +328,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DynamicRoutes = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRoutingTableOfAreaRequest) {
-				*request = (*request).UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
+				*request = request.UpdateRoutingTableOfAreaPayload(iaas.UpdateRoutingTableOfAreaPayload{
 					Labels:        testLabels,
 					Name:          utils.Ptr(testRoutingTableName),
 					Description:   utils.Ptr(testRoutingTableDescription),

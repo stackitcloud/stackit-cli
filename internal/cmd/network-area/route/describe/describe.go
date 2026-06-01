@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe static route: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -106,7 +106,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, route iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(route.Id))
@@ -141,7 +141,7 @@ func outputResult(p *print.Printer, outputFormat string, route iaas.Route) error
 			table.AddRow("NEXTHOP TYPE", nexthop.NexthopInternet.Type)
 			table.AddSeparator()
 		}
-		if route.Labels != nil && len(route.Labels) > 0 {
+		if len(route.Labels) > 0 {
 			labels := []string{}
 			for key, value := range route.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

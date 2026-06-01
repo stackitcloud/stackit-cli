@@ -236,7 +236,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.Labels = nil
 					}),
@@ -249,7 +249,7 @@ func TestBuildRequest(t *testing.T) {
 				model.SystemRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.SystemRoutes = utils.Ptr(false)
 					}),
@@ -262,7 +262,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DynamicRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.DynamicRoutes = utils.Ptr(false)
 					}),

@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 )
@@ -49,14 +48,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			} else if projectLabel == "" {
-				projectLabel = model.ProjectId
-			}
-
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
 
@@ -65,7 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list quotas: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, response.Quotas)
+			return outputResult(params.Printer, model.OutputFormat, &response.Quotas)
 		},
 	}
 
@@ -92,7 +83,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request
 }
 
-func outputResult(p *print.Printer, outputFormat string, quotas iaas.QuotaList) error {
+func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList) error {
 	return p.OutputResult(outputFormat, quotas, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "LIMIT", "CURRENT USAGE", "PERCENT")
@@ -119,25 +110,10 @@ func outputResult(p *print.Printer, outputFormat string, quotas iaas.QuotaList) 
 
 func quotaRow(description string, quota iaas.Quota) []interface{} {
 	result := make([]interface{}, 0, 4)
-	result = append(result, description)
-	result = append(result, conv(quota.Limit))
-	result = append(result, conv(quota.Usage))
-	result = append(result, fmt.Sprintf("%3.1f%%", 100.0/float64(quota.Limit)*float64(quota.Usage)))
+	result = append(result, description, conv(quota.Limit), conv(quota.Usage), fmt.Sprintf("%3.1f%%", 100.0/float64(quota.Limit)*float64(quota.Usage)))
 	return result
 }
 
 func conv(n int64) string {
 	return strconv.FormatInt(n, 10)
-}
-
-func percentage(val interface {
-	GetLimitOk() (int64, bool)
-	GetUsageOk() (int64, bool)
-}) string {
-	a, aOk := val.GetLimitOk()
-	b, bOk := val.GetUsageOk()
-	if aOk && bOk {
-		return fmt.Sprintf("%3.1f%%", 100.0/float64(a)*float64(b))
-	}
-	return "n/a"
 }

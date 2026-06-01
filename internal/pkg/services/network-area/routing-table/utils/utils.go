@@ -19,7 +19,7 @@ type RouteDetails struct {
 	Labels    string
 }
 
-func ExtractRouteDetails(route iaas.Route) RouteDetails {
+func ExtractRouteDetails(route *iaas.Route) RouteDetails {
 	var routeDetails RouteDetails
 
 	if route.Destination.DestinationCIDRv4 != nil {
@@ -42,7 +42,7 @@ func ExtractRouteDetails(route iaas.Route) RouteDetails {
 		routeDetails.HopType = route.Nexthop.NexthopBlackhole.Type
 	}
 
-	if route.Labels != nil && len(route.Labels) > 0 {
+	if len(route.Labels) > 0 {
 		stringMap := make(map[string]string)
 		for key, value := range route.Labels {
 			stringMap[key] = fmt.Sprintf("%v", value)

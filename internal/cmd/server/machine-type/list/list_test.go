@@ -156,7 +156,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Filter = utils.Ptr("vcpus==2")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListMachineTypesRequest) {
-				*request = (*request).Filter("vcpus==2")
+				*request = request.Filter("vcpus==2")
 			}),
 		},
 	}

@@ -108,7 +108,7 @@ func outputResult(p *print.Printer, outputFormat string, performanceClass *iaas.
 		table.AddRow("THROUGHPUT", utils.PtrString(performanceClass.Throughput))
 		table.AddSeparator()
 
-		if performanceClass.Labels != nil && len(performanceClass.Labels) > 0 {
+		if len(performanceClass.Labels) > 0 {
 			labels := []string{}
 			for key, value := range performanceClass.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

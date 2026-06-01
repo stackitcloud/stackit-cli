@@ -114,7 +114,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 	}
 
 	return p.OutputResult(outputFormat, route, func() error {
-		routeDetails := routeUtils.ExtractRouteDetails(*route)
+		routeDetails := routeUtils.ExtractRouteDetails(route)
 
 		table := tables.NewTable()
 

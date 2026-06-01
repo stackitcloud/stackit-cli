@@ -109,7 +109,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 func outputResult(p *print.Printer, outputFormat, areaLabel string, regionalArea iaas.RegionalAreaListResponse) error {
 	return p.OutputResult(outputFormat, regionalArea, func() error {
-		if regionalArea.Regions == nil || len(regionalArea.Regions) == 0 {
+		if len(regionalArea.Regions) == 0 {
 			p.Outputf("No regions found for network area %q\n", areaLabel)
 			return nil
 		}
@@ -126,7 +126,7 @@ func outputResult(p *print.Printer, outputFormat, areaLabel string, regionalArea
 				dnsNames = strings.Join(ipv4.DefaultNameservers, ",")
 
 				// Set networkRanges
-				if ipv4.NetworkRanges != nil && len(ipv4.NetworkRanges) > 0 {
+				if len(ipv4.NetworkRanges) > 0 {
 					for _, networkRange := range ipv4.NetworkRanges {
 						networkRanges = append(networkRanges, networkRange.Prefix)
 					}

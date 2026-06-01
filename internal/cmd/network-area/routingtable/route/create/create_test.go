@@ -497,7 +497,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = map[string]any{"key": "value"}
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
-				*request = (*request).AddRoutesToRoutingTablePayload(fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
+				*request = request.AddRoutesToRoutingTablePayload(fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
 					payload.Items[0].Labels = map[string]any{"key": "value"}
 				}))
 			}),
@@ -511,7 +511,7 @@ func TestBuildRequest(t *testing.T) {
 				model.NextHopValue = utils.Ptr("2001:db8::1")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
-				*request = (*request).AddRoutesToRoutingTablePayload(iaas.AddRoutesToRoutingTablePayload{
+				*request = request.AddRoutesToRoutingTablePayload(iaas.AddRoutesToRoutingTablePayload{
 					Items: []iaas.Route{
 						{
 							Destination: iaas.RouteDestination{
@@ -546,7 +546,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).AddRoutesToRoutingTablePayload(payload)
+				*request = request.AddRoutesToRoutingTablePayload(payload)
 			}),
 		},
 		{
@@ -563,7 +563,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).AddRoutesToRoutingTablePayload(payload)
+				*request = request.AddRoutesToRoutingTablePayload(payload)
 			}),
 		},
 		{
@@ -581,7 +581,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).AddRoutesToRoutingTablePayload(payload)
+				*request = request.AddRoutesToRoutingTablePayload(payload)
 			}),
 		},
 		{
@@ -599,7 +599,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).AddRoutesToRoutingTablePayload(payload)
+				*request = request.AddRoutesToRoutingTablePayload(payload)
 			}),
 		},
 	}

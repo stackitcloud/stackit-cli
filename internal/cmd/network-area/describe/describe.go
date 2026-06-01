@@ -133,7 +133,7 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		table.AddSeparator()
 		table.AddRow("NAME", networkArea.Name)
 		table.AddSeparator()
-		if networkArea.Labels != nil && len(networkArea.Labels) > 0 {
+		if len(networkArea.Labels) > 0 {
 			var labels []string
 			for key, value := range networkArea.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

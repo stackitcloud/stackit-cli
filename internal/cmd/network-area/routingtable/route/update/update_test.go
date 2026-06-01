@@ -208,7 +208,7 @@ func TestBuildRequest(t *testing.T) {
 				m.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRouteOfRoutingTableRequest) {
-				*request = (*request).UpdateRouteOfRoutingTablePayload(iaas.UpdateRouteOfRoutingTablePayload{
+				*request = request.UpdateRouteOfRoutingTablePayload(iaas.UpdateRouteOfRoutingTablePayload{
 					Labels: nil,
 				})
 			}),

@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.Ro
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
 		for _, routingTable := range routingTables {
 			var labels []string
-			if routingTable.Labels != nil && len(routingTable.Labels) > 0 {
+			if len(routingTable.Labels) > 0 {
 				for key, value := range routingTable.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}

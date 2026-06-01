@@ -114,7 +114,7 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		table.AddRow("AVAILABILITY ZONE", utils.PtrString(backup.AvailabilityZone))
 		table.AddSeparator()
 
-		if backup.Labels != nil && len(backup.Labels) > 0 {
+		if len(backup.Labels) > 0 {
 			var labels []string
 			for key, value := range backup.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

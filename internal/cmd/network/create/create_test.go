@@ -525,14 +525,14 @@ func TestBuildRequest(t *testing.T) {
 			description: "use prefix length",
 			model:       fixtureInputModelWithPrefixLength(),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
-				*request = (*request).CreateNetworkPayload(fixturePayloadWithPrefixLength())
+				*request = request.CreateNetworkPayload(fixturePayloadWithPrefixLength())
 			}),
 		},
 		{
 			description: "use prefix",
 			model:       fixtureInputModelWithPrefix(),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
-				*request = (*request).CreateNetworkPayload(fixturePayloadWithPrefix())
+				*request = request.CreateNetworkPayload(fixturePayloadWithPrefix())
 			}),
 		},
 		{
@@ -580,7 +580,7 @@ func TestBuildRequest(t *testing.T) {
 				IPv4PrefixLength:   utils.Ptr(int64(25)),
 			},
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
-				*request = (*request).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				*request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
 					Ipv4: &iaas.CreateNetworkIPv4{
 						CreateNetworkIPv4WithPrefixLength: &iaas.CreateNetworkIPv4WithPrefixLength{
 							Nameservers:  []string{"1.1.1.1"},
@@ -598,7 +598,7 @@ func TestBuildRequest(t *testing.T) {
 				model.NoIPv6Gateway = true
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
-				*request = (*request).CreateNetworkPayload(
+				*request = request.CreateNetworkPayload(
 					fixturePayloadWithPrefix(func(payload *iaas.CreateNetworkPayload) {
 						payload.Ipv4.CreateNetworkIPv4WithPrefix.Gateway = *iaas.NewNullableString(nil)
 						payload.Ipv6.CreateNetworkIPv6WithPrefix.Gateway = *iaas.NewNullableString(nil)

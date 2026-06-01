@@ -394,7 +394,7 @@ func TestBuildRequest(t *testing.T) {
 				payload.Agent = &iaas.ServerAgent{
 					Provisioned: utils.Ptr(true),
 				}
-				*request = (*request).CreateServerPayload(payload)
+				*request = request.CreateServerPayload(payload)
 			}),
 		},
 	}

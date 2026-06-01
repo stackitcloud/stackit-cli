@@ -124,7 +124,7 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 			table.AddSeparator()
 		}
 
-		if volume.Labels != nil && len(volume.Labels) > 0 {
+		if len(volume.Labels) > 0 {
 			labels := []string{}
 			for key, value := range volume.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

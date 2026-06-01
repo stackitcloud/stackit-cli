@@ -105,7 +105,7 @@ func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp)
 		table.AddRow("ASSOCIATED TO", networkInterfaceId)
 		table.AddSeparator()
 
-		if publicIp.Labels != nil && len(publicIp.Labels) > 0 {
+		if len(publicIp.Labels) > 0 {
 			labels := []string{}
 			for key, value := range publicIp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

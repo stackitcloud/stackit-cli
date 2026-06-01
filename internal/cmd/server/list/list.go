@@ -173,7 +173,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, servers [
 
 			nicIPv4 := ""
 			publicIPs := ""
-			if server.Nics != nil && len(server.Nics) > 0 {
+			if len(server.Nics) > 0 {
 				for i, nic := range server.Nics {
 					if nic.Ipv4 != nil || nic.PublicIp != nil {
 						nicIPv4 += utils.PtrString(nic.Ipv4)

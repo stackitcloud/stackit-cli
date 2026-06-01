@@ -394,7 +394,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Labels = nil
 				}))
 			}),
@@ -405,7 +405,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Name = utils.Ptr("something else")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Name = utils.Ptr("something else")
 				}))
 			}),
@@ -416,7 +416,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.CdromBus = utils.Ptr("something else")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Config.CdromBus.Set(utils.Ptr("something else"))
 				}))
 			}),
@@ -427,7 +427,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Config = nil
 				}))
 			}),

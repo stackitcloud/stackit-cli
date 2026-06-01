@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create network range: %w", err)
 			}
 
-			if resp.Items == nil || len(resp.Items) == 0 {
+			if len(resp.Items) == 0 {
 				return fmt.Errorf("empty response from API")
 			}
 

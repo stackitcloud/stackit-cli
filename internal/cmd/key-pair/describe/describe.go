@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
 
-		if keyPair.Labels != nil && len(keyPair.Labels) > 0 {
+		if len(keyPair.Labels) > 0 {
 			var labels []string
 			for key, value := range keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

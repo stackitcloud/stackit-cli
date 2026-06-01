@@ -109,7 +109,7 @@ func outputResult(p *print.Printer, outputFormat string, snapshot *iaas.Snapshot
 		table.AddRow("VOLUME ID", snapshot.VolumeId)
 		table.AddSeparator()
 
-		if snapshot.Labels != nil && len(snapshot.Labels) > 0 {
+		if len(snapshot.Labels) > 0 {
 			labels := []string{}
 			for key, value := range snapshot.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

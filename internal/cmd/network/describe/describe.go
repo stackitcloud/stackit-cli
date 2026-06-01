@@ -184,7 +184,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6Prefixes, ", "))
 			table.AddSeparator()
 		}
-		if network.Labels != nil && len(network.Labels) > 0 {
+		if len(network.Labels) > 0 {
 			var labels []string
 			for key, value := range network.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

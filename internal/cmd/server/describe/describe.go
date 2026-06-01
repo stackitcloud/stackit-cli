@@ -178,12 +178,12 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			table.AddSeparator()
 		}
 
-		if server.ServiceAccountMails != nil && len(server.ServiceAccountMails) > 0 {
+		if len(server.ServiceAccountMails) > 0 {
 			table.AddRow("SERVICE ACCOUNTS", strings.Join(server.ServiceAccountMails, "\n"))
 			table.AddSeparator()
 		}
 
-		if server.Volumes != nil && len(server.Volumes) > 0 {
+		if len(server.Volumes) > 0 {
 			volumes := []string{}
 			volumes = append(volumes, server.Volumes...)
 			table.AddRow("VOLUMES", strings.Join(volumes, "\n"))

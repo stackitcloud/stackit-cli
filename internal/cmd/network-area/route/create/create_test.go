@@ -239,7 +239,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = map[string]any{"key": "value"}
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkAreaRouteRequest) {
-				*request = (*request).CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
+				*request = request.CreateNetworkAreaRoutePayload(fixturePayload(func(payload *iaas.CreateNetworkAreaRoutePayload) {
 					payload.Items[0].Labels = map[string]any{"key": "value"}
 				}))
 			}),
@@ -288,7 +288,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, tt.args.route); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, &tt.args.route); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
