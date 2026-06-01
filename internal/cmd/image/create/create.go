@@ -72,11 +72,11 @@ type imageConfig struct {
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	Id                  *string
+	Id                  string
 	Name                string
 	DiskFormat          string
 	LocalFilePath       string
-	Labels              *map[string]string
+	Labels              map[string]any
 	Config              *imageConfig
 	MinDiskSize         *int64
 	MinRam              *int64
@@ -146,7 +146,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
 			}
-			if err := uploadAsync(ctx, params.Printer, model, file, url); err != nil {
+			if err := uploadAsync(ctx, params.Printer, model, file, *url); err != nil {
 				return err
 			}
 
@@ -304,7 +304,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Name:                name,
 		DiskFormat:          flags.FlagToStringValue(p, cmd, diskFormatFlag),
 		LocalFilePath:       flags.FlagToStringValue(p, cmd, localFilePathFlag),
-		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Labels:              flags.FlagToStringToAny(p, cmd, labelsFlag),
 		NoProgressIndicator: flags.FlagToBoolPointer(p, cmd, noProgressIndicatorFlag),
 		Config: &imageConfig{
 			Architecture:           flags.FlagToStringPointer(p, cmd, architectureFlag),
@@ -332,16 +332,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateImageRequest {
-	request := apiClient.CreateImage(ctx, model.ProjectId, model.Region).
+	request := apiClient.DefaultAPI.CreateImage(ctx, model.ProjectId, model.Region).
 		CreateImagePayload(createPayload(ctx, model))
 	return request
 }
 
 func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload {
 	payload := iaas.CreateImagePayload{
-		DiskFormat:  &model.DiskFormat,
-		Name:        &model.Name,
-		Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
+		DiskFormat:  model.DiskFormat,
+		Name:        model.Name,
+		Labels:      model.Labels,
 		MinDiskSize: model.MinDiskSize,
 		MinRam:      model.MinRam,
 		Protected:   model.Protected,
@@ -356,34 +356,34 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 			payload.Config.BootMenu = model.Config.BootMenu
 		}
 		if config.CdromBus != nil {
-			payload.Config.CdromBus = iaas.NewNullableString(model.Config.CdromBus)
+			payload.Config.CdromBus = *iaas.NewNullableString(model.Config.CdromBus)
 		}
 		if config.DiskBus != nil {
-			payload.Config.DiskBus = iaas.NewNullableString(config.DiskBus)
+			payload.Config.DiskBus = *iaas.NewNullableString(config.DiskBus)
 		}
 		if config.NicModel != nil {
-			payload.Config.NicModel = iaas.NewNullableString(config.NicModel)
+			payload.Config.NicModel = *iaas.NewNullableString(config.NicModel)
 		}
 		if config.OperatingSystem != nil {
 			payload.Config.OperatingSystem = config.OperatingSystem
 		}
 		if config.OperatingSystemDistro != nil {
-			payload.Config.OperatingSystemDistro = iaas.NewNullableString(config.OperatingSystemDistro)
+			payload.Config.OperatingSystemDistro = *iaas.NewNullableString(config.OperatingSystemDistro)
 		}
 		if config.OperatingSystemVersion != nil {
-			payload.Config.OperatingSystemVersion = iaas.NewNullableString(config.OperatingSystemVersion)
+			payload.Config.OperatingSystemVersion = *iaas.NewNullableString(config.OperatingSystemVersion)
 		}
 		if config.RescueBus != nil {
-			payload.Config.RescueBus = iaas.NewNullableString(config.RescueBus)
+			payload.Config.RescueBus = *iaas.NewNullableString(config.RescueBus)
 		}
 		if config.RescueDevice != nil {
-			payload.Config.RescueDevice = iaas.NewNullableString(config.RescueDevice)
+			payload.Config.RescueDevice = *iaas.NewNullableString(config.RescueDevice)
 		}
 		if config.SecureBoot != nil {
 			payload.Config.SecureBoot = config.SecureBoot
 		}
 		if config.VideoModel != nil {
-			payload.Config.VideoModel = iaas.NewNullableString(config.VideoModel)
+			payload.Config.VideoModel = *iaas.NewNullableString(config.VideoModel)
 		}
 		if config.VirtioScsi != nil {
 			payload.Config.VirtioScsi = config.VirtioScsi
@@ -403,7 +403,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateRes
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created image %q with id %s\n", model.Name, utils.PtrString(model.Id))
+		p.Outputf("Created image %q with id %s\n", model.Name, model.Id)
 		return nil
 	})
 }

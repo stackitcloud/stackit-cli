@@ -26,7 +26,7 @@ var (
 	testClient    = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testVolumeId  = uuid.NewString()
-	testLabels    = map[string]string{"key1": "value1"}
+	testLabels    = map[string]any{"key1": "value1"}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -62,12 +62,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSnapshotRequest)) iaas.ApiCreateSnapshotRequest {
-	request := testClient.CreateSnapshot(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateSnapshot(testCtx, testProjectId, testRegion)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
-	payload.VolumeId = &testVolumeId
+	payload.VolumeId = testVolumeId
 	payload.Name = utils.Ptr(testName)
 
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
+	payload.Labels = testLabels
 
 	request = request.CreateSnapshotPayload(*payload)
 	for _, mod := range mods {
@@ -132,7 +132,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Name = nil
-				model.Labels = make(map[string]string)
+				model.Labels = make(map[string]any)
 			}),
 		},
 	}
@@ -163,7 +163,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

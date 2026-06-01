@@ -34,7 +34,7 @@ const testNextHopTypeFlag = nextHopTypeIPv4
 const testNextHopValueFlag = "1.1.1.1"
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -79,7 +79,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiAddRoutesToRoutingTableRequest)) iaas.ApiAddRoutesToRoutingTableRequest {
-	request := testClient.AddRoutesToRoutingTable(testCtx, testOrgId, testNetworkAreaId, testRegion, testRoutingTableId)
+	request := testClient.DefaultAPI.AddRoutesToRoutingTable(testCtx, testOrgId, testNetworkAreaId, testRegion, testRoutingTableId)
 	request = request.AddRoutesToRoutingTablePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -89,21 +89,21 @@ func fixtureRequest(mods ...func(request *iaas.ApiAddRoutesToRoutingTableRequest
 
 func fixturePayload(mods ...func(payload *iaas.AddRoutesToRoutingTablePayload)) iaas.AddRoutesToRoutingTablePayload {
 	payload := iaas.AddRoutesToRoutingTablePayload{
-		Items: &[]iaas.Route{
+		Items: []iaas.Route{
 			{
-				Destination: &iaas.RouteDestination{
+				Destination: iaas.RouteDestination{
 					DestinationCIDRv4: &iaas.DestinationCIDRv4{
-						Type:  utils.Ptr(testDestinationTypeFlag),
-						Value: utils.Ptr(testDestinationValueFlag),
+						Type:  testDestinationTypeFlag,
+						Value: testDestinationValueFlag,
 					},
 				},
-				Nexthop: &iaas.RouteNexthop{
+				Nexthop: iaas.RouteNexthop{
 					NexthopIPv4: &iaas.NexthopIPv4{
-						Type:  utils.Ptr(testNextHopTypeFlag),
-						Value: utils.Ptr(testNextHopValueFlag),
+						Type:  testNextHopTypeFlag,
+						Value: testNextHopValueFlag,
 					},
 				},
-				Labels: utils.ConvertStringMapToInterfaceMap(testLabels),
+				Labels: testLabels,
 			},
 		},
 	}
@@ -319,7 +319,7 @@ func TestParseInput(t *testing.T) {
 				flagValues[labelFlag] = "key=value"
 			}),
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
+				model.Labels = map[string]any{"key": "value"}
 			}),
 			isValid: true,
 		},
@@ -360,8 +360,8 @@ func TestBuildNextHop(t *testing.T) {
 			}),
 			expected: &iaas.RouteNexthop{
 				NexthopIPv4: &iaas.NexthopIPv4{
-					Type:  utils.Ptr(nextHopTypeIPv4),
-					Value: utils.Ptr("1.1.1.1"),
+					Type:  nextHopTypeIPv4,
+					Value: "1.1.1.1",
 				},
 			},
 		},
@@ -373,8 +373,8 @@ func TestBuildNextHop(t *testing.T) {
 			}),
 			expected: &iaas.RouteNexthop{
 				NexthopIPv6: &iaas.NexthopIPv6{
-					Type:  utils.Ptr(nextHopTypeIPv6),
-					Value: utils.Ptr("::1"),
+					Type:  nextHopTypeIPv6,
+					Value: "::1",
 				},
 			},
 		},
@@ -386,7 +386,7 @@ func TestBuildNextHop(t *testing.T) {
 			}),
 			expected: &iaas.RouteNexthop{
 				NexthopInternet: &iaas.NexthopInternet{
-					Type: utils.Ptr(nextHopTypeInternet),
+					Type: nextHopTypeInternet,
 				},
 			},
 		},
@@ -398,7 +398,7 @@ func TestBuildNextHop(t *testing.T) {
 			}),
 			expected: &iaas.RouteNexthop{
 				NexthopBlackhole: &iaas.NexthopBlackhole{
-					Type: utils.Ptr(nextHopTypeBlackhole),
+					Type: nextHopTypeBlackhole,
 				},
 			},
 		},
@@ -435,8 +435,8 @@ func TestBuildDestination(t *testing.T) {
 			}),
 			expected: &iaas.RouteDestination{
 				DestinationCIDRv4: &iaas.DestinationCIDRv4{
-					Type:  utils.Ptr(destTypeCIDRv4),
-					Value: utils.Ptr("192.168.1.0/24"),
+					Type:  destTypeCIDRv4,
+					Value: "192.168.1.0/24",
 				},
 			},
 		},
@@ -448,8 +448,8 @@ func TestBuildDestination(t *testing.T) {
 			}),
 			expected: &iaas.RouteDestination{
 				DestinationCIDRv6: &iaas.DestinationCIDRv6{
-					Type:  utils.Ptr(destTypeCIDRv6),
-					Value: utils.Ptr("2001:db8::/32"),
+					Type:  destTypeCIDRv6,
+					Value: "2001:db8::/32",
 				},
 			},
 		},
@@ -494,11 +494,11 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "optional labels provided",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Labels = utils.Ptr(map[string]string{"key": "value"})
+				model.Labels = map[string]any{"key": "value"}
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				*request = (*request).AddRoutesToRoutingTablePayload(fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
-					(*payload.Items)[0].Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(map[string]string{"key": "value"}))
+					payload.Items[0].Labels = map[string]any{"key": "value"}
 				}))
 			}),
 		},
@@ -512,21 +512,21 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				*request = (*request).AddRoutesToRoutingTablePayload(iaas.AddRoutesToRoutingTablePayload{
-					Items: &[]iaas.Route{
+					Items: []iaas.Route{
 						{
-							Destination: &iaas.RouteDestination{
+							Destination: iaas.RouteDestination{
 								DestinationCIDRv6: &iaas.DestinationCIDRv6{
-									Type:  utils.Ptr(destTypeCIDRv6),
-									Value: utils.Ptr("2001:db8::/32"),
+									Type:  destTypeCIDRv6,
+									Value: "2001:db8::/32",
 								},
 							},
-							Nexthop: &iaas.RouteNexthop{
+							Nexthop: iaas.RouteNexthop{
 								NexthopIPv6: &iaas.NexthopIPv6{
-									Type:  utils.Ptr(nextHopTypeIPv6),
-									Value: utils.Ptr("2001:db8::1"),
+									Type:  nextHopTypeIPv6,
+									Value: "2001:db8::1",
 								},
 							},
-							Labels: utils.ConvertStringMapToInterfaceMap(testLabels),
+							Labels: testLabels,
 						},
 					},
 				})
@@ -540,9 +540,9 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				payload := fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
-					(*payload.Items)[0].Nexthop = &iaas.RouteNexthop{
+					payload.Items[0].Nexthop = iaas.RouteNexthop{
 						NexthopInternet: &iaas.NexthopInternet{
-							Type: utils.Ptr(nextHopTypeInternet),
+							Type: nextHopTypeInternet,
 						},
 					}
 				})
@@ -557,9 +557,9 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				payload := fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
-					(*payload.Items)[0].Nexthop = &iaas.RouteNexthop{
+					payload.Items[0].Nexthop = iaas.RouteNexthop{
 						NexthopBlackhole: &iaas.NexthopBlackhole{
-							Type: utils.Ptr(nextHopTypeBlackhole),
+							Type: nextHopTypeBlackhole,
 						},
 					}
 				})
@@ -574,10 +574,10 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				payload := fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
-					(*payload.Items)[0].Nexthop = &iaas.RouteNexthop{
+					payload.Items[0].Nexthop = iaas.RouteNexthop{
 						NexthopIPv4: &iaas.NexthopIPv4{
-							Type:  utils.Ptr(nextHopTypeIPv4),
-							Value: utils.Ptr("1.2.3.4"),
+							Type:  nextHopTypeIPv4,
+							Value: "1.2.3.4",
 						},
 					}
 				})
@@ -592,10 +592,10 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutesToRoutingTableRequest) {
 				payload := fixturePayload(func(payload *iaas.AddRoutesToRoutingTablePayload) {
-					(*payload.Items)[0].Nexthop = &iaas.RouteNexthop{
+					payload.Items[0].Nexthop = iaas.RouteNexthop{
 						NexthopIPv6: &iaas.NexthopIPv6{
-							Type:  utils.Ptr(nextHopTypeIPv6),
-							Value: utils.Ptr("2001:db8::1"),
+							Type:  nextHopTypeIPv6,
+							Value: "2001:db8::1",
 						},
 					}
 				})
@@ -613,7 +613,7 @@ func TestBuildRequest(t *testing.T) {
 
 			if diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx)); diff != "" {
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{})); diff != "" {
 				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
 			}
 		})
@@ -623,19 +623,19 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	dummyRoute := iaas.Route{
 		Id: utils.Ptr("route-foo"),
-		Destination: &iaas.RouteDestination{
+		Destination: iaas.RouteDestination{
 			DestinationCIDRv4: &iaas.DestinationCIDRv4{
-				Type:  utils.Ptr(destTypeCIDRv4),
-				Value: utils.Ptr("10.0.0.0/24"),
+				Type:  destTypeCIDRv4,
+				Value: "10.0.0.0/24",
 			},
 		},
-		Nexthop: &iaas.RouteNexthop{
+		Nexthop: iaas.RouteNexthop{
 			NexthopIPv4: &iaas.NexthopIPv4{
-				Type:  utils.Ptr(nextHopTypeIPv4),
-				Value: utils.Ptr("10.0.0.1"),
+				Type:  nextHopTypeIPv4,
+				Value: "10.0.0.1",
 			},
 		},
-		Labels:    utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:    testLabels,
 		CreatedAt: utils.Ptr(time.Now()),
 		UpdatedAt: utils.Ptr(time.Now()),
 	}

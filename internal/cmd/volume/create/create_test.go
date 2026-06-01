@@ -54,16 +54,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		AvailabilityZone: utils.Ptr("eu01-1"),
+		AvailabilityZone: "eu01-1",
 		Name:             utils.Ptr("example-volume-name"),
 		Description:      utils.Ptr("example-volume-description"),
 		PerformanceClass: utils.Ptr("example-perf-class"),
 		Size:             utils.Ptr(int64(5)),
-		SourceId:         utils.Ptr(testSourceId),
-		SourceType:       utils.Ptr("example-source-type"),
-		Labels: utils.Ptr(map[string]string{
+		SourceId:         testSourceId,
+		SourceType:       "example-source-type",
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -72,7 +72,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
-	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateVolume(testCtx, testProjectId, testRegion)
 	request = request.CreateVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -81,9 +81,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.Api
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
-	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateVolume(testCtx, testProjectId, testRegion)
 	request = request.CreateVolumePayload(iaas.CreateVolumePayload{
-		AvailabilityZone: utils.Ptr("eu01-1"),
+		AvailabilityZone: "eu01-1",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -93,17 +93,17 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) 
 
 func fixturePayload(mods ...func(payload *iaas.CreateVolumePayload)) iaas.CreateVolumePayload {
 	payload := iaas.CreateVolumePayload{
-		AvailabilityZone: utils.Ptr("eu01-1"),
+		AvailabilityZone: "eu01-1",
 		Name:             utils.Ptr("example-volume-name"),
 		Description:      utils.Ptr("example-volume-description"),
 		PerformanceClass: utils.Ptr("example-perf-class"),
 		Size:             utils.Ptr(int64(5)),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Source: &iaas.VolumeSource{
-			Id:   utils.Ptr(testSourceId),
-			Type: utils.Ptr("example-source-type"),
+			Id:   testSourceId,
+			Type: "example-source-type",
 		},
 	}
 	for _, mod := range mods {
@@ -144,8 +144,8 @@ func TestParseInput(t *testing.T) {
 				model.Labels = nil
 				model.PerformanceClass = nil
 				model.Size = nil
-				model.SourceType = nil
-				model.SourceId = nil
+				model.SourceType = ""
+				model.SourceId = ""
 			}),
 		},
 		{
@@ -201,8 +201,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.SourceId = utils.Ptr(testSourceId)
-				model.SourceType = utils.Ptr("example-source-type")
+				model.SourceId = testSourceId
+				model.SourceType = "example-source-type"
 			}),
 		},
 	}
@@ -233,7 +233,7 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				AvailabilityZone: utils.Ptr("eu01-1"),
+				AvailabilityZone: "eu01-1",
 			},
 			expectedRequest: fixtureRequiredRequest(),
 		},
@@ -245,7 +245,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

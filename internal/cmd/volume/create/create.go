@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -36,14 +36,14 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	AvailabilityZone *string
+	AvailabilityZone string
 	Name             *string
 	Description      *string
-	Labels           *map[string]string
+	Labels           map[string]any
 	PerformanceClass *string
 	Size             *int64
-	SourceId         *string
-	SourceType       *string
+	SourceId         string
+	SourceType       string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -106,7 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating volume", func() error {
-					_, err = wait.CreateVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+					_, err = wait.CreateVolumeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -143,14 +143,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:  globalFlags,
-		AvailabilityZone: flags.FlagToStringPointer(p, cmd, availabilityZoneFlag),
+		AvailabilityZone: flags.FlagToStringValue(p, cmd, availabilityZoneFlag),
 		Name:             flags.FlagToStringPointer(p, cmd, nameFlag),
 		Description:      flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:           flags.FlagToStringToAny(p, cmd, labelFlag),
 		PerformanceClass: flags.FlagToStringPointer(p, cmd, performanceClassFlag),
 		Size:             flags.FlagToInt64Pointer(p, cmd, sizeFlag),
-		SourceId:         flags.FlagToStringPointer(p, cmd, sourceIdFlag),
-		SourceType:       flags.FlagToStringPointer(p, cmd, sourceTypeFlag),
+		SourceId:         flags.FlagToStringValue(p, cmd, sourceIdFlag),
+		SourceType:       flags.FlagToStringValue(p, cmd, sourceTypeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -158,7 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateVolumeRequest {
-	req := apiClient.CreateVolume(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateVolume(ctx, model.ProjectId, model.Region)
 	source := &iaas.VolumeSource{
 		Id:   model.SourceId,
 		Type: model.SourceType,
@@ -168,14 +168,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		AvailabilityZone: model.AvailabilityZone,
 		Name:             model.Name,
 		Description:      model.Description,
-		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:           model.Labels,
 		PerformanceClass: model.PerformanceClass,
 		Size:             model.Size,
 	}
 
-	if model.SourceId != nil && model.SourceType != nil {
-		payload.Source = source
-	}
+	payload.Source = source
 
 	return req.CreateVolumePayload(payload)
 }

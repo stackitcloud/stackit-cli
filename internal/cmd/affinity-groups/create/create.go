@@ -88,11 +88,11 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiCreateAffinityGroupRequest {
-	req := apiClient.CreateAffinityGroup(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateAffinityGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateAffinityGroupPayload(
 		iaas.CreateAffinityGroupPayload{
-			Name:   utils.Ptr(model.Name),
-			Policy: utils.Ptr(model.Policy),
+			Name:   model.Name,
+			Policy: model.Policy,
 		},
 	)
 	return req

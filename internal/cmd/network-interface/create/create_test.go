@@ -62,15 +62,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		NetworkId:        testNetworkId,
-		AllowedAddresses: utils.Ptr(allowedAddresses),
+		AllowedAddresses: allowedAddresses,
 		Ipv4:             utils.Ptr("1.2.3.4"),
 		Ipv6:             utils.Ptr("2001:0db8:85a3:08d3::0370:7344"),
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Name:           utils.Ptr("testNic"),
 		NicSecurity:    utils.Ptr(true),
-		SecurityGroups: utils.Ptr([]string{testSecurityGroup}),
+		SecurityGroups: []string{testSecurityGroup},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,7 +79,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNicRequest)) iaas.ApiCreateNicRequest {
-	request := testClient.CreateNic(testCtx, testProjectId, testRegion, testNetworkId)
+	request := testClient.DefaultAPI.CreateNic(testCtx, testProjectId, testRegion, testNetworkId)
 	request = request.CreateNicPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -94,15 +94,15 @@ func fixturePayload(mods ...func(payload *iaas.CreateNicPayload)) iaas.CreateNic
 		iaas.StringAsAllowedAddressesInner(utils.Ptr("9.9.9.9")),
 	}
 	payload := iaas.CreateNicPayload{
-		AllowedAddresses: utils.Ptr(allowedAddresses),
+		AllowedAddresses: allowedAddresses,
 		Ipv4:             utils.Ptr("1.2.3.4"),
 		Ipv6:             utils.Ptr("2001:0db8:85a3:08d3::0370:7344"),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		Name:           utils.Ptr("testNic"),
 		NicSecurity:    utils.Ptr(true),
-		SecurityGroups: utils.Ptr([]string{testSecurityGroup}),
+		SecurityGroups: []string{testSecurityGroup},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -223,7 +223,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

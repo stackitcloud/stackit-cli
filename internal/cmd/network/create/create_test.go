@@ -97,11 +97,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		Name:      utils.Ptr(testNetworkName),
+		Name:      testNetworkName,
 		NonRouted: testNonRouted,
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		RoutingTableID: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
@@ -113,11 +113,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureInputModelWithPrefix(mods ...func(model *inputModel)) *inputModel {
 	model := fixtureInputModel()
 
-	model.IPv4DnsNameServers = utils.Ptr(testIPv4NameServers)
+	model.IPv4DnsNameServers = testIPv4NameServers
 	model.IPv4Prefix = utils.Ptr(testIPv4Prefix)
 	model.IPv4Gateway = utils.Ptr(testIPv4Gateway)
 
-	model.IPv6DnsNameServers = utils.Ptr(testIPv6NameServers)
+	model.IPv6DnsNameServers = testIPv6NameServers
 	model.IPv6Prefix = utils.Ptr(testIPv6Prefix)
 	model.IPv6Gateway = utils.Ptr(testIPv6Gateway)
 
@@ -130,10 +130,10 @@ func fixtureInputModelWithPrefix(mods ...func(model *inputModel)) *inputModel {
 func fixtureInputModelWithPrefixLength(mods ...func(model *inputModel)) *inputModel {
 	model := fixtureInputModel()
 
-	model.IPv4DnsNameServers = utils.Ptr(testIPv4NameServers)
+	model.IPv4DnsNameServers = testIPv4NameServers
 	model.IPv4PrefixLength = utils.Ptr(testIPv4PrefixLength)
 
-	model.IPv6DnsNameServers = utils.Ptr(testIPv6NameServers)
+	model.IPv6DnsNameServers = testIPv6NameServers
 	model.IPv6PrefixLength = utils.Ptr(testIPv6PrefixLength)
 
 	for _, mod := range mods {
@@ -143,7 +143,7 @@ func fixtureInputModelWithPrefixLength(mods ...func(model *inputModel)) *inputMo
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
-	request := testClient.CreateNetwork(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion)
 	request = request.CreateNetworkPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -152,9 +152,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.Ap
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
-	request := testClient.CreateNetwork(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion)
 	request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
-		Name:   utils.Ptr(testNetworkName),
+		Name:   testNetworkName,
 		Routed: utils.Ptr(true),
 	})
 	for _, mod := range mods {
@@ -165,11 +165,11 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest))
 
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.CreateNetworkPayload {
 	payload := iaas.CreateNetworkPayload{
-		Name:   utils.Ptr("example-network-name"),
+		Name:   "example-network-name",
 		Routed: utils.Ptr(true),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 		RoutingTableId: utils.Ptr(testRoutingTableId),
 	}
 	for _, mod := range mods {
@@ -182,16 +182,16 @@ func fixturePayloadWithPrefix(mods ...func(payload *iaas.CreateNetworkPayload)) 
 	payload := fixturePayload()
 	payload.Ipv4 = &iaas.CreateNetworkIPv4{
 		CreateNetworkIPv4WithPrefix: &iaas.CreateNetworkIPv4WithPrefix{
-			Gateway:     iaas.NewNullableString(utils.Ptr(testIPv4Gateway)),
-			Nameservers: utils.Ptr(testIPv4NameServers),
-			Prefix:      utils.Ptr(testIPv4Prefix),
+			Gateway:     *iaas.NewNullableString(utils.Ptr(testIPv4Gateway)),
+			Nameservers: testIPv4NameServers,
+			Prefix:      testIPv4Prefix,
 		},
 	}
 	payload.Ipv6 = &iaas.CreateNetworkIPv6{
 		CreateNetworkIPv6WithPrefix: &iaas.CreateNetworkIPv6WithPrefix{
-			Nameservers: utils.Ptr(testIPv6NameServers),
-			Prefix:      utils.Ptr(testIPv6Prefix),
-			Gateway:     iaas.NewNullableString(utils.Ptr(testIPv6Gateway)),
+			Nameservers: testIPv6NameServers,
+			Prefix:      testIPv6Prefix,
+			Gateway:     *iaas.NewNullableString(utils.Ptr(testIPv6Gateway)),
 		},
 	}
 	for _, mod := range mods {
@@ -204,14 +204,14 @@ func fixturePayloadWithPrefixLength(mods ...func(payload *iaas.CreateNetworkPayl
 	payload := fixturePayload()
 	payload.Ipv4 = &iaas.CreateNetworkIPv4{
 		CreateNetworkIPv4WithPrefixLength: &iaas.CreateNetworkIPv4WithPrefixLength{
-			PrefixLength: utils.Ptr(testIPv4PrefixLength),
-			Nameservers:  utils.Ptr(testIPv4NameServers),
+			PrefixLength: testIPv4PrefixLength,
+			Nameservers:  testIPv4NameServers,
 		},
 	}
 	payload.Ipv6 = &iaas.CreateNetworkIPv6{
 		CreateNetworkIPv6WithPrefixLength: &iaas.CreateNetworkIPv6WithPrefixLength{
-			PrefixLength: utils.Ptr(testIPv6PrefixLength),
-			Nameservers:  utils.Ptr(testIPv6NameServers),
+			PrefixLength: testIPv6PrefixLength,
+			Nameservers:  testIPv6NameServers,
 		},
 	}
 	for _, mod := range mods {
@@ -249,7 +249,7 @@ func TestParseInput(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				Name: utils.Ptr(testNetworkName),
+				Name: testNetworkName,
 			},
 		},
 		{
@@ -517,7 +517,7 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				Name: utils.Ptr(testNetworkName),
+				Name: testNetworkName,
 			},
 			expectedRequest: fixtureRequiredRequest(),
 		},
@@ -543,11 +543,11 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				Name:      utils.Ptr(testNetworkName),
+				Name:      testNetworkName,
 				NonRouted: true,
 			},
-			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
-				Name:   utils.Ptr(testNetworkName),
+			expectedRequest: testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				Name:   testNetworkName,
 				Routed: utils.Ptr(false),
 			}),
 		},
@@ -559,11 +559,11 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				Name:           utils.Ptr(testNetworkName),
+				Name:           testNetworkName,
 				RoutingTableID: utils.Ptr(testRoutingTableId),
 			},
-			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
-				Name:           utils.Ptr(testNetworkName),
+			expectedRequest: testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
+				Name:           testNetworkName,
 				RoutingTableId: utils.Ptr(testRoutingTableId),
 				Routed:         utils.Ptr(true),
 			}),
@@ -576,15 +576,15 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				IPv4DnsNameServers: utils.Ptr([]string{"1.1.1.1"}),
+				IPv4DnsNameServers: []string{"1.1.1.1"},
 				IPv4PrefixLength:   utils.Ptr(int64(25)),
 			},
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
 				*request = (*request).CreateNetworkPayload(iaas.CreateNetworkPayload{
 					Ipv4: &iaas.CreateNetworkIPv4{
 						CreateNetworkIPv4WithPrefixLength: &iaas.CreateNetworkIPv4WithPrefixLength{
-							Nameservers:  utils.Ptr([]string{"1.1.1.1"}),
-							PrefixLength: utils.Ptr(int64(25)),
+							Nameservers:  []string{"1.1.1.1"},
+							PrefixLength: int64(25),
 						},
 					},
 					Routed: utils.Ptr(true),
@@ -600,8 +600,8 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
 				*request = (*request).CreateNetworkPayload(
 					fixturePayloadWithPrefix(func(payload *iaas.CreateNetworkPayload) {
-						payload.Ipv4.CreateNetworkIPv4WithPrefix.Gateway = iaas.NewNullableString(nil)
-						payload.Ipv6.CreateNetworkIPv6WithPrefix.Gateway = iaas.NewNullableString(nil)
+						payload.Ipv4.CreateNetworkIPv4WithPrefix.Gateway = *iaas.NewNullableString(nil)
+						payload.Ipv6.CreateNetworkIPv6WithPrefix.Gateway = *iaas.NewNullableString(nil)
 					}),
 				)
 			}),
@@ -614,16 +614,16 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 					Region:    testRegion,
 				},
-				IPv6DnsNameServers: utils.Ptr([]string{"2001:4860:4860::8888"}),
+				IPv6DnsNameServers: []string{"2001:4860:4860::8888"},
 				IPv6Prefix:         utils.Ptr("2001:4860:4860::8888"),
 				IPv6Gateway:        utils.Ptr("2001:4860:4860::8888"),
 			},
-			expectedRequest: testClient.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
+			expectedRequest: testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion).CreateNetworkPayload(iaas.CreateNetworkPayload{
 				Ipv6: &iaas.CreateNetworkIPv6{
 					CreateNetworkIPv6WithPrefix: &iaas.CreateNetworkIPv6WithPrefix{
-						Nameservers: utils.Ptr([]string{"2001:4860:4860::8888"}),
-						Prefix:      utils.Ptr("2001:4860:4860::8888"),
-						Gateway:     iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
+						Nameservers: []string{"2001:4860:4860::8888"},
+						Prefix:      "2001:4860:4860::8888",
+						Gateway:     *iaas.NewNullableString(utils.Ptr("2001:4860:4860::8888")),
 					},
 				},
 				Routed: utils.Ptr(true),
@@ -636,7 +636,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

@@ -30,7 +30,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	OrganizationId *string
 	NetworkAreaId  *string
-	NetworkRange   *string
+	NetworkRange   string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -59,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -78,11 +78,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create network range: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
+			if resp.Items == nil || len(resp.Items) == 0 {
 				return fmt.Errorf("empty response from API")
 			}
 
-			networkRange, err := iaasUtils.GetNetworkRangeFromAPIResponse(*model.NetworkRange, resp.Items)
+			networkRange, err := iaasUtils.GetNetworkRangeFromAPIResponse(model.NetworkRange, resp.Items)
 			if err != nil {
 				return err
 			}
@@ -110,7 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
 		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
-		NetworkRange:    flags.FlagToStringPointer(p, cmd, networkRangeFlag),
+		NetworkRange:    flags.FlagToStringValue(p, cmd, networkRangeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -118,9 +118,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRangeRequest {
-	req := apiClient.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
+	req := apiClient.DefaultAPI.CreateNetworkAreaRange(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 	payload := iaas.CreateNetworkAreaRangePayload{
-		Ipv4: &[]iaas.NetworkRange{
+		Ipv4: []iaas.NetworkRange{
 			{
 				Prefix: model.NetworkRange,
 			},

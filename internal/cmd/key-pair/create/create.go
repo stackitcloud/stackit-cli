@@ -26,8 +26,8 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Name      *string
-	PublicKey *string
-	Labels    *map[string]string
+	PublicKey string
+	Labels    map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -101,9 +101,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
-		PublicKey:       flags.FlagToStringPointer(p, cmd, publicKeyFlag),
+		PublicKey:       flags.FlagToStringValue(p, cmd, publicKeyFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -111,11 +111,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateKeyPairRequest {
-	req := apiClient.CreateKeyPair(ctx)
+	req := apiClient.DefaultAPI.CreateKeyPair(ctx)
 
 	payload := iaas.CreateKeyPairPayload{
 		Name:      model.Name,
-		Labels:    utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:    model.Labels,
 		PublicKey: model.PublicKey,
 	}
 

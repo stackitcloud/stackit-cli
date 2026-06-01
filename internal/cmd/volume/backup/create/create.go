@@ -37,7 +37,7 @@ type inputModel struct {
 	SourceID   string
 	SourceType string
 	Name       *string
-	Labels     map[string]string
+	Labels     map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -81,14 +81,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			switch model.SourceType {
 			case "volume":
-				name, err := iaasutils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
+				name, err := iaasutils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				} else if name != "" {
 					sourceLabel = name
 				}
 			case "snapshot":
-				name, err := iaasutils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SourceID)
+				name, err := iaasutils.GetSnapshotName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SourceID)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				} else if name != "" {
@@ -116,7 +116,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				resp, err = spinner.Run2(params.Printer, "Creating backup", func() (*iaas.Backup, error) {
-					return wait.CreateBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
+					return wait.CreateBackupWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, volumeId).WaitWithContext(ctx)
 				})
 				if err != nil {
 					return fmt.Errorf("wait for backup creation: %w", err)
@@ -155,9 +155,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	sourceType := flags.FlagToStringValue(p, cmd, sourceTypeFlag)
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
-		labels = &map[string]string{}
+		labels = map[string]any{}
 	}
 
 	model := inputModel{
@@ -165,7 +165,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		SourceID:        sourceID,
 		SourceType:      sourceType,
 		Name:            name,
-		Labels:          *labels,
+		Labels:          labels,
 	}
 
 	p.DebugInputModel(model)
@@ -173,14 +173,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateBackupRequest {
-	req := apiClient.CreateBackup(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateBackup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateBackupPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels)),
-		Source: &iaas.BackupSource{
-			Id:   &model.SourceID,
-			Type: &model.SourceType,
+		Labels: model.Labels,
+		Source: iaas.BackupSource{
+			Id:   model.SourceID,
+			Type: model.SourceType,
 		},
 	}
 

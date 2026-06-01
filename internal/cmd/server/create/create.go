@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -47,25 +47,25 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name                          *string
-	MachineType                   *string
+	Name                          string
+	MachineType                   string
 	AffinityGroup                 *string
 	AvailabilityZone              *string
 	AgentProvisioningPolicy       *string
-	BootVolumeSourceId            *string
-	BootVolumeSourceType          *string
+	BootVolumeSourceId            string
+	BootVolumeSourceType          string
 	BootVolumeSize                *int64
 	BootVolumePerformanceClass    *string
 	BootVolumeDeleteOnTermination *bool
 	ImageId                       *string
 	KeypairName                   *string
-	Labels                        *map[string]string
+	Labels                        map[string]any
 	NetworkId                     *string
-	NetworkInterfaceIds           *[]string
-	SecurityGroups                *[]string
-	ServiceAccountMails           *[]string
+	NetworkInterfaceIds           []string
+	SecurityGroups                []string
+	ServiceAccountMails           []string
 	UserData                      *string
-	Volumes                       *[]string
+	Volumes                       []string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -152,7 +152,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating server", func() error {
-					_, err = wait.CreateServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
+					_, err = wait.CreateServerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, serverId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -254,25 +254,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:               globalFlags,
-		Name:                          flags.FlagToStringPointer(p, cmd, nameFlag),
-		MachineType:                   flags.FlagToStringPointer(p, cmd, machineTypeFlag),
+		Name:                          flags.FlagToStringValue(p, cmd, nameFlag),
+		MachineType:                   flags.FlagToStringValue(p, cmd, machineTypeFlag),
 		AffinityGroup:                 flags.FlagToStringPointer(p, cmd, affinityGroupFlag),
 		AvailabilityZone:              flags.FlagToStringPointer(p, cmd, availabilityZoneFlag),
 		AgentProvisioningPolicy:       flags.FlagToStringPointer(p, cmd, agentProvisioningPolicyFlag),
-		BootVolumeSourceId:            flags.FlagToStringPointer(p, cmd, bootVolumeSourceIdFlag),
-		BootVolumeSourceType:          flags.FlagToStringPointer(p, cmd, bootVolumeSourceTypeFlag),
+		BootVolumeSourceId:            flags.FlagToStringValue(p, cmd, bootVolumeSourceIdFlag),
+		BootVolumeSourceType:          flags.FlagToStringValue(p, cmd, bootVolumeSourceTypeFlag),
 		BootVolumeSize:                flags.FlagToInt64Pointer(p, cmd, bootVolumeSizeFlag),
 		BootVolumePerformanceClass:    flags.FlagToStringPointer(p, cmd, bootVolumePerformanceClassFlag),
 		BootVolumeDeleteOnTermination: flags.FlagToBoolPointer(p, cmd, bootVolumeDeleteOnTerminationFlag),
 		ImageId:                       flags.FlagToStringPointer(p, cmd, imageIdFlag),
 		KeypairName:                   flags.FlagToStringPointer(p, cmd, keypairNameFlag),
-		Labels:                        flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:                        flags.FlagToStringToAny(p, cmd, labelFlag),
 		NetworkId:                     flags.FlagToStringPointer(p, cmd, networkIdFlag),
-		NetworkInterfaceIds:           flags.FlagToStringSlicePointer(p, cmd, networkInterfaceIdsFlag),
-		SecurityGroups:                flags.FlagToStringSlicePointer(p, cmd, securityGroupsFlag),
-		ServiceAccountMails:           flags.FlagToStringSlicePointer(p, cmd, serviceAccountEmailsFlag),
+		NetworkInterfaceIds:           flags.FlagToStringSliceValue(p, cmd, networkInterfaceIdsFlag),
+		SecurityGroups:                flags.FlagToStringSliceValue(p, cmd, securityGroupsFlag),
+		ServiceAccountMails:           flags.FlagToStringSliceValue(p, cmd, serviceAccountEmailsFlag),
 		UserData:                      flags.FlagToStringPointer(p, cmd, userDataFlag),
-		Volumes:                       flags.FlagToStringSlicePointer(p, cmd, volumesFlag),
+		Volumes:                       flags.FlagToStringSliceValue(p, cmd, volumesFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -280,12 +280,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateServerRequest {
-	req := apiClient.CreateServer(ctx, model.ProjectId, model.Region)
-
-	var userData *[]byte
-	if model.UserData != nil {
-		userData = utils.Ptr([]byte(*model.UserData))
-	}
+	req := apiClient.DefaultAPI.CreateServer(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateServerPayload{
 		Name:             model.Name,
@@ -297,9 +292,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		KeypairName:         model.KeypairName,
 		SecurityGroups:      model.SecurityGroups,
 		ServiceAccountMails: model.ServiceAccountMails,
-		UserData:            userData,
+		UserData:            model.UserData,
 		Volumes:             model.Volumes,
-		Labels:              utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:              model.Labels,
 	}
 
 	if model.AgentProvisioningPolicy != nil {
@@ -311,8 +306,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
-	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || model.BootVolumeSourceId != nil || model.BootVolumeSourceType != nil {
-		payload.BootVolume = &iaas.ServerBootVolume{
+	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil {
+		payload.BootVolume = &iaas.BootVolume{
 			PerformanceClass:    model.BootVolumePerformanceClass,
 			Size:                model.BootVolumeSize,
 			DeleteOnTermination: model.BootVolumeDeleteOnTermination,
@@ -324,7 +319,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.NetworkInterfaceIds != nil || model.NetworkId != nil {
-		payload.Networking = &iaas.CreateServerPayloadAllOfNetworking{}
+		payload.Networking = iaas.CreateServerPayloadAllOfNetworking{}
 
 		if model.NetworkInterfaceIds != nil {
 			payload.Networking.CreateServerNetworkingWithNics = &iaas.CreateServerNetworkingWithNics{

@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -37,10 +37,10 @@ type inputModel struct {
 	OrganizationId string
 	NetworkAreaId  string
 
-	IPv4DefaultNameservers  *[]string
-	IPv4DefaultPrefixLength *int64
-	IPv4MaxPrefixLength     *int64
-	IPv4MinPrefixLength     *int64
+	IPv4DefaultNameservers  []string
+	IPv4DefaultPrefixLength int64
+	IPv4MaxPrefixLength     int64
+	IPv4MinPrefixLength     int64
 	IPv4NetworkRanges       []string
 	IPv4TransferNetwork     string
 }
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.NetworkAreaId
@@ -109,7 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Create network area region", func() error {
-					_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+					_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -148,10 +148,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel:         globalFlags,
 		NetworkAreaId:           flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		OrganizationId:          flags.FlagToStringValue(p, cmd, organizationIdFlag),
-		IPv4DefaultNameservers:  flags.FlagToStringSlicePointer(p, cmd, ipv4DefaultNameservers),
-		IPv4DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, ipv4DefaultPrefixLengthFlag),
-		IPv4MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, ipv4MaxPrefixLengthFlag),
-		IPv4MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, ipv4MinPrefixLengthFlag),
+		IPv4DefaultNameservers:  flags.FlagToStringSliceValue(p, cmd, ipv4DefaultNameservers),
+		IPv4DefaultPrefixLength: flags.FlagWithDefaultToInt64Value(p, cmd, ipv4DefaultPrefixLengthFlag),
+		IPv4MaxPrefixLength:     flags.FlagWithDefaultToInt64Value(p, cmd, ipv4MaxPrefixLengthFlag),
+		IPv4MinPrefixLength:     flags.FlagWithDefaultToInt64Value(p, cmd, ipv4MinPrefixLengthFlag),
 		IPv4NetworkRanges:       flags.FlagToStringSliceValue(p, cmd, ipv4NetworkRangesFlag),
 		IPv4TransferNetwork:     flags.FlagToStringValue(p, cmd, ipv4TransferNetworkFlag),
 	}
@@ -161,14 +161,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRegionRequest {
-	req := apiClient.CreateNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	req := apiClient.DefaultAPI.CreateNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 
 	var networkRange []iaas.NetworkRange
 	if len(model.IPv4NetworkRanges) > 0 {
 		networkRange = make([]iaas.NetworkRange, len(model.IPv4NetworkRanges))
 		for i := range model.IPv4NetworkRanges {
 			networkRange[i] = iaas.NetworkRange{
-				Prefix: utils.Ptr(model.IPv4NetworkRanges[i]),
+				Prefix: model.IPv4NetworkRanges[i],
 			}
 		}
 	}
@@ -179,8 +179,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			DefaultPrefixLen:   model.IPv4DefaultPrefixLength,
 			MaxPrefixLen:       model.IPv4MaxPrefixLength,
 			MinPrefixLen:       model.IPv4MinPrefixLength,
-			NetworkRanges:      utils.Ptr(networkRange),
-			TransferNetwork:    utils.Ptr(model.IPv4TransferNetwork),
+			NetworkRanges:      networkRange,
+			TransferNetwork:    model.IPv4TransferNetwork,
 		},
 	}
 	return req.CreateNetworkAreaRegionPayload(payload)

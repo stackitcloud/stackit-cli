@@ -21,7 +21,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 )
 
 const (
@@ -34,7 +34,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	VolumeID string
 	Name     *string
-	Labels   map[string]string
+	Labels   map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get volume name for label
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeID)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeID
@@ -96,7 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				resp, err = spinner.Run2(params.Printer, "Creating snapshot", func() (*iaas.Snapshot, error) {
-					return wait.CreateSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
+					return wait.CreateSnapshotWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *resp.Id).WaitWithContext(ctx)
 				})
 				if err != nil {
 					return fmt.Errorf("wait for snapshot creation: %w", err)
@@ -134,16 +134,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	volumeID := flags.FlagToStringValue(p, cmd, volumeIdFlag)
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
-		labels = &map[string]string{}
+		labels = map[string]any{}
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		VolumeID:        volumeID,
 		Name:            name,
-		Labels:          *labels,
+		Labels:          labels,
 	}
 
 	p.DebugInputModel(model)
@@ -151,11 +151,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSnapshotRequest {
-	req := apiClient.CreateSnapshot(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateSnapshot(ctx, model.ProjectId, model.Region)
 	payload := iaas.NewCreateSnapshotPayloadWithDefaults()
-	payload.VolumeId = &model.VolumeID
+	payload.VolumeId = model.VolumeID
 	payload.Name = model.Name
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels))
+	payload.Labels = model.Labels
 
 	req = req.CreateSnapshotPayload(*payload)
 	return req

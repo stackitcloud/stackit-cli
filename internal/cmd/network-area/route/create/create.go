@@ -56,7 +56,7 @@ type inputModel struct {
 	NexthopV6        *string
 	NexthopBlackhole *bool
 	NexthopInternet  *bool
-	Labels           *map[string]string
+	Labels           map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -92,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -111,7 +111,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create static route: %w", err)
 			}
 
-			if resp.Items == nil || len(*resp.Items) == 0 {
+			if resp.Items == nil || len(resp.Items) == 0 {
 				return fmt.Errorf("empty response from API")
 			}
 
@@ -225,7 +225,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		NexthopV6:        nexthopIPv6,
 		NexthopBlackhole: nexthopBlackhole,
 		NexthopInternet:  nexthopInternet,
-		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:           flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -233,20 +233,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRouteRequest {
-	req := apiClient.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
+	req := apiClient.DefaultAPI.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 
 	var destinationV4 *iaas.DestinationCIDRv4
 	var destinationV6 *iaas.DestinationCIDRv6
 	if model.DestinationV4 != nil {
 		destinationV4 = &iaas.DestinationCIDRv4{
-			Type:  utils.Ptr(destinationCIDRv4Type),
-			Value: model.DestinationV4,
+			Type:  destinationCIDRv4Type,
+			Value: *model.DestinationV4,
 		}
 	}
 	if model.DestinationV6 != nil {
 		destinationV6 = &iaas.DestinationCIDRv6{
-			Type:  utils.Ptr(destinationCIDRv6Type),
-			Value: model.DestinationV6,
+			Type:  destinationCIDRv6Type,
+			Value: *model.DestinationV6,
 		}
 	}
 
@@ -257,38 +257,38 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	if model.NexthopV4 != nil {
 		nexthopIPv4 = &iaas.NexthopIPv4{
-			Type:  utils.Ptr(nexthopIPv4Type),
-			Value: model.NexthopV4,
+			Type:  nexthopIPv4Type,
+			Value: *model.NexthopV4,
 		}
 	} else if model.NexthopV6 != nil {
 		nexthopIPv6 = &iaas.NexthopIPv6{
-			Type:  utils.Ptr(nexthopIPv6Type),
-			Value: model.NexthopV6,
+			Type:  nexthopIPv6Type,
+			Value: *model.NexthopV6,
 		}
 	} else if model.NexthopBlackhole != nil {
 		nexthopBlackhole = &iaas.NexthopBlackhole{
-			Type: utils.Ptr(nexthopBlackholeType),
+			Type: nexthopBlackholeType,
 		}
 	} else if model.NexthopInternet != nil {
 		nexthopInternet = &iaas.NexthopInternet{
-			Type: utils.Ptr(nexthopInternetType),
+			Type: nexthopInternetType,
 		}
 	}
 
 	payload := iaas.CreateNetworkAreaRoutePayload{
-		Items: &[]iaas.Route{
+		Items: []iaas.Route{
 			{
-				Destination: &iaas.RouteDestination{
+				Destination: iaas.RouteDestination{
 					DestinationCIDRv4: destinationV4,
 					DestinationCIDRv6: destinationV6,
 				},
-				Nexthop: &iaas.RouteNexthop{
+				Nexthop: iaas.RouteNexthop{
 					NexthopIPv4:      nexthopIPv4,
 					NexthopIPv6:      nexthopIPv6,
 					NexthopBlackhole: nexthopBlackhole,
 					NexthopInternet:  nexthopInternet,
 				},
-				Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+				Labels: model.Labels,
 			},
 		},
 	}
