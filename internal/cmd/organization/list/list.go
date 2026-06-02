@@ -9,7 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -78,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list organizations: empty response")
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, utils.PtrValue(resp.Items))
+			return outputResult(params.Printer, model.OutputFormat, resp.Items)
 		},
 	}
 	configureFlags(cmd)
@@ -110,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiListOrganizationsRequest {
-	req := apiClient.ListOrganizations(ctx)
+	req := apiClient.DefaultAPI.ListOrganizations(ctx)
 	req = req.Member(model.Member)
 	if model.Limit != nil {
 		req = req.Limit(float32(*model.Limit))
@@ -130,9 +129,9 @@ func outputResult(p *print.Printer, outputFormat string, organizations []resourc
 
 		for _, organization := range organizations {
 			table.AddRow(
-				utils.PtrString(organization.OrganizationId),
-				utils.PtrString(organization.Name),
-				utils.PtrString(organization.ContainerId),
+				organization.OrganizationId,
+				organization.Name,
+				organization.ContainerId,
 			)
 			table.AddSeparator()
 		}

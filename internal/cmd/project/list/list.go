@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -78,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Fetch projects
-			projects, err := fetchProjects(ctx, model, apiClient)
+			projects, err := fetchProjects(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -219,15 +218,11 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 		for i := range projects {
 			p := projects[i]
 
-			var parentId *string
-			if p.Parent != nil {
-				parentId = p.Parent.Id
-			}
 			table.AddRow(
-				utils.PtrString(p.ProjectId),
-				utils.PtrString(p.Name),
-				utils.PtrString(p.LifecycleState),
-				utils.PtrString(parentId),
+				p.ProjectId,
+				p.Name,
+				p.LifecycleState,
+				p.Parent.Id,
 			)
 		}
 

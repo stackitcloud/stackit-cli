@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -84,7 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiGetOrganizationRequest {
-	req := apiClient.GetOrganization(ctx, model.OrganizationId)
+	req := apiClient.DefaultAPI.GetOrganization(ctx, model.OrganizationId)
 	return req
 }
 
@@ -97,17 +97,17 @@ func outputResult(p *print.Printer, outputFormat string, organization *resourcem
 
 		table := tables.NewTable()
 
-		table.AddRow("ORGANIZATION ID", utils.PtrString(organization.OrganizationId))
+		table.AddRow("ORGANIZATION ID", organization.OrganizationId)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(organization.Name))
+		table.AddRow("NAME", organization.Name)
 		table.AddSeparator()
-		table.AddRow("CONTAINER ID", utils.PtrString(organization.ContainerId))
+		table.AddRow("CONTAINER ID", organization.ContainerId)
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(organization.LifecycleState))
+		table.AddRow("STATUS", organization.LifecycleState)
 		table.AddSeparator()
-		table.AddRow("CREATION TIME", utils.PtrString(organization.CreationTime))
+		table.AddRow("CREATION TIME", organization.CreationTime)
 		table.AddSeparator()
-		table.AddRow("UPDATE TIME", utils.PtrString(organization.UpdateTime))
+		table.AddRow("UPDATE TIME", organization.UpdateTime)
 		table.AddSeparator()
 		table.AddRow("LABELS", utils.JoinStringMap(utils.PtrValue(organization.Labels), ": ", ", "))
 

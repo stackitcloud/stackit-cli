@@ -103,7 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			var orgLabel string
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
-				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient, model.OrganizationId)
+				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient.DefaultAPI, model.OrganizationId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
 					orgLabel = model.OrganizationId
