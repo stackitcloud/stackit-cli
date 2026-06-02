@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -26,18 +26,21 @@ type resourceManagerClientMocked struct {
 	getProjectResp       *resourcemanager.GetProjectResponse
 }
 
-func (s *resourceManagerClientMocked) GetOrganizationExecute(_ context.Context, _ string) (*resourcemanager.OrganizationResponse, error) {
-	if s.getOrganizationFails {
-		return nil, fmt.Errorf("could not get organization")
+func (s *resourceManagerClientMocked) newMock() resourcemanager.DefaultAPI {
+	return resourcemanager.DefaultAPIServiceMock{
+		GetOrganizationExecuteMock: utils.Ptr(func(_ resourcemanager.ApiGetOrganizationRequest) (*resourcemanager.OrganizationResponse, error) {
+			if s.getOrganizationFails {
+				return nil, fmt.Errorf("could not get organization")
+			}
+			return s.getOrganizationResp, nil
+		}),
+		GetProjectExecuteMock: utils.Ptr(func(_ resourcemanager.ApiGetProjectRequest) (*resourcemanager.GetProjectResponse, error) {
+			if s.getProjectFails {
+				return nil, fmt.Errorf("could not get project")
+			}
+			return s.getProjectResp, nil
+		}),
 	}
-	return s.getOrganizationResp, nil
-}
-
-func (s *resourceManagerClientMocked) GetProjectExecute(_ context.Context, _ string) (*resourcemanager.GetProjectResponse, error) {
-	if s.getProjectFails {
-		return nil, fmt.Errorf("could not get project")
-	}
-	return s.getProjectResp, nil
 }
 
 func TestGetOrganizationName(t *testing.T) {
@@ -51,7 +54,7 @@ func TestGetOrganizationName(t *testing.T) {
 		{
 			description: "base",
 			getOrganizationResp: &resourcemanager.OrganizationResponse{
-				Name: utils.Ptr(testOrgName),
+				Name: testOrgName,
 			},
 			isValid:        true,
 			expectedOutput: testOrgName,
@@ -70,7 +73,7 @@ func TestGetOrganizationName(t *testing.T) {
 				getOrganizationResp:  tt.getOrganizationResp,
 			}
 
-			output, err := GetOrganizationName(context.Background(), client, testOrgId)
+			output, err := GetOrganizationName(context.Background(), client.newMock(), testOrgId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -99,7 +102,7 @@ func TestGetProjectName(t *testing.T) {
 		{
 			description: "base",
 			getProjectResp: &resourcemanager.GetProjectResponse{
-				Name: utils.Ptr("project"),
+				Name: "project",
 			},
 			isValid:        true,
 			expectedOutput: "project",
@@ -118,7 +121,7 @@ func TestGetProjectName(t *testing.T) {
 				getProjectResp:  tt.getProjectResp,
 			}
 
-			output, err := GetProjectName(context.Background(), client, testOrgId)
+			output, err := GetProjectName(context.Background(), client.newMock(), testOrgId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

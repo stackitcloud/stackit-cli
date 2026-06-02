@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 const (
@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiGetProjectRequest {
-	req := apiClient.GetProject(ctx, model.ArgProjectId)
+	req := apiClient.DefaultAPI.GetProject(ctx, model.ArgProjectId)
 	req.IncludeParents(model.IncludeParents)
 	return req
 }
@@ -117,17 +117,15 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 
 	return p.OutputResult(outputFormat, project, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(project.ProjectId))
+		table.AddRow("ID", project.ProjectId)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(project.Name))
+		table.AddRow("NAME", project.Name)
 		table.AddSeparator()
-		table.AddRow("CREATION", utils.PtrString(project.CreationTime))
+		table.AddRow("CREATION", project.CreationTime)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(project.LifecycleState))
+		table.AddRow("STATE", project.LifecycleState)
 		table.AddSeparator()
-		if project.Parent != nil {
-			table.AddRow("PARENT ID", utils.PtrString(project.Parent.Id))
-		}
+		table.AddRow("PARENT ID", project.Parent.Id)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

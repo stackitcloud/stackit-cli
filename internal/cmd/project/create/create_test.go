@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 var testParentId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
 var testEmail = "email"
@@ -41,8 +41,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
-		ParentId:        utils.Ptr(testParentId),
-		Name:            utils.Ptr(nameFlag),
+		ParentId:        testParentId,
+		Name:            nameFlag,
 		Labels: utils.Ptr(map[string]string{
 			"key": "value",
 		}),
@@ -56,16 +56,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *resourcemanager.CreateProjectPayload)) resourcemanager.CreateProjectPayload {
 	payload := resourcemanager.CreateProjectPayload{
-		ContainerParentId: utils.Ptr(testParentId),
-		Name:              utils.Ptr(nameFlag),
+		ContainerParentId: testParentId,
+		Name:              nameFlag,
 		Labels: utils.Ptr(map[string]string{
 			"key":            "value",
 			networkAreaLabel: testNetworkAreaId,
 		}),
-		Members: &[]resourcemanager.Member{
+		Members: []resourcemanager.Member{
 			{
-				Role:    utils.Ptr(ownerRole),
-				Subject: utils.Ptr(testEmail),
+				Role:    ownerRole,
+				Subject: testEmail,
 			},
 		},
 	}
@@ -76,7 +76,7 @@ func fixturePayload(mods ...func(payload *resourcemanager.CreateProjectPayload))
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectRequest)) resourcemanager.ApiCreateProjectRequest {
-	request := testClient.CreateProject(testCtx)
+	request := testClient.DefaultAPI.CreateProject(testCtx)
 	request = request.CreateProjectPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -306,7 +306,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -14,13 +14,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 
 var (
 	testOrganizationId = uuid.NewString()
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiGetOrganizationRequest)) resourcemanager.ApiGetOrganizationRequest {
-	request := testClient.GetOrganization(testCtx, testOrganizationId)
+	request := testClient.DefaultAPI.GetOrganization(testCtx, testOrganizationId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -120,7 +120,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -162,12 +162,12 @@ func TestOutputResult(t *testing.T) {
 			name: "full response",
 			args: args{
 				organization: utils.Ptr(resourcemanager.OrganizationResponse{
-					OrganizationId: utils.Ptr(uuid.NewString()),
-					Name:           utils.Ptr("foo bar"),
-					LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_ACTIVE),
-					ContainerId:    utils.Ptr("foo-bar-organization"),
-					CreationTime:   utils.Ptr(time.Now()),
-					UpdateTime:     utils.Ptr(time.Now()),
+					OrganizationId: uuid.NewString(),
+					Name:           "foo bar",
+					LifecycleState: resourcemanager.LIFECYCLESTATE_ACTIVE,
+					ContainerId:    "foo-bar-organization",
+					CreationTime:   time.Now(),
+					UpdateTime:     time.Now(),
 					Labels: utils.Ptr(map[string]string{
 						"foo": "true",
 						"bar": "false",

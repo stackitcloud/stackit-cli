@@ -8,12 +8,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testProjectId2 = uuid.NewString()
 
@@ -61,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiGetProjectRequest)) resourcemanager.ApiGetProjectRequest {
-	request := testClient.GetProject(testCtx, testProjectId)
+	request := testClient.DefaultAPI.GetProject(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -162,7 +161,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -184,11 +183,11 @@ func Test_outputResult(t *testing.T) {
 		{"empty", args{}, true},
 		{"base", args{"", &resourcemanager.GetProjectResponse{}}, false},
 		{"complete", args{"", &resourcemanager.GetProjectResponse{
-			ProjectId:      utils.Ptr("4711"),
-			Name:           utils.Ptr("name"),
-			CreationTime:   utils.Ptr(time.Now()),
-			LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_CREATING),
-			Parent:         &resourcemanager.Parent{Id: utils.Ptr("parent id")},
+			ProjectId:      "4711",
+			Name:           "name",
+			CreationTime:   time.Now(),
+			LifecycleState: resourcemanager.LIFECYCLESTATE_CREATING,
+			Parent:         resourcemanager.Parent{Id: "parent id"},
 		},
 		}, false},
 	}
