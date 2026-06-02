@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 type inputModel struct {
@@ -94,6 +94,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiDeleteProjectRequest {
-	req := apiClient.DeleteProject(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.DeleteProject(ctx, model.ProjectId)
 	return req
 }

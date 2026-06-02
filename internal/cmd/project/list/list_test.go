@@ -16,7 +16,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -27,7 +27,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 var testParentId = uuid.NewString()
 var testProjectIdLike = uuid.NewString()
 var testCreationTimeAfter = "2023-01-01T00:00:00Z"
@@ -64,12 +64,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiListProjectsRequest)) resourcemanager.ApiListProjectsRequest {
-	request := testClient.ListProjects(testCtx)
+	request := testClient.DefaultAPI.ListProjects(testCtx)
 	request = request.ContainerParentId(testParentId)
 
 	testCreationTimeAfter, err := time.Parse(creationTimeAfterFormat, testCreationTimeAfter)
 	if err != nil {
-		return resourcemanager.ListProjectsRequest{}
+		return resourcemanager.ApiListProjectsRequest{}
 	}
 	request = request.CreationTimeStart(testCreationTimeAfter)
 	request = request.Member("member")
@@ -246,7 +246,7 @@ func TestBuildRequest(t *testing.T) {
 				PageSize: pageSizeDefault,
 			},
 			offset:          1,
-			expectedRequest: testClient.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault).Member(authUserEmail),
+			expectedRequest: testClient.DefaultAPI.ListProjects(testCtx).Offset(1).Limit(pageSizeDefault).Member(authUserEmail),
 		},
 		{
 			description:     "projectIdLike set",
@@ -262,14 +262,14 @@ func TestBuildRequest(t *testing.T) {
 			if tt.projectIdLike != nil {
 				tt.model.ProjectIdLike = tt.projectIdLike
 			}
-			request, err := buildRequest(testCtx, tt.model, testClient, tt.offset)
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI, tt.offset)
 			if err != nil {
 				t.Fatalf("Failed to build request: %v", err)
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -404,7 +404,7 @@ func TestFetchProjects(t *testing.T) {
 
 				projects := make([]resourcemanager.Project, numItemsToReturn)
 				mockedResp := resourcemanager.ListProjectsResponse{
-					Items: &projects,
+					Items: projects,
 				}
 
 				mockedRespBytes, err := json.Marshal(mockedResp)
@@ -427,7 +427,7 @@ func TestFetchProjects(t *testing.T) {
 				t.Fatalf("Failed to initialize client: %v", err)
 			}
 
-			projects, err := fetchProjects(testCtx, tt.model, client)
+			projects, err := fetchProjects(testCtx, tt.model, client.DefaultAPI)
 			if err != nil {
 				if !tt.apiCallFails {
 					t.Fatalf("did not fail on invalid input")
@@ -461,26 +461,26 @@ func Test_outputResult(t *testing.T) {
 		{"base", args{"", []resourcemanager.Project{{}}}, false},
 		{"complete", args{"", []resourcemanager.Project{
 			{
-				ContainerId:    utils.Ptr("container-id1"),
-				CreationTime:   utils.Ptr(time.Now()),
+				ContainerId:    "container-id1",
+				CreationTime:   time.Now(),
 				Labels:         &map[string]string{"foo": "bar"},
-				LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_CREATING),
-				Name:           utils.Ptr("some name"),
-				Parent: &resourcemanager.Parent{
-					Id: utils.Ptr("parent-id"),
+				LifecycleState: resourcemanager.LIFECYCLESTATE_CREATING,
+				Name:           "some name",
+				Parent: resourcemanager.Parent{
+					Id: "parent-id",
 				},
-				ProjectId: utils.Ptr("project-id1"),
+				ProjectId: "project-id1",
 			},
 			{
-				ContainerId:    utils.Ptr("container-id2"),
-				CreationTime:   utils.Ptr(time.Now()),
+				ContainerId:    "container-id2",
+				CreationTime:   time.Now(),
 				Labels:         &map[string]string{"foo": "bar"},
-				LifecycleState: utils.Ptr(resourcemanager.LIFECYCLESTATE_CREATING),
-				Name:           utils.Ptr("some name"),
-				Parent: &resourcemanager.Parent{
-					Id: utils.Ptr("parent-id"),
+				LifecycleState: resourcemanager.LIFECYCLESTATE_CREATING,
+				Name:           "some name",
+				Parent: resourcemanager.Parent{
+					Id: "parent-id",
 				},
-				ProjectId: utils.Ptr("project-id2"),
+				ProjectId: "project-id2",
 			},
 		}}, false},
 	}

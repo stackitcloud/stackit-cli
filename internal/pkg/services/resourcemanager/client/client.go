@@ -6,7 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*resourcemanager.APIClient, error) {

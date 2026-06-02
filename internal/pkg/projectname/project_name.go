@@ -35,7 +35,7 @@ func GetProjectName(ctx context.Context, p *print.Printer, cliVersion string, cm
 		return "", fmt.Errorf("configure resource manager client: %w", err)
 	}
 
-	projectName, err := utils.GetProjectName(ctx, apiClient, projectId)
+	projectName, err := utils.GetProjectName(ctx, apiClient.DefaultAPI, projectId)
 	if err != nil {
 		return "", fmt.Errorf("get project name: %w", err)
 	}

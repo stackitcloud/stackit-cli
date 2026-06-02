@@ -15,10 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 const (
@@ -35,8 +34,8 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	ParentId      *string
-	Name          *string
+	ParentId      string
+	Name          string
 	Labels        *map[string]string
 	NetworkAreaId *string
 }
@@ -77,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %q?", *model.ParentId)
+			prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %q?", model.ParentId)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -136,8 +135,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		ParentId:        flags.FlagToStringPointer(p, cmd, parentIdFlag),
-		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		ParentId:        flags.FlagToStringValue(p, cmd, parentIdFlag),
+		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
 		Labels:          labels,
 		NetworkAreaId:   flags.FlagToStringPointer(p, cmd, networkAreaIdFlag),
 	}
@@ -147,7 +146,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) (resourcemanager.ApiCreateProjectRequest, error) {
-	req := apiClient.CreateProject(ctx)
+	req := apiClient.DefaultAPI.CreateProject(ctx)
 
 	authFlow, err := auth.GetAuthFlow()
 	if err != nil {
@@ -191,10 +190,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 		ContainerParentId: model.ParentId,
 		Name:              model.Name,
 		Labels:            labels,
-		Members: &[]resourcemanager.Member{
+		Members: []resourcemanager.Member{
 			{
-				Role:    utils.Ptr(ownerRole),
-				Subject: utils.Ptr(email),
+				Role:    ownerRole,
+				Subject: email,
 			},
 		},
 	})
@@ -210,7 +209,7 @@ func outputResult(p *print.Printer, model inputModel, resp *resourcemanager.Proj
 		return fmt.Errorf("globalflags are empty")
 	}
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", utils.PtrString(model.ParentId), utils.PtrString(resp.ProjectId))
+		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", model.ParentId, resp.ProjectId)
 		return nil
 	})
 }
