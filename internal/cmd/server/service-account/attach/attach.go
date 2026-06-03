@@ -3,6 +3,7 @@ package attach
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -23,6 +24,8 @@ const (
 	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL"
 
 	serverIdFlag = "server-id"
+
+	serviceAccFlag = "service-account-email"
 )
 
 type inputModel struct {
@@ -33,14 +36,14 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("attach %s", serviceAccMailArg),
+		Use:   fmt.Sprintf("attach"),
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
-		Args:  args.SingleArg(serviceAccMailArg, nil),
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed 2027-01
 		Example: examples.Build(
 			examples.NewExample(
 				`Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"`,
-				"$ stackit server service-account attach xxx@sa.stackit.cloud --server-id yyy",
+				"$ stackit server service-account attach --service-account-email xxx@sa.stackit.cloud --server-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -85,16 +88,29 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
-
+	cmd.Flags().StringP(serviceAccFlag, "a", "", "Service Account Email")
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	serviceAccMail := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	var serviceAccMail string
+	if cmd.Flags().Changed(serviceAccFlag) {
+		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
+	} else if len(inputArgs) > 0 {
+		serviceAccMail = inputArgs[0]
+		p.Warn("using a positional argument for the service account email is deprecated and will be removed in 2027-01. Please use '--%s' instead.\n", serviceAccFlag)
+	} else {
+		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or as a positional argument`, serviceAccFlag)
+	}
+
+	if serviceAccMail == "" || !strings.Contains(serviceAccMail, "@") {
+		return nil, fmt.Errorf("invalid service account email format: %q", serviceAccMail)
 	}
 
 	model := inputModel{
