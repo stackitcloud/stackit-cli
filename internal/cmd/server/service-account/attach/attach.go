@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
-	cmd.Flags().StringP(serviceAccFlag, "a", "", "Service Account Email")
+	cmd.Flags().VarP(flags.EmailFlag(), serviceAccFlag, "a", "Service Account Email")
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
 }
