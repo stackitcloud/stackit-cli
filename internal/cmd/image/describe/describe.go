@@ -138,7 +138,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			}
 		}
 
-		if resp.Labels != nil && len(resp.Labels) > 0 {
+		if len(resp.Labels) > 0 {
 			labels := []string{}
 			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

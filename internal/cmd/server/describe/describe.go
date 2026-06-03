@@ -169,7 +169,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 		table.AddRow("MACHINE TYPE", server.MachineType)
 		table.AddSeparator()
 
-		if server.Labels != nil && len(server.Labels) > 0 {
+		if len(server.Labels) > 0 {
 			labels := []string{}
 			for key, value := range server.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
@@ -192,7 +192,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		content = append(content, table)
 
-		if server.Nics != nil && len(server.Nics) > 0 {
+		if len(server.Nics) > 0 {
 			nicsTable := tables.NewTable()
 			nicsTable.SetTitle("Attached Network Interfaces")
 			nicsTable.SetHeader("ID", "NETWORK ID", "NETWORK NAME", "IPv4", "PUBLIC IP")

@@ -122,7 +122,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 		table.AddRow("DEFAULT", utils.PtrString(routingTable.Default))
 		table.AddSeparator()
 
-		if routingTable.Labels != nil && len(routingTable.Labels) > 0 {
+		if len(routingTable.Labels) > 0 {
 			var labels []string
 			for key, value := range routingTable.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))

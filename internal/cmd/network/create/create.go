@@ -207,7 +207,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	// IPv4 nameserver can not be set alone. IPv4 Prefix || IPv4 Prefix length must be set as well
-	isIPv4NameserverSet := model.IPv4DnsNameServers != nil && len(model.IPv4DnsNameServers) > 0
+	isIPv4NameserverSet := len(model.IPv4DnsNameServers) > 0
 	isIPv4PrefixOrPrefixLengthSet := model.IPv4Prefix != nil || model.IPv4PrefixLength != nil
 	if isIPv4NameserverSet && !isIPv4PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{
@@ -225,7 +225,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	// IPv6 nameserver can not be set alone. IPv6 Prefix || IPv6 Prefix length must be set as well
-	isIPv6NameserverSet := model.IPv6DnsNameServers != nil && len(model.IPv6DnsNameServers) > 0
+	isIPv6NameserverSet := len(model.IPv6DnsNameServers) > 0
 	isIPv6PrefixOrPrefixLengthSet := model.IPv6Prefix != nil || model.IPv6PrefixLength != nil
 	if isIPv6NameserverSet && !isIPv6PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{

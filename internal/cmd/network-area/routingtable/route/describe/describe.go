@@ -133,7 +133,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		table.AddRow("NEXTHOP VALUE", routeDetails.HopValue)
 		table.AddSeparator()
 
-		if route.Labels != nil && len(route.Labels) > 0 {
+		if len(route.Labels) > 0 {
 			var labels []string
 			for key, value := range route.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
