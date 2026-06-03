@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 const (
@@ -16,21 +16,21 @@ const (
 
 // enforce implementation of interfaces
 var (
-	_ SQLServerFlexClient = &sqlserverflex.APIClient{}
+	_ SQLServerFlexClient = sqlserverflex.APIClient{}.DefaultAPI
 )
 
 type SQLServerFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string, region string) (*sqlserverflex.GetInstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId string, region string) (*sqlserverflex.GetUserResponse, error)
+	ListVersions(ctx context.Context, projectId string, region string) sqlserverflex.ApiListVersionsRequest
+	GetInstance(ctx context.Context, projectId, instanceId string, region string) sqlserverflex.ApiGetInstanceRequest
+	GetUser(ctx context.Context, projectId, instanceId, userId string, region string) sqlserverflex.ApiGetUserRequest
 }
 
-func ValidateFlavorId(flavorId string, flavors *[]sqlserverflex.InstanceFlavorEntry) error {
+func ValidateFlavorId(flavorId string, flavors []sqlserverflex.InstanceFlavorEntry) error {
 	if flavors == nil {
 		return fmt.Errorf("nil flavors")
 	}
 
-	for _, f := range *flavors {
+	for _, f := range flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
 			return nil
 		}
@@ -57,7 +57,7 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *sqlserv
 		return nil
 	}
 
-	for _, sc := range *storages.StorageClasses {
+	for _, sc := range storages.StorageClasses {
 		if strings.EqualFold(*storageClass, sc) {
 			return nil
 		}
@@ -69,13 +69,13 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *sqlserv
 	}
 }
 
-func LoadFlavorId(cpu, ram int64, flavors *[]sqlserverflex.InstanceFlavorEntry) (*string, error) {
+func LoadFlavorId(cpu, ram int32, flavors []sqlserverflex.InstanceFlavorEntry) (*string, error) {
 	if flavors == nil {
 		return nil, fmt.Errorf("nil flavors")
 	}
 
 	availableFlavors := ""
-	for _, f := range *flavors {
+	for _, f := range flavors {
 		if f.Id == nil || f.Cpu == nil || f.Memory == nil {
 			continue
 		}
@@ -91,7 +91,7 @@ func LoadFlavorId(cpu, ram int64, flavors *[]sqlserverflex.InstanceFlavorEntry) 
 }
 
 func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, region string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId, region)
+	resp, err := apiClient.GetInstance(ctx, projectId, instanceId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex instance: %w", err)
 	}
@@ -99,7 +99,7 @@ func GetInstanceName(ctx context.Context, apiClient SQLServerFlexClient, project
 }
 
 func GetUserName(ctx context.Context, apiClient SQLServerFlexClient, projectId, instanceId, userId, region string) (string, error) {
-	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId, region)
+	resp, err := apiClient.GetUser(ctx, projectId, instanceId, userId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex user: %w", err)
 	}

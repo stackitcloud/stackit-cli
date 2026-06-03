@@ -17,8 +17,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/wait"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api/wait"
 )
 
 const (
@@ -54,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting instance", func() error {
-					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -113,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteInstanceRequest {
-	req := apiClient.DeleteInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 	return req
 }

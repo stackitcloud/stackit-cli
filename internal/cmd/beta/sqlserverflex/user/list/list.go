@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			users := resp.GetItems()
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }
 

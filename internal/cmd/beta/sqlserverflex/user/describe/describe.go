@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 const (
@@ -106,7 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	return req
 }
 
@@ -120,9 +120,9 @@ func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.Use
 		table.AddRow("ID", utils.PtrString(user.Id))
 		table.AddSeparator()
 		table.AddRow("USERNAME", utils.PtrString(user.Username))
-		if user.Roles != nil && len(*user.Roles) != 0 {
+		if len(user.Roles) != 0 {
 			table.AddSeparator()
-			table.AddRow("ROLES", strings.Join(*user.Roles, "\n"))
+			table.AddRow("ROLES", strings.Join(user.Roles, "\n"))
 		}
 		if user.DefaultDatabase != nil && *user.DefaultDatabase != "" {
 			table.AddSeparator()

@@ -20,19 +20,19 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/wait"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api/wait"
 )
 
 // enforce implementation of interfaces
 var (
-	_ sqlServerFlexClient = &sqlserverflex.APIClient{}
+	_ sqlServerFlexClient = sqlserverflex.APIClient{}.DefaultAPI
 )
 
 type sqlServerFlexClient interface {
 	CreateInstance(ctx context.Context, projectId string, region string) sqlserverflex.ApiCreateInstanceRequest
-	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
+	ListFlavors(ctx context.Context, projectId string, region string) sqlserverflex.ApiListFlavorsRequest
+	ListStorages(ctx context.Context, projectId, flavorId string, region string) sqlserverflex.ApiListStoragesRequest
 }
 
 const (
@@ -52,12 +52,12 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceName   *string
-	ACL            *[]string
+	InstanceName   string
+	ACL            []string
 	BackupSchedule *string
 	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
+	CPU            *int32
+	RAM            *int32
 	StorageClass   *string
 	StorageSize    *int64
 	Version        *string
@@ -110,7 +110,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -123,7 +123,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -143,8 +143,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
+	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
+	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().String(versionFlag, "", "SQLServer version")
@@ -162,8 +162,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
+	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -180,8 +180,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
+		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
 		BackupSchedule:  flags.FlagToStringPointer(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		CPU:             cpu,
@@ -203,7 +203,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
@@ -225,7 +225,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId, model.Region)
+	storages, err := apiClient.ListStorages(ctx, model.ProjectId, *flavorId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex storages: %w", err)
 	}
@@ -241,15 +241,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 
 	req = req.CreateInstancePayload(sqlserverflex.CreateInstancePayload{
 		Name:           model.InstanceName,
-		Acl:            &sqlserverflex.CreateInstancePayloadAcl{Items: model.ACL},
+		Acl:            &sqlserverflex.InstanceDocumentationACL{Items: model.ACL},
 		BackupSchedule: model.BackupSchedule,
-		FlavorId:       flavorId,
-		Storage: &sqlserverflex.CreateInstancePayloadStorage{
+		FlavorId:       *flavorId,
+		Storage: &sqlserverflex.InstanceDocumentationStorage{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		},
 		Version: model.Version,
-		Options: &sqlserverflex.CreateInstancePayloadOptions{
+		Options: &sqlserverflex.InstanceDocumentationOptions{
 			Edition:       model.Edition,
 			RetentionDays: retentionDays,
 		},

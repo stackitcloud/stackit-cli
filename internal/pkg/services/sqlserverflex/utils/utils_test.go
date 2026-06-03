@@ -9,16 +9,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 var (
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testUserId     = uuid.NewString()
-
-	// enforce implementation of interfaces
-	_ SQLServerFlexClient = &sqlServerFlexClientMocked{}
 )
 
 const (
@@ -27,7 +24,7 @@ const (
 	testRegion       = "eu01"
 )
 
-type sqlServerFlexClientMocked struct {
+type mockSettings struct {
 	listVersionsFails    bool
 	listVersionsResp     *sqlserverflex.ListVersionsResponse
 	getInstanceFails     bool
@@ -38,32 +35,33 @@ type sqlServerFlexClientMocked struct {
 	listRestoreJobsResp  *sqlserverflex.ListRestoreJobsResponse
 }
 
-func (m *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListVersionsResponse, error) {
-	if m.listVersionsFails {
-		return nil, fmt.Errorf("could not list versions")
+func newApiMock(s *mockSettings) sqlserverflex.DefaultAPI {
+	return &sqlserverflex.DefaultAPIServiceMock{
+		ListVersionsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListVersionsRequest) (*sqlserverflex.ListVersionsResponse, error) {
+			if s.listVersionsFails {
+				return nil, fmt.Errorf("could not list versions")
+			}
+			return s.listVersionsResp, nil
+		}),
+		GetInstanceExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiGetInstanceRequest) (*sqlserverflex.GetInstanceResponse, error) {
+			if s.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return s.getInstanceResp, nil
+		}),
+		GetUserExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiGetUserRequest) (*sqlserverflex.GetUserResponse, error) {
+			if s.getUserFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return s.getUserResp, nil
+		}),
+		ListRestoreJobsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListRestoreJobsRequest) (*sqlserverflex.ListRestoreJobsResponse, error) {
+			if s.listRestoreJobsFails {
+				return nil, fmt.Errorf("could not list versions")
+			}
+			return s.listRestoreJobsResp, nil
+		}),
 	}
-	return m.listVersionsResp, nil
-}
-
-func (m *sqlServerFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListRestoreJobsResponse, error) {
-	if m.listRestoreJobsFails {
-		return nil, fmt.Errorf("could not list versions")
-	}
-	return m.listRestoreJobsResp, nil
-}
-
-func (m *sqlServerFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*sqlserverflex.GetInstanceResponse, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
-	}
-	return m.getInstanceResp, nil
-}
-
-func (m *sqlServerFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*sqlserverflex.GetUserResponse, error) {
-	if m.getUserFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getUserResp, nil
 }
 
 func TestValidateStorage(t *testing.T) {
@@ -79,7 +77,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -99,7 +97,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(1)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -112,7 +110,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(200)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -125,7 +123,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(5)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -138,7 +136,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(20)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -151,7 +149,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "bar-3"},
+				StorageClasses: []string{"bar-1", "bar-2", "bar-3"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -178,13 +176,13 @@ func TestValidateFlavorId(t *testing.T) {
 	tests := []struct {
 		description string
 		flavorId    string
-		flavors     *[]sqlserverflex.InstanceFlavorEntry
+		flavors     []sqlserverflex.InstanceFlavorEntry
 		isValid     bool
 	}{
 		{
 			description: "base",
 			flavorId:    "foo",
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("foo")},
@@ -200,13 +198,13 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "no flavors",
 			flavorId:    "foo",
-			flavors:     &[]sqlserverflex.InstanceFlavorEntry{},
+			flavors:     []sqlserverflex.InstanceFlavorEntry{},
 			isValid:     false,
 		},
 		{
 			description: "nil flavor id",
 			flavorId:    "foo",
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{Id: utils.Ptr("bar-1")},
 				{Id: nil},
 				{Id: utils.Ptr("foo")},
@@ -216,7 +214,7 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "invalid flavor",
 			flavorId:    "foo",
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("bar-3")},
@@ -241,9 +239,9 @@ func TestValidateFlavorId(t *testing.T) {
 func TestLoadFlavorId(t *testing.T) {
 	tests := []struct {
 		description    string
-		cpu            int64
-		ram            int64
-		flavors        *[]sqlserverflex.InstanceFlavorEntry
+		cpu            int32
+		ram            int32
+		flavors        []sqlserverflex.InstanceFlavorEntry
 		isValid        bool
 		expectedOutput *string
 	}{
@@ -251,21 +249,21 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "base",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     utils.Ptr("foo"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid:        true,
@@ -282,14 +280,14 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "no flavors",
 			cpu:         2,
 			ram:         4,
-			flavors:     &[]sqlserverflex.InstanceFlavorEntry{},
+			flavors:     []sqlserverflex.InstanceFlavorEntry{},
 			isValid:     false,
 		},
 		{
 			description: "flavors with details missing",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    nil,
@@ -297,13 +295,13 @@ func TestLoadFlavorId(t *testing.T) {
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     utils.Ptr("foo"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid:        true,
@@ -313,21 +311,21 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "match with nil id",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     nil,
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid: false,
@@ -336,16 +334,16 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "invalid settings",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]sqlserverflex.InstanceFlavorEntry{
+			flavors: []sqlserverflex.InstanceFlavorEntry{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid: false,
@@ -404,12 +402,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sqlServerFlexClientMocked{
+			settings := &mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId, testRegion)
+			output, err := GetInstanceName(context.Background(), newApiMock(settings), testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -454,12 +452,12 @@ func TestGetUserName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sqlServerFlexClientMocked{
+			settings := &mockSettings{
 				getUserFails: tt.getUserFails,
 				getUserResp:  tt.getUserResp,
 			}
 
-			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId, testRegion)
+			output, err := GetUserName(context.Background(), newApiMock(settings), testProjectId, testInstanceId, testUserId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
