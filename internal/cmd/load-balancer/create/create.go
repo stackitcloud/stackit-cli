@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/wait"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -95,7 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating load balancer", func() error {
-					_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *model.Payload.Name).WaitWithContext(ctx)
+					_, err = wait.CreateLoadBalancerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.Payload.Name).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -148,7 +148,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiCreateLoadBalancerRequest {
-	req := apiClient.CreateLoadBalancer(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateLoadBalancer(ctx, model.ProjectId, model.Region)
 	req = req.CreateLoadBalancerPayload(*model.Payload)
 	req = req.XRequestID(xRequestId)
 	return req
