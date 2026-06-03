@@ -106,7 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		serviceAccMail = inputArgs[0]
 		p.Warn("using a positional argument for the service account email is deprecated and will be removed in 2027-01. Please use '--%s' instead.\n", serviceAccFlag)
 	} else {
-		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or as a positional argument`, serviceAccFlag)
+		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
 	}
 
 	if serviceAccMail == "" || !strings.Contains(serviceAccMail, "@") {
