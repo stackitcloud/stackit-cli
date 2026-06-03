@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,7 +19,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testParentId = uuid.NewString()
 
@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiPartialUpdateProjectRequest)) resourcemanager.ApiPartialUpdateProjectRequest {
-	request := testClient.PartialUpdateProject(testCtx, testProjectId)
+	request := testClient.DefaultAPI.PartialUpdateProject(testCtx, testProjectId)
 	request = request.PartialUpdateProjectPayload(resourcemanager.PartialUpdateProjectPayload{
 		ContainerParentId: utils.Ptr(testParentId),
 		Name:              utils.Ptr(nameFlag),
@@ -157,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 				},
 			},
-			expectedRequest: testClient.PartialUpdateProject(testCtx, testProjectId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateProject(testCtx, testProjectId).
 				PartialUpdateProjectPayload(resourcemanager.PartialUpdateProjectPayload{}),
 		},
 	}
@@ -168,7 +168,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

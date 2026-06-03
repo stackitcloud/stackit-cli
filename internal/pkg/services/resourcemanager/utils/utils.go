@@ -4,29 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
-type ResourceManagerClient interface {
-	GetOrganizationExecute(ctx context.Context, organizationId string) (*resourcemanager.OrganizationResponse, error)
-	GetProjectExecute(ctx context.Context, projectId string) (*resourcemanager.GetProjectResponse, error)
-}
-
 // GetOrganizationName returns the name of an organization by its ID.
-func GetOrganizationName(ctx context.Context, apiClient ResourceManagerClient, orgId string) (string, error) {
-	resp, err := apiClient.GetOrganizationExecute(ctx, orgId)
+func GetOrganizationName(ctx context.Context, apiClient resourcemanager.DefaultAPI, orgId string) (string, error) {
+	resp, err := apiClient.GetOrganization(ctx, orgId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get organization details: %w", err)
 	}
 
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetProjectName(ctx context.Context, apiClient ResourceManagerClient, projectId string) (string, error) {
-	resp, err := apiClient.GetProjectExecute(ctx, projectId)
+func GetProjectName(ctx context.Context, apiClient resourcemanager.DefaultAPI, projectId string) (string, error) {
+	resp, err := apiClient.GetProject(ctx, projectId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get project details: %w", err)
 	}
 
-	return *resp.Name, nil
+	return resp.Name, nil
 }

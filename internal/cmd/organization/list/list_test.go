@@ -12,13 +12,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
 
 const (
 	testEmail = "foo@bar"
@@ -27,7 +27,7 @@ const (
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		limitFlag: strconv.Itoa(int(testLimit)),
+		limitFlag: strconv.Itoa(testLimit),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiListOrganizationsRequest)) resourcemanager.ApiListOrganizationsRequest {
-	request := testClient.ListOrganizations(testCtx)
+	request := testClient.DefaultAPI.ListOrganizations(testCtx)
 	request = request.Limit(testLimit)
 	request = request.Member(testEmail)
 	for _, mod := range mods {
@@ -128,7 +128,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Member = ""
 				model.Limit = nil
 			}),
-			expectedRequest: testClient.ListOrganizations(testCtx).Member(""),
+			expectedRequest: testClient.DefaultAPI.ListOrganizations(testCtx).Member(""),
 		},
 	}
 
@@ -138,7 +138,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, resourcemanager.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

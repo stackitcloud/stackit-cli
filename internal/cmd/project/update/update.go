@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/resourcemanager"
+	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
 )
 
 const (
@@ -147,7 +147,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiPartialUpdateProjectRequest {
-	req := apiClient.PartialUpdateProject(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.PartialUpdateProject(ctx, model.ProjectId)
 	req = req.PartialUpdateProjectPayload(resourcemanager.PartialUpdateProjectPayload{
 		ContainerParentId: model.ParentId,
 		Name:              model.Name,
