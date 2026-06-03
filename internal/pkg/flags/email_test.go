@@ -24,7 +24,7 @@ func TestEmailFlag(t *testing.T) {
 		},
 		{
 			description: "invalid",
-			value:       "invalid-uuid",
+			value:       "invalid-email",
 			isValid:     false,
 		},
 	}
