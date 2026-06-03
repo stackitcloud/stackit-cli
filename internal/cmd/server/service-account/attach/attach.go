@@ -36,7 +36,7 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("attach"),
+		Use:   "attach",
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
 		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed 2026-12-03
