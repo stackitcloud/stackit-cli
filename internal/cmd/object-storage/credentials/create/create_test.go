@@ -238,6 +238,15 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "minimal",
+			args: args{
+				createAccessKeyResponse: &objectstorage.CreateAccessKeyResponse{
+					Expires: *objectstorage.NewNullableString(nil),
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
