@@ -16,7 +16,7 @@ import (
 	loadbalancerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			credentialsLabel, err := loadbalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.Region, model.CredentialsRef)
+			credentialsLabel, err := loadbalancerUtils.GetCredentialsDisplayName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get observability credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
@@ -102,6 +102,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiDeleteCredentialsRequest {
-	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
+	req := apiClient.DefaultAPI.DeleteCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 	return req
 }

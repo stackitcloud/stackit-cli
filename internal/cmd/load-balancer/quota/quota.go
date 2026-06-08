@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 type inputModel struct {
@@ -73,7 +73,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetQuotaRequest {
-	req := apiClient.GetQuota(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.GetQuota(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -85,7 +85,7 @@ func outputResult(p *print.Printer, outputFormat string, quota *loadbalancer.Get
 	return p.OutputResult(outputFormat, quota, func() error {
 		maxLoadBalancers := "Unlimited"
 		if quota.MaxLoadBalancers != nil && *quota.MaxLoadBalancers != -1 {
-			maxLoadBalancers = strconv.FormatInt(*quota.MaxLoadBalancers, 10)
+			maxLoadBalancers = strconv.FormatInt(int64(*quota.MaxLoadBalancers), 10)
 		}
 
 		p.Outputf("Maximum number of load balancers allowed: %s\n", maxLoadBalancers)
