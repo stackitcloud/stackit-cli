@@ -15,21 +15,21 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 // enforce implementation of interfaces
 var (
-	_ sqlServerFlexOptionsClient = &sqlserverflex.APIClient{}
+	_ sqlServerFlexOptionsClient = sqlserverflex.APIClient{}.DefaultAPI
 )
 
 type sqlServerFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
-	ListRolesExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListRolesResponse, error)
-	ListCollationsExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListCollationsResponse, error)
-	ListCompatibilityExecute(ctx context.Context, projectId string, instanceId string, region string) (*sqlserverflex.ListCompatibilityResponse, error)
+	ListFlavors(ctx context.Context, projectId string, region string) sqlserverflex.ApiListFlavorsRequest
+	ListVersions(ctx context.Context, projectId string, region string) sqlserverflex.ApiListVersionsRequest
+	ListStorages(ctx context.Context, projectId, flavorId string, region string) sqlserverflex.ApiListStoragesRequest
+	ListRoles(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListRolesRequest
+	ListCollations(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListCollationsRequest
+	ListCompatibility(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListCompatibilityRequest
 }
 
 const (
@@ -59,12 +59,12 @@ type inputModel struct {
 }
 
 type options struct {
-	Flavors           *[]sqlserverflex.InstanceFlavorEntry `json:"flavors,omitempty"`
-	Versions          *[]string                            `json:"versions,omitempty"`
-	Storages          *flavorStorages                      `json:"flavorStorages,omitempty"`
-	UserRoles         *instanceUserRoles                   `json:"userRoles,omitempty"`
-	DBCollations      *instanceDBCollations                `json:"dbCollations,omitempty"`
-	DBCompatibilities *instanceDBCompatibilities           `json:"dbCompatibilities,omitempty"`
+	Flavors           []sqlserverflex.InstanceFlavorEntry `json:"flavors,omitempty"`
+	Versions          []string                            `json:"versions,omitempty"`
+	Storages          *flavorStorages                     `json:"flavorStorages,omitempty"`
+	UserRoles         *instanceUserRoles                  `json:"userRoles,omitempty"`
+	DBCollations      *instanceDBCollations               `json:"dbCollations,omitempty"`
+	DBCompatibilities *instanceDBCompatibilities          `json:"dbCompatibilities,omitempty"`
 }
 
 type flavorStorages struct {
@@ -121,7 +121,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient)
+			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("get SQL Server Flex options: %w", err)
 			}
@@ -203,37 +203,37 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
+		versions, err = apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId, model.Region)
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, *model.FlavorId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex storages: %w", err)
 		}
 	}
 	if model.UserRoles {
-		userRoles, err = apiClient.ListRolesExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
+		userRoles, err = apiClient.ListRoles(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex user roles: %w", err)
 		}
 	}
 	if model.DBCollations {
-		dbCollations, err = apiClient.ListCollationsExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
+		dbCollations, err = apiClient.ListCollations(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB collations: %w", err)
 		}
 	}
 	if model.DBCompatibilities {
-		dbCompatibilities, err = apiClient.ListCompatibilityExecute(ctx, model.ProjectId, *model.InstanceId, model.Region)
+		dbCompatibilities, err = apiClient.ListCompatibility(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB compatibilities: %w", err)
 		}
@@ -259,31 +259,31 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 	if userRoles != nil && model.InstanceId != nil {
 		options.UserRoles = &instanceUserRoles{
 			InstanceId: *model.InstanceId,
-			UserRoles:  *userRoles.Roles,
+			UserRoles:  userRoles.Roles,
 		}
 	}
 	if dbCollations != nil && model.InstanceId != nil {
 		options.DBCollations = &instanceDBCollations{
 			InstanceId:   *model.InstanceId,
-			DBCollations: *dbCollations.Collations,
+			DBCollations: dbCollations.Collations,
 		}
 	}
 	if dbCompatibilities != nil && model.InstanceId != nil {
 		options.DBCompatibilities = &instanceDBCompatibilities{
 			InstanceId:        *model.InstanceId,
-			DBCompatibilities: *dbCompatibilities.Compatibilities,
+			DBCompatibilities: dbCompatibilities.Compatibilities,
 		}
 	}
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
 		content := []tables.Table{}
-		if model.Flavors && len(*options.Flavors) != 0 {
-			content = append(content, buildFlavorsTable(*options.Flavors))
+		if model.Flavors && len(options.Flavors) != 0 {
+			content = append(content, buildFlavorsTable(options.Flavors))
 		}
-		if model.Versions && len(*options.Versions) != 0 {
-			content = append(content, buildVersionsTable(*options.Versions))
+		if model.Versions && len(options.Versions) != 0 {
+			content = append(content, buildVersionsTable(options.Versions))
 		}
-		if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) != 0 {
+		if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) != 0 {
 			content = append(content, buildStoragesTable(*options.Storages.Storages))
 		}
 		if model.UserRoles && len(options.UserRoles.UserRoles) != 0 {
@@ -329,7 +329,7 @@ func buildVersionsTable(versions []string) tables.Table {
 }
 
 func buildStoragesTable(storagesResp sqlserverflex.ListStoragesResponse) tables.Table {
-	storages := *storagesResp.StorageClasses
+	storages := storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")

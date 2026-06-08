@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -19,37 +19,32 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sqlserverflex.APIClient{}
+var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIService{}}
+
 var testRegion = "eu01"
 
-// enforce implementation of interfaces
-var (
-	_ sqlServerFlexClient = &sqlServerFlexClientMocked{}
-)
-
-type sqlServerFlexClientMocked struct {
+type mockSettings struct {
 	listFlavorsFails  bool
 	listFlavorsResp   *sqlserverflex.ListFlavorsResponse
 	listStoragesFails bool
 	listStoragesResp  *sqlserverflex.ListStoragesResponse
 }
 
-func (c *sqlServerFlexClientMocked) CreateInstance(ctx context.Context, projectId, region string) sqlserverflex.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId, region)
-}
-
-func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
-	if c.listFlavorsFails {
-		return nil, fmt.Errorf("list storages failed")
+func newAPIMock(s mockSettings) sqlserverflex.DefaultAPI {
+	return &sqlserverflex.DefaultAPIServiceMock{
+		ListStoragesExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListStoragesRequest) (*sqlserverflex.ListStoragesResponse, error) {
+			if s.listFlavorsFails {
+				return nil, fmt.Errorf("list storages failed")
+			}
+			return s.listStoragesResp, nil
+		}),
+		ListFlavorsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListFlavorsRequest) (*sqlserverflex.ListFlavorsResponse, error) {
+			if s.listFlavorsFails {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listFlavorsResp, nil
+		}),
 	}
-	return c.listStoragesResp, nil
-}
-
-func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
-	if c.listFlavorsFails {
-		return nil, fmt.Errorf("list flavors failed")
-	}
-	return c.listFlavorsResp, nil
 }
 
 var testProjectId = uuid.NewString()
@@ -82,8 +77,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName:   utils.Ptr("example-name"),
-		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
+		InstanceName:   "example-name",
+		ACL:            []string{"0.0.0.0/0"},
 		BackupSchedule: utils.Ptr("0 0/6 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		StorageClass:   utils.Ptr("storage-class"),
@@ -99,7 +94,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateInstanceRequest)) sqlserverflex.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -109,16 +104,16 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateInstanceRequest
 
 func fixturePayload(mods ...func(payload *sqlserverflex.CreateInstancePayload)) sqlserverflex.CreateInstancePayload {
 	payload := sqlserverflex.CreateInstancePayload{
-		Name:           utils.Ptr("example-name"),
-		Acl:            &sqlserverflex.CreateInstancePayloadAcl{Items: utils.Ptr([]string{"0.0.0.0/0"})},
+		Name:           "example-name",
+		Acl:            &sqlserverflex.InstanceDocumentationACL{Items: []string{"0.0.0.0/0"}},
 		BackupSchedule: utils.Ptr("0 0/6 * * *"),
-		FlavorId:       utils.Ptr(testFlavorId),
-		Storage: &sqlserverflex.CreateInstancePayloadStorage{
+		FlavorId:       testFlavorId,
+		Storage: &sqlserverflex.InstanceDocumentationStorage{
 			Class: utils.Ptr("storage-class"),
 			Size:  utils.Ptr(int64(10)),
 		},
 		Version: utils.Ptr("6.0"),
-		Options: &sqlserverflex.CreateInstancePayloadOptions{
+		Options: &sqlserverflex.InstanceDocumentationOptions{
 			Edition:       utils.Ptr("developer"),
 			RetentionDays: utils.Ptr("32"),
 		},
@@ -154,8 +149,8 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.FlavorId = nil
-				model.CPU = utils.Ptr(int64(2))
-				model.RAM = utils.Ptr(int64(4))
+				model.CPU = utils.Ptr(int32(2))
+				model.RAM = utils.Ptr(int32(4))
 			}),
 		},
 		{
@@ -222,9 +217,7 @@ func TestParseInput(t *testing.T) {
 			aclValues:   []string{"198.51.100.14/24", "198.51.100.14/32"},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ACL = utils.Ptr(
-					append(*model.ACL, "198.51.100.14/24", "198.51.100.14/32"),
-				)
+				model.ACL = append(model.ACL, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 		{
@@ -233,9 +226,7 @@ func TestParseInput(t *testing.T) {
 			aclValues:   []string{"198.51.100.14/24,198.51.100.14/32"},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ACL = utils.Ptr(
-					append(*model.ACL, "198.51.100.14/24", "198.51.100.14/32"),
-				)
+				model.ACL = append(model.ACL, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 		{
@@ -277,16 +268,16 @@ func TestBuildRequest(t *testing.T) {
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: &[]sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{
 					{
 						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
+						Cpu:    utils.Ptr(int32(2)),
+						Memory: utils.Ptr(int32(4)),
 					},
 				},
 			},
 			listStoragesResp: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"storage-class"},
+				StorageClasses: []string{"storage-class"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -298,28 +289,28 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
+					model.CPU = utils.Ptr(int32(2))
+					model.RAM = utils.Ptr(int32(4))
 				},
 			),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: &[]sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{
 					{
 						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
+						Cpu:    utils.Ptr(int32(2)),
+						Memory: utils.Ptr(int32(4)),
 					},
 					{
 						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int64(1)),
-						Memory: utils.Ptr(int64(8)),
+						Cpu:    utils.Ptr(int32(1)),
+						Memory: utils.Ptr(int32(8)),
 					},
 				},
 			},
 			listStoragesResp: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"storage-class"},
+				StorageClasses: []string{"storage-class"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -331,8 +322,8 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
+					model.CPU = utils.Ptr(int32(2))
+					model.RAM = utils.Ptr(int32(4))
 				},
 			),
 			listFlavorsFails: true,
@@ -343,21 +334,21 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(5))
-					model.RAM = utils.Ptr(int64(9))
+					model.CPU = utils.Ptr(int32(5))
+					model.RAM = utils.Ptr(int32(9))
 				},
 			),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: &[]sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{
 					{
 						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
+						Cpu:    utils.Ptr(int32(2)),
+						Memory: utils.Ptr(int32(4)),
 					},
 					{
 						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int64(1)),
-						Memory: utils.Ptr(int64(8)),
+						Cpu:    utils.Ptr(int32(1)),
+						Memory: utils.Ptr(int32(8)),
 					},
 				},
 			},
@@ -368,8 +359,8 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
+					model.CPU = utils.Ptr(int32(2))
+					model.RAM = utils.Ptr(int32(4))
 				},
 			),
 			listFlavorsFails: true,
@@ -383,16 +374,16 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: &[]sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{
 					{
 						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
+						Cpu:    utils.Ptr(int32(2)),
+						Memory: utils.Ptr(int32(4)),
 					},
 				},
 			},
 			listStoragesResp: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"storage-class"},
+				StorageClasses: []string{"storage-class"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -408,16 +399,16 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: &[]sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{
 					{
 						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int64(2)),
-						Memory: utils.Ptr(int64(4)),
+						Cpu:    utils.Ptr(int32(2)),
+						Memory: utils.Ptr(int32(4)),
 					},
 				},
 			},
 			listStoragesResp: &sqlserverflex.ListStoragesResponse{
-				StorageClasses: &[]string{"storage-class"},
+				StorageClasses: []string{"storage-class"},
 				StorageRange: &sqlserverflex.StorageRange{
 					Min: utils.Ptr(int64(10)),
 					Max: utils.Ptr(int64(100)),
@@ -429,13 +420,13 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &sqlServerFlexClientMocked{
+			client := mockSettings{
 				listFlavorsFails:  tt.listFlavorsFails,
 				listFlavorsResp:   tt.listFlavorsResp,
 				listStoragesFails: tt.listStoragesFails,
 				listStoragesResp:  tt.listStoragesResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -446,6 +437,9 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

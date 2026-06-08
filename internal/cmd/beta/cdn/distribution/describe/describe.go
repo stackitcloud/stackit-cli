@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -93,7 +93,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) cdn.ApiGetDistributionRequest {
-	return apiClient.GetDistribution(ctx, model.ProjectId, model.DistributionID).WithWafStatus(model.WithWAF)
+	return apiClient.DefaultAPI.GetDistribution(ctx, model.ProjectId, model.DistributionID).WithWafStatus(model.WithWAF)
 }
 
 func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDistributionResponse) error {
@@ -104,10 +104,10 @@ func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDi
 		d := distribution.Distribution
 		var content []tables.Table
 
-		content = append(content, buildDistributionTable(d))
+		content = append(content, buildDistributionTable(&d))
 
 		if d.Waf != nil {
-			content = append(content, buildWAFTable(d))
+			content = append(content, buildWAFTable(&d))
 		}
 
 		err := tables.DisplayTables(p, content)
@@ -119,41 +119,41 @@ func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDi
 }
 
 func buildDistributionTable(d *cdn.Distribution) tables.Table {
-	regions := strings.Join(sdkUtils.EnumSliceToStringSlice(*d.Config.Regions), ", ")
+	regions := strings.Join(sdkUtils.EnumSliceToStringSlice(d.Config.Regions), ", ")
 	defaultCacheDuration := ""
-	if d.Config.DefaultCacheDuration != nil && d.Config.DefaultCacheDuration.IsSet() {
+	if d.Config.DefaultCacheDuration.IsSet() && d.Config.DefaultCacheDuration.Get() != nil {
 		defaultCacheDuration = *d.Config.DefaultCacheDuration.Get()
 	}
 	logSinkPushUrl := ""
-	if d.Config.LogSink != nil && d.Config.LogSink.LokiLogSink != nil {
-		logSinkPushUrl = *d.Config.LogSink.LokiLogSink.PushUrl
+	if d.Config.LogSink != nil && d.Config.LogSink.PushUrl != "" {
+		logSinkPushUrl = d.Config.LogSink.PushUrl
 	}
 	monthlyLimitBytes := ""
-	if d.Config.MonthlyLimitBytes != nil {
-		monthlyLimitBytes = fmt.Sprintf("%d", *d.Config.MonthlyLimitBytes)
+	if d.Config.MonthlyLimitBytes.IsSet() && d.Config.MonthlyLimitBytes.Get() != nil {
+		monthlyLimitBytes = fmt.Sprintf("%d", *d.Config.MonthlyLimitBytes.Get())
 	}
 	optimizerEnabled := ""
 	if d.Config.Optimizer != nil {
-		optimizerEnabled = fmt.Sprintf("%t", *d.Config.Optimizer.Enabled)
+		optimizerEnabled = fmt.Sprintf("%t", d.Config.Optimizer.Enabled)
 	}
 	table := tables.NewTable()
 	table.SetTitle("Distribution")
-	table.AddRow("ID", utils.PtrString(d.Id))
+	table.AddRow("ID", d.Id)
 	table.AddSeparator()
-	table.AddRow("STATUS", utils.PtrString(d.Status))
+	table.AddRow("STATUS", d.Status)
 	table.AddSeparator()
 	table.AddRow("REGIONS", regions)
 	table.AddSeparator()
-	table.AddRow("CREATED AT", utils.PtrString(d.CreatedAt))
+	table.AddRow("CREATED AT", d.CreatedAt)
 	table.AddSeparator()
-	table.AddRow("UPDATED AT", utils.PtrString(d.UpdatedAt))
+	table.AddRow("UPDATED AT", d.UpdatedAt)
 	table.AddSeparator()
-	table.AddRow("PROJECT ID", utils.PtrString(d.ProjectId))
+	table.AddRow("PROJECT ID", d.ProjectId)
 	table.AddSeparator()
-	if d.Errors != nil && len(*d.Errors) > 0 {
+	if len(d.Errors) > 0 {
 		var errorDescriptions []string
-		for _, err := range *d.Errors {
-			errorDescriptions = append(errorDescriptions, *err.En)
+		for _, err := range d.Errors {
+			errorDescriptions = append(errorDescriptions, err.En)
 		}
 		table.AddRow("ERRORS", strings.Join(errorDescriptions, "\n"))
 		table.AddSeparator()
@@ -162,33 +162,33 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 		b := d.Config.Backend.BucketBackend
 		table.AddRow("BACKEND TYPE", "BUCKET")
 		table.AddSeparator()
-		table.AddRow("BUCKET URL", utils.PtrString(b.BucketUrl))
+		table.AddRow("BUCKET URL", b.BucketUrl)
 		table.AddSeparator()
-		table.AddRow("BUCKET REGION", utils.PtrString(b.Region))
+		table.AddRow("BUCKET REGION", b.Region)
 		table.AddSeparator()
 	} else if d.Config.Backend.HttpBackend != nil {
 		h := d.Config.Backend.HttpBackend
 		var geofencing []string
 		if h.Geofencing != nil {
-			for k, v := range *h.Geofencing {
+			for k, v := range h.Geofencing {
 				geofencing = append(geofencing, fmt.Sprintf("%s: %s", k, strings.Join(v, ", ")))
 			}
 		}
 		slices.Sort(geofencing)
 		table.AddRow("BACKEND TYPE", "HTTP")
 		table.AddSeparator()
-		table.AddRow("HTTP ORIGIN URL", utils.PtrString(h.OriginUrl))
+		table.AddRow("HTTP ORIGIN URL", h.OriginUrl)
 		table.AddSeparator()
 		if h.OriginRequestHeaders != nil {
-			table.AddRow("HTTP ORIGIN REQUEST HEADERS", utils.JoinStringMap(*h.OriginRequestHeaders, ": ", ", "))
+			table.AddRow("HTTP ORIGIN REQUEST HEADERS", utils.JoinStringMap(h.OriginRequestHeaders, ": ", ", "))
 			table.AddSeparator()
 		}
 		table.AddRow("HTTP GEOFENCING PROPERTIES", strings.Join(geofencing, "\n"))
 		table.AddSeparator()
 	}
-	table.AddRow("BLOCKED COUNTRIES", strings.Join(*d.Config.BlockedCountries, ", "))
+	table.AddRow("BLOCKED COUNTRIES", strings.Join(d.Config.BlockedCountries, ", "))
 	table.AddSeparator()
-	table.AddRow("BLOCKED IPS", strings.Join(*d.Config.BlockedIps, ", "))
+	table.AddRow("BLOCKED IPS", strings.Join(d.Config.BlockedIps, ", "))
 	table.AddSeparator()
 	table.AddRow("DEFAULT CACHE DURATION", defaultCacheDuration)
 	table.AddSeparator()
@@ -204,16 +204,16 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 func buildWAFTable(d *cdn.Distribution) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("WAF")
-	for _, disabled := range *d.Waf.DisabledRules {
-		table.AddRow("DISABLED RULE ID", utils.PtrString(disabled.Id))
+	for _, disabled := range d.Waf.DisabledRules {
+		table.AddRow("DISABLED RULE ID", disabled.Id)
 		table.AddSeparator()
 	}
-	for _, enabled := range *d.Waf.EnabledRules {
-		table.AddRow("ENABLED RULE ID", utils.PtrString(enabled.Id))
+	for _, enabled := range d.Waf.EnabledRules {
+		table.AddRow("ENABLED RULE ID", enabled.Id)
 		table.AddSeparator()
 	}
-	for _, logOnly := range *d.Waf.LogOnlyRules {
-		table.AddRow("LOG-ONLY RULE ID", utils.PtrString(logOnly.Id))
+	for _, logOnly := range d.Waf.LogOnlyRules {
+		table.AddRow("LOG-ONLY RULE ID", logOnly.Id)
 		table.AddSeparator()
 	}
 	return table

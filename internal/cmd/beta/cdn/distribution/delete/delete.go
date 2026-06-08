@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -89,5 +89,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) cdn.ApiDeleteDistributionRequest {
-	return apiClient.DeleteDistribution(ctx, model.ProjectId, model.DistributionID)
+	return apiClient.DefaultAPI.DeleteDistribution(ctx, model.ProjectId, model.DistributionID)
 }
