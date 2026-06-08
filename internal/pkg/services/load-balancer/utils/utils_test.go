@@ -44,7 +44,6 @@ func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
 		}),
 		GetLoadBalancerExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetLoadBalancerRequest) (*loadbalancer.LoadBalancer, error) {
 			if s.getLoadBalancerFails {
-
 				return nil, fmt.Errorf("could not get load balancer")
 			}
 			return s.getLoadBalancerResp, nil

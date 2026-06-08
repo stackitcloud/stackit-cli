@@ -335,7 +335,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).UpdateTargetPoolPayload(*payload)
+				*request = request.UpdateTargetPoolPayload(*payload)
 			}),
 		},
 		{
@@ -354,7 +354,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).UpdateTargetPoolPayload(*payload)
+				*request = request.UpdateTargetPoolPayload(*payload)
 			}),
 		},
 		{
@@ -373,7 +373,7 @@ func TestBuildRequest(t *testing.T) {
 						},
 					}
 				})
-				*request = (*request).UpdateTargetPoolPayload(*payload)
+				*request = request.UpdateTargetPoolPayload(*payload)
 			}),
 		},
 		{

@@ -8,10 +8,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -34,24 +35,13 @@ type mockSettings struct {
 
 func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
 	return &loadbalancer.DefaultAPIServiceMock{
-		GetCredentialsExecuteMock: utils.Ptr(func(r loadbalancer.ApiGetCredentialsRequest) (*loadbalancer.GetCredentialsResponse, error) {
+		GetCredentialsExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetCredentialsRequest) (*loadbalancer.GetCredentialsResponse, error) {
 			if s.getCredentialsError {
 				return nil, fmt.Errorf("get credentials failed")
 			}
 			return s.getCredentialsResponse, nil
 		}),
 	}
-}
-
-func (c *mockSettings) UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest {
-	return testClient.DefaultAPI.UpdateCredentials(ctx, projectId, region, credentialsRef)
-}
-
-func (c *mockSettings) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
-	if c.getCredentialsError {
-		return nil, fmt.Errorf("get credentials failed")
-	}
-	return c.getCredentialsResponse, nil
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
