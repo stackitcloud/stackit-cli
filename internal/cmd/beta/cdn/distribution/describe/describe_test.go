@@ -9,7 +9,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -24,7 +25,7 @@ var (
 	testCtx            = context.WithValue(context.Background(), testCtxKey{}, "test")
 	testProjectID      = uuid.NewString()
 	testDistributionID = uuid.NewString()
-	testClient         = &cdn.APIClient{}
+	testClient         = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 	testTime           = time.Time{}
 )
 
@@ -55,31 +56,31 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureResponse(mods ...func(resp *cdn.GetDistributionResponse)) *cdn.GetDistributionResponse {
 	response := &cdn.GetDistributionResponse{
-		Distribution: &cdn.Distribution{
-			Config: &cdn.Config{
-				Backend: &cdn.ConfigBackend{
+		Distribution: cdn.Distribution{
+			Config: cdn.Config{
+				Backend: cdn.ConfigBackend{
 					BucketBackend: &cdn.BucketBackend{
-						BucketUrl: utils.Ptr("https://example.com"),
-						Region:    utils.Ptr("eu"),
-						Type:      utils.Ptr("bucket"),
+						BucketUrl: "https://example.com",
+						Region:    "eu",
+						Type:      "bucket",
 					},
 				},
-				BlockedCountries:     utils.Ptr([]string{}),
-				BlockedIps:           utils.Ptr([]string{}),
-				DefaultCacheDuration: nil,
+				BlockedCountries:     []string{},
+				BlockedIps:           []string{},
+				DefaultCacheDuration: *cdn.NewNullableString(nil),
 				LogSink:              nil,
-				MonthlyLimitBytes:    nil,
+				MonthlyLimitBytes:    *cdn.NewNullableInt64(nil),
 				Optimizer:            nil,
-				Regions:              &[]cdn.Region{cdn.REGION_EU},
-				Waf:                  nil,
+				Regions:              []cdn.Region{cdn.REGION_EU},
+				Waf:                  cdn.WafConfig{},
 			},
-			CreatedAt: utils.Ptr(testTime),
-			Domains:   &[]cdn.Domain{},
+			CreatedAt: testTime,
+			Domains:   []cdn.Domain{},
 			Errors:    nil,
-			Id:        utils.Ptr(testDistributionID),
-			ProjectId: utils.Ptr(testProjectID),
-			Status:    utils.Ptr(cdn.DISTRIBUTIONSTATUS_ACTIVE),
-			UpdatedAt: utils.Ptr(testTime),
+			Id:        testDistributionID,
+			ProjectId: testProjectID,
+			Status:    wait.DISTRIBUTIONSTATUS_ACTIVE,
+			UpdatedAt: testTime,
 			Waf:       nil,
 		},
 	}
@@ -158,21 +159,21 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "base",
 			model:       fixtureInputModel(),
-			expected:    testClient.GetDistribution(testCtx, testProjectID, testDistributionID).WithWafStatus(false),
+			expected:    testClient.DefaultAPI.GetDistribution(testCtx, testProjectID, testDistributionID).WithWafStatus(false),
 		},
 		{
 			description: "with WAF",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.WithWAF = true
 			}),
-			expected: testClient.GetDistribution(testCtx, testProjectID, testDistributionID).WithWafStatus(true),
+			expected: testClient.DefaultAPI.GetDistribution(testCtx, testProjectID, testDistributionID).WithWafStatus(true),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			got := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(got, tt.expected,
-				cmp.AllowUnexported(tt.expected),
+				cmp.AllowUnexported(tt.expected, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -243,12 +244,12 @@ func TestOutputResult(t *testing.T) {
 			format:      "table",
 			distribution: fixtureResponse(
 				func(r *cdn.GetDistributionResponse) {
-					r.Distribution.Errors = &[]cdn.StatusError{
+					r.Distribution.Errors = []cdn.StatusError{
 						{
-							En: utils.Ptr("First error message"),
+							En: "First error message",
 						},
 						{
-							En: utils.Ptr("Second error message"),
+							En: "Second error message",
 						},
 					}
 				},
@@ -300,42 +301,41 @@ func TestOutputResult(t *testing.T) {
 			distribution: fixtureResponse(
 				func(r *cdn.GetDistributionResponse) {
 					r.Distribution.Waf = &cdn.DistributionWaf{
-						EnabledRules: &[]cdn.WafStatusRuleBlock{
-							{Id: utils.Ptr("rule-id-1")},
-							{Id: utils.Ptr("rule-id-2")},
+						EnabledRules: []cdn.WafStatusRuleBlock{
+							{Id: "rule-id-1"},
+							{Id: "rule-id-2"},
 						},
-						DisabledRules: &[]cdn.WafStatusRuleBlock{
-							{Id: utils.Ptr("rule-id-3")},
-							{Id: utils.Ptr("rule-id-4")},
+						DisabledRules: []cdn.WafStatusRuleBlock{
+							{Id: "rule-id-3"},
+							{Id: "rule-id-4"},
 						},
-						LogOnlyRules: &[]cdn.WafStatusRuleBlock{
-							{Id: utils.Ptr("rule-id-5")},
-							{Id: utils.Ptr("rule-id-6")},
+						LogOnlyRules: []cdn.WafStatusRuleBlock{
+							{Id: "rule-id-5"},
+							{Id: "rule-id-6"},
 						},
 					}
-					r.Distribution.Config.Backend = &cdn.ConfigBackend{
+					r.Distribution.Config.Backend = cdn.ConfigBackend{
 						HttpBackend: &cdn.HttpBackend{
-							OriginUrl: utils.Ptr("https://origin.example.com"),
-							OriginRequestHeaders: &map[string]string{
+							OriginUrl: "https://origin.example.com",
+							OriginRequestHeaders: map[string]string{
 								"X-Custom-Header": "CustomValue",
 							},
-							Geofencing: &map[string][]string{
+							Geofencing: map[string][]string{
 								"origin1.example.com": {"US", "CA"},
 								"origin2.example.com": {"FR", "DE"},
 							},
 						},
 					}
-					r.Distribution.Config.BlockedCountries = &[]string{"US", "CN"}
-					r.Distribution.Config.BlockedIps = &[]string{"127.0.0.1"}
-					r.Distribution.Config.DefaultCacheDuration = cdn.NewNullableString(utils.Ptr("P1DT2H30M"))
-					r.Distribution.Config.LogSink = &cdn.ConfigLogSink{
-						LokiLogSink: &cdn.LokiLogSink{
-							PushUrl: utils.Ptr("https://logs.example.com"),
-						},
+					r.Distribution.Config.BlockedCountries = []string{"US", "CN"}
+					r.Distribution.Config.BlockedIps = []string{"127.0.0.1"}
+					r.Distribution.Config.DefaultCacheDuration = *cdn.NewNullableString(utils.Ptr("P1DT2H30M"))
+					r.Distribution.Config.LogSink = &cdn.LokiLogSink{
+						PushUrl: "https://logs.example.com",
 					}
-					r.Distribution.Config.MonthlyLimitBytes = utils.Ptr(int64(104857600))
+					monthlyLimit := int64(104857600)
+					r.Distribution.Config.MonthlyLimitBytes = *cdn.NewNullableInt64(&monthlyLimit)
 					r.Distribution.Config.Optimizer = &cdn.Optimizer{
-						Enabled: utils.Ptr(true),
+						Enabled: true,
 					}
 				}),
 			//nolint:staticcheck //you can't use escape sequences in ``-string-literals

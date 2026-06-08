@@ -271,3 +271,16 @@ func GetSliceFromPointer[T any](s *[]T) []T {
 	}
 	return *s
 }
+
+// FormatPossibleValues formats a slice into a list for usage in the provider docs
+func FormatPossibleValues(values ...string) []string {
+	var formattedValues []string
+	for _, value := range values {
+		if value == "unknown_default_open_api" {
+			continue
+		}
+
+		formattedValues = append(formattedValues, value)
+	}
+	return formattedValues
+}

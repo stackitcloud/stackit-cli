@@ -134,7 +134,7 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		expireDate := "Never"
-		if resp.Expires.IsSet() && *resp.Expires.Get() != "" {
+		if resp.Expires.IsSet() && resp.Expires.Get() != nil && *resp.Expires.Get() != "" {
 			expireDate = *resp.Expires.Get()
 		}
 

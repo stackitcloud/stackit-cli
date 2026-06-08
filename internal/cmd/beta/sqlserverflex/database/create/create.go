@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -69,9 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			resp, err := spinner.Run2(params.Printer, "Creating database", func() (*sqlserverflex.CreateDatabaseResponse, error) {
-				return req.Execute()
-			})
+			resp, err := spinner.Run2(params.Printer, "Creating database", req.Execute)
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex database: %w", err)
 			}
@@ -110,11 +108,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateDatabaseRequest {
-	req := apiClient.CreateDatabase(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.CreateDatabase(ctx, model.ProjectId, model.InstanceId, model.Region)
 	payload := sqlserverflex.CreateDatabasePayload{
-		Name: &model.DatabaseName,
-		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
-			Owner: &model.Owner,
+		Name: model.DatabaseName,
+		Options: sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
+			Owner: model.Owner,
 		},
 	}
 	req = req.CreateDatabasePayload(payload)

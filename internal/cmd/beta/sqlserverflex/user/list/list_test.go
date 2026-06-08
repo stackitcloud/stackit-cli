@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -18,7 +18,8 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sqlserverflex.APIClient{}
+var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIService{}}
+
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -54,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiListUsersRequest)) sqlserverflex.ApiListUsersRequest {
-	request := testClient.ListUsers(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testInstanceId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -157,7 +158,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, sqlserverflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

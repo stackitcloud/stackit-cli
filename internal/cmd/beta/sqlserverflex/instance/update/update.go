@@ -19,20 +19,20 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/wait"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api/wait"
 )
 
 // enforce implementation of interfaces
 var (
-	_ sqlServerFlexClient = &sqlserverflex.APIClient{}
+	_ sqlServerFlexClient = sqlserverflex.APIClient{}.DefaultAPI
 )
 
 type sqlServerFlexClient interface {
 	PartialUpdateInstance(ctx context.Context, projectId, instanceId string, region string) sqlserverflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string, region string) (*sqlserverflex.GetInstanceResponse, error)
-	ListFlavorsExecute(ctx context.Context, projectId string, region string) (*sqlserverflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId string, region string) (*sqlserverflex.ListStoragesResponse, error)
+	GetInstance(ctx context.Context, projectId, instanceId string, region string) sqlserverflex.ApiGetInstanceRequest
+	ListFlavors(ctx context.Context, projectId string, region string) sqlserverflex.ApiListFlavorsRequest
+	ListStorages(ctx context.Context, projectId, flavorId string, region string) sqlserverflex.ApiListStoragesRequest
 }
 
 const (
@@ -52,11 +52,11 @@ type inputModel struct {
 
 	InstanceId     string
 	InstanceName   *string
-	ACL            *[]string
+	ACL            []string
 	BackupSchedule *string
 	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
+	CPU            *int32
+	RAM            *int32
 	Version        *string
 }
 
@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -101,7 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -114,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -134,8 +134,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "Lists of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
+	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
+	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
 }
 
@@ -149,9 +149,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
 	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
-	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
+	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
+	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
 	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
 	version := flags.FlagToStringPointer(p, cmd, versionFlag)
 
@@ -190,7 +190,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
@@ -199,7 +199,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		ram := model.RAM
 		cpu := model.CPU
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.InstanceId, model.Region)
+			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
 			if err != nil {
 				return req, fmt.Errorf("get SQLServer Flex instance: %w", err)
 			}
@@ -226,9 +226,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		flavorId = model.FlavorId
 	}
 
-	var payloadAcl *sqlserverflex.CreateInstancePayloadAcl
+	var payloadAcl *sqlserverflex.InstanceDocumentationACL
 	if model.ACL != nil {
-		payloadAcl = &sqlserverflex.CreateInstancePayloadAcl{Items: model.ACL}
+		payloadAcl = &sqlserverflex.InstanceDocumentationACL{Items: model.ACL}
 	}
 
 	req = req.PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{

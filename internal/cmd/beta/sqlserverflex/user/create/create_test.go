@@ -7,18 +7,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sqlserverflex.APIClient{}
+var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIService{}}
+
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRegion = "eu01"
@@ -45,8 +45,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
-		Username:   utils.Ptr("johndoe"),
-		Roles:      utils.Ptr([]string{"read"}),
+		Username:   "johndoe",
+		Roles:      []string{"read"},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -55,10 +55,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) sqlserverflex.ApiCreateUserRequest {
-	request := testClient.CreateUser(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
-		Username: utils.Ptr("johndoe"),
-		Roles:    utils.Ptr([]string{"read"}),
+		Username: "johndoe",
+		Roles:    []string{"read"},
 	})
 
 	for _, mod := range mods {
@@ -159,10 +159,10 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "no username specified",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
+				model.Username = ""
 			}),
 			expectedRequest: fixtureRequest().CreateUserPayload(sqlserverflex.CreateUserPayload{
-				Roles: utils.Ptr([]string{"read"}),
+				Roles: []string{"read"},
 			}),
 		},
 	}
@@ -173,7 +173,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, sqlserverflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
