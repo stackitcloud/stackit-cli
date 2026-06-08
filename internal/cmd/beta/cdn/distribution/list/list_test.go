@@ -13,7 +13,8 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -25,13 +26,13 @@ import (
 type testCtxKey struct{}
 
 var testProjectId = uuid.NewString()
-var testClient = &cdn.APIClient{}
+var testClient = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 
 const (
 	testNextPageID = "next-page-id-123"
 	testID         = "dist-1"
-	testStatus     = cdn.DISTRIBUTIONSTATUS_ACTIVE
+	testStatus     = wait.DISTRIBUTIONSTATUS_ACTIVE
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -59,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-	request := testClient.ListDistributions(testCtx, testProjectId)
+	request := testClient.DefaultAPI.ListDistributions(testCtx, testProjectId)
 	request = request.PageSize(100)
 	request = request.SortBy("createdAt")
 	for _, mod := range mods {
@@ -181,7 +182,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description string
 		inputModel  *inputModel
-		nextPageID  *string
+		nextPageID  string
 		expected    cdn.ApiListDistributionsRequest
 	}{
 		{
@@ -201,7 +202,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "with next page id",
 			inputModel:  fixtureInputModel(),
-			nextPageID:  utils.Ptr(testNextPageID),
+			nextPageID:  testNextPageID,
 			expected: fixtureRequest(func(req cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
 				return req.PageIdentifier(testNextPageID)
 			}),
@@ -211,7 +212,7 @@ func TestBuildRequest(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			req := buildRequest(testCtx, tt.inputModel, testClient, tt.nextPageID, maxPageSize)
 			diff := cmp.Diff(req, tt.expected,
-				cmp.AllowUnexported(tt.expected),
+				cmp.AllowUnexported(tt.expected, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -241,7 +242,30 @@ func fixtureDistributions(count int) []cdn.Distribution {
 	for i := 0; i < count; i++ {
 		id := fmt.Sprintf("dist-%d", i+1)
 		distributions[i] = cdn.Distribution{
-			Id: &id,
+			Id:        id,
+			ProjectId: testProjectId,
+			Status:    string(testStatus),
+			Config: cdn.Config{
+				Backend: cdn.HttpBackendAsConfigBackend(&cdn.HttpBackend{
+					Type:                 "http",
+					OriginUrl:            "https://example.com",
+					AdditionalProperties: map[string]interface{}{},
+				}),
+				Waf: cdn.WafConfig{
+					Mode:                 "unknown_default_open_api",
+					Type:                 "unknown_default_open_api",
+					AdditionalProperties: map[string]interface{}{},
+				},
+				Tls: cdn.TlsConfig{
+					AdditionalProperties: map[string]interface{}{},
+				},
+				Regions:              []cdn.Region{cdn.REGION_EU},
+				BlockedCountries:     []string{},
+				BlockedIps:           []string{},
+				AdditionalProperties: map[string]interface{}{},
+			},
+			Domains:              []cdn.Domain{},
+			AdditionalProperties: map[string]interface{}{},
 		}
 	}
 	return distributions
@@ -262,20 +286,17 @@ func TestFetchDistributions(t *testing.T) {
 			},
 			expected: nil,
 		},
+
 		{
 			description: "single distribution, single page",
 			responses: []testResponse{
 				fixtureTestResponse(
 					func(resp *testResponse) {
-						resp.body.Distributions = &[]cdn.Distribution{
-							{Id: utils.Ptr("dist-1")},
-						}
+						resp.body.Distributions = fixtureDistributions(1)
 					},
 				),
 			},
-			expected: []cdn.Distribution{
-				{Id: utils.Ptr("dist-1")},
-			},
+			expected: fixtureDistributions(1),
 		},
 		{
 			description: "multiple distributions, multiple pages",
@@ -283,23 +304,16 @@ func TestFetchDistributions(t *testing.T) {
 				fixtureTestResponse(
 					func(resp *testResponse) {
 						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
-						resp.body.Distributions = &[]cdn.Distribution{
-							{Id: utils.Ptr("dist-1")},
-						}
+						resp.body.Distributions = fixtureDistributions(1)
 					},
 				),
 				fixtureTestResponse(
 					func(resp *testResponse) {
-						resp.body.Distributions = &[]cdn.Distribution{
-							{Id: utils.Ptr("dist-2")},
-						}
+						resp.body.Distributions = fixtureDistributions(2)[1:]
 					},
 				),
 			},
-			expected: []cdn.Distribution{
-				{Id: utils.Ptr("dist-1")},
-				{Id: utils.Ptr("dist-2")},
-			},
+			expected: fixtureDistributions(2),
 		},
 		{
 			description: "API error",
@@ -318,9 +332,7 @@ func TestFetchDistributions(t *testing.T) {
 				fixtureTestResponse(
 					func(resp *testResponse) {
 						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
-						resp.body.Distributions = &[]cdn.Distribution{
-							{Id: utils.Ptr("dist-1")},
-						}
+						resp.body.Distributions = fixtureDistributions(1)
 					},
 				),
 				fixtureTestResponse(
@@ -339,13 +351,13 @@ func TestFetchDistributions(t *testing.T) {
 					func(resp *testResponse) {
 						resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
 						distributions := fixtureDistributions(100)
-						resp.body.Distributions = &distributions
+						resp.body.Distributions = distributions
 					},
 				),
 				fixtureTestResponse(
 					func(resp *testResponse) {
 						distributions := fixtureDistributions(10)
-						resp.body.Distributions = &distributions
+						resp.body.Distributions = distributions
 					},
 				),
 			},
@@ -395,7 +407,11 @@ func TestFetchDistributions(t *testing.T) {
 			if callCount != len(tt.responses) {
 				t.Errorf("fetchDistributions() expected %d calls, got %d", len(tt.responses), callCount)
 			}
-			diff := cmp.Diff(got, tt.expected)
+			diff := cmp.Diff(got, tt.expected,
+				cmpopts.EquateComparable(
+					cdn.NullableString{},
+					cdn.NullableInt64{},
+				))
 			if diff != "" {
 				t.Errorf("fetchDistributions() mismatch (-want +got):\n%s", diff)
 			}
@@ -430,14 +446,14 @@ func TestOutputResult(t *testing.T) {
 			outputFormat: "table",
 			distributions: []cdn.Distribution{
 				{
-					Id: utils.Ptr(testID),
-					Config: &cdn.Config{
-						Regions: &[]cdn.Region{
+					Id: testID,
+					Config: cdn.Config{
+						Regions: []cdn.Region{
 							cdn.REGION_EU,
 							cdn.REGION_AF,
 						},
 					},
-					Status: utils.Ptr(testStatus),
+					Status: testStatus,
 				},
 			},
 			expected: `

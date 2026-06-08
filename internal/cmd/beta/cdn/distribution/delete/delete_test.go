@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -18,7 +18,7 @@ type testCtxKey struct{}
 var (
 	testCtx            = context.WithValue(context.Background(), testCtxKey{}, "test")
 	testProjectId      = uuid.NewString()
-	testClient         = &cdn.APIClient{}
+	testClient         = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 	testDistributionID = uuid.NewString()
 )
 
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *cdn.ApiDeleteDistributionRequest)) cdn.ApiDeleteDistributionRequest {
-	request := testClient.DeleteDistribution(testCtx, testProjectId, testDistributionID)
+	request := testClient.DefaultAPI.DeleteDistribution(testCtx, testProjectId, testDistributionID)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -120,7 +120,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedResult,
-				cmp.AllowUnexported(tt.expectedResult),
+				cmp.AllowUnexported(tt.expectedResult, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
