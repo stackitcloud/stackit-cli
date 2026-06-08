@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			var credentials []loadbalancer.CredentialsResponse
-			if resp.Credentials != nil && len(resp.Credentials) > 0 {
+			if len(resp.Credentials) > 0 {
 				credentials, err = utils.FilterCredentials(ctx, apiClient.DefaultAPI, resp.Credentials, model.ProjectId, model.Region, utils.OP_FILTER_UNUSED)
 				if err != nil {
 					return fmt.Errorf("filter Load Balancer observability credentials: %w", err)

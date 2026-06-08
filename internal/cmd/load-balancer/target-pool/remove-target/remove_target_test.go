@@ -316,7 +316,7 @@ func TestBuildRequest(t *testing.T) {
 				payload := fixturePayload(func(payload *loadbalancer.UpdateTargetPoolPayload) {
 					payload.Targets = (payload.Targets)[1:]
 				})
-				*request = (*request).UpdateTargetPoolPayload(*payload)
+				*request = request.UpdateTargetPoolPayload(*payload)
 			}),
 		},
 		{
