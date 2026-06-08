@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDeleteCredentialsRequest)) loadbalancer.ApiDeleteCredentialsRequest {
-	request := testClient.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+	request := testClient.DefaultAPI.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -59,7 +59,7 @@ func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDelete
 }
 
 func fixtureListCredentialsRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

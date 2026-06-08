@@ -15,28 +15,18 @@ const (
 	OP_FILTER_UNUSED
 )
 
-// enforce implementation of interfaces
-var (
-	_ LoadBalancerClient = &loadbalancer.APIClient{}
-)
-
-type LoadBalancerClient interface {
-	GetCredentialsExecute(ctx context.Context, projectId, region, credentialsRef string) (*loadbalancer.GetCredentialsResponse, error)
-	GetLoadBalancerExecute(ctx context.Context, projectId, region, name string) (*loadbalancer.LoadBalancer, error)
-	UpdateTargetPool(ctx context.Context, projectId, region, loadBalancerName, targetPoolName string) loadbalancer.ApiUpdateTargetPoolRequest
-	ListLoadBalancersExecute(ctx context.Context, projectId, region string) (*loadbalancer.ListLoadBalancersResponse, error)
-}
-
-func GetCredentialsDisplayName(ctx context.Context, apiClient LoadBalancerClient, projectId, region, credentialsRef string) (string, error) {
-	resp, err := apiClient.GetCredentialsExecute(ctx, projectId, region, credentialsRef)
+func GetCredentialsDisplayName(ctx context.Context, apiClient loadbalancer.DefaultAPI, projectId, region, credentialsRef string) (string, error) {
+	req := apiClient.GetCredentials(ctx, projectId, region, credentialsRef)
+	resp, err := apiClient.GetCredentialsExecute(req)
 	if err != nil {
 		return "", fmt.Errorf("get Load Balancer credentials: %w", err)
 	}
 	return *resp.Credential.DisplayName, nil
 }
 
-func GetLoadBalancerTargetPool(ctx context.Context, apiClient LoadBalancerClient, projectId, region, loadBalancerName, targetPoolName string) (*loadbalancer.TargetPool, error) {
-	resp, err := apiClient.GetLoadBalancerExecute(ctx, projectId, region, loadBalancerName)
+func GetLoadBalancerTargetPool(ctx context.Context, apiClient loadbalancer.DefaultAPI, projectId, region, loadBalancerName, targetPoolName string) (*loadbalancer.TargetPool, error) {
+	req := apiClient.GetLoadBalancer(ctx, projectId, region, loadBalancerName)
+	resp, err := apiClient.GetLoadBalancerExecute(req)
 	if err != nil {
 		return nil, fmt.Errorf("get load balancer: %w", err)
 	}
@@ -48,7 +38,7 @@ func GetLoadBalancerTargetPool(ctx context.Context, apiClient LoadBalancerClient
 		return nil, fmt.Errorf("no target pools found")
 	}
 
-	targetPool := FindLoadBalancerTargetPoolByName(*resp.TargetPools, targetPoolName)
+	targetPool := FindLoadBalancerTargetPoolByName(resp.TargetPools, targetPoolName)
 	if targetPool == nil {
 		return nil, fmt.Errorf("target pool not found")
 	}
@@ -87,10 +77,10 @@ func AddTargetToTargetPool(targetPool *loadbalancer.TargetPool, target *loadbala
 		return fmt.Errorf("target is nil")
 	}
 	if targetPool.Targets == nil {
-		targetPool.Targets = &[]loadbalancer.Target{*target}
+		targetPool.Targets = []loadbalancer.Target{*target}
 		return nil
 	}
-	*targetPool.Targets = append(*targetPool.Targets, *target)
+	targetPool.Targets = append(targetPool.Targets, *target)
 	return nil
 }
 
@@ -101,12 +91,12 @@ func RemoveTargetFromTargetPool(targetPool *loadbalancer.TargetPool, ip string) 
 	if targetPool.Targets == nil {
 		return fmt.Errorf("no targets found")
 	}
-	targets := *targetPool.Targets
+	targets := targetPool.Targets
 	for i, target := range targets {
 		if target.Ip != nil && *target.Ip == ip {
 			newTargets := targets[:i]
 			newTargets = append(newTargets, targets[i+1:]...)
-			*targetPool.Targets = newTargets
+			targetPool.Targets = newTargets
 			return nil
 		}
 	}
@@ -126,7 +116,7 @@ func ToPayloadTargetPool(targetPool *loadbalancer.TargetPool) *loadbalancer.Upda
 	}
 }
 
-func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId, region, loadBalancerName, targetPoolName, targetIp string) (string, error) {
+func GetTargetName(ctx context.Context, apiClient loadbalancer.DefaultAPI, projectId, region, loadBalancerName, targetPoolName, targetIp string) (string, error) {
 	targetPool, err := GetLoadBalancerTargetPool(ctx, apiClient, projectId, region, loadBalancerName, targetPoolName)
 	if err != nil {
 		return "", fmt.Errorf("get target pool: %w", err)
@@ -134,7 +124,7 @@ func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId,
 	if targetPool.Targets == nil {
 		return "", fmt.Errorf("no targets found")
 	}
-	for _, target := range *targetPool.Targets {
+	for _, target := range targetPool.Targets {
 		if target.Ip != nil && *target.Ip == targetIp {
 			if target.DisplayName == nil {
 				return "", fmt.Errorf("nil target display name")
@@ -147,10 +137,10 @@ func GetTargetName(ctx context.Context, apiClient LoadBalancerClient, projectId,
 
 // GetUsedObsCredentials returns a list of credentials that are used by load balancers for observability metrics or logs.
 // It goes through all load balancers and checks what observability credentials are being used, then returns a list of those credentials.
-func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId, region string) ([]loadbalancer.CredentialsResponse, error) {
+func GetUsedObsCredentials(ctx context.Context, apiClient loadbalancer.DefaultAPI, allCredentials []loadbalancer.CredentialsResponse, projectId, region string) ([]loadbalancer.CredentialsResponse, error) {
 	var usedCredentialsSlice []loadbalancer.CredentialsResponse
-
-	loadBalancers, err := apiClient.ListLoadBalancersExecute(ctx, projectId, region)
+	req := apiClient.ListLoadBalancers(ctx, projectId, region)
+	loadBalancers, err := apiClient.ListLoadBalancersExecute(req)
 	if err != nil {
 		return nil, fmt.Errorf("list load balancers: %w", err)
 	}
@@ -159,8 +149,8 @@ func GetUsedObsCredentials(ctx context.Context, apiClient LoadBalancerClient, al
 	}
 
 	var usedCredentialsRefs []string
-	for i := range *loadBalancers.LoadBalancers {
-		loadBalancer := &(*loadBalancers.LoadBalancers)[i]
+	for i := range loadBalancers.LoadBalancers {
+		loadBalancer := &(loadBalancers.LoadBalancers)[i]
 
 		if loadBalancer.Options == nil || loadBalancer.Options.Observability == nil {
 			continue
@@ -225,7 +215,7 @@ func GetUnusedObsCredentials(usedCredentials, allCredentials []loadbalancer.Cred
 // If unused is true, it returns only the credentials that are not used by any load balancer for observability metrics or logs.
 // If both used and unused are true, it returns an error.
 // If both used and unused are false, it returns the original list of credentials.
-func FilterCredentials(ctx context.Context, client LoadBalancerClient, allCredentials []loadbalancer.CredentialsResponse, projectId, region string, filterOp int) ([]loadbalancer.CredentialsResponse, error) {
+func FilterCredentials(ctx context.Context, client loadbalancer.DefaultAPI, allCredentials []loadbalancer.CredentialsResponse, projectId, region string, filterOp int) ([]loadbalancer.CredentialsResponse, error) {
 	// check that filter OP is valid
 	if filterOp != OP_FILTER_USED && filterOp != OP_FILTER_UNUSED && filterOp != OP_FILTER_NOP {
 		return nil, fmt.Errorf("invalid filter operation")
@@ -234,7 +224,6 @@ func FilterCredentials(ctx context.Context, client LoadBalancerClient, allCreden
 	if filterOp == OP_FILTER_NOP {
 		return allCredentials, nil
 	}
-
 	usedCredentials, err := GetUsedObsCredentials(ctx, client, allCredentials, projectId, region)
 	if err != nil {
 		return nil, fmt.Errorf("get used observability credentials: %w", err)

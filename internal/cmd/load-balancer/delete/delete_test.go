@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiDeleteLoadBalancerRequest)) loadbalancer.ApiDeleteLoadBalancerRequest {
-	request := testClient.DeleteLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
+	request := testClient.DefaultAPI.DeleteLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}

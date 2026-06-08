@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("build request: %w", err)
 			}
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient utils.LoadBalancerClient) (loadbalancer.ApiUpdateTargetPoolRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient loadbalancer.DefaultAPI) (loadbalancer.ApiUpdateTargetPoolRequest, error) {
 	req := apiClient.UpdateTargetPool(ctx, model.ProjectId, model.Region, model.LBName, model.TargetPoolName)
 
 	targetPool, err := utils.GetLoadBalancerTargetPool(ctx, apiClient, model.ProjectId, model.Region, model.LBName, model.TargetPoolName)

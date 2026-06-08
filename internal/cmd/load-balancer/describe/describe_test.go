@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetLoadBalancerRequest)) loadbalancer.ApiGetLoadBalancerRequest {
-	request := testClient.GetLoadBalancer(testCtx, testProjectId, testRegion, testloadBalancerName)
+	request := testClient.DefaultAPI.GetLoadBalancer(testCtx, testProjectId, testRegion, testloadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}

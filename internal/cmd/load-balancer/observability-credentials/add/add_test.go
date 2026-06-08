@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiCreateCredentialsRequest)) loadbalancer.ApiCreateCredentialsRequest {
-	request := testClient.CreateCredentials(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateCredentials(testCtx, testProjectId, testRegion)
 	request = request.CreateCredentialsPayload(loadbalancer.CreateCredentialsPayload{
 		DisplayName: utils.Ptr("name"),
 		Username:    utils.Ptr("username"),
@@ -152,7 +152,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(loadbalancer.CreateCredentialsRequest{}, "xRequestID"),
+				cmpopts.IgnoreFields(loadbalancer.ApiCreateCredentialsRequest{}, "xRequestID"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

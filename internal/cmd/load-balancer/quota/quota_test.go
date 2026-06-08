@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetQuotaRequest)) loadbalancer.ApiGetQuotaRequest {
-	request := testClient.GetQuota(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.GetQuota(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

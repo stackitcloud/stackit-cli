@@ -31,12 +31,12 @@ var (
 var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 	ExternalAddress: utils.Ptr(""),
 
-	Listeners: &[]loadbalancer.Listener{
+	Listeners: []loadbalancer.Listener{
 		{
 			DisplayName: utils.Ptr(""),
-			Port:        utils.Ptr(int64(0)),
+			Port:        utils.Ptr(int32(0)),
 			Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
-			ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+			ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 				{
 					Name: utils.Ptr(""),
 				},
@@ -51,7 +51,7 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		},
 	},
 	Name: utils.Ptr(""),
-	Networks: &[]loadbalancer.Network{
+	Networks: []loadbalancer.Network{
 		{
 			NetworkId: utils.Ptr(""),
 			Role:      loadbalancer.NetworkRole("").Ptr(),
@@ -59,7 +59,7 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 	},
 	Options: &loadbalancer.LoadBalancerOptions{
 		AccessControl: &loadbalancer.LoadbalancerOptionAccessControl{
-			AllowedSourceRanges: &[]string{
+			AllowedSourceRanges: []string{
 				"",
 			},
 		},
@@ -76,21 +76,21 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		},
 		PrivateNetworkOnly: utils.Ptr(false),
 	},
-	TargetPools: &[]loadbalancer.TargetPool{
+	TargetPools: []loadbalancer.TargetPool{
 		{
 			ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-				HealthyThreshold:   utils.Ptr(int64(0)),
+				HealthyThreshold:   utils.Ptr(int32(0)),
 				Interval:           utils.Ptr(""),
 				IntervalJitter:     utils.Ptr(""),
 				Timeout:            utils.Ptr(""),
-				UnhealthyThreshold: utils.Ptr(int64(0)),
+				UnhealthyThreshold: utils.Ptr(int32(0)),
 			},
 			Name: utils.Ptr(""),
 			SessionPersistence: &loadbalancer.SessionPersistence{
 				UseSourceIpAddress: utils.Ptr(false),
 			},
-			TargetPort: utils.Ptr(int64(0)),
-			Targets: &[]loadbalancer.Target{
+			TargetPort: utils.Ptr(int32(0)),
+			Targets: []loadbalancer.Target{
 				{
 					DisplayName: utils.Ptr(""),
 					Ip:          utils.Ptr(""),
@@ -197,7 +197,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiCreateLoadBalancerRequest)) loadbalancer.ApiCreateLoadBalancerRequest {
-	request := testClient.CreateLoadBalancer(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateLoadBalancer(testCtx, testProjectId, testRegion)
 	request = request.CreateLoadBalancerPayload(*testPayload)
 	request = request.XRequestID(testRequestId)
 	for _, mod := range mods {
