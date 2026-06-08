@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -21,7 +21,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &loadbalancer.APIClient{}
+	testClient    = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 )
 
@@ -32,33 +32,28 @@ const (
 	testIP             = "1.2.3.4"
 )
 
-type loadBalancerClientMocked struct {
+type mockSettings struct {
 	getCredentialsFails  bool
 	getCredentialsResp   *loadbalancer.GetCredentialsResponse
 	getLoadBalancerFails bool
 	getLoadBalancerResp  *loadbalancer.LoadBalancer
 }
 
-func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get credentials")
+func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
+	return loadbalancer.DefaultAPIServiceMock{
+		GetCredentialsExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetCredentialsRequest) (*loadbalancer.GetCredentialsResponse, error) {
+			if s.getCredentialsFails {
+				return nil, fmt.Errorf("could not get credentials")
+			}
+			return s.getCredentialsResp, nil
+		}),
+		GetLoadBalancerExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetLoadBalancerRequest) (*loadbalancer.LoadBalancer, error) {
+			if s.getLoadBalancerFails {
+				return nil, fmt.Errorf("could not get load balancer")
+			}
+			return s.getLoadBalancerResp, nil
+		}),
 	}
-	return m.getCredentialsResp, nil
-}
-
-func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _, _ string) (*loadbalancer.LoadBalancer, error) {
-	if m.getLoadBalancerFails {
-		return nil, fmt.Errorf("could not get load balancer")
-	}
-	return m.getLoadBalancerResp, nil
-}
-
-func (m *loadBalancerClientMocked) UpdateTargetPool(ctx context.Context, projectId, region, loadBalancerName, targetPoolName string) loadbalancer.ApiUpdateTargetPoolRequest {
-	return testClient.UpdateTargetPool(ctx, projectId, region, loadBalancerName, targetPoolName)
-}
-
-func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
-	return nil, nil
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -101,8 +96,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureTargets() *[]loadbalancer.Target {
-	return &[]loadbalancer.Target{
+func fixtureTargets() []loadbalancer.Target {
+	return []loadbalancer.Target{
 		{
 			DisplayName: utils.Ptr("target-1"),
 			Ip:          utils.Ptr("1.2.3.4"),
@@ -117,21 +112,21 @@ func fixtureTargets() *[]loadbalancer.Target {
 func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
 	lb := loadbalancer.LoadBalancer{
 		Name: utils.Ptr(testLBName),
-		TargetPools: &[]loadbalancer.TargetPool{
+		TargetPools: []loadbalancer.TargetPool{
 			{
 				Name:    utils.Ptr(testTargetPoolName),
 				Targets: fixtureTargets(),
 				ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-					UnhealthyThreshold: utils.Ptr(int64(3)),
+					UnhealthyThreshold: utils.Ptr(int32(3)),
 				},
 				SessionPersistence: &loadbalancer.SessionPersistence{
 					UseSourceIpAddress: utils.Ptr(true),
 				},
-				TargetPort: utils.Ptr(int64(80)),
+				TargetPort: utils.Ptr(int32(80)),
 			},
 			{
 				Name: utils.Ptr("target-pool-2"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("6.7.8.9"),
@@ -155,12 +150,12 @@ func fixturePayload(mods ...func(payload *loadbalancer.UpdateTargetPoolPayload))
 	payload := &loadbalancer.UpdateTargetPoolPayload{
 		Name: utils.Ptr("target-pool-1"),
 		ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-			UnhealthyThreshold: utils.Ptr(int64(3)),
+			UnhealthyThreshold: utils.Ptr(int32(3)),
 		},
 		SessionPersistence: &loadbalancer.SessionPersistence{
 			UseSourceIpAddress: utils.Ptr(true),
 		},
-		TargetPort: utils.Ptr(int64(80)),
+		TargetPort: utils.Ptr(int32(80)),
 		Targets:    fixtureTargets(),
 	}
 
@@ -171,7 +166,7 @@ func fixturePayload(mods ...func(payload *loadbalancer.UpdateTargetPoolPayload))
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateTargetPoolRequest)) loadbalancer.ApiUpdateTargetPoolRequest {
-	request := testClient.UpdateTargetPool(testCtx, testProjectId, testRegion, testLBName, testTargetPoolName)
+	request := testClient.DefaultAPI.UpdateTargetPool(testCtx, testProjectId, testRegion, testLBName, testTargetPoolName)
 	request = request.UpdateTargetPoolPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -319,7 +314,7 @@ func TestBuildRequest(t *testing.T) {
 			isValid:             true,
 			expectedRequest: fixtureRequest(func(request *loadbalancer.ApiUpdateTargetPoolRequest) {
 				payload := fixturePayload(func(payload *loadbalancer.UpdateTargetPoolPayload) {
-					payload.Targets = utils.Ptr((*payload.Targets)[1:])
+					payload.Targets = (payload.Targets)[1:]
 				})
 				*request = (*request).UpdateTargetPoolPayload(*payload)
 			}),
@@ -328,7 +323,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "empty targets",
 			model:       fixtureInputModel(),
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				(*lb.TargetPools)[0].Targets = &[]loadbalancer.Target{}
+				(lb.TargetPools)[0].Targets = []loadbalancer.Target{}
 			}),
 			isValid: false,
 		},
@@ -345,7 +340,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "nil targets",
 			model:       fixtureInputModel(),
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				(*lb.TargetPools)[0].Targets = nil
+				(lb.TargetPools)[0].Targets = nil
 			}),
 			isValid: false,
 		},
@@ -368,7 +363,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "nil target pool",
 			model:       fixtureInputModel(),
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				*lb.TargetPools = nil
+				lb.TargetPools = nil
 			}),
 			isValid: false,
 		},
@@ -376,11 +371,11 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				getLoadBalancerFails: tt.getLoadBalancerFails,
 				getLoadBalancerResp:  tt.getLoadBalancerResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -391,6 +386,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(loadbalancer.ApiUpdateTargetPoolRequest{}, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

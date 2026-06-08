@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
@@ -25,7 +25,7 @@ const (
 	testLoadBalancerName       = "my-load-balancer"
 )
 
-type loadBalancerClientMocked struct {
+type mockSettings struct {
 	getCredentialsFails    bool
 	getCredentialsResp     *loadbalancer.GetCredentialsResponse
 	getLoadBalancerFails   bool
@@ -34,38 +34,37 @@ type loadBalancerClientMocked struct {
 	listLoadBalancersResp  *loadbalancer.ListLoadBalancersResponse
 }
 
-func (m *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get credentials")
-	}
-	return m.getCredentialsResp, nil
-}
+func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
+	return &loadbalancer.DefaultAPIServiceMock{
+		GetCredentialsExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetCredentialsRequest) (*loadbalancer.GetCredentialsResponse, error) {
+			if s.getCredentialsFails {
+				return nil, fmt.Errorf("could not get credentials")
+			}
+			return s.getCredentialsResp, nil
+		}),
+		GetLoadBalancerExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetLoadBalancerRequest) (*loadbalancer.LoadBalancer, error) {
+			if s.getLoadBalancerFails {
 
-func (m *loadBalancerClientMocked) GetLoadBalancerExecute(_ context.Context, _, _, _ string) (*loadbalancer.LoadBalancer, error) {
-	if m.getLoadBalancerFails {
-		return nil, fmt.Errorf("could not get load balancer")
+				return nil, fmt.Errorf("could not get load balancer")
+			}
+			return s.getLoadBalancerResp, nil
+		}),
+		ListLoadBalancersExecuteMock: utils.Ptr(func(_ loadbalancer.ApiListLoadBalancersRequest) (*loadbalancer.ListLoadBalancersResponse, error) {
+			if s.listLoadBalancersFails {
+				return nil, fmt.Errorf("could not list load balancers")
+			}
+			return s.listLoadBalancersResp, nil
+		}),
 	}
-	return m.getLoadBalancerResp, nil
-}
-
-func (m *loadBalancerClientMocked) ListLoadBalancersExecute(_ context.Context, _, _ string) (*loadbalancer.ListLoadBalancersResponse, error) {
-	if m.listLoadBalancersFails {
-		return nil, fmt.Errorf("could not list load balancers")
-	}
-	return m.listLoadBalancersResp, nil
-}
-
-func (m *loadBalancerClientMocked) UpdateTargetPool(_ context.Context, _, _, _, _ string) loadbalancer.ApiUpdateTargetPoolRequest {
-	return loadbalancer.UpdateTargetPoolRequest{}
 }
 
 func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer.LoadBalancer {
 	lb := loadbalancer.LoadBalancer{
 		Name: utils.Ptr(testLoadBalancerName),
-		TargetPools: &[]loadbalancer.TargetPool{
+		TargetPools: []loadbalancer.TargetPool{
 			{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -78,7 +77,7 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 			},
 			{
 				Name: utils.Ptr("target-pool-2"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("6.7.8.9"),
@@ -136,8 +135,8 @@ func fixtureCredentials(mod ...func([]loadbalancer.CredentialsResponse)) []loadb
 	return credentials
 }
 
-func fixtureTargets(mod ...func(*[]loadbalancer.Target)) *[]loadbalancer.Target {
-	targets := &[]loadbalancer.Target{
+func fixtureTargets(mod ...func([]loadbalancer.Target)) []loadbalancer.Target {
+	targets := []loadbalancer.Target{
 		{
 			DisplayName: utils.Ptr("target-1"),
 			Ip:          utils.Ptr("1.2.3.4"),
@@ -186,12 +185,12 @@ func TestGetCredentialsDisplayName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				getCredentialsFails: tt.getCredentialsFails,
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsDisplayName(context.Background(), client, testProjectId, testRegion, testCredentialsRef)
+			output, err := GetCredentialsDisplayName(context.Background(), newAPIMock(client), testProjectId, testRegion, testCredentialsRef)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -225,7 +224,7 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 			isValid:             true,
 			expectedOutput: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -246,7 +245,7 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 		{
 			description: "no target pools",
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				lb.TargetPools = &[]loadbalancer.TargetPool{}
+				lb.TargetPools = []loadbalancer.TargetPool{}
 			}),
 			isValid: false,
 		},
@@ -266,12 +265,12 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				getLoadBalancerFails: tt.getLoadBalancerFails,
 				getLoadBalancerResp:  tt.getLoadBalancerResp,
 			}
 
-			output, err := GetLoadBalancerTargetPool(context.Background(), client, testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName)
+			output, err := GetLoadBalancerTargetPool(context.Background(), newAPIMock(client), testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -424,7 +423,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			description: "base",
 			targetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -438,7 +437,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			isValid: true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -454,7 +453,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			description: "no target pool targets",
 			targetPool: &loadbalancer.TargetPool{
 				Name:    utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{},
+				Targets: []loadbalancer.Target{},
 			},
 			target: &loadbalancer.Target{
 				DisplayName: utils.Ptr("target-3"),
@@ -463,7 +462,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			isValid: true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-3"),
 						Ip:          utils.Ptr("2.2.2.2"),
@@ -484,7 +483,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			isValid: true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-3"),
 						Ip:          utils.Ptr("2.2.2.2"),
@@ -505,7 +504,7 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			description: "nil new target",
 			targetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -556,7 +555,7 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			isValid:  true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-2"),
 						Ip:          utils.Ptr("2.2.2.2"),
@@ -578,7 +577,7 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			isValid:  true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -600,7 +599,7 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			isValid:  true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -616,7 +615,7 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			description: "remove only target",
 			targetPool: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -627,14 +626,14 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			isValid:  true,
 			expectedTargetPool: &loadbalancer.TargetPool{
 				Name:    utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{},
+				Targets: []loadbalancer.Target{},
 			},
 		},
 		{
 			description: "no target pool targets",
 			targetPool: &loadbalancer.TargetPool{
 				Name:    utils.Ptr("target-pool-1"),
-				Targets: &[]loadbalancer.Target{},
+				Targets: []loadbalancer.Target{},
 			},
 			targetIp: "2.2.2.2",
 			isValid:  false,
@@ -688,13 +687,13 @@ func TestToPayloadTargetPool(t *testing.T) {
 			input: &loadbalancer.TargetPool{
 				Name: utils.Ptr("target-pool-1"),
 				ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-					UnhealthyThreshold: utils.Ptr(int64(3)),
+					UnhealthyThreshold: utils.Ptr(int32(3)),
 				},
 				SessionPersistence: &loadbalancer.SessionPersistence{
 					UseSourceIpAddress: utils.Ptr(true),
 				},
-				TargetPort: utils.Ptr(int64(80)),
-				Targets: &[]loadbalancer.Target{
+				TargetPort: utils.Ptr(int32(80)),
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -704,13 +703,13 @@ func TestToPayloadTargetPool(t *testing.T) {
 			expected: &loadbalancer.UpdateTargetPoolPayload{
 				Name: utils.Ptr("target-pool-1"),
 				ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-					UnhealthyThreshold: utils.Ptr(int64(3)),
+					UnhealthyThreshold: utils.Ptr(int32(3)),
 				},
 				SessionPersistence: &loadbalancer.SessionPersistence{
 					UseSourceIpAddress: utils.Ptr(true),
 				},
-				TargetPort: utils.Ptr(int64(80)),
-				Targets: &[]loadbalancer.Target{
+				TargetPort: utils.Ptr(int32(80)),
+				Targets: []loadbalancer.Target{
 					{
 						DisplayName: utils.Ptr("target-1"),
 						Ip:          utils.Ptr("1.2.3.4"),
@@ -767,10 +766,10 @@ func TestGetTargetName(t *testing.T) {
 			targetPoolName: "target-pool-1",
 			targetIp:       "1.2.3.4",
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				lb.TargetPools = &[]loadbalancer.TargetPool{
+				lb.TargetPools = []loadbalancer.TargetPool{
 					{
 						Name:    utils.Ptr("target-pool-1"),
-						Targets: &[]loadbalancer.Target{},
+						Targets: []loadbalancer.Target{},
 					},
 				}
 			}),
@@ -781,7 +780,7 @@ func TestGetTargetName(t *testing.T) {
 			targetPoolName: "target-pool-1",
 			targetIp:       "1.2.3.4",
 			getLoadBalancerResp: fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
-				lb.TargetPools = &[]loadbalancer.TargetPool{
+				lb.TargetPools = []loadbalancer.TargetPool{
 					{
 						Name:    utils.Ptr("target-pool-1"),
 						Targets: nil,
@@ -796,10 +795,10 @@ func TestGetTargetName(t *testing.T) {
 			targetIp:       "1.2.3.4",
 			getLoadBalancerResp: fixtureLoadBalancer(
 				func(lb *loadbalancer.LoadBalancer) {
-					lb.TargetPools = &[]loadbalancer.TargetPool{
+					lb.TargetPools = []loadbalancer.TargetPool{
 						{
 							Name: utils.Ptr("target-pool-1"),
-							Targets: &[]loadbalancer.Target{
+							Targets: []loadbalancer.Target{
 								{
 									DisplayName: nil,
 									Ip:          utils.Ptr("1.2.3.4"),
@@ -821,11 +820,11 @@ func TestGetTargetName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				getLoadBalancerResp: tt.getLoadBalancerResp,
 			}
 
-			output, err := GetTargetName(context.Background(), client, testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName, tt.targetIp)
+			output, err := GetTargetName(context.Background(), newAPIMock(client), testProjectId, testRegion, testLoadBalancerName, tt.targetPoolName, tt.targetIp)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -856,7 +855,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description:    "base",
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 				},
 			},
@@ -878,7 +877,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description:    "repeated credentials in different load balancers",
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 					*fixtureLoadBalancer(),
 				},
@@ -901,7 +900,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description:    "no repeated credentials in different load balancers",
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 					*fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
 						lb.Options.Observability.Logs.CredentialsRef = utils.Ptr("credentials-ref-3")
@@ -929,7 +928,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description:    "no credentials",
 			allCredentials: []loadbalancer.CredentialsResponse{},
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 				},
 			},
@@ -945,7 +944,7 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			description:    "no observability options",
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(func(lb *loadbalancer.LoadBalancer) {
 						lb.Options = nil
 					}),
@@ -958,12 +957,12 @@ func TestGetUsedObsCredentials(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				listLoadBalancersFails: tt.listLoadBalancersFails,
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 			}
 
-			output, err := GetUsedObsCredentials(testCtx, client, tt.allCredentials, testProjectId, testRegion)
+			output, err := GetUsedObsCredentials(testCtx, newAPIMock(client), tt.allCredentials, testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -1077,7 +1076,7 @@ func TestFilterCredentials(t *testing.T) {
 			filterOp:       OP_FILTER_USED,
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 				},
 			},
@@ -1100,7 +1099,7 @@ func TestFilterCredentials(t *testing.T) {
 			filterOp:       OP_FILTER_UNUSED,
 			allCredentials: fixtureCredentials(),
 			listLoadBalancersResp: &loadbalancer.ListLoadBalancersResponse{
-				LoadBalancers: &[]loadbalancer.LoadBalancer{
+				LoadBalancers: []loadbalancer.LoadBalancer{
 					*fixtureLoadBalancer(),
 				},
 			},
@@ -1136,11 +1135,11 @@ func TestFilterCredentials(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 				listLoadBalancersFails: tt.listLoadBalancersFails,
 			}
-			filteredCredentials, err := FilterCredentials(testCtx, client, tt.allCredentials, testProjectId, testRegion, tt.filterOp)
+			filteredCredentials, err := FilterCredentials(testCtx, newAPIMock(client), tt.allCredentials, testProjectId, testRegion, tt.filterOp)
 			if err != nil {
 				if !tt.isValid {
 					return

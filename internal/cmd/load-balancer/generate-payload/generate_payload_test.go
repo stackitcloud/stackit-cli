@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -23,7 +23,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &loadbalancer.APIClient{}
+var testClient = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 const (
@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetLoadBalancerRequest)) loadbalancer.ApiGetLoadBalancerRequest {
-	request := testClient.GetLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
+	request := testClient.DefaultAPI.GetLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,7 +160,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -173,18 +173,18 @@ func TestModifyListeners(t *testing.T) {
 	tests := []struct {
 		description string
 		response    *loadbalancer.LoadBalancer
-		expected    *[]loadbalancer.Listener
+		expected    []loadbalancer.Listener
 	}{
 		{
 			description: "base",
 			response: &loadbalancer.LoadBalancer{
-				Listeners: &[]loadbalancer.Listener{
+				Listeners: []loadbalancer.Listener{
 					{
 						DisplayName: utils.Ptr(""),
-						Port:        utils.Ptr(int64(0)),
+						Port:        utils.Ptr(int32(0)),
 						Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 						Name:        utils.Ptr(""),
-						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 							{
 								Name: utils.Ptr(""),
 							},
@@ -199,10 +199,10 @@ func TestModifyListeners(t *testing.T) {
 					},
 					{
 						DisplayName: utils.Ptr(""),
-						Port:        utils.Ptr(int64(0)),
+						Port:        utils.Ptr(int32(0)),
 						Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 						Name:        utils.Ptr(""),
-						ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+						ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 							{
 								Name: utils.Ptr(""),
 							},
@@ -217,13 +217,13 @@ func TestModifyListeners(t *testing.T) {
 					},
 				},
 			},
-			expected: &[]loadbalancer.Listener{
+			expected: []loadbalancer.Listener{
 				{
 					DisplayName: utils.Ptr(""),
-					Port:        utils.Ptr(int64(0)),
+					Port:        utils.Ptr(int32(0)),
 					Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 					Name:        nil,
-					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+					ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 						{
 							Name: utils.Ptr(""),
 						},
@@ -238,10 +238,10 @@ func TestModifyListeners(t *testing.T) {
 				},
 				{
 					DisplayName: utils.Ptr(""),
-					Port:        utils.Ptr(int64(0)),
+					Port:        utils.Ptr(int32(0)),
 					Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
 					Name:        nil,
-					ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+					ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 						{
 							Name: utils.Ptr(""),
 						},

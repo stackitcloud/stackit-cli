@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -30,12 +30,12 @@ const (
 
 // enforce implementation of interfaces
 var (
-	_ loadBalancerClient = &loadbalancer.APIClient{}
+	_ loadBalancerClient = loadbalancer.APIClient{}.DefaultAPI
 )
 
 type loadBalancerClient interface {
 	UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest
-	GetCredentialsExecute(ctx context.Context, projectId, region, credentialsRef string) (*loadbalancer.GetCredentialsResponse, error)
+	GetCredentials(ctx context.Context, projectId string, region string, credentialsRef string) loadbalancer.ApiGetCredentialsRequest
 }
 
 type inputModel struct {
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient, model.ProjectId, model.Region, model.CredentialsRef)
+			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials display name: %v", err)
 				credentialsLabel = model.CredentialsRef
@@ -92,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -141,7 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient loadBalancerClient) (loadbalancer.ApiUpdateCredentialsRequest, error) {
 	req := apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 
-	currentCredentials, err := apiClient.GetCredentialsExecute(ctx, model.ProjectId, model.Region, model.CredentialsRef)
+	currentCredentials, err := apiClient.GetCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get Load Balancer observability credentials: %w", err)
 	}
