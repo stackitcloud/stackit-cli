@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -20,12 +20,7 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testInstanceId = uuid.NewString()
 
-// enforce implementation of interfaces
-var (
-	_ sqlServerFlexOptionsClient = &sqlServerFlexClientMocked{}
-)
-
-type sqlServerFlexClientMocked struct {
+type mockSettings struct {
 	listFlavorsFails           bool
 	listVersionsFails          bool
 	listStoragesFails          bool
@@ -41,68 +36,67 @@ type sqlServerFlexClientMocked struct {
 	listDBCompatibilitiesCalled bool
 }
 
-func (c *sqlServerFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListFlavorsResponse, error) {
-	c.listFlavorsCalled = true
-	if c.listFlavorsFails {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s *mockSettings) sqlserverflex.DefaultAPI {
+	return &sqlserverflex.DefaultAPIServiceMock{
+		ListFlavorsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListFlavorsRequest) (*sqlserverflex.ListFlavorsResponse, error) {
+			s.listFlavorsCalled = true
+			if s.listFlavorsFails {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return utils.Ptr(sqlserverflex.ListFlavorsResponse{
+				Flavors: []sqlserverflex.InstanceFlavorEntry{},
+			}), nil
+		}),
+		ListVersionsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListVersionsRequest) (*sqlserverflex.ListVersionsResponse, error) {
+			s.listVersionsCalled = true
+			if s.listVersionsFails {
+				return nil, fmt.Errorf("list versions failed")
+			}
+			return utils.Ptr(sqlserverflex.ListVersionsResponse{
+				Versions: []string{},
+			}), nil
+		}),
+		ListStoragesExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListStoragesRequest) (*sqlserverflex.ListStoragesResponse, error) {
+			s.listStoragesCalled = true
+			if s.listStoragesFails {
+				return nil, fmt.Errorf("list storages failed")
+			}
+			return utils.Ptr(sqlserverflex.ListStoragesResponse{
+				StorageClasses: []string{},
+				StorageRange: &sqlserverflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			}), nil
+		}),
+		ListRolesExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListRolesRequest) (*sqlserverflex.ListRolesResponse, error) {
+			s.listUserRolesCalled = true
+			if s.listUserRolesFails {
+				return nil, fmt.Errorf("list roles failed")
+			}
+			return utils.Ptr(sqlserverflex.ListRolesResponse{
+				Roles: []string{},
+			}), nil
+		}),
+		ListCollationsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListCollationsRequest) (*sqlserverflex.ListCollationsResponse, error) {
+			s.listDBCollationsCalled = true
+			if s.listDBCollationsFails {
+				return nil, fmt.Errorf("list collations failed")
+			}
+			return utils.Ptr(sqlserverflex.ListCollationsResponse{
+				Collations: []sqlserverflex.MssqlDatabaseCollation{},
+			}), nil
+		}),
+		ListCompatibilityExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListCompatibilityRequest) (*sqlserverflex.ListCompatibilityResponse, error) {
+			s.listDBCompatibilitiesCalled = true
+			if s.listDBCompatibilitiesFails {
+				return nil, fmt.Errorf("list compatibilities failed")
+			}
+			return utils.Ptr(sqlserverflex.ListCompatibilityResponse{
+				Compatibilities: []sqlserverflex.MssqlDatabaseCompatibility{},
+			}), nil
+		}),
 	}
-	return utils.Ptr(sqlserverflex.ListFlavorsResponse{
-		Flavors: utils.Ptr([]sqlserverflex.InstanceFlavorEntry{}),
-	}), nil
-}
-
-func (c *sqlServerFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*sqlserverflex.ListVersionsResponse, error) {
-	c.listVersionsCalled = true
-	if c.listVersionsFails {
-		return nil, fmt.Errorf("list versions failed")
-	}
-	return utils.Ptr(sqlserverflex.ListVersionsResponse{
-		Versions: utils.Ptr([]string{}),
-	}), nil
-}
-
-func (c *sqlServerFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListStoragesResponse, error) {
-	c.listStoragesCalled = true
-	if c.listStoragesFails {
-		return nil, fmt.Errorf("list storages failed")
-	}
-	return utils.Ptr(sqlserverflex.ListStoragesResponse{
-		StorageClasses: utils.Ptr([]string{}),
-		StorageRange: &sqlserverflex.StorageRange{
-			Min: utils.Ptr(int64(10)),
-			Max: utils.Ptr(int64(100)),
-		},
-	}), nil
-}
-
-func (c *sqlServerFlexClientMocked) ListRolesExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListRolesResponse, error) {
-	c.listUserRolesCalled = true
-	if c.listUserRolesFails {
-		return nil, fmt.Errorf("list roles failed")
-	}
-	return utils.Ptr(sqlserverflex.ListRolesResponse{
-		Roles: utils.Ptr([]string{}),
-	}), nil
-}
-
-func (c *sqlServerFlexClientMocked) ListCollationsExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListCollationsResponse, error) {
-	c.listDBCollationsCalled = true
-	if c.listDBCollationsFails {
-		return nil, fmt.Errorf("list collations failed")
-	}
-	return utils.Ptr(sqlserverflex.ListCollationsResponse{
-		Collations: utils.Ptr([]sqlserverflex.MssqlDatabaseCollation{}),
-	}), nil
-}
-
-func (c *sqlServerFlexClientMocked) ListCompatibilityExecute(_ context.Context, _, _, _ string) (*sqlserverflex.ListCompatibilityResponse, error) {
-	c.listDBCompatibilitiesCalled = true
-	if c.listDBCompatibilitiesFails {
-		return nil, fmt.Errorf("list compatibilities failed")
-	}
-	return utils.Ptr(sqlserverflex.ListCompatibilityResponse{
-		Compatibilities: utils.Ptr([]sqlserverflex.MssqlDatabaseCompatibility{}),
-	}), nil
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -436,7 +430,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			client := &sqlServerFlexClientMocked{
+			settings := mockSettings{
 				listFlavorsFails:           tt.listFlavorsFails,
 				listVersionsFails:          tt.listVersionsFails,
 				listStoragesFails:          tt.listStoragesFails,
@@ -445,7 +439,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				listDBCompatibilitiesFails: tt.listDBCompatibilitiesFails,
 			}
 
-			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, client)
+			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, newAPIMock(&settings))
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
@@ -456,14 +450,14 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				return
 			}
 
-			if tt.expectListFlavorsCalled != client.listFlavorsCalled {
-				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, client.listFlavorsCalled)
+			if tt.expectListFlavorsCalled != settings.listFlavorsCalled {
+				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, settings.listFlavorsCalled)
 			}
-			if tt.expectListVersionsCalled != client.listVersionsCalled {
-				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, client.listVersionsCalled)
+			if tt.expectListVersionsCalled != settings.listVersionsCalled {
+				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, settings.listVersionsCalled)
 			}
-			if tt.expectListStoragesCalled != client.listStoragesCalled {
-				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, client.listStoragesCalled)
+			if tt.expectListStoragesCalled != settings.listStoragesCalled {
+				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, settings.listStoragesCalled)
 			}
 		})
 	}
@@ -495,12 +489,12 @@ func TestOutputResult(t *testing.T) {
 			name: "all input set",
 			args: args{
 				model:             fixtureInputModelAllTrue(),
-				flavors:           &sqlserverflex.ListFlavorsResponse{Flavors: &[]sqlserverflex.InstanceFlavorEntry{}},
-				versions:          &sqlserverflex.ListVersionsResponse{Versions: &[]string{}},
-				storages:          &sqlserverflex.ListStoragesResponse{StorageClasses: &[]string{}},
-				userRoles:         &sqlserverflex.ListRolesResponse{Roles: &[]string{}},
-				dbCollations:      &sqlserverflex.ListCollationsResponse{Collations: &[]sqlserverflex.MssqlDatabaseCollation{}},
-				dbCompatibilities: &sqlserverflex.ListCompatibilityResponse{Compatibilities: &[]sqlserverflex.MssqlDatabaseCompatibility{}},
+				flavors:           &sqlserverflex.ListFlavorsResponse{Flavors: []sqlserverflex.InstanceFlavorEntry{}},
+				versions:          &sqlserverflex.ListVersionsResponse{Versions: []string{}},
+				storages:          &sqlserverflex.ListStoragesResponse{StorageClasses: []string{}},
+				userRoles:         &sqlserverflex.ListRolesResponse{Roles: []string{}},
+				dbCollations:      &sqlserverflex.ListCollationsResponse{Collations: []sqlserverflex.MssqlDatabaseCollation{}},
+				dbCompatibilities: &sqlserverflex.ListCompatibilityResponse{Compatibilities: []sqlserverflex.MssqlDatabaseCompatibility{}},
 			},
 			wantErr: false,
 		},

@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -18,7 +18,8 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &sqlserverflex.APIClient{}
+var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIService{}}
+
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testDatabaseName = "my-database"
@@ -66,11 +67,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateDatabaseRequest)) sqlserverflex.ApiCreateDatabaseRequest {
-	request := testClient.CreateDatabase(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.CreateDatabase(testCtx, testProjectId, testInstanceId, testRegion)
 	payload := sqlserverflex.CreateDatabasePayload{
-		Name: &testDatabaseName,
-		Options: &sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
-			Owner: &testOwner,
+		Name: testDatabaseName,
+		Options: sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
+			Owner: testOwner,
 		},
 	}
 	request = request.CreateDatabasePayload(payload)
@@ -203,7 +204,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, sqlserverflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -31,8 +31,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	Username   *string
-	Roles      *[]string
+	Username   string
+	Roles      []string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -116,8 +116,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Roles:           flags.FlagToStringSlicePointer(p, cmd, rolesFlag),
+		Username:        flags.FlagToStringValue(p, cmd, usernameFlag),
+		Roles:           flags.FlagToStringSliceValue(p, cmd, rolesFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
 
 	req = req.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: model.Username,
@@ -142,8 +142,8 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-		if user.Roles != nil && len(*user.Roles) != 0 {
-			p.Outputf("Roles: [%v]\n", strings.Join(*user.Roles, ", "))
+		if len(user.Roles) != 0 {
+			p.Outputf("Roles: [%v]\n", strings.Join(user.Roles, ", "))
 		}
 		if user.Host != nil && *user.Host != "" {
 			p.Outputf("Host: %s\n", *user.Host)

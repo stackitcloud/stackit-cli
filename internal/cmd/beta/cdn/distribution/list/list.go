@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn"
+	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/cdn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type inputModel struct {
@@ -107,12 +106,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType, pageLimit int32) cdn.ApiListDistributionsRequest {
-	req := apiClient.ListDistributions(ctx, model.ProjectId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID string, pageLimit int32) cdn.ApiListDistributionsRequest {
+	req := apiClient.DefaultAPI.ListDistributions(ctx, model.ProjectId)
 	req = req.SortBy(model.SortBy)
 	req = req.PageSize(pageLimit)
-	if nextPageID != nil {
-		req = req.PageIdentifier(*nextPageID)
+	if nextPageID != "" {
+		req = req.PageIdentifier(nextPageID)
 	}
 	return req
 }
@@ -131,13 +130,13 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 		table.SetHeader("ID", "REGIONS", "STATUS")
 		for _, d := range distributions {
 			var joinedRegions string
-			if d.Config != nil && d.Config.Regions != nil {
-				joinedRegions = strings.Join(sdkUtils.EnumSliceToStringSlice(*d.Config.Regions), ", ")
+			if d.Config.Regions != nil {
+				joinedRegions = strings.Join(sdkUtils.EnumSliceToStringSlice(d.Config.Regions), ", ")
 			}
 			table.AddRow(
-				utils.PtrString(d.Id),
+				d.Id,
 				joinedRegions,
-				utils.PtrString(d.Status),
+				d.Status,
 			)
 		}
 		err := table.Display(p)
@@ -149,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 }
 
 func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) ([]cdn.Distribution, error) {
-	var nextPageID cdn.ListDistributionsResponseGetNextPageIdentifierAttributeType
+	var nextPageID string
 	var distributions []cdn.Distribution
 	received := int32(0)
 	limit := int32(math.MaxInt32)
@@ -164,11 +163,14 @@ func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.A
 			return nil, fmt.Errorf("list distributions: %w", err)
 		}
 		if response.Distributions != nil {
-			distributions = append(distributions, *response.Distributions...)
+			distributions = append(distributions, response.Distributions...)
 		}
-		nextPageID = response.NextPageIdentifier
+		nextPageID = ""
+		if response.NextPageIdentifier != nil {
+			nextPageID = *response.NextPageIdentifier
+		}
 		received += want
-		if nextPageID == nil || received >= limit {
+		if nextPageID == "" || received >= limit {
 			break
 		}
 	}
