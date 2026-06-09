@@ -6,8 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -42,12 +42,12 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name               *string
-	IPv4DnsNameServers *[]string
+	Name               string
+	IPv4DnsNameServers []string
 	IPv4PrefixLength   *int64
 	IPv4Prefix         *string
 	IPv4Gateway        *string
-	IPv6DnsNameServers *[]string
+	IPv6DnsNameServers []string
 	IPv6PrefixLength   *int64
 	IPv6Prefix         *string
 	IPv6Gateway        *string
@@ -55,7 +55,7 @@ type inputModel struct {
 	NoIPv4Gateway      bool
 	NoIPv6Gateway      bool
 	RoutingTableID     *string
-	Labels             *map[string]string
+	Labels             map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -128,15 +128,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create network : %w", err)
 			}
 
-			if resp == nil || resp.Id == nil {
+			if resp == nil {
 				return fmt.Errorf("create network : empty response")
 			}
-			networkId := *resp.Id
+			networkId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating network", func() error {
-					_, err = wait.CreateNetworkWaitHandler(ctx, apiClient, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
+					_, err = wait.CreateNetworkWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, networkId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -189,13 +189,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:    globalFlags,
-		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
-		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
+		Name:               flags.FlagToStringValue(p, cmd, nameFlag),
+		IPv4DnsNameServers: flags.FlagToStringSliceValue(p, cmd, ipv4DnsNameServersFlag),
 		IPv4PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv4PrefixLengthFlag),
 		IPv4Prefix:         flags.FlagToStringPointer(p, cmd, ipv4PrefixFlag),
 		IPv4Gateway:        flags.FlagToStringPointer(p, cmd, ipv4GatewayFlag),
 
-		IPv6DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv6DnsNameServersFlag),
+		IPv6DnsNameServers: flags.FlagToStringSliceValue(p, cmd, ipv6DnsNameServersFlag),
 		IPv6PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv6PrefixLengthFlag),
 		IPv6Prefix:         flags.FlagToStringPointer(p, cmd, ipv6PrefixFlag),
 		IPv6Gateway:        flags.FlagToStringPointer(p, cmd, ipv6GatewayFlag),
@@ -203,11 +203,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		NoIPv4Gateway:      flags.FlagToBoolValue(p, cmd, noIpv4GatewayFlag),
 		NoIPv6Gateway:      flags.FlagToBoolValue(p, cmd, noIpv6GatewayFlag),
 		RoutingTableID:     flags.FlagToStringPointer(p, cmd, routingTableIdFlag),
-		Labels:             flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:             flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	// IPv4 nameserver can not be set alone. IPv4 Prefix || IPv4 Prefix length must be set as well
-	isIPv4NameserverSet := model.IPv4DnsNameServers != nil && len(*model.IPv4DnsNameServers) > 0
+	isIPv4NameserverSet := len(model.IPv4DnsNameServers) > 0
 	isIPv4PrefixOrPrefixLengthSet := model.IPv4Prefix != nil || model.IPv4PrefixLength != nil
 	if isIPv4NameserverSet && !isIPv4PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{
@@ -225,7 +225,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	// IPv6 nameserver can not be set alone. IPv6 Prefix || IPv6 Prefix length must be set as well
-	isIPv6NameserverSet := model.IPv6DnsNameServers != nil && len(*model.IPv6DnsNameServers) > 0
+	isIPv6NameserverSet := len(model.IPv6DnsNameServers) > 0
 	isIPv6PrefixOrPrefixLengthSet := model.IPv6Prefix != nil || model.IPv6PrefixLength != nil
 	if isIPv6NameserverSet && !isIPv6PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{
@@ -247,27 +247,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkRequest {
-	req := apiClient.CreateNetwork(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateNetwork(ctx, model.ProjectId, model.Region)
 	var ipv4Network *iaas.CreateNetworkIPv4
 	var ipv6Network *iaas.CreateNetworkIPv6
 
 	if model.IPv6Prefix != nil {
 		ipv6Network = &iaas.CreateNetworkIPv6{
 			CreateNetworkIPv6WithPrefix: &iaas.CreateNetworkIPv6WithPrefix{
-				Prefix:      model.IPv6Prefix,
+				Prefix:      *model.IPv6Prefix,
 				Nameservers: model.IPv6DnsNameServers,
 			},
 		}
 
 		if model.NoIPv6Gateway {
-			ipv6Network.CreateNetworkIPv6WithPrefix.Gateway = iaas.NewNullableString(nil)
+			ipv6Network.CreateNetworkIPv6WithPrefix.Gateway = *iaas.NewNullableString(nil)
 		} else if model.IPv6Gateway != nil {
-			ipv6Network.CreateNetworkIPv6WithPrefix.Gateway = iaas.NewNullableString(model.IPv6Gateway)
+			ipv6Network.CreateNetworkIPv6WithPrefix.Gateway = *iaas.NewNullableString(model.IPv6Gateway)
 		}
 	} else if model.IPv6PrefixLength != nil {
 		ipv6Network = &iaas.CreateNetworkIPv6{
 			CreateNetworkIPv6WithPrefixLength: &iaas.CreateNetworkIPv6WithPrefixLength{
-				PrefixLength: model.IPv6PrefixLength,
+				PrefixLength: *model.IPv6PrefixLength,
 				Nameservers:  model.IPv6DnsNameServers,
 			},
 		}
@@ -276,20 +276,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.IPv4Prefix != nil {
 		ipv4Network = &iaas.CreateNetworkIPv4{
 			CreateNetworkIPv4WithPrefix: &iaas.CreateNetworkIPv4WithPrefix{
-				Prefix:      model.IPv4Prefix,
+				Prefix:      *model.IPv4Prefix,
 				Nameservers: model.IPv4DnsNameServers,
 			},
 		}
 
 		if model.NoIPv4Gateway {
-			ipv4Network.CreateNetworkIPv4WithPrefix.Gateway = iaas.NewNullableString(nil)
+			ipv4Network.CreateNetworkIPv4WithPrefix.Gateway = *iaas.NewNullableString(nil)
 		} else if model.IPv4Gateway != nil {
-			ipv4Network.CreateNetworkIPv4WithPrefix.Gateway = iaas.NewNullableString(model.IPv4Gateway)
+			ipv4Network.CreateNetworkIPv4WithPrefix.Gateway = *iaas.NewNullableString(model.IPv4Gateway)
 		}
 	} else if model.IPv4PrefixLength != nil {
 		ipv4Network = &iaas.CreateNetworkIPv4{
 			CreateNetworkIPv4WithPrefixLength: &iaas.CreateNetworkIPv4WithPrefixLength{
-				PrefixLength: model.IPv4PrefixLength,
+				PrefixLength: *model.IPv4PrefixLength,
 				Nameservers:  model.IPv4DnsNameServers,
 			},
 		}
@@ -297,7 +297,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateNetworkPayload{
 		Name:           model.Name,
-		Labels:         utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:         model.Labels,
 		Routed:         utils.Ptr(!model.NonRouted),
 		Ipv4:           ipv4Network,
 		Ipv6:           ipv6Network,
@@ -316,7 +316,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, utils.PtrString(network.Id))
+		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, network.Id)
 		return nil
 	})
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -118,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListKeyPairsRequest {
-	req := apiClient.ListKeyPairs(ctx)
+	req := apiClient.DefaultAPI.ListKeyPairs(ctx)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -140,7 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, keyPairs []iaas.Keypair
 
 			var labels []string
 			if keyPair.Labels != nil {
-				for key, value := range *keyPair.Labels {
+				for key, value := range keyPair.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
 			}

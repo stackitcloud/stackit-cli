@@ -17,8 +17,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	iaasutils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 )
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient, model.ProjectId, model.Region, model.BackupId)
+			backupLabel, err := iaasutils.GetBackupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BackupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get backup name: %v", err)
 			}
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting backup", func() error {
-					_, err = wait.DeleteBackupWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
+					_, err = wait.DeleteBackupWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.BackupId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -113,6 +113,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteBackupRequest {
-	req := apiClient.DeleteBackup(ctx, model.ProjectId, model.Region, model.BackupId)
+	req := apiClient.DefaultAPI.DeleteBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }

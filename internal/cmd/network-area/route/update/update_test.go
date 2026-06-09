@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testOrgId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
@@ -54,7 +54,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 func fixturePayload(mods ...func(payload *iaas.UpdateNetworkAreaRoutePayload)) iaas.UpdateNetworkAreaRoutePayload {
 	payload := iaas.UpdateNetworkAreaRoutePayload{
-		Labels: &map[string]interface{}{
+		Labels: map[string]any{
 			"value": "key",
 		},
 	}
@@ -65,10 +65,10 @@ func fixturePayload(mods ...func(payload *iaas.UpdateNetworkAreaRoutePayload)) i
 	return payload
 }
 
-func fixturePayloadAsStringMap() map[string]string {
+func fixturePayloadAsMap() map[string]any {
 	payload := fixturePayload()
-	labelsMap := make(map[string]string)
-	for k, v := range *payload.Labels {
+	labelsMap := make(map[string]any)
+	for k, v := range payload.Labels {
 		if value, ok := v.(string); ok {
 			labelsMap[k] = value
 		}
@@ -77,7 +77,7 @@ func fixturePayloadAsStringMap() map[string]string {
 }
 
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
-	payload := fixturePayloadAsStringMap()
+	payload := fixturePayloadAsMap()
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
@@ -86,7 +86,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
 		RouteId:        testRouteId,
-		Labels:         utils.Ptr(payload),
+		Labels:         payload,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -95,7 +95,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNetworkAreaRouteRequest)) iaas.ApiUpdateNetworkAreaRouteRequest {
-	request := testClient.UpdateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRegion, testRouteId)
+	request := testClient.DefaultAPI.UpdateNetworkAreaRoute(testCtx, testOrgId, testNetworkAreaId, testRegion, testRouteId)
 	request = request.UpdateNetworkAreaRoutePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -268,7 +268,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -304,7 +304,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, tt.args.route); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, &tt.args.route); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

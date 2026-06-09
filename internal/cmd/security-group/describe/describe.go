@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 type inputModel struct {
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetSecurityGroupRequest {
-	request := apiClient.GetSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
+	request := apiClient.DefaultAPI.GetSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	return request
 }
 
@@ -103,10 +103,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 		}
 		table.AddSeparator()
 
-		if name := resp.Name; name != nil {
-			table.AddRow("NAME", *name)
-			table.AddSeparator()
-		}
+		table.AddRow("NAME", resp.Name)
+		table.AddSeparator()
 
 		if description := resp.Description; description != nil {
 			table.AddRow("DESCRIPTION", *description)
@@ -118,9 +116,9 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 			table.AddSeparator()
 		}
 
-		if resp.Labels != nil && len(*resp.Labels) > 0 {
+		if len(resp.Labels) > 0 {
 			var labels []string
-			for key, value := range *resp.Labels {
+			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
@@ -139,7 +137,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 
 		content = append(content, table)
 
-		if resp.Rules != nil && len(*resp.Rules) > 0 {
+		if len(resp.Rules) > 0 {
 			rulesTable := tables.NewTable()
 			rulesTable.SetTitle("RULES")
 			rulesTable.SetHeader(
@@ -154,10 +152,10 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 				"REMOTE SECURITY GROUP ID",
 			)
 
-			for _, rule := range *resp.Rules {
+			for _, rule := range resp.Rules {
 				var portRange string
 				if rule.PortRange != nil {
-					portRange = fmt.Sprintf("%s-%s", utils.PtrString(rule.PortRange.Min), utils.PtrString(rule.PortRange.Max))
+					portRange = fmt.Sprintf("%d-%d", rule.PortRange.Min, rule.PortRange.Max)
 				}
 
 				var protocol string
@@ -167,14 +165,14 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 
 				var icmpParameter string
 				if rule.IcmpParameters != nil {
-					icmpParameter = fmt.Sprintf("type: %s, code: %s", utils.PtrString(rule.IcmpParameters.Type), utils.PtrString(rule.IcmpParameters.Code))
+					icmpParameter = fmt.Sprintf("type: %d, code: %d", rule.IcmpParameters.Type, rule.IcmpParameters.Code)
 				}
 
 				rulesTable.AddRow(
 					utils.PtrString(rule.Id),
 					utils.PtrString(rule.Description),
 					protocol,
-					utils.PtrString(rule.Direction),
+					rule.Direction,
 					utils.PtrString(rule.Ethertype),
 					portRange,
 					utils.PtrString(rule.IpRange),

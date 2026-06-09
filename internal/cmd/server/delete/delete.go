@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -59,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -83,7 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting server", func() error {
-					_, err = wait.DeleteServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+					_, err = wait.DeleteServerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -120,5 +120,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteServerRequest {
-	return apiClient.DeleteServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	return apiClient.DefaultAPI.DeleteServer(ctx, model.ProjectId, model.Region, model.ServerId)
 }

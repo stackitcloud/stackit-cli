@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -47,7 +47,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
+	testClient    = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 )
 
@@ -84,8 +84,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func parseLabels(labelstring string) map[string]string {
-	labels := map[string]string{}
+func parseLabels(labelstring string) map[string]any {
+	labels := map[string]any{}
 	for _, part := range strings.Split(labelstring, ",") {
 		v := strings.Split(part, "=")
 		labels[v[0]] = v[1]
@@ -104,7 +104,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:          testName,
 		DiskFormat:    testDiskFormat,
 		LocalFilePath: testLocalImagePath,
-		Labels:        utils.Ptr(parseLabels(testLabels)),
+		Labels:        parseLabels(testLabels),
 		Config: &imageConfig{
 			Architecture:           utils.Ptr(testArchitecture),
 			BootMenu:               utils.Ptr(testBootmenu),
@@ -136,28 +136,28 @@ func fixtureCreatePayload(mods ...func(payload *iaas.CreateImagePayload)) (paylo
 		Config: &iaas.ImageConfig{
 			Architecture:           utils.Ptr(testArchitecture),
 			BootMenu:               utils.Ptr(testBootmenu),
-			CdromBus:               iaas.NewNullableString(utils.Ptr(testCdRomBus)),
-			DiskBus:                iaas.NewNullableString(utils.Ptr(testDiskBus)),
-			NicModel:               iaas.NewNullableString(utils.Ptr(testNicModel)),
+			CdromBus:               *iaas.NewNullableString(utils.Ptr(testCdRomBus)),
+			DiskBus:                *iaas.NewNullableString(utils.Ptr(testDiskBus)),
+			NicModel:               *iaas.NewNullableString(utils.Ptr(testNicModel)),
 			OperatingSystem:        utils.Ptr(testOperatingSystem),
-			OperatingSystemDistro:  iaas.NewNullableString(utils.Ptr(testOperatingSystemDistro)),
-			OperatingSystemVersion: iaas.NewNullableString(utils.Ptr(testOperatingSystemVersion)),
-			RescueBus:              iaas.NewNullableString(utils.Ptr(testRescueBus)),
-			RescueDevice:           iaas.NewNullableString(utils.Ptr(testRescueDevice)),
+			OperatingSystemDistro:  *iaas.NewNullableString(utils.Ptr(testOperatingSystemDistro)),
+			OperatingSystemVersion: *iaas.NewNullableString(utils.Ptr(testOperatingSystemVersion)),
+			RescueBus:              *iaas.NewNullableString(utils.Ptr(testRescueBus)),
+			RescueDevice:           *iaas.NewNullableString(utils.Ptr(testRescueDevice)),
 			SecureBoot:             utils.Ptr(testSecureBoot),
 			Uefi:                   utils.Ptr(testUefi),
-			VideoModel:             iaas.NewNullableString(utils.Ptr(testVideoModel)),
+			VideoModel:             *iaas.NewNullableString(utils.Ptr(testVideoModel)),
 			VirtioScsi:             utils.Ptr(testVirtioScsi),
 		},
-		DiskFormat: utils.Ptr(testDiskFormat),
-		Labels: &map[string]interface{}{
+		DiskFormat: testDiskFormat,
+		Labels: map[string]any{
 			"foo": "FOO",
 			"bar": "BAR",
 			"baz": "BAZ",
 		},
 		MinDiskSize: utils.Ptr(testDiskSize),
 		MinRam:      utils.Ptr(testRamSize),
-		Name:        utils.Ptr(testName),
+		Name:        testName,
 		Protected:   utils.Ptr(testProtected),
 	}
 	for _, mod := range mods {
@@ -167,7 +167,7 @@ func fixtureCreatePayload(mods ...func(payload *iaas.CreateImagePayload)) (paylo
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateImageRequest)) iaas.ApiCreateImageRequest {
-	request := testClient.CreateImage(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateImage(testCtx, testProjectId, testRegion)
 
 	request = request.CreateImagePayload(fixtureCreatePayload())
 
@@ -241,7 +241,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"foo": "bar",
 				}
 			}),
@@ -308,7 +308,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
 					payload.Labels = nil
 				}))
 			}),
@@ -319,8 +319,8 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.CdromBus = utils.Ptr("foobar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
-					payload.Config.CdromBus = iaas.NewNullableString(utils.Ptr("foobar"))
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+					payload.Config.CdromBus = *iaas.NewNullableString(utils.Ptr("foobar"))
 				}))
 			}),
 		},
@@ -330,7 +330,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.Uefi = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateImageRequest) {
-				*request = (*request).CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
+				*request = request.CreateImagePayload(fixtureCreatePayload(func(payload *iaas.CreateImagePayload) {
 					payload.Config.Uefi = utils.Ptr(false)
 				}))
 			}),
@@ -342,7 +342,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

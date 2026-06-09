@@ -14,7 +14,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -25,7 +25,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx             = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient          = &iaas.APIClient{}
+	testClient          = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId       = uuid.NewString()
 	testLabels          = "fooKey=fooValue,barKey=barValue,bazKey=bazValue"
 	testLimit     int64 = 10
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListImagesRequest)) iaas.ApiListImagesRequest {
-	request := testClient.ListImages(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListImages(testCtx, testProjectId, testRegion)
 	request = request.LabelSelector(testLabels)
 	for _, mod := range mods {
 		mod(&request)
@@ -157,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = utils.Ptr("")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListImagesRequest) {
-				*request = (*request).LabelSelector("")
+				*request = request.LabelSelector("")
 			}),
 		},
 		{
@@ -166,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = utils.Ptr("foo=bar")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListImagesRequest) {
-				*request = (*request).LabelSelector("foo=bar")
+				*request = request.LabelSelector("foo=bar")
 			}),
 		},
 	}
@@ -176,7 +176,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

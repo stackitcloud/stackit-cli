@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkRequest {
-	return apiClient.GetNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
+	return apiClient.DefaultAPI.GetNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) error {
@@ -103,15 +103,15 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		var publicIp, ipv4Gateway *string
 		if ipv4 := network.Ipv4; ipv4 != nil {
 			if ipv4.Nameservers != nil {
-				ipv4Nameservers = append(ipv4Nameservers, *ipv4.Nameservers...)
+				ipv4Nameservers = append(ipv4Nameservers, ipv4.Nameservers...)
 			}
 			if ipv4.Prefixes != nil {
-				ipv4Prefixes = append(ipv4Prefixes, *ipv4.Prefixes...)
+				ipv4Prefixes = append(ipv4Prefixes, ipv4.Prefixes...)
 			}
 			if ipv4.PublicIp != nil {
 				publicIp = ipv4.PublicIp
 			}
-			if ipv4.Gateway != nil && ipv4.Gateway.IsSet() {
+			if ipv4.Gateway.IsSet() {
 				ipv4Gateway = ipv4.Gateway.Get()
 			}
 		}
@@ -121,22 +121,22 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		var ipv6Gateway *string
 		if ipv6 := network.Ipv6; ipv6 != nil {
 			if ipv6.Nameservers != nil {
-				ipv6Nameservers = append(ipv6Nameservers, *ipv6.Nameservers...)
+				ipv6Nameservers = append(ipv6Nameservers, ipv6.Nameservers...)
 			}
 			if ipv6.Prefixes != nil {
-				ipv6Prefixes = append(ipv6Prefixes, *ipv6.Prefixes...)
+				ipv6Prefixes = append(ipv6Prefixes, ipv6.Prefixes...)
 			}
-			if ipv6.Gateway != nil && ipv6.Gateway.IsSet() {
+			if ipv6.Gateway.IsSet() {
 				ipv6Gateway = ipv6.Gateway.Get()
 			}
 		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(network.Id))
+		table.AddRow("ID", network.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(network.Name))
+		table.AddRow("NAME", network.Name)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(network.Status))
+		table.AddRow("STATE", network.Status)
 		table.AddSeparator()
 
 		if publicIp != nil {
@@ -184,9 +184,9 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6Prefixes, ", "))
 			table.AddSeparator()
 		}
-		if network.Labels != nil && len(*network.Labels) > 0 {
+		if len(network.Labels) > 0 {
 			var labels []string
-			for key, value := range *network.Labels {
+			for key, value := range network.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

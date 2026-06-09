@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var (
 	testOrgId  = uuid.NewString()
@@ -69,9 +69,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:           utils.Ptr(testName),
 		OrganizationId: utils.Ptr(testOrgId),
 		AreaId:         testAreaId,
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -80,7 +80,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkAreaRequest)) iaas.ApiPartialUpdateNetworkAreaRequest {
-	request := testClient.PartialUpdateNetworkArea(testCtx, testOrgId, testAreaId)
+	request := testClient.DefaultAPI.PartialUpdateNetworkArea(testCtx, testOrgId, testAreaId)
 	request = request.PartialUpdateNetworkAreaPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -91,9 +91,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkAreaReques
 func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkAreaPayload)) iaas.PartialUpdateNetworkAreaPayload {
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name: utils.Ptr(testName),
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -102,7 +102,7 @@ func fixturePayload(mods ...func(payload *iaas.PartialUpdateNetworkAreaPayload))
 }
 
 func fixtureRequestRegionalArea(mods ...func(request *iaas.ApiUpdateNetworkAreaRegionRequest)) iaas.ApiUpdateNetworkAreaRegionRequest {
-	request := testClient.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
+	request := testClient.DefaultAPI.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
 	request = request.UpdateNetworkAreaRegionPayload(fixturePayloadRegionalArea())
 	for _, mod := range mods {
 		mod(&request)
@@ -113,7 +113,7 @@ func fixtureRequestRegionalArea(mods ...func(request *iaas.ApiUpdateNetworkAreaR
 func fixturePayloadRegionalArea(mods ...func(payload *iaas.UpdateNetworkAreaRegionPayload)) iaas.UpdateNetworkAreaRegionPayload {
 	payload := iaas.UpdateNetworkAreaRegionPayload{
 		Ipv4: &iaas.UpdateRegionalAreaIPv4{
-			DefaultNameservers: utils.Ptr(testDnsNameservers),
+			DefaultNameservers: testDnsNameservers,
 			DefaultPrefixLen:   utils.Ptr(testDefaultPrefixLength),
 			MaxPrefixLen:       utils.Ptr(testMaxPrefixLength),
 			MinPrefixLen:       utils.Ptr(testMinPrefixLength),
@@ -152,7 +152,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = utils.Ptr(testDnsNameservers)
+				model.DnsNameServers = testDnsNameservers
 				model.DefaultPrefixLength = utils.Ptr(testDefaultPrefixLength)
 				model.MaxPrefixLength = utils.Ptr(testMaxPrefixLength)
 				model.MinPrefixLength = utils.Ptr(testMinPrefixLength)
@@ -301,7 +301,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -319,7 +319,7 @@ func TestBuildRequestNetworkAreaRegion(t *testing.T) {
 		{
 			description: "base",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.DnsNameServers = utils.Ptr(testDnsNameservers)
+				model.DnsNameServers = testDnsNameservers
 				model.DefaultPrefixLength = utils.Ptr(testDefaultPrefixLength)
 				model.MaxPrefixLength = utils.Ptr(testMaxPrefixLength)
 				model.MinPrefixLength = utils.Ptr(testMinPrefixLength)
@@ -334,7 +334,7 @@ func TestBuildRequestNetworkAreaRegion(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -398,9 +398,9 @@ func TestGetConfiguredDeprecatedFlags(t *testing.T) {
 					},
 					Name:           utils.Ptr(testName),
 					OrganizationId: utils.Ptr(testOrgId),
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      nil,
 					DefaultPrefixLength: nil,
 					MaxPrefixLength:     nil,
@@ -418,10 +418,10 @@ func TestGetConfiguredDeprecatedFlags(t *testing.T) {
 					},
 					Name:           utils.Ptr(testName),
 					OrganizationId: utils.Ptr(testOrgId),
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
-					DnsNameServers:      utils.Ptr(testDnsNameservers),
+					},
+					DnsNameServers:      testDnsNameservers,
 					DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
 					MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
 					MinPrefixLength:     utils.Ptr(testMinPrefixLength),
@@ -462,9 +462,9 @@ func TestHasDeprecatedFlagsSet(t *testing.T) {
 					},
 					Name:           utils.Ptr(testName),
 					OrganizationId: utils.Ptr(testOrgId),
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      nil,
 					DefaultPrefixLength: nil,
 					MaxPrefixLength:     nil,
@@ -482,10 +482,10 @@ func TestHasDeprecatedFlagsSet(t *testing.T) {
 					},
 					Name:           utils.Ptr(testName),
 					OrganizationId: utils.Ptr(testOrgId),
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
-					DnsNameServers:      utils.Ptr(testDnsNameservers),
+					},
+					DnsNameServers:      testDnsNameservers,
 					DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
 					MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
 					MinPrefixLength:     utils.Ptr(testMinPrefixLength),

@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -21,7 +21,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testSecurityGroupId = uuid.NewString()
@@ -67,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiDeleteSecurityGroupRuleRequest)) iaas.ApiDeleteSecurityGroupRuleRequest {
-	request := testClient.DeleteSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId, testSecurityGroupRuleId)
+	request := testClient.DefaultAPI.DeleteSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId, testSecurityGroupRuleId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -230,7 +230,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

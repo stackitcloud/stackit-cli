@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -30,7 +30,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Description    *string
-	Labels         *map[string]string
+	Labels         map[string]any
 	Name           string
 	NetworkAreaId  string
 	SystemRoutes   bool
@@ -117,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		DynamicRoutes:   flags.FlagToBoolValue(p, cmd, dynamicRoutesFlag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
 		NetworkAreaId:   flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
@@ -131,13 +131,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) (iaas.ApiAddRoutingTableToAreaRequest, error) {
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   model.Description,
-		Name:          utils.Ptr(model.Name),
-		Labels:        utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Name:          model.Name,
+		Labels:        model.Labels,
 		SystemRoutes:  utils.Ptr(model.SystemRoutes),
 		DynamicRoutes: utils.Ptr(model.DynamicRoutes),
 	}
 
-	return apiClient.AddRoutingTableToArea(
+	return apiClient.DefaultAPI.AddRoutingTableToArea(
 		ctx,
 		model.OrganizationId,
 		model.NetworkAreaId,

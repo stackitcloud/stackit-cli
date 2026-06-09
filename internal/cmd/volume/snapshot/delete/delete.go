@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 )
 
 const (
@@ -56,7 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get snapshot name for label
-			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId)
+			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				snapshotLabel = model.SnapshotId
@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting snapshot", func() error {
-					_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId).WaitWithContext(ctx)
+					_, err = wait.DeleteSnapshotWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SnapshotId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -115,5 +115,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSnapshotRequest {
-	return apiClient.DeleteSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
+	return apiClient.DefaultAPI.DeleteSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 }

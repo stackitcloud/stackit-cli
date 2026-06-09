@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverName, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverName, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverName = model.ServerId
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list service accounts: %w", err)
 			}
-			serviceAccounts := *resp.Items
+			serviceAccounts := resp.Items
 
 			if model.Limit != nil && len(serviceAccounts) > int(*model.Limit) {
 				serviceAccounts = serviceAccounts[:int(*model.Limit)]
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServerServiceAccountsRequest {
-	req := apiClient.ListServerServiceAccounts(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.ListServerServiceAccounts(ctx, model.ProjectId, model.Region, model.ServerId)
 	return req
 }
 

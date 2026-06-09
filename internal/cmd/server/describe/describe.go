@@ -19,7 +19,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -91,7 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetServerRequest {
-	req := apiClient.GetServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.GetServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	req = req.Details(true)
 
 	return req
@@ -131,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 
 		table.AddRow("ID", utils.PtrString(server.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(server.Name))
+		table.AddRow("NAME", server.Name)
 		table.AddSeparator()
 		table.AddRow("STATE", utils.PtrString(server.Status))
 		table.AddSeparator()
@@ -166,44 +166,42 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			table.AddSeparator()
 		}
 
-		if server.MachineType != nil {
-			table.AddRow("MACHINE TYPE", *server.MachineType)
-			table.AddSeparator()
-		}
+		table.AddRow("MACHINE TYPE", server.MachineType)
+		table.AddSeparator()
 
-		if server.Labels != nil && len(*server.Labels) > 0 {
+		if len(server.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *server.Labels {
+			for key, value := range server.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
 
-		if server.ServiceAccountMails != nil && len(*server.ServiceAccountMails) > 0 {
-			table.AddRow("SERVICE ACCOUNTS", strings.Join(*server.ServiceAccountMails, "\n"))
+		if len(server.ServiceAccountMails) > 0 {
+			table.AddRow("SERVICE ACCOUNTS", strings.Join(server.ServiceAccountMails, "\n"))
 			table.AddSeparator()
 		}
 
-		if server.Volumes != nil && len(*server.Volumes) > 0 {
+		if len(server.Volumes) > 0 {
 			volumes := []string{}
-			volumes = append(volumes, *server.Volumes...)
+			volumes = append(volumes, server.Volumes...)
 			table.AddRow("VOLUMES", strings.Join(volumes, "\n"))
 			table.AddSeparator()
 		}
 
 		content = append(content, table)
 
-		if server.Nics != nil && len(*server.Nics) > 0 {
+		if len(server.Nics) > 0 {
 			nicsTable := tables.NewTable()
 			nicsTable.SetTitle("Attached Network Interfaces")
 			nicsTable.SetHeader("ID", "NETWORK ID", "NETWORK NAME", "IPv4", "PUBLIC IP")
 
-			for _, nic := range *server.Nics {
+			for _, nic := range server.Nics {
 				nicsTable.AddRow(
-					utils.PtrString(nic.NicId),
-					utils.PtrString(nic.NetworkId),
-					utils.PtrString(nic.NetworkName),
+					nic.NicId,
+					nic.NetworkId,
+					nic.NetworkName,
 					utils.PtrString(nic.Ipv4),
 					utils.PtrString(nic.PublicIp),
 				)
@@ -217,28 +215,23 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			maintenanceWindow := tables.NewTable()
 			maintenanceWindow.SetTitle("Maintenance Window")
 
-			if server.MaintenanceWindow.Status != nil {
-				maintenanceWindow.AddRow("STATUS", *server.MaintenanceWindow.Status)
-				maintenanceWindow.AddSeparator()
-			}
+			maintenanceWindow.AddRow("STATUS", server.MaintenanceWindow.Status)
+			maintenanceWindow.AddSeparator()
+
 			if server.MaintenanceWindow.Details != nil {
 				maintenanceWindow.AddRow("DETAILS", *server.MaintenanceWindow.Details)
 				maintenanceWindow.AddSeparator()
 			}
-			if server.MaintenanceWindow.StartsAt != nil {
-				maintenanceWindow.AddRow(
-					"STARTS AT",
-					utils.ConvertTimePToDateTimeString(server.MaintenanceWindow.StartsAt),
-				)
-				maintenanceWindow.AddSeparator()
-			}
-			if server.MaintenanceWindow.EndsAt != nil {
-				maintenanceWindow.AddRow(
-					"ENDS AT",
-					utils.ConvertTimePToDateTimeString(server.MaintenanceWindow.EndsAt),
-				)
-				maintenanceWindow.AddSeparator()
-			}
+			maintenanceWindow.AddRow(
+				"STARTS AT",
+				utils.ConvertTimePToDateTimeString(&server.MaintenanceWindow.StartsAt),
+			)
+			maintenanceWindow.AddSeparator()
+			maintenanceWindow.AddRow(
+				"ENDS AT",
+				utils.ConvertTimePToDateTimeString(&server.MaintenanceWindow.EndsAt),
+			)
+			maintenanceWindow.AddSeparator()
 
 			content = append(content, maintenanceWindow)
 		}

@@ -16,7 +16,7 @@ import (
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddServiceAccountToServerRequest {
-	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
+	req := apiClient.DefaultAPI.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
 	return req
 }
 

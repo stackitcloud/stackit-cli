@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 var (
@@ -14,66 +14,47 @@ var (
 	ErrItemsNil    = errors.New("items is nil")
 )
 
-type IaaSClient interface {
-	GetSecurityGroupRuleExecute(ctx context.Context, projectId, region, securityGroupRuleId, securityGroupId string) (*iaas.SecurityGroupRule, error)
-	GetSecurityGroupExecute(ctx context.Context, projectId, region, securityGroupId string) (*iaas.SecurityGroup, error)
-	GetPublicIPExecute(ctx context.Context, projectId, region, publicIpId string) (*iaas.PublicIp, error)
-	GetServerExecute(ctx context.Context, projectId, region, serverId string) (*iaas.Server, error)
-	GetVolumeExecute(ctx context.Context, projectId, region, volumeId string) (*iaas.Volume, error)
-	GetNetworkExecute(ctx context.Context, projectId, region, networkId string) (*iaas.Network, error)
-	GetRoutingTableOfAreaExecute(ctx context.Context, organizationId, areaId, region, routingTableId string) (*iaas.RoutingTable, error)
-	GetNetworkAreaExecute(ctx context.Context, organizationId, areaId string) (*iaas.NetworkArea, error)
-	ListNetworkAreaProjectsExecute(ctx context.Context, organizationId, areaId string) (*iaas.ProjectListResponse, error)
-	GetNetworkAreaRangeExecute(ctx context.Context, organizationId, areaId, region, networkRangeId string) (*iaas.NetworkRange, error)
-	GetImageExecute(ctx context.Context, projectId, region, imageId string) (*iaas.Image, error)
-	GetAffinityGroupExecute(ctx context.Context, projectId, region, affinityGroupId string) (*iaas.AffinityGroup, error)
-	GetSnapshotExecute(ctx context.Context, projectId, region, snapshotId string) (*iaas.Snapshot, error)
-	GetBackupExecute(ctx context.Context, projectId, region, backupId string) (*iaas.Backup, error)
-}
-
-func GetSecurityGroupRuleName(ctx context.Context, apiClient IaaSClient, projectId, region, securityGroupRuleId, securityGroupId string) (string, error) {
-	resp, err := apiClient.GetSecurityGroupRuleExecute(ctx, projectId, region, securityGroupRuleId, securityGroupId)
+func GetSecurityGroupRuleName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, securityGroupRuleId, securityGroupId string) (string, error) {
+	resp, err := apiClient.GetSecurityGroupRule(ctx, projectId, region, securityGroupRuleId, securityGroupId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get security group rule: %w", err)
 	}
-	securityGroupRuleName := *resp.Ethertype + ", " + *resp.Direction
+	securityGroupRuleName := *resp.Ethertype + ", " + resp.Direction
 	return securityGroupRuleName, nil
 }
 
-func GetSecurityGroupName(ctx context.Context, apiClient IaaSClient, projectId, region, securityGroupId string) (string, error) {
-	resp, err := apiClient.GetSecurityGroupExecute(ctx, projectId, region, securityGroupId)
+func GetSecurityGroupName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, securityGroupId string) (string, error) {
+	resp, err := apiClient.GetSecurityGroup(ctx, projectId, region, securityGroupId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get security group: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetPublicIP(ctx context.Context, apiClient IaaSClient, projectId, region, publicIpId string) (ip, associatedResource string, err error) {
-	resp, err := apiClient.GetPublicIPExecute(ctx, projectId, region, publicIpId)
+func GetPublicIP(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, publicIpId string) (ip, associatedResource string, err error) {
+	resp, err := apiClient.GetPublicIP(ctx, projectId, region, publicIpId).Execute()
 	if err != nil {
 		return "", "", fmt.Errorf("get public ip: %w", err)
 	}
 	associatedResourceId := ""
-	if resp.NetworkInterface != nil {
+	if resp.NetworkInterface.IsSet() {
 		associatedResourceId = *resp.NetworkInterface.Get()
 	}
 	return *resp.Ip, associatedResourceId, nil
 }
 
-func GetServerName(ctx context.Context, apiClient IaaSClient, projectId, region, serverId string) (string, error) {
-	resp, err := apiClient.GetServerExecute(ctx, projectId, region, serverId)
+func GetServerName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, serverId string) (string, error) {
+	resp, err := apiClient.GetServer(ctx, projectId, region, serverId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get server: %w", err)
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetVolumeName(ctx context.Context, apiClient IaaSClient, projectId, region, volumeId string) (string, error) {
-	resp, err := apiClient.GetVolumeExecute(ctx, projectId, region, volumeId)
+func GetVolumeName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, volumeId string) (string, error) {
+	resp, err := apiClient.GetVolume(ctx, projectId, region, volumeId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get volume: %w", err)
 	} else if resp == nil {
@@ -84,44 +65,38 @@ func GetVolumeName(ctx context.Context, apiClient IaaSClient, projectId, region,
 	return *resp.Name, nil
 }
 
-func GetNetworkName(ctx context.Context, apiClient IaaSClient, projectId, region, networkId string) (string, error) {
-	resp, err := apiClient.GetNetworkExecute(ctx, projectId, region, networkId)
+func GetNetworkName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, networkId string) (string, error) {
+	resp, err := apiClient.GetNetwork(ctx, projectId, region, networkId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get network: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetRoutingTableOfAreaName(ctx context.Context, apiClient IaaSClient, organizationId, areaId, region, routingTableId string) (string, error) {
-	resp, err := apiClient.GetRoutingTableOfAreaExecute(ctx, organizationId, areaId, region, routingTableId)
+func GetRoutingTableOfAreaName(ctx context.Context, apiClient iaas.DefaultAPI, organizationId, areaId, region, routingTableId string) (string, error) {
+	resp, err := apiClient.GetRoutingTableOfArea(ctx, organizationId, areaId, region, routingTableId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get routing-table: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetNetworkAreaName(ctx context.Context, apiClient IaaSClient, organizationId, areaId string) (string, error) {
-	resp, err := apiClient.GetNetworkAreaExecute(ctx, organizationId, areaId)
+func GetNetworkAreaName(ctx context.Context, apiClient iaas.DefaultAPI, organizationId, areaId string) (string, error) {
+	resp, err := apiClient.GetNetworkArea(ctx, organizationId, areaId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get network area: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func ListAttachedProjects(ctx context.Context, apiClient IaaSClient, organizationId, areaId string) ([]string, error) {
-	resp, err := apiClient.ListNetworkAreaProjectsExecute(ctx, organizationId, areaId)
+func ListAttachedProjects(ctx context.Context, apiClient iaas.DefaultAPI, organizationId, areaId string) ([]string, error) {
+	resp, err := apiClient.ListNetworkAreaProjects(ctx, organizationId, areaId).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("list network area attached projects: %w", err)
 	} else if resp == nil {
@@ -129,60 +104,42 @@ func ListAttachedProjects(ctx context.Context, apiClient IaaSClient, organizatio
 	} else if resp.Items == nil {
 		return nil, ErrItemsNil
 	}
-	return *resp.Items, nil
+	return resp.Items, nil
 }
 
-func GetNetworkRangePrefix(ctx context.Context, apiClient IaaSClient, organizationId, areaId, region, networkRangeId string) (string, error) {
-	resp, err := apiClient.GetNetworkAreaRangeExecute(ctx, organizationId, areaId, region, networkRangeId)
+func GetNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, organizationId, areaId, region, networkRangeId string) (string, error) {
+	resp, err := apiClient.GetNetworkAreaRange(ctx, organizationId, areaId, region, networkRangeId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get network range: %w", err)
 	}
-	return *resp.Prefix, nil
+	return resp.Prefix, nil
 }
 
 // GetRouteFromAPIResponse returns the static route from the API response that matches the prefix and nexthop
 // This works because static routes are unique by prefix and nexthop
-func GetRouteFromAPIResponse(destination, nexthop string, routes *[]iaas.Route) (iaas.Route, error) {
-	for _, route := range *routes {
+func GetRouteFromAPIResponse(destination, nexthop string, routes []iaas.Route) (iaas.Route, error) {
+	for _, route := range routes {
 		// Check if destination matches
-		if dest := route.Destination; dest != nil {
-			match := false
-			if destV4 := dest.DestinationCIDRv4; destV4 != nil {
-				if destV4.Value != nil && *destV4.Value == destination {
-					match = true
-				}
-			} else if destV6 := dest.DestinationCIDRv6; destV6 != nil {
-				if destV6.Value != nil && *destV6.Value == destination {
-					match = true
-				}
-			}
-			if !match {
-				continue
-			}
+		destV4 := route.Destination.DestinationCIDRv4
+		destV4Matches := destV4 != nil && destV4.Value == destination
+		destV6 := route.Destination.DestinationCIDRv6
+		destV6Matches := destV6 != nil && destV6.Value == destination
+		destMatches := destV4Matches || destV6Matches
+		if !destMatches {
+			continue
 		}
 		// Check if nexthop matches
-		if routeNexthop := route.Nexthop; routeNexthop != nil {
-			match := false
-			if nexthopIPv4 := routeNexthop.NexthopIPv4; nexthopIPv4 != nil {
-				if nexthopIPv4.Value != nil && *nexthopIPv4.Value == nexthop {
-					match = true
-				}
-			} else if nexthopIPv6 := routeNexthop.NexthopIPv6; nexthopIPv6 != nil {
-				if nexthopIPv6.Value != nil && *nexthopIPv6.Value == nexthop {
-					match = true
-				}
-			} else if nexthopInternet := routeNexthop.NexthopInternet; nexthopInternet != nil {
-				if nexthopInternet.Type != nil && *nexthopInternet.Type == nexthop {
-					match = true
-				}
-			} else if nexthopBlackhole := routeNexthop.NexthopBlackhole; nexthopBlackhole != nil {
-				if nexthopBlackhole.Type != nil && *nexthopBlackhole.Type == nexthop {
-					match = true
-				}
-			}
-			if match {
-				return route, nil
-			}
+		nextHopV4 := route.Nexthop.NexthopIPv4
+		nextHopV4Matches := nextHopV4 != nil && nextHopV4.Value == nexthop
+		nextHopV6 := route.Nexthop.NexthopIPv6
+		nextHopV6Matches := nextHopV6 != nil && nextHopV6.Value == nexthop
+		nextHopInet := route.Nexthop.NexthopInternet
+		nextHopInetMatches := nextHopInet != nil && nextHopInet.Type == nexthop
+		nextHopBlackhole := route.Nexthop.NexthopBlackhole
+		nextHopBlackholeMatches := nextHopBlackhole != nil && nextHopBlackhole.Type == nexthop
+		nextHopMatches := nextHopV4Matches || nextHopV6Matches || nextHopInetMatches || nextHopBlackholeMatches
+		if nextHopMatches {
+			return route, nil
 		}
 	}
 	return iaas.Route{}, fmt.Errorf("new static route not found in API response")
@@ -190,41 +147,37 @@ func GetRouteFromAPIResponse(destination, nexthop string, routes *[]iaas.Route) 
 
 // GetNetworkRangeFromAPIResponse returns the network range from the API response that matches the given prefix
 // This works because network range prefixes are unique in the same SNA
-func GetNetworkRangeFromAPIResponse(prefix string, networkRanges *[]iaas.NetworkRange) (iaas.NetworkRange, error) {
-	for _, networkRange := range *networkRanges {
-		if *networkRange.Prefix == prefix {
+func GetNetworkRangeFromAPIResponse(prefix string, networkRanges []iaas.NetworkRange) (iaas.NetworkRange, error) {
+	for _, networkRange := range networkRanges {
+		if networkRange.Prefix == prefix {
 			return networkRange, nil
 		}
 	}
 	return iaas.NetworkRange{}, fmt.Errorf("new network range not found in API response")
 }
 
-func GetImageName(ctx context.Context, apiClient IaaSClient, projectId, region, imageId string) (string, error) {
-	resp, err := apiClient.GetImageExecute(ctx, projectId, region, imageId)
+func GetImageName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, imageId string) (string, error) {
+	resp, err := apiClient.GetImage(ctx, projectId, region, imageId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get image: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetAffinityGroupName(ctx context.Context, apiClient IaaSClient, projectId, region, affinityGroupId string) (string, error) {
-	resp, err := apiClient.GetAffinityGroupExecute(ctx, projectId, region, affinityGroupId)
+func GetAffinityGroupName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, affinityGroupId string) (string, error) {
+	resp, err := apiClient.GetAffinityGroup(ctx, projectId, region, affinityGroupId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get affinity group: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.Name == nil {
-		return "", ErrNameNil
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetSnapshotName(ctx context.Context, apiClient IaaSClient, projectId, region, snapshotId string) (string, error) {
-	resp, err := apiClient.GetSnapshotExecute(ctx, projectId, region, snapshotId)
+func GetSnapshotName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, snapshotId string) (string, error) {
+	resp, err := apiClient.GetSnapshot(ctx, projectId, region, snapshotId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get snapshot: %w", err)
 	} else if resp == nil {
@@ -235,8 +188,8 @@ func GetSnapshotName(ctx context.Context, apiClient IaaSClient, projectId, regio
 	return *resp.Name, nil
 }
 
-func GetBackupName(ctx context.Context, apiClient IaaSClient, projectId, region, backupId string) (string, error) {
-	resp, err := apiClient.GetBackupExecute(ctx, projectId, region, backupId)
+func GetBackupName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, region, backupId string) (string, error) {
+	resp, err := apiClient.GetBackup(ctx, projectId, region, backupId).Execute()
 	if err != nil {
 		return backupId, fmt.Errorf("get backup: %w", err)
 	}

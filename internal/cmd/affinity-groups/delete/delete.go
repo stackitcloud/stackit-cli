@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			affinityGroupLabel, err := iaasUtils.GetAffinityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.AffinityGroupId)
+			affinityGroupLabel, err := iaasUtils.GetAffinityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.AffinityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get affinity group name: %v", err)
 				affinityGroupLabel = model.AffinityGroupId
@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteAffinityGroupRequest {
-	return apiClient.DeleteAffinityGroup(ctx, model.ProjectId, model.Region, model.AffinityGroupId)
+	return apiClient.DefaultAPI.DeleteAffinityGroup(ctx, model.ProjectId, model.Region, model.AffinityGroupId)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {

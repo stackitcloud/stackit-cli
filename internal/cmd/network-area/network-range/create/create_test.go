@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testOrgId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
@@ -49,7 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		OrganizationId: utils.Ptr(testOrgId),
 		NetworkAreaId:  utils.Ptr(testNetworkAreaId),
-		NetworkRange:   utils.Ptr("1.1.1.0/24"),
+		NetworkRange:   "1.1.1.0/24",
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRangeRequest)) iaas.ApiCreateNetworkAreaRangeRequest {
-	request := testClient.CreateNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testRegion)
+	request := testClient.DefaultAPI.CreateNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testRegion)
 	request = request.CreateNetworkAreaRangePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -68,9 +68,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRangeRequest)
 
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRangePayload)) iaas.CreateNetworkAreaRangePayload {
 	payload := iaas.CreateNetworkAreaRangePayload{
-		Ipv4: &[]iaas.NetworkRange{
+		Ipv4: []iaas.NetworkRange{
 			{
-				Prefix: utils.Ptr("1.1.1.0/24"),
+				Prefix: "1.1.1.0/24",
 			},
 		},
 	}
@@ -177,7 +177,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

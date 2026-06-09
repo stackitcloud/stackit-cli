@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -28,7 +28,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var (
 	testAreaId             = uuid.NewString()
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		OrganizationId:          testOrgId,
 		NetworkAreaId:           testAreaId,
-		IPv4DefaultNameservers:  utils.Ptr(testDefaultNameservers),
+		IPv4DefaultNameservers:  testDefaultNameservers,
 		IPv4DefaultPrefixLength: utils.Ptr(testDefaultPrefixLength),
 		IPv4MaxPrefixLength:     utils.Ptr(testMaxPrefixLength),
 		IPv4MinPrefixLength:     utils.Ptr(testMinPrefixLength),
@@ -74,7 +74,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateNetworkAreaRegionRequest)) iaas.ApiUpdateNetworkAreaRegionRequest {
-	request := testClient.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
+	request := testClient.DefaultAPI.UpdateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
 	request = request.UpdateNetworkAreaRegionPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -88,14 +88,14 @@ func fixturePayload(mods ...func(payload *iaas.UpdateNetworkAreaRegionPayload)) 
 		networkRange = make([]iaas.NetworkRange, len(testNetworkRanges))
 		for i := range testNetworkRanges {
 			networkRange[i] = iaas.NetworkRange{
-				Prefix: utils.Ptr(testNetworkRanges[i]),
+				Prefix: testNetworkRanges[i],
 			}
 		}
 	}
 
 	payload := iaas.UpdateNetworkAreaRegionPayload{
 		Ipv4: &iaas.UpdateRegionalAreaIPv4{
-			DefaultNameservers: utils.Ptr(testDefaultNameservers),
+			DefaultNameservers: testDefaultNameservers,
 			DefaultPrefixLen:   utils.Ptr(testDefaultPrefixLength),
 			MaxPrefixLen:       utils.Ptr(testMaxPrefixLength),
 			MinPrefixLen:       utils.Ptr(testMinPrefixLength),
@@ -213,7 +213,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

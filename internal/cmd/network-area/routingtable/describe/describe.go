@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			request := apiClient.GetRoutingTableOfArea(
+			request := apiClient.DefaultAPI.GetRoutingTableOfArea(
 				ctx,
 				model.OrganizationId,
 				model.NetworkAreaId,
@@ -113,7 +113,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 		table.AddRow("ID", utils.PtrString(routingTable.Id))
 		table.AddSeparator()
 
-		table.AddRow("NAME", utils.PtrString(routingTable.Name))
+		table.AddRow("NAME", routingTable.Name)
 		table.AddSeparator()
 
 		table.AddRow("DESCRIPTION", utils.PtrString(routingTable.Description))
@@ -122,9 +122,9 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 		table.AddRow("DEFAULT", utils.PtrString(routingTable.Default))
 		table.AddSeparator()
 
-		if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
+		if len(routingTable.Labels) > 0 {
 			var labels []string
-			for key, value := range *routingTable.Labels {
+			for key, value := range routingTable.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

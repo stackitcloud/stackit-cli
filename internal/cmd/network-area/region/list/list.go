@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = model.NetworkAreaId
@@ -104,38 +104,36 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNetworkAreaRegionsRequest {
-	return apiClient.ListNetworkAreaRegions(ctx, model.OrganizationId, model.NetworkAreaId)
+	return apiClient.DefaultAPI.ListNetworkAreaRegions(ctx, model.OrganizationId, model.NetworkAreaId)
 }
 
 func outputResult(p *print.Printer, outputFormat, areaLabel string, regionalArea iaas.RegionalAreaListResponse) error {
 	return p.OutputResult(outputFormat, regionalArea, func() error {
-		if regionalArea.Regions == nil || len(*regionalArea.Regions) == 0 {
+		if len(regionalArea.Regions) == 0 {
 			p.Outputf("No regions found for network area %q\n", areaLabel)
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("REGION", "STATUS", "DNS NAME SERVERS", "NETWORK RANGES", "TRANSFER NETWORK")
-		for region, regionConfig := range *regionalArea.Regions {
+		for region, regionConfig := range regionalArea.Regions {
 			var dnsNames string
 			var networkRanges []string
 			var transferNetwork string
 
 			if ipv4 := regionConfig.Ipv4; ipv4 != nil {
 				// Set dnsNames
-				dnsNames = utils.JoinStringPtr(ipv4.DefaultNameservers, ",")
+				dnsNames = strings.Join(ipv4.DefaultNameservers, ",")
 
 				// Set networkRanges
-				if ipv4.NetworkRanges != nil && len(*ipv4.NetworkRanges) > 0 {
-					for _, networkRange := range *ipv4.NetworkRanges {
-						if networkRange.Prefix != nil {
-							networkRanges = append(networkRanges, *networkRange.Prefix)
-						}
+				if len(ipv4.NetworkRanges) > 0 {
+					for _, networkRange := range ipv4.NetworkRanges {
+						networkRanges = append(networkRanges, networkRange.Prefix)
 					}
 				}
 
 				// Set transferNetwork
-				transferNetwork = utils.PtrString(ipv4.TransferNetwork)
+				transferNetwork = ipv4.TransferNetwork
 			}
 
 			table.AddRow(

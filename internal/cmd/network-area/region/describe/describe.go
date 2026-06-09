@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaName, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaName, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				// Set explicit the networkAreaName to empty string and not to the ID, because this is used for the table output
@@ -114,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRegionRequest {
-	return apiClient.GetNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	return apiClient.DefaultAPI.GetNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, region, areaId, areaName string, regionalArea iaas.RegionalArea) error {
@@ -133,34 +133,24 @@ func outputResult(p *print.Printer, outputFormat, region, areaId, areaName strin
 		if ipv4 := regionalArea.Ipv4; ipv4 != nil {
 			if ipv4.NetworkRanges != nil {
 				var networkRanges []string
-				for _, networkRange := range *ipv4.NetworkRanges {
-					if networkRange.Prefix != nil {
-						networkRanges = append(networkRanges, *networkRange.Prefix)
-					}
+				for _, networkRange := range ipv4.NetworkRanges {
+					networkRanges = append(networkRanges, networkRange.Prefix)
 				}
 				table.AddRow("NETWORK RANGES", strings.Join(networkRanges, ","))
 				table.AddSeparator()
 			}
-			if transferNetwork := ipv4.TransferNetwork; transferNetwork != nil {
-				table.AddRow("TRANSFER RANGE", utils.PtrString(transferNetwork))
+			table.AddRow("TRANSFER RANGE", ipv4.TransferNetwork)
+			table.AddSeparator()
+			if len(ipv4.DefaultNameservers) > 0 {
+				table.AddRow("DNS NAME SERVERS", strings.Join(ipv4.DefaultNameservers, ","))
 				table.AddSeparator()
 			}
-			if defaultNameserver := ipv4.DefaultNameservers; defaultNameserver != nil && len(*defaultNameserver) > 0 {
-				table.AddRow("DNS NAME SERVERS", strings.Join(*defaultNameserver, ","))
-				table.AddSeparator()
-			}
-			if defaultPrefixLength := ipv4.DefaultPrefixLen; defaultPrefixLength != nil {
-				table.AddRow("DEFAULT PREFIX LENGTH", utils.PtrString(defaultPrefixLength))
-				table.AddSeparator()
-			}
-			if maxPrefixLength := ipv4.MaxPrefixLen; maxPrefixLength != nil {
-				table.AddRow("MAX PREFIX LENGTH", utils.PtrString(maxPrefixLength))
-				table.AddSeparator()
-			}
-			if minPrefixLen := ipv4.MinPrefixLen; minPrefixLen != nil {
-				table.AddRow("MIN PREFIX LENGTH", utils.PtrString(minPrefixLen))
-				table.AddSeparator()
-			}
+			table.AddRow("DEFAULT PREFIX LENGTH", ipv4.DefaultPrefixLen)
+			table.AddSeparator()
+			table.AddRow("MAX PREFIX LENGTH", ipv4.MaxPrefixLen)
+			table.AddSeparator()
+			table.AddRow("MIN PREFIX LENGTH", ipv4.MinPrefixLen)
+			table.AddSeparator()
 		}
 
 		if err := table.Display(p); err != nil {

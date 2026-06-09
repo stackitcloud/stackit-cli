@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,7 +20,7 @@ var testOrgId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
 var testRoutingTableId = uuid.NewString()
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -159,8 +159,8 @@ func TestOutputResult(t *testing.T) {
 		Default:       nil,
 		Description:   utils.Ptr("description"),
 		Id:            utils.Ptr("route-foo"),
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
-		Name:          utils.Ptr("route-foo"),
+		Labels:        testLabels,
+		Name:          "route-foo",
 		SystemRoutes:  utils.Ptr(true),
 		DynamicRoutes: utils.Ptr(true),
 		UpdatedAt:     utils.Ptr(time.Now()),

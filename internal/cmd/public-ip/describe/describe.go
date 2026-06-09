@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetPublicIPRequest {
-	return apiClient.GetPublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
+	return apiClient.DefaultAPI.GetPublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp) error {
@@ -101,15 +101,13 @@ func outputResult(p *print.Printer, outputFormat string, publicIp iaas.PublicIp)
 		table.AddRow("IP ADDRESS", utils.PtrString(publicIp.Ip))
 		table.AddSeparator()
 
-		if publicIp.NetworkInterface != nil {
-			networkInterfaceId := *publicIp.GetNetworkInterface()
-			table.AddRow("ASSOCIATED TO", networkInterfaceId)
-			table.AddSeparator()
-		}
+		networkInterfaceId := publicIp.GetNetworkInterface()
+		table.AddRow("ASSOCIATED TO", networkInterfaceId)
+		table.AddSeparator()
 
-		if publicIp.Labels != nil && len(*publicIp.Labels) > 0 {
+		if len(publicIp.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *publicIp.Labels {
+			for key, value := range publicIp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

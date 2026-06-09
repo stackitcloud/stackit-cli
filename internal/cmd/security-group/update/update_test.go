@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 const (
@@ -22,28 +21,17 @@ type testCtxKey struct{}
 
 var (
 	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient      = &iaas.APIClient{}
+	testClient      = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId   = uuid.NewString()
 	testGroupId     = []string{uuid.NewString()}
 	testName        = "new-security-group"
 	testDescription = "a test description"
-	testLabels      = map[string]string{
+	testLabels      = map[string]any{
 		"fooKey": "fooValue",
 		"barKey": "barValue",
 		"bazKey": "bazValue",
 	}
 )
-
-func toStringAnyMapPtr(m map[string]string) map[string]any {
-	if m == nil {
-		return nil
-	}
-	result := map[string]any{}
-	for k, v := range m {
-		result[k] = v
-	}
-	return result
-}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -67,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Labels:          &testLabels,
+		Labels:          testLabels,
 		Description:     &testDescription,
 		Name:            &testName,
 		SecurityGroupId: testGroupId[0],
@@ -79,10 +67,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateSecurityGroupRequest)) iaas.ApiUpdateSecurityGroupRequest {
-	request := testClient.UpdateSecurityGroup(testCtx, testProjectId, testRegion, testGroupId[0])
+	request := testClient.DefaultAPI.UpdateSecurityGroup(testCtx, testProjectId, testRegion, testGroupId[0])
 	request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
 		Description: &testDescription,
-		Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
+		Labels:      testLabels,
 		Name:        &testName,
 	})
 	for _, mod := range mods {
@@ -185,7 +173,7 @@ func TestParseInput(t *testing.T) {
 			args:    testGroupId,
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"foo": "bar",
 				}
 			}),
@@ -276,7 +264,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateSecurityGroupRequest) {
-				*request = (*request).UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
+				*request = request.UpdateSecurityGroupPayload(iaas.UpdateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      nil,
 					Name:        &testName,
@@ -290,7 +278,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

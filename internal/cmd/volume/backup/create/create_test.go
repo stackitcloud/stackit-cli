@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -26,10 +26,10 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
+	testClient    = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testSourceId  = uuid.NewString()
-	testLabels    = map[string]string{"key1": "value1"}
+	testLabels    = map[string]any{"key1": "value1"}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -67,16 +67,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateBackupRequest)) iaas.ApiCreateBackupRequest {
-	request := testClient.CreateBackup(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateBackup(testCtx, testProjectId, testRegion)
 
 	createPayload := iaas.NewCreateBackupPayloadWithDefaults()
 	createPayload.Name = utils.Ptr(testName)
-	createPayload.Labels = &map[string]interface{}{
+	createPayload.Labels = map[string]any{
 		"key1": "value1",
 	}
-	createPayload.Source = &iaas.BackupSource{
-		Id:   &testSourceId,
-		Type: utils.Ptr(testSourceType),
+	createPayload.Source = iaas.BackupSource{
+		Id:   testSourceId,
+		Type: testSourceType,
 	}
 
 	request = request.CreateBackupPayload(*createPayload)
@@ -149,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Name = nil
-				model.Labels = make(map[string]string)
+				model.Labels = make(map[string]any)
 			}),
 		},
 	}
@@ -180,7 +180,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

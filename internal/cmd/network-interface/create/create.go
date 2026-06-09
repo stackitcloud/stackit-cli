@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -41,13 +41,13 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NetworkId        string
-	AllowedAddresses *[]iaas.AllowedAddressesInner
+	AllowedAddresses []iaas.AllowedAddressesInner
 	Ipv4             *string
 	Ipv6             *string
-	Labels           *map[string]string
+	Labels           map[string]any
 	Name             *string // <= 63 characters + regex  ^[A-Za-z0-9]+((-|_|\s|\.)[A-Za-z0-9]+)*$
 	NicSecurity      *bool
-	SecurityGroups   *[]string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+	SecurityGroups   []string // = 36 characters + regex ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -155,11 +155,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	// check security groups size and regex
-	securityGroups := flags.FlagToStringSlicePointer(p, cmd, securityGroupsFlag)
-	if securityGroups != nil && len(*securityGroups) > 0 {
+	securityGroups := flags.FlagToStringSliceValue(p, cmd, securityGroupsFlag)
+	if len(securityGroups) > 0 {
 		securityGroupsRegex := regexp.MustCompile(securityGroupsRegex)
 		// iterate over them
-		for _, value := range *securityGroups {
+		for _, value := range securityGroups {
 			if len(value) != securityGroupLength {
 				return nil, &errors.FlagValidationError{
 					Flag:    securityGroupsFlag,
@@ -180,14 +180,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		NetworkId:       flags.FlagToStringValue(p, cmd, networkIdFlag),
 		Ipv4:            flags.FlagToStringPointer(p, cmd, ipv4Flag),
 		Ipv6:            flags.FlagToStringPointer(p, cmd, ipv6Flag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 		Name:            name,
 		NicSecurity:     flags.FlagToBoolPointer(p, cmd, nicSecurityFlag),
 		SecurityGroups:  securityGroups,
 	}
 
 	if allowedAddresses != nil {
-		model.AllowedAddresses = utils.Ptr(allowedAddressesInner)
+		model.AllowedAddresses = allowedAddressesInner
 	}
 
 	p.DebugInputModel(model)
@@ -195,13 +195,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNicRequest {
-	req := apiClient.CreateNic(ctx, model.ProjectId, model.Region, model.NetworkId)
+	req := apiClient.DefaultAPI.CreateNic(ctx, model.ProjectId, model.Region, model.NetworkId)
 
 	payload := iaas.CreateNicPayload{
 		AllowedAddresses: model.AllowedAddresses,
 		Ipv4:             model.Ipv4,
 		Ipv6:             model.Ipv6,
-		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:           model.Labels,
 		Name:             model.Name,
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,

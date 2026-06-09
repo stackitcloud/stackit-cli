@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -54,14 +54,14 @@ type inputModel struct {
 	Name           *string
 	OrganizationId *string
 	// Deprecated: DnsNameServers is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
-	DnsNameServers *[]string
+	DnsNameServers []string
 	// Deprecated: DefaultPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	DefaultPrefixLength *int64
 	// Deprecated: MaxPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	MaxPrefixLength *int64
 	// Deprecated: MinPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	MinPrefixLength *int64
-	Labels          *map[string]string
+	Labels          map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -170,11 +170,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Name:                flags.FlagToStringPointer(p, cmd, nameFlag),
 		OrganizationId:      flags.FlagToStringPointer(p, cmd, organizationIdFlag),
 		AreaId:              areaId,
-		DnsNameServers:      flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
+		DnsNameServers:      flags.FlagToStringSliceValue(p, cmd, dnsNameServersFlag),
 		DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, defaultPrefixLengthFlag),
 		MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, maxPrefixLengthFlag),
 		MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, minPrefixLengthFlag),
-		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:              flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -204,18 +204,18 @@ func getConfiguredDeprecatedFlags(model *inputModel) []string {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkAreaRequest {
-	req := apiClient.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
+	req := apiClient.DefaultAPI.PartialUpdateNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 
 	payload := iaas.PartialUpdateNetworkAreaPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 
 	return req.PartialUpdateNetworkAreaPayload(payload)
 }
 
 func buildRequestNetworkAreaRegion(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRegionRequest {
-	req := apiClient.UpdateNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region)
+	req := apiClient.DefaultAPI.UpdateNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region)
 
 	payload := iaas.UpdateNetworkAreaRegionPayload{
 		Ipv4: &iaas.UpdateRegionalAreaIPv4{

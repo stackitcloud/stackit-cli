@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			groupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Warn("get security group name: %v", err)
 				groupLabel = model.SecurityGroupId
@@ -98,6 +98,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteSecurityGroupRequest {
-	request := apiClient.DeleteSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
+	request := apiClient.DefaultAPI.DeleteSecurityGroup(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	return request
 }

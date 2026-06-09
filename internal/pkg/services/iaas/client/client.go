@@ -6,7 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*iaas.APIClient, error) {

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -88,11 +88,11 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiCreateAffinityGroupRequest {
-	req := apiClient.CreateAffinityGroup(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateAffinityGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateAffinityGroupPayload(
 		iaas.CreateAffinityGroupPayload{
-			Name:   utils.Ptr(model.Name),
-			Policy: utils.Ptr(model.Policy),
+			Name:   model.Name,
+			Policy: model.Policy,
 		},
 	)
 	return req

@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "test")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testKeyPairName = "foobar"
 var testPublicKeyFlag = "true"
 
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiGetKeyPairRequest)) iaas.ApiGetKeyPairRequest {
-	request := testClient.GetKeyPair(testCtx, testKeyPairName)
+	request := testClient.DefaultAPI.GetKeyPair(testCtx, testKeyPairName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -132,7 +132,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedResult,
 				cmp.AllowUnexported(tt.expectedResult),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("data does not match: %s", diff)

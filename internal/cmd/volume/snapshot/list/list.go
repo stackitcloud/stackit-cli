@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 )
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSnapshotsInProjectRequest {
-	req := apiClient.ListSnapshotsInProject(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListSnapshotsInProject(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, snapshots
 			var labelsString string
 			if snapshot.Labels != nil {
 				var labels []string
-				for key, value := range *snapshot.Labels {
+				for key, value := range snapshot.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
 				labelsString = strings.Join(labels, "\n")
@@ -155,7 +155,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, snapshots
 				utils.PtrString(snapshot.Name),
 				utils.PtrGigaByteSizeDefault(snapshot.Size, "n/a"),
 				utils.PtrString(snapshot.Status),
-				utils.PtrString(snapshot.VolumeId),
+				snapshot.VolumeId,
 				labelsString,
 				utils.ConvertTimePToDateTimeString(snapshot.CreatedAt),
 				utils.ConvertTimePToDateTimeString(snapshot.UpdatedAt),

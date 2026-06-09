@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListVolumePerformanceClassesRequest {
-	req := apiClient.ListVolumePerformanceClasses(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListVolumePerformanceClasses(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -145,7 +145,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, performan
 		table.SetHeader("Name", "Description")
 
 		for _, performanceClass := range performanceClasses {
-			table.AddRow(utils.PtrString(performanceClass.Name), utils.PtrString(performanceClass.Description))
+			table.AddRow(performanceClass.Name, utils.PtrString(performanceClass.Description))
 			table.AddSeparator()
 		}
 

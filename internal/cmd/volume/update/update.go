@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -33,7 +33,7 @@ type inputModel struct {
 	VolumeId    string
 	Name        *string
 	Description *string
-	Labels      *map[string]string
+	Labels      map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
@@ -114,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		VolumeId:        volumeId,
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -122,12 +122,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateVolumeRequest {
-	req := apiClient.UpdateVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
+	req := apiClient.DefaultAPI.UpdateVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 
 	payload := iaas.UpdateVolumePayload{
 		Name:        model.Name,
 		Description: model.Description,
-		Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:      model.Labels,
 	}
 
 	return req.UpdateVolumePayload(payload)

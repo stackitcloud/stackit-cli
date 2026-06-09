@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNicRequest {
-	req := apiClient.GetNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
+	req := apiClient.DefaultAPI.GetNic(ctx, model.ProjectId, model.Region, model.NetworkId, model.NicId)
 	return req
 }
 
@@ -134,17 +134,17 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 		table.AddRow("MAC", utils.PtrString(nic.Mac))
 		table.AddSeparator()
 		table.AddRow("NIC SECURITY", utils.PtrString(nic.NicSecurity))
-		if nic.AllowedAddresses != nil && len(*nic.AllowedAddresses) > 0 {
+		if len(nic.AllowedAddresses) > 0 {
 			var allowedAddresses []string
-			for _, value := range *nic.AllowedAddresses {
+			for _, value := range nic.AllowedAddresses {
 				allowedAddresses = append(allowedAddresses, *value.String)
 			}
 			table.AddSeparator()
 			table.AddRow("ALLOWED ADDRESSES", strings.Join(allowedAddresses, "\n"))
 		}
-		if nic.Labels != nil && len(*nic.Labels) > 0 {
+		if len(nic.Labels) > 0 {
 			var labels []string
-			for key, value := range *nic.Labels {
+			for key, value := range nic.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddSeparator()
@@ -154,9 +154,9 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 		table.AddRow("STATUS", utils.PtrString(nic.Status))
 		table.AddSeparator()
 		table.AddRow("TYPE", utils.PtrString(nic.Type))
-		if nic.SecurityGroups != nil && len(*nic.SecurityGroups) > 0 {
+		if len(nic.SecurityGroups) > 0 {
 			table.AddSeparator()
-			table.AddRow("SECURITY GROUPS", strings.Join(*nic.SecurityGroups, "\n"))
+			table.AddRow("SECURITY GROUPS", strings.Join(nic.SecurityGroups, "\n"))
 		}
 
 		err := table.Display(p)

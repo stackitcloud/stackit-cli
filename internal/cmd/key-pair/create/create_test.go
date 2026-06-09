@@ -12,13 +12,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testPublicKey = "ssh-rsa <key>"
 var testKeyPairName = "foobar_key"
@@ -40,10 +40,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"foo": "bar",
-		}),
-		PublicKey: utils.Ptr(testPublicKey),
+		},
+		PublicKey: testPublicKey,
 		Name:      utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateKeyPairRequest)) iaas.ApiCreateKeyPairRequest {
-	request := testClient.CreateKeyPair(testCtx)
+	request := testClient.DefaultAPI.CreateKeyPair(testCtx)
 	request = request.CreateKeyPairPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -63,10 +63,10 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateKeyPairRequest)) iaas.Ap
 
 func fixturePayload(mods ...func(payload *iaas.CreateKeyPairPayload)) iaas.CreateKeyPairPayload {
 	payload := iaas.CreateKeyPairPayload{
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"foo": "bar",
-		}),
-		PublicKey: utils.Ptr(testPublicKey),
+		},
+		PublicKey: testPublicKey,
 		Name:      utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
@@ -112,7 +112,7 @@ func TestParseInput(t *testing.T) {
 				if err != nil {
 					t.Fatal("could not create expected Model", err)
 				}
-				model.PublicKey = utils.Ptr(string(file))
+				model.PublicKey = string(file)
 			}),
 		},
 		{
@@ -148,7 +148,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

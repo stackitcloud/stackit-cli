@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels      *map[string]string
+	Labels      map[string]any
 	KeyPairName *string
 }
 
@@ -82,10 +82,10 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateKeyPairRequest {
-	req := apiClient.UpdateKeyPair(ctx, *model.KeyPairName)
+	req := apiClient.DefaultAPI.UpdateKeyPair(ctx, *model.KeyPairName)
 
 	payload := iaas.UpdateKeyPairPayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 	return req.UpdateKeyPairPayload(payload)
 }
@@ -96,7 +96,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelsFlag),
 		KeyPairName:     utils.Ptr(keyPairName),
 	}
 

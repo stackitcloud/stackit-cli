@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routing-tables: %w", err)
 			}
 
-			routingTables := utils.GetSliceFromPointer(response.Items)
+			routingTables := response.Items
 
 			// Truncate output
 			if model.Limit != nil && len(routingTables) > int(*model.Limit) {
@@ -125,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListRoutingTablesOfAreaRequest {
-	request := apiClient.ListRoutingTablesOfArea(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	request := apiClient.DefaultAPI.ListRoutingTablesOfArea(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
@@ -148,15 +148,15 @@ func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.Ro
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
 		for _, routingTable := range routingTables {
 			var labels []string
-			if routingTable.Labels != nil && len(*routingTable.Labels) > 0 {
-				for key, value := range *routingTable.Labels {
+			if len(routingTable.Labels) > 0 {
+				for key, value := range routingTable.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
 			}
 
 			table.AddRow(
 				utils.PtrString(routingTable.Id),
-				utils.PtrString(routingTable.Name),
+				routingTable.Name,
 				utils.PtrString(routingTable.Description),
 				utils.PtrString(routingTable.Default),
 				strings.Join(labels, "\n"),

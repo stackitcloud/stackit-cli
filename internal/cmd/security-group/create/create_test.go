@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -23,11 +23,11 @@ type testCtxKey struct{}
 
 var (
 	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient      = &iaas.APIClient{}
+	testClient      = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId   = uuid.NewString()
 	testName        = "new-security-group"
 	testDescription = "a test description"
-	testLabels      = map[string]string{
+	testLabels      = map[string]any{
 		"fooKey": "fooValue",
 		"barKey": "barValue",
 		"bazKey": "bazValue",
@@ -58,9 +58,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Labels:      &testLabels,
+		Labels:      testLabels,
 		Description: &testDescription,
-		Name:        &testName,
+		Name:        testName,
 		Stateful:    &testStateful,
 	}
 	for _, mod := range mods {
@@ -69,23 +69,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func toStringAnyMapPtr(m map[string]string) map[string]any {
-	if m == nil {
-		return nil
-	}
-	result := map[string]any{}
-	for k, v := range m {
-		result[k] = v
-	}
-	return result
-}
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) iaas.ApiCreateSecurityGroupRequest {
-	request := testClient.CreateSecurityGroup(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateSecurityGroup(testCtx, testProjectId, testRegion)
 
 	request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 		Description: &testDescription,
-		Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
-		Name:        &testName,
+		Labels:      testLabels,
+		Name:        testName,
 		Rules:       nil,
 		Stateful:    &testStateful,
 	})
@@ -159,7 +149,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"foo": "bar",
 				}
 			}),
@@ -200,10 +190,10 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = (*request).CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
+				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 					Description: &testDescription,
 					Labels:      nil,
-					Name:        &testName,
+					Name:        testName,
 					Stateful:    &testStateful,
 				})
 			}),
@@ -214,10 +204,10 @@ func TestBuildRequest(t *testing.T) {
 				model.Stateful = utils.Ptr(false)
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateSecurityGroupRequest) {
-				*request = (*request).CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
+				*request = request.CreateSecurityGroupPayload(iaas.CreateSecurityGroupPayload{
 					Description: &testDescription,
-					Labels:      utils.Ptr(toStringAnyMapPtr(testLabels)),
-					Name:        &testName,
+					Labels:      testLabels,
+					Name:        testName,
 					Stateful:    utils.Ptr(false),
 				})
 			}),
@@ -229,7 +219,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -258,7 +248,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.name, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.name, &tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

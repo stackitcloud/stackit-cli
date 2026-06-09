@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testSourceId = uuid.NewString()
@@ -68,23 +68,23 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		AgentProvisioningPolicy:       utils.Ptr("INHERIT"),
 		AvailabilityZone:              utils.Ptr("eu01-1"),
-		Name:                          utils.Ptr("test-server-name"),
-		MachineType:                   utils.Ptr("t1.1"),
+		Name:                          "test-server-name",
+		MachineType:                   "t1.1",
 		AffinityGroup:                 utils.Ptr("test-affinity-group"),
 		BootVolumePerformanceClass:    utils.Ptr("test-perf-class"),
 		BootVolumeSize:                utils.Ptr(int64(5)),
-		BootVolumeSourceId:            utils.Ptr(testSourceId),
-		BootVolumeSourceType:          utils.Ptr("test-source-type"),
+		BootVolumeSourceId:            testSourceId,
+		BootVolumeSourceType:          "test-source-type",
 		BootVolumeDeleteOnTermination: utils.Ptr(false),
 		KeypairName:                   utils.Ptr("test-keypair-name"),
 		NetworkId:                     utils.Ptr(testNetworkId),
-		SecurityGroups:                utils.Ptr([]string{"test-security-groups"}),
-		ServiceAccountMails:           utils.Ptr([]string{"test-service-account"}),
+		SecurityGroups:                []string{"test-security-groups"},
+		ServiceAccountMails:           []string{"test-service-account"},
 		UserData:                      utils.Ptr("test-user-data"),
-		Volumes:                       utils.Ptr([]string{testVolumeId}),
-		Labels: utils.Ptr(map[string]string{
+		Volumes:                       []string{testVolumeId},
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -93,7 +93,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -102,10 +102,10 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.Api
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
-	request := testClient.CreateServer(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateServer(testCtx, testProjectId, testRegion)
 	request = request.CreateServerPayload(iaas.CreateServerPayload{
-		MachineType: utils.Ptr("t1.1"),
-		Name:        utils.Ptr("test-server-name"),
+		MachineType: "t1.1",
+		Name:        "test-server-name",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -115,28 +115,28 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateServerRequest)) 
 
 func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.CreateServerPayload {
 	payload := iaas.CreateServerPayload{
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]any{
 			"key": "value",
-		}),
-		MachineType:         utils.Ptr("t1.1"),
-		Name:                utils.Ptr("test-server-name"),
+		},
+		MachineType:         "t1.1",
+		Name:                "test-server-name",
 		AvailabilityZone:    utils.Ptr("eu01-1"),
 		AffinityGroup:       utils.Ptr("test-affinity-group"),
 		KeypairName:         utils.Ptr("test-keypair-name"),
-		SecurityGroups:      utils.Ptr([]string{"test-security-groups"}),
-		ServiceAccountMails: utils.Ptr([]string{"test-service-account"}),
-		UserData:            utils.Ptr([]byte("test-user-data")),
-		Volumes:             utils.Ptr([]string{testVolumeId}),
-		BootVolume: &iaas.ServerBootVolume{
+		SecurityGroups:      []string{"test-security-groups"},
+		ServiceAccountMails: []string{"test-service-account"},
+		UserData:            utils.Ptr("test-user-data"),
+		Volumes:             []string{testVolumeId},
+		BootVolume: &iaas.BootVolume{
 			PerformanceClass:    utils.Ptr("test-perf-class"),
 			Size:                utils.Ptr(int64(5)),
 			DeleteOnTermination: utils.Ptr(false),
 			Source: &iaas.BootVolumeSource{
-				Id:   utils.Ptr(testSourceId),
-				Type: utils.Ptr("test-source-type"),
+				Id:   testSourceId,
+				Type: "test-source-type",
 			},
 		},
-		Networking: &iaas.CreateServerPayloadAllOfNetworking{
+		Networking: iaas.CreateServerPayloadAllOfNetworking{
 			CreateServerNetworking: &iaas.CreateServerNetworking{
 				NetworkId: utils.Ptr(testNetworkId),
 			},
@@ -188,8 +188,8 @@ func TestParseInput(t *testing.T) {
 				model.AgentProvisioningPolicy = nil
 				model.AvailabilityZone = nil
 				model.Labels = nil
-				model.BootVolumeSourceId = nil
-				model.BootVolumeSourceType = nil
+				model.BootVolumeSourceId = ""
+				model.BootVolumeSourceType = ""
 				model.BootVolumeSize = nil
 				model.BootVolumePerformanceClass = nil
 				model.BootVolumeDeleteOnTermination = nil
@@ -252,8 +252,8 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.NetworkId = utils.Ptr(testNetworkId)
-				model.Name = utils.Ptr("test-server-name")
-				model.MachineType = utils.Ptr("t1.1")
+				model.Name = "test-server-name"
+				model.MachineType = "t1.1"
 			}),
 		},
 		{
@@ -264,8 +264,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.BootVolumeSourceId = utils.Ptr(testImageId)
-				model.BootVolumeSourceType = utils.Ptr("image")
+				model.BootVolumeSourceId = testImageId
+				model.BootVolumeSourceType = "image"
 			}),
 		},
 		{
@@ -303,8 +303,8 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.BootVolumeSourceId = nil
-				model.BootVolumeSourceType = nil
+				model.BootVolumeSourceId = ""
+				model.BootVolumeSourceType = ""
 				model.BootVolumeSize = nil
 				model.ImageId = utils.Ptr(testImageId)
 			}),
@@ -379,8 +379,8 @@ func TestBuildRequest(t *testing.T) {
 					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				MachineType: utils.Ptr("t1.1"),
-				Name:        utils.Ptr("test-server-name"),
+				MachineType: "t1.1",
+				Name:        "test-server-name",
 			},
 			expectedRequest: fixtureRequiredRequest(),
 		},
@@ -394,7 +394,7 @@ func TestBuildRequest(t *testing.T) {
 				payload.Agent = &iaas.ServerAgent{
 					Provisioned: utils.Ptr(true),
 				}
-				*request = (*request).CreateServerPayload(payload)
+				*request = request.CreateServerPayload(payload)
 			}),
 		},
 	}
@@ -405,7 +405,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
