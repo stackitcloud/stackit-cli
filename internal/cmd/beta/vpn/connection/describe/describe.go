@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 )
 
 const (
@@ -124,13 +125,13 @@ func outputResult(p *print.Printer, model *inputModel, resp *vpn.ConnectionRespo
 		ts := []tables.Table{
 			mainTable,
 		}
-		ts = append(ts, tunnelTables(resp.Tunnel1, "Tunnel 1")...)
-		ts = append(ts, tunnelTables(resp.Tunnel2, "Tunnel 2")...)
+		ts = append(ts, tunnelTables(&resp.Tunnel1, "Tunnel 1")...)
+		ts = append(ts, tunnelTables(&resp.Tunnel2, "Tunnel 2")...)
 		return tables.DisplayTables(p, ts)
 	})
 }
 
-func tunnelTables(tunnel vpn.TunnelConfiguration, title string) []tables.Table {
+func tunnelTables(tunnel *vpn.TunnelConfiguration, title string) []tables.Table {
 	table := tables.NewTable()
 	table.SetTitle(title)
 	table.AddRow("IP Address", tunnel.RemoteAddress)

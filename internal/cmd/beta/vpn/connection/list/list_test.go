@@ -10,12 +10,13 @@ import (
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/spf13/cobra"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 )
 
 type testCtxKey struct{}
@@ -197,7 +198,7 @@ func TestOutputResult(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			err := outputResult(params.Printer, tt.model, testProjectId, tt.resp)
+			err := outputResult(params.Printer, tt.model, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

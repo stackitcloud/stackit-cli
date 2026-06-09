@@ -2,6 +2,7 @@ package connection
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/connection/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/connection/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/connection/describe"

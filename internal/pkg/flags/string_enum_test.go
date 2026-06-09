@@ -114,7 +114,7 @@ func TestStringEnumFlag_Register(t *testing.T) {
 
 	flag := cmd.Flags().Lookup("my-flag")
 	if flag == nil {
-		t.Errorf("Expected flag 'my-flag' to be registered")
+		t.Fatalf("Expected flag 'my-flag' to be registered")
 	}
 	if flag.Usage != "docs (possible values: [a, b])" {
 		t.Errorf("Expected flag usage to be set correctly")

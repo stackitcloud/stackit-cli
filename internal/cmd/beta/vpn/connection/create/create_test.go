@@ -11,12 +11,13 @@ import (
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/spf13/cobra"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 )
 
 type testCtxKey struct{}

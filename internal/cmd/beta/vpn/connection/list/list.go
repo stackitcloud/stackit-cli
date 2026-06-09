@@ -5,18 +5,18 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/vpn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 )
 
 const (
@@ -62,13 +62,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list VPN connections: %w", err)
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
-			if err != nil {
-				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			}
-
-			return outputResult(p.Printer, model, projectLabel, resp)
+			return outputResult(p.Printer, model, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -102,7 +96,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 	return req, nil
 }
 
-func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *vpn.ConnectionList) error {
+func outputResult(p *print.Printer, model *inputModel, resp *vpn.ConnectionList) error {
 	if resp == nil || resp.Connections == nil {
 		return fmt.Errorf("list connections response is empty")
 	}

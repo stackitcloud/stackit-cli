@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn/connection"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
