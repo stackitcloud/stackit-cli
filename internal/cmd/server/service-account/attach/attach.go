@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed 2026-12-03
+	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12
 
 	serverIdFlag = "server-id"
 
@@ -39,7 +39,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Use:   "attach",
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
-		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed 2026-12-03
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12
 		Example: examples.Build(
 			examples.NewExample(
 				`Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"`,
@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
 	} else if len(inputArgs) > 0 {
 		serviceAccMail = inputArgs[0]
-		p.Warn("using a positional argument for the service account email is deprecated and will be removed on 2026-12-03. Please use '--%s' instead.\n", serviceAccFlag)
+		p.Warn("using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use '--%s' instead.\n", serviceAccFlag)
 	} else {
 		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
 	}
