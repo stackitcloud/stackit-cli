@@ -16,8 +16,7 @@ const (
 )
 
 func GetCredentialsDisplayName(ctx context.Context, apiClient loadbalancer.DefaultAPI, projectId, region, credentialsRef string) (string, error) {
-	req := apiClient.GetCredentials(ctx, projectId, region, credentialsRef)
-	resp, err := apiClient.GetCredentialsExecute(req)
+	resp, err := apiClient.GetCredentials(ctx, projectId, region, credentialsRef).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get Load Balancer credentials: %w", err)
 	}
@@ -25,8 +24,7 @@ func GetCredentialsDisplayName(ctx context.Context, apiClient loadbalancer.Defau
 }
 
 func GetLoadBalancerTargetPool(ctx context.Context, apiClient loadbalancer.DefaultAPI, projectId, region, loadBalancerName, targetPoolName string) (*loadbalancer.TargetPool, error) {
-	req := apiClient.GetLoadBalancer(ctx, projectId, region, loadBalancerName)
-	resp, err := apiClient.GetLoadBalancerExecute(req)
+	resp, err := apiClient.GetLoadBalancer(ctx, projectId, region, loadBalancerName).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("get load balancer: %w", err)
 	}
@@ -139,8 +137,7 @@ func GetTargetName(ctx context.Context, apiClient loadbalancer.DefaultAPI, proje
 // It goes through all load balancers and checks what observability credentials are being used, then returns a list of those credentials.
 func GetUsedObsCredentials(ctx context.Context, apiClient loadbalancer.DefaultAPI, allCredentials []loadbalancer.CredentialsResponse, projectId, region string) ([]loadbalancer.CredentialsResponse, error) {
 	var usedCredentialsSlice []loadbalancer.CredentialsResponse
-	req := apiClient.ListLoadBalancers(ctx, projectId, region)
-	loadBalancers, err := apiClient.ListLoadBalancersExecute(req)
+	loadBalancers, err := apiClient.ListLoadBalancers(ctx, projectId, region).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("list load balancers: %w", err)
 	}
