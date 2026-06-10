@@ -20,9 +20,11 @@ import (
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL"
+	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12-31
 
 	serverIdFlag = "server-id"
+
+	serviceAccFlag = "service-account-email"
 )
 
 type inputModel struct {
@@ -33,14 +35,14 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("detach %s", serviceAccMailArg),
+		Use:   "detach",
 		Short: "Detach a service account from a server",
 		Long:  "Detach a service account from a server",
-		Args:  args.SingleArg(serviceAccMailArg, nil),
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"`,
-				"$ stackit server service-account detach xxx@sa.stackit.cloud --server-id yyy",
+				"$ stackit server service-account detach --service-account-email xxx@sa.stackit.cloud --server-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -85,16 +87,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server id")
-
+	cmd.Flags().VarP(flags.EmailFlag(), serviceAccFlag, "a", "Service Account Email")
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	serviceAccMail := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	var serviceAccMail string
+	if cmd.Flags().Changed(serviceAccFlag) {
+		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
+	} else if len(inputArgs) > 0 {
+		serviceAccMail = inputArgs[0]
+		p.Warn("Using a positional argument for the service account email is deprecated and will be removed after 2026-12-31. Please use the '--%s' flag instead.\n", serviceAccFlag)
+	} else {
+		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
 	}
 
 	model := inputModel{

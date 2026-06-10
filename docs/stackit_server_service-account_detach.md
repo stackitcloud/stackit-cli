@@ -7,21 +7,22 @@ Detach a service account from a server
 Detach a service account from a server
 
 ```
-stackit server service-account detach SERVICE_ACCOUNT_EMAIL [flags]
+stackit server service-account detach [flags]
 ```
 
 ### Examples
 
 ```
   Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"
-  $ stackit server service-account detach xxx@sa.stackit.cloud --server-id yyy
+  $ stackit server service-account detach --service-account-email xxx@sa.stackit.cloud --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help               Help for "stackit server service-account detach"
-  -s, --server-id string   Server id
+  -h, --help                           Help for "stackit server service-account detach"
+  -s, --server-id string               Server id
+  -a, --service-account-email string   Service Account Email
 ```
 
 ### Options inherited from parent commands

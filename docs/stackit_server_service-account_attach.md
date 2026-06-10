@@ -7,21 +7,22 @@ Attach a service account to a server
 Attach a service account to a server
 
 ```
-stackit server service-account attach SERVICE_ACCOUNT_EMAIL [flags]
+stackit server service-account attach [flags]
 ```
 
 ### Examples
 
 ```
   Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"
-  $ stackit server service-account attach xxx@sa.stackit.cloud --server-id yyy
+  $ stackit server service-account attach --service-account-email xxx@sa.stackit.cloud --server-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help               Help for "stackit server service-account attach"
-  -s, --server-id string   Server ID
+  -h, --help                           Help for "stackit server service-account attach"
+  -s, --server-id string               Server ID
+  -a, --service-account-email string   Service Account Email
 ```
 
 ### Options inherited from parent commands
