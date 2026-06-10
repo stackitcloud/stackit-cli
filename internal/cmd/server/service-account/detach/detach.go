@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12
+	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12-31
 
 	serverIdFlag = "server-id"
 
