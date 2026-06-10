@@ -3,7 +3,6 @@ package detach
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -107,10 +106,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		p.Warn("using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use '--%s' instead.\n", serviceAccFlag)
 	} else {
 		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
-	}
-
-	if serviceAccMail == "" || !strings.Contains(serviceAccMail, "@") {
-		return nil, fmt.Errorf("invalid service account email format: %q", serviceAccMail)
 	}
 
 	model := inputModel{
