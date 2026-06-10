@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -18,7 +18,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &git.APIClient{}
+	testClient     = &git.APIClient{DefaultAPI: &git.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testInstanceId = []string{uuid.NewString()}
 )
@@ -45,7 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *git.ApiGetInstanceRequest)) git.ApiGetInstanceRequest {
-	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId[0])
+	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testInstanceId[0])
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -183,7 +183,7 @@ func TestBuildRequest(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, git.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

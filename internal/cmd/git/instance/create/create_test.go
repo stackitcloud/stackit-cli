@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,7 +20,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &git.APIClient{}
+	testClient    = &git.APIClient{DefaultAPI: &git.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 
 	testName   = "test-instance"
@@ -57,9 +57,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureCreatePayload(mods ...func(payload *git.CreateInstancePayload)) (payload git.CreateInstancePayload) {
 	payload = git.CreateInstancePayload{
-		Name:   &testName,
-		Flavor: git.CreateInstancePayloadGetFlavorAttributeType(&testFlavor),
-		Acl:    &testAcl,
+		Name:   testName,
+		Flavor: utils.Ptr(git.CreateInstancePayloadFlavor(testFlavor)),
+		Acl:    testAcl,
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -68,7 +68,7 @@ func fixtureCreatePayload(mods ...func(payload *git.CreateInstancePayload)) (pay
 }
 
 func fixtureRequest(mods ...func(request *git.ApiCreateInstanceRequest)) git.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
 
 	request = request.CreateInstancePayload(fixtureCreatePayload())
 
@@ -151,8 +151,8 @@ func TestBuildRequest(t *testing.T) {
 				model.Name = "new-name"
 			}),
 			expectedRequest: fixtureRequest(func(request *git.ApiCreateInstanceRequest) {
-				*request = (*request).CreateInstancePayload(fixtureCreatePayload(func(payload *git.CreateInstancePayload) {
-					payload.Name = utils.Ptr("new-name")
+				*request = request.CreateInstancePayload(fixtureCreatePayload(func(payload *git.CreateInstancePayload) {
+					payload.Name = "new-name"
 				}))
 			}),
 		},
@@ -164,7 +164,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmp.AllowUnexported(git.NullableString{}),
+				cmp.AllowUnexported(git.NullableString{}, git.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -201,7 +201,7 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: "",
 				async:        false,
 				instanceName: "",
-				resp:         &git.Instance{Id: utils.Ptr(uuid.NewString())},
+				resp:         &git.Instance{Id: uuid.NewString()},
 			},
 			wantErr: false,
 		},
@@ -211,7 +211,7 @@ func TestOutputResult(t *testing.T) {
 				outputFormat: print.JSONOutputFormat,
 				async:        true,
 				instanceName: testName,
-				resp:         &git.Instance{Id: utils.Ptr(uuid.NewString())},
+				resp:         &git.Instance{Id: uuid.NewString()},
 			},
 			wantErr: false,
 		},

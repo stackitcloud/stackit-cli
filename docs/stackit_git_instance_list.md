@@ -1,6 +1,6 @@
 ## stackit git instance list
 
-Lists all instances of STACKIT Git.
+Lists all instances of STACKIT Git
 
 ### Synopsis
 
