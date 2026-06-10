@@ -118,7 +118,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Short: "Generates a payload to create/update a Load Balancer",
 		Long: fmt.Sprintf("%s\n%s",
 			"Generates a JSON payload with values to be used as --payload input for load balancer creation or update.",
-			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v1#tag/Load-Balancer/operation/APIService_CreateLoadBalancer for information regarding the payload structure.",
+			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v2#tag/Load-Balancer/operation/APIService_CreateLoadBalancer for information regarding the payload structure.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
