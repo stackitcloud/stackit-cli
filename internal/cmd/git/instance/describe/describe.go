@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -83,7 +83,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClient) git.ApiGetInstanceRequest {
-	return apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	return apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *git.Instance) error {
@@ -93,30 +93,19 @@ func outputResult(p *print.Printer, outputFormat string, resp *git.Instance) err
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		table := tables.NewTable()
-		if id := resp.Id; id != nil {
-			table.AddRow("ID", *id)
-			table.AddSeparator()
-		}
-		if name := resp.Name; name != nil {
-			table.AddRow("NAME", *name)
-			table.AddSeparator()
-		}
-		if url := resp.Url; url != nil {
-			table.AddRow("URL", *url)
-			table.AddSeparator()
-		}
-		if version := resp.Version; version != nil {
-			table.AddRow("VERSION", *version)
-			table.AddSeparator()
-		}
-		if state := resp.State; state != nil {
-			table.AddRow("STATE", *state)
-			table.AddSeparator()
-		}
-		if created := resp.Created; created != nil {
-			table.AddRow("CREATED", *created)
-			table.AddSeparator()
-		}
+
+		table.AddRow("ID", resp.Id)
+		table.AddSeparator()
+		table.AddRow("NAME", resp.Name)
+		table.AddSeparator()
+		table.AddRow("URL", resp.Url)
+		table.AddSeparator()
+		table.AddRow("VERSION", resp.Version)
+		table.AddSeparator()
+		table.AddRow("STATE", resp.State)
+		table.AddSeparator()
+		table.AddRow("CREATED", resp.Created)
+		table.AddSeparator()
 
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)

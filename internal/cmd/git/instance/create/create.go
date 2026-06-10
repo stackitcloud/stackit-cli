@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
-	"github.com/stackitcloud/stackit-sdk-go/services/git/wait"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -82,8 +83,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				err := spinner.Run(params.Printer, "Creating STACKIT git instance", func() error {
-					_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, *result.Id).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Creating STACKIT Git instance", func() error {
+					_, err = wait.CreateGitInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, result.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -130,14 +131,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClient) git.ApiCreateInstanceRequest {
-	return apiClient.CreateInstance(ctx, model.ProjectId).CreateInstancePayload(createPayload(model))
+	return apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId).CreateInstancePayload(createPayload(model))
 }
 
 func createPayload(model *inputModel) git.CreateInstancePayload {
 	return git.CreateInstancePayload{
-		Name:   &model.Name,
-		Flavor: git.CreateInstancePayloadGetFlavorAttributeType(&model.Flavor),
-		Acl:    &model.Acl,
+		Name:   model.Name,
+		Flavor: utils.Ptr(git.CreateInstancePayloadFlavor(model.Flavor)),
+		Acl:    model.Acl,
 	}
 }
 
@@ -145,16 +146,13 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceNam
 	if resp == nil {
 		return fmt.Errorf("API resp is nil")
 	}
-	if resp.Id == nil {
-		return fmt.Errorf("API resp is missing instance id")
-	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, *resp.Id)
+		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, resp.Id)
 		return nil
 	})
 }

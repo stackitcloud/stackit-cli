@@ -7,8 +7,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
-	"github.com/stackitcloud/stackit-sdk-go/services/git/wait"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectName = model.ProjectId
 			}
 
-			instanceName, err := gitUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceName, err := gitUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get stackit git intance name: %v", err)
 				instanceName = model.InstanceId
@@ -82,8 +82,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				err := spinner.Run(params.Printer, "Deleting STACKIT git instance", func() error {
-					_, err = wait.DeleteGitInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, "Deleting STACKIT Git instance", func() error {
+					_, err = wait.DeleteGitInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -120,5 +120,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClient) git.ApiDeleteInstanceRequest {
-	return apiClient.DeleteInstance(ctx, model.ProjectId, model.InstanceId)
+	return apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.InstanceId)
 }

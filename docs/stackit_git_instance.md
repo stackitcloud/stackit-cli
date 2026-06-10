@@ -33,5 +33,5 @@ stackit git instance [flags]
 * [stackit git instance create](./stackit_git_instance_create.md)	 - Creates STACKIT Git instance
 * [stackit git instance delete](./stackit_git_instance_delete.md)	 - Deletes STACKIT Git instance
 * [stackit git instance describe](./stackit_git_instance_describe.md)	 - Describes STACKIT Git instance
-* [stackit git instance list](./stackit_git_instance_list.md)	 - Lists all instances of STACKIT Git.
+* [stackit git instance list](./stackit_git_instance_list.md)	 - Lists all instances of STACKIT Git
 
