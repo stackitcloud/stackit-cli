@@ -103,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
 	} else if len(inputArgs) > 0 {
 		serviceAccMail = inputArgs[0]
-		p.Warn("using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use '--%s' instead.\n", serviceAccFlag)
+		p.Warn("Using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use the '--%s' flag instead.\n", serviceAccFlag)
 	} else {
 		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
 	}
