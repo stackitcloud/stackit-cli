@@ -38,7 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Use:   "attach",
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
-		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"`,

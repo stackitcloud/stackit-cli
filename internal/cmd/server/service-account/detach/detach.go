@@ -38,7 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Use:   "detach",
 		Short: "Detach a service account from a server",
 		Long:  "Detach a service account from a server",
-		Args:  args.SingleOptionalArg(serviceAccMailArg, nil), // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Detach a service account with mail "xxx@sa.stackit.cloud" from a server "yyy"`,
