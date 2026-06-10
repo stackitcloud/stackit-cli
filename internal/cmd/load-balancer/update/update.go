@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Updates a load balancer.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
-			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v1#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.",
+			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v2#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.",
 		),
 		Args: args.SingleArg(loadBalancerNameArg, nil),
 		Example: examples.Build(
