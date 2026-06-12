@@ -155,6 +155,7 @@ func TestAuthenticationConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			t.Setenv(EnvUseOIDC, "") // ensure OIDC mode is off for these tests
 			keyring.MockInit()
 			timestamp := time.Now().Add(24 * time.Hour)
 			authFields := make(map[authFieldKey]string)
