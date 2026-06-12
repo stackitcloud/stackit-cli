@@ -61,9 +61,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			ProjectId: testProjectId,
 		},
-		GatewayId:                         testGatewayID,
-		DisplayName:                       "test-connection",
-		Enabled:                           nil,
+		GatewayId:   testGatewayID,
+		DisplayName: "test-connection",
+		Enabled:     nil,
 		Tunnel1: tunnelInputModel{
 			RemoteAddress:              "1.2.3.4",
 			PreSharedKey:               "test-psk-1",

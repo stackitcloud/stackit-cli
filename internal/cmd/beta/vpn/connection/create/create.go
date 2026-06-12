@@ -331,7 +331,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func buildTunnelConfiguration(model tunnelInputModel) vpn.TunnelConfiguration {
+func buildTunnelConfiguration(model *tunnelInputModel) vpn.TunnelConfiguration {
 	tunnel := vpn.TunnelConfiguration{
 		RemoteAddress: model.RemoteAddress,
 	}
@@ -376,8 +376,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 		StaticRoutes:  model.StaticRoutes,
 	}
 
-	payload.Tunnel1 = buildTunnelConfiguration(model.Tunnel1)
-	payload.Tunnel2 = buildTunnelConfiguration(model.Tunnel2)
+	payload.Tunnel1 = buildTunnelConfiguration(&model.Tunnel1)
+	payload.Tunnel2 = buildTunnelConfiguration(&model.Tunnel2)
 
 	return req.CreateGatewayConnectionPayload(payload), nil
 }
