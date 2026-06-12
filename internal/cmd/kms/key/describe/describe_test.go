@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &kms.APIClient{}
+var testClient = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testKeyRingID = uuid.NewString()
 var testKeyID = uuid.NewString()
@@ -131,10 +131,10 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	got := buildRequest(testCtx, fixtureInputModel(), testClient)
-	want := testClient.GetKey(testCtx, testProjectId, testRegion, testKeyRingID, testKeyID)
+	want := testClient.DefaultAPI.GetKey(testCtx, testProjectId, testRegion, testKeyRingID, testKeyID)
 	diff := cmp.Diff(got, want,
 		cmp.AllowUnexported(want),
-		cmpopts.EquateComparable(testCtx),
+		cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 	)
 	if diff != "" {
 		t.Fatalf("buildRequest() mismatch (-want +got):\n%s", diff)
@@ -158,18 +158,18 @@ func TestOutputResult(t *testing.T) {
 			description: "table format",
 			outputFmt:   "table",
 			keyRing: &kms.Key{
-				AccessScope:  utils.Ptr(kms.ACCESSSCOPE_PUBLIC),
-				Algorithm:    utils.Ptr(kms.ALGORITHM_AES_256_GCM),
-				CreatedAt:    utils.Ptr(testTime),
+				AccessScope:  kms.ACCESSSCOPE_PUBLIC,
+				Algorithm:    kms.ALGORITHM_AES_256_GCM,
+				CreatedAt:    testTime,
 				DeletionDate: nil,
 				Description:  utils.Ptr("very secure and secret key"),
-				DisplayName:  utils.Ptr("Test Key"),
-				Id:           utils.Ptr(testKeyID),
-				ImportOnly:   utils.Ptr(true),
-				KeyRingId:    utils.Ptr(testKeyRingID),
-				Protection:   utils.Ptr(kms.PROTECTION_SOFTWARE),
-				Purpose:      utils.Ptr(kms.PURPOSE_SYMMETRIC_ENCRYPT_DECRYPT),
-				State:        utils.Ptr(kms.KEYSTATE_ACTIVE),
+				DisplayName:  "Test Key",
+				Id:           testKeyID,
+				ImportOnly:   true,
+				KeyRingId:    testKeyRingID,
+				Protection:   kms.PROTECTION_SOFTWARE,
+				Purpose:      kms.PURPOSE_SYMMETRIC_ENCRYPT_DECRYPT,
+				State:        kms.KEYSTATE_ACTIVE,
 			},
 			expected: fmt.Sprintf(`
  ID            │ %-37s

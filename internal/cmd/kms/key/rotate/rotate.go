@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			keyName, err := kmsUtils.GetKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+			keyName, err := kmsUtils.GetKeyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
 				keyName = model.KeyId
@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiRotateKeyRequest {
-	req := apiClient.RotateKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+	req := apiClient.DefaultAPI.RotateKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 	return req
 }
 
@@ -121,7 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Rotated key %s\n", utils.PtrString(resp.KeyId))
+		p.Outputf("Rotated key %s\n", resp.KeyId)
 		return nil
 	})
 }

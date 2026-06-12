@@ -15,7 +15,7 @@ import (
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -35,8 +35,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId     string
 	KeyId         string
-	WrappedKey    *string
-	WrappingKeyId *string
+	WrappedKey    string
+	WrappingKeyId string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -68,12 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			keyName, err := kmsUtils.GetKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+			keyName, err := kmsUtils.GetKeyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
 				keyName = model.KeyId
 			}
-			keyRingName, err := kmsUtils.GetKeyRingName(ctx, apiClient, model.ProjectId, model.KeyRingId, model.Region)
+			keyRingName, err := kmsUtils.GetKeyRingName(ctx, apiClient.DefaultAPI, model.ProjectId, model.KeyRingId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key ring name: %v", err)
 				keyRingName = model.KeyRingId
@@ -86,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, _ := buildRequest(ctx, model, apiClient)
+			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("import KMS key: %w", err)
@@ -108,9 +108,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	// WrappedKey needs to be base64 encoded
-	var wrappedKey = flags.FlagToStringPointer(p, cmd, wrappedKeyFlag)
-	_, err := base64.StdEncoding.DecodeString(*wrappedKey)
-	if err != nil || *wrappedKey == "" {
+	var wrappedKey = flags.FlagToStringValue(p, cmd, wrappedKeyFlag)
+	_, err := base64.StdEncoding.DecodeString(wrappedKey)
+	if err != nil || wrappedKey == "" {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    wrappedKeyFlag,
 			Details: "The 'wrappedKey' argument is required and needs to be base64 encoded (whether provided inline or via file).",
@@ -122,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		KeyId:           keyId,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
 		WrappedKey:      wrappedKey,
-		WrappingKeyId:   flags.FlagToStringPointer(p, cmd, wrappingKeyIdFlag),
+		WrappingKeyId:   flags.FlagToStringValue(p, cmd, wrappingKeyIdFlag),
 	}
 
 	p.DebugInputModel(model)

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiListKeysRequest {
-	req := apiClient.ListKeys(ctx, model.ProjectId, model.Region, model.KeyRingId)
+	req := apiClient.DefaultAPI.ListKeys(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
 }
 
@@ -103,7 +103,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 		return fmt.Errorf("response was nil / empty")
 	}
 
-	keys := *resp.Keys
+	keys := resp.Keys
 
 	return p.OutputResult(outputFormat, keys, func() error {
 		if len(keys) == 0 {
@@ -115,12 +115,12 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 
 		for _, key := range keys {
 			table.AddRow(
-				utils.PtrString(key.Id),
-				utils.PtrString(key.DisplayName),
-				utils.PtrString(key.Purpose),
-				utils.PtrString(key.Algorithm),
+				key.Id,
+				key.DisplayName,
+				key.Purpose,
+				key.Algorithm,
 				utils.PtrString(key.DeletionDate),
-				utils.PtrString(key.State),
+				key.State,
 			)
 		}
 

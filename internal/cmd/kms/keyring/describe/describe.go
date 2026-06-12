@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -80,7 +80,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiGetKeyRingRequest {
-	return apiClient.GetKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingID)
+	return apiClient.DefaultAPI.GetKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingID)
 }
 
 func outputResult(p *print.Printer, outputFormat string, keyRing *kms.KeyRing) error {
@@ -89,13 +89,13 @@ func outputResult(p *print.Printer, outputFormat string, keyRing *kms.KeyRing) e
 	}
 	return p.OutputResult(outputFormat, keyRing, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(keyRing.Id))
+		table.AddRow("ID", keyRing.Id)
 		table.AddSeparator()
-		table.AddRow("DISPLAY NAME", utils.PtrString(keyRing.DisplayName))
+		table.AddRow("DISPLAY NAME", keyRing.DisplayName)
 		table.AddSeparator()
-		table.AddRow("CREATED AT", utils.PtrString(keyRing.CreatedAt))
+		table.AddRow("CREATED AT", keyRing.CreatedAt)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(keyRing.State))
+		table.AddRow("STATE", keyRing.State)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(keyRing.Description))
 
