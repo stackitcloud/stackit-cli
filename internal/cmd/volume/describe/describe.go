@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -90,7 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumeRequest {
-	return apiClient.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
+	return apiClient.DefaultAPI.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) error {
@@ -109,11 +109,11 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 		table.AddSeparator()
 		table.AddRow("PERFORMANCE CLASS", utils.PtrString(volume.PerformanceClass))
 		table.AddSeparator()
-		table.AddRow("AVAILABILITY ZONE", utils.PtrString(volume.AvailabilityZone))
+		table.AddRow("AVAILABILITY ZONE", volume.AvailabilityZone)
 		table.AddSeparator()
 
 		if volume.Source != nil {
-			sourceId := *volume.Source.Id
+			sourceId := volume.Source.Id
 			table.AddRow("SOURCE", sourceId)
 			table.AddSeparator()
 		}
@@ -124,9 +124,9 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 			table.AddSeparator()
 		}
 
-		if volume.Labels != nil && len(*volume.Labels) > 0 {
+		if len(volume.Labels) > 0 {
 			labels := []string{}
-			for key, value := range *volume.Labels {
+			for key, value := range volume.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

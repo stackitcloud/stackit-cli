@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -60,7 +60,7 @@ type inputModel struct {
 	Id          string
 	Name        *string
 	DiskFormat  *string
-	Labels      *map[string]string
+	Labels      map[string]any
 	Config      *imageConfig
 	MinDiskSize *int64
 	MinRam      *int64
@@ -134,7 +134,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.Region, model.Id)
+			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.Id)
 			if err != nil {
 				params.Printer.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
 				imageLabel = model.Id
@@ -153,7 +153,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update image: %w", err)
 			}
-			params.Printer.Info("Updated image \"%v\" for %q\n", utils.PtrString(resp.Name), projectLabel)
+			params.Printer.Info("Updated image \"%v\" for %q\n", resp.Name, projectLabel)
 
 			return nil
 		},
@@ -203,7 +203,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 
 		DiskFormat: flags.FlagToStringPointer(p, cmd, diskFormatFlag),
-		Labels:     flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Labels:     flags.FlagToStringToAny(p, cmd, labelsFlag),
 		Config: &imageConfig{
 			Architecture:           flags.FlagToStringPointer(p, cmd, architectureFlag),
 			BootMenu:               flags.FlagToBoolPointer(p, cmd, bootMenuFlag),
@@ -238,12 +238,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateImageRequest {
-	request := apiClient.UpdateImage(ctx, model.ProjectId, model.Region, model.Id)
+	request := apiClient.DefaultAPI.UpdateImage(ctx, model.ProjectId, model.Region, model.Id)
 	payload := iaas.NewUpdateImagePayload()
 
 	// Config *ImageConfig `json:"config,omitempty"`
 	payload.DiskFormat = model.DiskFormat
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(model.Labels)
+	payload.Labels = model.Labels
 	payload.MinDiskSize = model.MinDiskSize
 	payload.MinRam = model.MinRam
 	payload.Name = model.Name
@@ -256,28 +256,28 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			payload.Config.BootMenu = model.Config.BootMenu
 		}
 		if model.Config.CdromBus != nil {
-			payload.Config.CdromBus = iaas.NewNullableString(model.Config.CdromBus)
+			payload.Config.CdromBus = *iaas.NewNullableString(model.Config.CdromBus)
 		}
 		if model.Config.DiskBus != nil {
-			payload.Config.DiskBus = iaas.NewNullableString(model.Config.DiskBus)
+			payload.Config.DiskBus = *iaas.NewNullableString(model.Config.DiskBus)
 		}
 		if model.Config.NicModel != nil {
-			payload.Config.NicModel = iaas.NewNullableString(model.Config.NicModel)
+			payload.Config.NicModel = *iaas.NewNullableString(model.Config.NicModel)
 		}
 		if model.Config.OperatingSystem != nil {
 			payload.Config.OperatingSystem = model.Config.OperatingSystem
 		}
 		if model.Config.OperatingSystemDistro != nil {
-			payload.Config.OperatingSystemDistro = iaas.NewNullableString(model.Config.OperatingSystemDistro)
+			payload.Config.OperatingSystemDistro = *iaas.NewNullableString(model.Config.OperatingSystemDistro)
 		}
 		if model.Config.OperatingSystemVersion != nil {
-			payload.Config.OperatingSystemVersion = iaas.NewNullableString(model.Config.OperatingSystemVersion)
+			payload.Config.OperatingSystemVersion = *iaas.NewNullableString(model.Config.OperatingSystemVersion)
 		}
 		if model.Config.RescueBus != nil {
-			payload.Config.RescueBus = iaas.NewNullableString(model.Config.RescueBus)
+			payload.Config.RescueBus = *iaas.NewNullableString(model.Config.RescueBus)
 		}
 		if model.Config.RescueDevice != nil {
-			payload.Config.RescueDevice = iaas.NewNullableString(model.Config.RescueDevice)
+			payload.Config.RescueDevice = *iaas.NewNullableString(model.Config.RescueDevice)
 		}
 		if model.Config.SecureBoot != nil {
 			payload.Config.SecureBoot = model.Config.SecureBoot
@@ -286,7 +286,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			payload.Config.Uefi = model.Config.Uefi
 		}
 		if model.Config.VideoModel != nil {
-			payload.Config.VideoModel = iaas.NewNullableString(model.Config.VideoModel)
+			payload.Config.VideoModel = *iaas.NewNullableString(model.Config.VideoModel)
 		}
 		if model.Config.VirtioScsi != nil {
 			payload.Config.VirtioScsi = model.Config.VirtioScsi

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -45,7 +45,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	DestinationType  string
 	DestinationValue *string
-	Labels           *map[string]string
+	Labels           map[string]any
 	NetworkAreaId    string
 	NextHopType      string
 	NextHopValue     *string
@@ -81,7 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
 				routingTableLabel = model.RoutingTableId
@@ -142,7 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel:  globalFlags,
 		DestinationType:  flags.FlagToStringValue(p, cmd, destinationTypeFlag),
 		DestinationValue: flags.FlagToStringPointer(p, cmd, destinationValueFlag),
-		Labels:           flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:           flags.FlagToStringToAny(p, cmd, labelFlag),
 		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
 		NextHopType:      flags.FlagToStringValue(p, cmd, nextHopTypeFlag),
 		NextHopValue:     flags.FlagToStringPointer(p, cmd, nextHopValueFlag),
@@ -174,16 +174,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	if destination != nil && nextHop != nil {
 		payload := iaas.AddRoutesToRoutingTablePayload{
-			Items: &[]iaas.Route{
+			Items: []iaas.Route{
 				{
-					Destination: destination,
-					Nexthop:     nextHop,
-					Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
+					Destination: *destination,
+					Nexthop:     *nextHop,
+					Labels:      model.Labels,
 				},
 			},
 		}
 
-		return apiClient.AddRoutesToRoutingTable(
+		return apiClient.DefaultAPI.AddRoutesToRoutingTable(
 			ctx,
 			model.OrganizationId,
 			model.NetworkAreaId,
@@ -192,7 +192,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		).AddRoutesToRoutingTablePayload(payload), nil
 	}
 
-	return nil, fmt.Errorf("invalid input")
+	return iaas.ApiAddRoutesToRoutingTableRequest{}, fmt.Errorf("invalid input")
 }
 
 func buildDestination(model *inputModel) *iaas.RouteDestination {
@@ -205,15 +205,15 @@ func buildDestination(model *inputModel) *iaas.RouteDestination {
 	case destTypeCIDRv4:
 		return &iaas.RouteDestination{
 			DestinationCIDRv4: &iaas.DestinationCIDRv4{
-				Type:  &model.DestinationType,
-				Value: model.DestinationValue,
+				Type:  model.DestinationType,
+				Value: *model.DestinationValue,
 			},
 		}
 	case destTypeCIDRv6:
 		return &iaas.RouteDestination{
 			DestinationCIDRv6: &iaas.DestinationCIDRv6{
-				Type:  &model.DestinationType,
-				Value: model.DestinationValue,
+				Type:  model.DestinationType,
+				Value: *model.DestinationValue,
 			},
 		}
 	default:
@@ -227,27 +227,27 @@ func buildNextHop(model *inputModel) *iaas.RouteNexthop {
 	case nextHopTypeIPv4:
 		return &iaas.RouteNexthop{
 			NexthopIPv4: &iaas.NexthopIPv4{
-				Type:  &model.NextHopType,
-				Value: model.NextHopValue,
+				Type:  model.NextHopType,
+				Value: *model.NextHopValue,
 			},
 		}
 	case nextHopTypeIPv6:
 		return &iaas.RouteNexthop{
 			NexthopIPv6: &iaas.NexthopIPv6{
-				Type:  &model.NextHopType,
-				Value: model.NextHopValue,
+				Type:  model.NextHopType,
+				Value: *model.NextHopValue,
 			},
 		}
 	case nextHopTypeInternet:
 		return &iaas.RouteNexthop{
 			NexthopInternet: &iaas.NexthopInternet{
-				Type: &model.NextHopType,
+				Type: model.NextHopType,
 			},
 		}
 	case nextHopTypeBlackhole:
 		return &iaas.RouteNexthop{
 			NexthopBlackhole: &iaas.NexthopBlackhole{
-				Type: &model.NextHopType,
+				Type: model.NextHopType,
 			},
 		}
 	default:

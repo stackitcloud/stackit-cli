@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			items := resp.GetItems()
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListServerNICsRequest {
-	return apiClient.ListServerNICs(ctx, model.ProjectId, model.Region, model.ServerId)
+	return apiClient.DefaultAPI.ListServerNICs(ctx, model.ProjectId, model.Region, model.ServerId)
 }
 
 func outputResult(p *print.Printer, outputFormat, serverId, serverLabel string, serverNics []iaas.NIC) error {

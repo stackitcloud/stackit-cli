@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -40,7 +40,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	SecurityGroupId       string
-	Direction             *string
+	Direction             string
 	Description           *string
 	EtherType             *string
 	IcmpParameterCode     *int64
@@ -96,7 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = model.SecurityGroupId
@@ -150,7 +150,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:       globalFlags,
 		SecurityGroupId:       flags.FlagToStringValue(p, cmd, securityGroupIdFlag),
-		Direction:             flags.FlagToStringPointer(p, cmd, directionFlag),
+		Direction:             flags.FlagToStringValue(p, cmd, directionFlag),
 		Description:           flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		EtherType:             flags.FlagToStringPointer(p, cmd, etherTypeFlag),
 		IcmpParameterCode:     flags.FlagToInt64Pointer(p, cmd, icmpParameterCodeFlag),
@@ -168,7 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRuleRequest {
-	req := apiClient.CreateSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
+	req := apiClient.DefaultAPI.CreateSecurityGroupRule(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 	icmpParameters := &iaas.ICMPParameters{}
 	portRange := &iaas.PortRange{}
 	protocol := &iaas.CreateProtocol{}
@@ -182,15 +182,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.IcmpParameterCode != nil || model.IcmpParameterType != nil {
-		icmpParameters.Code = model.IcmpParameterCode
-		icmpParameters.Type = model.IcmpParameterType
+		icmpParameters.Code = *model.IcmpParameterCode
+		icmpParameters.Type = *model.IcmpParameterType
 
 		payload.IcmpParameters = icmpParameters
 	}
 
 	if model.PortRangeMax != nil || model.PortRangeMin != nil {
-		portRange.Max = model.PortRangeMax
-		portRange.Min = model.PortRangeMin
+		portRange.Max = *model.PortRangeMax
+		portRange.Min = *model.PortRangeMin
 
 		payload.PortRange = portRange
 	}

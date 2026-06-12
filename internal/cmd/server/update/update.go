@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -31,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ServerId string
 	Name     *string
-	Labels   *map[string]string
+	Labels   map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		ServerId:        serverId,
-		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:          flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -116,11 +116,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateServerRequest {
-	req := apiClient.UpdateServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.UpdateServer(ctx, model.ProjectId, model.Region, model.ServerId)
 
 	payload := iaas.UpdateServerPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 
 	return req.UpdateServerPayload(payload)

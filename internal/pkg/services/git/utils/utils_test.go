@@ -5,21 +5,26 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-type GitClientMocked struct {
+type mockSettings struct {
 	GetInstanceFails bool
 	GetInstanceResp  *git.Instance
 }
 
-func (m *GitClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*git.Instance, error) {
-	if m.GetInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIMock(settings *mockSettings) git.DefaultAPI {
+	return &git.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ git.ApiGetInstanceRequest) (*git.Instance, error) {
+			if settings.GetInstanceFails {
+				return nil, fmt.Errorf("could not get instance details")
+			}
+
+			return settings.GetInstanceResp, nil
+		}),
 	}
-	return m.GetInstanceResp, nil
 }
 
 func TestGetinstanceName(t *testing.T) {
@@ -31,10 +36,12 @@ func TestGetinstanceName(t *testing.T) {
 		wantErr      bool
 	}{
 		{
-			name:         "successful retrieval",
-			instanceResp: &git.Instance{Name: utils.Ptr("test-instance")},
-			want:         "test-instance",
-			wantErr:      false,
+			name: "successful retrieval",
+			instanceResp: &git.Instance{
+				Name: "test-instance",
+			},
+			want:    "test-instance",
+			wantErr: false,
 		},
 		{
 			name:        "error on retrieval",
@@ -50,10 +57,10 @@ func TestGetinstanceName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := &GitClientMocked{
+			client := newAPIMock(&mockSettings{
 				GetInstanceFails: tt.instanceErr,
 				GetInstanceResp:  tt.instanceResp,
-			}
+			})
 			got, err := GetInstanceName(context.Background(), client, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetInstanceName() error = %v, wantErr %v", err, tt.wantErr)

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/git/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type inputModel struct {
@@ -110,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClient) git.ApiListFlavorsRequest {
-	return apiClient.ListFlavors(ctx, model.ProjectId)
+	return apiClient.DefaultAPI.ListFlavors(ctx, model.ProjectId)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, flavors []git.Flavor) error {
@@ -125,11 +124,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, flavors [
 		for i := range flavors {
 			flavor := (flavors)[i]
 			table.AddRow(
-				utils.PtrString(flavor.Id),
-				utils.PtrString(flavor.Description),
-				utils.PtrString(flavor.DisplayName),
-				utils.PtrString(flavor.Availability),
-				utils.PtrString(flavor.Sku),
+				flavor.Id,
+				flavor.Description,
+				flavor.DisplayName,
+				flavor.Availability,
+				flavor.Sku,
 			)
 		}
 		err := table.Display(p)

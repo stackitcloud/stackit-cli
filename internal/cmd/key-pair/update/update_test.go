@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testKeyPairName = "foobar_key"
 
@@ -45,9 +45,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"foo": "bar",
-		}),
+		},
 		KeyPairName: utils.Ptr(testKeyPairName),
 	}
 	for _, mod := range mods {
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateKeyPairRequest)) iaas.ApiUpdateKeyPairRequest {
-	request := testClient.UpdateKeyPair(testCtx, testKeyPairName)
+	request := testClient.DefaultAPI.UpdateKeyPair(testCtx, testKeyPairName)
 	request = request.UpdateKeyPairPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -67,9 +67,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiUpdateKeyPairRequest)) iaas.Ap
 
 func fixturePayload(mods ...func(payload *iaas.UpdateKeyPairPayload)) iaas.UpdateKeyPairPayload {
 	payload := iaas.UpdateKeyPairPayload{
-		Labels: utils.Ptr(map[string]interface{}{
+		Labels: map[string]interface{}{
 			"foo": "bar",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -173,7 +173,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

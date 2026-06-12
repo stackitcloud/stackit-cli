@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testAssociatedResourceId = uuid.NewString()
@@ -49,9 +49,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 		},
 		AssociatedResourceId: utils.Ptr(testAssociatedResourceId),
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreatePublicIPRequest)) iaas.ApiCreatePublicIPRequest {
-	request := testClient.CreatePublicIP(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreatePublicIP(testCtx, testProjectId, testRegion)
 	request = request.CreatePublicIPPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -70,10 +70,10 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreatePublicIPRequest)) iaas.A
 
 func fixturePayload(mods ...func(payload *iaas.CreatePublicIPPayload)) iaas.CreatePublicIPPayload {
 	payload := iaas.CreatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(utils.Ptr(testAssociatedResourceId)),
-		Labels: utils.Ptr(map[string]interface{}{
+		NetworkInterface: *iaas.NewNullableString(utils.Ptr(testAssociatedResourceId)),
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -172,7 +172,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -86,5 +86,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteKeyPairRequest {
-	return apiClient.DeleteKeyPair(ctx, model.KeyPairName)
+	return apiClient.DefaultAPI.DeleteKeyPair(ctx, model.KeyPairName)
 }

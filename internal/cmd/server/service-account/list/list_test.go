@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), &testCtxKey{}, "test")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testLimit = int64(10)
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListServerServiceAccountsRequest)) iaas.ApiListServerServiceAccountsRequest {
-	request := testClient.ListServerServiceAccounts(testCtx, testProjectId, testRegion, testServerId)
+	request := testClient.DefaultAPI.ListServerServiceAccounts(testCtx, testProjectId, testRegion, testServerId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -179,7 +179,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Request does not match: %s", diff)

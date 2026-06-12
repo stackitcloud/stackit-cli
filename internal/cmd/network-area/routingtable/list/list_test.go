@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -25,7 +25,7 @@ var testNetworkAreaId = uuid.NewString()
 
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -33,7 +33,7 @@ var testLabels = &map[string]string{
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testLimitFlag = int64(10)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -51,7 +51,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListRoutingTablesOfAreaRequest)) iaas.ApiListRoutingTablesOfAreaRequest {
-	request := testClient.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+	request := testClient.DefaultAPI.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
 	request = request.LabelSelector(testLabelSelectorFlag)
 
 	for _, mod := range mods {
@@ -159,8 +159,8 @@ func TestOutputResult(t *testing.T) {
 		Default:       nil,
 		Description:   utils.Ptr("description"),
 		Id:            utils.Ptr("route-foo"),
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
-		Name:          utils.Ptr("route-foo"),
+		Labels:        testLabels,
+		Name:          "route-foo",
 		SystemRoutes:  utils.Ptr(true),
 		DynamicRoutes: utils.Ptr(true),
 		UpdatedAt:     utils.Ptr(time.Now()),
@@ -261,7 +261,7 @@ func TestBuildRequest(t *testing.T) {
 				model.LabelSelector = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiListRoutingTablesOfAreaRequest) {
-				*request = testClient.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+				*request = testClient.DefaultAPI.ListRoutingTablesOfArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
 			}),
 		},
 	}
@@ -272,7 +272,7 @@ func TestBuildRequest(t *testing.T) {
 
 			if diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx)); diff != "" {
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{})); diff != "" {
 				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
 			}
 		})

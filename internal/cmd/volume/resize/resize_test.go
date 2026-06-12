@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 const (
@@ -21,7 +20,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testVolumeId = uuid.NewString()
@@ -56,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Size:     utils.Ptr(int64(10)),
+		Size:     int64(10),
 		VolumeId: testVolumeId,
 	}
 	for _, mod := range mods {
@@ -66,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiResizeVolumeRequest)) iaas.ApiResizeVolumeRequest {
-	request := testClient.ResizeVolume(testCtx, testProjectId, testRegion, testVolumeId)
+	request := testClient.DefaultAPI.ResizeVolume(testCtx, testProjectId, testRegion, testVolumeId)
 	request = request.ResizeVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -76,7 +75,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiResizeVolumeRequest)) iaas.Api
 
 func fixturePayload(mods ...func(payload *iaas.ResizeVolumePayload)) iaas.ResizeVolumePayload {
 	payload := iaas.ResizeVolumePayload{
-		Size: utils.Ptr(int64(10)),
+		Size: int64(10),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -149,7 +148,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Size = utils.Ptr(int64(15))
+				model.Size = int64(15)
 			}),
 		},
 	}
@@ -227,7 +226,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

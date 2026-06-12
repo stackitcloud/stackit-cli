@@ -10,7 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -88,7 +88,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiListAffinityGroupsRequest {
-	return apiClient.ListAffinityGroups(ctx, model.ProjectId, model.Region)
+	return apiClient.DefaultAPI.ListAffinityGroups(ctx, model.ProjectId, model.Region)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -125,8 +125,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 		for _, item := range items {
 			table.AddRow(
 				utils.PtrString(item.Id),
-				utils.PtrString(item.Name),
-				utils.PtrString(item.Policy),
+				item.Name,
+				item.Policy,
 			)
 			table.AddSeparator()
 		}

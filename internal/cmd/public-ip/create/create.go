@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,7 +28,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	AssociatedResourceId *string
-	Labels               *map[string]string
+	Labels               map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -106,7 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:      globalFlags,
 		AssociatedResourceId: flags.FlagToStringPointer(p, cmd, associatedResourceIdFlag),
-		Labels:               flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:               flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -114,11 +114,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreatePublicIPRequest {
-	req := apiClient.CreatePublicIP(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreatePublicIP(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(model.AssociatedResourceId),
-		Labels:           utils.ConvertStringMapToInterfaceMap(model.Labels),
+		NetworkInterface: *iaas.NewNullableString(model.AssociatedResourceId),
+		Labels:           model.Labels,
 	}
 
 	return req.CreatePublicIPPayload(payload)

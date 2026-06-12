@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -88,7 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.BackupId)
+	req := apiClient.DefaultAPI.GetBackup(ctx, model.ProjectId, model.Region, model.BackupId)
 	return req
 }
 
@@ -114,9 +114,9 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 		table.AddRow("AVAILABILITY ZONE", utils.PtrString(backup.AvailabilityZone))
 		table.AddSeparator()
 
-		if backup.Labels != nil && len(*backup.Labels) > 0 {
+		if len(backup.Labels) > 0 {
 			var labels []string
-			for key, value := range *backup.Labels {
+			for key, value := range backup.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

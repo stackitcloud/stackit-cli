@@ -7,8 +7,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -47,7 +47,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name           *string
+	Name           string
 	OrganizationId string
 	// Deprecated: DnsNameServers is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	DnsNameServers *[]string
@@ -61,7 +61,7 @@ type inputModel struct {
 	MaxPrefixLength *int64
 	// Deprecated: MinPrefixLength is deprecated, because with iaas v2 the create endpoint for network area was separated, remove this after April 2026.
 	MinPrefixLength *int64
-	Labels          *map[string]string
+	Labels          map[string]any
 }
 
 // NetworkAreaResponses is a workaround, to keep the two responses of the iaas v2 api together for the json and yaml output
@@ -147,7 +147,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 				if !model.Async {
 					err := spinner.Run(params.Printer, "Create network area region", func() error {
-						_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, *resp.Id, model.Region).WaitWithContext(ctx)
+						_, err = wait.CreateNetworkAreaRegionWaitHandler(ctx, apiClient.DefaultAPI, model.OrganizationId, *resp.Id, model.Region).WaitWithContext(ctx)
 						return err
 					})
 					if err != nil {
@@ -221,7 +221,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:     globalFlags,
-		Name:                flags.FlagToStringPointer(p, cmd, nameFlag),
+		Name:                flags.FlagToStringValue(p, cmd, nameFlag),
 		OrganizationId:      flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		DnsNameServers:      flags.FlagToStringSlicePointer(p, cmd, dnsNameServersFlag),
 		NetworkRanges:       flags.FlagToStringSlicePointer(p, cmd, networkRangesFlag),
@@ -229,7 +229,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DefaultPrefixLength: flags.FlagToInt64Pointer(p, cmd, defaultPrefixLengthFlag),
 		MaxPrefixLength:     flags.FlagToInt64Pointer(p, cmd, maxPrefixLengthFlag),
 		MinPrefixLength:     flags.FlagToInt64Pointer(p, cmd, minPrefixLengthFlag),
-		Labels:              flags.FlagToStringToStringPointer(p, cmd, labelFlag),
+		Labels:              flags.FlagToStringToAny(p, cmd, labelFlag),
 	}
 
 	// Check if any of the deprecated **optional** fields are set and if no of the associated deprecated **required** fields is set.
@@ -247,38 +247,50 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRequest {
-	req := apiClient.CreateNetworkArea(ctx, model.OrganizationId)
+	req := apiClient.DefaultAPI.CreateNetworkArea(ctx, model.OrganizationId)
 
 	payload := iaas.CreateNetworkAreaPayload{
 		Name:   model.Name,
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 
 	return req.CreateNetworkAreaPayload(payload)
 }
 
 func buildRequestNetworkAreaRegion(ctx context.Context, model *inputModel, networkAreaId string, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRegionRequest {
-	req := apiClient.CreateNetworkAreaRegion(ctx, model.OrganizationId, networkAreaId, model.Region)
+	req := apiClient.DefaultAPI.CreateNetworkAreaRegion(ctx, model.OrganizationId, networkAreaId, model.Region)
 
 	var networkRanges []iaas.NetworkRange
 	if model.NetworkRanges != nil {
 		networkRanges = make([]iaas.NetworkRange, len(*model.NetworkRanges))
 		for i, networkRange := range *model.NetworkRanges {
 			networkRanges[i] = iaas.NetworkRange{
-				Prefix: utils.Ptr(networkRange),
+				Prefix: networkRange,
 			}
 		}
 	}
 
+	ipv4 := &iaas.RegionalAreaIPv4{
+		NetworkRanges: networkRanges,
+	}
+	if model.DnsNameServers != nil {
+		ipv4.DefaultNameservers = *model.DnsNameServers
+	}
+	if model.TransferNetwork != nil {
+		ipv4.TransferNetwork = *model.TransferNetwork
+	}
+	if model.DefaultPrefixLength != nil {
+		ipv4.DefaultPrefixLen = *model.DefaultPrefixLength
+	}
+	if model.MaxPrefixLength != nil {
+		ipv4.MaxPrefixLen = *model.MaxPrefixLength
+	}
+	if model.MinPrefixLength != nil {
+		ipv4.MinPrefixLen = *model.MinPrefixLength
+	}
+
 	payload := iaas.CreateNetworkAreaRegionPayload{
-		Ipv4: &iaas.RegionalAreaIPv4{
-			DefaultNameservers: model.DnsNameServers,
-			NetworkRanges:      utils.Ptr(networkRanges),
-			TransferNetwork:    model.TransferNetwork,
-			DefaultPrefixLen:   model.DefaultPrefixLength,
-			MaxPrefixLen:       model.MaxPrefixLength,
-			MinPrefixLen:       model.MinPrefixLength,
-		},
+		Ipv4: ipv4,
 	}
 
 	return req.CreateNetworkAreaRegionPayload(payload)

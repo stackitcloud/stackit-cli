@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testOrganizationId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
 
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListNetworkAreaRoutesRequest)) iaas.ApiListNetworkAreaRoutesRequest {
-	request := testClient.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
+	request := testClient.DefaultAPI.ListNetworkAreaRoutes(testCtx, testOrganizationId, testNetworkAreaId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -172,7 +172,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -215,7 +215,7 @@ func TestOutputResult(t *testing.T) {
 			name: "empty destination in route",
 			args: args{
 				routes: []iaas.Route{{
-					Destination: &iaas.RouteDestination{},
+					Destination: iaas.RouteDestination{},
 				}},
 			},
 			wantErr: false,
@@ -224,7 +224,7 @@ func TestOutputResult(t *testing.T) {
 			name: "empty nexthop in route",
 			args: args{
 				routes: []iaas.Route{{
-					Nexthop: &iaas.RouteNexthop{},
+					Nexthop: iaas.RouteNexthop{},
 				}},
 			},
 			wantErr: false,

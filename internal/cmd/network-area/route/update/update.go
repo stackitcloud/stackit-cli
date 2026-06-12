@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -34,7 +34,7 @@ type inputModel struct {
 	OrganizationId *string
 	NetworkAreaId  *string
 	RouteId        string
-	Labels         *map[string]string
+	Labels         map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, *model.OrganizationId, *model.NetworkAreaId)
+			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaLabel = *model.NetworkAreaId
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create static route: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, networkAreaLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	routeId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelFlag)
 
 	if labels == nil {
 		return nil, &cliErr.EmptyUpdateError{}
@@ -118,17 +118,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateNetworkAreaRouteRequest {
-	req := apiClient.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
+	req := apiClient.DefaultAPI.UpdateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region, model.RouteId)
 
 	payload := iaas.UpdateNetworkAreaRoutePayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels: model.Labels,
 	}
 	req = req.UpdateNetworkAreaRoutePayload(payload)
 
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route iaas.Route) error {
+func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route *iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
 		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.Id))
 		return nil

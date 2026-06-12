@@ -16,13 +16,15 @@ import (
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
-	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL"
+	serviceAccMailArg = "SERVICE_ACCOUNT_EMAIL" // Deprecated: positional argument is not used anymore, use the flag instead, will be removed after 2026-12-31
 
 	serverIdFlag = "server-id"
+
+	serviceAccFlag = "service-account-email"
 )
 
 type inputModel struct {
@@ -33,14 +35,14 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("attach %s", serviceAccMailArg),
+		Use:   "attach",
 		Short: "Attach a service account to a server",
 		Long:  "Attach a service account to a server",
-		Args:  args.SingleArg(serviceAccMailArg, nil),
+		Args:  args.SingleOptionalArg(serviceAccMailArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
 				`Attach a service account with mail "xxx@sa.stackit.cloud" to a server with ID "yyy"`,
-				"$ stackit server service-account attach xxx@sa.stackit.cloud --server-id yyy",
+				"$ stackit server service-account attach --service-account-email xxx@sa.stackit.cloud --server-id yyy",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -55,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -85,16 +87,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
-
+	cmd.Flags().VarP(flags.EmailFlag(), serviceAccFlag, "a", "Service Account Email")
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag)
 	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	serviceAccMail := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	var serviceAccMail string
+	if cmd.Flags().Changed(serviceAccFlag) {
+		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
+	} else if len(inputArgs) > 0 {
+		serviceAccMail = inputArgs[0]
+		p.Warn("Using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use the '--%s' flag instead.\n", serviceAccFlag)
+	} else {
+		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
 	}
 
 	model := inputModel{
@@ -108,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiAddServiceAccountToServerRequest {
-	req := apiClient.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
+	req := apiClient.DefaultAPI.AddServiceAccountToServer(ctx, model.ProjectId, model.Region, model.ServerId, model.ServiceAccMail)
 	return req
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
@@ -182,7 +182,7 @@ type Base64PatchedServer struct {
 	Name                *string                 `json:"name,omitempty"`
 	Status              *string                 `json:"status,omitempty"`
 	AvailabilityZone    *string                 `json:"availabilityZone,omitempty"`
-	BootVolume          *iaas.ServerBootVolume  `json:"bootVolume,omitempty"`
+	BootVolume          *iaas.BootVolume        `json:"bootVolume,omitempty"`
 	CreatedAt           *time.Time              `json:"createdAt,omitempty"`
 	ErrorMessage        *string                 `json:"errorMessage,omitempty"`
 	PowerStatus         *string                 `json:"powerStatus,omitempty"`
@@ -190,17 +190,17 @@ type Base64PatchedServer struct {
 	ImageId             *string                 `json:"imageId,omitempty"`
 	KeypairName         *string                 `json:"keypairName,omitempty"`
 	MachineType         *string                 `json:"machineType,omitempty"`
-	Labels              *map[string]interface{} `json:"labels,omitempty"`
+	Labels              map[string]interface{}  `json:"labels,omitempty"`
 	LaunchedAt          *time.Time              `json:"launchedAt,omitempty"`
 	MaintenanceWindow   *iaas.ServerMaintenance `json:"maintenanceWindow,omitempty"`
-	Metadata            *map[string]interface{} `json:"metadata,omitempty"`
+	Metadata            map[string]interface{}  `json:"metadata,omitempty"`
 	Networking          *iaas.ServerNetworking  `json:"networking,omitempty"`
-	Nics                *[]iaas.ServerNetwork   `json:"nics,omitempty"`
-	SecurityGroups      *[]string               `json:"securityGroups,omitempty"`
-	ServiceAccountMails *[]string               `json:"serviceAccountMails,omitempty"`
+	Nics                []iaas.ServerNetwork    `json:"nics,omitempty"`
+	SecurityGroups      []string                `json:"securityGroups,omitempty"`
+	ServiceAccountMails []string                `json:"serviceAccountMails,omitempty"`
 	UpdatedAt           *time.Time              `json:"updatedAt,omitempty"`
 	UserData            *Base64Bytes            `json:"userData,omitempty"`
-	Volumes             *[]string               `json:"volumes,omitempty"`
+	Volumes             []string                `json:"volumes,omitempty"`
 	Agent               *iaas.ServerAgent       `json:"agent,omitempty"`
 }
 
@@ -220,7 +220,7 @@ func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 
 	return &Base64PatchedServer{
 		Id:                  server.Id,
-		Name:                server.Name,
+		Name:                &server.Name,
 		Status:              server.Status,
 		AvailabilityZone:    server.AvailabilityZone,
 		BootVolume:          server.BootVolume,
@@ -230,7 +230,7 @@ func ConvertToBase64PatchedServer(server *iaas.Server) *Base64PatchedServer {
 		AffinityGroup:       server.AffinityGroup,
 		ImageId:             server.ImageId,
 		KeypairName:         server.KeypairName,
-		MachineType:         server.MachineType,
+		MachineType:         &server.MachineType,
 		Labels:              server.Labels,
 		LaunchedAt:          server.LaunchedAt,
 		MaintenanceWindow:   server.MaintenanceWindow,

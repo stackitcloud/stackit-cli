@@ -6,8 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -32,7 +32,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ServerId    string
-	MachineType *string
+	MachineType string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				serverLabel = model.ServerId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to resize server %q to machine type %q?", serverLabel, *model.MachineType)
+			prompt := fmt.Sprintf("Are you sure you want to resize server %q to machine type %q?", serverLabel, model.MachineType)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Resizing server", func() error {
-					_, err = wait.ResizeServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+					_, err = wait.ResizeServerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ServerId:        serverId,
-		MachineType:     flags.FlagToStringPointer(p, cmd, machineTypeFlag),
+		MachineType:     flags.FlagToStringValue(p, cmd, machineTypeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -131,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiResizeServerRequest {
-	req := apiClient.ResizeServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.ResizeServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	payload := iaas.ResizeServerPayload{
 		MachineType: model.MachineType,
 	}

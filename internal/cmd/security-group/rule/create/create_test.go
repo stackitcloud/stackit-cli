@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -23,7 +23,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testSecurityGroupId = uuid.NewString()
@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		SecurityGroupId:       testSecurityGroupId,
-		Direction:             utils.Ptr("ingress"),
+		Direction:             "ingress",
 		Description:           utils.Ptr("example-description"),
 		EtherType:             utils.Ptr("ether"),
 		IcmpParameterCode:     utils.Ptr(int64(0)),
@@ -80,7 +80,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
-	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
+	request := testClient.DefaultAPI.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
 	request = request.CreateSecurityGroupRulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -89,9 +89,9 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
-	request := testClient.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
+	request := testClient.DefaultAPI.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
 	request = request.CreateSecurityGroupRulePayload(iaas.CreateSecurityGroupRulePayload{
-		Direction: utils.Ptr("ingress"),
+		Direction: "ingress",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -101,17 +101,17 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRul
 
 func fixturePayload(mods ...func(payload *iaas.CreateSecurityGroupRulePayload)) iaas.CreateSecurityGroupRulePayload {
 	payload := iaas.CreateSecurityGroupRulePayload{
-		Direction:   utils.Ptr("ingress"),
+		Direction:   "ingress",
 		Description: utils.Ptr("example-description"),
 		Ethertype:   utils.Ptr("ether"),
 		IcmpParameters: &iaas.ICMPParameters{
-			Code: utils.Ptr(int64(0)),
-			Type: utils.Ptr(int64(8)),
+			Code: int64(0),
+			Type: int64(8),
 		},
 		IpRange: utils.Ptr("10.1.2.3"),
 		PortRange: &iaas.PortRange{
-			Max: utils.Ptr(int64(24)),
-			Min: utils.Ptr(int64(22)),
+			Max: int64(24),
+			Min: int64(22),
 		},
 		Protocol: &iaas.CreateProtocol{
 			Int64:  utils.Ptr(int64(1)),
@@ -275,7 +275,7 @@ func TestBuildRequest(t *testing.T) {
 					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Direction:       utils.Ptr("ingress"),
+				Direction:       "ingress",
 				SecurityGroupId: testSecurityGroupId,
 			},
 			expectedRequest: fixtureRequiredRequest(),
@@ -287,7 +287,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 				cmp.AllowUnexported(iaas.NullableString{}),
 			)
 			if diff != "" {

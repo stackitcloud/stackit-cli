@@ -57,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
+			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
 				routingTableLabel = model.RoutingTableId
@@ -72,7 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := apiClient.DeleteRouteFromRoutingTable(
+			req := apiClient.DefaultAPI.DeleteRouteFromRoutingTable(
 				ctx,
 				model.OrganizationId,
 				model.NetworkAreaId,

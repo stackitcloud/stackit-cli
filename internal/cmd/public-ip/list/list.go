@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListPublicIPsRequest {
-	req := apiClient.ListPublicIPs(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListPublicIPs(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -147,11 +147,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, publicIps
 		table.SetHeader("ID", "IP ADDRESS", "USED BY")
 
 		for _, publicIp := range publicIps {
-			networkInterfaceId := utils.PtrStringDefault(publicIp.GetNetworkInterface(), "")
 			table.AddRow(
 				utils.PtrString(publicIp.Id),
 				utils.PtrString(publicIp.Ip),
-				networkInterfaceId,
+				publicIp.GetNetworkInterface(),
 			)
 			table.AddSeparator()
 		}

@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, model.Region)
 
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
@@ -148,7 +148,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, backups [
 			var labelsString string
 			if backup.Labels != nil {
 				var labels []string
-				for key, value := range *backup.Labels {
+				for key, value := range backup.Labels {
 					labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 				}
 				labelsString = strings.Join(labels, ", ")

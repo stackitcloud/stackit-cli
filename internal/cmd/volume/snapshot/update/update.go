@@ -18,7 +18,7 @@ import (
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -31,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	SnapshotId string
 	Name       *string
-	Labels     map[string]string
+	Labels     map[string]any
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -62,7 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get snapshot name for label
-			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient, model.ProjectId, model.Region, model.SnapshotId)
+			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
 				snapshotLabel = model.SnapshotId
@@ -104,12 +104,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelsFlag)
+	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
-		labels = &map[string]string{}
+		labels = map[string]any{}
 	}
 
-	if name == nil && len(*labels) == 0 {
+	if name == nil && len(labels) == 0 {
 		return nil, fmt.Errorf("either name or labels must be provided")
 	}
 
@@ -117,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		SnapshotId:      snapshotId,
 		Name:            name,
-		Labels:          *labels,
+		Labels:          labels,
 	}
 
 	p.DebugInputModel(model)
@@ -125,10 +125,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateSnapshotRequest {
-	req := apiClient.UpdateSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
+	req := apiClient.DefaultAPI.UpdateSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 	payload := iaas.NewUpdateSnapshotPayloadWithDefaults()
 	payload.Name = model.Name
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(model.Labels))
+	payload.Labels = model.Labels
 
 	req = req.UpdateSnapshotPayload(*payload)
 	return req

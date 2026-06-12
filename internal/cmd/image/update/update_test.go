@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -24,7 +24,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &iaas.APIClient{}
+	testClient    = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 
 	testImageId                      = []string{uuid.NewString()}
@@ -80,8 +80,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func parseLabels(labelstring string) map[string]string {
-	labels := map[string]string{}
+func parseLabels(labelstring string) map[string]any {
+	labels := map[string]any{}
 	for _, part := range strings.Split(labelstring, ",") {
 		v := strings.Split(part, "=")
 		labels[v[0]] = v[1]
@@ -100,7 +100,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Id:         testImageId[0],
 		Name:       &testName,
 		DiskFormat: &testDiskFormat,
-		Labels:     utils.Ptr(parseLabels(testLabels)),
+		Labels:     parseLabels(testLabels),
 		Config: &imageConfig{
 			BootMenu:               &testBootmenu,
 			CdromBus:               &testCdRomBus,
@@ -130,21 +130,21 @@ func fixtureCreatePayload(mods ...func(payload *iaas.UpdateImagePayload)) (paylo
 	payload = iaas.UpdateImagePayload{
 		Config: &iaas.ImageConfig{
 			BootMenu:               &testBootmenu,
-			CdromBus:               iaas.NewNullableString(&testCdRomBus),
-			DiskBus:                iaas.NewNullableString(&testDiskBus),
-			NicModel:               iaas.NewNullableString(&testNicModel),
+			CdromBus:               *iaas.NewNullableString(&testCdRomBus),
+			DiskBus:                *iaas.NewNullableString(&testDiskBus),
+			NicModel:               *iaas.NewNullableString(&testNicModel),
 			OperatingSystem:        &testOperatingSystem,
-			OperatingSystemDistro:  iaas.NewNullableString(&testOperatingSystemDistro),
-			OperatingSystemVersion: iaas.NewNullableString(&testOperatingSystemVersion),
-			RescueBus:              iaas.NewNullableString(&testRescueBus),
-			RescueDevice:           iaas.NewNullableString(&testRescueDevice),
+			OperatingSystemDistro:  *iaas.NewNullableString(&testOperatingSystemDistro),
+			OperatingSystemVersion: *iaas.NewNullableString(&testOperatingSystemVersion),
+			RescueBus:              *iaas.NewNullableString(&testRescueBus),
+			RescueDevice:           *iaas.NewNullableString(&testRescueDevice),
 			SecureBoot:             &testSecureBoot,
 			Uefi:                   &testUefi,
-			VideoModel:             iaas.NewNullableString(&testVideoModel),
+			VideoModel:             *iaas.NewNullableString(&testVideoModel),
 			VirtioScsi:             &testVirtioScsi,
 		},
 		DiskFormat: &testDiskFormat,
-		Labels: &map[string]interface{}{
+		Labels: map[string]any{
 			"foo": "FOO",
 			"bar": "BAR",
 			"baz": "BAZ",
@@ -161,7 +161,7 @@ func fixtureCreatePayload(mods ...func(payload *iaas.UpdateImagePayload)) (paylo
 }
 
 func fixtureRequest(mods ...func(*iaas.ApiUpdateImageRequest)) iaas.ApiUpdateImageRequest {
-	request := testClient.UpdateImage(testCtx, testProjectId, testRegion, testImageId[0])
+	request := testClient.DefaultAPI.UpdateImage(testCtx, testProjectId, testRegion, testImageId[0])
 
 	request = request.UpdateImagePayload(fixtureCreatePayload())
 
@@ -253,7 +253,7 @@ func TestParseInput(t *testing.T) {
 			args:    testImageId,
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = &map[string]string{
+				model.Labels = map[string]any{
 					"foo": "bar",
 				}
 			}),
@@ -394,7 +394,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Labels = nil
 				}))
 			}),
@@ -405,7 +405,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Name = utils.Ptr("something else")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Name = utils.Ptr("something else")
 				}))
 			}),
@@ -416,7 +416,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config.CdromBus = utils.Ptr("something else")
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Config.CdromBus.Set(utils.Ptr("something else"))
 				}))
 			}),
@@ -427,7 +427,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Config = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateImageRequest) {
-				*request = (*request).UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
+				*request = request.UpdateImagePayload(fixtureCreatePayload(func(payload *iaas.UpdateImagePayload) {
 					payload.Config = nil
 				}))
 			}),
@@ -439,7 +439,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, iaas.NullableString{}),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

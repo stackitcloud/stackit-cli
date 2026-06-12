@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), &testCtxKey{}, "test")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testServiceAccount = "test@example.com"
@@ -67,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiRemoveServiceAccountFromServerRequest)) iaas.ApiRemoveServiceAccountFromServerRequest {
-	request := testClient.RemoveServiceAccountFromServer(testCtx, testProjectId, testRegion, testServerId, testServiceAccount)
+	request := testClient.DefaultAPI.RemoveServiceAccountFromServer(testCtx, testProjectId, testRegion, testServerId, testServiceAccount)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -222,7 +222,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

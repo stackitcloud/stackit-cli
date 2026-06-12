@@ -3,11 +3,12 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -70,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func buildRequest(ctx context.Context, model inputModel, apiClient *iaas.APIClient) iaas.ApiGetAffinityGroupRequest {
-	return apiClient.GetAffinityGroup(ctx, model.ProjectId, model.Region, model.AffinityGroupId)
+	return apiClient.DefaultAPI.GetAffinityGroup(ctx, model.ProjectId, model.Region, model.AffinityGroupId)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputModel, error) {
@@ -101,16 +102,12 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 			table.AddRow("ID", utils.PtrString(resp.Id))
 			table.AddSeparator()
 		}
-		if resp.Name != nil {
-			table.AddRow("NAME", utils.PtrString(resp.Name))
-			table.AddSeparator()
-		}
-		if resp.Policy != nil {
-			table.AddRow("POLICY", utils.PtrString(resp.Policy))
-			table.AddSeparator()
-		}
+		table.AddRow("NAME", resp.Name)
+		table.AddSeparator()
+		table.AddRow("POLICY", resp.Policy)
+		table.AddSeparator()
 		if resp.HasMembers() {
-			table.AddRow("Members", utils.JoinStringPtr(resp.Members, ", "))
+			table.AddRow("Members", strings.Join(resp.Members, ", "))
 			table.AddSeparator()
 		}
 

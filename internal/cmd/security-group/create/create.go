@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -28,9 +28,9 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Labels      *map[string]string
+	Labels      map[string]any
 	Description *string
-	Name        *string
+	Name        string
 	Stateful    *bool
 }
 
@@ -57,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", *model.Name)
+			prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", model.Name)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create security group: %w", err)
 			}
 
-			if err := outputResult(params.Printer, model.OutputFormat, *model.Name, *group); err != nil {
+			if err := outputResult(params.Printer, model.OutputFormat, model.Name, group); err != nil {
 				return err
 			}
 
@@ -103,9 +103,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            &name,
+		Name:            name,
 
-		Labels:      flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
+		Labels:      flags.FlagToStringToAny(p, cmd, labelsFlag),
 		Description: flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Stateful:    flags.FlagToBoolPointer(p, cmd, statefulFlag),
 	}
@@ -115,11 +115,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateSecurityGroupRequest {
-	request := apiClient.CreateSecurityGroup(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.CreateSecurityGroup(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateSecurityGroupPayload{
 		Description: model.Description,
-		Labels:      utils.ConvertStringMapToInterfaceMap(model.Labels),
+		Labels:      model.Labels,
 		Name:        model.Name,
 		Stateful:    model.Stateful,
 	}
@@ -127,7 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	return request.CreateSecurityGroupPayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, name string, resp iaas.SecurityGroup) error {
+func outputResult(p *print.Printer, outputFormat, name string, resp *iaas.SecurityGroup) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created security group %q.\nSecurity Group ID %s\n", name, utils.PtrString(resp.Id))
 		return nil

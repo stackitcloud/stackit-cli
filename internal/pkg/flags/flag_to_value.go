@@ -76,6 +76,22 @@ func FlagToStringToStringPointer(p *print.Printer, cmd *cobra.Command, flag stri
 	return nil
 }
 
+func FlagToStringToAny(p *print.Printer, cmd *cobra.Command, flag string) map[string]any {
+	value, err := cmd.Flags().GetStringToString(flag)
+	r := make(map[string]any, len(value))
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag to string to any value: %v", err)
+		return r
+	}
+	if !cmd.Flag(flag).Changed {
+		return nil
+	}
+	for k, v := range value {
+		r[k] = v
+	}
+	return r
+}
+
 // Returns a pointer to the flag's value.
 // Returns nil if the flag is not set, if its value can not be converted to int, or if the flag does not exist.
 func FlagToIntPointer(p *print.Printer, cmd *cobra.Command, flag string) *int {

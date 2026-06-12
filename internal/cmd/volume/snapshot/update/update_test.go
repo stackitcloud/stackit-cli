@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -23,10 +23,10 @@ type testCtxKey struct{}
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &iaas.APIClient{}
+	testClient     = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testSnapshotId = uuid.NewString()
-	testLabels     = map[string]string{"key1": "value1"}
+	testLabels     = map[string]any{"key1": "value1"}
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -71,10 +71,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiUpdateSnapshotRequest)) iaas.ApiUpdateSnapshotRequest {
-	request := testClient.UpdateSnapshot(testCtx, testProjectId, testRegion, testSnapshotId)
+	request := testClient.DefaultAPI.UpdateSnapshot(testCtx, testProjectId, testRegion, testSnapshotId)
 	payload := iaas.NewUpdateSnapshotPayloadWithDefaults()
 	payload.Name = utils.Ptr(testName)
-	payload.Labels = utils.ConvertStringMapToInterfaceMap(utils.Ptr(testLabels))
+	payload.Labels = testLabels
 
 	request = request.UpdateSnapshotPayload(*payload)
 	for _, mod := range mods {
@@ -155,7 +155,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Labels = make(map[string]string)
+				model.Labels = make(map[string]any)
 			}),
 		},
 		{
@@ -197,7 +197,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

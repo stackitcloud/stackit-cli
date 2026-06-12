@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testNicId = uuid.NewString()
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequestDetach(mods ...func(request *iaas.ApiRemoveNicFromServerRequest)) iaas.ApiRemoveNicFromServerRequest {
-	request := testClient.RemoveNicFromServer(testCtx, testProjectId, testRegion, testServerId, testNicId)
+	request := testClient.DefaultAPI.RemoveNicFromServer(testCtx, testProjectId, testRegion, testServerId, testNicId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -67,7 +67,7 @@ func fixtureRequestDetach(mods ...func(request *iaas.ApiRemoveNicFromServerReque
 }
 
 func fixtureRequestDetachAndDelete(mods ...func(request *iaas.ApiRemoveNetworkFromServerRequest)) iaas.ApiRemoveNetworkFromServerRequest {
-	request := testClient.RemoveNetworkFromServer(testCtx, testProjectId, testRegion, testServerId, testNetworkId)
+	request := testClient.DefaultAPI.RemoveNetworkFromServer(testCtx, testProjectId, testRegion, testServerId, testNetworkId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -228,7 +228,7 @@ func TestBuildRequestDetach(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -260,7 +260,7 @@ func TestBuildRequestDetachAndDelete(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -32,7 +32,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ServerId string
-	ImageId  *string
+	ImageId  string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient, model.ProjectId, model.Region, model.ServerId)
+			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
 				serverLabel = model.ServerId
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Rescuing server", func() error {
-					_, err = wait.RescueServerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
+					_, err = wait.RescueServerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -96,7 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered rescue of"
 			}
-			params.Printer.Info("%s server %q. Image %q is used as temporary boot image\n", operationState, serverLabel, utils.PtrString(model.ImageId))
+			params.Printer.Info("%s server %q. Image %q is used as temporary boot image\n", operationState, serverLabel, model.ImageId)
 
 			return nil
 		},
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ServerId:        serverId,
-		ImageId:         flags.FlagToStringPointer(p, cmd, imageIdFlag),
+		ImageId:         flags.FlagToStringValue(p, cmd, imageIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -131,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiRescueServerRequest {
-	req := apiClient.RescueServer(ctx, model.ProjectId, model.Region, model.ServerId)
+	req := apiClient.DefaultAPI.RescueServer(ctx, model.ProjectId, model.Region, model.ServerId)
 	payload := iaas.RescueServerPayload{
 		Image: model.ImageId,
 	}

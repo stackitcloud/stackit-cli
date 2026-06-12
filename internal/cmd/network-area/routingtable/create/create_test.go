@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -21,7 +21,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 const testRegion = "eu01"
 
@@ -36,7 +36,7 @@ const testDynamicRoutesFlag = true
 
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -79,7 +79,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiAddRoutingTableToAreaRequest)) iaas.ApiAddRoutingTableToAreaRequest {
-	request := testClient.AddRoutingTableToArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+	request := testClient.DefaultAPI.AddRoutingTableToArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
 	request = request.AddRoutingTableToAreaPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -90,8 +90,8 @@ func fixtureRequest(mods ...func(request *iaas.ApiAddRoutingTableToAreaRequest))
 func fixturePayload(mods ...func(payload *iaas.AddRoutingTableToAreaPayload)) iaas.AddRoutingTableToAreaPayload {
 	payload := iaas.AddRoutingTableToAreaPayload{
 		Description:   utils.Ptr(testRoutingTableDescription),
-		Name:          utils.Ptr(testRoutingTableName),
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Name:          testRoutingTableName,
+		Labels:        testLabels,
 		SystemRoutes:  utils.Ptr(true),
 		DynamicRoutes: utils.Ptr(true),
 	}
@@ -236,7 +236,7 @@ func TestBuildRequest(t *testing.T) {
 				model.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.Labels = nil
 					}),
@@ -249,7 +249,7 @@ func TestBuildRequest(t *testing.T) {
 				model.SystemRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.SystemRoutes = utils.Ptr(false)
 					}),
@@ -262,7 +262,7 @@ func TestBuildRequest(t *testing.T) {
 				model.DynamicRoutes = false
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiAddRoutingTableToAreaRequest) {
-				*request = (*request).AddRoutingTableToAreaPayload(
+				*request = request.AddRoutingTableToAreaPayload(
 					fixturePayload(func(payload *iaas.AddRoutingTableToAreaPayload) {
 						payload.DynamicRoutes = utils.Ptr(false)
 					}),
@@ -280,7 +280,7 @@ func TestBuildRequest(t *testing.T) {
 
 			if diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx)); diff != "" {
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{})); diff != "" {
 				t.Errorf("buildRequest() mismatch (-got +want):\n%s", diff)
 			}
 		})
@@ -290,11 +290,11 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	dummyRoutingTable := iaas.RoutingTable{
 		Id:            utils.Ptr("id-foo"),
-		Name:          utils.Ptr("route-table-foo"),
+		Name:          "route-table-foo",
 		Description:   utils.Ptr("description-foo"),
 		SystemRoutes:  utils.Ptr(true),
 		DynamicRoutes: utils.Ptr(true),
-		Labels:        utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:        testLabels,
 		CreatedAt:     utils.Ptr(time.Now()),
 		UpdatedAt:     utils.Ptr(time.Now()),
 	}

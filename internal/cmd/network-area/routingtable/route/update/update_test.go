@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 const testRegion = "eu01"
 
@@ -31,7 +31,7 @@ var testRouteId = uuid.NewString()
 
 const testLabelSelectorFlag = "key1=value1,key2=value2"
 
-var testLabels = &map[string]string{
+var testLabels = map[string]any{
 	"key1": "value1",
 	"key2": "value2",
 }
@@ -79,7 +79,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 }
 
 func fixtureRequest(mods ...func(req *iaas.ApiUpdateRouteOfRoutingTableRequest)) iaas.ApiUpdateRouteOfRoutingTableRequest {
-	req := testClient.UpdateRouteOfRoutingTable(
+	req := testClient.DefaultAPI.UpdateRouteOfRoutingTable(
 		testCtx,
 		testOrgId,
 		testNetworkAreaId,
@@ -89,7 +89,7 @@ func fixtureRequest(mods ...func(req *iaas.ApiUpdateRouteOfRoutingTableRequest))
 	)
 
 	payload := iaas.UpdateRouteOfRoutingTablePayload{
-		Labels: utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels: testLabels,
 	}
 
 	req = req.UpdateRouteOfRoutingTablePayload(payload)
@@ -208,7 +208,7 @@ func TestBuildRequest(t *testing.T) {
 				m.Labels = nil
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiUpdateRouteOfRoutingTableRequest) {
-				*request = (*request).UpdateRouteOfRoutingTablePayload(iaas.UpdateRouteOfRoutingTablePayload{
+				*request = request.UpdateRouteOfRoutingTablePayload(iaas.UpdateRouteOfRoutingTablePayload{
 					Labels: nil,
 				})
 			}),
@@ -223,7 +223,7 @@ func TestBuildRequest(t *testing.T) {
 				tt.expectedRequest,
 				gotReq,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			); diff != "" {
 				t.Errorf("buildRequest() mismatch (-want +got):\n%s", diff)
 			}
@@ -234,19 +234,19 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	dummyRoute := iaas.Route{
 		Id: utils.Ptr("route-foo"),
-		Destination: &iaas.RouteDestination{
+		Destination: iaas.RouteDestination{
 			DestinationCIDRv4: &iaas.DestinationCIDRv4{
-				Type:  utils.Ptr("cidrv4"),
-				Value: utils.Ptr("10.0.0.0/24"),
+				Type:  "cidrv4",
+				Value: "10.0.0.0/24",
 			},
 		},
-		Nexthop: &iaas.RouteNexthop{
+		Nexthop: iaas.RouteNexthop{
 			NexthopIPv4: &iaas.NexthopIPv4{
-				Type:  utils.Ptr("ipv4"),
-				Value: utils.Ptr("10.0.0.1"),
+				Type:  "ipv4",
+				Value: "10.0.0.1",
 			},
 		},
-		Labels:    utils.ConvertStringMapToInterfaceMap(testLabels),
+		Labels:    testLabels,
 		CreatedAt: utils.Ptr(time.Now()),
 		UpdatedAt: utils.Ptr(time.Now()),
 	}

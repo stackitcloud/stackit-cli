@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			items := resp.GetItems()
 
-			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient, model.ProjectId, model.Region, model.SecurityGroupId)
+			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
 				securityGroupLabel = model.SecurityGroupId
@@ -133,7 +133,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListSecurityGroupRulesRequest {
-	return apiClient.ListSecurityGroupRules(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
+	return apiClient.DefaultAPI.ListSecurityGroupRules(ctx, model.ProjectId, model.Region, model.SecurityGroupId)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLabel string, securityGroupRules []iaas.SecurityGroupRule) error {
@@ -158,7 +158,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLab
 			table.AddRow(
 				utils.PtrString(securityGroupRule.Id),
 				etherType,
-				utils.PtrString(securityGroupRule.Direction),
+				securityGroupRule.Direction,
 				protocolName,
 				utils.PtrString(securityGroupRule.RemoteSecurityGroupId),
 			)

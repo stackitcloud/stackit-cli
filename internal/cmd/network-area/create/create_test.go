@@ -14,7 +14,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 )
 
 const (
@@ -29,7 +29,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{}
+var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
 
 var (
 	testOrgId          = uuid.NewString()
@@ -58,11 +58,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		Name:           utils.Ptr("example-network-area-name"),
+		Name:           "example-network-area-name",
 		OrganizationId: testOrgId,
-		Labels: utils.Ptr(map[string]string{
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -71,7 +71,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRequest)) iaas.ApiCreateNetworkAreaRequest {
-	request := testClient.CreateNetworkArea(testCtx, testOrgId)
+	request := testClient.DefaultAPI.CreateNetworkArea(testCtx, testOrgId)
 	request = request.CreateNetworkAreaPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -81,10 +81,10 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRequest)) iaa
 
 func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaPayload)) iaas.CreateNetworkAreaPayload {
 	payload := iaas.CreateNetworkAreaPayload{
-		Name: utils.Ptr("example-network-area-name"),
-		Labels: utils.Ptr(map[string]interface{}{
+		Name: "example-network-area-name",
+		Labels: map[string]any{
 			"key": "value",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -93,7 +93,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaPayload)) iaas.C
 }
 
 func fixtureRequestRegionalArea(mods ...func(request *iaas.ApiCreateNetworkAreaRegionRequest)) iaas.ApiCreateNetworkAreaRegionRequest {
-	req := testClient.CreateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
+	req := testClient.DefaultAPI.CreateNetworkAreaRegion(testCtx, testOrgId, testAreaId, testRegion)
 	req = req.CreateNetworkAreaRegionPayload(fixtureRegionalAreaPayload())
 	for _, mod := range mods {
 		mod(&req)
@@ -105,18 +105,18 @@ func fixtureRegionalAreaPayload(mods ...func(request *iaas.CreateNetworkAreaRegi
 	var networkRanges []iaas.NetworkRange
 	for _, networkRange := range testNetworkRanges {
 		networkRanges = append(networkRanges, iaas.NetworkRange{
-			Prefix: utils.Ptr(networkRange),
+			Prefix: networkRange,
 		})
 	}
 
 	payload := iaas.CreateNetworkAreaRegionPayload{
 		Ipv4: &iaas.RegionalAreaIPv4{
-			DefaultNameservers: utils.Ptr(testDnsNameservers),
-			DefaultPrefixLen:   utils.Ptr(testDefaultPrefixLength),
-			MaxPrefixLen:       utils.Ptr(testMaxPrefixLength),
-			MinPrefixLen:       utils.Ptr(testMinPrefixLength),
-			NetworkRanges:      utils.Ptr(networkRanges),
-			TransferNetwork:    utils.Ptr(testTransferNetwork),
+			DefaultNameservers: testDnsNameservers,
+			DefaultPrefixLen:   testDefaultPrefixLength,
+			MaxPrefixLen:       testMaxPrefixLength,
+			MinPrefixLen:       testMinPrefixLength,
+			NetworkRanges:      networkRanges,
+			TransferNetwork:    testTransferNetwork,
 		},
 		Status: nil,
 	}
@@ -160,7 +160,7 @@ func TestParseInput(t *testing.T) {
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Name:           utils.Ptr(testName),
+				Name:           testName,
 				OrganizationId: testOrgId,
 
 				// Deprecated fields
@@ -279,7 +279,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -331,7 +331,7 @@ func TestBuildRequestNetworkAreaRegion(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -399,11 +399,11 @@ func TestGetConfiguredDeprecatedFlags(t *testing.T) {
 					GlobalFlagModel: &globalflags.GlobalFlagModel{
 						Verbosity: globalflags.VerbosityDefault,
 					},
-					Name:           utils.Ptr(testName),
+					Name:           testName,
 					OrganizationId: testOrgId,
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      nil,
 					NetworkRanges:       nil,
 					TransferNetwork:     nil,
@@ -421,11 +421,11 @@ func TestGetConfiguredDeprecatedFlags(t *testing.T) {
 					GlobalFlagModel: &globalflags.GlobalFlagModel{
 						Verbosity: globalflags.VerbosityDefault,
 					},
-					Name:           utils.Ptr(testName),
+					Name:           testName,
 					OrganizationId: testOrgId,
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      utils.Ptr(testDnsNameservers),
 					NetworkRanges:       utils.Ptr(testNetworkRanges),
 					TransferNetwork:     utils.Ptr(testTransferNetwork),
@@ -467,11 +467,11 @@ func TestHasDeprecatedFlagsSet(t *testing.T) {
 					GlobalFlagModel: &globalflags.GlobalFlagModel{
 						Verbosity: globalflags.VerbosityDefault,
 					},
-					Name:           utils.Ptr(testName),
+					Name:           testName,
 					OrganizationId: testOrgId,
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      nil,
 					NetworkRanges:       nil,
 					TransferNetwork:     nil,
@@ -489,11 +489,11 @@ func TestHasDeprecatedFlagsSet(t *testing.T) {
 					GlobalFlagModel: &globalflags.GlobalFlagModel{
 						Verbosity: globalflags.VerbosityDefault,
 					},
-					Name:           utils.Ptr(testName),
+					Name:           testName,
 					OrganizationId: testOrgId,
-					Labels: utils.Ptr(map[string]string{
+					Labels: map[string]any{
 						"key": "value",
-					}),
+					},
 					DnsNameServers:      utils.Ptr(testDnsNameservers),
 					NetworkRanges:       utils.Ptr(testNetworkRanges),
 					TransferNetwork:     utils.Ptr(testTransferNetwork),

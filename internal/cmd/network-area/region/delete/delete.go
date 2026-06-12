@@ -7,8 +7,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get network area label
-			networkAreaName, err := iaasUtils.GetNetworkAreaName(ctx, apiClient, model.OrganizationId, model.NetworkAreaId)
+			networkAreaName, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
 				networkAreaName = model.NetworkAreaId
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Delete network area region", func() error {
-					_, err = wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
+					_, err = wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -125,5 +125,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteNetworkAreaRegionRequest {
-	return apiClient.DeleteNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
+	return apiClient.DefaultAPI.DeleteNetworkAreaRegion(ctx, model.OrganizationId, model.NetworkAreaId, model.Region)
 }

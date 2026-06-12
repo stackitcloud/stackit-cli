@@ -8,7 +8,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			var projects []string
 
 			if model.ShowAttachedProjects {
-				projects, err = iaasUtils.ListAttachedProjects(ctx, apiClient, *model.OrganizationId, model.AreaId)
+				projects, err = iaasUtils.ListAttachedProjects(ctx, apiClient.DefaultAPI, *model.OrganizationId, model.AreaId)
 				if err != nil && errors.Is(err, iaasUtils.ErrItemsNil) {
 					projects = []string{}
 				} else if err != nil {
@@ -119,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetNetworkAreaRequest {
-	return apiClient.GetNetworkArea(ctx, *model.OrganizationId, model.AreaId)
+	return apiClient.DefaultAPI.GetNetworkArea(ctx, *model.OrganizationId, model.AreaId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.NetworkArea, attachedProjects []string) error {
@@ -131,11 +131,11 @@ func outputResult(p *print.Printer, outputFormat string, networkArea *iaas.Netwo
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(networkArea.Id))
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(networkArea.Name))
+		table.AddRow("NAME", networkArea.Name)
 		table.AddSeparator()
-		if networkArea.Labels != nil && len(*networkArea.Labels) > 0 {
+		if len(networkArea.Labels) > 0 {
 			var labels []string
-			for key, value := range *networkArea.Labels {
+			for key, value := range networkArea.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
 			table.AddRow("LABELS", strings.Join(labels, "\n"))

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas/wait"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -59,7 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId)
+			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
 				volumeLabel = model.VolumeId
@@ -81,7 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting volume", func() error {
-					_, err = wait.DeleteVolumeWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.VolumeId).WaitWithContext(ctx)
+					_, err = wait.DeleteVolumeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -118,5 +118,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteVolumeRequest {
-	return apiClient.DeleteVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
+	return apiClient.DefaultAPI.DeleteVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 }

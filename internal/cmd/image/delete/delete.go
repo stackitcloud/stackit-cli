@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			imageName, err := iaasUtils.GetImageName(ctx, apiClient, model.ProjectId, model.Region, model.ImageId)
+			imageName, err := iaasUtils.GetImageName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ImageId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get image name: %v", err)
 				imageName = model.ImageId
@@ -98,6 +98,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteImageRequest {
-	request := apiClient.DeleteImage(ctx, model.ProjectId, model.Region, model.ImageId)
+	request := apiClient.DefaultAPI.DeleteImage(ctx, model.ProjectId, model.Region, model.ImageId)
 	return request
 }

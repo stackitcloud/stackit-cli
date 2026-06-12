@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient, model.ProjectId, model.Region, model.PublicIpId)
+			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
 				publicIpLabel = model.PublicIpId
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("associate public IP: %w", err)
 			}
 
-			params.Printer.Outputf("Associated public IP %q with resource %v.\n", publicIpLabel, utils.PtrString(resp.GetNetworkInterface()))
+			params.Printer.Outputf("Associated public IP %q with resource %v.\n", publicIpLabel, resp.GetNetworkInterface())
 			return nil
 		},
 	}
@@ -113,10 +113,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdatePublicIPRequest {
-	req := apiClient.UpdatePublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
+	req := apiClient.DefaultAPI.UpdatePublicIP(ctx, model.ProjectId, model.Region, model.PublicIpId)
 
 	payload := iaas.UpdatePublicIPPayload{
-		NetworkInterface: iaas.NewNullableString(model.AssociatedResourceId),
+		NetworkInterface: *iaas.NewNullableString(model.AssociatedResourceId),
 	}
 
 	return req.UpdatePublicIPPayload(payload)

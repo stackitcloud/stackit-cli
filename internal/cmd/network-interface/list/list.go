@@ -10,7 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -94,7 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 
 				// Truncate output
-				items := utils.GetSliceFromPointer(resp.Items)
+				items := resp.Items
 				if model.Limit != nil && len(items) > int(*model.Limit) {
 					items = items[:*model.Limit]
 				}
@@ -110,7 +110,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list network interfaces: %w", err)
 			}
 
-			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient, model.ProjectId, model.Region, *model.NetworkId)
+			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
 				networkLabel = *model.NetworkId
@@ -119,7 +119,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(resp.Items)
+			items := resp.Items
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -163,7 +163,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildProjectRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListProjectNICsRequest {
-	req := apiClient.ListProjectNICs(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListProjectNICs(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -172,7 +172,7 @@ func buildProjectRequest(ctx context.Context, model *inputModel, apiClient *iaas
 }
 
 func buildNetworkRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListNicsRequest {
-	req := apiClient.ListNics(ctx, model.ProjectId, model.Region, *model.NetworkId)
+	req := apiClient.DefaultAPI.ListNics(ctx, model.ProjectId, model.Region, *model.NetworkId)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/git"
+	git "github.com/stackitcloud/stackit-sdk-go/services/git/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/git/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type inputModel struct {
@@ -31,7 +30,7 @@ const limitFlag = "limit"
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all instances of STACKIT Git.",
+		Short: "Lists all instances of STACKIT Git",
 		Long:  "Lists all instances of STACKIT Git for the current project.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
@@ -110,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *git.APIClient) git.ApiListInstancesRequest {
-	return apiClient.ListInstances(ctx, model.ProjectId)
+	return apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []git.Instance) error {
@@ -125,12 +124,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		for i := range instances {
 			instance := (instances)[i]
 			table.AddRow(
-				utils.PtrString(instance.Id),
-				utils.PtrString(instance.Name),
-				utils.PtrString(instance.Url),
-				utils.PtrString(instance.Version),
-				utils.PtrString(instance.State),
-				utils.PtrString(instance.Created),
+				instance.Id,
+				instance.Name,
+				instance.Url,
+				instance.Version,
+				instance.State,
+				instance.Created,
 			)
 		}
 		err := table.Display(p)

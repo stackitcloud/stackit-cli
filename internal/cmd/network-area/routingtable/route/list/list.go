@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/iaas"
+	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			request := apiClient.ListRoutesOfRoutingTable(
+			request := apiClient.DefaultAPI.ListRoutesOfRoutingTable(
 				ctx,
 				model.OrganizationId,
 				model.NetworkAreaId,
@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list routes: %w", err)
 			}
 
-			routes := utils.GetSliceFromPointer(response.Items)
+			routes := response.Items
 
 			// Truncate output
 			if model.Limit != nil && len(routes) > int(*model.Limit) {
@@ -152,7 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, or
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
 		for _, route := range routes {
-			routeDetails := routeUtils.ExtractRouteDetails(route)
+			routeDetails := routeUtils.ExtractRouteDetails(&route)
 			table.AddRow(
 				utils.PtrString(route.Id),
 				routeDetails.DestType,
