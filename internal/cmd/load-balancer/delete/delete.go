@@ -15,8 +15,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/wait"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api/wait"
 )
 
 const (
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting load balancer", func() error {
-					_, err = wait.DeleteLoadBalancerWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.LoadBalancerName).WaitWithContext(ctx)
+					_, err = wait.DeleteLoadBalancerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.LoadBalancerName).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -104,6 +104,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiDeleteLoadBalancerRequest {
-	req := apiClient.DeleteLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
+	req := apiClient.DefaultAPI.DeleteLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
 	return req
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/load-balancer/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Updates a load balancer.",
 			"The payload can be provided as a JSON string or a file path prefixed with \"@\".",
-			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v1#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.",
+			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v2#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.",
 		),
 		Args: args.SingleArg(loadBalancerNameArg, nil),
 		Example: examples.Build(
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiUpdateLoadBalancerRequest {
-	req := apiClient.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
+	req := apiClient.DefaultAPI.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
 
 	req = req.UpdateLoadBalancerPayload(model.Payload)
 	return req

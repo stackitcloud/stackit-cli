@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get load balancers: %w", err)
 			}
 
-			loadBalancers := utils.GetSliceFromPointer(resp.LoadBalancers)
+			loadBalancers := resp.LoadBalancers
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiListLoadBalancersRequest {
-	req := apiClient.ListLoadBalancers(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListLoadBalancers(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -132,10 +132,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, loadBalan
 			l := loadBalancers[i]
 			var numListeners, numTargetPools int
 			if l.Listeners != nil {
-				numListeners = len(*l.Listeners)
+				numListeners = len(l.Listeners)
 			}
 			if l.TargetPools != nil {
-				numTargetPools = len(*l.TargetPools)
+				numTargetPools = len(l.TargetPools)
 			}
 
 			externalAddress := utils.PtrStringDefault(l.ExternalAddress, "-")

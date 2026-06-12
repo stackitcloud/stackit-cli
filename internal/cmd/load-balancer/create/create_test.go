@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &loadbalancer.APIClient{}
+	testClient    = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testRequestId = xRequestId
 )
@@ -31,12 +31,12 @@ var (
 var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 	ExternalAddress: utils.Ptr(""),
 
-	Listeners: &[]loadbalancer.Listener{
+	Listeners: []loadbalancer.Listener{
 		{
 			DisplayName: utils.Ptr(""),
-			Port:        utils.Ptr(int64(0)),
-			Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
-			ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+			Port:        utils.Ptr(int32(0)),
+			Protocol:    loadbalancer.ListenerProtocol("unknown_default_open_api").Ptr(),
+			ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 				{
 					Name: utils.Ptr(""),
 				},
@@ -51,15 +51,15 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		},
 	},
 	Name: utils.Ptr(""),
-	Networks: &[]loadbalancer.Network{
+	Networks: []loadbalancer.Network{
 		{
 			NetworkId: utils.Ptr(""),
-			Role:      loadbalancer.NetworkRole("").Ptr(),
+			Role:      loadbalancer.NetworkRole("unknown_default_open_api").Ptr(),
 		},
 	},
 	Options: &loadbalancer.LoadBalancerOptions{
 		AccessControl: &loadbalancer.LoadbalancerOptionAccessControl{
-			AllowedSourceRanges: &[]string{
+			AllowedSourceRanges: []string{
 				"",
 			},
 		},
@@ -76,21 +76,21 @@ var testPayload = &loadbalancer.CreateLoadBalancerPayload{
 		},
 		PrivateNetworkOnly: utils.Ptr(false),
 	},
-	TargetPools: &[]loadbalancer.TargetPool{
+	TargetPools: []loadbalancer.TargetPool{
 		{
 			ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-				HealthyThreshold:   utils.Ptr(int64(0)),
+				HealthyThreshold:   utils.Ptr(int32(0)),
 				Interval:           utils.Ptr(""),
 				IntervalJitter:     utils.Ptr(""),
 				Timeout:            utils.Ptr(""),
-				UnhealthyThreshold: utils.Ptr(int64(0)),
+				UnhealthyThreshold: utils.Ptr(int32(0)),
 			},
 			Name: utils.Ptr(""),
 			SessionPersistence: &loadbalancer.SessionPersistence{
 				UseSourceIpAddress: utils.Ptr(false),
 			},
-			TargetPort: utils.Ptr(int64(0)),
-			Targets: &[]loadbalancer.Target{
+			TargetPort: utils.Ptr(int32(0)),
+			Targets: []loadbalancer.Target{
 				{
 					DisplayName: utils.Ptr(""),
 					Ip:          utils.Ptr(""),
@@ -197,7 +197,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiCreateLoadBalancerRequest)) loadbalancer.ApiCreateLoadBalancerRequest {
-	request := testClient.CreateLoadBalancer(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateLoadBalancer(testCtx, testProjectId, testRegion)
 	request = request.CreateLoadBalancerPayload(*testPayload)
 	request = request.XRequestID(testRequestId)
 	for _, mod := range mods {
@@ -277,7 +277,9 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInputWithOptions(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, nil, tt.isValid, []testutils.TestingOption{
+				testutils.WithCmpOptions(cmpopts.EquateEmpty()),
+			})
 		})
 	}
 }
@@ -302,7 +304,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
