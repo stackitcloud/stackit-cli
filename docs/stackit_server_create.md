@@ -13,35 +13,26 @@ stackit server create [flags]
 ### Examples
 
 ```
-  Create a server from an image with id xxx
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx
-
-  Create a server with labels from an image with id xxx
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --labels key=value,foo=bar
-
-  Create a server with a boot volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64
+  Create a server with a boot volume with source type image
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64
 
   Create a server with a boot volume from an existing volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type volume
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type volume
 
   Create a server with a keypair
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --keypair-name example
-
-  Create a server with a network
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --network-id yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --keypair-name example
 
   Create a server with a network interface
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy
 
   Create a server with an attached volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes zzz
 
   Create a server with user data (cloud-init)
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
 
   Create a server with provisioned agent
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-id yyy --agent-provisioning-policy ALWAYS
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --agent-provisioning-policy ALWAYS
 ```
 
 ### Options
