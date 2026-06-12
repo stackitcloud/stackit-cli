@@ -131,6 +131,24 @@ var (
 	)
 )
 
+type tunnelInputModel struct {
+	BgpRemoteAsn               *int64
+	PeeringLocalAddress        *string
+	PeeringRemoteAddress       *string
+	Phase1DhGroups             []vpn.PhaseDhGroupsInner
+	Phase1EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
+	Phase1IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
+	Phase1RekeyTime            *int32
+	Phase2DhGroups             []vpn.PhaseDhGroupsInner
+	Phase2EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
+	Phase2IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
+	Phase2RekeyTime            *int32
+	Phase2DpdAction            *vpn.TunnelConfigurationPhase2AllOfDpdAction
+	Phase2StartAction          *vpn.TunnelConfigurationPhase2AllOfStartAction
+	PreSharedKey               string
+	RemoteAddress              string
+}
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	GatewayId string
@@ -142,37 +160,8 @@ type inputModel struct {
 	RemoteSubnets []string
 	StaticRoutes  []string
 
-	Tunnel1BgpRemoteAsn               *int64
-	Tunnel1PeeringLocalAddress        *string
-	Tunnel1PeeringRemoteAddress       *string
-	Tunnel1Phase1DhGroups             []vpn.PhaseDhGroupsInner
-	Tunnel1Phase1EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
-	Tunnel1Phase1IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
-	Tunnel1Phase1RekeyTime            *int32
-	Tunnel1Phase2DhGroups             []vpn.PhaseDhGroupsInner
-	Tunnel1Phase2EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
-	Tunnel1Phase2IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
-	Tunnel1Phase2RekeyTime            *int32
-	Tunnel1Phase2DpdAction            *vpn.TunnelConfigurationPhase2AllOfDpdAction
-	Tunnel1Phase2StartAction          *vpn.TunnelConfigurationPhase2AllOfStartAction
-	Tunnel1PreSharedKey               string
-	Tunnel1RemoteAddress              string
-
-	Tunnel2BgpRemoteAsn               *int64
-	Tunnel2PeeringLocalAddress        *string
-	Tunnel2PeeringRemoteAddress       *string
-	Tunnel2Phase1DhGroups             []vpn.PhaseDhGroupsInner
-	Tunnel2Phase1EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
-	Tunnel2Phase1IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
-	Tunnel2Phase1RekeyTime            *int32
-	Tunnel2Phase2DhGroups             []vpn.PhaseDhGroupsInner
-	Tunnel2Phase2EncryptionAlgorithms []vpn.PhaseEncryptionAlgorithmsInner
-	Tunnel2Phase2IntegrityAlgorithms  []vpn.PhaseIntegrityAlgorithmsInner
-	Tunnel2Phase2RekeyTime            *int32
-	Tunnel2Phase2DpdAction            *vpn.TunnelConfigurationPhase2AllOfDpdAction
-	Tunnel2Phase2StartAction          *vpn.TunnelConfigurationPhase2AllOfStartAction
-	Tunnel2PreSharedKey               string
-	Tunnel2RemoteAddress              string
+	Tunnel1 tunnelInputModel
+	Tunnel2 tunnelInputModel
 }
 
 func NewCmd(p *types.CmdParams) *cobra.Command {
@@ -301,41 +290,78 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		RemoteSubnets: flags.FlagToStringSliceValue(p, cmd, remoteSubnetsFlag),
 		StaticRoutes:  flags.FlagToStringSliceValue(p, cmd, staticRoutesFlag),
 
-		Tunnel1BgpRemoteAsn:               flags.FlagToInt64Pointer(p, cmd, tunnel1BgpRemoteAsnFlag),
-		Tunnel1PeeringLocalAddress:        flags.FlagToStringPointer(p, cmd, tunnel1PeeringLocalAddressFlag),
-		Tunnel1PeeringRemoteAddress:       flags.FlagToStringPointer(p, cmd, tunnel1PeeringRemoteAddressFlag),
-		Tunnel1Phase1DhGroups:             tunnel1Phase1DhGroupsFlag.Get(),
-		Tunnel1Phase1EncryptionAlgorithms: tunnel1Phase1EncryptionAlgorithmsFlag.Get(),
-		Tunnel1Phase1IntegrityAlgorithms:  tunnel1Phase1IntegrityAlgorithmsFlag.Get(),
-		Tunnel1Phase1RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel1Phase1RekeyTimeFlag),
-		Tunnel1Phase2DhGroups:             tunnel1Phase2DhGroupsFlag.Get(),
-		Tunnel1Phase2EncryptionAlgorithms: tunnel1Phase2EncryptionAlgorithmsFlag.Get(),
-		Tunnel1Phase2IntegrityAlgorithms:  tunnel1Phase2IntegrityAlgorithmsFlag.Get(),
-		Tunnel1Phase2RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel1Phase2RekeyTimeFlag),
-		Tunnel1Phase2DpdAction:            tunnel1Phase2DpdActionFlag.Ptr(),
-		Tunnel1Phase2StartAction:          tunnel1Phase2StartActionFlag.Ptr(),
-		Tunnel1PreSharedKey:               flags.FlagToStringValue(p, cmd, tunnel1PreSharedKeyFlag),
-		Tunnel1RemoteAddress:              flags.FlagToStringValue(p, cmd, tunnel1RemoteAddressFlag),
+		Tunnel1: tunnelInputModel{
+			BgpRemoteAsn:               flags.FlagToInt64Pointer(p, cmd, tunnel1BgpRemoteAsnFlag),
+			PeeringLocalAddress:        flags.FlagToStringPointer(p, cmd, tunnel1PeeringLocalAddressFlag),
+			PeeringRemoteAddress:       flags.FlagToStringPointer(p, cmd, tunnel1PeeringRemoteAddressFlag),
+			Phase1DhGroups:             tunnel1Phase1DhGroupsFlag.Get(),
+			Phase1EncryptionAlgorithms: tunnel1Phase1EncryptionAlgorithmsFlag.Get(),
+			Phase1IntegrityAlgorithms:  tunnel1Phase1IntegrityAlgorithmsFlag.Get(),
+			Phase1RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel1Phase1RekeyTimeFlag),
+			Phase2DhGroups:             tunnel1Phase2DhGroupsFlag.Get(),
+			Phase2EncryptionAlgorithms: tunnel1Phase2EncryptionAlgorithmsFlag.Get(),
+			Phase2IntegrityAlgorithms:  tunnel1Phase2IntegrityAlgorithmsFlag.Get(),
+			Phase2RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel1Phase2RekeyTimeFlag),
+			Phase2DpdAction:            tunnel1Phase2DpdActionFlag.Ptr(),
+			Phase2StartAction:          tunnel1Phase2StartActionFlag.Ptr(),
+			PreSharedKey:               flags.FlagToStringValue(p, cmd, tunnel1PreSharedKeyFlag),
+			RemoteAddress:              flags.FlagToStringValue(p, cmd, tunnel1RemoteAddressFlag),
+		},
 
-		Tunnel2BgpRemoteAsn:               flags.FlagToInt64Pointer(p, cmd, tunnel2BgpRemoteAsnFlag),
-		Tunnel2PeeringLocalAddress:        flags.FlagToStringPointer(p, cmd, tunnel2PeeringLocalAddressFlag),
-		Tunnel2PeeringRemoteAddress:       flags.FlagToStringPointer(p, cmd, tunnel2PeeringRemoteAddressFlag),
-		Tunnel2Phase1DhGroups:             tunnel2Phase1DhGroupsFlag.Get(),
-		Tunnel2Phase1EncryptionAlgorithms: tunnel2Phase1EncryptionAlgorithmsFlag.Get(),
-		Tunnel2Phase1IntegrityAlgorithms:  tunnel2Phase1IntegrityAlgorithmsFlag.Get(),
-		Tunnel2Phase1RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel2Phase1RekeyTimeFlag),
-		Tunnel2Phase2DhGroups:             tunnel2Phase2DhGroupsFlag.Get(),
-		Tunnel2Phase2EncryptionAlgorithms: tunnel2Phase2EncryptionAlgorithmsFlag.Get(),
-		Tunnel2Phase2IntegrityAlgorithms:  tunnel2Phase2IntegrityAlgorithmsFlag.Get(),
-		Tunnel2Phase2RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel2Phase2RekeyTimeFlag),
-		Tunnel2Phase2DpdAction:            tunnel2Phase2DpdActionFlag.Ptr(),
-		Tunnel2Phase2StartAction:          tunnel2Phase2StartActionFlag.Ptr(),
-		Tunnel2PreSharedKey:               flags.FlagToStringValue(p, cmd, tunnel2PreSharedKeyFlag),
-		Tunnel2RemoteAddress:              flags.FlagToStringValue(p, cmd, tunnel2RemoteAddressFlag),
+		Tunnel2: tunnelInputModel{
+			BgpRemoteAsn:               flags.FlagToInt64Pointer(p, cmd, tunnel2BgpRemoteAsnFlag),
+			PeeringLocalAddress:        flags.FlagToStringPointer(p, cmd, tunnel2PeeringLocalAddressFlag),
+			PeeringRemoteAddress:       flags.FlagToStringPointer(p, cmd, tunnel2PeeringRemoteAddressFlag),
+			Phase1DhGroups:             tunnel2Phase1DhGroupsFlag.Get(),
+			Phase1EncryptionAlgorithms: tunnel2Phase1EncryptionAlgorithmsFlag.Get(),
+			Phase1IntegrityAlgorithms:  tunnel2Phase1IntegrityAlgorithmsFlag.Get(),
+			Phase1RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel2Phase1RekeyTimeFlag),
+			Phase2DhGroups:             tunnel2Phase2DhGroupsFlag.Get(),
+			Phase2EncryptionAlgorithms: tunnel2Phase2EncryptionAlgorithmsFlag.Get(),
+			Phase2IntegrityAlgorithms:  tunnel2Phase2IntegrityAlgorithmsFlag.Get(),
+			Phase2RekeyTime:            flags.FlagToInt32Pointer(p, cmd, tunnel2Phase2RekeyTimeFlag),
+			Phase2DpdAction:            tunnel2Phase2DpdActionFlag.Ptr(),
+			Phase2StartAction:          tunnel2Phase2StartActionFlag.Ptr(),
+			PreSharedKey:               flags.FlagToStringValue(p, cmd, tunnel2PreSharedKeyFlag),
+			RemoteAddress:              flags.FlagToStringValue(p, cmd, tunnel2RemoteAddressFlag),
+		},
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
+}
+
+func buildTunnelConfiguration(model tunnelInputModel) vpn.TunnelConfiguration {
+	tunnel := vpn.TunnelConfiguration{
+		RemoteAddress: model.RemoteAddress,
+	}
+	if model.BgpRemoteAsn != nil {
+		tunnel.Bgp = &vpn.BGPTunnelConfig{
+			RemoteAsn: *model.BgpRemoteAsn,
+		}
+	}
+	if model.PeeringLocalAddress != nil || model.PeeringRemoteAddress != nil {
+		tunnel.Peering = &vpn.PeeringConfig{
+			LocalAddress:  model.PeeringLocalAddress,
+			RemoteAddress: model.PeeringRemoteAddress,
+		}
+	}
+	tunnel.Phase1 = vpn.TunnelConfigurationPhase1{
+		DhGroups:             model.Phase1DhGroups,
+		EncryptionAlgorithms: model.Phase1EncryptionAlgorithms,
+		IntegrityAlgorithms:  model.Phase1IntegrityAlgorithms,
+		RekeyTime:            model.Phase1RekeyTime,
+	}
+	tunnel.Phase2 = vpn.TunnelConfigurationPhase2{
+		DhGroups:             model.Phase2DhGroups,
+		EncryptionAlgorithms: model.Phase2EncryptionAlgorithms,
+		IntegrityAlgorithms:  model.Phase2IntegrityAlgorithms,
+		RekeyTime:            model.Phase2RekeyTime,
+		DpdAction:            model.Phase2DpdAction,
+		StartAction:          model.Phase2StartAction,
+	}
+	tunnel.PreSharedKey = &model.PreSharedKey
+	return tunnel
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClient) (vpn.ApiCreateGatewayConnectionRequest, error) {
@@ -350,68 +376,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 		StaticRoutes:  model.StaticRoutes,
 	}
 
-	tunnel1 := vpn.TunnelConfiguration{
-		RemoteAddress: model.Tunnel1RemoteAddress,
-	}
-	if model.Tunnel1BgpRemoteAsn != nil {
-		tunnel1.Bgp = &vpn.BGPTunnelConfig{
-			RemoteAsn: *model.Tunnel1BgpRemoteAsn,
-		}
-	}
-	if model.Tunnel1PeeringLocalAddress != nil || model.Tunnel1PeeringRemoteAddress != nil {
-		tunnel1.Peering = &vpn.PeeringConfig{
-			LocalAddress:  model.Tunnel1PeeringLocalAddress,
-			RemoteAddress: model.Tunnel1PeeringRemoteAddress,
-		}
-	}
-	tunnel1.Phase1 = vpn.TunnelConfigurationPhase1{
-		DhGroups:             model.Tunnel1Phase1DhGroups,
-		EncryptionAlgorithms: model.Tunnel1Phase1EncryptionAlgorithms,
-		IntegrityAlgorithms:  model.Tunnel1Phase1IntegrityAlgorithms,
-		RekeyTime:            model.Tunnel1Phase1RekeyTime,
-	}
-	tunnel1.Phase2 = vpn.TunnelConfigurationPhase2{
-		DhGroups:             model.Tunnel1Phase2DhGroups,
-		EncryptionAlgorithms: model.Tunnel1Phase2EncryptionAlgorithms,
-		IntegrityAlgorithms:  model.Tunnel1Phase2IntegrityAlgorithms,
-		RekeyTime:            model.Tunnel1Phase2RekeyTime,
-		DpdAction:            model.Tunnel1Phase2DpdAction,
-		StartAction:          model.Tunnel1Phase2StartAction,
-	}
-	tunnel1.PreSharedKey = &model.Tunnel1PreSharedKey
-	payload.Tunnel1 = tunnel1
-
-	tunnel2 := vpn.TunnelConfiguration{
-		RemoteAddress: model.Tunnel2RemoteAddress,
-	}
-	if model.Tunnel2BgpRemoteAsn != nil {
-		tunnel2.Bgp = &vpn.BGPTunnelConfig{
-			RemoteAsn: *model.Tunnel2BgpRemoteAsn,
-		}
-	}
-	if model.Tunnel2PeeringLocalAddress != nil || model.Tunnel2PeeringRemoteAddress != nil {
-		tunnel2.Peering = &vpn.PeeringConfig{
-			LocalAddress:  model.Tunnel2PeeringLocalAddress,
-			RemoteAddress: model.Tunnel2PeeringRemoteAddress,
-		}
-	}
-	tunnel2.Phase1 = vpn.TunnelConfigurationPhase1{
-		DhGroups:             model.Tunnel2Phase1DhGroups,
-		EncryptionAlgorithms: model.Tunnel2Phase1EncryptionAlgorithms,
-		IntegrityAlgorithms:  model.Tunnel2Phase1IntegrityAlgorithms,
-		RekeyTime:            model.Tunnel2Phase1RekeyTime,
-	}
-
-	tunnel2.Phase2 = vpn.TunnelConfigurationPhase2{
-		DhGroups:             model.Tunnel2Phase2DhGroups,
-		EncryptionAlgorithms: model.Tunnel2Phase2EncryptionAlgorithms,
-		IntegrityAlgorithms:  model.Tunnel2Phase2IntegrityAlgorithms,
-		RekeyTime:            model.Tunnel2Phase2RekeyTime,
-		DpdAction:            model.Tunnel2Phase2DpdAction,
-		StartAction:          model.Tunnel2Phase2StartAction,
-	}
-	tunnel2.PreSharedKey = &model.Tunnel2PreSharedKey
-	payload.Tunnel2 = tunnel2
+	payload.Tunnel1 = buildTunnelConfiguration(model.Tunnel1)
+	payload.Tunnel2 = buildTunnelConfiguration(model.Tunnel2)
 
 	return req.CreateGatewayConnectionPayload(payload), nil
 }

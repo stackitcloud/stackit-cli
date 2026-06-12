@@ -64,18 +64,22 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GatewayId:                         testGatewayID,
 		DisplayName:                       "test-connection",
 		Enabled:                           nil,
-		Tunnel1RemoteAddress:              "1.2.3.4",
-		Tunnel1PreSharedKey:               "test-psk-1",
-		Tunnel1Phase1EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
-		Tunnel1Phase1IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
-		Tunnel1Phase2EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
-		Tunnel1Phase2IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
-		Tunnel2RemoteAddress:              "5.6.7.8",
-		Tunnel2PreSharedKey:               "test-psk-2",
-		Tunnel2Phase1EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
-		Tunnel2Phase1IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
-		Tunnel2Phase2EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
-		Tunnel2Phase2IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
+		Tunnel1: tunnelInputModel{
+			RemoteAddress:              "1.2.3.4",
+			PreSharedKey:               "test-psk-1",
+			Phase1EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
+			Phase1IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
+			Phase2EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
+			Phase2IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
+		},
+		Tunnel2: tunnelInputModel{
+			RemoteAddress:              "5.6.7.8",
+			PreSharedKey:               "test-psk-2",
+			Phase1EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
+			Phase1IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
+			Phase2EncryptionAlgorithms: []vpn.PhaseEncryptionAlgorithmsInner{"aes256"},
+			Phase2IntegrityAlgorithms:  []vpn.PhaseIntegrityAlgorithmsInner{"sha2_256"},
+		},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -202,15 +206,15 @@ func TestBuildRequest(t *testing.T) {
 				model.LocalSubnets = []string{"10.0.0.0/24"}
 				model.RemoteSubnets = []string{"192.168.0.0/24"}
 				model.StaticRoutes = []string{"10.1.0.0/24"}
-				model.Tunnel1BgpRemoteAsn = utils.Ptr(int64(65000))
-				model.Tunnel1PeeringLocalAddress = utils.Ptr("169.254.0.1")
-				model.Tunnel1PeeringRemoteAddress = utils.Ptr("169.254.0.2")
-				model.Tunnel1Phase1DhGroups = []vpn.PhaseDhGroupsInner{"14"}
-				model.Tunnel1Phase1RekeyTime = utils.Ptr(int32(3600))
-				model.Tunnel1Phase2DhGroups = []vpn.PhaseDhGroupsInner{"14"}
-				model.Tunnel1Phase2RekeyTime = utils.Ptr(int32(3600))
-				model.Tunnel1Phase2DpdAction = utils.Ptr(vpn.TunnelConfigurationPhase2AllOfDpdAction("restart"))
-				model.Tunnel1Phase2StartAction = utils.Ptr(vpn.TunnelConfigurationPhase2AllOfStartAction("start"))
+				model.Tunnel1.BgpRemoteAsn = utils.Ptr(int64(65000))
+				model.Tunnel1.PeeringLocalAddress = utils.Ptr("169.254.0.1")
+				model.Tunnel1.PeeringRemoteAddress = utils.Ptr("169.254.0.2")
+				model.Tunnel1.Phase1DhGroups = []vpn.PhaseDhGroupsInner{"14"}
+				model.Tunnel1.Phase1RekeyTime = utils.Ptr(int32(3600))
+				model.Tunnel1.Phase2DhGroups = []vpn.PhaseDhGroupsInner{"14"}
+				model.Tunnel1.Phase2RekeyTime = utils.Ptr(int32(3600))
+				model.Tunnel1.Phase2DpdAction = utils.Ptr(vpn.TunnelConfigurationPhase2AllOfDpdAction("restart"))
+				model.Tunnel1.Phase2StartAction = utils.Ptr(vpn.TunnelConfigurationPhase2AllOfStartAction("start"))
 			}),
 			expectedResult: fixtureRequest(func(request *vpn.ApiCreateGatewayConnectionRequest) {
 				payload := vpn.CreateGatewayConnectionPayload{
