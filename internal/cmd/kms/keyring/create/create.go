@@ -13,14 +13,13 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -70,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, _ := buildRequest(ctx, model, apiClient)
+			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
 
 			keyRing, err := req.Execute()
 			if err != nil {
@@ -78,16 +77,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Prevent potential nil pointer dereference
-			if keyRing == nil || keyRing.Id == nil {
+			if keyRing == nil {
 				return fmt.Errorf("API call succeeded but returned an invalid response (missing key ring ID)")
 			}
 
-			keyRingId := *keyRing.Id
+			keyRingId := keyRing.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating key ring", func() error {
-					_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
+					_, err = wait.CreateKeyRingWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, keyRingId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -134,7 +133,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyringCl
 	req := apiClient.CreateKeyRing(ctx, model.ProjectId, model.Region)
 
 	req = req.CreateKeyRingPayload(kms.CreateKeyRingPayload{
-		DisplayName: &model.KeyringName,
+		DisplayName: model.KeyringName,
 
 		// Description should be empty by default and only be overwritten with the descriptionFlag if it was passed.
 		Description: &model.Description,
@@ -152,7 +151,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.KeyRing) error 
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s key ring. KMS key ring ID: %s\n", operationState, utils.PtrString(resp.Id))
+		p.Outputf("%s key ring. KMS key ring ID: %s\n", operationState, resp.Id)
 		return nil
 	})
 }

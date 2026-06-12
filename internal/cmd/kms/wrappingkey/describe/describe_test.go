@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &kms.APIClient{}
+var testClient = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testKeyRingID = uuid.NewString()
 var testWrappingKeyID = uuid.NewString()
@@ -123,10 +123,10 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	got := buildRequest(testCtx, fixtureInputModel(), testClient)
-	want := testClient.GetWrappingKey(testCtx, testProjectId, testRegion, testKeyRingID, testWrappingKeyID)
+	want := testClient.DefaultAPI.GetWrappingKey(testCtx, testProjectId, testRegion, testKeyRingID, testWrappingKeyID)
 	diff := cmp.Diff(got, want,
 		cmp.AllowUnexported(want),
-		cmpopts.EquateComparable(testCtx),
+		cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 	)
 	if diff != "" {
 		t.Fatalf("buildRequest() mismatch (-want +got):\n%s", diff)
@@ -149,18 +149,18 @@ func TestOutputResult(t *testing.T) {
 			description: "table format",
 			outputFmt:   "table",
 			keyRing: &kms.WrappingKey{
-				Id:          utils.Ptr(testWrappingKeyID),
-				DisplayName: utils.Ptr("Test Key Ring"),
-				CreatedAt:   utils.Ptr(testTime),
+				Id:          testWrappingKeyID,
+				DisplayName: "Test Key Ring",
+				CreatedAt:   testTime,
 				Description: utils.Ptr("This is a test key ring."),
-				State:       utils.Ptr(kms.WRAPPINGKEYSTATE_ACTIVE),
-				AccessScope: utils.Ptr(kms.ACCESSSCOPE_PUBLIC),
-				Algorithm:   utils.Ptr(kms.WRAPPINGALGORITHM__2048_OAEP_SHA256),
-				ExpiresAt:   utils.Ptr(testTime),
-				KeyRingId:   utils.Ptr(testKeyRingID),
-				Protection:  utils.Ptr(kms.PROTECTION_SOFTWARE),
+				State:       kms.WRAPPINGKEYSTATE_ACTIVE,
+				AccessScope: kms.ACCESSSCOPE_PUBLIC,
+				Algorithm:   kms.WRAPPINGALGORITHM_RSA_2048_OAEP_SHA256,
+				ExpiresAt:   testTime,
+				KeyRingId:   testKeyRingID,
+				Protection:  kms.PROTECTION_SOFTWARE,
 				PublicKey:   utils.Ptr("-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQ...\n-----END PUBLIC KEY-----"),
-				Purpose:     utils.Ptr(kms.WRAPPINGPURPOSE_ASYMMETRIC_KEY),
+				Purpose:     kms.WRAPPINGPURPOSE_WRAP_ASYMMETRIC_KEY,
 			},
 			expected: fmt.Sprintf(`
  ID           │ %-46s

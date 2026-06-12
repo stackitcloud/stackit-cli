@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -90,14 +90,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiListVersionsRequest {
-	return apiClient.ListVersions(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+	return apiClient.DefaultAPI.ListVersions(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectId, keyId string, resp *kms.VersionList) error {
 	if resp == nil || resp.Versions == nil {
 		return fmt.Errorf("response is nil / empty")
 	}
-	versions := *resp.Versions
+	versions := resp.Versions
 
 	return p.OutputResult(outputFormat, versions, func() error {
 		if len(versions) == 0 {
@@ -109,11 +109,11 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, resp 
 
 		for _, version := range versions {
 			table.AddRow(
-				utils.PtrString(version.KeyId),
-				utils.PtrString(version.Number),
-				utils.PtrString(version.CreatedAt),
+				version.KeyId,
+				version.Number,
+				version.CreatedAt,
 				utils.PtrString(version.DestroyDate),
-				utils.PtrString(version.State),
+				version.State,
 			)
 		}
 
