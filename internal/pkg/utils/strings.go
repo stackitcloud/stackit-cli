@@ -47,11 +47,24 @@ func JoinStringMap(m map[string]string, keyValueSeparator, separator string) str
 
 // JoinStringPtr concatenates the strings of a string slice pointer, each separatore by the
 // [sep] string.
-func JoinStringPtr(vals *[]string, sep string) string {
+func JoinStringPtr[T ~string](vals *[]T, sep string) string {
 	if vals == nil || len(*vals) == 0 {
 		return ""
 	}
-	return strings.Join(*vals, sep)
+	deref := *vals
+	switch len(deref) {
+	case 0:
+		return ""
+	case 1:
+		return string(deref[0])
+	}
+	var b strings.Builder
+	b.WriteString(string(deref[0]))
+	for _, s := range deref[1:] {
+		b.WriteString(sep)
+		b.WriteString(string(s))
+	}
+	return b.String()
 }
 
 // Truncate trims the passed string (if it is not nil). If the input string is

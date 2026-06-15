@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*loadbalancer.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.LoadBalancerCustomEndpointKey), false, genericclient.CreateApiClient[*loadbalancer.APIClient](loadbalancer.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.LoadBalancerCustomEndpointKey), false, loadbalancer.NewAPIClient)
 }

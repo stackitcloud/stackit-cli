@@ -54,6 +54,7 @@ const (
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
+	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
