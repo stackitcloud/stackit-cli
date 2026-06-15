@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &loadbalancer.APIClient{}
+var testClient = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDeleteCredentialsRequest)) loadbalancer.ApiDeleteCredentialsRequest {
-	request := testClient.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+	request := testClient.DefaultAPI.DeleteCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -59,7 +59,7 @@ func fixtureDeleteCredentialRequest(mods ...func(request *loadbalancer.ApiDelete
 }
 
 func fixtureListCredentialsRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest)) loadbalancer.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -140,7 +140,7 @@ func TestBuildDeleteCredentialRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -168,7 +168,7 @@ func TestListCredentialsRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

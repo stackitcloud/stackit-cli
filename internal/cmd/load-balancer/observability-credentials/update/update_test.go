@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -24,24 +24,24 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &loadbalancer.APIClient{}
+	testClient    = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 )
 
-type loadBalancerClientMocked struct {
+type mockSettings struct {
 	getCredentialsError    bool
 	getCredentialsResponse *loadbalancer.GetCredentialsResponse
 }
 
-func (c *loadBalancerClientMocked) UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest {
-	return testClient.UpdateCredentials(ctx, projectId, region, credentialsRef)
-}
-
-func (c *loadBalancerClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*loadbalancer.GetCredentialsResponse, error) {
-	if c.getCredentialsError {
-		return nil, fmt.Errorf("get credentials failed")
+func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
+	return &loadbalancer.DefaultAPIServiceMock{
+		GetCredentialsExecuteMock: utils.Ptr(func(_ loadbalancer.ApiGetCredentialsRequest) (*loadbalancer.GetCredentialsResponse, error) {
+			if s.getCredentialsError {
+				return nil, fmt.Errorf("get credentials failed")
+			}
+			return s.getCredentialsResponse, nil
+		}),
 	}
-	return c.getCredentialsResponse, nil
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -87,7 +87,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsRequest)) loadbalancer.ApiUpdateCredentialsRequest {
-	request := testClient.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+	request := testClient.DefaultAPI.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	request = request.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
 		DisplayName: utils.Ptr("name"),
 		Username:    utils.Ptr("username"),
@@ -232,11 +232,11 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &loadBalancerClientMocked{
+			client := mockSettings{
 				getCredentialsError:    tt.getCredentialsFails,
 				getCredentialsResponse: tt.getCredentialsResponse,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 
 			if err != nil {
 				if !tt.isValid {
@@ -252,6 +252,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(loadbalancer.ApiUpdateCredentialsRequest{}, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
