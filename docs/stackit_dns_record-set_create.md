@@ -24,8 +24,8 @@ stackit dns record-set create [flags]
   -h, --help             Help for "stackit dns record-set create"
       --name string      Name of the record, should be compliant with RFC1035, Section 2.3.4
       --record strings   Records belonging to the record set
-      --ttl int          Time to live, if not provided defaults to the zone's default TTL
-      --type string      Record type, one of ["A" "AAAA" "SOA" "CNAME" "NS" "MX" "TXT" "SRV" "PTR" "ALIAS" "DNAME" "CAA" "DNSKEY" "DS" "LOC" "NAPTR" "SSHFP" "TLSA" "URI" "CERT" "SVCB" "TYPE" "CSYNC" "HINFO" "HTTPS"] (default "A")
+      --ttl int32        Time to live, if not provided defaults to the zone's default TTL
+      --type string      Record type, one of ["A" "AAAA" "SOA" "CNAME" "NS" "MX" "TXT" "SRV" "PTR" "ALIAS" "DNAME" "CAA" "DNSKEY" "DS" "LOC" "NAPTR" "SSHFP" "TLSA" "URI" "CERT" "SVCB" "TYPE" "CSYNC" "HINFO" "HTTPS" "unknown_default_open_api"] (default "A")
       --zone-id string   Zone ID
 ```
 

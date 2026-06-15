@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &dns.APIClient{DefaultAPI: &dns.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 
@@ -65,10 +65,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiCloneZoneRequest)) dns.ApiCloneZoneRequest {
-	request := testClient.CloneZone(testCtx, testProjectId, testZoneId)
+	request := testClient.DefaultAPI.CloneZone(testCtx, testProjectId, testZoneId)
 	request = request.CloneZonePayload(dns.CloneZonePayload{
 		Name:          utils.Ptr("example"),
-		DnsName:       utils.Ptr("example.com"),
+		DnsName:       "example.com",
 		Description:   utils.Ptr("Example"),
 		AdjustRecords: utils.Ptr(false),
 	})
@@ -196,9 +196,9 @@ func TestBuildRequest(t *testing.T) {
 				DnsName: utils.Ptr("example.com"),
 				ZoneId:  testZoneId,
 			},
-			expectedRequest: testClient.CloneZone(testCtx, testProjectId, testZoneId).
+			expectedRequest: testClient.DefaultAPI.CloneZone(testCtx, testProjectId, testZoneId).
 				CloneZonePayload(dns.CloneZonePayload{
-					DnsName: utils.Ptr("example.com"),
+					DnsName: "example.com",
 				}),
 		},
 	}
@@ -208,7 +208,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, dns.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -238,7 +238,7 @@ func TestOutputResult(t *testing.T) {
 			name: "only zone response as argument",
 			args: args{
 				model: fixtureInputModel(),
-				resp:  &dns.ZoneResponse{Zone: &dns.Zone{}},
+				resp:  &dns.ZoneResponse{Zone: dns.Zone{}},
 			},
 			wantErr: false,
 		},

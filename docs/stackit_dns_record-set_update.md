@@ -24,7 +24,7 @@ stackit dns record-set update RECORD_SET_ID [flags]
   -h, --help             Help for "stackit dns record-set update"
       --name string      Name of the record, should be compliant with RFC1035, Section 2.3.4
       --record strings   Records belonging to the record set. If this flag is used, records already created that aren't set when running the command will be deleted
-      --ttl int          Time to live, if not provided defaults to the zone's default TTL
+      --ttl int32        Time to live, if not provided defaults to the zone's default TTL
       --zone-id string   Zone ID
 ```
 

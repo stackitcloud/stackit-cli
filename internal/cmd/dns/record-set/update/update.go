@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
 )
 
 const (
@@ -40,7 +40,7 @@ type inputModel struct {
 	Comment     *string
 	Name        *string
 	Records     *[]string
-	TTL         *int64
+	TTL         *int32
 	Type        *string
 }
 
@@ -68,19 +68,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
 			}
 
-			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
+			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get record set name: %v", err)
 				recordSetLabel = model.RecordSetId
 			}
 
-			typeLabel, err := dnsUtils.GetRecordSetType(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId)
+			typeLabel, err := dnsUtils.GetRecordSetType(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get record set type: %v", err)
 			}
@@ -109,7 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating record set", func() error {
-					_, err = wait.PartialUpdateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateRecordSetWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId, model.RecordSetId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -133,7 +133,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().String(commentFlag, "", "User comment")
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
-	cmd.Flags().Int64(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
+	cmd.Flags().Int32(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set. If this flag is used, records already created that aren't set when running the command will be deleted")
 
 	err := flags.MarkFlagsRequired(cmd, zoneIdFlag)
@@ -152,7 +152,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	comment := flags.FlagToStringPointer(p, cmd, commentFlag)
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	records := flags.FlagToStringSlicePointer(p, cmd, recordFlag)
-	ttl := flags.FlagToInt64Pointer(p, cmd, ttlFlag)
+	ttl := flags.FlagToInt32Pointer(p, cmd, ttlFlag)
 
 	if comment == nil && name == nil && records == nil && ttl == nil {
 		return nil, &errors.EmptyUpdateError{}
@@ -194,15 +194,15 @@ func parseTxtRecord(records *[]string) error {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateRecordSetRequest {
-	var records *[]dns.RecordPayload = nil
+	var records []dns.RecordPayload = nil
 	if model.Records != nil {
-		records = utils.Ptr(make([]dns.RecordPayload, 0))
+		records = make([]dns.RecordPayload, 0)
 		for _, r := range *model.Records {
-			records = utils.Ptr(append(*records, dns.RecordPayload{Content: utils.Ptr(r)}))
+			records = append(records, dns.RecordPayload{Content: r})
 		}
 	}
 
-	req := apiClient.PartialUpdateRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.DefaultAPI.PartialUpdateRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
 	req = req.PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    model.Name,
