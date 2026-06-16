@@ -76,44 +76,32 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a server from an image with id xxx`,
-				`$ stackit server create --machine-type t1.1 --name server1 --image-id xxx`,
-			),
-			examples.NewExample(
-				`Create a server with labels from an image with id xxx`,
-				`$ stackit server create --machine-type t1.1 --name server1 --image-id xxx --labels key=value,foo=bar`,
-			),
-			examples.NewExample(
-				`Create a server with a boot volume`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64`,
+				`Create a server with a boot volume with source type image`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64`,
 			),
 			examples.NewExample(
 				`Create a server with a boot volume from an existing volume`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type volume`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type volume`,
 			),
 			examples.NewExample(
 				`Create a server with a keypair`,
-				`$ stackit server create --machine-type t1.1 --name server1 --image-id xxx --keypair-name example`,
-			),
-			examples.NewExample(
-				`Create a server with a network`,
-				`$ stackit server create --machine-type t1.1 --name server1 --image-id xxx --network-id yyy`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --keypair-name example`,
 			),
 			examples.NewExample(
 				`Create a server with a network interface`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy`,
 			),
 			examples.NewExample(
 				`Create a server with an attached volume`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes zzz`,
 			),
 			examples.NewExample(
 				`Create a server with user data (cloud-init)`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml`,
 			),
 			examples.NewExample(
 				`Create a server with provisioned agent`,
-				`$ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-id yyy --agent-provisioning-policy ALWAYS`,
+				`$ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --agent-provisioning-policy ALWAYS`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -194,6 +182,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceTypeFlag)
 	cmd.MarkFlagsMutuallyExclusive(networkIdFlag, networkInterfaceIdsFlag)
 	cmd.MarkFlagsOneRequired(networkIdFlag, networkInterfaceIdsFlag)
+
+	// hide image-id flag from help command to prevent users from using it alone which leads to errors, because it works only with small images
+	// instead of using image-id alone, boot-volume flags can be used with type image
+	cobra.CheckErr(cmd.Flags().MarkHidden(imageIdFlag))
+
 	cobra.CheckErr(err)
 }
 
@@ -306,7 +299,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
-	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil {
+	if model.BootVolumePerformanceClass != nil || model.BootVolumeSize != nil || model.BootVolumeDeleteOnTermination != nil || (model.BootVolumeSourceId != "" && model.BootVolumeSourceType != "") {
 		payload.BootVolume = &iaas.BootVolume{
 			PerformanceClass:    model.BootVolumePerformanceClass,
 			Size:                model.BootVolumeSize,
