@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -275,6 +276,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateServerRequest {
 	req := apiClient.DefaultAPI.CreateServer(ctx, model.ProjectId, model.Region)
 
+	var userData *string
+	if model.UserData != nil {
+		userData = utils.Ptr(base64.StdEncoding.EncodeToString([]byte(*model.UserData)))
+	}
+
 	payload := iaas.CreateServerPayload{
 		Name:             model.Name,
 		MachineType:      model.MachineType,
@@ -285,7 +291,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		KeypairName:         model.KeypairName,
 		SecurityGroups:      model.SecurityGroups,
 		ServiceAccountMails: model.ServiceAccountMails,
-		UserData:            model.UserData,
+		UserData:            userData,
 		Volumes:             model.Volumes,
 		Labels:              model.Labels,
 	}
