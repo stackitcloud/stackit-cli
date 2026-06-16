@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type inputModel struct {
@@ -79,7 +78,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiListKeyRingsRequest {
-	req := apiClient.ListKeyRings(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListKeyRings(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -88,7 +87,7 @@ func outputResult(p *print.Printer, outputFormat, projectId string, resp *kms.Ke
 		return fmt.Errorf("response was nil / empty")
 	}
 
-	keyRings := *resp.KeyRings
+	keyRings := resp.KeyRings
 
 	return p.OutputResult(outputFormat, keyRings, func() error {
 		if len(keyRings) == 0 {
@@ -102,9 +101,9 @@ func outputResult(p *print.Printer, outputFormat, projectId string, resp *kms.Ke
 		for i := range keyRings {
 			keyRing := keyRings[i]
 			table.AddRow(
-				utils.PtrString(keyRing.Id),
-				utils.PtrString(keyRing.DisplayName),
-				utils.PtrString(keyRing.State),
+				keyRing.Id,
+				keyRing.DisplayName,
+				keyRing.State,
 			)
 		}
 

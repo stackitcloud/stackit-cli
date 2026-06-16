@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -68,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get the key version in its state afterwards
-			resp, err := apiClient.GetVersionExecute(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
+			resp, err := apiClient.DefaultAPI.GetVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key version: %v", err)
 			}
@@ -108,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDestroyVersionRequest {
-	return apiClient.DestroyVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
+	return apiClient.DefaultAPI.DestroyVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -125,7 +124,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Version) erro
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Destroyed version %d of the key %q\n", utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		p.Outputf("Destroyed version %d of the key %q\n", resp.Number, resp.KeyId)
 		return nil
 	})
 }

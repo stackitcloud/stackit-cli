@@ -17,7 +17,7 @@ import (
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 )
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			keyName, err := kmsUtils.GetKeyName(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+			keyName, err := kmsUtils.GetKeyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
 				keyName = model.KeyId
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Don't wait for a month until the deletion was performed.
 			// Just print the deletion date.
-			resp, err := apiClient.GetKeyExecute(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+			resp, err := apiClient.DefaultAPI.GetKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key: %v", err)
 			}
@@ -111,7 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteKeyRequest {
-	req := apiClient.DeleteKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
+	req := apiClient.DefaultAPI.DeleteKey(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 	return req
 }
 
@@ -128,7 +128,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *kms.Key) error {
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Deletion of KMS key %s scheduled successfully for the deletion date: %s\n", utils.PtrString(resp.DisplayName), utils.PtrString(resp.DeletionDate))
+		p.Outputf("Deletion of KMS key %s scheduled successfully for the deletion date: %s\n", resp.DisplayName, utils.PtrString(resp.DeletionDate))
 		return nil
 	})
 }

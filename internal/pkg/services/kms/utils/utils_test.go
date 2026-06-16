@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var (
@@ -33,26 +35,27 @@ type kmsClientMocked struct {
 	getWrappingKeyResp  *kms.WrappingKey
 }
 
-// Implement the KMSClient interface methods for the mock.
-func (m *kmsClientMocked) GetKeyExecute(_ context.Context, _, _, _, _ string) (*kms.Key, error) {
-	if m.getKeyFails {
-		return nil, fmt.Errorf("could not get key")
+func (m *kmsClientMocked) newMock() kms.DefaultAPI {
+	return kms.DefaultAPIServiceMock{
+		GetKeyExecuteMock: utils.Ptr(func(_ kms.ApiGetKeyRequest) (*kms.Key, error) {
+			if m.getKeyFails {
+				return nil, fmt.Errorf("could not get key")
+			}
+			return m.getKeyResp, nil
+		}),
+		GetKeyRingExecuteMock: utils.Ptr(func(_ kms.ApiGetKeyRingRequest) (*kms.KeyRing, error) {
+			if m.getKeyRingFails {
+				return nil, fmt.Errorf("could not get key ring")
+			}
+			return m.getKeyRingResp, nil
+		}),
+		GetWrappingKeyExecuteMock: utils.Ptr(func(_ kms.ApiGetWrappingKeyRequest) (*kms.WrappingKey, error) {
+			if m.getWrappingKeyFails {
+				return nil, fmt.Errorf("could not get wrapping key")
+			}
+			return m.getWrappingKeyResp, nil
+		}),
 	}
-	return m.getKeyResp, nil
-}
-
-func (m *kmsClientMocked) GetKeyRingExecute(_ context.Context, _, _, _ string) (*kms.KeyRing, error) {
-	if m.getKeyRingFails {
-		return nil, fmt.Errorf("could not get key ring")
-	}
-	return m.getKeyRingResp, nil
-}
-
-func (m *kmsClientMocked) GetWrappingKeyExecute(_ context.Context, _, _, _, _ string) (*kms.WrappingKey, error) {
-	if m.getWrappingKeyFails {
-		return nil, fmt.Errorf("could not get wrapping key")
-	}
-	return m.getWrappingKeyResp, nil
 }
 
 func TestGetKeyName(t *testing.T) {
@@ -68,7 +71,7 @@ func TestGetKeyName(t *testing.T) {
 		{
 			description: "base",
 			getKeyResp: &kms.Key{
-				DisplayName: &keyName,
+				DisplayName: keyName,
 			},
 			isValid:        true,
 			expectedOutput: testKeyName,
@@ -87,7 +90,7 @@ func TestGetKeyName(t *testing.T) {
 				getKeyResp:  tt.getKeyResp,
 			}
 
-			output, err := GetKeyName(context.Background(), client, testProjectId, testRegion, testKeyRingId, testKeyId)
+			output, err := GetKeyName(context.Background(), client.newMock(), testProjectId, testRegion, testKeyRingId, testKeyId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
@@ -138,7 +141,7 @@ func TestGetKeyDeletionDate(t *testing.T) {
 				getKeyResp:  tt.getKeyResp,
 			}
 
-			output, err := GetKeyDeletionDate(context.Background(), client, testProjectId, testRegion, testKeyRingId, testKeyId)
+			output, err := GetKeyDeletionDate(context.Background(), client.newMock(), testProjectId, testRegion, testKeyRingId, testKeyId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
@@ -170,7 +173,7 @@ func TestGetKeyRingName(t *testing.T) {
 		{
 			description: "base",
 			getKeyRingResp: &kms.KeyRing{
-				DisplayName: &keyRingName,
+				DisplayName: keyRingName,
 			},
 			isValid:        true,
 			expectedOutput: testKeyRingName,
@@ -189,7 +192,7 @@ func TestGetKeyRingName(t *testing.T) {
 				getKeyRingResp:  tt.getKeyRingResp,
 			}
 
-			output, err := GetKeyRingName(context.Background(), client, testProjectId, testKeyRingId, testRegion)
+			output, err := GetKeyRingName(context.Background(), client.newMock(), testProjectId, testKeyRingId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
@@ -219,7 +222,7 @@ func TestGetWrappingKeyName(t *testing.T) {
 		{
 			description: "base",
 			getWrappingKeyResp: &kms.WrappingKey{
-				DisplayName: &wrappingKeyName,
+				DisplayName: wrappingKeyName,
 			},
 			isValid:        true,
 			expectedOutput: testWrappingKeyName,
@@ -238,7 +241,7 @@ func TestGetWrappingKeyName(t *testing.T) {
 				getWrappingKeyResp:  tt.getWrappingKeyResp,
 			}
 
-			output, err := GetWrappingKeyName(context.Background(), client, testProjectId, testRegion, testKeyRingId, testWrappingKeyId)
+			output, err := GetWrappingKeyName(context.Background(), client.newMock(), testProjectId, testRegion, testKeyRingId, testWrappingKeyId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)

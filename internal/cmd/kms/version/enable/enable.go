@@ -8,8 +8,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -72,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Enabling key version", func() error {
-					_, err = wait.EnableKeyVersionWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).WaitWithContext(ctx)
+					_, err = wait.EnableKeyVersionWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -81,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get the key version in its state afterwards
-			resp, err := apiClient.GetVersionExecute(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
+			resp, err := apiClient.DefaultAPI.GetVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key version: %v", err)
 			}
@@ -121,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiEnableVersionRequest {
-	return apiClient.EnableVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
+	return apiClient.DefaultAPI.EnableVersion(ctx, model.ProjectId, model.Region, model.KeyRingId, model.KeyId, model.VersionNumber)
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -142,7 +141,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resp *kms.V
 		if async {
 			operationState = "Triggered enable of"
 		}
-		p.Outputf("%s version %d of the key %q\n", operationState, utils.PtrValue(resp.Number), utils.PtrValue(resp.KeyId))
+		p.Outputf("%s version %d of the key %q\n", operationState, resp.Number, resp.KeyId)
 		return nil
 	})
 }
