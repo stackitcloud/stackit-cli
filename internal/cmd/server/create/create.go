@@ -182,6 +182,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsMutuallyExclusive(imageIdFlag, bootVolumeSourceTypeFlag)
 	cmd.MarkFlagsMutuallyExclusive(networkIdFlag, networkInterfaceIdsFlag)
 	cmd.MarkFlagsOneRequired(networkIdFlag, networkInterfaceIdsFlag)
+
+	// hide image-id flag from help command to prevent users from using it alone which leads to errors
+	// instead of using image-id alone, boot-volume flags can be used with type image
+	cobra.CheckErr(cmd.Flags().MarkHidden(imageIdFlag))
+
 	cobra.CheckErr(err)
 }
 
