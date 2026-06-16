@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -87,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiListWrappingKeysRequest {
-	req := apiClient.ListWrappingKeys(ctx, model.ProjectId, model.Region, model.KeyRingId)
+	req := apiClient.DefaultAPI.ListWrappingKeys(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
 }
 
@@ -102,7 +101,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingId string, resp *kms.Wr
 		return fmt.Errorf("response is nil / empty")
 	}
 
-	wrappingKeys := *resp.WrappingKeys
+	wrappingKeys := resp.WrappingKeys
 
 	return p.OutputResult(outputFormat, wrappingKeys, func() error {
 		if len(wrappingKeys) == 0 {
@@ -115,12 +114,12 @@ func outputResult(p *print.Printer, outputFormat, keyRingId string, resp *kms.Wr
 		for i := range wrappingKeys {
 			wrappingKey := wrappingKeys[i]
 			table.AddRow(
-				utils.PtrString(wrappingKey.Id),
-				utils.PtrString(wrappingKey.DisplayName),
-				utils.PtrString(wrappingKey.Purpose),
-				utils.PtrString(wrappingKey.Algorithm),
-				utils.PtrString(wrappingKey.ExpiresAt),
-				utils.PtrString(wrappingKey.State),
+				wrappingKey.Id,
+				wrappingKey.DisplayName,
+				wrappingKey.Purpose,
+				wrappingKey.Algorithm,
+				wrappingKey.ExpiresAt,
+				wrappingKey.State,
 			)
 		}
 

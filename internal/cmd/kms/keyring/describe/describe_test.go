@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &kms.APIClient{}
+var testClient = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testKeyRingID = uuid.NewString()
 var testTime = time.Time{}
@@ -114,10 +114,10 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	got := buildRequest(testCtx, fixtureInputModel(), testClient)
-	want := testClient.GetKeyRing(testCtx, testProjectId, testRegion, testKeyRingID)
+	want := testClient.DefaultAPI.GetKeyRing(testCtx, testProjectId, testRegion, testKeyRingID)
 	diff := cmp.Diff(got, want,
 		cmp.AllowUnexported(want),
-		cmpopts.EquateComparable(testCtx),
+		cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 	)
 	if diff != "" {
 		t.Fatalf("buildRequest() mismatch (-want +got):\n%s", diff)
@@ -141,11 +141,11 @@ func TestOutputResult(t *testing.T) {
 			description: "table format",
 			outputFmt:   "table",
 			keyRing: &kms.KeyRing{
-				Id:          utils.Ptr(testKeyRingID),
-				DisplayName: utils.Ptr("Test Key Ring"),
-				CreatedAt:   utils.Ptr(testTime),
+				Id:          testKeyRingID,
+				DisplayName: "Test Key Ring",
+				CreatedAt:   testTime,
 				Description: utils.Ptr("This is a test key ring."),
-				State:       utils.Ptr(kms.KEYRINGSTATE_ACTIVE),
+				State:       kms.KEYRINGSTATE_ACTIVE,
 			},
 			expected: fmt.Sprintf(`
  ID           │ %-37s

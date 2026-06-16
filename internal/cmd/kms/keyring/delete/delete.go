@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	kmsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -54,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			keyRingLabel, err := kmsUtils.GetKeyRingName(ctx, apiClient, model.ProjectId, model.KeyRingId, model.Region)
+			keyRingLabel, err := kmsUtils.GetKeyRingName(ctx, apiClient.DefaultAPI, model.ProjectId, model.KeyRingId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key ring name: %v", err)
 				keyRingLabel = model.KeyRingId
@@ -101,6 +101,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiDeleteKeyRingRequest {
-	req := apiClient.DeleteKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingId)
+	req := apiClient.DefaultAPI.DeleteKeyRing(ctx, model.ProjectId, model.Region, model.KeyRingId)
 	return req
 }
