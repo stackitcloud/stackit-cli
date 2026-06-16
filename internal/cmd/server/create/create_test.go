@@ -125,7 +125,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 		KeypairName:         utils.Ptr("test-keypair-name"),
 		SecurityGroups:      []string{"test-security-groups"},
 		ServiceAccountMails: []string{"test-service-account"},
-		UserData:            utils.Ptr("test-user-data"),
+		UserData:            utils.Ptr("dGVzdC11c2VyLWRhdGE="),
 		Volumes:             []string{testVolumeId},
 		BootVolume: &iaas.BootVolume{
 			PerformanceClass:    utils.Ptr("test-perf-class"),
@@ -394,6 +394,17 @@ func TestBuildRequest(t *testing.T) {
 				payload.Agent = &iaas.ServerAgent{
 					Provisioned: utils.Ptr(true),
 				}
+				*request = request.CreateServerPayload(payload)
+			}),
+		},
+		{
+			description: "with user data",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.UserData = utils.Ptr("cloud-init data")
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateServerRequest) {
+				payload := fixturePayload()
+				payload.UserData = utils.Ptr("Y2xvdWQtaW5pdCBkYXRh")
 				*request = request.CreateServerPayload(payload)
 			}),
 		},
