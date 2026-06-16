@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &loadbalancer.APIClient{}
+var testClient = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiGetCredentialsRequest)) loadbalancer.ApiGetCredentialsRequest {
-	request := testClient.GetCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+	request := testClient.DefaultAPI.GetCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,7 +160,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

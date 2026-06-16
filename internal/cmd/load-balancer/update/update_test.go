@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -22,18 +22,18 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &loadbalancer.APIClient{}
+var testClient = &loadbalancer.APIClient{DefaultAPI: &loadbalancer.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 var testPayload = loadbalancer.UpdateLoadBalancerPayload{
 	ExternalAddress: utils.Ptr(""),
 
-	Listeners: &[]loadbalancer.Listener{
+	Listeners: []loadbalancer.Listener{
 		{
 			DisplayName: utils.Ptr(""),
-			Port:        utils.Ptr(int64(0)),
-			Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
-			ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+			Port:        utils.Ptr(int32(0)),
+			Protocol:    loadbalancer.ListenerProtocol("unknown_default_open_api").Ptr(),
+			ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 				{
 					Name: utils.Ptr(""),
 				},
@@ -48,15 +48,15 @@ var testPayload = loadbalancer.UpdateLoadBalancerPayload{
 		},
 	},
 	Name: utils.Ptr(""),
-	Networks: &[]loadbalancer.Network{
+	Networks: []loadbalancer.Network{
 		{
 			NetworkId: utils.Ptr(""),
-			Role:      loadbalancer.NetworkRole("").Ptr(),
+			Role:      loadbalancer.NetworkRole("unknown_default_open_api").Ptr(),
 		},
 	},
 	Options: &loadbalancer.LoadBalancerOptions{
 		AccessControl: &loadbalancer.LoadbalancerOptionAccessControl{
-			AllowedSourceRanges: &[]string{
+			AllowedSourceRanges: []string{
 				"",
 			},
 		},
@@ -73,21 +73,21 @@ var testPayload = loadbalancer.UpdateLoadBalancerPayload{
 		},
 		PrivateNetworkOnly: utils.Ptr(false),
 	},
-	TargetPools: &[]loadbalancer.TargetPool{
+	TargetPools: []loadbalancer.TargetPool{
 		{
 			ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-				HealthyThreshold:   utils.Ptr(int64(0)),
+				HealthyThreshold:   utils.Ptr(int32(0)),
 				Interval:           utils.Ptr(""),
 				IntervalJitter:     utils.Ptr(""),
 				Timeout:            utils.Ptr(""),
-				UnhealthyThreshold: utils.Ptr(int64(0)),
+				UnhealthyThreshold: utils.Ptr(int32(0)),
 			},
 			Name: utils.Ptr(""),
 			SessionPersistence: &loadbalancer.SessionPersistence{
 				UseSourceIpAddress: utils.Ptr(false),
 			},
-			TargetPort: utils.Ptr(int64(0)),
-			Targets: &[]loadbalancer.Target{
+			TargetPort: utils.Ptr(int32(0)),
+			Targets: []loadbalancer.Target{
 				{
 					DisplayName: utils.Ptr(""),
 					Ip:          utils.Ptr(""),
@@ -209,7 +209,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateLoadBalancerRequest)) loadbalancer.ApiUpdateLoadBalancerRequest {
-	request := testClient.UpdateLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
+	request := testClient.DefaultAPI.UpdateLoadBalancer(testCtx, testProjectId, testRegion, testLoadBalancerName)
 	request = request.UpdateLoadBalancerPayload(testPayload)
 	for _, mod := range mods {
 		mod(&request)
@@ -299,7 +299,9 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInputWithOptions(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, nil, tt.isValid, []testutils.TestingOption{
+				testutils.WithCmpOptions(cmpopts.EquateEmpty()),
+			})
 		})
 	}
 }
@@ -321,10 +323,10 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
-
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, loadbalancer.DefaultAPIService{}),
+				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

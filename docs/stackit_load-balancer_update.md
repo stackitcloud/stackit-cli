@@ -6,7 +6,7 @@ Updates a Load Balancer
 
 Updates a load balancer.
 The payload can be provided as a JSON string or a file path prefixed with "@".
-See https://docs.api.stackit.cloud/documentation/load-balancer/version/v1#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.
+See https://docs.api.stackit.cloud/documentation/load-balancer/version/v2#tag/Load-Balancer/operation/APIService_UpdateLoadBalancer for information regarding the payload structure.
 
 ```
 stackit load-balancer update LOAD_BALANCER_NAME [flags]

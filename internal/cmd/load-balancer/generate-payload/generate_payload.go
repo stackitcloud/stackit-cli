@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -36,9 +36,9 @@ type inputModel struct {
 var (
 	defaultPayloadListener = &loadbalancer.Listener{
 		DisplayName: utils.Ptr(""),
-		Port:        utils.Ptr(int64(0)),
+		Port:        utils.Ptr(int32(0)),
 		Protocol:    loadbalancer.ListenerProtocol("").Ptr(),
-		ServerNameIndicators: &[]loadbalancer.ServerNameIndicator{
+		ServerNameIndicators: []loadbalancer.ServerNameIndicator{
 			{
 				Name: utils.Ptr(""),
 			},
@@ -59,18 +59,18 @@ var (
 
 	defaultPayloadTargetPool = &loadbalancer.TargetPool{
 		ActiveHealthCheck: &loadbalancer.ActiveHealthCheck{
-			HealthyThreshold:   utils.Ptr(int64(0)),
+			HealthyThreshold:   utils.Ptr(int32(0)),
 			Interval:           utils.Ptr(""),
 			IntervalJitter:     utils.Ptr(""),
 			Timeout:            utils.Ptr(""),
-			UnhealthyThreshold: utils.Ptr(int64(0)),
+			UnhealthyThreshold: utils.Ptr(int32(0)),
 		},
 		Name: utils.Ptr(""),
 		SessionPersistence: &loadbalancer.SessionPersistence{
 			UseSourceIpAddress: utils.Ptr(false),
 		},
-		TargetPort: utils.Ptr(int64(0)),
-		Targets: &[]loadbalancer.Target{
+		TargetPort: utils.Ptr(int32(0)),
+		Targets: []loadbalancer.Target{
 			{
 				DisplayName: utils.Ptr(""),
 				Ip:          utils.Ptr(""),
@@ -80,16 +80,16 @@ var (
 
 	DefaultCreateLoadBalancerPayload = loadbalancer.CreateLoadBalancerPayload{
 		ExternalAddress: utils.Ptr(""),
-		Listeners: &[]loadbalancer.Listener{
+		Listeners: []loadbalancer.Listener{
 			*defaultPayloadListener,
 		},
 		Name: utils.Ptr(""),
-		Networks: &[]loadbalancer.Network{
+		Networks: []loadbalancer.Network{
 			*defaultPayloadNetwork,
 		},
 		Options: &loadbalancer.LoadBalancerOptions{
 			AccessControl: &loadbalancer.LoadbalancerOptionAccessControl{
-				AllowedSourceRanges: &[]string{
+				AllowedSourceRanges: []string{
 					"",
 				},
 			},
@@ -106,7 +106,7 @@ var (
 			},
 			PrivateNetworkOnly: utils.Ptr(false),
 		},
-		TargetPools: &[]loadbalancer.TargetPool{
+		TargetPools: []loadbalancer.TargetPool{
 			*defaultPayloadTargetPool,
 		},
 	}
@@ -118,7 +118,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Short: "Generates a payload to create/update a Load Balancer",
 		Long: fmt.Sprintf("%s\n%s",
 			"Generates a JSON payload with values to be used as --payload input for load balancer creation or update.",
-			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v1#tag/Load-Balancer/operation/APIService_CreateLoadBalancer for information regarding the payload structure.",
+			"See https://docs.api.stackit.cloud/documentation/load-balancer/version/v2#tag/Load-Balancer/operation/APIService_CreateLoadBalancer for information regarding the payload structure.",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
@@ -203,7 +203,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetLoadBalancerRequest {
-	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, *model.LoadBalancerName)
+	req := apiClient.DefaultAPI.GetLoadBalancer(ctx, model.ProjectId, model.Region, *model.LoadBalancerName)
 	return req
 }
 
@@ -249,12 +249,12 @@ func outputUpdateResult(p *print.Printer, filePath *string, payload *loadbalance
 	return nil
 }
 
-func modifyListener(resp *loadbalancer.LoadBalancer) *[]loadbalancer.Listener {
-	listeners := *resp.Listeners
+func modifyListener(resp *loadbalancer.LoadBalancer) []loadbalancer.Listener {
+	listeners := resp.Listeners
 
 	for i := range listeners {
 		listeners[i].Name = nil
 	}
 
-	return &listeners
+	return listeners
 }

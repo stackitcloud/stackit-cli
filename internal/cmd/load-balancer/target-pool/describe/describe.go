@@ -9,7 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -68,12 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read load balancer: %w", err)
 			}
 
-			targetPool := lbUtils.FindLoadBalancerTargetPoolByName(*resp.TargetPools, model.TargetPoolName)
+			targetPool := lbUtils.FindLoadBalancerTargetPoolByName(resp.TargetPools, model.TargetPoolName)
 			if targetPool == nil {
 				return fmt.Errorf("target pool not found")
 			}
 
-			listener := lbUtils.FindLoadBalancerListenerByTargetPool(*resp.Listeners, *targetPool.Name)
+			listener := lbUtils.FindLoadBalancerListenerByTargetPool(resp.Listeners, *targetPool.Name)
 
 			return outputResult(params.Printer, model.OutputFormat, *targetPool, listener)
 		},
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetLoadBalancerRequest {
-	req := apiClient.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.LBName)
+	req := apiClient.DefaultAPI.GetLoadBalancer(ctx, model.ProjectId, model.Region, model.LBName)
 	return req
 }
 
@@ -138,17 +138,17 @@ func outputResult(p *print.Printer, outputFormat string, targetPool loadbalancer
 				healthCheckInterval = *targetPool.ActiveHealthCheck.Interval
 			}
 			if targetPool.ActiveHealthCheck.UnhealthyThreshold != nil {
-				healthCheckUnhealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.UnhealthyThreshold, 10)
+				healthCheckUnhealthyThreshold = strconv.FormatInt(int64(*targetPool.ActiveHealthCheck.UnhealthyThreshold), 10)
 			}
 			if targetPool.ActiveHealthCheck.HealthyThreshold != nil {
-				healthCheckHealthyThreshold = strconv.FormatInt(*targetPool.ActiveHealthCheck.HealthyThreshold, 10)
+				healthCheckHealthyThreshold = strconv.FormatInt(int64(*targetPool.ActiveHealthCheck.HealthyThreshold), 10)
 			}
 		}
 
 		targets := "-"
 		if targetPool.Targets != nil {
 			var targetsSlice []string
-			for _, target := range *targetPool.Targets {
+			for _, target := range targetPool.Targets {
 				targetStr := fmt.Sprintf("%s (%s)", *target.DisplayName, *target.Ip)
 				targetsSlice = append(targetsSlice, targetStr)
 			}
