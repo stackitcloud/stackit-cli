@@ -28,8 +28,8 @@ stackit kms wrapping-key create [flags]
   -h, --help                 Help for "stackit kms wrapping-key create"
       --keyring-id string    ID of the KMS key ring
       --name string          The display name to distinguish multiple wrapping keys
-      --protection string    The underlying system that is responsible for protecting the wrapping key material. (one of: [software])
-      --purpose string       Purpose of the wrapping key. (one of: [wrap_symmetric_key, wrap_asymmetric_key])
+      --protection string    The underlying system that is responsible for protecting the key material. (one of: [software])
+      --purpose string       Purpose of the key. (one of: [wrap_symmetric_key, wrap_asymmetric_key])
 ```
 
 ### Options inherited from parent commands

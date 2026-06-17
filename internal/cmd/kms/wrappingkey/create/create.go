@@ -13,8 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -39,24 +39,23 @@ var (
 	purposeFlag = flags.StringEnumFlag(
 		"purpose",
 		kms.AllowedWrappingPurposeEnumValues,
-		"Purpose of the wrapping key.",
+		"Purpose of the key.",
 	)
 	protectionFlag = flags.StringEnumFlag(
 		"protection",
 		kms.AllowedProtectionEnumValues,
-		"The underlying system that is responsible for protecting the wrapping key material.",
-	)
+		"The underlying system that is responsible for protecting the key material.")
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId string
 
-	Algorithm   *kms.WrappingAlgorithm
+	Algorithm   kms.WrappingAlgorithm
 	Description *string
 	Name        *string
-	Purpose     *kms.WrappingPurpose
-	Protection  *kms.Protection
+	Purpose     kms.WrappingPurpose
+	Protection  kms.Protection
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -92,7 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, _ := buildRequest(ctx, model, apiClient)
+			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
 			wrappingKey, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS wrapping key: %w", err)
@@ -101,7 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating wrapping key", func() error {
-					_, err = wait.CreateWrappingKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, *wrappingKey.KeyRingId, *wrappingKey.Id).WaitWithContext(ctx)
+					_, err = wait.CreateWrappingKeyWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, wrappingKey.KeyRingId, wrappingKey.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -126,11 +125,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		Algorithm:       algorithmFlag.Ptr(),
+		Algorithm:       algorithmFlag.Get(),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Purpose:         purposeFlag.Ptr(),
-		Protection:      protectionFlag.Ptr(),
+		Purpose:         purposeFlag.Get(),
+		Protection:      protectionFlag.Get(),
 	}
 
 	p.DebugInputModel(model)
@@ -145,11 +144,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsWrappingK
 	req := apiClient.CreateWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingId)
 
 	req = req.CreateWrappingKeyPayload(kms.CreateWrappingKeyPayload{
-		DisplayName: model.Name,
+		DisplayName: utils.PtrString(model.Name),
 		Description: model.Description,
-		Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
-		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(model.Purpose),
-		Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(model.Protection),
+		Algorithm:   model.Algorithm,
+		Purpose:     model.Purpose,
+		Protection:  model.Protection,
 	})
 	return req, nil
 }
@@ -164,7 +163,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.WrappingKey) er
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s wrapping key. Wrapping key ID: %s\n", operationState, utils.PtrString(resp.Id))
+		p.Outputf("%s wrapping key. Wrapping key ID: %s\n", operationState, resp.Id)
 		return nil
 	})
 }
@@ -172,7 +171,6 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.WrappingKey) er
 func configureFlags(cmd *cobra.Command) {
 	algorithmFlag.Register(cmd.Flags())
 	purposeFlag.Register(cmd.Flags())
-	// backend was deprectaed in /v1beta, but protection is a required attribute with value "software"
 	protectionFlag.Register(cmd.Flags())
 
 	// All further non Enum Flags

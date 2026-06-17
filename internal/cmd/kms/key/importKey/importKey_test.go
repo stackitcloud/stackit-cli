@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx           = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient        = &kms.APIClient{}
+	testClient        = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId     = uuid.NewString()
 	testKeyRingId     = uuid.NewString()
 	testKeyId         = uuid.NewString()
@@ -67,8 +67,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		KeyRingId:     testKeyRingId,
 		KeyId:         testKeyId,
-		WrappedKey:    &testWrappedKey,
-		WrappingKeyId: &testWrappingKeyId,
+		WrappedKey:    testWrappedKey,
+		WrappingKeyId: testWrappingKeyId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -78,10 +78,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiImportKeyRequest)) kms.ApiImportKeyRequest {
-	request := testClient.ImportKey(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId)
+	request := testClient.DefaultAPI.ImportKey(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId)
 	request = request.ImportKeyPayload(kms.ImportKeyPayload{
-		WrappedKey:    &testWrappedKey,
-		WrappingKeyId: &testWrappingKeyId,
+		WrappedKey:    testWrappedKey,
+		WrappingKeyId: testWrappingKeyId,
 	})
 
 	for _, mod := range mods {
@@ -296,14 +296,14 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			if err != nil {
 				t.Fatalf("error building request: %v", err)
 			}
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

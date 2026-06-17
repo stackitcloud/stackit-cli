@@ -13,8 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -45,20 +45,19 @@ var (
 	protectionFlag = flags.StringEnumFlag(
 		"protection",
 		kms.AllowedProtectionEnumValues,
-		"The underlying system that is responsible for protecting the key material.",
-	)
+		"The underlying system that is responsible for protecting the key material.")
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId string
 
-	Algorithm   *kms.Algorithm
+	Algorithm   kms.Algorithm
 	Description *string
 	Name        *string
 	ImportOnly  bool // Default false
-	Purpose     *kms.Purpose
-	Protection  *kms.Protection
+	Purpose     kms.Purpose
+	Protection  kms.Protection
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -106,7 +105,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, _ := buildRequest(ctx, model, apiClient)
+			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS key: %w", err)
@@ -115,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating key", func() error {
-					_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, *resp.Id).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, resp.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -139,12 +138,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		Algorithm:       algorithmFlag.Ptr(),
+		Algorithm:       algorithmFlag.Get(),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
-		Purpose:         purposeFlag.Ptr(),
-		Protection:      protectionFlag.Ptr(),
+		Purpose:         purposeFlag.Get(),
+		Protection:      protectionFlag.Get(),
 	}
 
 	p.DebugInputModel(model)
@@ -159,12 +158,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 	req := apiClient.CreateKey(ctx, model.ProjectId, model.Region, model.KeyRingId)
 
 	req = req.CreateKeyPayload(kms.CreateKeyPayload{
-		DisplayName: model.Name,
+		DisplayName: utils.PtrString(model.Name),
 		Description: model.Description,
-		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
-		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(model.Purpose),
+		Algorithm:   model.Algorithm,
+		Purpose:     model.Purpose,
 		ImportOnly:  &model.ImportOnly,
-		Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(model.Protection),
+		Protection:  model.Protection,
 	})
 	return req, nil
 }
@@ -179,7 +178,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s the KMS key %q. Key ID: %s\n", operationState, utils.PtrString(resp.DisplayName), utils.PtrString(resp.Id))
+		p.Outputf("%s the KMS key %q. Key ID: %s\n", operationState, resp.DisplayName, resp.Id)
 		return nil
 	})
 }

@@ -94,7 +94,7 @@ func TestStringEnumFlag_DefaultValue(t *testing.T) {
 func TestStringEnumFlag_Usage(t *testing.T) {
 	f := StringEnumFlag("test", []string{"a", "b"}, "docs")
 	usage := f.Usage()
-	if usage != "docs (possible values: [a, b])" {
+	if usage != "docs (one of: [a, b])" {
 		t.Errorf("Expected usage 'docs (possible values: [a, b])', got %q", usage)
 	}
 }
@@ -102,7 +102,7 @@ func TestStringEnumFlag_Usage(t *testing.T) {
 func TestStringEnumFlag_UnknownDefaultOpenAPI(t *testing.T) {
 	f := StringEnumFlag("test", []string{"a", "unknown_default_open_api", "b"}, "docs")
 	usage := f.Usage()
-	if usage != "docs (possible values: [a, b])" {
+	if usage != "docs (one of: [a, b])" {
 		t.Errorf("Expected unknown_default_open_api to be filtered out, got %q", usage)
 	}
 }
@@ -116,7 +116,7 @@ func TestStringEnumFlag_Register(t *testing.T) {
 	if flag == nil {
 		t.Fatalf("Expected flag 'my-flag' to be registered")
 	}
-	if flag.Usage != "docs (possible values: [a, b])" {
+	if flag.Usage != "docs (one of: [a, b])" {
 		t.Errorf("Expected flag usage to be set correctly")
 	}
 }

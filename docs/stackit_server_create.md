@@ -13,35 +13,26 @@ stackit server create [flags]
 ### Examples
 
 ```
-  Create a server from an image with id xxx
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx
-
-  Create a server with labels from an image with id xxx
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --labels key=value,foo=bar
-
-  Create a server with a boot volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64
+  Create a server with a boot volume with source type image
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64
 
   Create a server with a boot volume from an existing volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type volume
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type volume
 
   Create a server with a keypair
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --keypair-name example
-
-  Create a server with a network
-  $ stackit server create --machine-type t1.1 --name server1 --image-id xxx --network-id yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --keypair-name example
 
   Create a server with a network interface
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-interface-ids yyy
 
   Create a server with an attached volume
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes yyy
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --volumes zzz
 
   Create a server with user data (cloud-init)
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --user-data @path/to/file.yaml
 
   Create a server with provisioned agent
-  $ stackit server create --machine-type t1.1 --name server1 --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --network-id yyy --agent-provisioning-policy ALWAYS
+  $ stackit server create --machine-type g2i.1 --name server1 --network-id yyy --boot-volume-source-id xxx --boot-volume-source-type image --boot-volume-size 64 --agent-provisioning-policy ALWAYS
 ```
 
 ### Options
@@ -56,7 +47,6 @@ stackit server create [flags]
       --boot-volume-source-id string           ID of the source object of boot volume. It can be either an image or volume ID
       --boot-volume-source-type string         Type of the source object of boot volume. It can be either  'image' or 'volume'
   -h, --help                                   Help for "stackit server create"
-      --image-id string                        The image ID to be used for an ephemeral disk on the server. Either 'image-id' or 'boot-volume-...' flags are required
       --keypair-name string                    The name of the SSH keypair used during the server creation
       --labels stringToString                  Labels are key-value string pairs which can be attached to a server. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --machine-type string                    Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/

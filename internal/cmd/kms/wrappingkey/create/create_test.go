@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -18,9 +18,9 @@ import (
 
 const (
 	testRegion      = "eu01"
-	testAlgorithm   = kms.WRAPPINGALGORITHM__2048_OAEP_SHA256_AES_256_KEY_WRAP
+	testAlgorithm   = kms.WRAPPINGALGORITHM_RSA_2048_OAEP_SHA256
 	testDisplayName = "my-key"
-	testPurpose     = kms.WRAPPINGPURPOSE_ASYMMETRIC_KEY
+	testPurpose     = kms.WRAPPINGPURPOSE_WRAP_ASYMMETRIC_KEY
 	testDescription = "my key description"
 	testProtection  = kms.PROTECTION_SOFTWARE
 )
@@ -29,7 +29,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &kms.APIClient{}
+	testClient    = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testKeyRingId = uuid.NewString()
 )
@@ -61,11 +61,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		KeyRingId:   testKeyRingId,
-		Algorithm:   utils.Ptr(testAlgorithm),
+		Algorithm:   testAlgorithm,
 		Name:        utils.Ptr(testDisplayName),
-		Purpose:     utils.Ptr(testPurpose),
+		Purpose:     testPurpose,
 		Description: utils.Ptr(testDescription),
-		Protection:  utils.Ptr(testProtection),
+		Protection:  testProtection,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -75,13 +75,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiCreateWrappingKeyRequest)) kms.ApiCreateWrappingKeyRequest {
-	request := testClient.CreateWrappingKey(testCtx, testProjectId, testRegion, testKeyRingId)
+	request := testClient.DefaultAPI.CreateWrappingKey(testCtx, testProjectId, testRegion, testKeyRingId)
 	request = request.CreateWrappingKeyPayload(kms.CreateWrappingKeyPayload{
-		Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
-		DisplayName: utils.Ptr(testDisplayName),
-		Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
+		Algorithm:   testAlgorithm,
+		DisplayName: testDisplayName,
+		Purpose:     testPurpose,
 		Description: utils.Ptr(testDescription),
-		Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
+		Protection:  testProtection,
 	})
 
 	for _, mod := range mods {
@@ -248,24 +248,24 @@ func TestBuildRequest(t *testing.T) {
 				model.Description = nil
 			}),
 			expectedRequest: fixtureRequest().CreateWrappingKeyPayload(kms.CreateWrappingKeyPayload{
-				Algorithm:   kms.CreateWrappingKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
-				DisplayName: utils.Ptr(testDisplayName),
-				Purpose:     kms.CreateWrappingKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
-				Protection:  kms.CreateWrappingKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
+				Algorithm:   testAlgorithm,
+				DisplayName: testDisplayName,
+				Purpose:     testPurpose,
+				Protection:  testProtection,
 			}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			if err != nil {
 				t.Fatalf("error building request: %v", err)
 			}
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

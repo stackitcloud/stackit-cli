@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -30,7 +30,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &kms.APIClient{}
+	testClient    = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testKeyRingId = uuid.NewString()
 )
@@ -63,12 +63,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		KeyRingId:   testKeyRingId,
-		Algorithm:   utils.Ptr(testAlgorithm),
+		Algorithm:   testAlgorithm,
 		Name:        utils.Ptr(testDisplayName),
-		Purpose:     utils.Ptr(testPurpose),
+		Purpose:     testPurpose,
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  true, // Watch out: ImportOnly is not testImportOnly!
-		Protection:  utils.Ptr(testProtection),
+		Protection:  testProtection,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -78,14 +78,14 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiCreateKeyRequest)) kms.ApiCreateKeyRequest {
-	request := testClient.CreateKey(testCtx, testProjectId, testRegion, testKeyRingId)
+	request := testClient.DefaultAPI.CreateKey(testCtx, testProjectId, testRegion, testKeyRingId)
 	request = request.CreateKeyPayload(kms.CreateKeyPayload{
-		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
-		DisplayName: utils.Ptr(testDisplayName),
-		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
+		Algorithm:   testAlgorithm,
+		DisplayName: testDisplayName,
+		Purpose:     testPurpose,
 		Description: utils.Ptr(testDescription),
 		ImportOnly:  utils.Ptr(true),
-		Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
+		Protection:  testProtection,
 	})
 
 	for _, mod := range mods {
@@ -255,26 +255,26 @@ func TestBuildRequest(t *testing.T) {
 				model.ImportOnly = false
 			}),
 			expectedRequest: fixtureRequest().CreateKeyPayload(kms.CreateKeyPayload{
-				Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(utils.Ptr(testAlgorithm)),
-				DisplayName: utils.Ptr(testDisplayName),
-				Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(utils.Ptr(testPurpose)),
+				Algorithm:   testAlgorithm,
+				DisplayName: testDisplayName,
+				Purpose:     testPurpose,
 				Description: nil,
 				ImportOnly:  utils.Ptr(false),
-				Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(utils.Ptr(testProtection)),
+				Protection:  testProtection,
 			}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			if err != nil {
 				t.Fatalf("error building request: %v", err)
 			}
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

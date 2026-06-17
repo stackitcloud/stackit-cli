@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &kms.APIClient{}
+	testClient    = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testKeyRingId = uuid.NewString()
 	testKeyId     = uuid.NewString()
@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiListVersionsRequest)) kms.ApiListVersionsRequest {
-	request := testClient.ListVersions(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId)
+	request := testClient.DefaultAPI.ListVersions(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -219,7 +219,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -252,19 +252,19 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			description:  "default output",
-			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
+			resp:         &kms.VersionList{Versions: []kms.Version{}},
 			projectLabel: "my-project",
 			wantErr:      false,
 		},
 		{
 			description:  "json output",
-			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
+			resp:         &kms.VersionList{Versions: []kms.Version{}},
 			outputFormat: print.JSONOutputFormat,
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
-			resp:         &kms.VersionList{Versions: &[]kms.Version{}},
+			resp:         &kms.VersionList{Versions: []kms.Version{}},
 			outputFormat: print.YAMLOutputFormat,
 			wantErr:      false,
 		},

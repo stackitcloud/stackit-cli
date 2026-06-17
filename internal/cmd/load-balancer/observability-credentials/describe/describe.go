@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 )
 
 const (
@@ -83,7 +83,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiGetCredentialsRequest {
-	req := apiClient.GetCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
+	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 	return req
 }
 

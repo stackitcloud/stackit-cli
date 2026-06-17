@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/loadbalancer"
+	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -85,14 +85,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
 
-			credentials := utils.GetSliceFromPointer(resp.Credentials)
+			credentials := resp.Credentials
 
 			filterOp, err := getFilterOp(model.Used, model.Unused)
 			if err != nil {
 				return err
 			}
 
-			filteredCredentials, err := lbUtils.FilterCredentials(ctx, apiClient, credentials, model.ProjectId, model.Region, filterOp)
+			filteredCredentials, err := lbUtils.FilterCredentials(ctx, apiClient.DefaultAPI, credentials, model.ProjectId, model.Region, filterOp)
 			if err != nil {
 				return fmt.Errorf("filter credentials: %w", err)
 			}
@@ -153,7 +153,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region)
 	return req
 }
 

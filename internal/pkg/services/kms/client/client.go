@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*kms.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.KMSCustomEndpointKey), false, genericclient.CreateApiClient[*kms.APIClient](kms.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.KMSCustomEndpointKey), false, kms.NewAPIClient)
 }
