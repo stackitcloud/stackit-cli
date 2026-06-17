@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -120,17 +123,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	var typeFlagOptions []string
-	for _, val := range dns.AllowedCreateZonePayloadTypeEnumValues {
-		typeFlagOptions = append(typeFlagOptions, string(val))
-	}
-
 	cmd.Flags().String(nameFlag, "", "User given name of the zone")
 	cmd.Flags().String(dnsNameFlag, "", "Fully qualified domain name of the DNS zone")
 	cmd.Flags().Int32(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().Var(flags.EnumFlag(false, "", append(typeFlagOptions, "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", typeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, "", append(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues), "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues)...)))
 	cmd.Flags().Int32(retryTimeFlag, 0, "Retry time")
 	cmd.Flags().Int32(refreshTimeFlag, 0, "Refresh time")
 	cmd.Flags().Int32(negativeCacheFlag, 0, "Negative cache")

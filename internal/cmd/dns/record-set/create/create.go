@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -107,17 +110,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	var typeFlagOptions []string
-	for _, val := range dns.AllowedCreateRecordSetPayloadTypeEnumValues {
-		typeFlagOptions = append(typeFlagOptions, string(val))
-	}
-
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().String(commentFlag, "", "User comment")
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
 	cmd.Flags().Int32(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set")
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultType), typeFlagOptions...), typeFlag, fmt.Sprintf("Record type, one of %q", typeFlagOptions))
+	cmd.Flags().Var(flags.EnumFlag(false, string(defaultType), sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateRecordSetPayloadTypeEnumValues)...), typeFlag, fmt.Sprintf("Record type, one of %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateRecordSetPayloadTypeEnumValues)...)))
 
 	err := flags.MarkFlagsRequired(cmd, zoneIdFlag, nameFlag, recordFlag)
 	cobra.CheckErr(err)
