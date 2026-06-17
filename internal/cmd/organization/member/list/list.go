@@ -25,9 +25,15 @@ const (
 	organizationIdFlag = "organization-id"
 	subjectFlag        = "subject"
 	limitFlag          = "limit"
-	sortByFlag         = "sort-by"
 
 	organizationResourceType = "organization"
+)
+
+var sortByFlag = flags.StringEnumFlag(
+	"sort-by",
+	[]string{"subject", "role"},
+	"Sort entries by a specific field,",
+	flags.StringEnumDefaultValue("subject"),
 )
 
 type inputModel struct {
@@ -94,12 +100,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	sortByFlagOptions := []string{"subject", "role"}
-
 	cmd.Flags().String(organizationIdFlag, "", "The organization ID")
 	cmd.Flags().String(subjectFlag, "", "Filter by subject (Identifier of user, service account or client. Usually email address in case of users or name in case of clients)")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
-	cmd.Flags().Var(flags.EnumFlag(false, "subject", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
+	sortByFlag.Register(cmd.Flags())
 
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag)
 	cobra.CheckErr(err)
@@ -121,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
 		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
 		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
-		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
+		SortBy:          sortByFlag.Get(),
 	}
 
 	p.DebugInputModel(model)

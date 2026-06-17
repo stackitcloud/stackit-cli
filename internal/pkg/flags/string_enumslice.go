@@ -9,12 +9,13 @@ import (
 )
 
 type stringEnumSliceFlag[T ~string] struct {
-	ignoreCase bool
-	options    []T
-	value      []T
-	valueSet   bool
-	docs       string
-	name       string
+	ignoreCase    bool
+	options       []T
+	value         []T
+	defaultValues []T
+	valueSet      bool
+	docs          string
+	name          string
 }
 
 type StringEnumSliceFlagOption[T ~string] func(*stringEnumSliceFlag[T])
@@ -28,6 +29,7 @@ func IgnoreCase[T ~string]() StringEnumSliceFlagOption[T] {
 func DefaultValues[T ~string](values ...T) StringEnumSliceFlagOption[T] {
 	return func(f *stringEnumSliceFlag[T]) {
 		f.value = append(f.value, values...)
+		f.defaultValues = append(f.defaultValues, values...)
 	}
 }
 
@@ -61,6 +63,13 @@ func (s *stringEnumSliceFlag[T]) Get() []T {
 	return s.value
 }
 
+func (s *stringEnumSliceFlag[T]) Ptr() *[]T {
+	if s.valueSet || s.value != nil {
+		return &s.value
+	}
+	return nil
+}
+
 func (s *stringEnumSliceFlag[T]) Name() string {
 	return s.name
 }
@@ -86,7 +95,7 @@ func (s *stringEnumSliceFlag[T]) Set(value string) error {
 	// If the default value is still set, remove it
 	// (Since we're going to append the incoming values to f.value)
 	if !s.valueSet {
-		s.value = []T{}
+		s.value = nil
 		s.valueSet = true
 	}
 
@@ -123,4 +132,13 @@ func (s *stringEnumSliceFlag[T]) appendToValue(values []string) error {
 		}
 	}
 	return nil
+}
+
+func (s *stringEnumSliceFlag[T]) Reset() {
+	if s.defaultValues == nil {
+		s.value = nil
+		s.valueSet = false
+	} else {
+		s.value = append([]T{}, s.defaultValues...)
+	}
 }

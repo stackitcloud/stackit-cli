@@ -381,7 +381,7 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				flags: fixtureFlagValues(func(flagValues map[string]string) {
 					flagValues[commonKubeconfig.DisableWritingFlag] = "true"
-					flagValues[globalflags.OutputFormatFlag] = print.PrettyOutputFormat
+					flagValues[globalflags.OutputFormatFlag.Name()] = print.PrettyOutputFormat
 				}),
 			},
 		},
@@ -403,7 +403,7 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				flags: fixtureFlagValues(func(flagValues map[string]string) {
 					flagValues[commonKubeconfig.DisableWritingFlag] = "true"
-					flagValues[globalflags.OutputFormatFlag] = print.YAMLOutputFormat
+					flagValues[globalflags.OutputFormatFlag.Name()] = print.YAMLOutputFormat
 				}),
 				cmpOpts: []testUtils.ValueComparisonOption{
 					testUtils.WithAllowUnexported(inputModel{}),

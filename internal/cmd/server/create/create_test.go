@@ -35,23 +35,23 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
-		agentProvisioningPolicyFlag:       "INHERIT",
-		availabilityZoneFlag:              "eu01-1",
-		nameFlag:                          "test-server-name",
-		machineTypeFlag:                   "t1.1",
-		affinityGroupFlag:                 "test-affinity-group",
-		labelFlag:                         "key=value",
-		bootVolumePerformanceClassFlag:    "test-perf-class",
-		bootVolumeSizeFlag:                "5",
-		bootVolumeSourceIdFlag:            testSourceId,
-		bootVolumeSourceTypeFlag:          "test-source-type",
-		bootVolumeDeleteOnTerminationFlag: "false",
-		keypairNameFlag:                   "test-keypair-name",
-		networkIdFlag:                     testNetworkId,
-		securityGroupsFlag:                "test-security-groups",
-		serviceAccountEmailsFlag:          "test-service-account",
-		userDataFlag:                      "test-user-data",
-		volumesFlag:                       testVolumeId,
+		agentProvisioningPolicyFlag.Name(): "INHERIT",
+		availabilityZoneFlag:               "eu01-1",
+		nameFlag:                           "test-server-name",
+		machineTypeFlag:                    "t1.1",
+		affinityGroupFlag:                  "test-affinity-group",
+		labelFlag:                          "key=value",
+		bootVolumePerformanceClassFlag:     "test-perf-class",
+		bootVolumeSizeFlag:                 "5",
+		bootVolumeSourceIdFlag:             testSourceId,
+		bootVolumeSourceTypeFlag:           "test-source-type",
+		bootVolumeDeleteOnTerminationFlag:  "false",
+		keypairNameFlag:                    "test-keypair-name",
+		networkIdFlag:                      testNetworkId,
+		securityGroupsFlag:                 "test-security-groups",
+		serviceAccountEmailsFlag:           "test-service-account",
+		userDataFlag:                       "test-user-data",
+		volumesFlag:                        testVolumeId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -166,7 +166,7 @@ func TestParseInput(t *testing.T) {
 			description: "required only",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, affinityGroupFlag)
-				delete(flagValues, agentProvisioningPolicyFlag)
+				delete(flagValues, agentProvisioningPolicyFlag.Name())
 				delete(flagValues, availabilityZoneFlag)
 				delete(flagValues, labelFlag)
 				delete(flagValues, bootVolumeSourceIdFlag)
@@ -185,7 +185,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.AffinityGroup = nil
-				model.AgentProvisioningPolicy = nil
+				model.AgentProvisioningPolicy = utils.Ptr("INHERIT")
 				model.AvailabilityZone = nil
 				model.Labels = nil
 				model.BootVolumeSourceId = ""
@@ -334,17 +334,17 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "valid with agent-provisioned flag missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, agentProvisioningPolicyFlag)
+				delete(flagValues, agentProvisioningPolicyFlag.Name())
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.AgentProvisioningPolicy = nil
+				model.AgentProvisioningPolicy = utils.Ptr("INHERIT")
 			}),
 		},
 		{
 			description: "agent-provisioned flag properly handled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[agentProvisioningPolicyFlag] = "ALWAYS"
+				flagValues[agentProvisioningPolicyFlag.Name()] = "ALWAYS"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {

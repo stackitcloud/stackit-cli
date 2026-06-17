@@ -93,7 +93,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by id",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "id"
+				flagValues[sortByFlag.Name()] = "id"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -103,7 +103,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by origin-url",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "originUrl"
+				flagValues[sortByFlag.Name()] = "originUrl"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -113,7 +113,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by status",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "status"
+				flagValues[sortByFlag.Name()] = "status"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -123,7 +123,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by created",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "createdAt"
+				flagValues[sortByFlag.Name()] = "createdAt"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -133,7 +133,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by updated",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "updatedAt"
+				flagValues[sortByFlag.Name()] = "updatedAt"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -143,7 +143,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by originUrlRelated",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "originUrlRelated"
+				flagValues[sortByFlag.Name()] = "originUrlRelated"
 			}),
 			isValid: true,
 			expected: fixtureInputModel(func(model *inputModel) {
@@ -153,7 +153,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "invalid sort by",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "invalid"
+				flagValues[sortByFlag.Name()] = "invalid"
 			}),
 			isValid: false,
 		},
@@ -161,7 +161,7 @@ func TestParseInput(t *testing.T) {
 			description: "missing sort by uses default",
 			flagValues: fixtureFlagValues(
 				func(flagValues map[string]string) {
-					delete(flagValues, sortByFlag)
+					delete(flagValues, sortByFlag.Name())
 				},
 			),
 			isValid: true,
@@ -244,7 +244,7 @@ func fixtureDistributions(count int) []cdn.Distribution {
 		distributions[i] = cdn.Distribution{
 			Id:        id,
 			ProjectId: testProjectId,
-			Status:    string(testStatus),
+			Status:    testStatus,
 			Config: cdn.Config{
 				Backend: cdn.HttpBackendAsConfigBackend(&cdn.HttpBackend{
 					Type:                 "http",

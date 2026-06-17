@@ -194,7 +194,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[disableWritingFlag] = "true"
-				flagValues[globalflags.OutputFormatFlag] = print.YAMLOutputFormat
+				flagValues[globalflags.OutputFormatFlag.Name()] = print.YAMLOutputFormat
 			}),
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.DisableWriting = true

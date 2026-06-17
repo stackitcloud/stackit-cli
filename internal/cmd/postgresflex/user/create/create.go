@@ -23,11 +23,16 @@ import (
 const (
 	instanceIdFlag = "instance-id"
 	usernameFlag   = "username"
-	roleFlag       = "role"
 )
 
 var (
 	rolesDefault = []string{"login"}
+	roleFlag     = flags.StringEnumSliceFlag(
+		"role",
+		[]string{"login", "createdb"},
+		"Roles of the user,",
+		flags.DefaultValues(rolesDefault...),
+	)
 )
 
 type inputModel struct {
@@ -98,11 +103,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	roleOptions := []string{"login", "createdb"}
-
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(usernameFlag, "", "Username of the user")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, rolesDefault, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q", roleOptions))
+	roleFlag.Register(cmd)
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, usernameFlag)
 	cobra.CheckErr(err)
@@ -118,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Roles:           flags.FlagWithDefaultToStringSlicePointer(p, cmd, roleFlag),
+		Roles:           roleFlag.Ptr(),
 	}
 
 	p.DebugInputModel(model)

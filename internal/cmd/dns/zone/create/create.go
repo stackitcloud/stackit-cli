@@ -28,7 +28,6 @@ const (
 	defaultTTLFlag    = "default-ttl"
 	primaryFlag       = "primary"
 	aclFlag           = "acl"
-	typeFlag          = "type"
 	retryTimeFlag     = "retry-time"
 	refreshTimeFlag   = "refresh-time"
 	negativeCacheFlag = "negative-cache"
@@ -36,6 +35,13 @@ const (
 	expireTimeFlag    = "expire-time"
 	descriptionFlag   = "description"
 	contactEmailFlag  = "contact-email"
+)
+
+var typeFlag = flags.StringEnumFlag(
+	"type",
+	append(dns.AllowedCreateZonePayloadTypesEnumValues, ""),
+	"Zone type,",
+	flags.StringEnumDefaultValue(dns.CreateZonePayloadTypes("")),
 )
 
 type inputModel struct {
@@ -121,17 +127,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	var typeFlagOptions []string
-	for _, val := range dns.AllowedCreateZonePayloadTypesEnumValues {
-		typeFlagOptions = append(typeFlagOptions, string(val))
-	}
-
 	cmd.Flags().String(nameFlag, "", "User given name of the zone")
 	cmd.Flags().String(dnsNameFlag, "", "Fully qualified domain name of the DNS zone")
 	cmd.Flags().Int64(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().Var(flags.EnumFlag(false, "", append(typeFlagOptions, "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", typeFlagOptions))
+	typeFlag.Register(cmd.Flags())
 	cmd.Flags().Int64(retryTimeFlag, 0, "Retry time")
 	cmd.Flags().Int64(refreshTimeFlag, 0, "Refresh time")
 	cmd.Flags().Int64(negativeCacheFlag, 0, "Negative cache")
@@ -151,8 +152,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	var zoneType *dns.CreateZonePayloadTypes
-	if zoneTypeString := flags.FlagToStringPointer(p, cmd, typeFlag); zoneTypeString != nil && *zoneTypeString != "" {
-		zoneType = dns.CreateZonePayloadTypes(*zoneTypeString).Ptr()
+	if typeFlagValue := typeFlag.Ptr(); typeFlagValue != nil && *typeFlagValue != "" {
+		zoneType = typeFlagValue
 	}
 
 	model := inputModel{

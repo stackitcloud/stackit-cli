@@ -237,8 +237,8 @@ func configureFlags(cmd *cobra.Command) {
 	tunnel1Phase2EncryptionAlgorithmsFlag.Register(cmd)
 	tunnel1Phase2IntegrityAlgorithmsFlag.Register(cmd)
 	cmd.Flags().Int64(tunnel1Phase2RekeyTimeFlag, 0, "Tunnel 1 Phase 2 Rekey Time.\nTime to schedule a Child SA re-keying (in seconds).")
-	tunnel1Phase2DpdActionFlag.Register(cmd)
-	tunnel1Phase2StartActionFlag.Register(cmd)
+	tunnel1Phase2DpdActionFlag.Register(cmd.Flags())
+	tunnel1Phase2StartActionFlag.Register(cmd.Flags())
 	cmd.Flags().String(tunnel1PreSharedKeyFlag, "", "Required: Tunnel 1 Pre Shared Key.\nA Pre-Shared Key for authentication. Required in create-requests, optional in update-requests and omitted in every response.")
 	cmd.Flags().String(tunnel1RemoteAddressFlag, "", "Tunnel 1 Remote Address")
 
@@ -253,8 +253,8 @@ func configureFlags(cmd *cobra.Command) {
 	tunnel2Phase2EncryptionAlgorithmsFlag.Register(cmd)
 	tunnel2Phase2IntegrityAlgorithmsFlag.Register(cmd)
 	cmd.Flags().Int64(tunnel2Phase2RekeyTimeFlag, 0, "Tunnel 2 Phase 2 Rekey Time.\nTime to schedule a Child SA re-keying (in seconds).")
-	tunnel2Phase2DpdActionFlag.Register(cmd)
-	tunnel2Phase2StartActionFlag.Register(cmd)
+	tunnel2Phase2DpdActionFlag.Register(cmd.Flags())
+	tunnel2Phase2StartActionFlag.Register(cmd.Flags())
 	cmd.Flags().String(tunnel2PreSharedKeyFlag, "", "Required: Tunnel 2 Pre Shared Key.\nA Pre-Shared Key for authentication. Required in create-requests, optional in update-requests and omitted in every response.")
 	cmd.Flags().String(tunnel2RemoteAddressFlag, "", "Tunnel 2 Remote Address")
 

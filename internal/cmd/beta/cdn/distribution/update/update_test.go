@@ -45,7 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 		},
 		DistributionID: testDistributionID,
-		Regions:        []cdn.Region{},
+		Regions:        nil,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -125,7 +125,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   []string{testDistributionID},
 			flagValues: fixtureFlagValues(
 				func(flagValues map[string]string) {
-					flagValues[flagRegions] = "EU,US"
+					flagValues[flagRegions.Name()] = "EU,US"
 					flagValues[flagBlockedCountries] = "DE,AT,CH"
 					flagValues[flagBlockedIPs] = "127.0.0.1,10.0.0.8"
 					flagValues[flagDefaultCacheDuration] = "P1DT12H"

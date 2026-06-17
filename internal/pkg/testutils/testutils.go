@@ -3,6 +3,7 @@ package testutils
 import (
 	"testing"
 
+	"github.com/spf13/pflag"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -25,6 +26,10 @@ func TestParseInputWithAdditionalFlags[T any](t *testing.T, cmdFactory func(*typ
 	TestParseInputWithOptions(t, cmdFactory, parseInputFunc, expectedModel, argValues, flagValues, additionalFlagValues, isValid, nil)
 }
 
+type Resettable interface {
+	Reset()
+}
+
 func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdParams) *cobra.Command, parseInputFunc func(*print.Printer, *cobra.Command, []string) (T, error), expectedModel T, argValues []string, flagValues map[string]string, additionalFlagValues map[string][]string, isValid bool, testingOptions []TestingOption) {
 	opts := Option{}
 	for _, option := range testingOptions {
@@ -41,6 +46,15 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 	if err != nil {
 		t.Fatalf("configure global flags: %v", err)
 	}
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		if flag.Value == nil {
+			return
+		}
+		// StringEnum and StringEnumSlice Flags are stateful singletons. During tests we reset their state.
+		if r, ok := flag.Value.(Resettable); ok {
+			r.Reset()
+		}
+	})
 
 	// set regular flag values
 	for flag, value := range flagValues {

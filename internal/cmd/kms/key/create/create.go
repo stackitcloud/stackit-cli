@@ -26,24 +26,39 @@ import (
 const (
 	keyRingIdFlag = "keyring-id"
 
-	algorithmFlag   = "algorithm"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	importOnlyFlag  = "import-only"
-	purposeFlag     = "purpose"
-	protectionFlag  = "protection"
+)
+
+var (
+	algorithmFlag = flags.StringEnumFlag(
+		"algorithm",
+		kms.AllowedAlgorithmEnumValues,
+		"En-/Decryption / signing algorithm.",
+	)
+	purposeFlag = flags.StringEnumFlag(
+		"purpose",
+		kms.AllowedPurposeEnumValues,
+		"Purpose of the key.",
+	)
+	protectionFlag = flags.StringEnumFlag(
+		"protection",
+		kms.AllowedProtectionEnumValues,
+		"The underlying system that is responsible for protecting the key material.",
+	)
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId string
 
-	Algorithm   *string
+	Algorithm   *kms.Algorithm
 	Description *string
 	Name        *string
 	ImportOnly  bool // Default false
-	Purpose     *string
-	Protection  *string
+	Purpose     *kms.Purpose
+	Protection  *kms.Protection
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -124,12 +139,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		Algorithm:       flags.FlagToStringPointer(p, cmd, algorithmFlag),
+		Algorithm:       algorithmFlag.Ptr(),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
-		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
-		Protection:      flags.FlagToStringPointer(p, cmd, protectionFlag),
+		Purpose:         purposeFlag.Ptr(),
+		Protection:      protectionFlag.Ptr(),
 	}
 
 	p.DebugInputModel(model)
@@ -170,26 +185,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	// Algorithm
-	var algorithmFlagOptions []string
-	for _, val := range kms.AllowedAlgorithmEnumValues {
-		algorithmFlagOptions = append(algorithmFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
-
-	// Purpose
-	var purposeFlagOptions []string
-	for _, val := range kms.AllowedPurposeEnumValues {
-		purposeFlagOptions = append(purposeFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the key. Possible values: %q", purposeFlagOptions))
-
-	// Protection
-	var protectionFlagOptions []string
-	for _, val := range kms.AllowedProtectionEnumValues {
-		protectionFlagOptions = append(protectionFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the key material. Possible values: %q", purposeFlagOptions))
+	algorithmFlag.Register(cmd.Flags())
+	purposeFlag.Register(cmd.Flags())
+	protectionFlag.Register(cmd.Flags())
 
 	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
@@ -197,6 +195,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Optional description of the key")
 	cmd.Flags().Bool(importOnlyFlag, false, "States whether versions can be created or only imported")
 
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag, protectionFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag.Name(), purposeFlag.Name(), displayNameFlag, protectionFlag.Name())
 	cobra.CheckErr(err)
 }

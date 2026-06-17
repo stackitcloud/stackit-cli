@@ -110,7 +110,7 @@ func TestStringEnumFlag_UnknownDefaultOpenAPI(t *testing.T) {
 func TestStringEnumFlag_Register(t *testing.T) {
 	cmd := &cobra.Command{Use: "test"}
 	f := StringEnumFlag("my-flag", []string{"a", "b"}, "docs")
-	f.Register(cmd)
+	f.Register(cmd.Flags())
 
 	flag := cmd.Flags().Lookup("my-flag")
 	if flag == nil {

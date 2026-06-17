@@ -28,7 +28,6 @@ const (
 	machineTypeFlag                   = "machine-type"
 	affinityGroupFlag                 = "affinity-group"
 	availabilityZoneFlag              = "availability-zone"
-	agentProvisioningPolicyFlag       = "agent-provisioning-policy"
 	bootVolumeSourceIdFlag            = "boot-volume-source-id"
 	bootVolumeSourceTypeFlag          = "boot-volume-source-type"
 	bootVolumeSizeFlag                = "boot-volume-size"
@@ -43,6 +42,13 @@ const (
 	serviceAccountEmailsFlag          = "service-account-emails"
 	userDataFlag                      = "user-data"
 	volumesFlag                       = "volumes"
+)
+
+var agentProvisioningPolicyFlag = flags.StringEnumFlag(
+	"agent-provisioning-policy",
+	[]string{"ALWAYS", "NEVER", "INHERIT"},
+	"Whether to provision an agent on server creation,",
+	flags.StringEnumDefaultValue("INHERIT"),
 )
 
 type inputModel struct {
@@ -168,8 +174,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	agentProvisioningPolicyOptions := []string{"ALWAYS", "NEVER", "INHERIT"}
-	cmd.Flags().Var(flags.EnumFlag(false, "INHERIT", agentProvisioningPolicyOptions...), agentProvisioningPolicyFlag, fmt.Sprintf("Whether to provision an agent on server creation, one of %q", agentProvisioningPolicyOptions))
+	agentProvisioningPolicyFlag.Register(cmd.Flags())
 	cmd.Flags().StringP(nameFlag, "n", "", "Server name")
 	cmd.Flags().String(machineTypeFlag, "", "Name of the type of the machine for the server. Possible values are documented in https://docs.stackit.cloud/products/compute-engine/server/basics/machine-types/")
 	cmd.Flags().String(affinityGroupFlag, "", "The affinity group the server is assigned to")
@@ -258,7 +263,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		MachineType:                   flags.FlagToStringValue(p, cmd, machineTypeFlag),
 		AffinityGroup:                 flags.FlagToStringPointer(p, cmd, affinityGroupFlag),
 		AvailabilityZone:              flags.FlagToStringPointer(p, cmd, availabilityZoneFlag),
-		AgentProvisioningPolicy:       flags.FlagToStringPointer(p, cmd, agentProvisioningPolicyFlag),
+		AgentProvisioningPolicy:       agentProvisioningPolicyFlag.Ptr(),
 		BootVolumeSourceId:            flags.FlagToStringValue(p, cmd, bootVolumeSourceIdFlag),
 		BootVolumeSourceType:          flags.FlagToStringValue(p, cmd, bootVolumeSourceTypeFlag),
 		BootVolumeSize:                flags.FlagToInt64Pointer(p, cmd, bootVolumeSizeFlag),

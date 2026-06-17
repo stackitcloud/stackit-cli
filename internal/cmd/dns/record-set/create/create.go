@@ -29,10 +29,16 @@ const (
 	nameFlag    = "name"
 	recordFlag  = "record"
 	ttlFlag     = "ttl"
-	typeFlag    = "type"
 
 	defaultType = dns.CREATERECORDSETPAYLOADTYPE_A
 	txtType     = dns.CREATERECORDSETPAYLOADTYPE_TXT
+)
+
+var typeFlag = flags.StringEnumFlag(
+	"type",
+	dns.AllowedCreateRecordSetPayloadTypesEnumValues,
+	"Record type,",
+	flags.StringEnumDefaultValue(defaultType),
 )
 
 type inputModel struct {
@@ -108,17 +114,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	var typeFlagOptions []string
-	for _, val := range dns.AllowedCreateRecordSetPayloadTypesEnumValues {
-		typeFlagOptions = append(typeFlagOptions, string(val))
-	}
-
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().String(commentFlag, "", "User comment")
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
 	cmd.Flags().Int64(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set")
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultType), typeFlagOptions...), typeFlag, fmt.Sprintf("Record type, one of %q", typeFlagOptions))
+	typeFlag.Register(cmd.Flags())
 
 	err := flags.MarkFlagsRequired(cmd, zoneIdFlag, nameFlag, recordFlag)
 	cobra.CheckErr(err)
@@ -130,8 +131,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	recordType := flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
@@ -139,7 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
 		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
-		Type:            dns.CreateRecordSetPayloadTypes(recordType),
+		Type:            typeFlag.Get(),
 	}
 
 	if model.Type == txtType {

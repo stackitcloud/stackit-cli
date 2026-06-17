@@ -25,7 +25,6 @@ import (
 )
 
 const (
-	requestMethodFlag          = "request"
 	headerFlag                 = "header"
 	dataFlag                   = "data"
 	includeResponseHeadersFlag = "include"
@@ -35,6 +34,25 @@ const (
 
 const (
 	urlArg = "URL"
+)
+
+var requestMethodFlag = flags.StringEnumFlag(
+	"request",
+	[]string{
+		http.MethodGet,
+		http.MethodHead,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+		http.MethodConnect,
+		http.MethodOptions,
+		http.MethodTrace,
+	},
+	"HTTP method, defaults to GET",
+	flags.StringEnumIgnoreCase[string](),
+	flags.StringEnumDefaultValue(http.MethodGet),
+	flags.StringEnumShortHand[string]("X"),
 )
 
 type inputModel struct {
@@ -117,20 +135,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	requestMethodOptions := []string{
-		http.MethodGet,
-		http.MethodHead,
-		http.MethodPost,
-		http.MethodPut,
-		http.MethodPatch,
-		http.MethodDelete,
-		http.MethodConnect,
-		http.MethodOptions,
-		http.MethodTrace,
-	}
+	requestMethodFlag.Register(cmd.Flags())
 	headerFlagUsage := `Custom headers to include in the request, can be specified multiple times. If the "Authorization" header is set, it will override the authentication provided by the CLI`
-
-	cmd.Flags().VarP(flags.EnumFlag(true, "", requestMethodOptions...), requestMethodFlag, "X", "HTTP method, defaults to GET")
 	cmd.Flags().StringSliceP(headerFlag, "H", []string{}, headerFlagUsage)
 	cmd.Flags().Var(flags.ReadFromFileFlag(), dataFlag, `Content to include in the request body. Can be a string or a file path prefixed with "@"`)
 	cmd.Flags().Bool(includeResponseHeadersFlag, false, "If set, response headers are added to the output")
@@ -140,10 +146,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	urlString := inputArgs[0]
-	requestMethod := flags.FlagToStringValue(p, cmd, requestMethodFlag)
-	if requestMethod == "" {
-		requestMethod = http.MethodGet
-	}
+	requestMethod := requestMethodFlag.Get()
 
 	model := inputModel{
 		URL:                    urlString,

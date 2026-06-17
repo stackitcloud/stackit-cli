@@ -18,12 +18,12 @@ import (
 
 const (
 	testRegion      = "eu01"
-	testAlgorithm   = "rsa_2048_oaep_sha256"
+	testAlgorithm   = kms.ALGORITHM_RSA_2048_OAEP_SHA256
 	testDisplayName = "my-key"
-	testPurpose     = "asymmetric_encrypt_decrypt"
+	testPurpose     = kms.PURPOSE_ASYMMETRIC_ENCRYPT_DECRYPT
 	testDescription = "my key description"
 	testImportOnly  = "true"
-	testProtection  = "software"
+	testProtection  = kms.PROTECTION_SOFTWARE
 )
 
 type testCtxKey struct{}
@@ -41,12 +41,12 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		keyRingIdFlag:             testKeyRingId,
-		algorithmFlag:             testAlgorithm,
+		algorithmFlag.Name():      string(testAlgorithm),
 		displayNameFlag:           testDisplayName,
-		purposeFlag:               testPurpose,
+		purposeFlag.Name():        string(testPurpose),
 		descriptionFlag:           testDescription,
 		importOnlyFlag:            testImportOnly,
-		protectionFlag:            testProtection,
+		protectionFlag.Name():     string(testProtection),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -162,14 +162,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "algorithm missing (required)",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, algorithmFlag)
+				delete(flagValues, algorithmFlag.Name())
 			}),
 			isValid: false,
 		},
 		{
 			description: "protection missing (required)",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, protectionFlag)
+				delete(flagValues, protectionFlag.Name())
 			}),
 			isValid: false,
 		},
@@ -183,7 +183,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "purpose missing (required)",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, purposeFlag)
+				delete(flagValues, purposeFlag.Name())
 			}),
 			isValid: false,
 		},

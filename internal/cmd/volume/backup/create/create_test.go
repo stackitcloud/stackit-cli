@@ -37,10 +37,10 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 
-		sourceIdFlag:   testSourceId,
-		sourceTypeFlag: testSourceType,
-		nameFlag:       testName,
-		labelsFlag:     "key1=value1",
+		sourceIdFlag:          testSourceId,
+		sourceTypeFlag.Name(): testSourceType,
+		nameFlag:              testName,
+		labelsFlag:            "key1=value1",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -115,14 +115,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no source type",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, sourceTypeFlag)
+				delete(flagValues, sourceTypeFlag.Name())
 			}),
 			isValid: false,
 		},
 		{
 			description: "invalid source type",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sourceTypeFlag] = "invalid"
+				flagValues[sourceTypeFlag.Name()] = "invalid"
 			}),
 			isValid: false,
 		},

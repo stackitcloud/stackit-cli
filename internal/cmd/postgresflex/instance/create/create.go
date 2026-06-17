@@ -34,12 +34,20 @@ const (
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
-	typeFlag           = "type"
 
 	defaultBackupSchedule = "0 0 * * *"
 	defaultStorageClass   = "premium-perf2-stackit"
 	defaultStorageSize    = 10
 	defaultType           = "Replica"
+)
+
+var (
+	typeFlag = flags.StringEnumFlag(
+		"type",
+		postgresflexUtils.AvailableInstanceTypes(),
+		"Instance type,",
+		flags.StringEnumDefaultValue(defaultType),
+	)
 )
 
 type inputModel struct {
@@ -139,8 +147,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := postgresflexUtils.AvailableInstanceTypes()
-
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, defaultBackupSchedule, "Backup schedule")
@@ -150,7 +156,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "PostgreSQL version. Defaults to the latest version available")
-	cmd.Flags().Var(flags.EnumFlag(false, defaultType, typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
+	typeFlag.Register(cmd.Flags())
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, aclFlag)
 	cobra.CheckErr(err)
@@ -190,7 +196,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
 		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
-		Type:            utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)),
+		Type:            typeFlag.Ptr(),
 	}
 
 	p.DebugInputModel(model)

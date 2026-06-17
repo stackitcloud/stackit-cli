@@ -25,9 +25,9 @@ var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 
 var recordTxtOver255Char = []string{
-	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
-	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo",
-	"foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
+	strings.Repeat("a", 255),
+	strings.Repeat("a", 255),
+	strings.Repeat("a", 60),
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -38,7 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameFlag:                  "example.com",
 		recordFlag:                "1.1.1.1",
 		ttlFlag:                   "3600",
-		typeFlag:                  "SOA", // Non-default value
+		typeFlag.Name():           "SOA", // Non-default value
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -205,7 +205,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "type missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, typeFlag)
+				delete(flagValues, typeFlag.Name())
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -215,14 +215,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "type invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[typeFlag] = ""
+				flagValues[typeFlag.Name()] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "type invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[typeFlag] = "a"
+				flagValues[typeFlag.Name()] = "a"
 			}),
 			isValid: false,
 		},
@@ -247,7 +247,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "TXT record with > 255 characters",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[typeFlag] = string(txtType)
+				flagValues[typeFlag.Name()] = string(txtType)
 				flagValues[recordFlag] = strings.Join(recordTxtOver255Char, "")
 			}),
 			isValid: true,
