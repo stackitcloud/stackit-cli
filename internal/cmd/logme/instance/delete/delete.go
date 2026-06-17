@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
-				err := spinner.Run(params.Printer, "Deleting instacne", func() error {
+				err := spinner.Run(params.Printer, "Deleting instance", func() error {
 					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
 					return err
 				})
