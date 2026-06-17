@@ -56,6 +56,7 @@ type inputModel struct {
 	SgwAcl               *[]string
 	Syslog               *[]string
 	PlanId               *string
+	InstanceName         *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -146,6 +147,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance LogMe version")
+	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -166,6 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
+	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
@@ -175,8 +178,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
-		metricsFrequency == nil && metricsPrefix == nil &&
-		sgwAcl == nil && syslog == nil && planId == nil &&
+		metricsFrequency == nil && metricsPrefix == nil && sgwAcl == nil &&
+		syslog == nil && planId == nil && instanceName == nil &&
 		planName == "" && version == "" {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
@@ -194,6 +197,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
+		InstanceName:         instanceName,
 	}
 
 	p.DebugInputModel(model)
