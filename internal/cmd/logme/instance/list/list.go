@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId)
 	return req
 }
 
@@ -131,15 +131,16 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		for i := range instances {
 			instance := instances[i]
 
-			lastOperationType, lastOperationState := "", ""
-			if instance.LastOperation != nil {
-				lastOperationType = utils.PtrString(instance.LastOperation.Type)
-				lastOperationState = utils.PtrString(instance.LastOperation.State)
+			lastOperationType, lastOperationState := logme.INSTANCELASTOPERATIONTYPE_UNKNOWN_DEFAULT_OPEN_API, logme.INSTANCELASTOPERATIONSTATE_UNKNOWN_DEFAULT_OPEN_API
+			_, ok := instance.LastOperation.GetStateOk()
+			if ok {
+				lastOperationType = instance.LastOperation.Type
+				lastOperationState = instance.LastOperation.State
 			}
 
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
-				utils.PtrString(instance.Name),
+				instance.Name,
 				lastOperationType,
 				lastOperationState,
 			)

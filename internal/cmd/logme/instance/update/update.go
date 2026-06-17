@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme/wait"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme/v1api/wait"
 )
 
 const (
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -97,7 +97,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -114,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -204,13 +204,13 @@ type logMeClient interface {
 	ListOfferingsExecute(ctx context.Context, projectId string) (*logme.ListOfferingsResponse, error)
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient) (logme.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get LogMe offerings: %w", err)
 	}
@@ -240,15 +240,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient)
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
+	var metricsFrequency *int32
+	if model.MetricsFrequency != nil {
+		metricsFrequency = utils.Ptr(int32(*model.MetricsFrequency))
+	}
+
+	var syslog []string
+	if model.Syslog != nil {
+		syslog = utils.GetSliceFromPointer(model.Syslog)
+	}
+
 	req = req.PartialUpdateInstancePayload(logme.PartialUpdateInstancePayload{
 		Parameters: &logme.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
 			MonitoringInstanceId: model.MonitoringInstanceId,
-			MetricsFrequency:     model.MetricsFrequency,
+			MetricsFrequency:     metricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
 			SgwAcl:               sgwAcl,
-			Syslog:               model.Syslog,
+			Syslog:               syslog,
 		},
 		PlanId: planId,
 	})

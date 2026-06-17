@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 const (
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiGetCredentialsRequest {
-	req := apiClient.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
 	return req
 }
 
@@ -110,19 +110,19 @@ func outputResult(p *print.Printer, outputFormat string, credentials *logme.Cred
 
 	return p.OutputResult(outputFormat, credentials, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(credentials.Id))
+		table.AddRow("ID", credentials.Id)
 		table.AddSeparator()
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if raw := credentials.Raw; raw != nil {
-			if cred := raw.Credentials; cred != nil {
-				if username := cred.Username; username != nil && *username != "" {
-					table.AddRow("USERNAME", *username)
-					table.AddSeparator()
-				}
-				table.AddRow("PASSWORD", utils.PtrString(cred.Password))
+			cred := raw.Credentials
+
+			if username := cred.Username; username != "" {
+				table.AddRow("USERNAME", username)
 				table.AddSeparator()
-				table.AddRow("URI", utils.PtrString(cred.Uri))
 			}
+			table.AddRow("PASSWORD", cred.Password)
+			table.AddSeparator()
+			table.AddRow("URI", utils.PtrString(cred.Uri))
 		}
 		err := table.Display(p)
 		if err != nil {

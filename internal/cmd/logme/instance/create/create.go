@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme/wait"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme/v1api/wait"
 )
 
 const (
@@ -98,7 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -110,12 +110,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create LogMe instance: %w", err)
 			}
-			instanceId := *resp.InstanceId
+			instanceId := resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -187,18 +187,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-type logMeClient interface {
-	CreateInstance(ctx context.Context, projectId string) logme.ApiCreateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*logme.ListOfferingsResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient) (logme.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get LogMe offerings: %w", err)
 	}
@@ -225,18 +220,28 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient)
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
+	var metricsFrequency *int32
+	if model.MetricsFrequency != nil {
+		metricsFrequency = utils.Ptr(int32(*model.MetricsFrequency))
+	}
+
+	var syslog []string
+	if model.Syslog != nil {
+		syslog = utils.GetSliceFromPointer(model.Syslog)
+	}
+
 	req = req.CreateInstancePayload(logme.CreateInstancePayload{
-		InstanceName: model.InstanceName,
+		InstanceName: utils.PtrValue(model.InstanceName),
 		Parameters: &logme.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
 			MonitoringInstanceId: model.MonitoringInstanceId,
-			MetricsFrequency:     model.MetricsFrequency,
+			MetricsFrequency:     metricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
 			SgwAcl:               sgwAcl,
-			Syslog:               model.Syslog,
+			Syslog:               syslog,
 		},
-		PlanId: planId,
+		PlanId: utils.PtrValue(planId),
 	})
 	return req, nil
 }
@@ -251,7 +256,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.InstanceId))
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.InstanceId)
 		return nil
 	})
 }

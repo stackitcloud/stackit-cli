@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,22 +20,22 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logme.APIClient{}
+var testClient = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
 
-type logMeClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *logme.ListOfferingsResponse
 }
 
-func (c *logMeClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) logme.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
-}
-
-func (c *logMeClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*logme.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s mockSettings) logme.DefaultAPI {
+	return &logme.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ logme.ApiListOfferingsRequest) (*logme.ListOfferingsResponse, error) {
+			if s.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
 
 var (
@@ -96,16 +96,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logme.ApiPartialUpdateInstanceRequest)) logme.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
 	request = request.PartialUpdateInstancePayload(logme.PartialUpdateInstancePayload{
 		Parameters: &logme.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
 		PlanId: utils.Ptr(testPlanId),
 	})
@@ -352,13 +352,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -376,13 +376,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -411,13 +411,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -434,18 +434,18 @@ func TestBuildRequest(t *testing.T) {
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
 				PartialUpdateInstancePayload(logme.PartialUpdateInstancePayload{Parameters: &logme.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logMeClientMocked{
+			client := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -456,6 +456,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(logme.ApiPartialUpdateInstanceRequest{}, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
