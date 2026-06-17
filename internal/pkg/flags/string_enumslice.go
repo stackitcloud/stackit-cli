@@ -56,7 +56,7 @@ func (s *stringEnumSliceFlag[T]) Register(cmd *cobra.Command) {
 }
 
 func (s *stringEnumSliceFlag[T]) Usage() string {
-	return s.docs + fmt.Sprintf(" (possible values: %s)", s.fmtValues(s.options))
+	return s.docs + fmt.Sprintf(" (multiple of: %s)", s.fmtValues(s.options))
 }
 
 func (s *stringEnumSliceFlag[T]) Get() []T {

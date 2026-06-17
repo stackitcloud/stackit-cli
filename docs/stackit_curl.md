@@ -35,7 +35,7 @@ stackit curl URL [flags]
   -h, --help             Help for "stackit curl"
       --include          If set, response headers are added to the output
       --output string    Writes output to provided file instead of printing to console
-  -X, --request string   HTTP method, defaults to GET
+  -X, --request string   HTTP method, defaults to GET (one of: [GET, HEAD, POST, PUT, PATCH, DELETE, CONNECT, OPTIONS, TRACE]) (default "GET")
 ```
 
 ### Options inherited from parent commands
@@ -43,10 +43,10 @@ stackit curl URL [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

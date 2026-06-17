@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 

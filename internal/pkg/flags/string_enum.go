@@ -67,7 +67,7 @@ func (s *stringEnumFlag[T]) Register(fs *pflag.FlagSet) {
 }
 
 func (s *stringEnumFlag[T]) Usage() string {
-	return s.docs + fmt.Sprintf(" (possible values: %s)", s.fmtValues(s.options))
+	return s.docs + fmt.Sprintf(" (one of: %s)", s.fmtValues(s.options))
 }
 
 func (s *stringEnumFlag[T]) Get() T {
