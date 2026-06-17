@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -25,7 +25,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &kms.APIClient{}
+	testClient    = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testKeyRingId = uuid.NewString()
 	testKeyId     = uuid.NewString()
@@ -76,7 +76,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiDestroyVersionRequest)) kms.ApiDestroyVersionRequest {
-	request := testClient.DestroyVersion(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId, testVersionNumber)
+	request := testClient.DefaultAPI.DestroyVersion(testCtx, testProjectId, testRegion, testKeyRingId, testKeyId, testVersionNumber)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -269,7 +269,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

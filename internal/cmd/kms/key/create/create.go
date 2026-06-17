@@ -13,8 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/kms/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms/wait"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/kms/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -26,24 +26,38 @@ import (
 const (
 	keyRingIdFlag = "keyring-id"
 
-	algorithmFlag   = "algorithm"
 	descriptionFlag = "description"
 	displayNameFlag = "name"
 	importOnlyFlag  = "import-only"
-	purposeFlag     = "purpose"
-	protectionFlag  = "protection"
+)
+
+var (
+	algorithmFlag = flags.StringEnumFlag(
+		"algorithm",
+		kms.AllowedAlgorithmEnumValues,
+		"En-/Decryption / signing algorithm.",
+	)
+	purposeFlag = flags.StringEnumFlag(
+		"purpose",
+		kms.AllowedPurposeEnumValues,
+		"Purpose of the key.",
+	)
+	protectionFlag = flags.StringEnumFlag(
+		"protection",
+		kms.AllowedProtectionEnumValues,
+		"The underlying system that is responsible for protecting the key material.")
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	KeyRingId string
 
-	Algorithm   *string
+	Algorithm   kms.Algorithm
 	Description *string
 	Name        *string
 	ImportOnly  bool // Default false
-	Purpose     *string
-	Protection  *string
+	Purpose     kms.Purpose
+	Protection  kms.Protection
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -91,7 +105,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, _ := buildRequest(ctx, model, apiClient)
+			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS key: %w", err)
@@ -100,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating key", func() error {
-					_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.KeyRingId, *resp.Id).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateKeyWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, resp.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -124,12 +138,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyRingId:       flags.FlagToStringValue(p, cmd, keyRingIdFlag),
-		Algorithm:       flags.FlagToStringPointer(p, cmd, algorithmFlag),
+		Algorithm:       algorithmFlag.Get(),
 		Name:            flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ImportOnly:      flags.FlagToBoolValue(p, cmd, importOnlyFlag),
-		Purpose:         flags.FlagToStringPointer(p, cmd, purposeFlag),
-		Protection:      flags.FlagToStringPointer(p, cmd, protectionFlag),
+		Purpose:         purposeFlag.Get(),
+		Protection:      protectionFlag.Get(),
 	}
 
 	p.DebugInputModel(model)
@@ -144,12 +158,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 	req := apiClient.CreateKey(ctx, model.ProjectId, model.Region, model.KeyRingId)
 
 	req = req.CreateKeyPayload(kms.CreateKeyPayload{
-		DisplayName: model.Name,
+		DisplayName: utils.PtrString(model.Name),
 		Description: model.Description,
-		Algorithm:   kms.CreateKeyPayloadGetAlgorithmAttributeType(model.Algorithm),
-		Purpose:     kms.CreateKeyPayloadGetPurposeAttributeType(model.Purpose),
+		Algorithm:   model.Algorithm,
+		Purpose:     model.Purpose,
 		ImportOnly:  &model.ImportOnly,
-		Protection:  kms.CreateKeyPayloadGetProtectionAttributeType(model.Protection),
+		Protection:  model.Protection,
 	})
 	return req, nil
 }
@@ -164,32 +178,15 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s the KMS key %q. Key ID: %s\n", operationState, utils.PtrString(resp.DisplayName), utils.PtrString(resp.Id))
+		p.Outputf("%s the KMS key %q. Key ID: %s\n", operationState, resp.DisplayName, resp.Id)
 		return nil
 	})
 }
 
 func configureFlags(cmd *cobra.Command) {
-	// Algorithm
-	var algorithmFlagOptions []string
-	for _, val := range kms.AllowedAlgorithmEnumValues {
-		algorithmFlagOptions = append(algorithmFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", algorithmFlagOptions...), algorithmFlag, fmt.Sprintf("En-/Decryption / signing algorithm. Possible values: %q", algorithmFlagOptions))
-
-	// Purpose
-	var purposeFlagOptions []string
-	for _, val := range kms.AllowedPurposeEnumValues {
-		purposeFlagOptions = append(purposeFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", purposeFlagOptions...), purposeFlag, fmt.Sprintf("Purpose of the key. Possible values: %q", purposeFlagOptions))
-
-	// Protection
-	var protectionFlagOptions []string
-	for _, val := range kms.AllowedProtectionEnumValues {
-		protectionFlagOptions = append(protectionFlagOptions, string(val))
-	}
-	cmd.Flags().Var(flags.EnumFlag(false, "", protectionFlagOptions...), protectionFlag, fmt.Sprintf("The underlying system that is responsible for protecting the key material. Possible values: %q", purposeFlagOptions))
+	algorithmFlag.Register(cmd)
+	purposeFlag.Register(cmd)
+	protectionFlag.Register(cmd)
 
 	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")
@@ -197,6 +194,6 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Optional description of the key")
 	cmd.Flags().Bool(importOnlyFlag, false, "States whether versions can be created or only imported")
 
-	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag, purposeFlag, displayNameFlag, protectionFlag)
+	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag, algorithmFlag.Name(), purposeFlag.Name(), displayNameFlag, protectionFlag.Name())
 	cobra.CheckErr(err)
 }

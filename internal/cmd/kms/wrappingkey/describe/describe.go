@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -91,7 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClient) kms.ApiGetWrappingKeyRequest {
-	return apiClient.GetWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingID, model.WrappingKeyID)
+	return apiClient.DefaultAPI.GetWrappingKey(ctx, model.ProjectId, model.Region, model.KeyRingID, model.WrappingKeyID)
 }
 
 func outputResult(p *print.Printer, outputFormat string, wrappingKey *kms.WrappingKey) error {
@@ -100,29 +100,29 @@ func outputResult(p *print.Printer, outputFormat string, wrappingKey *kms.Wrappi
 	}
 	return p.OutputResult(outputFormat, wrappingKey, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(wrappingKey.Id))
+		table.AddRow("ID", wrappingKey.Id)
 		table.AddSeparator()
-		table.AddRow("DISPLAY NAME", utils.PtrString(wrappingKey.DisplayName))
+		table.AddRow("DISPLAY NAME", wrappingKey.DisplayName)
 		table.AddSeparator()
-		table.AddRow("CREATED AT", utils.PtrString(wrappingKey.CreatedAt))
+		table.AddRow("CREATED AT", wrappingKey.CreatedAt)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(wrappingKey.State))
+		table.AddRow("STATE", wrappingKey.State)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(wrappingKey.Description))
 		table.AddSeparator()
-		table.AddRow("ACCESS SCOPE", utils.PtrString(wrappingKey.AccessScope))
+		table.AddRow("ACCESS SCOPE", wrappingKey.AccessScope)
 		table.AddSeparator()
-		table.AddRow("ALGORITHM", utils.PtrString(wrappingKey.Algorithm))
+		table.AddRow("ALGORITHM", wrappingKey.Algorithm)
 		table.AddSeparator()
-		table.AddRow("EXPIRES AT", utils.PtrString(wrappingKey.ExpiresAt))
+		table.AddRow("EXPIRES AT", wrappingKey.ExpiresAt)
 		table.AddSeparator()
-		table.AddRow("KEYRING ID", utils.PtrString(wrappingKey.KeyRingId))
+		table.AddRow("KEYRING ID", wrappingKey.KeyRingId)
 		table.AddSeparator()
-		table.AddRow("PROTECTION", utils.PtrString(wrappingKey.Protection))
+		table.AddRow("PROTECTION", wrappingKey.Protection)
 		table.AddSeparator()
 		table.AddRow("PUBLIC KEY", utils.PtrString(wrappingKey.PublicKey))
 		table.AddSeparator()
-		table.AddRow("PURPOSE", utils.PtrString(wrappingKey.Purpose))
+		table.AddRow("PURPOSE", wrappingKey.Purpose)
 
 		err := table.Display(p)
 		if err != nil {

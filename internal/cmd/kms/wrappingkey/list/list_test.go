@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/kms"
+	kms "github.com/stackitcloud/stackit-sdk-go/services/kms/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &kms.APIClient{}
+	testClient    = &kms.APIClient{DefaultAPI: &kms.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 	testKeyRingId = uuid.NewString()
 )
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *kms.ApiListWrappingKeysRequest)) kms.ApiListWrappingKeysRequest {
-	request := testClient.ListWrappingKeys(testCtx, testProjectId, testRegion, testKeyRingId)
+	request := testClient.DefaultAPI.ListWrappingKeys(testCtx, testProjectId, testRegion, testKeyRingId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -194,7 +194,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, kms.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -220,19 +220,19 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			description:  "default output",
-			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
+			resp:         &kms.WrappingKeyList{WrappingKeys: []kms.WrappingKey{}},
 			projectLabel: "my-project",
 			wantErr:      false,
 		},
 		{
 			description:  "json output",
-			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
+			resp:         &kms.WrappingKeyList{WrappingKeys: []kms.WrappingKey{}},
 			outputFormat: print.JSONOutputFormat,
 			wantErr:      false,
 		},
 		{
 			description:  "yaml output",
-			resp:         &kms.WrappingKeyList{WrappingKeys: &[]kms.WrappingKey{}},
+			resp:         &kms.WrappingKeyList{WrappingKeys: []kms.WrappingKey{}},
 			outputFormat: print.YAMLOutputFormat,
 			wantErr:      false,
 		},
