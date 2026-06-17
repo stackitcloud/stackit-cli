@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -199,11 +200,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type logMeClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) logme.ApiPartialUpdateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*logme.ListOfferingsResponse, error)
-}
-
 func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
@@ -242,7 +238,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 
 	var metricsFrequency *int32
 	if model.MetricsFrequency != nil {
-		metricsFrequency = utils.Ptr(int32(*model.MetricsFrequency))
+		val := *model.MetricsFrequency
+		if val < 0 || val > math.MaxInt32 {
+			return req, fmt.Errorf("metrics frequency value %d overflows int32", val)
+		}
+		metricsFrequency = utils.Ptr(int32(val))
 	}
 
 	var syslog []string

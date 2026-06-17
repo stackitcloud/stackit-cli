@@ -7,10 +7,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag

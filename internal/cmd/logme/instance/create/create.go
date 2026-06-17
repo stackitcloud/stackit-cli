@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -222,7 +223,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 
 	var metricsFrequency *int32
 	if model.MetricsFrequency != nil {
-		metricsFrequency = utils.Ptr(int32(*model.MetricsFrequency))
+		val := *model.MetricsFrequency
+		if val < 0 || val > math.MaxInt32 {
+			return req, fmt.Errorf("metrics frequency value %d overflows int32", val)
+		}
+		metricsFrequency = utils.Ptr(int32(val))
 	}
 
 	var syslog []string
