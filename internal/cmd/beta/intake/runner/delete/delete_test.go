@@ -95,6 +95,17 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "with force",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[forceFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Force = true
+			}),
+		},
+		{
 			description: "no arg values",
 			argValues:   []string{},
 			flagValues:  fixtureFlagValues(),
@@ -139,6 +150,13 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "with force",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Force = true
+			}),
+			expectedRequest: fixtureRequest().Force(true),
 		},
 	}
 
