@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -181,6 +183,55 @@ func TestFlagToInt32Pointer(t *testing.T) {
 
 			if got := FlagToInt32Pointer(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FlagToInt32Pointer() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFlagToInstanceParametersPluginsInnerSliceValue(t *testing.T) {
+	const flagName = "temp"
+	tests := []struct {
+		name       string
+		flagValues []string
+		want       []rabbitmq.InstanceParametersPluginsInner
+	}{
+		{
+			name:       "flag unset",
+			flagValues: nil,
+			want:       nil,
+		},
+		{
+			name:       "flag value",
+			flagValues: []string{"val1", "val2"},
+			want:       []rabbitmq.InstanceParametersPluginsInner{"val1", "val2"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := testparams.NewTestParams()
+			cmd := func() *cobra.Command {
+				cmd := &cobra.Command{
+					Use:   "greet",
+					Short: "A simple greeting command",
+					Long:  "A simple greeting command",
+					Run: func(_ *cobra.Command, _ []string) {
+						fmt.Println("Hello world")
+					},
+				}
+				cmd.Flags().StringSlice(flagName, []string{}, "Plugin")
+				return cmd
+			}()
+			// set the flag value if a value use given, else consider the flag unset
+			if tt.flagValues != nil {
+				for _, val := range tt.flagValues {
+					err := cmd.Flags().Set(flagName, val)
+					if err != nil {
+						t.Error(err)
+					}
+				}
+			}
+			if got := FlagToInstanceParametersPluginsInnerSliceValue(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FlagToInstanceParametersPluginsInnerSliceValue() = %v, want %v", got, tt.want)
 			}
 		})
 	}

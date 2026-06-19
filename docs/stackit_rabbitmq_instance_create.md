@@ -30,7 +30,7 @@ stackit rabbitmq instance create [flags]
       --enable-monitoring               Enable monitoring
       --graphite string                 Graphite host
   -h, --help                            Help for "stackit rabbitmq instance create"
-      --metrics-frequency int           Metrics frequency
+      --metrics-frequency int32         Metrics frequency
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name

@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/wait"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api/wait"
 )
 
 const (
@@ -48,12 +48,12 @@ type inputModel struct {
 	InstanceName         *string
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
+	Plugin               []rabbitmq.InstanceParametersPluginsInner
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
 }
 
@@ -100,7 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -112,12 +112,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create RabbitMQ instance: %w", err)
 			}
-			instanceId := *resp.InstanceId
+			instanceId := resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -136,7 +136,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
 	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
@@ -177,11 +177,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
 		MonitoringInstanceId: flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag),
 		Graphite:             flags.FlagToStringPointer(p, cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag),
+		MetricsFrequency:     flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag),
 		MetricsPrefix:        flags.FlagToStringPointer(p, cmd, metricsPrefixFlag),
-		Plugin:               flags.FlagToStringSlicePointer(p, cmd, pluginFlag),
+		Plugin:               flags.FlagToInstanceParametersPluginsInnerSliceValue(p, cmd, pluginFlag),
 		SgwAcl:               flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(p, cmd, syslogFlag),
+		Syslog:               flags.FlagToStringSliceValue(p, cmd, syslogFlag),
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
@@ -192,17 +192,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 type rabbitMQClient interface {
-	CreateInstance(ctx context.Context, projectId string) rabbitmq.ApiCreateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*rabbitmq.ListOfferingsResponse, error)
+	CreateInstance(ctx context.Context, projectId, regionId string) rabbitmq.ApiCreateInstanceRequest
+	ListOfferings(ctx context.Context, projectId, regionId string) rabbitmq.ApiListOfferingsRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 	}
@@ -230,7 +230,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	}
 
 	req = req.CreateInstancePayload(rabbitmq.CreateInstancePayload{
-		InstanceName: model.InstanceName,
+		InstanceName: *model.InstanceName,
 		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
@@ -241,7 +241,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},
-		PlanId: planId,
+		PlanId: *planId,
 	})
 	return req, nil
 }
