@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/logs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 	logsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"

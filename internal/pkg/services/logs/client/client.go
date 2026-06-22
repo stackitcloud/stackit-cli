@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	genericclient "github.com/stackitcloud/stackit-cli/internal/pkg/generic-client"
