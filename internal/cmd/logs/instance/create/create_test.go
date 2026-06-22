@@ -166,13 +166,11 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		expectedRequest logs.ApiCreateLogsInstanceRequest
-		isValid         bool
 	}{
 		{
 			description:     "base case",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
-			isValid:         true,
 		},
 		{
 			description: "no optional values",
@@ -186,7 +184,6 @@ func TestBuildRequest(t *testing.T) {
 				Description:   nil,
 				Acl:           nil,
 			}),
-			isValid: true,
 		},
 	}
 
