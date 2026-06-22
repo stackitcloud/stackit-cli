@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"math"
 
 	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
@@ -87,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				return err
 			}
@@ -98,15 +99,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if resp == nil {
 				return fmt.Errorf("create Logs instance: empty response from API")
 			}
-			if resp.Id == nil {
+			if len(resp.Id) == 0 {
 				return fmt.Errorf("create Logs instance: instance id missing in response")
 			}
-			instanceId := *resp.Id
+			instanceId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -149,16 +150,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateLogsInstanceRequest {
-	req := apiClient.CreateLogsInstance(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) (logs.ApiCreateLogsInstanceRequest, error) {
+	req := apiClient.DefaultAPI.CreateLogsInstance(ctx, model.ProjectId, model.Region)
+
+	var retentionDays int32
+	if model.RetentionDays != nil {
+		val := *model.RetentionDays
+		if val < 0 || val > math.MaxInt32 {
+			return req, fmt.Errorf("metrics frequency value %d overflows int32", val)
+		}
+		retentionDays = int32(val)
+	}
 
 	req = req.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-		DisplayName:   model.DisplayName,
+		DisplayName:   utils.PtrString(model.DisplayName),
 		Description:   model.Description,
-		RetentionDays: model.RetentionDays,
-		Acl:           model.ACL,
+		RetentionDays: retentionDays,
+		Acl:           utils.PtrValue(model.ACL),
 	})
-	return req
+	return req, nil
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *logs.LogsInstance) error {
@@ -173,7 +183,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

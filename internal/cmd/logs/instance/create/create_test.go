@@ -31,7 +31,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &logs.APIClient{}
+	testClient    = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 )
 
@@ -72,12 +72,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *logs.ApiCreateLogsInstanceRequest)) logs.ApiCreateLogsInstanceRequest {
-	request := testClient.CreateLogsInstance(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateLogsInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-		DisplayName:   utils.Ptr(testDisplayName),
+		DisplayName:   testDisplayName,
 		Description:   utils.Ptr(testDescription),
-		RetentionDays: utils.Ptr(int64(testRetentionDays)),
-		Acl:           utils.Ptr([]string{testAcl}),
+		RetentionDays: testRetentionDays,
+		Acl:           []string{testAcl},
 	})
 
 	for _, mod := range mods {
@@ -166,11 +166,13 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		expectedRequest logs.ApiCreateLogsInstanceRequest
+		isValid         bool
 	}{
 		{
 			description:     "base case",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+			isValid:         true,
 		},
 		{
 			description: "no optional values",
@@ -179,20 +181,38 @@ func TestBuildRequest(t *testing.T) {
 				model.ACL = nil
 			}),
 			expectedRequest: fixtureRequest().CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-				DisplayName:   utils.Ptr(testDisplayName),
-				RetentionDays: utils.Ptr(int64(testRetentionDays)),
+				DisplayName:   testDisplayName,
+				RetentionDays: int32(testRetentionDays),
 				Description:   nil,
 				Acl:           nil,
 			}),
+			isValid: true,
+		},
+		{
+			description: "retention days not valid",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.RetentionDays = utils.Int64Ptr(1 << 31)
+			}),
+			expectedRequest: fixtureRequest(),
+			isValid:         false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient)
+
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error building request: %v", err)
+			}
+
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(logs.ApiCreateLogsInstanceRequest{}, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
