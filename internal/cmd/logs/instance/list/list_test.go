@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logs.APIClient{}
+var testClient = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -142,7 +142,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, tt.expectedRequest),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
