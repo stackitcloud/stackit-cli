@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -48,7 +47,7 @@ type inputModel struct {
 	InstanceName         *string
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
 	SgwAcl               *[]string
@@ -135,7 +134,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
@@ -175,7 +174,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
 		MonitoringInstanceId: flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag),
 		Graphite:             flags.FlagToStringPointer(p, cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag),
+		MetricsFrequency:     flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag),
 		MetricsPrefix:        flags.FlagToStringPointer(p, cmd, metricsPrefixFlag),
 		SgwAcl:               flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag),
 		Syslog:               flags.FlagToStringSlicePointer(p, cmd, syslogFlag),
@@ -221,30 +220,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
 
-	var metricsFrequency *int32
-	if model.MetricsFrequency != nil {
-		val := *model.MetricsFrequency
-		if val < 0 || val > math.MaxInt32 {
-			return req, fmt.Errorf("metrics frequency value %d overflows int32", val)
-		}
-		metricsFrequency = utils.Ptr(int32(val))
-	}
-
-	var syslog []string
-	if model.Syslog != nil {
-		syslog = utils.GetSliceFromPointer(model.Syslog)
-	}
-
 	req = req.CreateInstancePayload(logme.CreateInstancePayload{
 		InstanceName: utils.PtrValue(model.InstanceName),
 		Parameters: &logme.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
 			MonitoringInstanceId: model.MonitoringInstanceId,
-			MetricsFrequency:     metricsFrequency,
+			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
 			SgwAcl:               sgwAcl,
-			Syslog:               syslog,
+			Syslog:               utils.GetSliceFromPointer(model.Syslog),
 		},
 		PlanId: utils.PtrValue(planId),
 	})

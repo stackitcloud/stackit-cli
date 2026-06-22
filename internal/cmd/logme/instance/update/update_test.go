@@ -82,7 +82,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:           testInstanceId,
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: &testMonitoringInstanceId,
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
@@ -186,7 +186,7 @@ func TestParseInput(t *testing.T) {
 				PlanId:           &testPlanId,
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -457,6 +457,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
 				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
