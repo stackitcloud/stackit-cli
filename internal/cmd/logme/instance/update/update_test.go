@@ -84,10 +84,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Graphite:             utils.Ptr("example-graphite"),
 		MetricsFrequency:     utils.Ptr(int64(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
-		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+		MonitoringInstanceId: &testMonitoringInstanceId,
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
 		Syslog:               utils.Ptr([]string{"example-syslog"}),
-		PlanId:               utils.Ptr(testPlanId),
+		PlanId:               &testPlanId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -103,11 +103,11 @@ func fixtureRequest(mods ...func(request *logme.ApiPartialUpdateInstanceRequest)
 			Graphite:             utils.Ptr("example-graphite"),
 			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
-			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+			MonitoringInstanceId: &testMonitoringInstanceId,
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
 			Syslog:               []string{"example-syslog"},
 		},
-		PlanId: utils.Ptr(testPlanId),
+		PlanId: &testPlanId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -183,7 +183,7 @@ func TestParseInput(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId:       testInstanceId,
-				PlanId:           utils.Ptr(testPlanId),
+				PlanId:           &testPlanId,
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
 				MetricsFrequency: utils.Ptr(int64(0)),
