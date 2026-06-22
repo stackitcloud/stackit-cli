@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		DisplayName:   utils.Ptr(testDisplayName),
 		Description:   utils.Ptr(testDescription),
-		RetentionDays: utils.Ptr(int64(testRetentionDays)),
+		RetentionDays: utils.Ptr(int32(testRetentionDays)),
 		ACL:           utils.Ptr([]string{testAcl}),
 	}
 	for _, mod := range mods {
@@ -188,31 +188,16 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 		},
-		{
-			description: "retention days not valid",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.RetentionDays = utils.Int64Ptr(1 << 31)
-			}),
-			expectedRequest: fixtureRequest(),
-			isValid:         false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
-
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error building request: %v", err)
-			}
-
+			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(logs.ApiCreateLogsInstanceRequest{}, "ApiService"),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

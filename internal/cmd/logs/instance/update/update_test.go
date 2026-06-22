@@ -26,7 +26,7 @@ const (
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &logs.APIClient{}
+	testClient     = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 )
@@ -66,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceID:    testInstanceId,
 		DisplayName:   utils.Ptr("name"),
 		ACL:           utils.Ptr([]string{"0.0.0.0/0"}),
-		RetentionDays: utils.Ptr(int64(60)),
+		RetentionDays: utils.Ptr(int32(60)),
 		Description:   utils.Ptr("Example"),
 	}
 	for _, mod := range mods {
@@ -76,11 +76,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiUpdateLogsInstanceRequest)) logs.ApiUpdateLogsInstanceRequest {
-	request := testClient.UpdateLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.UpdateLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.UpdateLogsInstancePayload(logs.UpdateLogsInstancePayload{
 		DisplayName:   utils.Ptr("name"),
-		Acl:           utils.Ptr([]string{"0.0.0.0/0"}),
-		RetentionDays: utils.Ptr(int64(60)),
+		Acl:           []string{"0.0.0.0/0"},
+		RetentionDays: utils.Ptr(int32(60)),
 		Description:   utils.Ptr("Example"),
 	})
 	for _, mod := range mods {
@@ -160,7 +160,7 @@ func TestParseInput(t *testing.T) {
 				InstanceID:    testInstanceId,
 				DisplayName:   utils.Ptr("display-name"),
 				ACL:           utils.Ptr([]string{"0.0.0.0/24"}),
-				RetentionDays: utils.Ptr(int64(60)),
+				RetentionDays: utils.Ptr(int32(60)),
 				Description:   utils.Ptr("description"),
 			},
 		},
@@ -230,7 +230,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 				InstanceID: testInstanceId,
 			},
-			expectedRequest: testClient.UpdateLogsInstance(testCtx, testProjectId, testRegion, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.UpdateLogsInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				UpdateLogsInstancePayload(logs.UpdateLogsInstancePayload{}),
 		},
 	}
@@ -242,6 +242,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

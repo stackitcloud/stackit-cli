@@ -34,7 +34,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceID    string
 	DisplayName   *string
-	RetentionDays *int64
+	RetentionDays *int32
 	ACL           *[]string
 	Description   *string
 }
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceID)
+			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceID
@@ -108,7 +108,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringSlice(aclFlag, []string{}, "Access control list")
-	cmd.Flags().Int64(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
+	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -120,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	displayName := flags.FlagToStringPointer(p, cmd, displayNameFlag)
-	retentionDays := flags.FlagToInt64Pointer(p, cmd, retentionDaysFlag)
+	retentionDays := flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag)
 	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
 	description := flags.FlagToStringPointer(p, cmd, descriptionFlag)
 
@@ -142,10 +142,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiUpdateLogsInstanceRequest {
-	req := apiClient.UpdateLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
+	req := apiClient.DefaultAPI.UpdateLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
+
 	req = req.UpdateLogsInstancePayload(logs.UpdateLogsInstancePayload{
 		DisplayName:   model.DisplayName,
-		Acl:           model.ACL,
+		Acl:           utils.PtrValue(model.ACL),
 		RetentionDays: model.RetentionDays,
 		Description:   model.Description,
 	})
@@ -159,7 +160,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, inst
 		return fmt.Errorf("input model is nil")
 	}
 	return p.OutputResult(model.OutputFormat, instance, func() error {
-		p.Outputf("Updated instance %q for project %q.\n", utils.PtrString(instance.DisplayName), projectLabel)
+		p.Outputf("Updated instance %q for project %q.\n", instance.DisplayName, projectLabel)
 		return nil
 	})
 }

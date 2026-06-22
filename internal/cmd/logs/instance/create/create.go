@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"math"
 
 	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
@@ -37,7 +36,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	DisplayName   *string
-	RetentionDays *int64
+	RetentionDays *int32
 	ACL           *[]string
 	Description   *string
 }
@@ -88,10 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return err
-			}
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Logs instance: %w", err)
@@ -126,7 +122,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringSlice(aclFlag, []string{}, "Access control list")
-	cmd.Flags().Int64(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
+	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
 
 	err := flags.MarkFlagsRequired(cmd, displayNameFlag, retentionDaysFlag)
 	cobra.CheckErr(err)
@@ -141,7 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
-		RetentionDays:   flags.FlagToInt64Pointer(p, cmd, retentionDaysFlag),
+		RetentionDays:   flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
 	}
@@ -150,25 +146,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) (logs.ApiCreateLogsInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateLogsInstanceRequest {
 	req := apiClient.DefaultAPI.CreateLogsInstance(ctx, model.ProjectId, model.Region)
-
-	var retentionDays int32
-	if model.RetentionDays != nil {
-		val := *model.RetentionDays
-		if val < 0 || val > math.MaxInt32 {
-			return req, fmt.Errorf("metrics frequency value %d overflows int32", val)
-		}
-		retentionDays = int32(val)
-	}
-
 	req = req.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
 		DisplayName:   utils.PtrString(model.DisplayName),
 		Description:   model.Description,
-		RetentionDays: retentionDays,
-		Acl:           utils.PtrValue(model.ACL),
+		RetentionDays: utils.PtrValue(model.RetentionDays),
+		Acl:           utils.GetSliceFromPointer(model.ACL),
 	})
-	return req, nil
+	return req
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *logs.LogsInstance) error {
