@@ -7,16 +7,14 @@ import (
 	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 	logUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
 )
@@ -55,7 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -77,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete all expired access token: nil result")
 			}
 
-			params.Printer.Outputf("Deleted %d expired access token(s)\n", len(utils.PtrValue(items.Tokens)))
+			params.Printer.Outputf("Deleted %d expired access token(s)\n", len(items.Tokens))
 			return nil
 		},
 	}
@@ -107,6 +105,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiDeleteAllAccessTokensRequest {
-	return apiClient.DeleteAllExpiredAccessTokens(ctx, model.ProjectId, model.Region, model.InstanceId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiDeleteAllExpiredAccessTokensRequest {
+	return apiClient.DefaultAPI.DeleteAllExpiredAccessTokens(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
