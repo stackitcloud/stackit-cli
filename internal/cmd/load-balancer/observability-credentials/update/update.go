@@ -28,16 +28,6 @@ const (
 	credentialsRefArg = "CREDENTIALS_REF" //nolint:gosec // linter false positive
 )
 
-// enforce implementation of interfaces
-var (
-	_ loadBalancerClient = loadbalancer.APIClient{}.DefaultAPI
-)
-
-type loadBalancerClient interface {
-	UpdateCredentials(ctx context.Context, projectId, region, credentialsRef string) loadbalancer.ApiUpdateCredentialsRequest
-	GetCredentials(ctx context.Context, projectId string, region string, credentialsRef string) loadbalancer.ApiGetCredentialsRequest
-}
-
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	CredentialsRef string
@@ -138,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient loadBalancerClient) (loadbalancer.ApiUpdateCredentialsRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient loadbalancer.DefaultAPI) (loadbalancer.ApiUpdateCredentialsRequest, error) {
 	req := apiClient.UpdateCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef)
 
 	currentCredentials, err := apiClient.GetCredentials(ctx, model.ProjectId, model.Region, model.CredentialsRef).Execute()
