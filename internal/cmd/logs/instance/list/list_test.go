@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiListLogsInstancesRequest)) logs.ApiListLogsInstancesRequest {
-	request := testClient.ListLogsInstances(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListLogsInstances(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

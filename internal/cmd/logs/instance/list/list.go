@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type inputModel struct {
@@ -117,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiListLogsInstancesRequest {
-	request := apiClient.ListLogsInstances(ctx, model.ProjectId, model.Region)
+	request := apiClient.DefaultAPI.ListLogsInstances(ctx, model.ProjectId, model.Region)
 
 	return request
 }
@@ -133,9 +132,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		table.SetHeader("NAME", "ID", "STATUS")
 		for _, instance := range instances {
 			table.AddRow(
-				utils.PtrString(instance.DisplayName),
-				utils.PtrString(instance.Id),
-				utils.PtrString(instance.Status),
+				instance.DisplayName,
+				instance.Id,
+				instance.Status,
 			)
 		}
 		err := table.Display(p)
