@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.PtrValue(resp.Tokens)
+			items := resp.Tokens
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}
@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiListAccessTokensRequest {
-	return apiClient.ListAccessTokens(ctx, model.ProjectId, model.Region, model.InstanceId)
+	return apiClient.DefaultAPI.ListAccessTokens(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, tokens []logs.AccessToken, projectLabel string) error {
@@ -142,12 +142,12 @@ func outputResult(p *print.Printer, outputFormat string, tokens []logs.AccessTok
 
 		for _, token := range tokens {
 			table.AddRow(
-				utils.PtrString(token.Id),
-				utils.PtrString(token.DisplayName),
+				token.Id,
+				token.DisplayName,
 				utils.PtrString(token.Description),
-				utils.PtrString(token.Permissions),
+				token.Permissions,
 				utils.PtrString(token.ValidUntil),
-				utils.PtrString(token.Status),
+				token.Status,
 			)
 			table.AddSeparator()
 		}
