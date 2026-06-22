@@ -23,25 +23,28 @@ const (
 	testRegion       = "eu01"
 )
 
-type logsClientMocked struct {
+type mockSettings struct {
 	getInstanceFails    bool
 	getInstanceResp     *logs.LogsInstance
 	getAccessTokenFails bool
 	getAccessTokenResp  *logs.AccessToken
 }
 
-func (m *logsClientMocked) GetLogsInstanceExecute(_ context.Context, _, _, _ string) (*logs.LogsInstance, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIMock(s mockSettings) logs.DefaultAPI {
+	return &logs.DefaultAPIServiceMock{
+		GetLogsInstanceExecuteMock: utils.Ptr(func(_ logs.ApiGetLogsInstanceRequest) (*logs.LogsInstance, error) {
+			if s.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return s.getInstanceResp, nil
+		}),
+		GetAccessTokenExecuteMock: utils.Ptr(func(_ logs.ApiGetAccessTokenRequest) (*logs.AccessToken, error) {
+			if s.getAccessTokenFails {
+				return nil, fmt.Errorf("could not get access token")
+			}
+			return s.getAccessTokenResp, nil
+		}),
 	}
-	return m.getInstanceResp, nil
-}
-
-func (m *logsClientMocked) GetAccessTokenExecute(_ context.Context, _, _, _, _ string) (*logs.AccessToken, error) {
-	if m.getAccessTokenFails {
-		return nil, fmt.Errorf("could not get access token")
-	}
-	return m.getAccessTokenResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
@@ -55,7 +58,7 @@ func TestGetInstanceName(t *testing.T) {
 		{
 			description: "base",
 			getInstanceResp: &logs.LogsInstance{
-				DisplayName: utils.Ptr(testInstanceName),
+				DisplayName: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -71,24 +74,16 @@ func TestGetInstanceName(t *testing.T) {
 			getInstanceResp:  nil,
 			isValid:          false,
 		},
-		{
-			description:      "name in response is nil",
-			getInstanceFails: false,
-			getInstanceResp: &logs.LogsInstance{
-				DisplayName: nil,
-			},
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logsClientMocked{
+			client := mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testRegion, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(client), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -117,7 +112,7 @@ func TestGetAccessTokenName(t *testing.T) {
 		{
 			description: "base",
 			getAccessTokenResp: &logs.AccessToken{
-				DisplayName: utils.Ptr(testInstanceName),
+				DisplayName: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -133,24 +128,16 @@ func TestGetAccessTokenName(t *testing.T) {
 			getAccessTokenResp:  nil,
 			isValid:             false,
 		},
-		{
-			description:         "name in response is nil",
-			getAccessTokenFails: false,
-			getAccessTokenResp: &logs.AccessToken{
-				DisplayName: nil,
-			},
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logsClientMocked{
+			client := mockSettings{
 				getAccessTokenFails: tt.getAccessTokenFails,
 				getAccessTokenResp:  tt.getAccessTokenResp,
 			}
 
-			output, err := GetAccessTokenName(context.Background(), client, testProjectId, testRegion, testInstanceId, testAccessTokenId)
+			output, err := GetAccessTokenName(context.Background(), newAPIMock(client), testProjectId, testRegion, testInstanceId, testAccessTokenId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
