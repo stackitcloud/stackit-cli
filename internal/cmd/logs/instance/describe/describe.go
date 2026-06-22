@@ -84,7 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiGetLogsInstanceRequest {
-	return apiClient.GetLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
+	return apiClient.DefaultAPI.GetLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *logs.LogsInstance) error {
@@ -93,13 +93,13 @@ func outputResult(p *print.Printer, outputFormat string, instance *logs.LogsInst
 	}
 	return p.OutputResult(outputFormat, instance, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(instance.Id))
+		table.AddRow("ID", instance.Id)
 		table.AddSeparator()
-		table.AddRow("DISPLAY NAME", utils.PtrString(instance.DisplayName))
+		table.AddRow("DISPLAY NAME", instance.DisplayName)
 		table.AddSeparator()
-		table.AddRow("RETENTION DAYS", utils.PtrString(instance.RetentionDays))
+		table.AddRow("RETENTION DAYS", instance.RetentionDays)
 		table.AddSeparator()
-		table.AddRow("ACL IP RANGES", utils.PtrString(instance.Acl))
+		table.AddRow("ACL IP RANGES", instance.Acl)
 		table.AddSeparator()
 		table.AddRow("DATA SOURCE", utils.PtrString(instance.DatasourceUrl))
 		table.AddSeparator()

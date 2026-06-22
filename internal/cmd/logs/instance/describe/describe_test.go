@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logs.APIClient{}
+var testClient = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -51,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiGetLogsInstanceRequest)) logs.ApiGetLogsInstanceRequest {
-	request := testClient.GetLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.GetLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -140,7 +140,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, tt.expectedRequest),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
