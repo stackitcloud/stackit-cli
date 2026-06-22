@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get the display name for confirmation
-			accessTokenLabel, err := logUtils.GetAccessTokenName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
+			accessTokenLabel, err := logUtils.GetAccessTokenName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get access token: %v", err)
 			}
@@ -113,5 +113,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiDeleteAccessTokenRequest {
-	return apiClient.DeleteAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
+	return apiClient.DefaultAPI.DeleteAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
 }
