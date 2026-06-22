@@ -26,7 +26,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &logs.APIClient{}
+	testClient     = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 )
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:  testInstanceId,
 		Description: utils.Ptr(testDescription),
 		DisplayName: testDisplayName,
-		Lifetime:    utils.Ptr(int64(0)),
+		Lifetime:    utils.Ptr(int32(0)),
 		Permissions: []string{
 			"read",
 			"write",
@@ -72,7 +72,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiCreateAccessTokenRequest)) logs.ApiCreateAccessTokenRequest {
-	request := testClient.CreateAccessToken(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.CreateAccessToken(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CreateAccessTokenPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -82,13 +82,13 @@ func fixtureRequest(mods ...func(request *logs.ApiCreateAccessTokenRequest)) log
 
 func fixturePayload(mods ...func(payload *logs.CreateAccessTokenPayload)) logs.CreateAccessTokenPayload {
 	payload := logs.CreateAccessTokenPayload{
-		DisplayName: utils.Ptr(testDisplayName),
+		DisplayName: testDisplayName,
 		Description: utils.Ptr(testDescription),
-		Lifetime:    utils.Ptr(int64(0)),
-		Permissions: utils.Ptr([]string{
+		Lifetime:    utils.Ptr(int32(0)),
+		Permissions: []logs.PermissionsInner{
 			"read",
 			"write",
-		}),
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -192,7 +192,9 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInputWithOptions(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, nil, tt.isValid, []testutils.TestingOption{
+				testutils.WithCmpOptions(cmpopts.EquateEmpty()),
+			})
 		})
 	}
 }
@@ -216,6 +218,8 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -240,16 +244,16 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				instanceLabel: "",
 				accessToken: utils.Ptr(logs.AccessToken{
-					Id: utils.Ptr(uuid.NewString()),
-					Permissions: utils.Ptr([]string{
+					Id: uuid.NewString(),
+					Permissions: []logs.PermissionsInner{
 						"read",
 						"write",
-					}),
-					DisplayName: utils.Ptr("Token"),
+					},
+					DisplayName: "Token",
 					AccessToken: utils.Ptr("Secret access token"),
-					Creator:     utils.Ptr(uuid.NewString()),
-					Expires:     utils.Ptr(false),
-					Status:      utils.Ptr(logs.ACCESSTOKENSTATUS_ACTIVE),
+					Creator:     uuid.NewString(),
+					Expires:     false,
+					Status:      logs.ACCESSTOKENSTATUS_ACTIVE,
 				}),
 			},
 			wantErr: false,
