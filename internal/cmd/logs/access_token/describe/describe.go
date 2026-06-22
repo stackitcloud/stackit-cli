@@ -101,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiGetAccessTokenRequest {
-	return apiClient.GetAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
+	return apiClient.DefaultAPI.GetAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, token *logs.AccessToken) error {
@@ -110,21 +110,21 @@ func outputResult(p *print.Printer, outputFormat string, token *logs.AccessToken
 	}
 	return p.OutputResult(outputFormat, token, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(token.Id))
+		table.AddRow("ID", token.Id)
 		table.AddSeparator()
-		table.AddRow("DISPLAY NAME", utils.PtrString(token.DisplayName))
+		table.AddRow("DISPLAY NAME", token.DisplayName)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(token.Description))
 		table.AddSeparator()
-		table.AddRow("PERMISSIONS", utils.PtrString(token.Permissions))
+		table.AddRow("PERMISSIONS", token.Permissions)
 		table.AddSeparator()
-		table.AddRow("CREATOR", utils.PtrString(token.Creator))
+		table.AddRow("CREATOR", token.Creator)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(token.Status))
+		table.AddRow("STATE", token.Status)
 		table.AddSeparator()
-		table.AddRow("EXPIRES", utils.PtrString(token.Expires))
+		table.AddRow("EXPIRES", token.Expires)
 		table.AddSeparator()
-		table.AddRow("VALID UNTIL", utils.PtrString(token.ValidUntil))
+		table.AddRow("VALID UNTIL", token.ValidUntil)
 		table.AddSeparator()
 
 		err := table.Display(p)

@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient = &logs.APIClient{}
+	testClient = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 
 	testProjectId     = uuid.NewString()
 	testInstanceId    = uuid.NewString()
@@ -71,7 +71,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiGetAccessTokenRequest)) logs.ApiGetAccessTokenRequest {
-	request := testClient.GetAccessToken(testCtx, testProjectId, testRegion, testInstanceId, testAccessTokenId)
+	request := testClient.DefaultAPI.GetAccessToken(testCtx, testProjectId, testRegion, testInstanceId, testAccessTokenId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -199,7 +199,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, tt.expectedRequest),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -222,16 +222,16 @@ func TestOutputResult(t *testing.T) {
 			name: "base",
 			args: args{
 				accessToken: utils.Ptr(logs.AccessToken{
-					Id: utils.Ptr(uuid.NewString()),
-					Permissions: utils.Ptr([]string{
+					Id: uuid.NewString(),
+					Permissions: []logs.PermissionsInner{
 						"read",
 						"write",
-					}),
-					DisplayName: utils.Ptr("Token"),
+					},
+					DisplayName: "Token",
 					AccessToken: utils.Ptr("Secret access token"),
-					Creator:     utils.Ptr(uuid.NewString()),
-					Expires:     utils.Ptr(false),
-					Status:      utils.Ptr(logs.ACCESSTOKENSTATUS_ACTIVE),
+					Creator:     uuid.NewString(),
+					Expires:     false,
+					Status:      logs.ACCESSTOKENSTATUS_ACTIVE,
 				}),
 			},
 			wantErr: false,
