@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{}
+var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiListCredentialsRequest)) mariadb.ApiListCredentialsRequest {
-	request := testClient.ListCredentials(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -160,7 +160,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mariadb.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

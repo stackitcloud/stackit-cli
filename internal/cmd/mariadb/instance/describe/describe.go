@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 

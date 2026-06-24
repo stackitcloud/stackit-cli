@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{}
+var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -47,7 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiListInstancesRequest)) mariadb.ApiListInstancesRequest {
-	request := testClient.ListInstances(testCtx, testProjectId)
+	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}

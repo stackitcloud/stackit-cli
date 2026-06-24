@@ -20,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{}
+var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
 
 type mariaDBClientMocked struct {
 	returnError       bool

@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mariadbUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := mariadbUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -208,7 +208,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariaDBClien
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.DefaultAPI.ListOfferingsExecute(ctx, model.ProjectId)
 	if err != nil {
 		return req, fmt.Errorf("get MariaDB offerings: %w", err)
 	}
