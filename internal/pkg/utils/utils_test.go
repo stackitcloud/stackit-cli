@@ -379,9 +379,7 @@ func TestMap(t *testing.T) {
 			name: "default",
 			args: args[string, *string]{
 				input: []string{"foo", "bar"},
-				mapFn: func(s string) *string {
-					return Ptr(s)
-				},
+				mapFn: Ptr[string],
 			},
 			want: []*string{Ptr("foo"), Ptr("bar")},
 		},
@@ -389,9 +387,7 @@ func TestMap(t *testing.T) {
 			name: "input slice is nil",
 			args: args[string, *string]{
 				input: nil,
-				mapFn: func(s string) *string {
-					return Ptr(s)
-				},
+				mapFn: Ptr[string],
 			},
 			want: []*string{},
 		},
