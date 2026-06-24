@@ -78,12 +78,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := mockSettings{
+			settings := mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newAPIMock(client), testProjectId, testRegion, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(settings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -132,12 +132,12 @@ func TestGetAccessTokenName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := mockSettings{
+			settings := mockSettings{
 				getAccessTokenFails: tt.getAccessTokenFails,
 				getAccessTokenResp:  tt.getAccessTokenResp,
 			}
 
-			output, err := GetAccessTokenName(context.Background(), newAPIMock(client), testProjectId, testRegion, testInstanceId, testAccessTokenId)
+			output, err := GetAccessTokenName(context.Background(), newAPIMock(settings), testProjectId, testRegion, testInstanceId, testAccessTokenId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
