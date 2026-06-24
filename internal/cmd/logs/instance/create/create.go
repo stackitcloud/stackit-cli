@@ -95,12 +95,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if resp == nil {
 				return fmt.Errorf("create Logs instance: empty response from API")
 			}
-			instanceId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {

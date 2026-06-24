@@ -224,8 +224,8 @@ func TestOutputResult(t *testing.T) {
 				accessToken: utils.Ptr(logs.AccessToken{
 					Id: uuid.NewString(),
 					Permissions: []logs.PermissionsInner{
-						"read",
-						"write",
+						logs.PERMISSIONSINNER_READ,
+						logs.PERMISSIONSINNER_WRITE,
 					},
 					DisplayName: "Token",
 					AccessToken: utils.Ptr("Secret access token"),
