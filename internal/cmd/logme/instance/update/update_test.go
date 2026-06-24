@@ -441,11 +441,11 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := mockSettings{
+			settings := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -456,8 +456,8 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 				cmpopts.EquateEmpty(),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
