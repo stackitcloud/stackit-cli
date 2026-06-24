@@ -10,5 +10,5 @@ import (
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*mariadb.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.MariaDBCustomEndpointKey), true, genericclient.CreateApiClient[*mariadb.APIClient](mariadb.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.MariaDBCustomEndpointKey), true, mariadb.NewAPIClient)
 }

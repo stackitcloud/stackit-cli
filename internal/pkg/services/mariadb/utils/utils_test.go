@@ -22,25 +22,28 @@ const (
 	testCredentialsUsername = "username"
 )
 
-type mariaDBClientMocked struct {
+type mockSettings struct {
 	getInstanceFails    bool
 	getInstanceResp     *mariadb.Instance
 	getCredentialsFails bool
 	getCredentialsResp  *mariadb.CredentialsResponse
 }
 
-func (m *mariaDBClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*mariadb.Instance, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIMock(m mockSettings) mariadb.DefaultAPI {
+	return &mariadb.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ mariadb.ApiGetInstanceRequest) (*mariadb.Instance, error) {
+			if m.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return m.getInstanceResp, nil
+		}),
+		GetCredentialsExecuteMock: utils.Ptr(func(_ mariadb.ApiGetCredentialsRequest) (*mariadb.CredentialsResponse, error) {
+			if m.getCredentialsFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return m.getCredentialsResp, nil
+		}),
 	}
-	return m.getInstanceResp, nil
-}
-
-func (m *mariaDBClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*mariadb.CredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getCredentialsResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
@@ -54,7 +57,7 @@ func TestGetInstanceName(t *testing.T) {
 		{
 			description: "base",
 			getInstanceResp: &mariadb.Instance{
-				Name: utils.Ptr(testInstanceName),
+				Name: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -68,12 +71,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mariaDBClientMocked{
+			settings := mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(settings), testProjectId, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -103,8 +106,8 @@ func TestGetCredentialsUsername(t *testing.T) {
 			description: "base",
 			getCredentialsResp: &mariadb.CredentialsResponse{
 				Raw: &mariadb.RawCredentials{
-					Credentials: &mariadb.Credentials{
-						Username: utils.Ptr(testCredentialsUsername),
+					Credentials: mariadb.Credentials{
+						Username: testCredentialsUsername,
 					},
 				},
 			},
@@ -120,12 +123,12 @@ func TestGetCredentialsUsername(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mariaDBClientMocked{
+			settings := mockSettings{
 				getCredentialsFails: tt.getCredentialsFails,
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newAPIMock(settings), testProjectId, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
