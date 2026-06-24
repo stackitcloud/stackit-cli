@@ -86,8 +86,8 @@ func fixturePayload(mods ...func(payload *logs.CreateAccessTokenPayload)) logs.C
 		Description: utils.Ptr(testDescription),
 		Lifetime:    utils.Ptr(int32(0)),
 		Permissions: []logs.PermissionsInner{
-			"read",
-			"write",
+			logs.PERMISSIONSINNER_READ,
+			logs.PERMISSIONSINNER_WRITE,
 		},
 	}
 	for _, mod := range mods {
@@ -215,8 +215,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
@@ -244,8 +243,8 @@ func TestOutputResult(t *testing.T) {
 				accessToken: utils.Ptr(logs.AccessToken{
 					Id: uuid.NewString(),
 					Permissions: []logs.PermissionsInner{
-						"read",
-						"write",
+						logs.PERMISSIONSINNER_READ,
+						logs.PERMISSIONSINNER_WRITE,
 					},
 					DisplayName: "Token",
 					AccessToken: utils.Ptr("Secret access token"),

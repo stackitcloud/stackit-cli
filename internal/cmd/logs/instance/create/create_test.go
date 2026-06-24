@@ -192,8 +192,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
