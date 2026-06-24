@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb/wait"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api/wait"
 )
 
 const (

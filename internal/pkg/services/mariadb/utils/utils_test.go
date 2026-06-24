@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
 )
 
 var (
