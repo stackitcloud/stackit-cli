@@ -138,10 +138,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateAccessTokenRequest {
 	req := apiClient.DefaultAPI.CreateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId)
-	permissions := make([]logs.PermissionsInner, len(model.Permissions))
-	for i, permission := range model.Permissions {
-		permissions[i] = logs.PermissionsInner(permission)
-	}
+	permissions := utils.Map(model.Permissions, func(t string) logs.PermissionsInner {
+		return logs.PermissionsInner(t)
+	})
 	return req.CreateAccessTokenPayload(logs.CreateAccessTokenPayload{
 		Description: model.Description,
 		DisplayName: model.DisplayName,
