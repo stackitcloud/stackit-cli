@@ -24,7 +24,7 @@ var (
 	formatFlag = flags.StringEnumFlag(
 		"format",
 		[]string{"json", "yaml"},
-		"Defines the output format, default is 'json'",
+		"Defines the output format",
 		flags.StringEnumIgnoreCase[string](),
 		flags.StringEnumShortHand[string]("f"),
 		flags.StringEnumDefaultValue("json"),
@@ -32,7 +32,7 @@ var (
 	typeFlag = flags.StringEnumFlag(
 		"type",
 		[]string{"alb", "pool"},
-		"Defines the output type, default is 'alb'",
+		"Defines the output type",
 		flags.StringEnumIgnoreCase[string](),
 		flags.StringEnumShortHand[string]("t"),
 		flags.StringEnumDefaultValue("alb"),
