@@ -23,9 +23,9 @@ stackit beta alb template [flags]
 ### Options
 
 ```
-  -f, --format string   Defines the output format, default is 'json' (one of: [json, yaml]) (default "json")
+  -f, --format string   Defines the output format (one of: [json, yaml]) (default "json")
   -h, --help            Help for "stackit beta alb template"
-  -t, --type string     Defines the output type, default is 'alb' (one of: [alb, pool]) (default "alb")
+  -t, --type string     Defines the output type (one of: [alb, pool]) (default "alb")
 ```
 
 ### Options inherited from parent commands
