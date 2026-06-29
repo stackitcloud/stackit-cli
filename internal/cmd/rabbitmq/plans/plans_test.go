@@ -20,12 +20,12 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &rabbitmq.APIClient{DefaultAPI: &rabbitmq.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegionId = "eu01"
+var testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegionId,
+		globalflags.RegionFlag:    testRegion,
 		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
@@ -38,7 +38,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegionId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Limit: utils.Ptr(int64(10)),
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiListOfferingsRequest)) rabbitmq.ApiListOfferingsRequest {
-	request := testClient.DefaultAPI.ListOfferings(testCtx, testProjectId, testRegionId)
+	request := testClient.DefaultAPI.ListOfferings(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

@@ -192,8 +192,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 type rabbitMQClient interface {
-	CreateInstance(ctx context.Context, projectId, regionId string) rabbitmq.ApiCreateInstanceRequest
-	ListOfferings(ctx context.Context, projectId, regionId string) rabbitmq.ApiListOfferingsRequest
+	CreateInstance(ctx context.Context, projectId, region string) rabbitmq.ApiCreateInstanceRequest
+	ListOfferings(ctx context.Context, projectId, region string) rabbitmq.ApiListOfferingsRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiCreateInstanceRequest, error) {

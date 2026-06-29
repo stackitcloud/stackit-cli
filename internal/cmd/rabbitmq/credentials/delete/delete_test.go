@@ -18,7 +18,7 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &rabbitmq.APIClient{DefaultAPI: &rabbitmq.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegionId = "eu01"
+var testRegion = "eu01"
 var testInstanceId = uuid.NewString()
 var testCredentialsId = uuid.NewString()
 
@@ -35,7 +35,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegionId,
+		globalflags.RegionFlag:    testRegion,
 		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegionId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:    testInstanceId,
@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiDeleteCredentialsRequest)) rabbitmq.ApiDeleteCredentialsRequest {
-	request := testClient.DefaultAPI.DeleteCredentials(testCtx, testProjectId, testRegionId, testInstanceId, testCredentialsId)
+	request := testClient.DefaultAPI.DeleteCredentials(testCtx, testProjectId, testRegion, testInstanceId, testCredentialsId)
 	for _, mod := range mods {
 		mod(&request)
 	}

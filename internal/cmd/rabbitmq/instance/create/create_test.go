@@ -43,12 +43,12 @@ var testPlanId = uuid.NewString()
 var testMonitoringInstanceId = uuid.NewString()
 var testInstanceName = utils.Ptr("instance")
 
-const testRegionId = "eu01"
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegionId,
+		globalflags.RegionFlag:    testRegion,
 		instanceNameFlag:          "example-name",
 		enableMonitoringFlag:      "true",
 		graphiteFlag:              "example-graphite",
@@ -70,7 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegionId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName:         utils.Ptr("example-name"),
@@ -91,7 +91,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiCreateInstanceRequest)) rabbitmq.ApiCreateInstanceRequest {
-	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegionId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(rabbitmq.CreateInstancePayload{
 		InstanceName: "example-name",
 		Parameters: &rabbitmq.InstanceParameters{
@@ -383,7 +383,7 @@ func TestBuildRequest(t *testing.T) {
 				InstanceName: testInstanceName,
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
-					Region:    testRegionId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId: utils.Ptr(testPlanId),
@@ -401,7 +401,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegionId).
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion).
 				CreateInstancePayload(rabbitmq.CreateInstancePayload{InstanceName: *testInstanceName, PlanId: testPlanId, Parameters: &rabbitmq.InstanceParameters{}}),
 		},
 	}

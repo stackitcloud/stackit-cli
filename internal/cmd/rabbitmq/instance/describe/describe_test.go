@@ -19,7 +19,7 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &rabbitmq.APIClient{DefaultAPI: &rabbitmq.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegionId = "eu01"
+var testRegion = "eu01"
 var testInstanceId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -35,7 +35,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegionId,
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -47,7 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegionId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiGetInstanceRequest)) rabbitmq.ApiGetInstanceRequest {
-	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testRegionId, testInstanceId)
+	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}

@@ -39,7 +39,7 @@ func newAPIMock(settings mockSettings) rabbitmq.DefaultAPI {
 var (
 	testProjectId            = uuid.NewString()
 	testInstanceId           = uuid.NewString()
-	testRegionId             = "eu01"
+	testRegion               = "eu01"
 	testPlanId               = uuid.NewString()
 	testMonitoringInstanceId = uuid.NewString()
 )
@@ -57,7 +57,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegionId,
+		globalflags.RegionFlag:    testRegion,
 		enableMonitoringFlag:      "true",
 		graphiteFlag:              "example-graphite",
 		metricsFrequencyFlag:      "100",
@@ -78,7 +78,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    testRegionId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:           testInstanceId,
@@ -99,7 +99,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiPartialUpdateInstanceRequest)) rabbitmq.ApiPartialUpdateInstanceRequest {
-	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegionId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{
 		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
@@ -466,12 +466,12 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
-					Region:    testRegionId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegionId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{Parameters: &rabbitmq.InstanceParameters{}}),
 		},
 	}

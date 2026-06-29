@@ -19,7 +19,7 @@ var (
 
 const (
 	testInstanceName        = "instance"
-	testRegionId            = "eu01"
+	testRegion              = "eu01"
 	testCredentialsUsername = "username"
 )
 
@@ -77,7 +77,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newApiMock(settings), testProjectId, testRegionId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newApiMock(settings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -129,7 +129,7 @@ func TestGetCredentialsUsername(t *testing.T) {
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsUsername(context.Background(), newApiMock(settings), testProjectId, testRegionId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newApiMock(settings), testProjectId, testRegion, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
