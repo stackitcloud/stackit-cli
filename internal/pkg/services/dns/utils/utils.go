@@ -5,38 +5,33 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-type DNSClient interface {
-	GetZoneExecute(ctx context.Context, projectId, zoneId string) (*dns.ZoneResponse, error)
-	GetRecordSetExecute(ctx context.Context, projectId, zoneId, recordSetId string) (*dns.RecordSetResponse, error)
-}
-
-func GetZoneName(ctx context.Context, apiClient DNSClient, projectId, zoneId string) (string, error) {
-	resp, err := apiClient.GetZoneExecute(ctx, projectId, zoneId)
+func GetZoneName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneId string) (string, error) {
+	resp, err := apiClient.GetZone(ctx, projectId, zoneId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get DNS zone: %w", err)
 	}
-	return *resp.Zone.Name, nil
+	return resp.Zone.Name, nil
 }
 
-func GetRecordSetName(ctx context.Context, apiClient DNSClient, projectId, zoneId, recordSetId string) (string, error) {
-	resp, err := apiClient.GetRecordSetExecute(ctx, projectId, zoneId, recordSetId)
+func GetRecordSetName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneId, recordSetId string) (string, error) {
+	resp, err := apiClient.GetRecordSet(ctx, projectId, zoneId, recordSetId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get DNS recordset: %w", err)
 	}
-	return *resp.Rrset.Name, nil
+	return resp.Rrset.Name, nil
 }
 
-func GetRecordSetType(ctx context.Context, apiClient DNSClient, projectId, zoneId, recordSetId string) (*string, error) {
-	resp, err := apiClient.GetRecordSetExecute(ctx, projectId, zoneId, recordSetId)
+func GetRecordSetType(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneId, recordSetId string) (*string, error) {
+	resp, err := apiClient.GetRecordSet(ctx, projectId, zoneId, recordSetId).Execute()
 	if err != nil {
 		return utils.Ptr(""), fmt.Errorf("get DNS recordset: %w", err)
 	}
-	return (*string)(resp.Rrset.Type), nil
+	return utils.Ptr(string(resp.Rrset.Type)), nil
 }
 
 func FormatTxtRecord(input string) (string, error) {

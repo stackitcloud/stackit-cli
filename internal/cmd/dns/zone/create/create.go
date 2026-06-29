@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -15,11 +18,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
 )
 
 const (
@@ -40,17 +42,17 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name          *string
-	DnsName       *string
-	DefaultTTL    *int64
-	Primaries     *[]string
+	Name          string
+	DnsName       string
+	DefaultTTL    *int32
+	Primaries     []string
 	Acl           *string
-	Type          *dns.CreateZonePayloadTypes
-	RetryTime     *int64
-	RefreshTime   *int64
-	NegativeCache *int64
+	Type          *dns.CreateZonePayloadType
+	RetryTime     *int32
+	RefreshTime   *int32
+	NegativeCache *int32
 	IsReverseZone *bool
-	ExpireTime    *int64
+	ExpireTime    *int32
 	Description   *string
 	ContactEmail  *string
 }
@@ -100,12 +102,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create DNS zone: %w", err)
 			}
-			zoneId := *resp.Zone.Id
+			zoneId := resp.Zone.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating zone", func() error {
-					_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
+					_, err = wait.CreateZoneWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, zoneId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -121,22 +123,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	var typeFlagOptions []string
-	for _, val := range dns.AllowedCreateZonePayloadTypesEnumValues {
-		typeFlagOptions = append(typeFlagOptions, string(val))
-	}
-
 	cmd.Flags().String(nameFlag, "", "User given name of the zone")
 	cmd.Flags().String(dnsNameFlag, "", "Fully qualified domain name of the DNS zone")
-	cmd.Flags().Int64(defaultTTLFlag, 1000, "Default time to live")
+	cmd.Flags().Int32(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().Var(flags.EnumFlag(false, "", append(typeFlagOptions, "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", typeFlagOptions))
-	cmd.Flags().Int64(retryTimeFlag, 0, "Retry time")
-	cmd.Flags().Int64(refreshTimeFlag, 0, "Refresh time")
-	cmd.Flags().Int64(negativeCacheFlag, 0, "Negative cache")
+	cmd.Flags().Var(flags.EnumFlag(false, "", append(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues), "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues)...)))
+	cmd.Flags().Int32(retryTimeFlag, 0, "Retry time")
+	cmd.Flags().Int32(refreshTimeFlag, 0, "Refresh time")
+	cmd.Flags().Int32(negativeCacheFlag, 0, "Negative cache")
 	cmd.Flags().Bool(isReverseZoneFlag, false, "Is reverse zone")
-	cmd.Flags().Int64(expireTimeFlag, 0, "Expire time")
+	cmd.Flags().Int32(expireTimeFlag, 0, "Expire time")
 	cmd.Flags().String(descriptionFlag, "", "Description of the zone")
 	cmd.Flags().String(contactEmailFlag, "", "Contact email for the zone")
 
@@ -150,24 +147,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	var zoneType *dns.CreateZonePayloadTypes
+	var zoneType *dns.CreateZonePayloadType
 	if zoneTypeString := flags.FlagToStringPointer(p, cmd, typeFlag); zoneTypeString != nil && *zoneTypeString != "" {
-		zoneType = dns.CreateZonePayloadTypes(*zoneTypeString).Ptr()
+		zoneType = dns.CreateZonePayloadType(*zoneTypeString).Ptr()
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
-		DnsName:         flags.FlagToStringPointer(p, cmd, dnsNameFlag),
-		DefaultTTL:      flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag),
-		Primaries:       flags.FlagToStringSlicePointer(p, cmd, primaryFlag),
+		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
+		DnsName:         flags.FlagToStringValue(p, cmd, dnsNameFlag),
+		DefaultTTL:      flags.FlagToInt32Pointer(p, cmd, defaultTTLFlag),
+		Primaries:       flags.FlagToStringSliceValue(p, cmd, primaryFlag),
 		Acl:             flags.FlagToStringPointer(p, cmd, aclFlag),
 		Type:            zoneType,
-		RetryTime:       flags.FlagToInt64Pointer(p, cmd, retryTimeFlag),
-		RefreshTime:     flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag),
-		NegativeCache:   flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag),
+		RetryTime:       flags.FlagToInt32Pointer(p, cmd, retryTimeFlag),
+		RefreshTime:     flags.FlagToInt32Pointer(p, cmd, refreshTimeFlag),
+		NegativeCache:   flags.FlagToInt32Pointer(p, cmd, negativeCacheFlag),
 		IsReverseZone:   flags.FlagToBoolPointer(p, cmd, isReverseZoneFlag),
-		ExpireTime:      flags.FlagToInt64Pointer(p, cmd, expireTimeFlag),
+		ExpireTime:      flags.FlagToInt32Pointer(p, cmd, expireTimeFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		ContactEmail:    flags.FlagToStringPointer(p, cmd, contactEmailFlag),
 	}
@@ -177,7 +174,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCreateZoneRequest {
-	req := apiClient.CreateZone(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.CreateZone(ctx, model.ProjectId)
 	req = req.CreateZonePayload(dns.CreateZonePayload{
 		Name:          model.Name,
 		DnsName:       model.DnsName,
@@ -205,7 +202,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Zone.Id))
+		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, resp.Zone.Id)
 		return nil
 	})
 }

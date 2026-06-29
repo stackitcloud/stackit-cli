@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &dns.APIClient{DefaultAPI: &dns.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -50,17 +50,17 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:          utils.Ptr("example"),
-		DnsName:       utils.Ptr("example.com"),
-		DefaultTTL:    utils.Ptr(int64(3600)),
-		Primaries:     utils.Ptr([]string{"1.1.1.1"}),
+		Name:          "example",
+		DnsName:       "example.com",
+		DefaultTTL:    utils.Ptr(int32(3600)),
+		Primaries:     []string{"1.1.1.1"},
 		Acl:           utils.Ptr("0.0.0.0/0"),
 		Type:          dns.CREATEZONEPAYLOADTYPE_PRIMARY.Ptr(),
-		RetryTime:     utils.Ptr(int64(600)),
-		RefreshTime:   utils.Ptr(int64(3600)),
-		NegativeCache: utils.Ptr(int64(60)),
+		RetryTime:     utils.Ptr(int32(600)),
+		RefreshTime:   utils.Ptr(int32(3600)),
+		NegativeCache: utils.Ptr(int32(60)),
 		IsReverseZone: utils.Ptr(false),
-		ExpireTime:    utils.Ptr(int64(36000000)),
+		ExpireTime:    utils.Ptr(int32(36000000)),
 		Description:   utils.Ptr("Example"),
 		ContactEmail:  utils.Ptr("example@example.com"),
 	}
@@ -71,19 +71,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiCreateZoneRequest)) dns.ApiCreateZoneRequest {
-	request := testClient.CreateZone(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateZone(testCtx, testProjectId)
 	request = request.CreateZonePayload(dns.CreateZonePayload{
-		Name:          utils.Ptr("example"),
-		DnsName:       utils.Ptr("example.com"),
-		DefaultTTL:    utils.Ptr(int64(3600)),
-		Primaries:     utils.Ptr([]string{"1.1.1.1"}),
+		Name:          "example",
+		DnsName:       "example.com",
+		DefaultTTL:    utils.Ptr(int32(3600)),
+		Primaries:     []string{"1.1.1.1"},
 		Acl:           utils.Ptr("0.0.0.0/0"),
 		Type:          dns.CREATEZONEPAYLOADTYPE_PRIMARY.Ptr(),
-		RetryTime:     utils.Ptr(int64(600)),
-		RefreshTime:   utils.Ptr(int64(3600)),
-		NegativeCache: utils.Ptr(int64(60)),
+		RetryTime:     utils.Ptr(int32(600)),
+		RefreshTime:   utils.Ptr(int32(3600)),
+		NegativeCache: utils.Ptr(int32(60)),
 		IsReverseZone: utils.Ptr(false),
-		ExpireTime:    utils.Ptr(int64(36000000)),
+		ExpireTime:    utils.Ptr(int32(36000000)),
 		Description:   utils.Ptr("Example"),
 		ContactEmail:  utils.Ptr("example@example.com"),
 	})
@@ -126,8 +126,8 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Name:    utils.Ptr("example"),
-				DnsName: utils.Ptr("example.com"),
+				Name:    "example",
+				DnsName: "example.com",
 			},
 		},
 		{
@@ -153,17 +153,17 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Name:          utils.Ptr(""),
-				DnsName:       utils.Ptr(""),
-				DefaultTTL:    utils.Ptr(int64(0)),
+				Name:          "",
+				DnsName:       "",
+				DefaultTTL:    utils.Ptr(int32(0)),
 				Primaries:     nil,
 				Acl:           utils.Ptr(""),
 				Type:          nil,
-				RetryTime:     utils.Ptr(int64(0)),
-				RefreshTime:   utils.Ptr(int64(0)),
-				NegativeCache: utils.Ptr(int64(0)),
+				RetryTime:     utils.Ptr(int32(0)),
+				RefreshTime:   utils.Ptr(int32(0)),
+				NegativeCache: utils.Ptr(int32(0)),
 				IsReverseZone: utils.Ptr(false),
-				ExpireTime:    utils.Ptr(int64(0)),
+				ExpireTime:    utils.Ptr(int32(0)),
 				Description:   utils.Ptr(""),
 				ContactEmail:  utils.Ptr(""),
 			},
@@ -195,9 +195,8 @@ func TestParseInput(t *testing.T) {
 			primaryFlagValues: []string{"1.2.3.4", "5.6.7.8"},
 			isValid:           true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Primaries = utils.Ptr(
-					append(*model.Primaries, "1.2.3.4", "5.6.7.8"),
-				)
+				model.Primaries =
+					append(model.Primaries, "1.2.3.4", "5.6.7.8")
 			}),
 		},
 		{
@@ -206,9 +205,8 @@ func TestParseInput(t *testing.T) {
 			primaryFlagValues: []string{"1.2.3.4,5.6.7.8"},
 			isValid:           true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Primaries = utils.Ptr(
-					append(*model.Primaries, "1.2.3.4", "5.6.7.8"),
-				)
+				model.Primaries =
+					append(model.Primaries, "1.2.3.4", "5.6.7.8")
 			}),
 		},
 	}
@@ -240,13 +238,13 @@ func TestBuildRequest(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Name:    utils.Ptr("example"),
-				DnsName: utils.Ptr("example.com"),
+				Name:    "example",
+				DnsName: "example.com",
 			},
-			expectedRequest: testClient.CreateZone(testCtx, testProjectId).
+			expectedRequest: testClient.DefaultAPI.CreateZone(testCtx, testProjectId).
 				CreateZonePayload(dns.CreateZonePayload{
-					Name:    utils.Ptr("example"),
-					DnsName: utils.Ptr("example.com"),
+					Name:    "example",
+					DnsName: "example.com",
 				}),
 		},
 	}
@@ -256,7 +254,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, dns.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -286,7 +284,7 @@ func TestOutputResult(t *testing.T) {
 			name: "only zone response as argument",
 			args: args{
 				model: fixtureInputModel(),
-				resp:  &dns.ZoneResponse{Zone: &dns.Zone{}},
+				resp:  &dns.ZoneResponse{Zone: dns.Zone{}},
 			},
 			wantErr: false,
 		},

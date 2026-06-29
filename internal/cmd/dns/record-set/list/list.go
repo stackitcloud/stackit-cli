@@ -9,7 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -20,7 +20,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -88,12 +87,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Fetch record sets
-			recordSets, err := fetchRecordSets(ctx, model, apiClient)
+			recordSets, err := fetchRecordSets(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
 
-			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
@@ -184,7 +183,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, p
 		req = req.NameLike(*model.NameLike)
 	}
 	if model.OrderByName != nil {
-		req = req.OrderByName(strings.ToUpper(*model.OrderByName))
+		req = req.OrderByName(dns.ListRecordSetsOrderByNameParameter(strings.ToUpper(*model.OrderByName)))
 	}
 
 	// check integer overflows
@@ -220,7 +219,7 @@ func fetchRecordSets(ctx context.Context, model *inputModel, apiClient dnsClient
 		if err != nil {
 			return nil, fmt.Errorf("get DNS record sets: %w", err)
 		}
-		respRecordSets := *resp.RrSets
+		respRecordSets := resp.RrSets
 		if len(respRecordSets) == 0 {
 			break
 		}
@@ -250,17 +249,17 @@ func outputResult(p *print.Printer, outputFormat, zoneLabel string, recordSets [
 		table.SetHeader("ID", "NAME", "STATUS", "TTL", "TYPE", "RECORD DATA")
 		for i := range recordSets {
 			rs := recordSets[i]
-			recordData := make([]string, 0, len(*rs.Records))
-			for _, r := range *rs.Records {
-				recordData = append(recordData, *r.Content)
+			recordData := make([]string, 0, len(rs.Records))
+			for _, r := range rs.Records {
+				recordData = append(recordData, r.Content)
 			}
 			recordDataJoin := strings.Join(recordData, ", ")
 			table.AddRow(
-				utils.PtrString(rs.Id),
-				utils.PtrString(rs.Name),
-				utils.PtrString(rs.State),
-				utils.PtrString(rs.Ttl),
-				utils.PtrString(rs.Type),
+				rs.Id,
+				rs.Name,
+				rs.State,
+				rs.Ttl,
+				rs.Type,
 				recordDataJoin,
 			)
 		}

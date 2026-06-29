@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 )
 
 const (
@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			recordSet := resp.Rrset
 
-			return outputResult(params.Printer, model.OutputFormat, recordSet)
+			return outputResult(params.Printer, model.OutputFormat, &recordSet)
 		},
 	}
 	configureFlags(cmd)
@@ -101,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiGetRecordSetRequest {
-	req := apiClient.GetRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
+	req := apiClient.DefaultAPI.GetRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
 	return req
 }
 
@@ -111,22 +111,22 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 	}
 
 	return p.OutputResult(outputFormat, recordSet, func() error {
-		recordsData := make([]string, 0, len(*recordSet.Records))
-		for _, r := range *recordSet.Records {
-			recordsData = append(recordsData, *r.Content)
+		recordsData := make([]string, 0, len(recordSet.Records))
+		for _, r := range recordSet.Records {
+			recordsData = append(recordsData, r.Content)
 		}
 		recordsDataJoin := strings.Join(recordsData, ", ")
 
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(recordSet.Id))
+		table.AddRow("ID", recordSet.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(recordSet.Name))
+		table.AddRow("NAME", recordSet.Name)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(recordSet.State))
+		table.AddRow("STATE", recordSet.State)
 		table.AddSeparator()
-		table.AddRow("TTL", utils.PtrString(recordSet.Ttl))
+		table.AddRow("TTL", recordSet.Ttl)
 		table.AddSeparator()
-		table.AddRow("TYPE", utils.PtrString(recordSet.Type))
+		table.AddRow("TYPE", recordSet.Type)
 		table.AddSeparator()
 		table.AddRow("RECORDS DATA", recordsDataJoin)
 		err := table.Display(p)
