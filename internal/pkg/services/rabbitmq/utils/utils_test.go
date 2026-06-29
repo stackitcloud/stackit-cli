@@ -32,13 +32,13 @@ type rabbitMQClientMockSettings struct {
 
 func newApiMock(s *rabbitMQClientMockSettings) rabbitmq.DefaultAPI {
 	return &rabbitmq.DefaultAPIServiceMock{
-		GetInstanceExecuteMock: utils.Ptr(func(r rabbitmq.ApiGetInstanceRequest) (*rabbitmq.Instance, error) {
+		GetInstanceExecuteMock: utils.Ptr(func(_ rabbitmq.ApiGetInstanceRequest) (*rabbitmq.Instance, error) {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
 			return s.getInstanceResp, nil
 		}),
-		GetCredentialsExecuteMock: utils.Ptr(func(r rabbitmq.ApiGetCredentialsRequest) (*rabbitmq.CredentialsResponse, error) {
+		GetCredentialsExecuteMock: utils.Ptr(func(_ rabbitmq.ApiGetCredentialsRequest) (*rabbitmq.CredentialsResponse, error) {
 			if s.getCredentialsFails {
 				return nil, fmt.Errorf("could not get user")
 			}

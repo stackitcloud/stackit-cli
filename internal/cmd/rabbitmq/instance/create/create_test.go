@@ -29,8 +29,7 @@ type mockSettings struct {
 
 func newAPIMock(settings mockSettings) rabbitmq.DefaultAPI {
 	return rabbitmq.DefaultAPIServiceMock{
-		ListOfferingsExecuteMock: utils.Ptr(func(r rabbitmq.ApiListOfferingsRequest) (*rabbitmq.ListOfferingsResponse, error) {
-
+		ListOfferingsExecuteMock: utils.Ptr(func(_ rabbitmq.ApiListOfferingsRequest) (*rabbitmq.ListOfferingsResponse, error) {
 			if settings.returnError {
 				return nil, fmt.Errorf("list flavors failed")
 			}
