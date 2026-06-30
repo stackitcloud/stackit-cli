@@ -62,12 +62,7 @@ func LoadPlanId(planName, version string, offerings *rabbitmq.ListOfferingsRespo
 	}
 }
 
-type RabbitMQClient interface {
-	GetInstance(ctx context.Context, projectId, region, instanceId string) rabbitmq.ApiGetInstanceRequest
-	GetCredentials(ctx context.Context, projectId, region, instanceId, credentialsId string) rabbitmq.ApiGetCredentialsRequest
-}
-
-func GetInstanceName(ctx context.Context, apiClient RabbitMQClient, projectId, region, instanceId string) (string, error) {
+func GetInstanceName(ctx context.Context, apiClient rabbitmq.DefaultAPI, projectId, region, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get RabbitMQ instance: %w", err)
@@ -75,7 +70,7 @@ func GetInstanceName(ctx context.Context, apiClient RabbitMQClient, projectId, r
 	return resp.Name, nil
 }
 
-func GetCredentialsUsername(ctx context.Context, apiClient RabbitMQClient, projectId, region, instanceId, credentialsId string) (string, error) {
+func GetCredentialsUsername(ctx context.Context, apiClient rabbitmq.DefaultAPI, projectId, region, instanceId, credentialsId string) (string, error) {
 	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get RabbitMQ credentials: %w", err)

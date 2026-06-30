@@ -41,7 +41,7 @@ func newAPIMock(settings mockSettings) rabbitmq.DefaultAPI {
 var testProjectId = uuid.NewString()
 var testPlanId = uuid.NewString()
 var testMonitoringInstanceId = uuid.NewString()
-var testInstanceName = utils.Ptr("instance")
+var testInstanceName = "instance"
 
 const testRegion = "eu01"
 
@@ -73,7 +73,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName:         utils.Ptr("example-name"),
+		InstanceName:         "example-name",
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
 		MetricsFrequency:     utils.Ptr(int32(100)),
@@ -161,7 +161,7 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				InstanceName: utils.Ptr("example-name"),
+				InstanceName: "example-name",
 				PlanId:       utils.Ptr(testPlanId),
 			},
 		},
@@ -183,7 +183,7 @@ func TestParseInput(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId:           utils.Ptr(testPlanId),
-				InstanceName:     utils.Ptr(""),
+				InstanceName:     "",
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
 				MetricsFrequency: utils.Ptr(int32(0)),
@@ -299,7 +299,6 @@ func TestBuildRequest(t *testing.T) {
 		isValid           bool
 	}{
 		{
-			//TODO: nil pointer due to plugins in model
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
@@ -402,7 +401,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion).
-				CreateInstancePayload(rabbitmq.CreateInstancePayload{InstanceName: *testInstanceName, PlanId: testPlanId, Parameters: &rabbitmq.InstanceParameters{}}),
+				CreateInstancePayload(rabbitmq.CreateInstancePayload{InstanceName: testInstanceName, PlanId: testPlanId, Parameters: &rabbitmq.InstanceParameters{}}),
 		},
 	}
 

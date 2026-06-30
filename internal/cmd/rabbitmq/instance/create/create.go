@@ -45,7 +45,7 @@ type inputModel struct {
 	PlanName string
 	Version  string
 
-	InstanceName         *string
+	InstanceName         string
 	EnableMonitoring     *bool
 	Graphite             *string
 	MetricsFrequency     *int32
@@ -173,7 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		InstanceName:         flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
 		MonitoringInstanceId: flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag),
 		Graphite:             flags.FlagToStringPointer(p, cmd, graphiteFlag),
@@ -199,7 +199,7 @@ type rabbitMQClient interface {
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var planId *string
+	var planId string
 	var err error
 
 	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
@@ -208,7 +208,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	}
 
 	if model.PlanId == nil {
-		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		foundPlanId, err := rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -216,12 +216,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 			}
 			return req, err
 		}
+		planId = *foundPlanId
 	} else {
 		err := rabbitmqUtils.ValidatePlanId(*model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}
-		planId = model.PlanId
+		planId = *model.PlanId
 	}
 
 	var sgwAcl *string
@@ -230,7 +231,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	}
 
 	req = req.CreateInstancePayload(rabbitmq.CreateInstancePayload{
-		InstanceName: *model.InstanceName,
+		InstanceName: model.InstanceName,
 		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     model.EnableMonitoring,
 			Graphite:             model.Graphite,
@@ -241,7 +242,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 			SgwAcl:               sgwAcl,
 			Syslog:               model.Syslog,
 		},
-		PlanId: *planId,
+		PlanId: planId,
 	})
 	return req, nil
 }
