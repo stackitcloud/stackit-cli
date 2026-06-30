@@ -25,17 +25,17 @@ stackit dns zone create [flags]
 ```
       --acl string             Access control list
       --contact-email string   Contact email for the zone
-      --default-ttl int        Default time to live (default 1000)
+      --default-ttl int32      Default time to live (default 1000)
       --description string     Description of the zone
       --dns-name string        Fully qualified domain name of the DNS zone
-      --expire-time int        Expire time
+      --expire-time int32      Expire time
   -h, --help                   Help for "stackit dns zone create"
       --is-reverse-zone        Is reverse zone
       --name string            User given name of the zone
-      --negative-cache int     Negative cache
+      --negative-cache int32   Negative cache
       --primary strings        Primary name server for secondary zone
-      --refresh-time int       Refresh time
-      --retry-time int         Retry time
+      --refresh-time int32     Refresh time
+      --retry-time int32       Retry time
       --type string            Zone type, one of: ["primary" "secondary"]
 ```
 

@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &dns.APIClient{DefaultAPI: &dns.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 
@@ -56,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Name:    utils.Ptr("example.com"),
 		Comment: utils.Ptr("comment"),
 		Records: []string{"1.1.1.1"},
-		TTL:     utils.Ptr(int64(3600)),
+		TTL:     utils.Ptr(int32(3600)),
 		Type:    "SOA",
 	}
 	for _, mod := range mods {
@@ -66,15 +66,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.ApiCreateRecordSetRequest {
-	request := testClient.CreateRecordSet(testCtx, testProjectId, testZoneId)
+	request := testClient.DefaultAPI.CreateRecordSet(testCtx, testProjectId, testZoneId)
 	request = request.CreateRecordSetPayload(dns.CreateRecordSetPayload{
-		Name:    utils.Ptr("example.com"),
+		Name:    "example.com",
 		Comment: utils.Ptr("comment"),
-		Records: &[]dns.RecordPayload{
-			{Content: utils.Ptr("1.1.1.1")},
+		Records: []dns.RecordPayload{
+			{Content: "1.1.1.1"},
 		},
-		Ttl:  utils.Ptr(int64(3600)),
-		Type: dns.CREATERECORDSETPAYLOADTYPE_SOA.Ptr(),
+		Ttl:  utils.Ptr(int32(3600)),
+		Type: dns.CREATERECORDSETPAYLOADTYPE_SOA,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -142,7 +142,7 @@ func TestParseInput(t *testing.T) {
 				Name:    utils.Ptr(""),
 				Comment: utils.Ptr(""),
 				Records: []string{"1.1.1.1"},
-				TTL:     utils.Ptr(int64(0)),
+				TTL:     utils.Ptr(int32(0)),
 				Type:    defaultType,
 			},
 		},
@@ -297,13 +297,13 @@ func TestBuildRequest(t *testing.T) {
 				Records: []string{"1.1.1.1"},
 				Type:    defaultType,
 			},
-			expectedRequest: testClient.CreateRecordSet(testCtx, testProjectId, testZoneId).
+			expectedRequest: testClient.DefaultAPI.CreateRecordSet(testCtx, testProjectId, testZoneId).
 				CreateRecordSetPayload(dns.CreateRecordSetPayload{
-					Name: utils.Ptr("example.com"),
-					Records: &[]dns.RecordPayload{
-						{Content: utils.Ptr("1.1.1.1")},
+					Name: "example.com",
+					Records: []dns.RecordPayload{
+						{Content: "1.1.1.1"},
 					},
-					Type: utils.Ptr(defaultType),
+					Type: defaultType,
 				}),
 		},
 	}
@@ -313,7 +313,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, dns.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -343,7 +343,7 @@ func TestOutputResult(t *testing.T) {
 			name: "only record set as argument",
 			args: args{
 				model: fixtureInputModel(),
-				resp:  &dns.RecordSetResponse{Rrset: &dns.RecordSet{}},
+				resp:  &dns.RecordSetResponse{Rrset: dns.RecordSet{}},
 			},
 			wantErr: false,
 		},
