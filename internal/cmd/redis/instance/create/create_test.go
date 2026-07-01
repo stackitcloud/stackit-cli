@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -21,31 +21,32 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &redis.APIClient{}
+var testClient = &redis.APIClient{DefaultAPI: &redis.DefaultAPIService{}}
+var testProjectId = uuid.NewString()
+var testPlanId = uuid.NewString()
+var testMonitoringInstanceId = uuid.NewString()
+var testRegion = "eu01"
 
-type redisClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *redis.ListOfferingsResponse
 }
 
-func (c *redisClientMocked) CreateInstance(ctx context.Context, projectId string) redis.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
-}
-
-func (c *redisClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*redis.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s mockSettings) redis.DefaultAPI {
+	return &redis.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ redis.ApiListOfferingsRequest) (*redis.ListOfferingsResponse, error) {
+			if s.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
-
-var testProjectId = uuid.NewString()
-var testPlanId = uuid.NewString()
-var testMonitoringInstanceId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:            testProjectId,
+		globalflags.RegionFlag:   testRegion,
 		instanceNameFlag:         "example-name",
 		enableMonitoringFlag:     "true",
 		graphiteFlag:             "example-graphite",
@@ -67,15 +68,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
-		InstanceName:         utils.Ptr("example-name"),
+		InstanceName:         "example-name",
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
@@ -85,19 +87,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *redis.ApiCreateInstanceRequest)) redis.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(redis.CreateInstancePayload{
-		InstanceName: utils.Ptr("example-name"),
+		InstanceName: "example-name",
 		Parameters: &redis.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
-		PlanId: utils.Ptr(testPlanId),
+		PlanId: testPlanId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -153,7 +155,7 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				InstanceName: utils.Ptr("example-name"),
+				InstanceName: "example-name",
 				PlanId:       utils.Ptr(testPlanId),
 			},
 		},
@@ -175,10 +177,10 @@ func TestParseInput(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId:           utils.Ptr(testPlanId),
-				InstanceName:     utils.Ptr(""),
+				InstanceName:     "",
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -254,9 +256,7 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog = append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}
@@ -285,13 +285,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			getOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -309,13 +309,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			getOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -344,13 +344,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -364,34 +364,35 @@ func TestBuildRequest(t *testing.T) {
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
+					Region:    testRegion,
 				},
 				PlanId: utils.Ptr(testPlanId),
 			},
 			getOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
 				},
 			},
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(redis.CreateInstancePayload{PlanId: utils.Ptr(testPlanId), Parameters: &redis.InstanceParameters{}}),
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion).
+				CreateInstancePayload(redis.CreateInstancePayload{PlanId: testPlanId, Parameters: &redis.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &redisClientMocked{
+			client := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -400,8 +401,11 @@ func TestBuildRequest(t *testing.T) {
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, redis.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

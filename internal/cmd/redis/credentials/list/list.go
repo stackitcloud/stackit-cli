@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	redisUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -68,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list Redis credentials: %w", err)
 			}
-			credentials := *resp.CredentialsList
+			credentials := resp.CredentialsList
 
 			// Truncate output
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
@@ -77,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			instanceLabel := model.InstanceId
 			if len(credentials) == 0 {
-				instanceLabel, err = redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+				instanceLabel, err = redisUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				}
@@ -123,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
@@ -138,7 +137,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(utils.PtrString(c.Id))
+			table.AddRow(c.Id)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Redis instances: %w", err)
 			}
-			instances := *resp.Instances
+			instances := resp.Instances
 
 			// Truncate output
 			if model.Limit != nil && len(instances) > int(*model.Limit) {
@@ -117,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -135,12 +135,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 			var (
 				lastOperationType, lastOperationState string
 			)
-			if lastOperation := instance.LastOperation; lastOperation != nil {
-				lastOperationType, lastOperationState = utils.PtrString(lastOperation.Type), utils.PtrString(lastOperation.State)
-			}
+			lastOperationType = string(instance.LastOperation.Type)
+			lastOperationState = string(instance.LastOperation.State)
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
-				utils.PtrString(instance.Name),
+				instance.Name,
 				lastOperationType,
 				lastOperationState,
 			)
