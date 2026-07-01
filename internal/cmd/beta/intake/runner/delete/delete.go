@@ -22,15 +22,15 @@ import (
 )
 
 const (
-	runnerIdArg = "RUNNER_ID"
-	forceFlag   = "force"
+	runnerIdArg     = "RUNNER_ID"
+	forceDeleteFlag = "force"
 )
 
 // inputModel struct holds all the input parameters for the command
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	RunnerId string
-	Force    bool
+	RunnerId    string
+	ForceDelete bool
 }
 
 // NewCmd creates a new cobra command for deleting an Intake Runner
@@ -62,7 +62,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete Intake Runner %q?", model.RunnerId)
-			if model.Force {
+			if model.ForceDelete {
 				prompt = fmt.Sprintf("%s This will also remove all Intakes and Intake Users that would stop the removal of the Intake", prompt)
 			}
 			err = p.Printer.PromptForConfirmation(prompt)
@@ -101,7 +101,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(forceFlag, false, "When true, also removes all associated Intakes and Intake Users that would stop the removal of the Intake")
+	cmd.Flags().Bool(forceDeleteFlag, false, "When true, also removes all associated Intakes and Intake Users that would stop the removal of the Intake")
 }
 
 // parseInput parses the command arguments and flags into a standardized model
@@ -116,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		RunnerId:        runnerId,
-		Force:           flags.FlagToBoolValue(p, cmd, forceFlag),
+		ForceDelete:     flags.FlagToBoolValue(p, cmd, forceDeleteFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -126,7 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 // buildRequest creates the API request to delete an Intake Runner
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiDeleteIntakeRunnerRequest {
 	req := apiClient.DefaultAPI.DeleteIntakeRunner(ctx, model.ProjectId, model.Region, model.RunnerId)
-	if model.Force {
+	if model.ForceDelete {
 		return req.Force(true)
 	}
 	return req

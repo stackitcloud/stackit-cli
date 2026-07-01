@@ -98,11 +98,11 @@ func TestParseInput(t *testing.T) {
 			description: "with force",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[forceFlag] = "true"
+				flagValues[forceDeleteFlag] = "true"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Force = true
+				model.ForceDelete = true
 			}),
 		},
 		{
@@ -154,7 +154,7 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "with force",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Force = true
+				model.ForceDelete = true
 			}),
 			expectedRequest: fixtureRequest().Force(true),
 		},
