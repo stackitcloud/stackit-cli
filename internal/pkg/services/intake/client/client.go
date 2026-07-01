@@ -11,5 +11,5 @@ import (
 
 // ConfigureClient creates and configures a new Intake API client
 func ConfigureClient(p *print.Printer, cliVersion string) (*intake.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.IntakeCustomEndpointKey), true, genericclient.CreateApiClient[*intake.APIClient](intake.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.IntakeCustomEndpointKey), false, genericclient.CreateApiClient[*intake.APIClient](intake.NewAPIClient))
 }
