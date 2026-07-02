@@ -37,8 +37,9 @@ const (
 
 var typeFlag = flags.StringEnumFlag(
 	"type",
-	dns.AllowedCreateZonePayloadTypeEnumValues,
+	append(dns.AllowedCreateZonePayloadTypeEnumValues, ""),
 	"Zone type,",
+	flags.StringEnumDefaultValue(dns.CreateZonePayloadType("")),
 )
 
 type inputModel struct {
@@ -148,6 +149,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	var zoneType *dns.CreateZonePayloadType
+	if typeFlagValue := typeFlag.Ptr(); typeFlagValue != nil && *typeFlagValue != "" {
+		zoneType = typeFlagValue
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
@@ -155,7 +161,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DefaultTTL:      flags.FlagToInt32Pointer(p, cmd, defaultTTLFlag),
 		Primaries:       flags.FlagToStringSliceValue(p, cmd, primaryFlag),
 		Acl:             flags.FlagToStringPointer(p, cmd, aclFlag),
-		Type:            typeFlag.Ptr(),
+		Type:            zoneType,
 		RetryTime:       flags.FlagToInt32Pointer(p, cmd, retryTimeFlag),
 		RefreshTime:     flags.FlagToInt32Pointer(p, cmd, refreshTimeFlag),
 		NegativeCache:   flags.FlagToInt32Pointer(p, cmd, negativeCacheFlag),
