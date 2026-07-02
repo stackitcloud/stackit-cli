@@ -36,7 +36,7 @@ stackit dns zone create [flags]
       --primary strings        Primary name server for secondary zone
       --refresh-time int32     Refresh time
       --retry-time int32       Retry time
-      --type string            Zone type, (one of: [primary, secondary])
+      --type string            Zone type, (one of: [primary, secondary, ])
 ```
 
 ### Options inherited from parent commands
