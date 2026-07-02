@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,7 +18,9 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &secretsmanager.APIClient{}
+var testClient = &secretsmanager.APIClient{
+	DefaultAPI: secretsmanager.DefaultAPIServiceMock{},
+}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -57,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiDeleteInstanceRequest)) secretsmanager.ApiDeleteInstanceRequest {
-	request := testClient.DeleteInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.DeleteInstance(testCtx, testProjectId, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}

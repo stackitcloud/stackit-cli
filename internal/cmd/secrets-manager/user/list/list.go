@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -69,8 +68,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Secrets Manager users: %w", err)
 			}
-			if resp.Users == nil || len(*resp.Users) == 0 {
-				instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId)
+			if len(resp.Users) == 0 {
+				instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 					instanceLabel = *model.InstanceId
@@ -78,14 +77,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Info("No users found for instance %q\n", instanceLabel)
 				return nil
 			}
-			users := *resp.Users
 
 			// Truncate output
-			if model.Limit != nil && len(users) > int(*model.Limit) {
-				users = users[:*model.Limit]
+			if model.Limit != nil && len((resp.Users)) > int(*model.Limit) {
+				(resp.Users) = resp.Users[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, users)
+			return outputResult(params.Printer, model.OutputFormat, (resp.Users))
 		},
 	}
 
@@ -126,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId)
+	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, *model.InstanceId)
 	return req
 }
 
@@ -137,10 +135,10 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 		for i := range users {
 			user := users[i]
 			table.AddRow(
-				utils.PtrString(user.Id),
-				utils.PtrString(user.Username),
-				utils.PtrString(user.Description),
-				utils.PtrString(user.Write),
+				user.Id,
+				user.Username,
+				user.Description,
+				user.Write,
 			)
 		}
 		err := table.Display(p)

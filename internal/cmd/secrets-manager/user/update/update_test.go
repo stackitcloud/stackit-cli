@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,7 +19,9 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &secretsmanager.APIClient{}
+var testClient = &secretsmanager.APIClient{
+	DefaultAPI: secretsmanager.DefaultAPIServiceMock{},
+}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testUserId = uuid.NewString()
@@ -64,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateUserRequest)) secretsmanager.ApiUpdateUserRequest {
-	request := testClient.UpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
+	request := testClient.DefaultAPI.UpdateUser(testCtx, testProjectId, testInstanceId, testUserId)
 	request = request.UpdateUserPayload(secretsmanager.UpdateUserPayload{
 		Write: utils.Ptr(true),
 	})

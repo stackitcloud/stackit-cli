@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -119,10 +119,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId)
+	var description string
+	var write bool
+	if model.Description != nil {
+		description = *model.Description
+	}
+	if model.Write != nil {
+		write = *model.Write
+	}
 	req = req.CreateUserPayload(secretsmanager.CreateUserPayload{
-		Description: model.Description,
-		Write:       model.Write,
+		Description: description,
+		Write:       write,
 	})
 	return req
 }
@@ -133,11 +141,11 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *se
 	}
 
 	return p.OutputResult(outputFormat, user, func() error {
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
-		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
-		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-		p.Outputf("Description: %s\n", utils.PtrString(user.Description))
-		p.Outputf("Write Access: %s\n", utils.PtrString(user.Write))
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, user.Id)
+		p.Outputf("Username: %s\n", user.Username)
+		p.Outputf("Password: %s\n", user.Password)
+		p.Outputf("Description: %s\n", user.Description)
+		p.Outputf("Write Access: %t\n", user.Write)
 
 		return nil
 	})

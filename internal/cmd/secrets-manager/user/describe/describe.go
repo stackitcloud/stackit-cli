@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get Secrets Manager user: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 
@@ -101,26 +101,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
+	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user secretsmanager.User) error {
+func outputResult(p *print.Printer, outputFormat string, user *secretsmanager.User) error {
 	return p.OutputResult(outputFormat, user, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(user.Id))
+		table.AddRow("ID", user.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", utils.PtrString(user.Username))
+		table.AddRow("USERNAME", user.Username)
 		table.AddSeparator()
-		if user.Description != nil && *user.Description != "" {
-			table.AddRow("DESCRIPTION", *user.Description)
+		if user.Description != "" {
+			table.AddRow("DESCRIPTION", user.Description)
 			table.AddSeparator()
 		}
-		if user.Password != nil && *user.Password != "" {
-			table.AddRow("PASSWORD", *user.Password)
+		if user.Password != "" {
+			table.AddRow("PASSWORD", user.Password)
 			table.AddSeparator()
 		}
-		table.AddRow("WRITE ACCESS", utils.PtrString(user.Write))
+		table.AddRow("WRITE ACCESS", user.Write)
 
 		err := table.Display(p)
 		if err != nil {

@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -24,7 +24,9 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &secretsmanager.APIClient{}
+var testClient = &secretsmanager.APIClient{
+	DefaultAPI: secretsmanager.DefaultAPIServiceMock{},
+}
 
 var (
 	testProjectId  = uuid.NewString()
@@ -76,11 +78,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
-	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.UpdateACLs(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-		Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
-			{Cidr: utils.Ptr(testACL1)},
-		})})
+		Cidrs: []secretsmanager.UpdateACLPayload{
+			{Cidr: testACL1},
+		}})
 
 	for _, mod := range mods {
 		mod(&request)
@@ -89,14 +91,14 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) 
 }
 
 func fixtureUpdateInstanceRequest(mods ...func(request *secretsmanager.ApiUpdateInstanceRequest)) secretsmanager.ApiUpdateInstanceRequest {
-	request := testClient.UpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.UpdateInstance(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateInstancePayload(secretsmanager.UpdateInstancePayload{
-		Name: utils.Ptr(testInstanceName),
+		Name: testInstanceName,
 		KmsKey: &secretsmanager.KmsKeyPayload{
-			KeyId:               utils.Ptr(testKmsKeyId),
-			KeyRingId:           utils.Ptr(testKmsKeyringId),
-			KeyVersion:          utils.Ptr(testKmsKeyVersion),
-			ServiceAccountEmail: utils.Ptr(testKmsServiceAccountEmail),
+			KeyId:               testKmsKeyId,
+			KeyRingId:           testKmsKeyringId,
+			KeyVersion:          testKmsKeyVersion,
+			ServiceAccountEmail: testKmsServiceAccountEmail,
 		},
 	})
 
@@ -329,10 +331,10 @@ func TestBuildUpdateACLsRequest(t *testing.T) {
 				*model.Acls = append(*model.Acls, testACL2)
 			}),
 			expectedRequest: fixtureRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-				Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
-					{Cidr: utils.Ptr(testACL1)},
-					{Cidr: utils.Ptr(testACL2)},
-				})}),
+				Cidrs: []secretsmanager.UpdateACLPayload{
+					{Cidr: testACL1},
+					{Cidr: testACL2},
+				}}),
 		},
 	}
 
@@ -363,9 +365,9 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				model.Acls = nil
 				model.InstanceName = utils.Ptr(testInstanceName)
 			}),
-			expectedRequest: testClient.UpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.UpdateInstance(testCtx, testProjectId, testInstanceId).
 				UpdateInstancePayload(secretsmanager.UpdateInstancePayload{
-					Name: utils.Ptr(testInstanceName),
+					Name: testInstanceName,
 				}),
 		},
 		{
@@ -384,7 +386,7 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildUpdateInstanceRequest(testCtx, tt.model, testClient)
+			request, _ := buildUpdateInstanceRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

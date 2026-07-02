@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -67,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get Secrets Manager instances: %w", err)
 			}
 
-			if resp.Instances == nil || len(*resp.Instances) == 0 {
+			if len(resp.Instances) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
@@ -76,14 +75,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
-			instances := *resp.Instances
 
 			// Truncate output
-			if model.Limit != nil && len(instances) > int(*model.Limit) {
-				instances = instances[:*model.Limit]
+			if model.Limit != nil && len((resp.Instances)) > int(*model.Limit) {
+				(resp.Instances) = resp.Instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, instances)
+			return outputResult(params.Printer, model.OutputFormat, (resp.Instances))
 		},
 	}
 
@@ -119,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId)
 	return req
 }
 
@@ -130,10 +128,10 @@ func outputResult(p *print.Printer, outputFormat string, instances []secretsmana
 		for i := range instances {
 			instance := instances[i]
 			table.AddRow(
-				utils.PtrString(instance.Id),
-				utils.PtrString(instance.Name),
-				utils.PtrString(instance.State),
-				utils.PtrString(instance.SecretCount),
+				instance.Id,
+				instance.Name,
+				instance.State,
+				instance.SecretCount,
 			)
 		}
 		err := table.Display(p)
